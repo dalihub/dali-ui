@@ -1,7 +1,7 @@
 #include <dali-ui-components/internal/component-image-path.h>
 #include <dali-ui-components/internal/styles/icon-button-style-impl.h>
 #include <dali-ui-components/public-api/styles/icon-button-style.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
 #include <utility>
@@ -23,25 +23,25 @@ UiStyleKey<IconButtonStyle> IconButtonStyle::DefaultKey()
 }
 IconButtonStyle IconButtonStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static IconButtonStyle style = CreateStyle({}, 56.0f, 56.0f);
   return style;
 }
 IconButtonStyle IconButtonStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   IconButtonStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }
 IconButtonStyle IconButtonStyle::AddPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static IconButtonStyle style = CreateStyle(Internal::ResolveComponentImageUrl("ic_add.svg"), 56.0f, 56.0f);
   return style;
 }
 IconButtonStyle IconButtonStyle::BackPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static IconButtonStyle style = IconButtonStyle::Builder()
                                    .SetIconUrl(Internal::ResolveComponentImageUrl("ic_navi_back.svg"))
                                    .SetIconWidth(40.0f)
@@ -52,7 +52,7 @@ IconButtonStyle IconButtonStyle::BackPreset()
 }
 IconButtonStyle IconButtonStyle::MorePreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static IconButtonStyle style = IconButtonStyle::Builder()
                                    .SetIconUrl(Internal::ResolveComponentImageUrl("ic_more.svg"))
                                    .SetIconWidth(40.0f)

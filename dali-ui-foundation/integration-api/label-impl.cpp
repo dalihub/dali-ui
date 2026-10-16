@@ -4293,7 +4293,6 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
   parameters.verticalLineAlignment        = mController->GetVerticalLineAlignment();
   parameters.lineWrapMode                 = mController->GetLineWrapMode();
   parameters.layoutDirectionPolicy        = mController->GetLayoutDirectionMode();
-  parameters.ellipsisPosition             = mController->GetEllipsisPosition();
   parameters.isUnderlineEnabled           = mController->IsUnderlineEnabled();
   parameters.underlineType                = mController->GetUnderlineType();
   parameters.underlineColor               = mController->GetUnderlineColor();

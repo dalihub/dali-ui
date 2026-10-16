@@ -53,6 +53,20 @@ std::size_t CountColor(const Image& image, Rect region, Color color, uint8_t tol
 Rect        ColorBounds(const Image& image, Rect region, Color color, uint8_t tolerance = 16);
 std::size_t CountInk(const Image& image, Rect region, Color background = {}, uint8_t threshold = 32);
 
+/**
+ * @brief Finds retained text outside the independently measured END marker.
+ *
+ * Uses the static reference only; the moving candidate cannot change the ROI.
+ * @param[in] reference Single-line opaque black text on a white background.
+ * @param[in] viewport Half-open viewport rectangle in capture pixels.
+ * @param[in] markerWidth Natural marker width at the reference font size, in pixels.
+ * @param[in] rightToLeft Whether the marker occupies the left end of the text.
+ * @return Retained region, or an empty rectangle for an invalid viewport, a
+ * nonfinite/nonpositive marker width, a marker covering the viewport, or fewer
+ * than 12 retained foreground pixels.
+ */
+Rect RetainedTextRegion(const Image& reference, Rect viewport, float markerWidth, bool rightToLeft);
+
 struct CompareOptions
 {
   Color       background{};

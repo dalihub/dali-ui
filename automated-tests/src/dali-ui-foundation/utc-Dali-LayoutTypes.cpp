@@ -191,7 +191,7 @@ int UtcDaliAbsoluteLayoutFlagsValuesP(void)
   DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL), 8u, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL), 12u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::ALL), 255u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::ALL), 15u, TEST_LOCATION);
 
   AbsoluteLayoutFlags combined =
     AbsoluteLayoutFlags::POSITION_PROPORTIONAL | AbsoluteLayoutFlags::SIZE_PROPORTIONAL;

@@ -366,11 +366,11 @@ private: // Internal methods
   void UpdatePlaceholderVisual();
 
   /**
-   * @brief Callback invoked when the view's resource becomes ready.
+   * @brief Removes the placeholder when the main image finishes loading.
    *
-   * @param[in] view The view whose resource became ready
+   * @param[in] index The property index of the visual whose resource changed
    */
-  void OnViewResourceReady(Ui::View view);
+  void OnImageResourceReady(Dali::Property::Index index);
 
   /**
    * @brief Applies the resolved image color to the image visual.

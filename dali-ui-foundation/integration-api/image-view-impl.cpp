@@ -427,12 +427,21 @@ void ImageViewImpl::SetResourceUrlInternal(const Dali::String& url)
   if(mUrl != url)
   {
     mUrl = url;
-    // Re-show placeholder while new image loads
-    UpdatePlaceholderVisual();
+    if(!mUrl.Empty())
+    {
+      UpdatePlaceholderVisual();
+    }
 
     const bool hasExplicitSize = GetRequestedWidth() > 0.0f && GetRequestedHeight() > 0.0f;
 
-    if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE || hasExplicitSize)
+    if(mUrl.Empty())
+    {
+      // Clear even deferred loads immediately, and measure using the placeholder.
+      mVisualDirty = false;
+      UpdateVisual();
+      InvalidateMeasure();
+    }
+    else if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE || hasExplicitSize)
     {
       // A fixed size cannot change when the new image's natural size becomes known,
       // so rebuild the visual without scheduling an otherwise redundant measure.
@@ -493,6 +502,10 @@ void ImageViewImpl::SetPlaceholderUrl(const Dali::String& url)
   {
     mPlaceholderUrl = url;
     UpdatePlaceholderVisual();
+    if(mUrl.Empty())
+    {
+      InvalidateMeasure();
+    }
   }
 }
 
@@ -779,9 +792,8 @@ void ImageViewImpl::OnInitialize()
 {
   ViewImpl::OnInitialize();
 
-  // Connect to View::ResourceReadySignal to remove the placeholder when the main
-  // image visual becomes ready.
-  Ui::View::DownCast(Self()).ResourceReadySignal().Connect(this, &ImageViewImpl::OnViewResourceReady);
+  // Main-image completion must not wait for the placeholder or background.
+  Internal::ViewDataImpl::Get(*this).VisualResourceReadySignal().Connect(this, &ImageViewImpl::OnImageResourceReady);
 }
 
 void ImageViewImpl::UpdatePlaceholderVisual()
@@ -794,8 +806,12 @@ void ImageViewImpl::UpdatePlaceholderVisual()
     return;
   }
 
-  // Don't show placeholder if main image is already loaded
-  if(viewData.GetVisualResourceStatus(ImageViewImpl::Property::IMAGE) == Ui::Visual::ResourceStatus::READY)
+  // An empty URL uses the placeholder as its image. Otherwise keep a ready
+  // image visible, and leave load failures to the broken-image visual.
+  const auto status           = viewData.GetVisualResourceStatus(ImageViewImpl::Property::IMAGE);
+  auto       previousVisual   = viewData.GetPreviousVisual(ImageViewImpl::Property::IMAGE);
+  const bool hasPreviousImage = previousVisual && Ui::GetImplementation(previousVisual).IsResourceReady();
+  if(!mUrl.Empty() && (status == Ui::Visual::ResourceStatus::READY || status == Ui::Visual::ResourceStatus::FAILED || hasPreviousImage))
   {
     return;
   }
@@ -818,16 +834,22 @@ void ImageViewImpl::UpdatePlaceholderVisual()
   }
 }
 
-void ImageViewImpl::OnViewResourceReady(Ui::View view)
+void ImageViewImpl::OnImageResourceReady(Dali::Property::Index index)
 {
-  // Only process when the main image visual becomes ready
-  auto& viewData = Internal::ViewDataImpl::Get(*this);
-  if(viewData.GetVisualResourceStatus(ImageViewImpl::Property::IMAGE) != Ui::Visual::ResourceStatus::READY)
+  if(index != ImageViewImpl::Property::IMAGE)
+  {
+    return;
+  }
+  // Keep the placeholder for an empty URL or a pending image, but remove it
+  // on either success or failure so it cannot cover the broken image.
+  auto&      viewData = Internal::ViewDataImpl::Get(*this);
+  const auto status   = viewData.GetVisualResourceStatus(ImageViewImpl::Property::IMAGE);
+  if(mUrl.Empty() || (status != Ui::Visual::ResourceStatus::READY && status != Ui::Visual::ResourceStatus::FAILED))
   {
     return;
   }
 
-  // Main image is ready: remove placeholder
+  // The main image load has completed: remove the placeholder
   viewData.UnregisterVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE);
 }
 
@@ -928,6 +950,14 @@ Vector3 ImageViewImpl::GetNaturalSize() const
   {
     self.mVisual.GetNaturalSize(naturalSize);
   }
+  else if(self.mUrl.Empty())
+  {
+    auto placeholder = Internal::ViewDataImpl::Get(self).GetVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE);
+    if(placeholder)
+    {
+      placeholder.GetNaturalSize(naturalSize);
+    }
+  }
   return Vector3(naturalSize);
 }
 
@@ -947,17 +977,17 @@ void ImageViewImpl::UpdateVisual()
   auto&            viewData       = Internal::ViewDataImpl::Get(*this);
   const LayoutRect arrangedBounds = GetArrangedBounds();
 
-  if(mVisual)
+  if(mUrl.Empty())
   {
     viewData.UnregisterVisual(ImageViewImpl::Property::IMAGE);
     mVisual.Reset();
-  }
-
-  if(mUrl.Empty())
-  {
+    UpdatePlaceholderVisual();
     DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: url is empty, visual cleared\n");
     return;
   }
+
+  // RegisterVisual keeps the previous image on scene until its replacement
+  // finishes loading. Unregistering it here would introduce a blank frame.
 
   auto visualFactory = Ui::Integration::VisualFactory::Get();
   if(visualFactory)
@@ -1005,8 +1035,15 @@ void ImageViewImpl::UpdateVisual()
     if(mVisual)
     {
       DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: RegisterVisual result=ok\n");
-      viewData.RegisterVisual(ImageViewImpl::Property::IMAGE, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
-      viewData.EnableCornerPropertiesOverridden(mVisual, true);
+      // ResourceReadySignal can clear or replace mVisual during registration.
+      // Keep the registered handle alive and stop if the callback changed it.
+      auto visual = mVisual;
+      viewData.RegisterVisual(ImageViewImpl::Property::IMAGE, visual, Dali::Ui::Integration::DepthIndex::CONTENT);
+      if(!mVisual || mVisual != visual)
+      {
+        return;
+      }
+      viewData.EnableCornerPropertiesOverridden(visual, true);
     }
     else
     {

@@ -20,7 +20,7 @@
 #include <utility>
 
 #include <dali-ui-components/internal/styles/toast-style-impl.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 
@@ -63,14 +63,14 @@ UiStyleKey<ToastStyle> ToastStyle::DefaultKey()
 
 ToastStyle ToastStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static ToastStyle style = ToastStyle::Builder().Build();
   return style;
 }
 
 ToastStyle ToastStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   ToastStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }

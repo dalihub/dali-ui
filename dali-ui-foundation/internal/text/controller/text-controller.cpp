@@ -2105,21 +2105,6 @@ void Controller::SetVerticalLineAlignment(Alignment alignment)
   }
 }
 
-Text::EllipsisPosition::Type Controller::GetEllipsisPosition() const
-{
-  return mImpl->mModel->GetEllipsisPosition();
-}
-
-void Controller::SetEllipsisPosition(Text::EllipsisPosition::Type ellipsisPosition)
-{
-  if(mImpl->mModel->mEllipsisPosition != ellipsisPosition)
-  {
-    mImpl->ClearEndEllipsisResult();
-  }
-  mImpl->mModel->mEllipsisPosition = ellipsisPosition;
-  mImpl->mModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
-}
-
 void Controller::SetRenderScale(const float renderScale)
 {
   float scale = renderScale;

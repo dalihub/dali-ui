@@ -30,6 +30,7 @@
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -187,14 +188,73 @@ public:
   };
 
   /**
-   * @brief One queued View layout-finished event. @c view is the raw key (nulled
-   * as a tombstone by UnregisterView); @c weakHandle is the safe emit handle.
+   * @brief One View's completed-pass notification awaiting delivery. @c view is the
+   * raw key (nulled as a tombstone by UnregisterView); @c weakHandle is the safe emit
+   * handle; @c bounds is the snapshot of the latest pass that arranged the View.
    */
   struct PendingViewLayoutFinishedEvent
   {
     ViewImpl*                  view{nullptr};
     Dali::WeakHandle<Ui::View> weakHandle;
     LayoutRect                 bounds;
+  };
+
+  /**
+   * @brief Completed-pass notifications awaiting delivery: one item per View, kept at the
+   * position where the View was first collected and holding its latest snapshot, plus
+   * whether a Window notification is owed. mPendingCompletion collects;
+   * mReadyCompletion is what the post-process phase delivers. nextView is the delivery
+   * cursor of mReadyCompletion and stays 0 in mPendingCompletion.
+   */
+  struct LayoutCompletionRecord
+  {
+    std::vector<PendingViewLayoutFinishedEvent> viewEvents;
+    std::unordered_map<ViewImpl*, std::size_t>  viewIndex; ///< live View -> its item; tombstoned items are unindexed
+    std::size_t                                 nextView{0u};
+    bool                                        windowPending{false};
+
+    bool HasUndelivered() const
+    {
+      return nextView < viewEvents.size() || windowPending;
+    }
+
+    void Clear()
+    {
+      viewEvents.clear();
+      viewIndex.clear();
+      nextView      = 0u;
+      windowPending = false;
+    }
+
+    /// Latest wins; a View keeps the position where it was first collected.
+    void Record(ViewImpl* view, Dali::WeakHandle<Ui::View> weakHandle, const LayoutRect& bounds)
+    {
+      auto it = viewIndex.find(view);
+      if(it != viewIndex.end())
+      {
+        PendingViewLayoutFinishedEvent& event = viewEvents[it->second];
+        event.weakHandle                      = std::move(weakHandle);
+        event.bounds                          = bounds;
+        return;
+      }
+      // Append first, index second: a throwing index insert leaves an unindexed item
+      // (still reached by Forget's scan), never an index past the end of the vector.
+      viewEvents.push_back(PendingViewLayoutFinishedEvent{view, std::move(weakHandle), bounds});
+      viewIndex[view] = viewEvents.size() - 1u;
+    }
+
+    /// Tombstones every item of @p view without shifting any index or the cursor.
+    void Forget(ViewImpl* view)
+    {
+      viewIndex.erase(view);
+      for(PendingViewLayoutFinishedEvent& event : viewEvents)
+      {
+        if(event.view == view)
+        {
+          event.view = nullptr;
+        }
+      }
+    }
   };
 
   /**
@@ -243,13 +303,14 @@ public:
   /**
    * @brief RAII for LayoutControllerImpl::mProcessDepth.
    *
-   * The counter gates three things: the "fully settled" evaluation (mProcessDepth == 1 in
-   * the pre phase), the once-per-frame post-phase emit, and the deferred self-destruct at
-   * the outermost unwind. A DALI_ASSERT_ALWAYS anywhere in the Measure/Arrange/emit call
-   * stack throws Dali::DaliException and Process() has no try/catch, so the manual
-   * decrement this replaces was skipped on unwind: the counter stayed above zero and NO
-   * later frame was ever the outermost one again -- layout kept running but never settled,
-   * never emitted LayoutFinished, and never honoured a pending Remove(window).
+   * The counter gates three things: the promotion of recorded completions (outermost
+   * automatic pre phase only, mProcessDepth == 1), the once-per-cycle post-phase delivery
+   * (mProcessDepth == 1), and the deferred self-destruct at the outermost unwind. A
+   * DALI_ASSERT_ALWAYS anywhere in the Measure/Arrange/emit call stack throws
+   * Dali::DaliException and Process() has no try/catch, so the manual decrement this
+   * replaces was skipped on unwind: the counter stayed above zero and NO later frame was
+   * ever the outermost one again -- layout kept running but its completions were never
+   * promoted or delivered, and a pending Remove(window) was never honoured.
    *
    * The deferred destroy stays in the destructor, unchanged in rule, so it also runs on the
    * abnormal exit. It is the same operation the manual line performed, so the normal path
@@ -343,9 +404,9 @@ public:
    * Every restore goes through RetainLayoutRootWithoutWake, never RequestLayout and never
    * ViewImpl::InvalidateMeasure: see that helper for why no wake, and note that
    * InvalidateMeasure would additionally walk to a DIFFERENT root than the one being
-   * restored. mLayoutDirtySinceEmit is re-armed by the helper and never cleared here --
-   * the latch means "real layout work has been requested since the last emit", which an
-   * aborted batch has not falsified.
+   * restored. Completion snapshots of the roots that finished before the throw are
+   * already in mPendingCompletion and stay there; only a batch that reaches its normal
+   * end sets the Window notification flag, so an aborted batch never does.
    *
    * Disarmed by Commit() on the normal path, so normal flow costs one bool store.
    *
@@ -355,7 +416,7 @@ public:
    * Measure/Arrange guard has unwound (gActiveLayoutPassDepth == 0), the collector frame
    * has been popped and gActiveLayoutFinishedController restored, and mDetached /
    * mDestroyPending are still readable and are still honoured. It touches only members
-   * that outlive it -- mPendingViews, mAllLayoutRoots, mLayoutDirtySinceEmit -- and the
+   * that outlive it -- mPendingViews and mAllLayoutRoots -- and the
    * dispatcher's EndLayoutPass still runs AFTER it, the same relative order as the normal
    * path (the manual EndLayoutPass came after the loop).
    */
@@ -483,11 +544,11 @@ public:
    * tick driver, so nothing in the event loop can reach this controller again.
    * Idempotent.
    *
-   * Deliberately does NOT clear the pending-view / event containers:
-   * EmitPendingViewLayoutFinishedSignals() may be on the stack (a View
-   * LayoutFinished slot is allowed to call LayoutController::Remove), and those
-   * containers take part in its stale-skip bookkeeping. They die with the
-   * controller at reap time instead.
+   * Deliberately does NOT clear the pending-view set or the completion records:
+   * DeliverReadyCompletion() may be on the stack (a View LayoutFinished slot is
+   * allowed to call LayoutController::Remove) and reads mReadyCompletion after the
+   * slot returns, and UnregisterView keeps tombstoning both records until the reap.
+   * They die with the controller at reap time instead.
    */
   void Detach()
   {
@@ -587,10 +648,6 @@ public:
 
     // Add to pending (dirty) set
     mPendingViews.insert(view);
-
-    // Real layout work has been requested since the last LayoutFinished emit;
-    // arm the settled latch so the next drain-to-empty fires the signal.
-    mLayoutDirtySinceEmit = true;
     return true;
   }
 
@@ -682,16 +739,12 @@ public:
       frame.set->erase(view);
       frame.views->erase(std::remove(frame.views->begin(), frame.views->end(), view), frame.views->end());
     }
-    // Scrub episode events: erase the index and tombstone matching slots (never a
-    // mid-vector erase, which would shift every other index).
-    mPendingViewLayoutFinishedEventIndex.erase(view);
-    for(auto& event : mPendingViewLayoutFinishedEvents)
-    {
-      if(event.view == view)
-      {
-        event.view = nullptr;
-      }
-    }
+    // Tombstone the View in both completion records (never a mid-vector erase, which would
+    // shift every other index and the ready record's delivery cursor). This also runs on
+    // scene disconnection, so a View that is still alive -- or rejoins a window later --
+    // loses every snapshot it had before it left.
+    mPendingCompletion.Forget(view);
+    mReadyCompletion.Forget(view);
 
     if(mTransitionDispatcher)
     {
@@ -856,86 +909,55 @@ public:
         mTransitionDispatcher->TickAnimators();
       }
 
-      // "Fully settled" is evaluated only by the outermost Process frame
-      // (mProcessDepth == 1) and AFTER TickAnimators, so any same-frame
-      // re-dirty from an OnFinished / EXIT-Remove callback is already visible
-      // in mPendingViews before we decide.
+      // Evaluated only by the outermost Process frame (mProcessDepth == 1) and AFTER
+      // TickAnimators, so a pass that a transition callback runs through ProcessLayouts()
+      // is covered by this cycle's delivery too.
       if(mProcessDepth == 1)
       {
+        // Only an AUTOMATIC pre-process promotes. Core Relayout and this controller's
+        // post-process follow in the same ProcessEvents cycle, so every completion recorded
+        // so far -- earlier manual passes, this pre-process's own pass and passes nested in
+        // it -- is covered by that Relayout. A public ProcessLayouts() call never promotes:
+        // at depth 1, mManualProcessInvocation is true exactly when the outermost frame is
+        // that call (ManualProcessScope). Its completion, and any pass recorded after this
+        // point (for example from a post-process slot), waits for the next automatic cycle.
+        if(!mManualProcessInvocation)
+        {
+          PromotePendingCompletion();
+        }
+
         if(mPendingViews.empty())
         {
-          // A drained pending set ends the parked episode: the next park is a
-          // new episode and may log its one diagnostic again.
+          // A drained pending set ends the parked episode: the next park is a new episode
+          // and may log its one diagnostic again.
           mParkedWorkLogged = false;
-
-          if(mLayoutDirtySinceEmit)
-          {
-            // Fully settled in the pre phase. Do NOT emit here; the signals must
-            // fire in the post-process phase (after core size negotiation). Just
-            // schedule the emit for this frame's post pass, which runs later in
-            // the same ProcessEvents cycle.
-            mEmitScheduled = true;
-          }
         }
         else
         {
-          // Work was re-scheduled during this pass; not settled yet. Cancel any
-          // stale schedule so the post pass does not emit from a previous frame.
-          // The work remains pending, but processing does not wake itself: the
-          // next independently triggered ProcessEvents cycle will drain it.
-          mEmitScheduled        = false;
-          mLayoutDirtySinceEmit = true;
+          // Work was re-scheduled during processing. It stays pending without a wake and is
+          // drained by the next independently triggered ProcessEvents cycle. It does not
+          // affect the completions promoted above.
           LogParkedWorkOnce();
         }
       }
     }
-    else
+    else if(mProcessDepth == 1 && mReadyCompletion.HasUndelivered())
     {
-      // Post-process phase (postProcess == true), window valid. RunProcessors
-      // (pre) always runs before RunPostProcessors (post) in the same
-      // ProcessEvents cycle, so the outermost pre pass has already re-evaluated
-      // mEmitScheduled this frame: it is true only when the layout settled this
-      // frame, and false when pending work remains. Emit exactly once here.
-      if(mProcessDepth == 1 && mEmitScheduled)
+      // Post-process phase, window valid, outermost frame. Hold the LayoutFinished half of the
+      // LAYOUT PROCESSING WINDOW open across the whole delivery (View AND Window signals).
+      // Slot code runs at pass depth 0 -- every Measure/Arrange guard has already unwound by
+      // the post-process phase -- so this scope is the only thing that extends the
+      // no-self-wake window over LayoutFinished handlers. Invalidations from a slot are fully
+      // recorded and propagated, but they cannot request another idle ProcessEvents cycle
+      // from inside this processing episode.
+      Internal::LayoutInvalidation::ScopedLayoutFinishedEmit emitScope;
+
+      DeliverReadyCompletion(window);
+
+      if(!mDestroyPending && !mPendingViews.empty())
       {
-        // Hold the LayoutFinished half of the LAYOUT PROCESSING WINDOW open across
-        // BOTH emits below. Slot code runs at pass depth 0 -- every Measure/Arrange
-        // guard has already unwound by the post-process phase -- so this scope is the
-        // only thing that extends the no-self-wake window over LayoutFinished
-        // handlers. Invalidations from a slot are fully recorded and propagated,
-        // but they cannot request another idle ProcessEvents cycle from inside
-        // this processing episode.
-        Internal::LayoutInvalidation::ScopedLayoutFinishedEmit emitScope;
-
-        mEmitScheduled = false;
-
-        // Deliver every subscribed View's layout-finished event FIRST (in
-        // traversal order), then decide the window signal.
-        //
-        // A view is re-collected/re-emitted whenever it is re-arranged, even with
-        // unchanged bounds, so callers must not treat an emit as "bounds changed".
-        EmitPendingViewLayoutFinishedSignals();
-
-        if(mDestroyPending)
-        {
-          // A slot called Remove(window) -> deferred destroy at the outermost
-          // Process() unwind. Skip BOTH the window Emit and the idle request.
-        }
-        else if(mPendingViews.empty() && mPendingViewLayoutFinishedEvents.empty())
-        {
-          // Truly settled: no re-queued layout work AND no View events stranded
-          // by a nested depth>=2 ProcessLayouts (its settle gate was skipped).
-          mLayoutDirtySinceEmit = false;
-          mLayoutFinishedSignal.Emit(window);
-        }
-        else
-        {
-          // A slot or nested pass re-scheduled work. Keep the latch armed, but
-          // do not self-wake; a later independently triggered ProcessEvents
-          // cycle will drain the pending work and emit only after it settles.
-          mLayoutDirtySinceEmit = true;
-          LogParkedWorkOnce();
-        }
+        // A slot parked layout work. It is reported by the pass that later services it.
+        LogParkedWorkOnce();
       }
     }
   }
@@ -949,8 +971,8 @@ public:
   }
 
   /**
-   * @brief Returns the signal emitted when this window's layout calculation
-   * has fully settled (all Measure/Arrange work drained).
+   * @brief Returns the signal emitted once per post-process phase that delivers
+   * completed layout passes of this window.
    */
   LayoutController::LayoutFinishedSignalType& LayoutFinishedSignal()
   {
@@ -1005,9 +1027,10 @@ public:
   }
 
   /**
-   * @brief Snapshots each arranged subscribed View's final (post-RTL, pre-
-   * transition) actor bounds into the episode store (latest-wins, order-
-   * preserving). Runs after ProcessLayoutRoot returns, before StartTransitions.
+   * @brief Snapshots each arranged subscribed View's final (post-RTL, pre-transition)
+   * actor bounds into mPendingCompletion (latest wins, first-collected position kept).
+   * Runs after ProcessLayoutRoot returns and before StartTransitionsAfterLayout, once per
+   * root, so an exception from a LATER root cannot discard it.
    */
   void SnapshotViewLayoutFinishedCandidates(const std::vector<ViewImpl*>& arrangedViews)
   {
@@ -1034,64 +1057,88 @@ public:
         actor.GetProperty<float>(Actor::Property::SIZE_WIDTH),
         actor.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
 
-      auto indexIt = mPendingViewLayoutFinishedEventIndex.find(arranged);
-      if(indexIt == mPendingViewLayoutFinishedEventIndex.end())
-      {
-        std::size_t index                              = mPendingViewLayoutFinishedEvents.size();
-        mPendingViewLayoutFinishedEventIndex[arranged] = index;
-        mPendingViewLayoutFinishedEvents.push_back(
-          PendingViewLayoutFinishedEvent{arranged, Dali::WeakHandle<Ui::View>(viewHandle), bounds});
-      }
-      else
-      {
-        PendingViewLayoutFinishedEvent& event = mPendingViewLayoutFinishedEvents[indexIt->second];
-        event.weakHandle                      = Dali::WeakHandle<Ui::View>(viewHandle);
-        event.bounds                          = bounds;
-      }
-    }
-  }
-
-  /**
-   * @brief Emits all pending View events in traversal order, then clears the
-   * episode store. Move-out first so a slot re-entering Process / mutating views
-   * cannot corrupt iteration. Per entry: tombstone -> WeakHandle revive -> b1
-   * stale-skip -> connection check -> emit. NO requeue, NO mid-loop early-return.
-   */
-  void EmitPendingViewLayoutFinishedSignals()
-  {
-    auto localEvents = std::move(mPendingViewLayoutFinishedEvents);
-    mPendingViewLayoutFinishedEvents.clear();
-    mPendingViewLayoutFinishedEventIndex.clear();
-    for(auto& event : localEvents)
-    {
-      if(!event.view)
-      {
-        continue; // tombstone: destroyed BEFORE the move
-      }
-      Ui::View view = event.weakHandle.GetHandle();
-      if(!view)
-      {
-        continue; // destroyed DURING emit -> no UAF (raw event.view not dereferenced)
-      }
-      ViewImpl& viewImpl = GetImpl(view);
-      // b1 stale-skip: a nested ProcessLayouts during THIS emit re-queued a NEWER
-      // member event for this view (the member store was cleared at move-out).
-      // Skip the stale local event; the newer member event drains on the
-      // follow-up settled pass, so the view emits once with its latest bounds.
-      if(mPendingViewLayoutFinishedEventIndex.find(&viewImpl) != mPendingViewLayoutFinishedEventIndex.end())
-      {
-        continue;
-      }
-      Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
-      if(!viewDataImpl.HasLayoutFinishedSignalConnections())
-      {
-        continue; // unsubscribed since snapshot
-      }
-      viewDataImpl.EmitLayoutFinishedSignal(event.bounds);
+      mPendingCompletion.Record(arranged, Dali::WeakHandle<Ui::View>(viewHandle), bounds);
     }
   }
 
 private:
+  /**
+   * @brief Hands every completion recorded so far to the post-process phase of this
+   * ProcessEvents cycle. Called only from the outermost automatic pre-process.
+   *
+   * Nothing is handed over while the previous delivery is unfinished. Only an exception can
+   * leave one unfinished for this call to see (a slot threw, or the post-process never ran;
+   * a controller detached during its delivery never gets here again). The undelivered
+   * items then stay recorded at their cursor; that keeps the record consistent but is no
+   * delivery promise: an exception escaping Core::ProcessEvents ends event processing in
+   * the current core, so no later post-process runs in that process. Should one run, it
+   * would resume at the cursor and hand the pending record over in the cycle after, so no
+   * delivery notifies a View twice.
+   */
+  void PromotePendingCompletion()
+  {
+    if(!mPendingCompletion.HasUndelivered() || mReadyCompletion.HasUndelivered())
+    {
+      return;
+    }
+
+    // The previous delivery completed. Take the record wholesale; the swap reuses both
+    // records' storage.
+    mReadyCompletion.Clear();
+    std::swap(mReadyCompletion, mPendingCompletion);
+  }
+
+  /**
+   * @brief Delivers mReadyCompletion: every View once, in first-collected order with its
+   * latest snapshot, then the Window once. Runs inside a ScopedLayoutFinishedEmit.
+   *
+   * The record stays a member so UnregisterView can tombstone it while slots run, and
+   * nothing appends to it here: promotion happens only in the outermost automatic
+   * pre-process, and a pass run from a slot records into mPendingCompletion. There is
+   * deliberately NO stale-skip: an item is delivered even when a slot has already recorded a
+   * newer snapshot of the same View, which the next cycle delivers. The cursor advances and
+   * the Window flag is consumed BEFORE user code runs, so a throwing slot never makes the
+   * controller repeat a notification whose emit had started, while undelivered items stay.
+   */
+  void DeliverReadyCompletion(Dali::Window window)
+  {
+    while(!mDestroyPending && mReadyCompletion.nextView < mReadyCompletion.viewEvents.size())
+    {
+      const PendingViewLayoutFinishedEvent& item = mReadyCompletion.viewEvents[mReadyCompletion.nextView++];
+      if(!item.view)
+      {
+        continue; // tombstone: destroyed or left the scene after the snapshot
+      }
+      Ui::View view = item.weakHandle.GetHandle();
+      if(!view)
+      {
+        continue; // destroyed; the raw key is never dereferenced
+      }
+      const LayoutRect bounds = item.bounds; // no reference into the record is used after user code runs
+
+      Internal::ViewDataImpl& viewData = Internal::ViewDataImpl::Get(GetImpl(view));
+      if(!viewData.HasLayoutFinishedSignalConnections())
+      {
+        continue; // unsubscribed since the snapshot: connections are judged at emit time
+      }
+      viewData.EmitLayoutFinishedSignal(bounds);
+    }
+
+    if(mDestroyPending)
+    {
+      // A slot called LayoutController::Remove(): stop at once. What is left dies with the
+      // controller at reap time.
+      return;
+    }
+
+    const bool notifyWindow = mReadyCompletion.windowPending;
+    mReadyCompletion.Clear();
+    if(notifyWindow)
+    {
+      mLayoutFinishedSignal.Emit(window); // no-op without connections; judged now
+    }
+  }
+
   /**
    * @brief Requests one coalesced idle wake outside the no-self-wake layout window.
    *
@@ -1167,8 +1214,9 @@ private:
       "LayoutFinished is prohibited in principle and only honoured best-effort, so such "
       "work never wakes the event loop itself. It is serviced by the next externally "
       "triggered ProcessEvents cycle, which on a quiescent application may be "
-      "indefinitely later; LayoutFinished stays deferred until then. Defer the "
-      "invalidation to event time if the result must appear promptly.\n",
+      "indefinitely later. LayoutFinished is not withheld meanwhile: every completed pass "
+      "is still reported, and this work is reported by the pass that services it. Defer "
+      "the invalidation to event time if the result must appear promptly.\n",
       mPendingViews.size(),
       rootName.Empty() ? "View" : rootName.CStr());
   }
@@ -1261,6 +1309,10 @@ private:
       });
     }
 
+    // Set once a live root's pass has completed. The batch earns its Window notification only
+    // if it also reaches its normal end below.
+    bool processedLiveRoot = false;
+
     // Process each layout root
     for(std::size_t index = 0u; index < viewsToProcess.size(); ++index)
     {
@@ -1301,7 +1353,9 @@ private:
         // and StartTransitions has not yet overwritten actor props. Views destroyed
         // during ProcessLayoutRoot were scrubbed from arrangedViews by UnregisterView
         // (across all frames), and only property reads run here, so Self() is safe.
+        // Recorded straight into the member pending record, per root.
         SnapshotViewLayoutFinishedCandidates(arrangedViews);
+        processedLiveRoot = true;
 
         if(mTransitionDispatcher)
         {
@@ -1317,6 +1371,14 @@ private:
           mAllLayoutRoots.erase(it);
         }
       }
+    }
+
+    if(processedLiveRoot)
+    {
+      // Recorded whether or not the Window signal has a connection now: connections are
+      // judged at emit time. An aborted batch leaves the loop by exception and never
+      // reaches this line, so it never earns a Window notification of its own.
+      mPendingCompletion.windowPending = true;
     }
 
     // The batch drained normally; the member set is authoritative again.
@@ -1434,19 +1496,17 @@ private:
   std::unordered_set<ViewImpl*>                         mPendingViews;   ///< Dirty layout roots needing processing
   int32_t                                               mWindowWidth;
   int32_t                                               mWindowHeight;
-  void*                                                 mWindowObjectPtr;                     ///< For self-destruct case.
-  bool                                                  mIdleWakeArmed;                       ///< True only while one idle ProcessEvents wake is outstanding
-  bool                                                  mManualProcessInvocation{false};      ///< True while public ProcessLayouts() drains without consuming a queued platform wake
-  bool                                                  mParkedWorkLogged{false};             ///< One parked-work diagnostic per episode; reset when the pending set drains
-  LayoutController::LayoutFinishedSignalType            mLayoutFinishedSignal;                ///< Emitted when layout fully settles for this window
-  bool                                                  mLayoutDirtySinceEmit{false};         ///< Settled latch: armed by RequestLayout, cleared at emit
-  bool                                                  mEmitScheduled{false};                ///< PRE-phase settle detected; POST phase must emit the layout-finished signals this frame
-  int                                                   mProcessDepth{0};                     ///< Process() re-entrancy depth (emit gate + deferred-destroy safe point)
-  bool                                                  mDestroyPending{false};               ///< Deferred self-destruct requested during processing
-  bool                                                  mDetached{false};                     ///< Made inert and handed to gDetachedLayoutControllers; awaiting free
-  std::vector<ActiveCollectorFrame>                     mActiveCollectorStack;                ///< Stack of per-root collectors (nested-pass safe)
-  std::vector<PendingViewLayoutFinishedEvent>           mPendingViewLayoutFinishedEvents;     ///< Episode events (traversal order, latest-wins)
-  std::unordered_map<ViewImpl*, std::size_t>            mPendingViewLayoutFinishedEventIndex; ///< view -> index into the events vector
+  void*                                                 mWindowObjectPtr;                ///< For self-destruct case.
+  bool                                                  mIdleWakeArmed;                  ///< True only while one idle ProcessEvents wake is outstanding
+  bool                                                  mManualProcessInvocation{false}; ///< True while public ProcessLayouts() drains without consuming a queued platform wake
+  bool                                                  mParkedWorkLogged{false};        ///< One parked-work diagnostic per episode; reset when the pending set drains
+  LayoutController::LayoutFinishedSignalType            mLayoutFinishedSignal;           ///< Emitted once per post-process phase that delivers completed passes
+  int                                                   mProcessDepth{0};                ///< Process() re-entrancy depth (promotion/delivery gate + deferred-destroy safe point)
+  bool                                                  mDestroyPending{false};          ///< Deferred self-destruct requested during processing
+  bool                                                  mDetached{false};                ///< Made inert and handed to gDetachedLayoutControllers; awaiting free
+  std::vector<ActiveCollectorFrame>                     mActiveCollectorStack;           ///< Stack of per-root collectors (nested-pass safe)
+  LayoutCompletionRecord                                mPendingCompletion;              ///< Completions recorded since the last promotion
+  LayoutCompletionRecord                                mReadyCompletion;                ///< Completions covered by this cycle's core Relayout; delivered in post-process
 };
 
 } // namespace Integration

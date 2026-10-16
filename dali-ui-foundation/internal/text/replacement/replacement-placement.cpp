@@ -33,13 +33,16 @@ struct SurroundingMetrics
   bool  hasVisibleText{false};
 };
 
+/**
+ * @brief Tests membership in the line glyph run.
+ * @param[in] line Line in the same glyph domain as the index.
+ * @param[in] glyphIndex Glyph index to test.
+ * @return True when the glyph belongs to the line.
+ */
 bool ContainsGlyph(const LineRun& line, GlyphIndex glyphIndex)
 {
-  const auto contains = [glyphIndex](const GlyphRun& run)
-  {
-    return glyphIndex >= run.glyphIndex && glyphIndex < run.glyphIndex + run.numberOfGlyphs;
-  };
-  return contains(line.glyphRun) || (line.isSplitToTwoHalves && contains(line.glyphRunSecondHalf));
+  return glyphIndex >= line.glyphRun.glyphIndex &&
+         glyphIndex < line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs;
 }
 
 ReplacementCaretMetric ToCaretMetric(const TextAbstraction::FontMetrics& fontMetrics)
@@ -77,6 +80,17 @@ bool ResolveGlyphCaretMetric(const VisualModel&           visual,
   return metric.height > 0.0f;
 }
 
+/**
+ * @brief Selects retained neighboring text metrics at a replacement boundary.
+ * @param[in] visual Source visual model.
+ * @param[in] finalElision Maps source glyphs to retained final glyphs.
+ * @param[in] fontClient Font client providing metrics.
+ * @param[in] line Source line containing the replacement.
+ * @param[in] replacementGlyphIndex Replacement glyph in the source domain.
+ * @param[in] preferPrevious Whether to search preceding text first.
+ * @param[in] fallback Metrics used when no retained text is available.
+ * @return Resolved caret metrics at the boundary.
+ */
 ReplacementCaretMetric ResolveBoundaryCaretMetric(const VisualModel&            visual,
                                                   const FinalElisionResult&     finalElision,
                                                   TextAbstraction::FontClient&  fontClient,
@@ -87,12 +101,7 @@ ReplacementCaretMetric ResolveBoundaryCaretMetric(const VisualModel&            
 {
   GlyphIndex lineStart = line.glyphRun.glyphIndex;
   GlyphIndex lineEnd   = line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs;
-  if(line.isSplitToTwoHalves)
-  {
-    lineStart = std::min(lineStart, line.glyphRunSecondHalf.glyphIndex);
-    lineEnd   = std::max(lineEnd,
-                         line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs);
-  }
+
   lineEnd = std::min<GlyphIndex>(lineEnd, static_cast<GlyphIndex>(visual.mGlyphs.Count()));
 
   const auto findPrevious = [&]()
@@ -188,6 +197,15 @@ void IncludeGlyphMetrics(const VisualModel&               visual,
   }
 }
 
+/**
+ * @brief Collects retained text metrics around replacement glyphs.
+ * @param[in] visual Source visual model.
+ * @param[in] finalElision Maps source glyphs to retained final glyphs.
+ * @param[in] fontClient Font client providing metrics.
+ * @param[in] lineMetricData Optional replacement line metrics and render scale.
+ * @param[in] defaultFontId Font used for lines without retained ordinary text.
+ * @return Retained text metrics indexed by source layout line.
+ */
 Vector<SurroundingMetrics> ResolveSurroundingMetrics(const VisualModel&               visual,
                                                      const FinalElisionResult&        finalElision,
                                                      TextAbstraction::FontClient&     fontClient,
@@ -217,10 +235,7 @@ Vector<SurroundingMetrics> ResolveSurroundingMetrics(const VisualModel&         
   {
     const LineRun& line = visual.mLines[lineIndex];
     IncludeGlyphMetrics(visual, finalElision, fontClient, lineMetricData, line.glyphRun, lineMetrics[lineIndex]);
-    if(line.isSplitToTwoHalves)
-    {
-      IncludeGlyphMetrics(visual, finalElision, fontClient, lineMetricData, line.glyphRunSecondHalf, lineMetrics[lineIndex]);
-    }
+
     if(!lineMetrics[lineIndex].hasVisibleText && hasDefaultFont)
     {
       lineMetrics[lineIndex].ascender       = defaultFontMetrics.ascender;

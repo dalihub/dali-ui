@@ -1,3 +1,49 @@
+# Manual PR rules review
+
+`DALI UI Rules Review` runs only through `workflow_dispatch`. In Actions, choose
+the automation branch under **Run workflow** and enter `pr_number`. The workflow
+resolves the PR through the GitHub API and reviews its head SHA at lookup time.
+The selected workflow revision supplies the scripts; the PR supplies the rules
+and code being reviewed. The comment includes the reviewed head SHA.
+
+Before running:
+
+- Add the repository secret `CLINE_OFFLINE_TOKEN`, issued after AD SSO login at
+  <https://aicoding.sec.samsung.net/proxy/access-policy/issued-tokens>.
+  This replaces the old `CLINE_UMS_TOKEN` authentication for this workflow.
+- CLI `2.1.0` is pinned. The default requested model is `GaussO6`; the repository
+  variable `CLINE_MODEL` overrides it. Confirm that the token's account can use
+  the selected model. The comment labels it as the requested model, since the
+  CLI may substitute a default model; inspect CLI logs to confirm actual use.
+- The workflow must exist on the default branch for GitHub to offer manual runs.
+  Re-enable it in Actions if it was disabled through the web UI.
+
+`cline-rules-review.sh` validates `result.json` independently of the CLI's NDJSON
+event stream. It accepts at most 50 findings with all six nonempty string fields
+and one of the four allowed severities. It makes up to three attempts, passing
+the previous result and validator errors back for correction. Each attempt must
+create a fresh result file and exit successfully. CLI `--retries 3` controls its
+internal mistake handling separately from these result correction attempts.
+
+After exhaustion, the job fails and still posts a **리뷰 미완료** comment. Static
+checker findings remain visible; incomplete AI output is not presented as a
+completed review. Debug artifacts preserve each attempt's prompt, result,
+stdout, stderr, exit status and validator errors, plus the runtime CLI version.
+The offline token is redacted from uploaded debug files.
+CLI state uses a separate temporary directory per run, so runner preferences,
+memory and automatic update settings are not reused. This directory is deleted
+on script exit and is not included in debug artifacts.
+
+Hooks and LSP are not enabled by this workflow. Hook behavior needs verification
+against the pinned CLI, and C++ LSP additionally requires clangd 20+ and suitable
+build configuration on the runner.
+
+Run the rules review regression tests without credentials or model access:
+
+```sh
+python3 -m unittest discover -s .github/scripts/tests -p 'test_cline_rules_review.py' -v
+```
+
 # Shared test utility check
 
 `check-test-utils-sync.py` checks the shared test support sources in the resolved

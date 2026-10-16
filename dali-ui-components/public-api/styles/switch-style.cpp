@@ -24,7 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/styles/switch-style-impl.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 
@@ -75,14 +75,14 @@ UiStyleKey<SwitchStyle> SwitchStyle::DefaultKey()
 
 SwitchStyle SwitchStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static SwitchStyle style = SwitchStyle::Builder().Build();
   return style;
 }
 
 SwitchStyle SwitchStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   SwitchStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }

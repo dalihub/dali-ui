@@ -83,7 +83,7 @@ inline bool GetFinalSourceGlyphGeometry(const Model&              model,
     {
       return sourceGlyphIndex >= run.glyphIndex && sourceGlyphIndex < run.glyphIndex + run.numberOfGlyphs;
     };
-    if(contains(line.glyphRun) || (line.isSplitToTwoHalves && contains(line.glyphRunSecondHalf)))
+    if(contains(line.glyphRun))
     {
       geometry.lineIndex = lineIndex;
       break;

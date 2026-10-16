@@ -41,6 +41,7 @@ using Dali::Integration::ToStdString;
 
 namespace
 {
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(UiLocalizationManager);
 
 struct ApplyingGuard
 {
@@ -72,7 +73,7 @@ UiLocalizationManager UiLocalizationManagerImpl::Get()
   if(service)
   {
     // Check whether the singleton is already created
-    BaseHandle handle = service.GetSingleton(typeid(UiLocalizationManager));
+    BaseHandle handle = service.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle
@@ -81,7 +82,7 @@ UiLocalizationManager UiLocalizationManagerImpl::Get()
     else
     {
       manager = UiLocalizationManager(new UiLocalizationManagerImpl());
-      service.Register(typeid(manager), manager);
+      service.Register(gSingletonTypeInfoId, manager);
     }
   }
 

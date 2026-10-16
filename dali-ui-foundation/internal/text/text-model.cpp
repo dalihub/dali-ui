@@ -69,11 +69,6 @@ Alignment Model::GetVerticalLineAlignment() const
   return mVerticalLineAlignment;
 }
 
-Text::EllipsisPosition::Type Model::GetEllipsisPosition() const
-{
-  return mEllipsisPosition;
-}
-
 bool Model::IsTextElideEnabled() const
 {
   return mElideEnabled;
@@ -109,24 +104,9 @@ Length Model::GetNumberOfGlyphs() const
   return static_cast<Dali::Ui::Text::Length>(mVisualModel->mGlyphs.Count());
 }
 
-GlyphIndex Model::GetStartIndexOfElidedGlyphs() const
-{
-  return mVisualModel->GetStartIndexOfElidedGlyphs();
-}
-
 GlyphIndex Model::GetEndIndexOfElidedGlyphs() const
 {
   return mVisualModel->GetEndIndexOfElidedGlyphs();
-}
-
-GlyphIndex Model::GetFirstMiddleIndexOfElidedGlyphs() const
-{
-  return mVisualModel->GetFirstMiddleIndexOfElidedGlyphs();
-}
-
-GlyphIndex Model::GetSecondMiddleIndexOfElidedGlyphs() const
-{
-  return mVisualModel->GetSecondMiddleIndexOfElidedGlyphs();
 }
 
 const GlyphInfo* Model::GetGlyphs() const
@@ -414,8 +394,7 @@ Model::Model()
   mElideEnabled(false),
   mRemoveFrontInset(false),
   mRemoveBackInset(false),
-  mLayoutDirectionMode(LayoutDirectionMode::INHERIT),
-  mEllipsisPosition(Text::EllipsisPosition::END)
+  mLayoutDirectionMode(LayoutDirectionMode::INHERIT)
 {
   mLogicalModel = LogicalModel::New();
   mVisualModel  = VisualModel::New();

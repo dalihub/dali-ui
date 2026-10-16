@@ -38,6 +38,7 @@ namespace Internal
 
 namespace
 {
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(UiColorManager);
 
 struct ApplyingGuard
 {
@@ -67,7 +68,7 @@ UiColorManager UiColorManagerImpl::Get()
   if(service)
   {
     // Check whether the singleton is already created
-    BaseHandle handle = service.GetSingleton(typeid(UiColorManager));
+    BaseHandle handle = service.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle
@@ -76,7 +77,7 @@ UiColorManager UiColorManagerImpl::Get()
     else
     {
       manager = UiColorManager(new UiColorManagerImpl());
-      service.Register(typeid(manager), manager);
+      service.Register(gSingletonTypeInfoId, manager);
     }
   }
 

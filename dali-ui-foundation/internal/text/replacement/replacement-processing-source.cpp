@@ -173,7 +173,6 @@ void CopyTextProcessingProperties(const Model& source, Model& target)
 
   target.mLineWrapMode          = source.mLineWrapMode;
   target.mElideEnabled          = source.mElideEnabled;
-  target.mEllipsisPosition      = source.mEllipsisPosition;
   target.mHorizontalAlignment   = source.mHorizontalAlignment;
   target.mVerticalAlignment     = source.mVerticalAlignment;
   target.mVerticalLineAlignment = source.mVerticalLineAlignment;

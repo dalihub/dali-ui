@@ -84,7 +84,6 @@ ControllerPtr CreateController(const Model&                        originalModel
   controller->SetMultiLineEnabled(options.layoutType == Layout::Engine::MULTI_LINE_BOX);
   controller->SetLineWrapMode(options.lineWrapMode);
   controller->SetTextElideEnabled(options.elideText);
-  controller->SetEllipsisPosition(options.ellipsisPosition);
   controller->SetHorizontalAlignment(options.horizontalAlignment);
   controller->SetVerticalAlignment(options.verticalAlignment);
   controller->SetLayoutDirection(options.layoutDirection);

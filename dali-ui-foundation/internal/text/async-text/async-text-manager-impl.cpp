@@ -35,6 +35,8 @@ namespace Ui
 {
 namespace
 {
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(Text::AsyncTextManager);
+
 const char*    DALI_TEXT_NUMBER_OF_ASYNC_TEXT_LOADER("DALI_TEXT_NUMBER_OF_ASYNC_TEXT_LOADER");
 const int      DEFAULT_NUMBER_OF_LOADER = 4;
 const int      MINIMUM_NUMBER_OF_LOADER = 1;
@@ -120,7 +122,7 @@ Text::AsyncTextManager AsyncTextManager::Get()
   if(service)
   {
     // Check whether the singleton is already created
-    Dali::BaseHandle handle = service.GetSingleton(typeid(Text::AsyncTextManager));
+    Dali::BaseHandle handle = service.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle
@@ -130,7 +132,7 @@ Text::AsyncTextManager AsyncTextManager::Get()
     else // create and register the object
     {
       asyncTextManagerHandle = Text::AsyncTextManager(new AsyncTextManager);
-      service.Register(typeid(asyncTextManagerHandle), asyncTextManagerHandle);
+      service.Register(gSingletonTypeInfoId, asyncTextManagerHandle);
     }
   }
 

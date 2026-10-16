@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/styles/markdown-view-style-impl.h>
 #include <dali-ui-components/public-api/styles/check-box-style.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
 // EXTERNAL INCLUDES
@@ -50,14 +50,14 @@ UiStyleKey<MarkdownViewStyle> MarkdownViewStyle::DefaultKey()
 
 MarkdownViewStyle MarkdownViewStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static MarkdownViewStyle style = MarkdownViewStyle::Builder().Build();
   return style;
 }
 
 MarkdownViewStyle MarkdownViewStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   MarkdownViewStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }

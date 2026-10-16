@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <memory.h>
+#include <algorithm>
 
 namespace DALI_NAMESPACE
 {
@@ -163,11 +164,11 @@ void SetBidirectionalInfo(TextAbstraction::BidirectionalSupport& bidirectionalSu
   }
 }
 
-void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
-                 const BidirectionalParagraphInfoRun&   bidirectionalParagraphInfo,
+void ReorderLine(TextAbstraction::BidirectionalSupport&       bidirectionalSupport,
+                 const BidirectionalParagraphInfoRun&         bidirectionalParagraphInfo,
+                 const Vector<BidirectionalParagraphInfoRun>& paragraphs,
                  Vector<BidirectionalLineInfoRun>& lineInfoRuns, BidirectionalLineRunIndex bidiLineIndex,
-                 CharacterIndex startIndex, Length numberOfCharacters, CharacterIndex startIndexInSecondHalfLine,
-                 Length numberOfCharactersInSecondHalfLine, CharacterDirection direction)
+                 CharacterIndex startIndex, Length numberOfCharacters, CharacterDirection direction)
 {
   // Creates a bidirectional info for the line run.
   BidirectionalLineInfoRun lineInfoRun;
@@ -176,52 +177,57 @@ void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
   lineInfoRun.direction                       = direction;
   lineInfoRun.isIdentity                      = true;
 
-  lineInfoRun.characterRunForSecondHalfLine.characterIndex     = startIndexInSecondHalfLine;
-  lineInfoRun.characterRunForSecondHalfLine.numberOfCharacters = numberOfCharactersInSecondHalfLine;
-
-  // Allocate space for the conversion maps.
-  // The memory is freed after the visual to logical to visual conversion tables are built in the logical model.
+  // Ownership transfers to the logical model with the inserted line run.
+  // Its clear, replacement and destruction paths free this map.
   lineInfoRun.visualToLogicalMap =
     numberOfCharacters ? reinterpret_cast<CharacterIndex*>(malloc(numberOfCharacters * sizeof(CharacterIndex)))
                        : nullptr;
 
-  lineInfoRun.visualToLogicalMapSecondHalf =
-    numberOfCharactersInSecondHalfLine
-      ? reinterpret_cast<CharacterIndex*>(malloc(numberOfCharactersInSecondHalfLine * sizeof(CharacterIndex)))
-      : nullptr;
-
   if(nullptr != lineInfoRun.visualToLogicalMap)
   {
     // Reorders the line.
-    bidirectionalSupport.Reorder(
-      bidirectionalParagraphInfo.bidirectionalInfoIndex,
-      lineInfoRun.characterRun.characterIndex - bidirectionalParagraphInfo.characterRun.characterIndex,
-      lineInfoRun.characterRun.numberOfCharacters, lineInfoRun.visualToLogicalMap);
+    const CharacterIndex paragraphStart  = bidirectionalParagraphInfo.characterRun.characterIndex;
+    const Length         paragraphLength = bidirectionalParagraphInfo.characterRun.numberOfCharacters;
+    if(startIndex >= paragraphStart && startIndex - paragraphStart <= paragraphLength &&
+       numberOfCharacters <= paragraphLength - (startIndex - paragraphStart))
+    {
+      bidirectionalSupport.Reorder(bidirectionalParagraphInfo.bidirectionalInfoIndex,
+                                   startIndex - paragraphStart, numberOfCharacters,
+                                   lineInfoRun.visualToLogicalMap);
+    }
+    else
+    {
+      // A single visual line can contain several newline-delimited paragraphs.
+      // Reorder every paragraph intersection with its own metadata. Retain LTR
+      // gaps as identity and keep every character in the line's map.
+      for(CharacterIndex index = 0u; index < numberOfCharacters; ++index)
+      {
+        lineInfoRun.visualToLogicalMap[index] = index;
+      }
+      const CharacterIndex lineEnd = startIndex + numberOfCharacters;
+      for(const auto& paragraph : paragraphs)
+      {
+        const CharacterIndex first = std::max(startIndex, paragraph.characterRun.characterIndex);
+        const CharacterIndex last  = std::min(lineEnd, paragraph.characterRun.characterIndex + paragraph.characterRun.numberOfCharacters);
+        if(first < last)
+        {
+          const CharacterIndex offset = first - startIndex;
+          CharacterIndex*      map    = lineInfoRun.visualToLogicalMap + offset;
+          bidirectionalSupport.Reorder(paragraph.bidirectionalInfoIndex,
+                                       first - paragraph.characterRun.characterIndex, last - first, map);
+          for(CharacterIndex index = 0u; index < last - first; ++index)
+          {
+            map[index] += offset;
+          }
+        }
+      }
+    }
 
     // For those LTR lines inside a bidirectional paragraph.
     // It will save to relayout the line after reordering.
     for(unsigned int i = 0; i < numberOfCharacters; ++i)
     {
       if(i != *(lineInfoRun.visualToLogicalMap + i))
-      {
-        lineInfoRun.isIdentity = false;
-        break;
-      }
-    }
-  }
-
-  if(nullptr != lineInfoRun.visualToLogicalMapSecondHalf)
-  {
-    // Reorders the second half of the line.
-    bidirectionalSupport.Reorder(bidirectionalParagraphInfo.bidirectionalInfoIndex,
-                                 lineInfoRun.characterRunForSecondHalfLine.characterIndex -
-                                   bidirectionalParagraphInfo.characterRun.characterIndex,
-                                 lineInfoRun.characterRunForSecondHalfLine.numberOfCharacters,
-                                 lineInfoRun.visualToLogicalMapSecondHalf);
-
-    for(unsigned int i = 0; i < numberOfCharactersInSecondHalfLine; ++i)
-    {
-      if(i != *(lineInfoRun.visualToLogicalMapSecondHalf + i))
       {
         lineInfoRun.isIdentity = false;
         break;

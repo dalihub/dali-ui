@@ -15,20 +15,22 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/rendering/renderer-devel.h>
+#include <dali/public-api/rendering/texture.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
 #include <memory>
 #include <utility>
 #include <vector>
-#include <dali/devel-api/rendering/renderer-devel.h>
-#include <dali/public-api/rendering/texture.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
@@ -45,19 +47,17 @@
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
-#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
-#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-test-suite-utils.h>
-#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
-#include "replacement-layout-test-adapter.h"
 #include "inline-replacement-manager-test-accessor.h"
+#include "replacement-layout-test-adapter.h"
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -239,18 +239,12 @@ void CheckFinalElisionContract(const Text::ReplacementRenderState& state)
                                                                          ? finalElision.glyphs.Count()
                                                                          : state.processingModel->mVisualModel->mGlyphs.Count());
   const Vector<Text::LineRun>& finalLines = finalElision.HasAuthoritativeLayout()
-                                               ? finalElision.lines
-                                               : state.processingModel->mVisualModel->mLines;
+                                                   ? finalElision.lines
+                                                   : state.processingModel->mVisualModel->mLines;
   for(const Text::LineRun& line : finalLines)
   {
     DALI_TEST_CHECK(line.glyphRun.glyphIndex <= finalGlyphCount &&
                     line.glyphRun.numberOfGlyphs <= finalGlyphCount - line.glyphRun.glyphIndex);
-    if(line.isSplitToTwoHalves)
-    {
-      DALI_TEST_CHECK(line.glyphRunSecondHalf.glyphIndex <= finalGlyphCount &&
-                      line.glyphRunSecondHalf.numberOfGlyphs <=
-                        finalGlyphCount - line.glyphRunSecondHalf.glyphIndex);
-    }
   }
   uint32_t ellipsisLineCount = 0u;
   for(const Text::LineRun& line : state.processingModel->mVisualModel->mLines)
@@ -363,17 +357,6 @@ void CheckLaidOutBoundariesAreAtomic(const Text::ReplacementProjection&  project
       line.characterRun.characterIndex + line.characterRun.numberOfCharacters);
     DALI_TEST_CHECK(IsExactLogicalBoundary(projection, firstStart));
     DALI_TEST_CHECK(IsExactLogicalBoundary(projection, firstEnd));
-
-    if(line.characterRunForSecondHalfLine.numberOfCharacters > 0u)
-    {
-      const Text::CharacterIndex secondStart =
-        projection.ProjectedBoundaryToLogical(line.characterRunForSecondHalfLine.characterIndex);
-      const Text::CharacterIndex secondEnd = projection.ProjectedBoundaryToLogical(
-        line.characterRunForSecondHalfLine.characterIndex +
-        line.characterRunForSecondHalfLine.numberOfCharacters);
-      DALI_TEST_CHECK(IsExactLogicalBoundary(projection, secondStart));
-      DALI_TEST_CHECK(IsExactLogicalBoundary(projection, secondEnd));
-    }
   }
 }
 
@@ -1222,8 +1205,8 @@ int UtcDaliReplacementVerticalAlignmentLineContainmentP(void)
           TextAbstraction::FontMetrics fontMetrics;
           services.fontClient.GetFontMetrics(glyphs[glyphIndex].fontId, fontMetrics);
           surroundingMetrics.ascender = hasSurroundingMetrics
-                                          ? std::max(surroundingMetrics.ascender, fontMetrics.ascender)
-                                          : fontMetrics.ascender;
+                                           ? std::max(surroundingMetrics.ascender, fontMetrics.ascender)
+                                           : fontMetrics.ascender;
           surroundingMetrics.descender = hasSurroundingMetrics
                                            ? std::min(surroundingMetrics.descender, fontMetrics.descender)
                                            : fontMetrics.descender;
@@ -1231,15 +1214,12 @@ int UtcDaliReplacementVerticalAlignmentLineContainmentP(void)
         }
       };
       includeTextMetrics(line.glyphRun);
-      if(line.isSplitToTwoHalves)
-      {
-        includeTextMetrics(line.glyphRunSecondHalf);
-      }
+
       if(!hasSurroundingMetrics)
       {
         TextAbstraction::FontDescription defaultFontDescription;
         const Text::FontId defaultFontId = services.fontClient.GetFontId(defaultFontDescription,
-                                                                         options.fontPointSize);
+                                                                                       options.fontPointSize);
         services.fontClient.GetFontMetrics(defaultFontId, surroundingMetrics);
         hasSurroundingMetrics = true;
       }
@@ -1437,7 +1417,6 @@ int UtcDaliReplacementControllerModelGeometryAndAffinityContractP(void)
   Text::ControllerPtr     elidedController = Text::Controller::New();
   Text::Controller::Impl& elidedImpl       = Text::Controller::Impl::GetImplementation(*elidedController.Get());
   elidedController->SetTextElideEnabled(true);
-  elidedController->SetEllipsisPosition(Text::EllipsisPosition::END);
   elidedController->SetText("AabcdefghijZ");
   Text::ReplacementSourceSnapshot elidedSource;
   for(uint32_t index = 0u; index < 5u; ++index)
@@ -1473,7 +1452,6 @@ int UtcDaliReplacementControllerModelGeometryAndAffinityContractP(void)
   centeredController->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
   centeredController->SetHorizontalAlignment(Text::Alignment::CENTER);
   centeredController->SetTextElideEnabled(true);
-  centeredController->SetEllipsisPosition(Text::EllipsisPosition::END);
   centeredController->SetLineWrapMode(Text::LineWrapMode::CHARACTER);
   centeredController->SetText("Long prefix words\uFFFCtrailing text");
   Text::ReplacementSourceSnapshot centeredSource;
@@ -1544,7 +1522,6 @@ int UtcDaliReplacementEditableEllipsisFocusLossResetsScrollP(void)
   controller->GetLayoutEngine().SetLayout(Text::Layout::Engine::SINGLE_LINE_BOX);
   controller->SetHorizontalScrollEnabled(true);
   controller->SetTextElideEnabled(true);
-  controller->SetEllipsisPosition(Text::EllipsisPosition::END);
   controller->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
   controller->SetText("Leading replacement text that is wider than the control");
 
@@ -4187,7 +4164,6 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
     Text::ReplacementLayoutTestOptions options;
     options.contentSize      = Vector2(62.0f, 40.0f);
     options.elideText        = true;
-    options.ellipsisPosition = Text::EllipsisPosition::END;
     Text::ReplacementRenderState result;
     DALI_TEST_CHECK(Text::LayoutReplacementForTest(projection, services, options, result));
     DALI_TEST_CHECK(result.finalElision.textElided);
@@ -4228,7 +4204,6 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
     boundaryOptions.contentSize         = Vector2(width, 80.0f);
     boundaryOptions.lineWrapMode        = Text::LineWrapMode::CHARACTER;
     boundaryOptions.elideText           = true;
-    boundaryOptions.ellipsisPosition    = Text::EllipsisPosition::END;
     boundaryOptions.horizontalAlignment = Text::Alignment::CENTER;
 
     Text::ReplacementRenderState boundaryResult;
@@ -4311,7 +4286,6 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
       mixedSizeOptions.contentSize      = Vector2(width, 472.0f);
       mixedSizeOptions.layoutType       = Text::Layout::Engine::SINGLE_LINE_BOX;
       mixedSizeOptions.elideText        = true;
-      mixedSizeOptions.ellipsisPosition = Text::EllipsisPosition::END;
       mixedSizeOptions.fontPointSize    = 28u * 64u;
       mixedSizeOptions.fontPixelSize    = 28.0f;
       mixedSizeOptions.relativeLineSize = lineHeightMode.relative;
@@ -4357,7 +4331,6 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
       asyncParameters.textWidth                                           = width;
       asyncParameters.textHeight                                          = 472.0f;
       asyncParameters.ellipsis                                            = true;
-      asyncParameters.ellipsisPosition                                    = Text::EllipsisPosition::END;
       asyncParameters.relativeLineSize                                    = lineHeightMode.relative;
       asyncParameters.minLineSize                                         = lineHeightMode.minimum;
       asyncParameters.replacementSourceSnapshot.runs                      = mixedSizeCandidates;
@@ -4408,7 +4381,6 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
     fullyElidedOptions.contentSize      = Vector2(120.0f, 200.0f);
     fullyElidedOptions.layoutType       = Text::Layout::Engine::SINGLE_LINE_BOX;
     fullyElidedOptions.elideText        = true;
-    fullyElidedOptions.ellipsisPosition = Text::EllipsisPosition::END;
     fullyElidedOptions.fontPointSize    = 28u * 64u;
     fullyElidedOptions.fontPixelSize    = 28.0f;
     fullyElidedOptions.relativeLineSize = lineHeightMode.relative;
@@ -4434,7 +4406,6 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
   multilineOptions.contentSize      = Vector2(120.0f, 45.0f);
   multilineOptions.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
   multilineOptions.elideText        = true;
-  multilineOptions.ellipsisPosition = Text::EllipsisPosition::END;
   Text::ReplacementRenderState multilineResult;
   DALI_TEST_CHECK(Text::LayoutReplacementForTest(fullyElidedProjection,
                                                  services,
@@ -4479,7 +4450,6 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
     options.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
     options.lineWrapMode     = Text::LineWrapMode::WORD;
     options.elideText        = true;
-    options.ellipsisPosition = Text::EllipsisPosition::END;
     options.fontPointSize    = 28u * 64u;
     options.fontPixelSize    = 28.0f * 4.0f / 3.0f;
     options.sourceRevision   = 270u;
@@ -4563,7 +4533,6 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
   controller->SetMultiLineEnabled(true);
   controller->SetLineWrapMode(Text::LineWrapMode::WORD);
   controller->SetTextElideEnabled(true);
-  controller->SetEllipsisPosition(Text::EllipsisPosition::END);
   impl.GetOrCreateReplacementSourceSnapshot() = source;
 
   controller->Relayout(Size(400.0f, 90.0f));
@@ -4622,7 +4591,6 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
     parameters.isMultiLine                 = true;
     parameters.lineWrapMode                = Text::LineWrapMode::WORD;
     parameters.ellipsis                    = true;
-    parameters.ellipsisPosition            = Text::EllipsisPosition::END;
     parameters.renderScale                 = renderScale;
     parameters.replacementSourceSnapshot   = source;
     parameters.replacementLayoutGeneration = requestGeneration;
@@ -4660,56 +4628,6 @@ int UtcDaliReplacementVerticalEndEllipsisLifecycleP(void)
   DALI_TEST_EQUALS(scaleTwoWide.textElided, scaleOneWide.textElided, TEST_LOCATION);
   DALI_TEST_EQUALS(scaleTwoWide.generatedEllipsisCount, scaleOneWide.generatedEllipsisCount, TEST_LOCATION);
   DALI_TEST_EQUALS(scaleTwoWide.ellipsisLineIndex, scaleOneWide.ellipsisLineIndex, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliReplacementUnsupportedEllipsisPoliciesP(void)
-{
-  UiTestApplication application;
-
-  Text::ReplacementSourceSnapshot source;
-  source.runs.PushBack(Candidate(1u, 1u, 28.0f, 20.0f, 1u));
-  source.sourceRevision            = 71u;
-  source.hasValidReplacementSource = true;
-
-  const Text::EllipsisPosition::Type unsupported[] = {
-    Text::EllipsisPosition::START,
-    Text::EllipsisPosition::MIDDLE};
-  for(const Text::EllipsisPosition::Type position : unsupported)
-  {
-    Text::ControllerPtr     controller = Text::Controller::New();
-    Text::Controller::Impl& impl       = Text::Controller::Impl::GetImplementation(*controller.Get());
-    controller->SetText("A\uFFFCB");
-    controller->SetTextElideEnabled(true);
-    controller->SetEllipsisPosition(position);
-    impl.GetOrCreateReplacementSourceSnapshot() = source;
-    controller->Relayout(Size(32.0f, 40.0f));
-    DALI_TEST_CHECK(impl.GetReplacementRenderState().attempted);
-    DALI_TEST_CHECK(impl.GetReplacementRenderState().processingModel);
-    DALI_TEST_CHECK(controller->GetLogicalTextModel() != controller->GetRenderTextModel());
-    DALI_TEST_CHECK(!impl.GetReplacementRenderState().processingModel->mElideEnabled);
-    DALI_TEST_CHECK(!impl.GetReplacementRenderState().finalElision.textElided);
-    DALI_TEST_EQUALS(impl.GetReplacementRenderState().placements.Count(), 1u, TEST_LOCATION);
-
-    Text::AsyncTextParameters parameters;
-    parameters.text                        = "A\uFFFCB";
-    parameters.textWidth                   = 32.0f;
-    parameters.textHeight                  = 40.0f;
-    parameters.ellipsis                    = true;
-    parameters.ellipsisPosition            = position;
-    parameters.replacementSourceSnapshot   = source;
-    parameters.replacementLayoutGeneration = 9u;
-    Text::AsyncTextLoader loader           = Text::AsyncTextLoader::New();
-    loader.GetHeightForWidth(parameters);
-    const Text::ReplacementRenderState* async = Text::GetImplementation(loader).GetReplacementRenderState();
-    DALI_TEST_CHECK(async);
-    DALI_TEST_CHECK(async->attempted);
-    DALI_TEST_CHECK(async->processingModel);
-    DALI_TEST_CHECK(!async->processingModel->mElideEnabled);
-    DALI_TEST_CHECK(!async->finalElision.textElided);
-    DALI_TEST_EQUALS(async->placements.Count(), 1u, TEST_LOCATION);
-  }
 
   END_TEST;
 }
@@ -5151,7 +5069,6 @@ int UtcDaliReplacementAsyncRenderScalePlacementP(void)
     boundaryParameters.textHeight       = textHeight;
     boundaryParameters.isMultiLine      = true;
     boundaryParameters.ellipsis         = true;
-    boundaryParameters.ellipsisPosition = Text::EllipsisPosition::END;
     boundaryParameters.relativeLineSize = -1.0f;
     boundaryParameters.renderScale      = renderScale;
     if(fitMode == LineHeightFitMode::RANGE)
@@ -5329,7 +5246,6 @@ int UtcDaliReplacementAsyncRenderScalePlacementP(void)
     reuseParameters.originHeight     = reuseParameters.textHeight;
     reuseParameters.isMultiLine      = true;
     reuseParameters.ellipsis         = true;
-    reuseParameters.ellipsisPosition = Text::EllipsisPosition::END;
     reuseParameters.relativeLineSize = testCase.relativeLineSize;
     reuseParameters.minLineSize      = testCase.minimumLineSize;
     reuseParameters.renderScale      = testCase.renderScale;
@@ -5483,7 +5399,6 @@ int UtcDaliReplacementProductionParityMatrixP(void)
     controller->SetLineWrapMode(Text::LineWrapMode::CHARACTER);
     controller->SetRelativeLineSize(1.0f);
     controller->SetTextElideEnabled(ellipsis);
-    controller->SetEllipsisPosition(Text::EllipsisPosition::END);
     controller->SetHorizontalAlignment(horizontalAlignment);
     controller->SetVerticalAlignment(verticalAlignment);
     controller->SetVerticalLineAlignment(Text::Alignment::START);
@@ -5499,7 +5414,6 @@ int UtcDaliReplacementProductionParityMatrixP(void)
     parameters.isMultiLine                 = multiline;
     parameters.lineWrapMode                = Text::LineWrapMode::CHARACTER;
     parameters.ellipsis                    = ellipsis;
-    parameters.ellipsisPosition            = Text::EllipsisPosition::END;
     parameters.horizontalAlignment         = horizontalAlignment;
     parameters.verticalAlignment           = verticalAlignment;
     parameters.verticalLineAlignment       = Text::Alignment::START;
@@ -5875,7 +5789,7 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
   };
 
   const auto compareEllipsisMetrics = [&services](const Text::GlyphInfo& actual,
-                                                   const Text::GlyphInfo& expected)
+                                                  const Text::GlyphInfo& expected)
   {
     DALI_TEST_EQUALS(services.fontClient.GetPointSize(actual.fontId),
                      services.fontClient.GetPointSize(expected.fontId),
@@ -5894,7 +5808,6 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
     controller->SetText("ABC ordinary trailing text");
     controller->SetDefaultFontSize(pointSize, Text::Controller::POINT_SIZE);
     controller->SetTextElideEnabled(true);
-    controller->SetEllipsisPosition(Text::EllipsisPosition::END);
     controller->Relayout(Size(100.0f, 100.0f));
     const Text::FinalElisionResult* finalElision = controller->GetFinalElisionResult();
     DALI_TEST_CHECK(finalElision);
@@ -5924,7 +5837,6 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
     controller->SetDefaultFontSize(pointSize, Text::Controller::POINT_SIZE);
     controller->SetFontSizeScale(effectiveScale);
     controller->SetTextElideEnabled(true);
-    controller->SetEllipsisPosition(Text::EllipsisPosition::END);
     impl.GetOrCreateReplacementSourceSnapshot() = source;
     if(fitMode == FitMode::RANGE)
     {
@@ -6027,7 +5939,6 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
   retainedOptions.contentSize      = Size(300.0f, 50.0f);
   retainedOptions.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
   retainedOptions.elideText        = true;
-  retainedOptions.ellipsisPosition = Text::EllipsisPosition::END;
   retainedOptions.fontPointSize    = 28u * pointsPerUnit;
   retainedOptions.fontPixelSize    = 28.0f * 4.0f / 3.0f;
   Text::ReplacementRenderState retained;
@@ -6090,9 +6001,9 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
     const Text::ReplacementProjection projection = Text::ReplacementProjection::Build(text, candidates);
     Text::ReplacementRenderState      state;
     DALI_TEST_CHECK(Text::LayoutReplacementForTest(projection,
-                                                    services,
-                                                    retainedOptions,
-                                                    state));
+                                                   services,
+                                                   retainedOptions,
+                                                   state));
     DALI_TEST_CHECK(state.finalElision.applied);
     DALI_TEST_EQUALS(services.fontClient.GetPointSize(finalEllipsisGlyph(state.finalElision).fontId),
                      28u * pointsPerUnit,
@@ -6113,7 +6024,6 @@ int UtcDaliReplacementEndEllipsisFontContextP(void)
     parameters.originWidth        = parameters.textWidth;
     parameters.originHeight       = parameters.textHeight;
     parameters.ellipsis           = true;
-    parameters.ellipsisPosition   = Text::EllipsisPosition::END;
     parameters.renderScale        = renderScale;
     parameters.effectiveTextScale = effectiveScale;
     parameters.maxTextureSize     = 4096;
@@ -6224,7 +6134,6 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
     options.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
     options.lineWrapMode     = Text::LineWrapMode::CHARACTER;
     options.elideText        = elideText;
-    options.ellipsisPosition = Text::EllipsisPosition::END;
     options.fontPointSize    = 28u * pointsPerUnit;
     options.fontPixelSize    = 28.0f;
     options.relativeLineSize = -1.0f;
@@ -6272,31 +6181,31 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
                                        Text::ReplacementVerticalAlignment alignment)
   {
     Text::ReplacementRenderState retainedNatural = layout(retainedSourceText,
-                                                           replacementSize,
-                                                           alignment,
-                                                           Size(200.0f, 500.0f),
-                                                           false);
+                                                          replacementSize,
+                                                          alignment,
+                                                          Size(200.0f, 500.0f),
+                                                          false);
     const float retainedHeight = std::ceil(retainedNatural.processingModel->mVisualModel->GetLayoutSize().height);
     retainedNatural.Clear(services.bidirectionalSupport);
 
     Text::ReplacementRenderState referenceNatural = layout("ordinary\n\xEF\xBF\xBC\nfollowing",
-                                                            replacementSize,
-                                                            alignment,
-                                                            Size(200.0f, 500.0f),
-                                                            false);
+                                                           replacementSize,
+                                                           alignment,
+                                                           Size(200.0f, 500.0f),
+                                                           false);
     const float referenceHeight = std::ceil(referenceNatural.processingModel->mVisualModel->GetLayoutSize().height);
     referenceNatural.Clear(services.bidirectionalSupport);
 
     Text::ReplacementRenderState reference = layout(referenceText,
-                                                     replacementSize,
-                                                     alignment,
-                                                     Size(200.0f, referenceHeight),
-                                                     true);
+                                                    replacementSize,
+                                                    alignment,
+                                                    Size(200.0f, referenceHeight),
+                                                    true);
     Text::ReplacementRenderState target = layout(targetText,
-                                                  replacementSize,
-                                                  alignment,
-                                                  Size(200.0f, retainedHeight),
-                                                  true);
+                                                    replacementSize,
+                                                    alignment,
+                                                    Size(200.0f, retainedHeight),
+                                                    true);
     DALI_TEST_CHECK(reference.finalElision.applied);
     DALI_TEST_CHECK(reference.placements[0u].visible && !reference.placements[0u].elided);
     DALI_TEST_CHECK(reference.finalElision.ellipsisLineIndex > reference.placements[0u].lineIndex);
@@ -6336,10 +6245,10 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
   // A replacement that does not fit beside U+2026 is a true REMOVE. Its large
   // box must not survive in the authoritative ellipsis line metrics.
   Text::ReplacementRenderState removed = layout(targetText,
-                                                 Vector2(120.0f, 60.0f),
-                                                 Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
-                                                 Size(100.0f, 120.0f),
-                                                 true);
+                                                Vector2(120.0f, 60.0f),
+                                                Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+                                                Size(100.0f, 120.0f),
+                                                true);
   DALI_TEST_CHECK(removed.finalElision.applied);
   DALI_TEST_CHECK(!removed.placements[0u].visible && removed.placements[0u].elided);
   DALI_TEST_CHECK(!removed.finalElision.IsOriginalGlyphVisible(removed.placements[0u].syntheticGlyphIndex));
@@ -6351,10 +6260,10 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
   // A replacement beyond the visible END line remains fully elided and cannot
   // contribute metrics to that line.
   Text::ReplacementRenderState fullyElided = layout("ordinary first line\nsecond visible line\n\xEF\xBF\xBC",
-                                                     Vector2(120.0f, 120.0f),
-                                                     Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
-                                                     Size(200.0f, 70.0f),
-                                                     true);
+                                                    Vector2(120.0f, 120.0f),
+                                                    Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+                                                    Size(200.0f, 70.0f),
+                                                    true);
   DALI_TEST_CHECK(fullyElided.finalElision.applied);
   DALI_TEST_CHECK(!fullyElided.placements[0u].visible && fullyElided.placements[0u].elided);
   DALI_TEST_CHECK(!fullyElided.finalElision.IsOriginalGlyphVisible(fullyElided.placements[0u].syntheticGlyphIndex));
@@ -6364,10 +6273,10 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
   // and final source visibility must therefore agree for both supported
   // omission reasons.
   Text::ReplacementRenderState cannotFit = layout("\xEF\xBF\xBC\nhidden",
-                                                   Vector2(40.0f, 40.0f),
-                                                   Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
-                                                   Size(2.0f, 60.0f),
-                                                   true);
+                                                  Vector2(40.0f, 40.0f),
+                                                  Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+                                                  Size(2.0f, 60.0f),
+                                                  true);
   DALI_TEST_CHECK(cannotFit.finalElision.resolved && !cannotFit.finalElision.applied);
   DALI_TEST_EQUALS(cannotFit.finalElision.ellipsisOmissionReason,
                    Text::FinalElisionResult::EllipsisOmissionReason::ELLIPSIS_CANNOT_FIT,
@@ -6407,7 +6316,6 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
     options.layoutType       = Text::Layout::Engine::MULTI_LINE_BOX;
     options.lineWrapMode     = Text::LineWrapMode::CHARACTER;
     options.elideText        = elideText;
-    options.ellipsisPosition = Text::EllipsisPosition::END;
     options.fontPointSize    = 28u * pointsPerUnit;
     options.fontPixelSize    = 28.0f;
     options.relativeLineSize = -1.0f;
@@ -6455,13 +6363,13 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
   // retained-prefix REMOVE, and true removal of the whole replacement set.
   const std::vector<Vector2> multipleSizes = {Vector2(40.0f, 40.0f), Vector2(55.0f, 46.0f)};
   Text::ReplacementRenderState multipleReference = layoutMultiple("ordinary\nA \xEF\xBF\xBC \xEF\xBF\xBC",
-                                                                   multipleSizes,
-                                                                   Size(240.0f, 500.0f),
-                                                                   false);
+                                                                  multipleSizes,
+                                                                  Size(240.0f, 500.0f),
+                                                                  false);
   Text::ReplacementRenderState multipleAppend = layoutMultiple("ordinary\nA \xEF\xBF\xBC \xEF\xBF\xBC\nhidden continuation",
-                                                                multipleSizes,
-                                                                Size(240.0f, 100.0f),
-                                                                true);
+                                                                  multipleSizes,
+                                                                  Size(240.0f, 100.0f),
+                                                                  true);
   DALI_TEST_CHECK(multipleAppend.finalElision.applied);
   checkRetainedGeometry(multipleAppend, 0u, multipleReference, 0u);
   checkRetainedGeometry(multipleAppend, 1u, multipleReference, 1u);
@@ -6469,9 +6377,9 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
   multipleAppend.Clear(services.bidirectionalSupport);
 
   Text::ReplacementRenderState prefixReference = layoutMultiple("ordinary\nA \xEF\xBF\xBC",
-                                                                 {multipleSizes[0u]},
-                                                                 Size(125.0f, 500.0f),
-                                                                 false);
+                                                                {multipleSizes[0u]},
+                                                                Size(125.0f, 500.0f),
+                                                                false);
   Text::ReplacementRenderState prefixRetained = layoutMultiple("ordinary\nA \xEF\xBF\xBC \xEF\xBF\xBC\nhidden continuation",
                                                                 multipleSizes,
                                                                 Size(125.0f, 100.0f),
@@ -6485,9 +6393,9 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
   prefixRetained.Clear(services.bidirectionalSupport);
 
   Text::ReplacementRenderState allRemoved = layoutMultiple("ordinary\n\xEF\xBF\xBC \xEF\xBF\xBC\nhidden continuation",
-                                                            {Vector2(50.0f, 42.0f), Vector2(55.0f, 46.0f)},
-                                                            Size(48.0f, 100.0f),
-                                                            true);
+                                                           {Vector2(50.0f, 42.0f), Vector2(55.0f, 46.0f)},
+                                                           Size(48.0f, 100.0f),
+                                                           true);
   DALI_TEST_CHECK(allRemoved.finalElision.applied);
   for(const Text::ReplacementPlacement& placement : allRemoved.placements)
   {
@@ -6521,7 +6429,6 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
     controller->SetLineWrapMode(Text::LineWrapMode::CHARACTER);
     controller->SetRelativeLineSize(-1.0f);
     controller->SetTextElideEnabled(elideText);
-    controller->SetEllipsisPosition(Text::EllipsisPosition::END);
     impl.GetOrCreateReplacementSourceSnapshot() = source;
     controller->Relayout(Size(200.0f, height));
     return std::move(impl.GetOrCreateReplacementRenderState());
@@ -6551,7 +6458,6 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
     parameters.lineWrapMode                = Text::LineWrapMode::CHARACTER;
     parameters.relativeLineSize            = -1.0f;
     parameters.ellipsis                    = true;
-    parameters.ellipsisPosition            = Text::EllipsisPosition::END;
     parameters.renderScale                 = renderScale;
     parameters.replacementSourceSnapshot   = source;
     parameters.replacementLayoutGeneration = static_cast<uint64_t>(renderScale * 100.0f);

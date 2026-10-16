@@ -5233,7 +5233,6 @@ int UtcDaliTextRevealRuntimeGaussianSourceRegionP(void)
       if(alignment == Text::Alignment::END)
       {
         controller->SetTextElideEnabled(true);
-        controller->SetEllipsisPosition(Text::EllipsisPosition::END);
         controller->SetMaximumNumberOfLines(2);
       }
       controller->Relayout(size);
@@ -5427,7 +5426,6 @@ int UtcDaliTextRevealRuntimeGaussianMetadataRegionP(void)
       if(alignment == Text::Alignment::END)
       {
         controller->SetTextElideEnabled(true);
-        controller->SetEllipsisPosition(Text::EllipsisPosition::END);
         controller->SetMaximumNumberOfLines(2);
       }
       controller->SetDefaultColor(Vector4(0.2f, 0.6f, 0.9f, 0.25f));

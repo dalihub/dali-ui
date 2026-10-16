@@ -30,15 +30,22 @@
 //     kept the main loop spinning at 100% CPU.
 //  2. The console prints one "arrange #N" line per EXTERNAL event (touch, key):
 //     each event drains the parked work once, the callback re-parks, and the
-//     loop sleeps again. The label's SIZE also lags its text by one event --
-//     the newest string renders inside the previous measure, which is the
-//     "dirty but not yet laid out" state made visible.
+//     loop sleeps again. Touch-down, touch-up and pointer (hover) motion are each
+//     a separate external event, so one tap can advance two passes. The label's
+//     SIZE also lags its text by one event -- the newest string renders inside
+//     the previous measure, which is the "dirty but not yet laid out" state made
+//     visible.
 //  3. The LayoutController logs one parked-episode diagnostic (DALI_LOG_ERROR).
 //     No per-View warning appears: SetText() invalidates through the
 //     framework-internal path, and the park policy is route-independent.
-//  4. LayoutFinished stays deferred while the producer keeps re-invalidating.
-//     After ARRANGE_LIMIT arranges the callback stops mutating; the next event
-//     drains, the layout finally settles, and "LayoutFinished" is printed.
+//  4. "LayoutFinished" is printed for EVERY pass, including the passes that leave the
+//     label's re-invalidation parked: parked work never suppresses or defers the
+//     notification of a completed pass; such a pass carries the suffix "(label
+//     re-invalidation parked)". After ARRANGE_LIMIT arranges the callback stops
+//     mutating -- arrange #ARRANGE_LIMIT still parks one last re-invalidation and is
+//     reported with the suffix -- and the next event runs that last parked pass,
+//     reported as "pass completed after ARRANGE_LIMIT + 1 arranges" without the
+//     suffix. Afterwards nothing is printed until something else invalidates layout.
 //
 //
 // NOTE: this is a DIAGNOSTIC reproducer, not a pattern to copy. Two things about it are
@@ -71,6 +78,11 @@ int   gArrangeCount = 0;
 bool  gMutating     = true;
 Label gCounterLabel; ///< The label whose text is rewritten from inside the arrange pass.
 
+/// Set by an arrange whose SetText() parked a label re-invalidation; read and cleared by
+/// the LayoutFinished delivery that reports that pass. Unlike gMutating it is per pass:
+/// arrange #ARRANGE_LIMIT parks its last follow-up and clears gMutating in the same arrange.
+bool gReinvalidationParked = false;
+
 Label MakeLabel(const Dali::String& text, float fontSize, uint32_t color)
 {
   Label label = Label::New(text);
@@ -92,6 +104,7 @@ LayoutRect BoxArrange(View /*view*/, const LayoutRect& bounds)
     const std::string text = "arrange #" + std::to_string(gArrangeCount) +
                              " - parked; touch to run the next pass";
     gCounterLabel.SetText(Dali::String(text.c_str()));
+    gReinvalidationParked = true;
     std::cout << "arrange #" << gArrangeCount
               << ": label text changed in-pass -> invalidation parked, no idle wake" << std::endl;
     if(gArrangeCount >= ARRANGE_LIMIT)
@@ -121,6 +134,7 @@ public:
   {
     gArrangeCount = 0;
     gMutating = true;
+    gReinvalidationParked = false;
 
     Window window = UiContext::Get().GetDefaultWindow();
 
@@ -154,9 +168,13 @@ public:
 
   void OnLayoutFinished(Window /*window*/)
   {
-    // Starved while the producer kept re-invalidating; fires once the layout
-    // finally settles (after the mutation stops and one more event drains).
-    std::cout << "LayoutFinished: layout settled after " << gArrangeCount << " arranges" << std::endl;
+    // Reported for every completed pass, parked follow-up or not. Observation only: it must
+    // not invalidate layout itself. The suffix is consumed per delivery, so it describes the
+    // pass this delivery reports, not the producer's current state.
+    const bool parked     = gReinvalidationParked;
+    gReinvalidationParked = false;
+    std::cout << "LayoutFinished: pass completed after " << gArrangeCount << " arranges"
+              << (parked ? " (label re-invalidation parked)" : "") << std::endl;
   }
 
   void OnExit() override
@@ -165,6 +183,7 @@ public:
     gCounterLabel.Reset();
     gArrangeCount = 0;
     gMutating = true;
+    gReinvalidationParked = false;
   }
 };
 

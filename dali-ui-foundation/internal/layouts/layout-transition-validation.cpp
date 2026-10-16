@@ -45,6 +45,12 @@ constexpr const char* BOUNDS_EFFECT_NEGATIVE_SIZE_FACTOR =
   "LayoutBoundsEffect sizeFactor must be non-negative";
 constexpr const char* BOUNDS_EFFECT_ANCHOR_OUT_OF_RANGE =
   "LayoutBoundsEffect anchor must be in [0, 1]";
+constexpr const char* BOUNDS_EFFECT_NON_FINITE =
+  "LayoutBoundsEffect sizeFactor, anchor, offset and timing must be finite";
+constexpr const char* TIMING_NON_FINITE =
+  "LayoutTransitionTiming duration and delay must be finite";
+constexpr const char* ANIMATOR_TIMING_NON_FINITE =
+  "LayoutAnimatorTiming duration and delay must be finite";
 
 constexpr float BOUNDS_EFFECT_EPSILON = 1.0e-5f;
 
@@ -108,9 +114,46 @@ void AbortIfSpecHasLayoutBoundsProperty(const Dali::Ui::ViewAnimationSpec& spec)
   }
 }
 
+void AbortIfNonFiniteTiming(const Dali::Ui::LayoutTransitionTiming& timing)
+{
+  // Same reasoning as the bounds-effect gate below: a relational test cannot reject a
+  // NaN (`duration <= 0` is false for it), so the duration-zero opt-out lets it through
+  // into Animation::New and TimePeriod.
+  if(!std::isfinite(timing.duration.InSeconds()) || !std::isfinite(timing.delay.InSeconds()))
+  {
+    DALI_ABORT(TIMING_NON_FINITE);
+  }
+}
+
+void AbortIfNonFiniteAnimatorTiming(const Dali::Ui::LayoutAnimatorTiming& timing)
+{
+  if(!std::isfinite(timing.duration.InSeconds()) || !std::isfinite(timing.delay.InSeconds()))
+  {
+    DALI_ABORT(ANIMATOR_TIMING_NON_FINITE);
+  }
+}
+
 void AbortIfInvalidBoundsEffect(const Dali::Ui::LayoutBoundsEffect& effect)
 {
   AbortIfNonTerminalLayoutAlpha(effect.timing.alpha);
+
+  // Checked BEFORE the range tests below, because a NaN silently PASSES every
+  // relational test (`NaN < 0` and `NaN > 1` are both false) and would then be
+  // composed into the endpoint by ComputeBoundsEndpoint, producing a NaN rect
+  // that propagates into the arranged geometry of the animated subtree. An
+  // infinite descriptor does the same, and a non-finite duration/delay reaches
+  // Animation::SetDuration. Registration is the last point at which the value
+  // can still be reported to the caller, so every descriptor the endpoint maths
+  // reads is required to be finite here.
+  if(!std::isfinite(effect.sizeFactorX) || !std::isfinite(effect.sizeFactorY) ||
+     !std::isfinite(effect.anchorX) || !std::isfinite(effect.anchorY) ||
+     !std::isfinite(effect.timing.duration.InSeconds()) ||
+     !std::isfinite(effect.timing.delay.InSeconds()) ||
+     (effect.hasOffset && (!std::isfinite(effect.offset.x.value) ||
+                           !std::isfinite(effect.offset.y.value))))
+  {
+    DALI_ABORT(BOUNDS_EFFECT_NON_FINITE);
+  }
 
   if(effect.sizeFactorX < 0.0f || effect.sizeFactorY < 0.0f)
   {

@@ -14,6 +14,7 @@
  */
 
 #include "manual-test-case.h"
+#include "layout-transition-probe.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/public-api/adaptor-framework/ui-context.h>
@@ -40,6 +41,8 @@ using namespace Dali::Ui;
  *   - Tap "Add/Remove item": add or remove a magenta grand-child inside the
  *     card. Under SUBTREE the root's inherited ENTER/EXIT animates it (opacity
  *     fade + height expand/shrink); under DIRECT it snaps in/out (visible).
+ *     The item's height/opacity are printed per tick ([TC81][ENTER] /
+ *     [TC81][EXIT] lines, see layout-transition-probe.h) for automated checks.
  */
 class TcLayoutTransitionSubtree : public ManualTest::TestCase, public ConnectionTracker
 {
@@ -202,6 +205,7 @@ public:
     // instantly (visible, no animation).
     if(mExtraItem)
     {
+      mItemProbe.Start(mExtraItem, "EXIT");
       mCard.Remove(mExtraItem, RemovePolicy::ANIMATE_EXIT); // inherited EXIT fades it out, then unparents
       mExtraItem.Reset();
     }
@@ -220,6 +224,7 @@ public:
         item.SetProperty(Actor::Property::OPACITY, 0.0f);
       }
       mCard.Add(item);
+      mItemProbe.Start(item, "ENTER");
       mExtraItem = item;
     }
     return true;
@@ -242,6 +247,7 @@ public:
 
   void OnExit() override
   {
+    mItemProbe.Stop();
     DisconnectAll();
     mRoot.Reset();
     mCard.Reset();
@@ -262,6 +268,7 @@ private:
   View         mExtraItem;
   bool         mExpanded;
   bool         mSubtree;
+  LayoutTransitionProbe mItemProbe{"TC81"};
 };
 
 REGISTER_MANUAL_TEST(TcLayoutTransitionSubtree)

@@ -594,6 +594,19 @@ struct AtlasRenderer::Impl
     }
   }
 
+  /**
+   * @brief Builds atlas geometry for the View output and its authored styles.
+   * @param[in] view View supplying style-source mappings and rendering properties.
+   * @param[in] textControl Control owning the render actors.
+   * @param[in] animatablePropertyIndex Control color property used by rendering constraints.
+   * @param[in] positions Positions in the same output glyph domain as glyphs.
+   * @param[in] glyphs Complete rendered glyph sequence.
+   * @param[in] defaultColor Fallback text color.
+   * @param[in] colorsBuffer Model-owned palette.
+   * @param[in] colorIndicesBuffer Color indices for authored glyph styling.
+   * @param[in] depth Render depth.
+   * @param[in] minLineOffset Minimum alignment offset of the complete layout.
+   */
   void AddGlyphs(Text::ViewInterface& view, Actor textControl, Property::Index animatablePropertyIndex,
                  const Vector<Vector2>& positions, const Vector<GlyphInfo>& glyphs, const Vector4& defaultColor,
                  const Vector4* const colorsBuffer, const ColorIndex* const colorIndicesBuffer, int depth,
@@ -628,11 +641,6 @@ struct AtlasRenderer::Impl
     const Length     hyphensCount         = view.GetHyphensCount();
     const bool       strikethroughEnabled = view.IsStrikethroughEnabled();
     const float      characterSpacing(view.GetCharacterSpacing());
-
-    // Elided text info. Indices according to elided text.
-    const auto startIndexOfGlyphs              = view.GetStartIndexOfElidedGlyphs();
-    const auto firstMiddleIndexOfElidedGlyphs  = view.GetFirstMiddleIndexOfElidedGlyphs();
-    const auto secondMiddleIndexOfElidedGlyphs = view.GetSecondMiddleIndexOfElidedGlyphs();
 
     const bool useDefaultColor = (NULL == colorsBuffer);
 
@@ -724,17 +732,6 @@ struct AtlasRenderer::Impl
     const Vector<CharacterIndex>& glyphToCharacterMap       = view.GetGlyphsToCharacters();
     const CharacterIndex*         glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
 
-    // Skip hyphenIndices less than startIndexOfGlyphs or between two middle of elided text
-    if(hyphenIndices)
-    {
-      while((hyphenIndex < hyphensCount) && (hyphenIndices[hyphenIndex] < startIndexOfGlyphs ||
-                                             (hyphenIndices[hyphenIndex] > firstMiddleIndexOfElidedGlyphs &&
-                                              hyphenIndices[hyphenIndex] < secondMiddleIndexOfElidedGlyphs)))
-      {
-        ++hyphenIndex;
-      }
-    }
-
     // To keep the last fontMetrics of lastDecorativeLinesFontId
     FontId      lastDecorativeLinesFontId = 0; // DecorativeLines like Undeline and Strikethrough
     FontMetrics lastDecorativeLinesFontMetrics;
@@ -748,7 +745,7 @@ struct AtlasRenderer::Impl
       const GlyphIndex styleGlyphIndex = ResolveFinalStyleSourceGlyph(finalStyleSourceIndices, i);
       GlyphInfo        glyph;
       bool             addHyphen =
-        ((hyphenIndex < hyphensCount) && hyphenIndices && ((i + startIndexOfGlyphs) == hyphenIndices[hyphenIndex]));
+        ((hyphenIndex < hyphensCount) && hyphenIndices && (i == hyphenIndices[hyphenIndex]));
       // TODO : Shouldn't we have to control here when i == 0 cases?
       if(addHyphen && hyphens && i > 0u)
       {

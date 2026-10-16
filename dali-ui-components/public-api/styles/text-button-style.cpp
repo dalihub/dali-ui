@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-components/internal/styles/text-button-style-impl.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 
@@ -55,7 +55,7 @@ UiStyleKey<TextButtonStyle> TextButtonStyle::DefaultKey()
 
 TextButtonStyle TextButtonStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
 
   static TextButtonStyle style = TextButtonStyle::Builder().Build();
   return style;
@@ -63,7 +63,7 @@ TextButtonStyle TextButtonStyle::DefaultPreset()
 
 TextButtonStyle TextButtonStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
 
   TextButtonStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   if(style)

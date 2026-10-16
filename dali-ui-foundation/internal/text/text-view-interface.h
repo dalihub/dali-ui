@@ -113,7 +113,12 @@ public:
   virtual Length GetNumberOfGlyphs() const = 0;
 
   /**
-   * @brief Retrieves glyphs and positions in the given buffers.
+   * @brief Copies a range of the rendered glyph sequence and its positions.
+   *
+   * Indices address the final sequence when a resolved elision result is bound;
+   * otherwise they address the sequence produced by the complete uncached layout.
+   * A partial request is a slice of that sequence, with the same positions as a
+   * full request. It does not independently lay out or elide the requested range.
    *
    * @note The size of the @p glyphs and @p glyphPositions buffers need to be big enough to copy the @p numberOfGlyphs
    * glyphs and positions.
@@ -121,11 +126,14 @@ public:
    *
    * @param[out] glyphs Pointer to a buffer where the glyphs are copied.
    * @param[out] glyphPositions Pointer to a buffer where the glyph's positions are copied.
-   * @param[out] minLineOffset The minimum line offset.
-   * @param[in] glyphIndex Index to the first glyph.
-   * @param[in] numberOfGlyphs Number of glyphs to be copied.
+   * @param[out] minLineOffset The minimum alignment offset of the complete layout.
+   * An empty or out-of-range uncached request sets this to zero; a resolved
+   * elision result retains its stored offset even when no glyphs are copied.
+   * @param[in] glyphIndex Index of the first glyph in the rendered sequence.
+   * @param[in] numberOfGlyphs Maximum number of glyphs to copy; each output buffer
+   * must hold at least this many elements. Zero allows null output buffers.
    *
-   * @return The number of glyphs.
+   * @return The number copied, clamped to the remaining rendered sequence.
    */
   virtual Length GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLineOffset, GlyphIndex glyphIndex,
                            Length numberOfGlyphs) const = 0;
@@ -325,13 +333,6 @@ public:
   virtual bool IsOutlineEnabled() const = 0;
 
   /**
-   * @brief Retrieves ellipsis position for text.
-   *
-   * @return The ellipsis position.
-   */
-  virtual Text::EllipsisPosition::Type GetEllipsisPosition() const = 0;
-
-  /**
    * @brief Whether the text elide property is enabled.
    *
    * @return @e true if the text elide property is enabled, @e false otherwise.
@@ -339,32 +340,11 @@ public:
   virtual bool IsTextElideEnabled() const = 0;
 
   /**
-   * @brief Retrieves the start index of laid-out glyphs.
-   *
-   * @return The start index of laid-out glyphs.
-   */
-  virtual GlyphIndex GetStartIndexOfElidedGlyphs() const = 0;
-
-  /**
    * @brief Retrieves the end index of laid-out glyphs.
    *
    * @return The end index of laid-out glyphs.
    */
   virtual GlyphIndex GetEndIndexOfElidedGlyphs() const = 0;
-
-  /**
-   * @brief Retrieves the first middle index of elided glyphs, index before ellipsis of middle.
-   *
-   * @return The first middle index of elided glyphs, index before ellipsis of middle.
-   */
-  virtual GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const = 0;
-
-  /**
-   * @brief Retrieves the second middle index of elided glyphs, index of ellipsis of middle.
-   *
-   * @return The second middle index of elided glyphs, index of ellipsis of middle.
-   */
-  virtual GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const = 0;
 
   /**
    * @brief Retrieves the strikethrough color.

@@ -17,7 +17,7 @@
 #include <dali-ui-components/internal/styles/dialog-style-impl.h>
 #include <dali-ui-components/internal/styles/style-validation.h>
 #include <dali-ui-components/public-api/styles/dialog-style.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <cmath>
 #include <utility>
@@ -47,13 +47,13 @@ UiStyleKey<DialogStyle> DialogStyle::DefaultKey()
 }
 DialogStyle DialogStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static auto style = Builder().Build();
   return style;
 }
 DialogStyle DialogStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   auto style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }

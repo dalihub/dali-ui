@@ -21,8 +21,8 @@
 #include <utility>
 
 #include <dali-ui-components/internal/styles/progress-bar-style-impl.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
 namespace DALI_NAMESPACE
@@ -69,14 +69,14 @@ UiStyleKey<ProgressBarStyle> ProgressBarStyle::DefaultKey()
 
 ProgressBarStyle ProgressBarStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static ProgressBarStyle style = ProgressBarStyle::Builder().Build();
   return style;
 }
 
 ProgressBarStyle ProgressBarStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   ProgressBarStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }

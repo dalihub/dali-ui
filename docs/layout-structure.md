@@ -4,7 +4,7 @@
 
 The layout system in DALi UI Foundation computes **size (Measure)** and **position (Arrange)** of child views over a **View** hierarchy. Child management uses the inherited Actor `Add`/`Remove`/`InsertAbove`/`InsertBelow`/`RemoveAll` API.
 
-Layout processing is driven by **LayoutController** per window. Each frame, it runs Measure then Arrange on layout roots that have been invalidated.
+Layout processing is driven by **LayoutController** per window. In each ProcessEvents cycle with layout work it runs Measure then Arrange on layout roots that have been invalidated, and after core size negotiation it reports every completed pass through `LayoutFinished`.
 
 ---
 
@@ -71,7 +71,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **LayoutController**  
   - Singleton per window via `LayoutController::Get(Window)`.  
-  - When layout is invalidated, layout roots are registered; the Adaptor calls `Process()` once per frame. The controller registers for both the pre- and post-process phases: `ProcessLayouts()` runs in the pre-process phase to perform Measure and Arrange (before core size negotiation), and the `LayoutFinished` signals (LayoutController and View) are emitted in the post-process phase (after size negotiation).
+  - When layout is invalidated, layout roots are registered; the Adaptor calls `Process()` in every ProcessEvents cycle. The controller registers for both the pre- and post-process phases: `ProcessLayouts()` runs in the pre-process phase to perform Measure and Arrange (before core size negotiation), and the `LayoutFinished` signals (LayoutController and View) of every pass completed up to the end of that pre-process phase are emitted in the post-process phase (after size negotiation), whether or not more work is pending.
 
 ### 2. Integration API (Implementation)
 
@@ -95,7 +95,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Each provides `Get(ViewImpl&)`, which returns nullptr if the parameters are not attached.
 
 - **LayoutControllerImpl**  
-  - Keeps layout roots in `mPendingViews`; `ProcessLayouts()` resolves constraints, then runs Measure and Arrange for each root during the pre-process phase. Once the pending work drains, it schedules the `LayoutFinished` emit for the post-process phase (after core size negotiation) rather than emitting inline.
+  - Keeps layout roots in `mPendingViews`; `ProcessLayouts()` resolves constraints, then runs Measure and Arrange for each root during the pre-process phase. Each root's subscribed Views are snapshotted into a pending completion record as the root finishes, and a batch that ends normally adds a Window notification. The outermost automatic pre-process phase promotes that record and the post-process phase delivers it (after core size negotiation) instead of emitting inline; pending work never holds it back.
 
 ### 3. Layout Managers (Algorithms)
 
@@ -217,10 +217,41 @@ rather than re-run. The cost is the ancestor **path**, not every view below it.
 view was arranged in this pass, whether that pass ran the arrange implementation or
 served the cache. It is not a "bounds changed" notification.
 
-Delivery is nevertheless gated on the window reaching quiescence. A root retained in
-the pending set by an in-processing invalidation is still pending even though it did
-not arm an idle wake, so completion notification is delayed until another processing
-cycle drains that parked work.
+Delivery is not gated on the window reaching quiescence. Every batch that processes at
+least one live layout root records a completion: a snapshot of each subscribed View it
+arranged (parent-relative actor position and size, taken after the right-to-left mirror
+and before layout transitions start) and, when the batch ends normally, a Window
+notification. A root left pending by an in-processing invalidation neither withholds nor
+defers that record. The outermost automatic pre-process phase hands every record made so
+far to the post-process phase of the same ProcessEvents cycle, which runs after core size
+negotiation and delivers them as one notification per View -- in the order the Views
+were first collected, with the bounds of their most recent pass -- followed by one Window
+notification. Nothing is emitted when no pass completed since the previous delivery.
+
+A pass completed after that hand-over -- for example a manual `ProcessLayouts()` called
+from a `LayoutFinished` slot or from another window's post-process callback -- requests
+no ProcessEvents cycle of its own: it is delivered by the next independently triggered
+cycle (input, a timer, an animation or any other wake), which on a quiescent application
+may be indefinitely later. When prompt delivery is required, invalidate layout at event
+time, which requests a cycle, or call `ProcessLayouts()` from an input event handler,
+whose cycle then delivers the pass. A manual `ProcessLayouts()` never delivers inside the
+call.
+The item being delivered is not skipped because a newer snapshot of the same View is
+already waiting, so a payload is the result of the delivered pass and can differ from
+the live actor properties when a slot ran layout again. The framework's own fitting
+consumer therefore sizes fitting-mode visuals from the latest arranged target, not from
+the payload. Because that consumer runs on delivery, a direct manual `View::Arrange()`
+does not trigger the framework-driven fitting of a View's registered fitting-mode visuals
+(an SVG image, for example); a View type that fits its own content in `OnArrange()`
+(`LottieAnimationView`, for example) still does so when a manual `Arrange()` runs its
+`OnArrange()`, which an arrange-cache hit does not.
+
+Connections are evaluated at emit time. A View that is destroyed or leaves the scene loses
+its undelivered snapshots, and `LayoutController::Remove()` from a slot stops the rest of
+the delivery. A batch that throws keeps the snapshots of the roots it had already
+completed but earns no Window notification of its own. If a slot throws, the exception
+propagates; the notification whose emit had started is not repeated and the undelivered
+ones stay queued in the controller.
 
 ### Invalidation
 
@@ -302,7 +333,9 @@ prohibited in principle and honoured only best-effort — exactly dali-core's re
 policy, where `RequestRelayout()` raised while `ProcessEvents` runs is retained but
 requests no wake. Parked work is serviced by the NEXT externally triggered
 ProcessEvents cycle; on a quiescent application (no input, animation or timer) that
-next cycle may be indefinitely later, and `LayoutFinished` stays deferred with it.
+next cycle may be indefinitely later. `LayoutFinished` is not deferred with it: the
+pass that parked the work is reported at its own delivery point, and the parked work
+is reported by the pass that later services it.
 Components and applications must therefore never rely on in-processing invalidation
 for the correctness of the CURRENT frame. When a processing frame ends with parked
 work and no outstanding wake, the controller logs one `DALI_LOG_ERROR` per parked
@@ -558,12 +591,13 @@ When layout must be recomputed (e.g. size or child change):
 `ViewImpl::InvalidateMeasure()` or `InvalidateArrange()` → propagate to parent layout → at layout root, `RegisterWithLayoutController()` → `LayoutControllerImpl::RequestLayout(ViewImpl*)` adds the root to `mPendingViews`. From there scheduling has two branches:
 
 - outside the layout processing window, the request arms one coalesced outstanding wake;
-  the next ProcessEvents runs Measure/Arrange in the pre-process phase and emits settled
-  `LayoutFinished` signals in post-process;
+  the next ProcessEvents runs Measure/Arrange in the pre-process phase and delivers the
+  `LayoutFinished` signals of every completed pass in post-process;
 - inside the window, the same full invalidation and pending registration occur but no
   self idle wake is requested. The next independently triggered ProcessEvents or an
-  explicit `ProcessLayouts()` drains the parked work, and `LayoutFinished` remains
-  delayed until the pending set is empty.
+  explicit `ProcessLayouts()` drains the parked work. The pass that parked it has
+  already been reported, and the pass that drains it is reported in turn (a manual
+  `ProcessLayouts()` result by the next automatic cycle's post-process phase).
 
 ---
 
@@ -583,5 +617,5 @@ Two PlantUML diagram SOURCE files live beside this document in the repository. T
 | Area | Description |
 |------|-------------|
 | Public child API | Child add/remove/insert/bulk-remove uses Actor::Add/Remove/InsertAbove/InsertBelow/RemoveAll. View provides Remove(View, RemovePolicy) and RemoveAll(RemovePolicy). GetChildCount/GetChildAt are inherited from Actor (actor tree, ghost-inclusive); the logical layout child list is exposed via GetChildViewCount, GetChildViewAt and IndexOfChildView. |
-| Layout processing | LayoutController collects layout roots per window and runs Measure then Arrange once per frame. |
+| Layout processing | LayoutController collects layout roots per window, runs Measure then Arrange in the pre-process phase of a ProcessEvents cycle, and reports every completed pass through `LayoutFinished` in its post-process phase. |
 | Implementation | ViewImpl holds children and can attach a LayoutManager as a Trait via `View::AttachLayoutManager()`. Applications can customize measure/arrange via `SetMeasureCallback()`/`SetArrangeCallback()`. |

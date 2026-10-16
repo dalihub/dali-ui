@@ -2352,3 +2352,71 @@ int UtcDaliInputFieldStyledAnchorLookupP(void)
   DALI_TEST_CHECK(!anchorControl.AnchorClicked(100u, href));
   END_TEST;
 }
+
+int UtcDaliInputFieldEditableImeFocusCycleP(void)
+{
+  UiTestApplication application;
+  InputField        control = InputField::New();
+  control.SetFocusable(true);
+  control.SetText("aaa");
+  control.SetCursorPosition(3u);
+  application.GetScene().Add(control);
+  application.SendNotification();
+  application.Render();
+
+  namespace InputMethod      = Dali::Integration::InputMethodContext;
+  InputMethodContext context = control.GetInputMethodContext();
+  DALI_TEST_CHECK(context);
+  auto manager = FocusManager::Get();
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(control));
+  DALI_TEST_CHECK(!InputMethod::KeyboardEventReceivedSignal(context).Empty());
+
+  auto commit = InputMethod::EventData(InputMethod::COMMIT, Dali::String("b"), 0, 1);
+  InputMethod::KeyboardEventReceivedSignal(context).Emit(context, commit);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(control.GetText(), Dali::String("aaab"), TEST_LOCATION);
+  DALI_TEST_EQUALS(control.GetCursorPosition(), 4u, TEST_LOCATION);
+
+  manager.ClearFocus();
+  DALI_TEST_CHECK(InputMethod::KeyboardEventReceivedSignal(context).Empty());
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(control));
+  DALI_TEST_CHECK(!InputMethod::KeyboardEventReceivedSignal(context).Empty());
+  auto surrounding = InputMethod::EventData(InputMethod::GET_SURROUNDING, Dali::String(), 0, 0);
+  auto result      = InputMethod::KeyboardEventReceivedSignal(context).Emit(context, surrounding);
+  DALI_TEST_CHECK(result.update);
+  DALI_TEST_EQUALS(result.currentText, Dali::String("aaab"), TEST_LOCATION);
+  DALI_TEST_EQUALS(result.cursorPosition, 4, TEST_LOCATION);
+  manager.ClearFocus();
+  DALI_TEST_CHECK(InputMethod::KeyboardEventReceivedSignal(context).Empty());
+  END_TEST;
+}
+
+int UtcDaliInputFieldReadOnlyImeFocusCycleP(void)
+{
+  UiTestApplication application;
+  InputField        control = InputField::New();
+  control.SetFocusable(true);
+  control.SetEditable(false);
+  control.SetText("aaa");
+  application.GetScene().Add(control);
+  application.SendNotification();
+  application.Render();
+
+  namespace InputMethod      = Dali::Integration::InputMethodContext;
+  InputMethodContext context = control.GetInputMethodContext();
+  DALI_TEST_CHECK(context);
+  auto manager = FocusManager::Get();
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(control));
+  DALI_TEST_CHECK(InputMethod::KeyboardEventReceivedSignal(context).Empty());
+  DALI_TEST_EQUALS(control.GetText(), Dali::String("aaa"), TEST_LOCATION);
+
+  manager.ClearFocus();
+  control.SetEditable(true);
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(control));
+  DALI_TEST_CHECK(!InputMethod::KeyboardEventReceivedSignal(context).Empty());
+  DALI_TEST_EQUALS(control.GetText(), Dali::String("aaa"), TEST_LOCATION);
+  manager.ClearFocus();
+  DALI_TEST_CHECK(InputMethod::KeyboardEventReceivedSignal(context).Empty());
+  END_TEST;
+}

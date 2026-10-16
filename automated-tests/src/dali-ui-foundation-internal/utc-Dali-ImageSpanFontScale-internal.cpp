@@ -483,7 +483,6 @@ int UtcDaliImageSpanSystemFontScaleLayoutSemanticsP(void)
               controller->SetSystemFontSizeScaleEnabled(true);
               controller->SetSystemFontSizeScale(index == 0u ? scale : 1.f);
               controller->SetTextElideEnabled(ellipsis);
-              controller->SetEllipsisPosition(Text::EllipsisPosition::END);
               controller->SetHorizontalAlignment(alignment);
               controller->SetVerticalAlignment(alignment);
               controller->GetLayoutEngine().SetLayout(Text::Layout::Engine::MULTI_LINE_BOX);

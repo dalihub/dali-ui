@@ -123,7 +123,6 @@ SET(WINDOWS_UNSUPPORTED_TEST_SOURCES
   "${INTERNAL_TEST_DIR}/utc-Dali-AnimatedImageReleasePolicy-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-AsyncTextLoaderOwnership-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-ArcWireframeVisual-internal.cpp"
-  "${INTERNAL_TEST_DIR}/utc-Dali-FeedbackStyle-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-ImageCache-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-InternalCoverage-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-InteractiveView-internal.cpp"

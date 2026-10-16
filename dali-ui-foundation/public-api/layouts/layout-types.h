@@ -626,9 +626,9 @@ enum class AbsoluteLayoutFlags : uint8_t
    */
   SIZE_PROPORTIONAL = WIDTH_PROPORTIONAL | HEIGHT_PROPORTIONAL,
   /**
-   * @brief All bits set (all current and future proportional axes)
+   * @brief Every position and size value is proportional to parent size.
    */
-  ALL = static_cast<uint8_t>(~0)
+  ALL = POSITION_PROPORTIONAL | SIZE_PROPORTIONAL
 };
 
 /**

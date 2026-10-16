@@ -36,6 +36,8 @@ using namespace Dali::Ui;
  * Buttons:
  *   [TYPE]   — toggles between IMAGE / ANIMATED / LOTTIE and restarts the cycle.
  *   [RELOAD] — restarts the placeholder → main-image cycle for the current type.
+ *   [CLEAR IMAGE] — clears the existing ImageView URL and restores its placeholder.
+ *                   Available in IMAGE mode; cancels the pending load timer.
  */
 class ImagePlaceholderController : public ConnectionTracker
 {
@@ -130,8 +132,19 @@ private:
     Label::DownCast(reloadButton).SetVerticalTextAlignment(Text::Alignment::CENTER);
     reloadButton.AsInteractive().ClickedSignal().Connect(this, &ImagePlaceholderController::OnReloadClicked);
 
+    mClearButton = Label::New("CLEAR IMAGE");
+    mClearButton.SetRequestedWidth(WRAP_CONTENT);
+    mClearButton.SetRequestedHeight(MATCH_PARENT);
+    mClearButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    mClearButton.SetFontSize(13.0f);
+    mClearButton.SetTextColor(UiColor(0xFFFFFF));
+    mClearButton.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mClearButton.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mClearButton.AsInteractive().ClickedSignal().Connect(this, &ImagePlaceholderController::OnClearClicked);
+
     row.Add(mTypeButton);
     row.Add(reloadButton);
+    row.Add(mClearButton);
     return row;
   }
 
@@ -148,6 +161,10 @@ private:
       mContainer.Remove(mImage);
       mImage.Reset();
     }
+
+    const bool canClearImage = mViewType == ViewType::IMAGE;
+    mClearButton.SetProperty(Actor::Property::SENSITIVE, canClearImage);
+    mClearButton.SetBackgroundColor(UiColor(canClearImage ? 0xB71C1C : 0x555555));
 
     // Step 1: create view with placeholder only — no main URL yet.
     // MATCH_PARENT height ensures the view fills the weighted container so the placeholder is visible.
@@ -233,8 +250,26 @@ private:
   {
     ResetImage();
   }
+  void OnClearClicked(View, InputEvent)
+  {
+    if(mViewType != ViewType::IMAGE)
+    {
+      return;
+    }
+    if(mLoadTimer && mLoadTimer.IsRunning())
+    {
+      mLoadTimer.Stop();
+    }
+    ImageView::DownCast(mImage).SetResourceUrl(Dali::String());
+    mStatusLabel.SetText("Resource URL cleared — placeholder shown");
+  }
   void OnResourceReady(View view)
   {
+    if(auto image = ImageView::DownCast(view); image && image.GetResourceUrl().Empty())
+    {
+      mStatusLabel.SetText("Resource URL empty — placeholder shown");
+      return;
+    }
     mStatusLabel.SetText("ResourceReady — placeholder removed");
 
     Ui::Visual::ResourceStatus status = Ui::Visual::ResourceStatus::FAILED;
@@ -256,6 +291,7 @@ private:
   View         mImage;
   View         mContainer;
   Label        mTypeButton;
+  Label        mClearButton;
   Label        mStatusLabel;
   Timer        mLoadTimer;
   ViewType     mViewType;

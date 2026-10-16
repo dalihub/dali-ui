@@ -261,29 +261,23 @@ std::vector<RevealBlurSequence> BuildRevealBlurSequences(
   std::vector<bool>               covered(plan.glyphToUnit.size(), false);
   for(uint32_t lineIndex = 0u; lineIndex < model.GetNumberOfLines(); ++lineIndex)
   {
-    const auto& line     = model.GetLines()[lineIndex];
-    auto        contains = [](const Ui::Text::GlyphRun& run, uint32_t glyph)
-    {
-      return glyph >= run.glyphIndex && glyph - run.glyphIndex < run.numberOfGlyphs;
-    };
-    float start             = 1.0f;
-    bool  hasUnits          = false;
-    bool  hasTextForeground = false;
-    // Visit only this line's range, retaining the union semantics of split
-    // lines and the covered-glyph validation below. Do not rescan all text.
+    const auto& line              = model.GetLines()[lineIndex];
+    float       start             = 1.0f;
+    bool        hasUnits          = false;
+    bool        hasTextForeground = false;
+    // Visit this line's range and validate that each glyph is covered once.
     const auto glyphCount = static_cast<uint32_t>(plan.glyphToUnit.size());
     auto       endOf      = [glyphCount](const Ui::Text::GlyphRun& run)
     {
       const auto first = std::min(run.glyphIndex, glyphCount);
       return first + std::min(run.numberOfGlyphs, glyphCount - first);
     };
-    const auto firstGlyph = line.isSplitToTwoHalves ? std::min(line.glyphRun.glyphIndex, line.glyphRunSecondHalf.glyphIndex) : line.glyphRun.glyphIndex;
-    const auto lastGlyph  = line.isSplitToTwoHalves ? std::max(endOf(line.glyphRun), endOf(line.glyphRunSecondHalf)) : endOf(line.glyphRun);
+    const auto firstGlyph = line.glyphRun.glyphIndex;
+    const auto lastGlyph  = endOf(line.glyphRun);
     for(uint32_t glyph = firstGlyph; glyph < lastGlyph; ++glyph)
     {
       const auto unit = plan.glyphToUnit[glyph];
-      if(unit == Ui::Text::Internal::Reveal::NO_UNIT ||
-         !(contains(line.glyphRun, glyph) || (line.isSplitToTwoHalves && contains(line.glyphRunSecondHalf, glyph))))
+      if(unit == Ui::Text::Internal::Reveal::NO_UNIT)
       {
         continue;
       }

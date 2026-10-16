@@ -675,12 +675,20 @@ int Visual::Base::GetDepthIndex() const
 
 void Visual::Base::SetOnScene(Actor& actor)
 {
+  if(mImpl->mFlags & Impl::IS_SETTING_ON_SCENE)
+  {
+    // A later connection request supersedes an earlier deferred disconnection.
+    mImpl->mFlags &= ~Impl::IS_OFF_SCENE_REQUESTED;
+    return;
+  }
   if(!IsOnScene())
   {
     // To display the actor correctly, renderer should not be added to actor until all required resources are ready.
     // Thus the calling of actor.AddRenderer() should happen inside derived class as base class does not know the exact
     // timing.
+    mImpl->mFlags |= Impl::IS_SETTING_ON_SCENE;
     DoSetOnScene(actor);
+    mImpl->mFlags &= ~Impl::IS_SETTING_ON_SCENE;
 
     if(mImpl->mRenderer)
     {
@@ -697,12 +705,27 @@ void Visual::Base::SetOnScene(Actor& actor)
 
     mImpl->mFlags |= Impl::IS_ON_SCENE;
 
-    mImpl->mConstraintFeatureList.UpdateAllApplyRate();
+    if(mImpl->mFlags & Impl::IS_OFF_SCENE_REQUESTED)
+    {
+      // A ready callback may unregister the visual before DoSetOnScene returns.
+      // Disconnect after the derived visual has finished attaching its renderer.
+      mImpl->mFlags &= ~Impl::IS_OFF_SCENE_REQUESTED;
+      SetOffScene(actor);
+    }
+    else
+    {
+      mImpl->mConstraintFeatureList.UpdateAllApplyRate();
+    }
   }
 }
 
 void Visual::Base::SetOffScene(Actor& actor)
 {
+  if(mImpl->mFlags & Impl::IS_SETTING_ON_SCENE)
+  {
+    mImpl->mFlags |= Impl::IS_OFF_SCENE_REQUESTED;
+    return;
+  }
   if(IsOnScene())
   {
     DoSetOffScene(actor);

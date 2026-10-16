@@ -368,12 +368,11 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
     }
   }
 
-  auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
-  auto endIndexOfGlyphs   = viewModel.GetEndIndexOfElidedGlyphs();
+  auto endIndexOfGlyphs = viewModel.GetEndIndexOfElidedGlyphs();
 
   PixelBuffer result =
     mImpl->CreateTextGradientMaskImageBuffer(bufferWidth, bufferHeight, ignoreHorizontalAlignment, pixelFormat, penX,
-                                             penY, startIndexOfGlyphs, endIndexOfGlyphs);
+                                             penY, 0u, endIndexOfGlyphs);
 
   return result ? PixelBuffer::Convert(result) : PixelData{};
 }
@@ -454,12 +453,11 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
     }
   }
 
-  auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
-  auto endIndexOfGlyphs   = viewModel.GetEndIndexOfElidedGlyphs();
+  auto endIndexOfGlyphs = viewModel.GetEndIndexOfElidedGlyphs();
 
   PixelBuffer result =
     mImpl->CreateTextGradientPreservedImageBuffer(bufferWidth, bufferHeight, ignoreHorizontalAlignment, pixelFormat,
-                                                  penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+                                                  penX, penY, 0u, endIndexOfGlyphs);
 
   return result ? PixelBuffer::Convert(result) : PixelData{};
 }
@@ -588,9 +586,8 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
                             (behaviour == RENDER_NO_TEXT || behaviour == RENDER_OVERLAY_STYLE) ? Pixel::RGBA8888 : pixelFormat);
   }
 
-  // Elided text in ellipsis at START could start on index greater than 0
-  auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
-  auto endIndexOfGlyphs   = viewModel.GetEndIndexOfElidedGlyphs();
+  // END output keeps a zero-based final glyph buffer.
+  auto endIndexOfGlyphs = viewModel.GetEndIndexOfElidedGlyphs();
 
   PixelBuffer imageBuffer;
 
@@ -598,7 +595,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   {
     // Generate the image buffer as an alpha mask for color glyphs.
     imageBuffer = mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_MASK, ignoreHorizontalAlignment,
-                                           pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+                                           pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
   }
   else if(RENDER_NO_TEXT == behaviour || RENDER_OVERLAY_STYLE == behaviour)
   {
@@ -610,7 +607,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   {
     // Generate the image buffer for the text with no style.
     imageBuffer = mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_NONE, ignoreHorizontalAlignment,
-                                           pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+                                           pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
   }
 
   if((RENDER_NO_STYLES != behaviour) && (RENDER_MASK != behaviour))
@@ -622,7 +619,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
       // Create the image buffer for outline
       PixelBuffer outlineImageBuffer =
         mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_OUTLINE, ignoreHorizontalAlignment,
-                                 pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+                                 pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
 
       const float& blurRadius = viewModel.GetOutlineBlurRadius();
 
@@ -645,7 +642,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
       // Create the image buffer for shadow
       PixelBuffer shadowImageBuffer =
         mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_SHADOW, ignoreHorizontalAlignment,
-                                 pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+                                 pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
 
       // Check whether it will be a soft shadow
       const float& blurRadius = viewModel.GetShadowBlurRadius();
@@ -670,7 +667,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
       {
         backgroundImageBuffer =
           mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_BACKGROUND, ignoreHorizontalAlignment,
-                                   pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+                                   pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
       }
       else
       {
@@ -707,7 +704,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
         // Create the image buffer for underline
         PixelBuffer underlineImageBuffer =
           mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_UNDERLINE, ignoreHorizontalAlignment,
-                                   pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+                                   pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
 
         // Combine the two buffers
         CombineImageBuffer(imageBuffer, underlineImageBuffer, bufferWidth, bufferHeight, true);
@@ -934,14 +931,13 @@ PixelData Typesetter::RenderTextRevealMetadata(
     return {};
   }
 
-  const auto startGlyph = viewModel.GetStartIndexOfElidedGlyphs();
-  const auto endGlyph   = viewModel.GetEndIndexOfElidedGlyphs();
-  fadeDuration          = plan.fadeDuration;
+  const auto endGlyph = viewModel.GetEndIndexOfElidedGlyphs();
+  fadeDuration        = plan.fadeDuration;
 
   mImpl->BeginRevealMetadata(width, height, plan);
   mImpl->CreateImageBuffer(width, height, Typesetter::STYLE_NONE,
                            ignoreHorizontalAlignment, Pixel::RGBA8888,
-                           penX, penY, startGlyph, endGlyph);
+                           penX, penY, 0u, endGlyph);
   return mImpl->EndRevealMetadata();
 }
 
@@ -952,12 +948,12 @@ Rect<uint32_t> Typesetter::GetRuntimeBlurLineRasterBounds(const Vector2& size, L
   const auto           height = static_cast<uint32_t>(size.height);
   const Rect<uint32_t> full(0u, 0u, width, height);
   if(lineIndex >= model.GetNumberOfLines() || model.GetGradientSpanModelData() ||
-     model.GetHyphensCount() != 0u || model.GetEllipsisPosition() != Text::EllipsisPosition::END)
+     model.GetHyphensCount() != 0u)
   {
     return full;
   }
   const auto& line = model.GetLines()[lineIndex];
-  if(line.isSplitToTwoHalves || line.glyphRun.numberOfGlyphs == 0u)
+  if(line.glyphRun.numberOfGlyphs == 0u)
   {
     return full;
   }
@@ -986,14 +982,13 @@ Rect<uint32_t> Typesetter::GetRuntimeBlurLineRasterBounds(const Vector2& size, L
     }
   }
 
-  const auto start  = model.GetStartIndexOfElidedGlyphs();
-  const auto first  = std::max(line.glyphRun.glyphIndex, start);
+  const auto first  = line.glyphRun.glyphIndex;
   const auto last   = std::min(line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs - 1u, model.GetEndIndexOfElidedGlyphs());
   int64_t    top    = height;
   int64_t    bottom = 0;
   for(GlyphIndex index = first; index <= last; ++index)
   {
-    const auto& glyph = model.GetGlyphs()[index - start];
+    const auto& glyph = model.GetGlyphs()[index];
     if(IsSyntheticReplacementGlyph(glyph) || glyph.width < Math::MACHINE_EPSILON_1000 || glyph.height < Math::MACHINE_EPSILON_1000)
     {
       continue;
@@ -1004,7 +999,7 @@ Rect<uint32_t> Typesetter::GetRuntimeBlurLineRasterBounds(const Vector2& size, L
     mImpl->GetFontClient().CreateBitmap(glyph.fontId, glyph.index, glyph.isItalicRequired, glyph.isBoldRequired, bitmap, 0);
     if(bitmap.buffer && bitmap.width > 0u && bitmap.height > 0u)
     {
-      const int64_t y = static_cast<int64_t>(baseline) + static_cast<int32_t>(model.GetLayout()[index - start].y);
+      const int64_t y = static_cast<int64_t>(baseline) + static_cast<int32_t>(model.GetLayout()[index].y);
       top             = std::min(top, y);
       bottom          = std::max(bottom, y + bitmap.height);
     }
@@ -1029,7 +1024,7 @@ PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineI
     return {};
   }
   const auto& line    = model.GetLines()[lineIndex];
-  const auto& lastRun = line.isSplitToTwoHalves ? line.glyphRunSecondHalf : line.glyphRun;
+  const auto& lastRun = line.glyphRun;
   if(lastRun.numberOfGlyphs == 0u)
   {
     return {};

@@ -84,7 +84,6 @@ public:
       line.alignmentOffset            = 0.0f;
       line.direction                  = false;
       line.ellipsis                   = false;
-      line.isSplitToTwoHalves         = false;
       mLines.PushBack(line);
     }
 
@@ -105,7 +104,6 @@ public:
   UiText::Alignment GetHorizontalAlignment() const override { return UiText::Alignment::START; }
   UiText::Alignment GetVerticalAlignment() const override { return mVerticalAlignment; }
   UiText::Alignment GetVerticalLineAlignment() const override { return UiText::Alignment::START; }
-  UiText::EllipsisPosition::Type GetEllipsisPosition() const override { return UiText::EllipsisPosition::END; }
   bool IsTextElideEnabled() const override { return false; }
   UiText::Length GetNumberOfLines() const override { return static_cast<Dali::Ui::Text::Length>(mLines.Count()); }
   const UiText::LineRun* GetLines() const override { return mLines.Begin(); }
@@ -113,10 +111,7 @@ public:
   const UiText::ScriptRun* GetScriptRuns() const override { return nullptr; }
   UiText::Length GetNumberOfCharacters() const override { return static_cast<Dali::Ui::Text::Length>(mCharacters.Count()); }
   UiText::Length GetNumberOfGlyphs() const override { return static_cast<Dali::Ui::Text::Length>(mGlyphs.Count()); }
-  UiText::GlyphIndex GetStartIndexOfElidedGlyphs() const override { return 0u; }
   UiText::GlyphIndex GetEndIndexOfElidedGlyphs() const override { return static_cast<Dali::Ui::Text::GlyphIndex>(mGlyphs.Count() > 0u ? mGlyphs.Count() - 1u : 0u); }
-  UiText::GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const override { return 0u; }
-  UiText::GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const override { return 0u; }
   const UiText::GlyphInfo* GetGlyphs() const override { return mGlyphs.Begin(); }
   const Vector2* GetLayout() const override { return mPositions.Begin(); }
   const Vector4* GetColors() const override { return mColors.Count() > 0u ? mColors.Begin() : nullptr; }

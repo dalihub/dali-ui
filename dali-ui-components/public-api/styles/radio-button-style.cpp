@@ -22,7 +22,7 @@
 #include <dali-ui-components/internal/component-image-path.h>
 #include <dali-ui-components/internal/styles/radio-button-style-impl.h>
 #include <dali-ui-components/internal/styles/style-validation.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/internal/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
@@ -98,14 +98,14 @@ UiStyleKey<RadioButtonStyle> RadioButtonStyle::DefaultKey()
 
 RadioButtonStyle RadioButtonStyle::DefaultPreset()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   static RadioButtonStyle style = RadioButtonStyle::Builder().Build();
   return style;
 }
 
 RadioButtonStyle RadioButtonStyle::Default()
 {
-  DebugAssertStyleConfigApplied();
+  Internal::DebugAssertStyleConfigApplied();
   RadioButtonStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   return style ? style : DefaultPreset();
 }

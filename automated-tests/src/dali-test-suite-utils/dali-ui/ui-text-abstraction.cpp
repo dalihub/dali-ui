@@ -16,6 +16,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui/test-font-glyph-constants.h>
+#include <dali-ui/ui-text-abstraction.h>
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/devel-api/text-abstraction/bidirectional-support.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
@@ -39,6 +40,12 @@ namespace TextAbstraction
 {
 namespace
 {
+static constexpr Dali::TypeInfoId gSingletonTypeInfoIdBidirectionalSupport = DALI_TYPE_ID(TextAbstraction::BidirectionalSupport);
+
+static constexpr Dali::TypeInfoId gSingletonTypeInfoIdFontClient = DALI_TYPE_ID(Dali::TextAbstraction::FontClient);
+
+static constexpr Dali::TypeInfoId gSingletonTypeInfoIdShaping = DALI_TYPE_ID(Dali::TextAbstraction::Shaping);
+
 constexpr unsigned int WHITE_SPACE_THRESHOLD = 0x21;   ///< All characters below 0x21 are considered white spaces.
 constexpr unsigned int CHAR_SPACE            = 0x20;   ///< Space.
 constexpr unsigned int CHAR_LF               = 0x000A; ///< NL Line feed, new line.
@@ -67,7 +74,16 @@ float GetMockFontPixelSize(FontId fontId)
 {
   return static_cast<float>(fontId > 0u ? fontId : DEFAULT_POINT_SIZE_26DOT6) / 64.0f;
 }
+// Tests install and restore callbacks on the thread performing synchronous layout.
+thread_local TestReorderCallback testReorderCallback = nullptr;
 } // namespace
+
+TestReorderCallback SetTestReorderCallback(TestReorderCallback callback)
+{
+  const auto previous = testReorderCallback;
+  testReorderCallback = callback;
+  return previous;
+}
 
 namespace Internal
 {
@@ -95,7 +111,7 @@ public:
     if(service)
     {
       // Check whether the singleton is already created
-      BaseHandle handle = service.GetSingleton(typeid(TextAbstraction::BidirectionalSupport));
+      BaseHandle handle = service.GetSingleton(gSingletonTypeInfoIdBidirectionalSupport);
       if(handle)
       {
         // If so, downcast the handle
@@ -105,7 +121,7 @@ public:
       else // create and register the object
       {
         bidirectionalSupportHandle = Dali::TextAbstraction::Internal::BidirectionalSupport::New();
-        service.Register(typeid(bidirectionalSupportHandle), bidirectionalSupportHandle);
+        service.Register(gSingletonTypeInfoIdBidirectionalSupport, bidirectionalSupportHandle);
       }
     }
     return bidirectionalSupportHandle;
@@ -121,6 +137,10 @@ public:
 
   void Reorder(BidiInfoIndex bidiInfoIndex, CharacterIndex firstCharacterIndex, Length numberOfCharacters, CharacterIndex* visualToLogicalMap)
   {
+    if(testReorderCallback)
+    {
+      testReorderCallback(bidiInfoIndex, firstCharacterIndex, numberOfCharacters, visualToLogicalMap);
+    }
   }
 
   bool GetMirroredText(Character* text, CharacterDirection* directions, Length numberOfCharacters)
@@ -164,7 +184,7 @@ public:
     if(service)
     {
       // Check whether the singleton is already created
-      Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::TextAbstraction::FontClient));
+      Dali::BaseHandle handle = service.GetSingleton(gSingletonTypeInfoIdFontClient);
       if(handle)
       {
         // If so, downcast the handle
@@ -174,7 +194,7 @@ public:
       else // create and register the object
       {
         fontClientHandle = Dali::TextAbstraction::Internal::FontClient::New();
-        service.Register(typeid(fontClientHandle), fontClientHandle);
+        service.Register(gSingletonTypeInfoIdFontClient, fontClientHandle);
       }
     }
 
@@ -472,7 +492,7 @@ public:
     if(service)
     {
       // Check whether the singleton is already created
-      Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::TextAbstraction::Shaping));
+      Dali::BaseHandle handle = service.GetSingleton(gSingletonTypeInfoIdShaping);
       if(handle)
       {
         // If so, downcast the handle
@@ -482,7 +502,7 @@ public:
       else // create and register the object
       {
         shapingHandle = Dali::TextAbstraction::Internal::Shaping::New();
-        service.Register(typeid(shapingHandle), shapingHandle);
+        service.Register(gSingletonTypeInfoIdShaping, shapingHandle);
       }
     }
     return shapingHandle;

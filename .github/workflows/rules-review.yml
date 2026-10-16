@@ -1,8 +1,17 @@
 name: DALI UI Rules Review
+run-name: 'Rules review PR #${{ inputs.pr_number }}'
 
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to review
+        required: true
+        type: string
+
+concurrency:
+  group: rules-review-${{ inputs.pr_number }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -12,10 +21,11 @@ permissions:
 jobs:
   rules-review:
     runs-on: code-linux
+    timeout-minutes: 55
 
     env:
-      CLINE_MODEL: ${{ vars.CLINE_MODEL || 'GaussO4.1' }}
-      CLINE_VERSION: 0.6.0
+      CLINE_MODEL: ${{ vars.CLINE_MODEL || 'GaussO6' }}
+      CLINE_VERSION: 2.1.0
       CLINE_REGISTRY: https://bart.sec.samsung.net/artifactory/api/npm/coding-assistant-npm-remote/
       CLINE_NO_PROXY: aicoding.sec.samsung.net,bart.sec.samsung.net,codei.sec.samsung.net,ocean.sec.samsung.net,github.sec.samsung.net,ipaas-mcp.sec.samsung.net
       PROXY_URL: http://10.112.1.184:8080/
@@ -23,32 +33,56 @@ jobs:
       AUTOMATION_WORKSPACE: ${{ github.workspace }}/automation
 
     steps:
-      - name: Checkout automation from base
+      - name: Resolve pull request
+        id: pr
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          script: |
+            const input = process.env.PR_NUMBER;
+            if (!/^[1-9][0-9]*$/.test(input) || !Number.isSafeInteger(Number(input))) {
+              throw new Error('PR number must be a positive integer.');
+            }
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: Number(input)
+            });
+            if (!pr.head.repo) {
+              throw new Error('The pull request head repository is unavailable.');
+            }
+
+            core.setOutput('number', String(pr.number));
+            core.setOutput('base-sha', pr.base.sha);
+            core.setOutput('base-repository', pr.base.repo.full_name);
+            core.setOutput('head-sha', pr.head.sha);
+            core.setOutput('head-repository', pr.head.repo.full_name);
+
+      - name: Checkout selected automation revision
         uses: code-actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.sha }}
           path: automation
+          persist-credentials: false
 
       - name: Checkout PR head
         uses: code-actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.sha }}
+          repository: ${{ steps.pr.outputs.head-repository }}
+          ref: ${{ steps.pr.outputs.head-sha }}
           fetch-depth: 0
           path: pr
-          allow-unsafe-pr-checkout: true
 
       - name: Fetch base commit
         working-directory: pr
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          BASE_REPO: ${{ github.event.pull_request.base.repo.full_name }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_SHA: ${{ steps.pr.outputs.base-sha }}
+          BASE_REPO: ${{ steps.pr.outputs.base-repository }}
         run: |
-          git fetch origin "$BASE_SHA" || {
-            git remote add base "https://x-access-token:${GITHUB_TOKEN}@github.sec.samsung.net/${BASE_REPO}.git"
-            git fetch base "$BASE_SHA"
-          }
+          trap 'git config --local --unset-all "http.${GITHUB_SERVER_URL}/.extraheader" || true' EXIT
+          git fetch --no-tags "$GITHUB_SERVER_URL/$BASE_REPO.git" "$BASE_SHA"
 
       - name: Setup Node.js
         uses: code-actions/setup-node@v4
@@ -85,41 +119,39 @@ jobs:
           npm config set strict-ssl false
 
       - name: Install Cline CLI
-        run: npm install -g "cline@$CLINE_VERSION" --registry "$CLINE_REGISTRY"
-
-      - name: Authenticate Cline CLI
-        env:
-          CLINE_UMS_TOKEN: ${{ secrets.CLINE_UMS_TOKEN }}
         run: |
-          if [ -z "$CLINE_UMS_TOKEN" ]; then
-            echo "CLINE_UMS_TOKEN secret is required."
-            exit 1
-          fi
-
-          cline auth -k "$CLINE_UMS_TOKEN" -m "$CLINE_MODEL"
+          npm install -g "cline@$CLINE_VERSION" --registry "$CLINE_REGISTRY"
+          cline --version
 
       - name: Run rules review
+        id: review
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          BASE_SHA: ${{ steps.pr.outputs.base-sha }}
+          HEAD_SHA: ${{ steps.pr.outputs.head-sha }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          CLINE_OFFLINE_TOKEN: ${{ secrets.CLINE_OFFLINE_TOKEN }}
+          REVIEW_MAX_ATTEMPTS: 3
           MAX_DIFF_BYTES: 180000
         run: |
           bash "$AUTOMATION_WORKSPACE/.github/scripts/cline-rules-review.sh"
 
       - name: Post rules review comment
+        if: ${{ !cancelled() && steps.review.outcome != 'skipped' && steps.review.outcome != '' }}
         uses: actions/github-script@v7
         env:
           COMMENT_FILE: ${{ github.workspace }}/rules-review-comment.md
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
         with:
           script: |
             const fs = require('fs');
 
+            if (!fs.existsSync(process.env.COMMENT_FILE)) {
+              core.info('No review comment was generated. See the job logs and debug artifacts.');
+              return;
+            }
             const marker = '<!-- dali-ui-rules-review -->';
             const body = fs.readFileSync(process.env.COMMENT_FILE, 'utf8');
-            const issue_number = context.payload.pull_request.number;
+            const issue_number = Number(process.env.PR_NUMBER);
 
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
@@ -152,5 +184,5 @@ jobs:
         if: always()
         uses: CODE-Actions/upload-artifact@v2
         with:
-          name: rules-review-debug-${{ github.event.pull_request.number }}
+          name: rules-review-debug-${{ inputs.pr_number }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ github.workspace }}/rules-review-debug

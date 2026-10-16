@@ -570,19 +570,6 @@ public:
   bool IsBackgroundEnabled() const;
 
   /**
-   * @brief Sets ellipsis position
-   * @param[in] ellipsisPosition The ellipsis position for the text
-   */
-  void SetEllipsisPosition(EllipsisPosition::Type ellipsisPosition);
-
-  /**
-   * @brief Retrieves ellipsis position for text.
-   *
-   * @return The ellipsis position.
-   */
-  EllipsisPosition::Type GetEllipsisPosition() const;
-
-  /**
    * @brief Enable or disable the text elide.
    *
    * @param[in] enabled Whether to enable the text elide.
@@ -597,13 +584,6 @@ public:
   bool IsTextElideEnabled() const;
 
   /**
-   * @brief Sets the start index of laid-out glyphs.
-   *
-   * @param[in] startIndexOfElidedGlyphs The start index of laid-out glyphs.
-   */
-  void SetStartIndexOfElidedGlyphs(GlyphIndex startIndexOfElidedGlyphs);
-
-  /**
    * @brief Sets the end index of elided glyphs.
    *
    * @param[in] endIndexOfElidedGlyphs The end index of elided glyphs.
@@ -611,46 +591,11 @@ public:
   void SetEndIndexOfElidedGlyphs(GlyphIndex endIndexOfElidedGlyphs);
 
   /**
-   * @brief Sets the first middle index of elided glyphs, index before ellipsis of middle.
-   *
-   * @param[in] firstMiddleIndexOfElidedGlyphs The first middle index of elided glyphs, index before ellipsis of middle.
-   */
-  void SetFirstMiddleIndexOfElidedGlyphs(GlyphIndex firstMiddleIndexOfElidedGlyphs);
-
-  /**
-   * @brief Sets the second middle index of elided glyphs, index of ellipsis of middle.
-   *
-   * @param[in] secondMiddleIndexOfElidedGlyphs The second middle index of elided glyphs, index of ellipsis of middle.
-   */
-  void SetSecondMiddleIndexOfElidedGlyphs(GlyphIndex secondMiddleIndexOfElidedGlyphs);
-
-  /**
-   * @brief Retrieves the start index of laid-out glyphs.
-   *
-   * @return The start index of laid-out glyphs.
-   */
-  GlyphIndex GetStartIndexOfElidedGlyphs() const;
-
-  /**
    * @brief Retrieves the end index of laid-out glyphs.
    *
    * @return The end index of laid-out glyphs.
    */
   GlyphIndex GetEndIndexOfElidedGlyphs() const;
-
-  /**
-   * @brief Retrieves the first middle index of elided glyphs, index before ellipsis of middle.
-   *
-   * @return The first middle index of elided glyphs, index before ellipsis of middle.
-   */
-  GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const;
-
-  /**
-   * @brief Retrieves the second middle index of elided glyphs, index of ellipsis of middle.
-   *
-   * @return The second middle index of elided glyphs, index of ellipsis of middle.
-   */
-  GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const;
 
   /**
    * @brief Sets the text's strikethrough color.
@@ -888,14 +833,11 @@ private:
   LineIndex mCachedLineIndex; ///< Used to increase performance in consecutive calls to GetLineOfGlyph() or
                               ///< GetLineOfCharacter() with consecutive glyphs or characters.
 
-  Alignment              mVerticalLineAlignment;    ///< Vertical line alignment for glyph positioning within LineHeight.
-  EllipsisPosition::Type mEllipsisPosition;         ///< Where is the location the text elide
-  GlyphIndex             mStartIndexOfElidedGlyphs; ///< The start index of elided glyphs.
-  GlyphIndex             mEndIndexOfElidedGlyphs;   ///< The end index of elided glyphs.
-  GlyphIndex
-             mFirstMiddleIndexOfElidedGlyphs;  ///< The first end index of elided glyphs, index before ellipsis of middle.
-  GlyphIndex mSecondMiddleIndexOfElidedGlyphs; ///< The first end index of elided glyphs, index of ellipsis of middle.
-  bool       mTextElideEnabled : 1;            ///< Whether the text's elide is enabled.
+  Alignment mVerticalLineAlignment; ///< Vertical line alignment for glyph positioning within LineHeight.
+
+  GlyphIndex mEndIndexOfElidedGlyphs; ///< The end index of elided glyphs.
+
+  bool mTextElideEnabled : 1; ///< Whether the text's elide is enabled.
 
 public:
   bool  mUnderlineEnabled : 1;            ///< Underline enabled flag

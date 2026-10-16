@@ -2562,9 +2562,10 @@ void ViewDataImpl::LogInPassInvalidation(const char* apiName)
   DALI_LOG_ERROR(
     "%s() called on '%s' %s. The requested layout work was retained rather than "
     "discarded, but layout processing does not request another idle ProcessEvents cycle "
-    "for work it produces itself. The work remains pending and LayoutFinished remains "
-    "deferred until a later independently triggered ProcessEvents cycle services it. "
-    "Avoid unconditional invalidation from layout callbacks.\n",
+    "for work it produces itself. The work remains pending until a later independently "
+    "triggered ProcessEvents cycle services it; LayoutFinished for the pass already "
+    "running is not withheld, and the retained work is reported by the pass that "
+    "services it. Avoid unconditional invalidation from layout callbacks.\n",
     apiName,
     name,
     context);
@@ -3847,6 +3848,12 @@ void ViewDataImpl::OnViewSceneConnection()
 {
   OnSceneConnection();
 
+  Actor self(mViewImpl.Self());
+  if(!self.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  {
+    return;
+  }
+
   if(auto* traitObject = GetCoreInteractionObject())
   {
     if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
@@ -3855,8 +3862,7 @@ void ViewDataImpl::OnViewSceneConnection()
     }
   }
 
-  Actor self(mViewImpl.Self());
-  int   clippingMode = ClippingMode::DISABLED;
+  int clippingMode = ClippingMode::DISABLED;
   if(self.GetProperty(Actor::Property::CLIPPING_MODE).Get(clippingMode) &&
      clippingMode == ClippingMode::CLIP_CHILDREN &&
      (DALI_UNLIKELY(!mVisualData) || mVisualData->mVisuals.Empty()) &&
@@ -5088,14 +5094,6 @@ void ViewDataImpl::ReplayArrangeSubtreeFromCache(bool mirrorUnderParentRtl, floa
   }
   ApplySelfBoundsIfChanged(applied);
 
-  // Replay must deliver the same final SVG visual size as an ordinary Arrange,
-  // even while pending layout prevents LayoutFinished from being emitted.
-  const Vector2 finalSize(cached.width, cached.height);
-  if(mSize != finalSize)
-  {
-    ApplyFittingMode(finalSize, FittingModeUpdate::ARRANGE);
-  }
-
   // 2. Descendants, in mChildren order -- the order ArrangeDefault's snapshot preserves,
   //    and the order every layout manager iterates.
   //
@@ -5412,17 +5410,6 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // resolver below.
   mArrangedBounds         = finalBounds;
   mArrangeResultAvailable = true; // A completed rect now exists for the re-entrancy fallback.
-
-  // Per-axis actor size writes bypass OnSizeSet. Deliver the final size to
-  // SVG visuals now: LayoutFinished may be deferred by another dirty view,
-  // and SVG rasterization cannot start until its visual size is known. Publish
-  // the bounds first because fitting can synchronously notify resource readiness.
-  // Keep mSize owned by OnSizeSet; visuals handle unchanged rasterization sizes.
-  const Vector2 finalSize(finalBounds.width, finalBounds.height);
-  if(mSize != finalSize)
-  {
-    ApplyFittingMode(finalSize, FittingModeUpdate::ARRANGE);
-  }
 
   // Ensure standalone children are arranged even when OnArrange (e.g. in
   // leaf views like Label) does not iterate children.
@@ -6061,9 +6048,9 @@ void ViewDataImpl::ApplySelfBoundsIfChanged(const LayoutRect& bounds)
   // does not route through Actor::OnSizeSet (only Actor::SetSize does). Drive
   // the same render-effect refresh OnSizeSet would, so render effects (e.g.
   // blur) that read the final layout size refresh for layout-sized views that never
-  // receive an explicit SetSize. SVG fitting is applied separately after final
-  // Arrange bounds are published; applying it here could use provisional bounds.
-  // Other visuals retain their existing fitting update paths.
+  // receive an explicit SetSize. Fitting-mode visuals (SVG included) are fitted from
+  // the LayoutFinished handler with the final arranged size; applying fitting here
+  // could use provisional bounds.
   // Track against a dedicated field rather than mSize: Arrange() can run with
   // provisional/degenerate bounds for views outside real layout measurement
   // (e.g. a plain View given an explicit Actor size but never measured by a
@@ -6522,6 +6509,19 @@ const ViewDataImpl& ViewDataImpl::Get(const ViewImpl& viewImpl)
   return viewImpl.GetViewDataImpl();
 }
 
+ViewDataImpl::VisualResourceReadySignalType& ViewDataImpl::VisualResourceReadySignal()
+{
+  return EnsureResourceReadyData().visualResourceReadySignal;
+}
+
+void ViewDataImpl::VisualResourceReady(Property::Index index)
+{
+  if(mResourceReadyData)
+  {
+    mResourceReadyData->visualResourceReadySignal.Emit(index);
+  }
+}
+
 void ViewDataImpl::ResourceReady()
 {
   DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
@@ -6578,6 +6578,11 @@ Ui::Integration::Visual::Base ViewDataImpl::GetVisual(Property::Index index) con
   return Ui::Integration::Visual::Base(GetVisualImplPtr(index));
 }
 
+Ui::Integration::Visual::Base ViewDataImpl::GetPreviousVisual(Property::Index index) const
+{
+  return mVisualData ? mVisualData->GetPreviousVisual(index) : Ui::Integration::Visual::Base();
+}
+
 Ui::Internal::Visual::Base* ViewDataImpl::GetVisualImplPtr(Property::Index index) const
 {
   if(DALI_LIKELY(mVisualData))
@@ -6598,16 +6603,16 @@ bool ViewDataImpl::IsResourceReady() const
 
 void ViewDataImpl::OnSceneConnection()
 {
+  Actor self = mViewImpl.Self();
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "View::OnSceneConnection number of registered visuals(%d)\n",
                 mVisualData ? mVisualData->mVisuals.Size() : 0u);
 
   if(DALI_LIKELY(mVisualData))
   {
-    Actor self = mViewImpl.Self();
     mVisualData->ConnectScene(self);
   }
 
-  if(mRenderEffectData && mRenderEffectData->offscreenRendering)
+  if(self.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) && mRenderEffectData && mRenderEffectData->offscreenRendering)
   {
     mRenderEffectData->offscreenRendering->SetOwnerView(Ui::View(mViewImpl.GetOwner()));
   }
@@ -8218,7 +8223,14 @@ void ViewDataImpl::EnsureFittingModeLayoutFinishedSignalConnected()
 
 void ViewDataImpl::OnLayoutFinished(Ui::View view, LayoutRect bounds)
 {
-  ApplyFittingMode(Vector2(bounds.width, bounds.height), FittingModeUpdate::LAYOUT_FINISHED);
+  // The delivered snapshot can be older than this View's latest arranged target: a delivery
+  // never skips an item because a newer pass already exists (that pass is delivered next
+  // cycle), and an earlier slot of this same signal may have re-run layout before this
+  // internal slot runs. Fit to the latest target so an older payload cannot rewind a
+  // fitting-mode visual. Only the size is used; the right-to-left mirror does not change it
+  // and it is the transition target, like the snapshot.
+  const LayoutRect& target = mArrangeResultAvailable ? mArrangedBounds : bounds;
+  ApplyFittingMode(Vector2(target.width, target.height), FittingModeUpdate::LAYOUT_FINISHED);
 }
 
 void ViewDataImpl::SetBackground(const Property::Map& map)

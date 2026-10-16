@@ -273,12 +273,7 @@ void VisualModel::GetNumberOfLines(GlyphIndex glyphIndex, Length numberOfGlyphs,
       firstLineFound = true;
       ++numberOfLines;
     }
-    else if((line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs > glyphIndex) &&
-            (lastGlyphIndex > line.glyphRunSecondHalf.glyphIndex))
-    {
-      firstLineFound = true;
-      ++numberOfLines;
-    }
+
     else if(lastGlyphIndex <= line.glyphRun.glyphIndex)
     {
       // nothing else to do.
@@ -526,29 +521,9 @@ void VisualModel::SetTextElideEnabled(bool enabled)
   mTextElideEnabled = enabled;
 }
 
-void VisualModel::SetEllipsisPosition(EllipsisPosition::Type ellipsisPosition)
-{
-  mEllipsisPosition = ellipsisPosition;
-}
-
-void VisualModel::SetStartIndexOfElidedGlyphs(GlyphIndex startIndexOfElidedGlyphs)
-{
-  mStartIndexOfElidedGlyphs = startIndexOfElidedGlyphs;
-}
-
 void VisualModel::SetEndIndexOfElidedGlyphs(GlyphIndex endIndexOfElidedGlyphs)
 {
   mEndIndexOfElidedGlyphs = endIndexOfElidedGlyphs;
-}
-
-void VisualModel::SetFirstMiddleIndexOfElidedGlyphs(GlyphIndex firstMiddleIndexOfElidedGlyphs)
-{
-  mFirstMiddleIndexOfElidedGlyphs = firstMiddleIndexOfElidedGlyphs;
-}
-
-void VisualModel::SetSecondMiddleIndexOfElidedGlyphs(GlyphIndex secondMiddleIndexOfElidedGlyphs)
-{
-  mSecondMiddleIndexOfElidedGlyphs = secondMiddleIndexOfElidedGlyphs;
 }
 
 void VisualModel::SetStrikethroughColor(const Vector4& color)
@@ -747,29 +722,9 @@ bool VisualModel::IsTextElideEnabled() const
   return mTextElideEnabled;
 }
 
-EllipsisPosition::Type VisualModel::GetEllipsisPosition() const
-{
-  return mEllipsisPosition;
-}
-
-GlyphIndex VisualModel::GetStartIndexOfElidedGlyphs() const
-{
-  return mStartIndexOfElidedGlyphs;
-}
-
 GlyphIndex VisualModel::GetEndIndexOfElidedGlyphs() const
 {
   return mEndIndexOfElidedGlyphs;
-}
-
-GlyphIndex VisualModel::GetFirstMiddleIndexOfElidedGlyphs() const
-{
-  return mFirstMiddleIndexOfElidedGlyphs;
-}
-
-GlyphIndex VisualModel::GetSecondMiddleIndexOfElidedGlyphs() const
-{
-  return mSecondMiddleIndexOfElidedGlyphs;
 }
 
 Length VisualModel::GetNumberOfUnderlineRuns() const
@@ -913,11 +868,9 @@ VisualModel::VisualModel()
   mHeightForWidth(0.0f, 0.0f),
   mCachedLineIndex(0u),
   mVerticalLineAlignment(Alignment::CENTER),
-  mEllipsisPosition(EllipsisPosition::END),
-  mStartIndexOfElidedGlyphs(0u),
+
   mEndIndexOfElidedGlyphs(0u),
-  mFirstMiddleIndexOfElidedGlyphs(0u),
-  mSecondMiddleIndexOfElidedGlyphs(0u),
+
   mTextElideEnabled(false),
   mUnderlineEnabled(false),
   mShadowEnabled(false),

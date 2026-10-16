@@ -532,6 +532,13 @@ void CopyFinalColorIndices(const VisualModel& source, FinalElisionResult& result
   }
 }
 
+/**
+ * @brief Publishes the visible prefix when an END marker cannot be retained.
+ * @param[in] sourceModel Source layout model.
+ * @param[in] ellipsisLineIndex Source line at which omission begins.
+ * @param[in] reason Reason the marker is omitted.
+ * @param[out] result Owned final buffers and source/final maps.
+ */
 void BuildOmissionResult(const Model&                               sourceModel,
                          LineIndex                                  ellipsisLineIndex,
                          FinalElisionResult::EllipsisOmissionReason reason,
@@ -565,10 +572,7 @@ void BuildOmissionResult(const Model&                               sourceModel,
   {
     result.lines[line] = source.mLines[line];
   }
-  result.startIndex             = 0u;
   result.endIndex               = prefixGlyphCount == 0u ? 0u : prefixGlyphCount - 1u;
-  result.firstMiddleIndex       = result.startIndex;
-  result.secondMiddleIndex      = result.endIndex;
   result.ellipsisOmissionReason = reason;
   result.authoritativeLines     = true;
   result.resolved               = true;
@@ -585,6 +589,17 @@ void BuildOmissionResult(const Model&                               sourceModel,
   CopyFinalColorIndices(source, result);
 }
 
+/**
+ * @brief Builds the final glyph sequence and maps for a retained END marker.
+ * @param[in] sourceModel Source layout model.
+ * @param[in] ellipsisLineIndex Source line receiving the marker.
+ * @param[in] clusters Source glyph clusters of the elided line.
+ * @param[in] retainedClusterCount Number of leading clusters to retain.
+ * @param[in] ellipsisStyleGlyph Source glyph providing authored marker styling.
+ * @param[in] ellipsisGlyph Generated marker metrics.
+ * @param[in] projected Projected line positions after marker fitting.
+ * @param[out] result Owned final buffers with distinct source, final and style maps.
+ */
 void BuildFinalResult(const Model&                      sourceModel,
                       LineIndex                         ellipsisLineIndex,
                       const std::vector<SourceCluster>& clusters,
@@ -661,9 +676,6 @@ void BuildFinalResult(const Model&                      sourceModel,
   resultLine.glyphRun.glyphIndex             = finalPrefixCount;
   resultLine.glyphRun.numberOfGlyphs         = retainedGlyphCount + 1u;
   resultLine.characterRun.numberOfCharacters = retainedCharacterEnd - sourceLine.characterRun.characterIndex;
-  resultLine.isSplitToTwoHalves              = false;
-  resultLine.glyphRunSecondHalf              = GlyphRun{};
-  resultLine.characterRunForSecondHalfLine   = CharacterRun{};
 
   result.layoutSize = Size::ZERO;
   for(LineIndex lineIndex = 0u; lineIndex < result.lines.Count(); ++lineIndex)
@@ -671,12 +683,8 @@ void BuildFinalResult(const Model&                      sourceModel,
     result.layoutSize.width = std::max(result.layoutSize.width, result.lines[lineIndex].width);
     result.layoutSize.height += GetLineHeight(result.lines[lineIndex], lineIndex + 1u == result.lines.Count());
   }
-  result.layoutSize.height = std::ceil(result.layoutSize.height);
-
-  result.startIndex              = 0u;
+  result.layoutSize.height       = std::ceil(result.layoutSize.height);
   result.endIndex                = finalGlyphCount - 1u;
-  result.firstMiddleIndex        = result.startIndex;
-  result.secondMiddleIndex       = result.endIndex;
   result.ellipsisFinalGlyphIndex = finalGlyph;
   result.ellipsisLineIndex       = ellipsisLineIndex;
   result.ellipsisUnitCount       = 1u;
@@ -850,7 +858,7 @@ EndEllipsisSourceRetention ResolveEndEllipsisRetention(
   const EndEllipsisGlyphPositionView& glyphPositionView)
 {
   EndEllipsisSourceRetention retention;
-  if(model.mEllipsisPosition != EllipsisPosition::END || !model.mVisualModel || !model.mLogicalModel)
+  if(!model.mVisualModel || !model.mLogicalModel)
   {
     return retention;
   }
@@ -887,7 +895,7 @@ bool ResolveEndEllipsis(const Model&                 model,
                         FontId                       syntheticReplacementDefaultFontId)
 {
   result.Clear();
-  if(model.mEllipsisPosition != EllipsisPosition::END || !model.mVisualModel || !model.mLogicalModel)
+  if(!model.mVisualModel || !model.mLogicalModel)
   {
     return false;
   }

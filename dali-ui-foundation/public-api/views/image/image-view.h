@@ -213,7 +213,12 @@ public: // Image
   void Reload();
 
   /**
-   * @brief Sets the URL of a placeholder image shown while the main image is loading.
+   * @brief Sets the URL of an image shown when the resource URL is empty or while the main image is loading.
+   *
+   * Clearing the resource URL restores the placeholder. When replacing a loaded
+   * image, the previous image remains visible until the new image finishes loading.
+   * A failed main image load displays the broken image instead of the placeholder.
+   * An empty placeholder URL disables the placeholder.
    *
    * @param[in] url The URL of the placeholder image resource
    */

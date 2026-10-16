@@ -67,8 +67,8 @@ public:
   /**
    * @brief Binds the final result owned by the active render model.
    *
-   * A null pointer preserves the START/MIDDLE fallback and standalone
-   * callers that do not publish an authoritative final result.
+   * A null pointer uses uncached resolution for standalone callers that do not
+   * publish an authoritative final result. The owner must outlive this binding.
    *
    * @param[in] result The resolved final sequence, or nullptr to disable it.
    */
@@ -254,34 +254,14 @@ public:
   bool IsOutlineEnabled() const override;
 
   /**
-   * @copydoc Dali::Ui::Text::ViewInterface::GetEllipsisPosition()
-   */
-  Text::EllipsisPosition::Type GetEllipsisPosition() const override;
-
-  /**
    * @copydoc Dali::Ui::Text::ViewInterface::IsTextElideEnabled()
    */
   bool IsTextElideEnabled() const override;
 
   /**
-   * @copydoc Dali::Ui::Text::ViewInterface::GetStartIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetStartIndexOfElidedGlyphs() const override;
-
-  /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetEndIndexOfElidedGlyphs()
    */
   GlyphIndex GetEndIndexOfElidedGlyphs() const override;
-
-  /**
-   * @copydoc Dali::Ui::Text::ViewInterface::GetFirstMiddleIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const override;
-
-  /**
-   * @copydoc Dali::Ui::Text::ViewInterface::GetSecondMiddleIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetStrikethroughColor()
@@ -350,6 +330,25 @@ public:
   Alignment GetVerticalLineAlignment() const override;
 
 private:
+  /**
+   * @brief Resolves the complete uncached glyph sequence into caller-owned buffers.
+   *
+   * Both models must be bound. Line runs use absolute source glyph indices, so
+   * glyphIndex must be zero and numberOfGlyphs must cover all available glyphs.
+   * GetGlyphs uses temporary full-size buffers before copying a partial request.
+   *
+   * @param[out] glyphs Buffer for at least numberOfGlyphs glyphs.
+   * @param[out] glyphPositions Buffer for at least numberOfGlyphs positions.
+   * @param[in] fontClient Font client, or nullptr to obtain the current client.
+   * @param[out] minLineOffset Minimum alignment offset across the layout.
+   * @param[in] glyphIndex First source glyph index; must be zero.
+   * @param[in] numberOfGlyphs Available source glyph count; must be nonzero.
+   * @param[out] sourceGlyphIndices Optional final-to-source styling map buffer.
+   * @param[out] ellipsisFinalGlyphIndex Optional generated marker index, or the
+   * invalid glyph index when no marker is generated.
+   * @param[in] hasActiveReplacement Whether replacement elision planning applies.
+   * @return Number of glyphs in the resolved sequence.
+   */
   Length GetGlyphsUncached(GlyphInfo*                   glyphs,
                            Vector2*                     glyphPositions,
                            TextAbstraction::FontClient* fontClient,

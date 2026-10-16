@@ -1941,12 +1941,6 @@ void InputFieldImpl::OnFocusGained()
     mInputMethodContext.StatusChangedSignal().Connect(this, &InputFieldImpl::OnKeyboardStatusChanged);
 
     Dali::Integration::InputMethodContext::KeyboardEventReceivedSignal(mInputMethodContext).Connect(this, &InputFieldImpl::OnInputMethodContextEvent);
-
-    // Notify that the text editing start.
-    Dali::Integration::InputMethodContext::Activate(mInputMethodContext);
-
-    // When window gain lost focus, the inputMethodContext is deactivated. Thus when window gain focus again, the inputMethodContext must be activated.
-    mInputMethodContext.SetRestoreAfterFocusLostEnabled(true);
   }
 
   if(IsEditable() && mController->IsUserInteractionEnabled())
@@ -1954,6 +1948,15 @@ void InputFieldImpl::OnFocusGained()
     const bool scrollToCursor = !mFocusGainedByTouch;
     mController->KeyboardFocusGainEvent(scrollToCursor);
     mFocusGainedByTouch = false;
+  }
+
+  if(mInputMethodContext && IsEditable())
+  {
+    // Prepare the controller before activation, which can synchronously deliver IME events.
+    Dali::Integration::InputMethodContext::Activate(mInputMethodContext);
+
+    // Restore IME activation when the window regains focus.
+    mInputMethodContext.SetRestoreAfterFocusLostEnabled(true);
   }
 }
 

@@ -67,6 +67,8 @@ namespace Internal
 {
 namespace // Unnamed namespace
 {
+static constexpr Dali::TypeInfoId gSingletonTypeInfoId = DALI_TYPE_ID(Ui::FocusManager);
+
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_KEYBOARD_FOCUS_MANAGER");
 #endif
@@ -129,7 +131,7 @@ BaseHandle Create()
     if(singletonService)
     {
       Ui::FocusManager manager = Ui::FocusManager(new Internal::FocusManager());
-      singletonService.Register(typeid(manager), manager);
+      singletonService.Register(gSingletonTypeInfoId, manager);
       handle = manager;
     }
   }
@@ -173,7 +175,7 @@ Ui::FocusManager FocusManager::Get()
   if(singletonService)
   {
     // Check whether the keyboard focus manager is already created
-    Dali::BaseHandle handle = singletonService.GetSingleton(typeid(Ui::FocusManager));
+    Dali::BaseHandle handle = singletonService.GetSingleton(gSingletonTypeInfoId);
     if(handle)
     {
       // If so, downcast the handle of singleton to keyboard focus manager
@@ -411,7 +413,12 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
     keyManager.RemoveFocus(previousLocal);
     DisconnectFocusViewIfUnused(previousLocal);
   }
-  if(GetCurrentFocusView(window) != view || (independent && !CanSetKeyInputFocus(view)))
+  if(GetCurrentFocusView(window) != view)
+  {
+    // Focus-loss callbacks may replace or clear this accepted request.
+    return true;
+  }
+  if(independent && !CanSetKeyInputFocus(view))
   {
     return false;
   }
@@ -439,7 +446,8 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
   }
   if(GetCurrentFocusView(window) != view)
   {
-    return false;
+    // Preserve the result of reentrant key-focus notifications as a success.
+    return true;
   }
   RefreshFocusIndicator(view);
   if(global && previousWindow && previousWindow != window && previousGlobal && !retainPreviousGlobal)
@@ -557,7 +565,12 @@ bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
   {
     return false;
   }
-  if(IsIndependentFocusEnabled(window) == enabled)
+  auto* state = FindIndependentState(window);
+  if(!state && !enabled)
+  {
+    return true;
+  }
+  if(state && state->enabled == enabled)
   {
     return true;
   }
@@ -580,7 +593,8 @@ bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
         return false;
       }
     }
-    IndependentFocusState* state = FindIndependentState(window);
+    // Pruning expired entries may invalidate the previously found state.
+    state = FindIndependentState(window);
     if(!state)
     {
       mIndependentFocusStates.emplace_back();
@@ -607,7 +621,6 @@ bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
   }
   else
   {
-    auto* state    = FindIndependentState(window);
     state->enabled = false;
     if(!IsActiveWindow(Dali::Integration::SceneHolder::Get(window.GetRootLayer())))
     {

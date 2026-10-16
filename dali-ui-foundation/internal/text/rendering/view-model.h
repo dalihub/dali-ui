@@ -116,11 +116,6 @@ public:
   Alignment GetVerticalLineAlignment() const override;
 
   /**
-   * @copydoc ModelInterface::GetEllipsisPosition()
-   */
-  Text::EllipsisPosition::Type GetEllipsisPosition() const override;
-
-  /**
    * @copydoc ModelInterface::IsTextElideEnabled()
    */
   bool IsTextElideEnabled() const override;
@@ -156,24 +151,9 @@ public:
   Length GetNumberOfGlyphs() const override;
 
   /**
-   * @copydoc ModelInterface::GetStartIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetStartIndexOfElidedGlyphs() const override;
-
-  /**
    * @copydoc ModelInterface::GetEndIndexOfElidedGlyphs()
    */
   GlyphIndex GetEndIndexOfElidedGlyphs() const override;
-
-  /**
-   * @copydoc ModelInterface::GetFirstMiddleIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const override;
-
-  /**
-   * @copydoc ModelInterface::GetSecondMiddleIndexOfElidedGlyphs()
-   */
-  GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const override;
 
   /**
    * @copydoc ModelInterface::GetGlyphs()
@@ -512,11 +492,8 @@ private:
   bool                      mIsTextElided : 1; ///< Whether the text has been elided.
   float                     mElidedOffset;     ///< The width of the (control - elided line). This is required for calculating the correct
                                                ///< horizontal align offset.
-  GlyphIndex mStartIndexOfElidedGlyphs;        ///< The start index of elided glyphs.
-  GlyphIndex mEndIndexOfElidedGlyphs;          ///< The end index of elided glyphs.
-  GlyphIndex
-             mFirstMiddleIndexOfElidedGlyphs;  ///< The first end index of elided glyphs, index before ellipsis of middle.
-  GlyphIndex mSecondMiddleIndexOfElidedGlyphs; ///< The second end index of elided glyphs, index of ellipsis of middle.
+
+  GlyphIndex mEndIndexOfElidedGlyphs; ///< The end index of elided glyphs.
 };
 
 } // namespace Text

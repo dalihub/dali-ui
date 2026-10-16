@@ -119,12 +119,6 @@ const uint32_t OVERFLOW_MODE_TABLE_COUNT =
 const uint32_t PASSWORD_MODE_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(PASSWORD_MODE_TABLE) / sizeof(PASSWORD_MODE_TABLE[0]));
 
-DALI_ENUM_TO_STRING_TABLE_BEGIN(ELLIPSIS_POSITION_TYPE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, END)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, START)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, MIDDLE)
-DALI_ENUM_TO_STRING_TABLE_END(ELLIPSIS_POSITION_TYPE)
-
 } // unnamed namespace
 
 bool GetHorizontalAlignmentEnumeration(const Property::Value& propertyValue, Alignment& alignment)
@@ -179,15 +173,6 @@ bool GetPasswordModeEnumeration(const Property::Value& propertyValue, PasswordMo
                                            PASSWORD_MODE_TABLE,
                                            PASSWORD_MODE_TABLE_COUNT,
                                            passwordMode);
-}
-
-bool GetEllipsisPositionTypeEnumeration(const Property::Value&            propertyValue,
-                                        Ui::Text::EllipsisPosition::Type& ellipsisPositionType)
-{
-  return Scripting::GetEnumerationProperty(propertyValue,
-                                           ELLIPSIS_POSITION_TYPE_TABLE,
-                                           ELLIPSIS_POSITION_TYPE_TABLE_COUNT,
-                                           ellipsisPositionType);
 }
 
 const char* GetUnderlineTypeToString(const Ui::Text::Underline::Type& type)

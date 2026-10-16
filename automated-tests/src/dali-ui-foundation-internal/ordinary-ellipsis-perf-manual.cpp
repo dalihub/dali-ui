@@ -82,7 +82,6 @@ Timing RunSync(const Case& item)
   controller->SetMultiLineEnabled(item.multiline);
   controller->SetLineWrapMode(Text::LineWrapMode::WORD);
   controller->SetTextElideEnabled(item.ellipsis);
-  controller->SetEllipsisPosition(Text::EllipsisPosition::END);
   controller->SetCharacterSpacing(item.characterSpacing);
   controller->SetRenderScale(item.renderScale);
 
@@ -130,7 +129,6 @@ Timing RunAsync(const Case& item)
   parameters.isMultiLine      = item.multiline;
   parameters.lineWrapMode     = Text::LineWrapMode::WORD;
   parameters.ellipsis         = item.ellipsis;
-  parameters.ellipsisPosition = Text::EllipsisPosition::END;
   parameters.characterSpacing = item.characterSpacing;
   parameters.renderScale      = item.renderScale;
   parameters.layoutDirection  = item.direction;

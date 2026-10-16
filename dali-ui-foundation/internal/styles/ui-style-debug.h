@@ -27,11 +27,14 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+namespace Internal
+{
 
 inline void DebugAssertStyleConfigApplied()
 {
   DALI_ASSERT_DEBUG(UiConfig::HasCurrent() && "Ui style requires UiConfig::Apply()");
 }
 
+} // namespace Internal
 } // namespace Ui
 } //namespace DALI_NAMESPACE

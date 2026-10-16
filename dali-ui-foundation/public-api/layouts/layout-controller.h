@@ -149,6 +149,17 @@ public:
    *
    * This is called automatically by the system once per frame,
    * but can be called manually if immediate layout is needed.
+   *
+   * A manual call performs Measure and Arrange synchronously, but its pass is reported
+   * through LayoutFinishedSignal() and View::LayoutFinishedSignal() by the post-process
+   * phase that follows the next automatic pre-process phase, never inside this call.
+   * A call made after the automatic pre-process phase of the current ProcessEvents cycle --
+   * from a LayoutFinishedSignal slot or from another window's post-process callback --
+   * requests no ProcessEvents cycle of its own: its pass is delivered by the next
+   * independently triggered cycle (input, a timer, an animation or any other wake), which
+   * on a quiescent application may be indefinitely later. When prompt delivery is
+   * required, invalidate layout at event time, which requests a cycle, or call
+   * ProcessLayouts() from an input event handler, whose cycle then delivers the pass.
    */
   void ProcessLayouts();
 
@@ -158,9 +169,13 @@ public:
   using LayoutFinishedSignalType = Signal<void(Dali::Window)>;
 
   /**
-   * @brief This signal is emitted when this window's layout calculation has
-   * fully settled: every layout root's Measure and Arrange for the window
-   * have completed and no further Measure/Arrange work is pending.
+   * @brief This signal is emitted after layout passes of this window complete.
+   *
+   * A layout pass is one batch of Measure and Arrange that processes at least one live
+   * layout root of this window. Every pass that ends normally is reported at its delivery
+   * point, even when further layout work is still pending: pending work never suppresses
+   * or defers the notification of a completed pass, so this signal does not mean that the
+   * window's layout has settled.
    *
    * A slot connects with the signature:
    * @code
@@ -168,17 +183,29 @@ public:
    * @endcode
    *
    * Semantics:
-   * - Fires once per "dirty -> quiescent" transition, i.e. each time pending
-   *   layout work drains to nothing. Parked work is still pending even though it has
-   *   not armed an idle wake, so it delays this signal until a later processing cycle
-   *   drains it -- on a quiescent application, indefinitely. The signal recurs whenever layout is invalidated and settles again; it
-   *   is not a one-shot for the application lifetime.
-   * - Emitted during the post-process phase, i.e. AFTER DALi core size
-   *   negotiation (Relayout) for the frame in which layout settled. Measure and
-   *   Arrange still run in the pre-process phase; only the emit is deferred to
-   *   post-process. A manual ProcessLayouts() therefore performs layout
-   *   synchronously but does NOT emit this signal in the same call; the emit
-   *   fires on the next post-process pass (e.g. after the next ProcessEvents).
+   * - Delivery point: the post-process phase, i.e. AFTER DALi core size negotiation
+   *   (Relayout). Measure and Arrange still run in the pre-process phase. Passes completed
+   *   up to the end of an automatic pre-process phase are delivered by the post-process
+   *   phase of the same ProcessEvents cycle. A manual ProcessLayouts() performs layout
+   *   synchronously but never emits inside the call; its pass is delivered by the
+   *   post-process phase that follows the next automatic pre-process phase. A call made
+   *   after the automatic pre-process phase of the current cycle -- from a
+   *   LayoutFinishedSignal slot or from another window's post-process callback -- requests
+   *   no ProcessEvents cycle of its own: its pass is delivered by the next independently
+   *   triggered cycle (input, a timer, an animation or any other wake), which on a quiescent
+   *   application may be indefinitely later. When prompt delivery is required, invalidate
+   *   layout at event time, which requests a cycle, or call ProcessLayouts() from an input
+   *   event handler, whose cycle then delivers the pass.
+   * - One delivery emits this signal ONCE, however many passes it covers, after the
+   *   View::LayoutFinishedSignal of every subscribed View arranged in those passes (each
+   *   View once, with its most recent bounds). Nothing is emitted when no pass completed
+   *   since the previous delivery. The signal recurs for every later delivery; it is not a
+   *   one-shot for the application lifetime.
+   * - A pass interrupted by an exception from a Measure/Arrange implementation or a layout
+   *   transition callback earns no Window notification of its own; the View notifications
+   *   of the layout roots it had already completed are still delivered.
+   * - Connections are evaluated at emit time: a slot connected after a pass completed but
+   *   before its delivery is called, and a slot disconnected before the delivery is not.
    * - Reflects Measure/Arrange completion ONLY. It does NOT wait for layout
    *   transition animations to finish; use a transition-finished callback if
    *   post-animation geometry is required.
@@ -186,24 +213,28 @@ public:
    *   window, so a direct View::InvalidateMeasure() / View::InvalidateArrange() /
    *   LayoutController::RequestLayout() call is a contract violation and is logged
    *   once for that view. The work is retained, but it is PARKED and does not request
-   *   an idle ProcessEvents wake. The callback already being delivered cannot be
-   *   withdrawn; the parked work begins or extends a dirty episode whose next
-   *   completion signal is delayed until an independently triggered ProcessEvents, an
-   *   explicit ProcessLayouts(), or an out-of-processing request drains it. Defer
-   *   layout-affecting work to event time when prompt processing is required.
+   *   an idle ProcessEvents wake. It does not withdraw the notification being delivered;
+   *   it runs in a later pass when an independently triggered ProcessEvents, an explicit
+   *   ProcessLayouts(), or an out-of-processing request drains it, and that pass is
+   *   reported in turn. Defer layout-affecting work to event time when prompt processing
+   *   is required.
    * - Property changes and tree mutations from a slot (Add / Remove) follow the same
    *   scheduling rule. A framework-internal invalidation path is not an exemption.
+   * - If a slot throws, the exception propagates. The controller does not repeat a
+   *   notification whose emit had started, and it keeps the notifications it has not
+   *   delivered yet.
    * - Destroying this controller from within the slot (LayoutController::Remove)
    *   is supported. The controller is detached immediately - it stops processing
-   *   and emitting at once - but the object is not freed until the event loop
-   *   next goes idle, because DALi core still holds a processor pointer to it
-   *   for the remainder of the current processing pass.
+   *   and emitting at once, including the rest of the current delivery - but the
+   *   object is not freed until the event loop next goes idle, because DALi core
+   *   still holds a processor pointer to it for the remainder of the current
+   *   processing pass.
    *
    * @return The layout-finished signal
    * @note The @c Dali::Window is passed (not the LayoutController) because the
    * controller is a non-copyable, per-window infrastructure object; the window
-   * identifies which controller settled and the controller can be re-obtained
-   * via Get(). Adding parameters later would require migrating to a struct
+   * identifies which controller completed the passes and the controller can be
+   * re-obtained via Get(). Adding parameters later would require migrating to a struct
    * argument.
    */
   LayoutFinishedSignalType& LayoutFinishedSignal();

@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <cmath>
+#include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -57,9 +58,18 @@ float UiScaleManagerImpl::GetScale() const
 
 void UiScaleManagerImpl::SetScale(float scale)
 {
-  if(std::isnan(scale) || scale <= 0.0f)
+  // !isfinite rather than isnan: the documented contract is a positive FINITE
+  // scale, and an infinite scale multiplies straight into every view's effective
+  // scale, so every measured size and arranged rect in the tree becomes infinite.
+  // isnan alone let +/-Inf through (Inf > 0 and is not NaN).
+  //
+  // The lower bound is FLT_MIN, not 0: the layout divides by the effective scale in a
+  // dozen places, and a subnormal scale makes 1 / scale overflow to infinity long
+  // before the scale itself is zero. A subnormal is not a usable display scale, so it
+  // is rejected with every other invalid value rather than clamped.
+  if(!std::isfinite(scale) || scale < std::numeric_limits<float>::min())
   {
-    DALI_LOG_ERROR("UiScaleManagerImpl::SetScale: invalid scale value (%f). Scale must be a positive finite number.\n", scale);
+    DALI_LOG_ERROR("UiScaleManagerImpl::SetScale: invalid scale value (%f). Scale must be a positive, finite, normal number (>= FLT_MIN).\n", scale);
     return;
   }
 

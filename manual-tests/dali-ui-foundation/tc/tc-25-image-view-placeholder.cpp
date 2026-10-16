@@ -25,12 +25,8 @@ namespace
 const char* const IMG_A           = TEST_RESOURCE_DIR "/gallery-large-3.jpg";
 const char* const IMG_B           = TEST_RESOURCE_DIR "/landscape-sample.jpg";
 const char* const IMG_PLACEHOLDER = TEST_RESOURCE_DIR "/placeholder_image.png";
-// A path that cannot load. Local files finish (success or failure) faster than
-// any observer, so "placeholder shows while loading" was unobservable on this
-// screen; a FAILED main image is the stable state in which a placeholder set
-// AFTERWARDS registers and stays visible (review 25 — order matters: the
-// placeholder guard sees the OLD image's READY if you set it before switching).
-const char* const IMG_MISSING     = TEST_RESOURCE_DIR "/definitely-not-here.jpg";
+// A missing target verifies that failures use the broken image.
+const char* const IMG_MISSING = TEST_RESOURCE_DIR "/definitely-not-here.jpg";
 
 constexpr float    PREVIEW_SIZE  = 200.0f;
 constexpr float    BTN_H         = 52.0f;
@@ -43,17 +39,9 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
 } // namespace
 
 /**
- * @brief Verifies ImageView SetPlaceholderUrl / GetPlaceholderUrl.
- *
- * Steps:
- *   1. [Set Placeholder] -> placeholder image is set; verify GetPlaceholderUrl returns the path.
- *   2. [Reload] -> placeholder is briefly shown while the main image reloads.
- *   3. [Switch to B] -> placeholder shown during load, then replaced by image B.
- *   4. [Clear Placeholder] -> GetPlaceholderUrl returns an empty string.
- *
- * Expected result:
- *   After setting a placeholder, triggering a load shows the placeholder image during
- *   loading, then replaces it with the actual image on completion.
+ * Verify placeholder URL round-trips and empty resource URL recovery.
+ * A ready image remains visible while a replacement loads; a failed load
+ * displays the broken image. Clearing the resource URL restores the placeholder.
  */
 class TcImageViewPlaceholder : public ManualTest::TestCase, public ConnectionTracker
 {
@@ -65,7 +53,7 @@ public:
 
   Dali::String GetDescription() const override
   {
-    return "Verify placeholder is shown during load, then replaced by actual image";
+    return "Verify empty URLs show the placeholder and failed loads show the broken image";
   }
 
   void OnEnter(View contentArea) override
@@ -78,7 +66,8 @@ public:
     mImage.SetAccessibilityName("ImagePreview");
     mImage.SetAccessibilityRole(Accessibility::Role::IMAGE);
 
-    mImage.ResourceReadySignal().Connect(this, [this](View) {
+    mImage.ResourceReadySignal().Connect(this, [this](View)
+    {
       ++mReadyCount;
       UpdateLabel();
     });
@@ -94,14 +83,25 @@ public:
     content.Add(MakeCenteredPreview(mImage));
     content.Add(mLabel);
     content.Add(MakeButtonRow({
-      MakeButton("Set\nPlaceholder",   [this] { OnSetPlaceholder(IMG_PLACEHOLDER); }),
-      MakeButton("Clear\nPlaceholder", [this] { OnSetPlaceholder(""); }),
+      MakeButton("Set\nPlaceholder", [this]
+    { OnSetPlaceholder(IMG_PLACEHOLDER); }),
+      MakeButton("Clear\nPlaceholder", [this]
+    { OnSetPlaceholder(""); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Reload",      [this] { mImage.Reload(); }),
-      MakeButton("Switch to B", [this] { mImage.SetResourceUrl(IMG_B); UpdateLabel(); }),
-      MakeButton("Switch to A", [this] { mImage.SetResourceUrl(IMG_A); UpdateLabel(); }),
-      MakeButton("Switch to\nMissing", [this] { mImage.SetResourceUrl(IMG_MISSING); UpdateLabel(); }),
+      MakeButton("Reload", [this]
+    { mImage.Reload(); }),
+      MakeButton("Switch to B", [this]
+    { mImage.SetResourceUrl(IMG_B); UpdateLabel(); }),
+      MakeButton("Switch to A", [this]
+    { mImage.SetResourceUrl(IMG_A); UpdateLabel(); }),
+      MakeButton("Switch to\nMissing", [this]
+    { mImage.SetResourceUrl(IMG_MISSING); UpdateLabel(); }),
+    }));
+
+    content.Add(MakeButtonRow({
+      MakeButton("Clear Image", [this]
+    { mImage.SetResourceUrl(Dali::String()); UpdateLabel(); }),
     }));
 
     contentArea.Add(content);
@@ -177,12 +177,11 @@ private:
 
     InteractiveTrait interactive = btn.AsInteractive();
 
-    interactive.ClickedSignal().Connect(this, [onClick = std::move(onClick)](View, InputEvent) -> bool {
-
+    interactive.ClickedSignal().Connect(this, [onClick = std::move(onClick)](View, InputEvent) -> bool
+    {
       onClick();
 
       return true;
-
     });
     return btn;
   }

@@ -222,10 +222,7 @@ float ResolveTextForegroundReferencePixelSize(const ModelInterface&       model,
       }
     };
     includeGlyphRun(lines[index].glyphRun);
-    if(lines[index].isSplitToTwoHalves)
-    {
-      includeGlyphRun(lines[index].glyphRunSecondHalf);
-    }
+
     if(hasTextGlyph)
     {
       const float lineTextHeight = lineAscender - lineDescender;
