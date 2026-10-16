@@ -9,7 +9,7 @@ GetStopBehavior, AnimationFinishedSignal 동작을 확인한다.
 - 상태 라벨 (2줄):
   `Loop: X | LoopMode: Y | Idx: n/N` /
   `Stop: Z | Frame: n/N | Finished: C`
-  - `Loop`/`LoopMode`/`Stop`은 getter, `Frame`은 `GetCurrentFrame()/GetTotalFrame()` (100ms 폴)
+  - `Loop`/`LoopMode`/`Stop`은 getter, `Frame`은 `GetCurrentFrameNumber()/GetTotalFrameCount()` (100ms 폴)
   - `Idx: n/N`은 화면이 프레임 흐름에서 계산한 **현재 루프 번호**(1부터) —
     RESTART는 큰 폭의 역방향 점프(랩), AUTO_REVERSE는 하강→상승 전환(밸리)을 센다.
     [Play]는 정지 상태에서 누르면 인덱스를 0으로 리셋한다

@@ -334,26 +334,6 @@ public: // State Queries
    */
   int GetTotalFrameCount() const;
 
-  /**
-   * @brief Gets the number of the frame being shown.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @see GetCurrentFrameNumber()
-   */
-  int GetCurrentFrame() const;
-
-  /**
-   * @brief Gets how many frames the animation has.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @see GetTotalFrameCount()
-   */
-  int GetTotalFrame() const;
-
 public: // Performance Options
   /**
    * @brief Sets whether to redraw when the visual is scaled down.
@@ -391,17 +371,6 @@ public: // Performance Options
    * @param[in] notify True to notify after rasterization (default: false)
    */
   void SetNotifyAfterRasterizationEnabled(bool notify);
-
-  /**
-   * @brief Sets whether the view is redrawn only once a new frame is ready.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @param[in] notify True to redraw only once a new frame is ready
-   * @see SetNotifyAfterRasterizationEnabled()
-   */
-  void SetNotifyAfterRasterization(bool notify);
 
   /**
    * @brief Returns whether notify-after-rasterization is enabled.

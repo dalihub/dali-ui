@@ -181,27 +181,6 @@ public: // Image
   Dali::Vector<Dali::String> GetResourceUrlList() const;
 
   /**
-   * @brief Sets an array of image URLs for frame-by-frame animation.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @param[in] urls Array of image URLs
-   * @see SetResourceUrlList()
-   */
-  void SetResourceUrls(const Dali::Vector<Dali::String>& urls);
-
-  /**
-   * @brief Gets the array of image URLs.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @see GetResourceUrlList()
-   */
-  Dali::Vector<Dali::String> GetResourceUrls() const;
-
-  /**
    * @brief Sets whether the image is loaded synchronously at the current view size.
    *
    * @param[in] enabled True to enable loading image with view size
@@ -359,26 +338,6 @@ public: // Frame Control
    * @return The total frame count
    */
   int GetTotalFrameCount() const;
-
-  /**
-   * @brief Gets the number of the frame being shown.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @see GetCurrentFrameNumber()
-   */
-  int GetCurrentFrame() const;
-
-  /**
-   * @brief Gets how many frames the animation has.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @see GetTotalFrameCount()
-   */
-  int GetTotalFrame() const;
 
 public: // Visual Appearance
   /**
@@ -561,39 +520,18 @@ public: // Advanced Rendering & Masking
   bool IsCropToMask() const;
 
   /**
-   * @brief Sets the masking mode.
+   * @brief Sets the masking policy.
    *
-   * @param[in] maskingPolicy The masking mode to use
+   * @param[in] maskingPolicy The masking policy to use
    */
   void SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy);
 
   /**
-   * @brief Gets the masking mode.
+   * @brief Gets the masking policy.
    *
-   * @return The current masking mode
+   * @return The current masking policy
    */
   Ui::Image::MaskingPolicy GetMaskingPolicy() const;
-
-  /**
-   * @brief Sets when the alpha mask is applied.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @param[in] maskingPolicy The masking policy to set
-   * @see SetMaskingPolicy()
-   */
-  void SetMaskingMode(Ui::Image::MaskingPolicy maskingPolicy);
-
-  /**
-   * @brief Gets when the alpha mask is applied.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @see GetMaskingPolicy()
-   */
-  Ui::Image::MaskingPolicy GetMaskingMode() const;
 
   /**
    * @brief Sets the URL of a placeholder image shown while loading.
