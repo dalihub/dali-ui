@@ -85,6 +85,11 @@ private:
     DALI_LOG_RELEASE_INFO("[WVLOG][init] OnInit: window=%.0fx%.0f\n", mWindowSize.width, mWindowSize.height);
 
     BuildUI(window);
+    if(!mWebView)
+    {
+      application.Quit();
+      return;
+    }
     ConnectSignals(window);
 
     DALI_LOG_RELEASE_INFO("[WVLOG][init] OnInit: navigating to HOME_URL=%s\n", HOME_URL);
@@ -147,6 +152,11 @@ private:
     float webViewHeight = static_cast<float>(mWindowSize.height) - TOOLBAR_HEIGHT - STATUS_HEIGHT;
     mWebView            = WebView::New();
     DALI_LOG_RELEASE_INFO("[WVLOG][init] WebView::New() -> handle=%s\n", mWebView ? "valid" : "EMPTY");
+    if(!mWebView)
+    {
+      DALI_LOG_ERROR("WebView initialization failed\n");
+      return;
+    }
     mWebView.SetRequestedWidth(static_cast<float>(mWindowSize.width));
     mWebView.SetRequestedHeight(webViewHeight);
     mWebView.SetRequestedX(0.0f);

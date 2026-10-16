@@ -209,7 +209,12 @@ void GlViewImpl::InvokeTerminateCallback()
 
 void GlViewImpl::NotifyTerminateCompleted()
 {
-  mEventTrigger->Trigger();
+  // Core also retires registrations during shutdown or renderer destruction.
+  // Only an explicit Terminate request has an event-thread completion observer.
+  if(mEventTrigger)
+  {
+    mEventTrigger->Trigger();
+  }
 }
 
 void GlViewImpl::KeepRendering()
