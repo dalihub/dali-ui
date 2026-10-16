@@ -35,6 +35,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
@@ -674,6 +675,7 @@ private:
   WebViewImpl& operator=(WebViewImpl&&)      = delete;
 
 private:                                                        // Data — Rendering
+  Ui::ImageUrl                  mNativeImageUrl;                ///< Keeps the external texture registered while the visual uses it.
   Ui::Integration::Visual::Base mVisual;                        ///< Current image visual showing the web content
   Dali::Size                    mWebViewSize;                   ///< Current web view size (width, height)
   Dali::BoundsInteger           mWebViewArea;                   ///< Last known display area in screen coordinates
