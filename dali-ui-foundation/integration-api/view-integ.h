@@ -67,7 +67,6 @@ enum Type
   DISPATCH_KEY_EVENTS                 = Dali::Ui::View::Property::DISPATCH_KEY_EVENTS,
   CLOCKWISE_FOCUSABLE_VIEW_ID         = Dali::Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID,
   COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID = Dali::Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
-  OFFSCREEN_RENDERING                 = Dali::Ui::View::Property::OFFSCREEN_RENDERING,
   REQUESTED_WIDTH                     = Dali::Ui::View::Property::REQUESTED_WIDTH,
   REQUESTED_HEIGHT                    = Dali::Ui::View::Property::REQUESTED_HEIGHT,
   MINIMUM_WIDTH                       = Dali::Ui::View::Property::MINIMUM_WIDTH,

@@ -123,7 +123,7 @@ task 활성화 시점을 함께 설계해야 한다.
 
 ## 미결 사항
 
-1. Public getter와 `OFFSCREEN_RENDERING` property getter가 user 요청값과 effective 값 중
+1. Public enabled 및 refresh-rate getter가 user 요청값과 effective 값 중
    무엇을 반환할지 결정
 2. 여러 system 기능이 동시에 offscreen rendering을 요청하게 될 경우 단일 system
    enabled/rate 상태로 충분한지 재검토
@@ -156,6 +156,5 @@ task 활성화 시점을 함께 설계해야 한다.
 ### 회귀 테스트
 
 1. Public offscreen rendering enabled 및 refresh-rate getter/setter 동작
-2. `OFFSCREEN_RENDERING` property 기반 설정 동작
-3. `REFRESH_ONCE` finished signal과 output texture 동작
-4. View 제거 및 파괴 시 offscreen render task 정리
+2. `REFRESH_ONCE` finished signal과 output texture 동작
+3. View 제거 및 파괴 시 offscreen render task 정리

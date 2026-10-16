@@ -1072,14 +1072,6 @@ protected:
   ViewImpl(ViewBehaviour behaviourFlags);
 
   /**
-   * @brief Gets texture output of offscreen rendering.
-   * @return The offscreen rendering output texture
-   * @note Valid only inside OffscreenRenderingFinishedSignal() with REFRESH_ONCE type.
-   * @deprecated Use GetOffscreenRenderingOutput() instead.
-   */
-  Dali::Texture GetOffScreenRenderingOutput() const;
-
-  /**
    * @brief Registers a color binding for theme-aware color updates.
    *
    * A binding ID represents a stable callback slot. If a binding with the same

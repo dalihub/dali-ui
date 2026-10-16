@@ -1083,11 +1083,6 @@ View::ResourceReadySignalType& View::ResourceReadySignal()
   return viewDataImpl.ResourceReadySignal();
 }
 
-View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSignal()
-{
-  return OffscreenRenderingFinishedSignal();
-}
-
 View::OffscreenRenderingFinishedSignalType& View::OffscreenRenderingFinishedSignal()
 {
   ViewImpl&               viewImpl     = Ui::GetImpl(*this);

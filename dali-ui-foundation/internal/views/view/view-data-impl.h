@@ -1617,14 +1617,6 @@ private:
   bool OnIdleCallback();
 
   /**
-   * Sets offscreen rendering from the legacy integer property value.
-   * @param[in] offscreenRenderingValue 0 to disable, or an OffscreenRefreshRate value to enable
-   * @note When offscreen rendering is on, changing visual's depth index may not apply instantaneously. Turn it off and
-   * on again.
-   */
-  void SetOffscreenRendering(int32_t offscreenRenderingValue);
-
-  /**
    * Notify to this view's corner radius changed.
    */
   void UpdateCornerRadius();
@@ -1979,7 +1971,6 @@ private:
   static const PropertyRegistration           PROPERTY_22;
   static const PropertyRegistration           PROPERTY_24;
   static const PropertyRegistration           PROPERTY_25;
-  static const PropertyRegistration           PROPERTY_31;
   static const PropertyRegistration           PROPERTY_32;
   static const PropertyRegistration           PROPERTY_33;
   static const PropertyRegistration           PROPERTY_34;

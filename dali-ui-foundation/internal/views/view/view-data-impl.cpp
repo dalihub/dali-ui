@@ -1138,7 +1138,6 @@ const PropertyRegistration ViewDataImpl::PROPERTY_15(typeRegistration, "shadow",
 const PropertyRegistration ViewDataImpl::PROPERTY_22(typeRegistration, "dispatchKeyEvents",              Ui::View::Property::DISPATCH_KEY_EVENTS,              Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_24(typeRegistration, "clockwiseFocusableViewId",      Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID,     Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_25(typeRegistration, "counterClockwiseFocusableViewId", Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_31(typeRegistration, "offScreenRendering",             Ui::View::Property::OFFSCREEN_RENDERING,              Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::Integration::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::Integration::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_34(typeRegistration, "requestedWidth",                 Ui::View::Property::REQUESTED_WIDTH,                  Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -6926,16 +6925,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::OFFSCREEN_RENDERING:
-      {
-        int32_t offscreenRenderingValue;
-        if(value.Get(offscreenRenderingValue))
-        {
-          viewImpl.GetViewDataImpl().SetOffscreenRendering(offscreenRenderingValue);
-        }
-        break;
-      }
-
       case Ui::Integration::View::Property::INNER_SHADOW:
       {
         const Property::Map* map = value.GetMap();
@@ -7333,15 +7322,6 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID:
       {
         value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::backwardId);
-        break;
-      }
-
-      case Ui::View::Property::OFFSCREEN_RENDERING:
-      {
-        const auto* renderEffectData = viewImpl.GetViewDataImpl().mRenderEffectData.get();
-        value                        = renderEffectData && renderEffectData->offscreenRendering
-                                         ? static_cast<int32_t>(renderEffectData->offscreenRefreshRate)
-                                         : 0;
         break;
       }
 
@@ -8701,25 +8681,6 @@ void ViewDataImpl::RefreshRenderEffects()
   {
     mRenderEffectData->offscreenRendering->Refresh();
   }
-}
-
-void ViewDataImpl::SetOffscreenRendering(int32_t offscreenRenderingValue)
-{
-  if(offscreenRenderingValue == 0)
-  {
-    SetOffscreenRenderingEnabled(false);
-    return;
-  }
-
-  if(offscreenRenderingValue != static_cast<int32_t>(Ui::View::OffscreenRefreshRate::REFRESH_ONCE) &&
-     offscreenRenderingValue != static_cast<int32_t>(Ui::View::OffscreenRefreshRate::REFRESH_ALWAYS))
-  {
-    DALI_LOG_ERROR("Failed to set offscreen rendering. Property value is invalid.\n");
-    return;
-  }
-
-  SetOffscreenRenderingRefreshRate(static_cast<Ui::View::OffscreenRefreshRate>(offscreenRenderingValue));
-  SetOffscreenRenderingEnabled(true);
 }
 
 void ViewDataImpl::SetOffscreenRenderingEnabled(bool enabled)
