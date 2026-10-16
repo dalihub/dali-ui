@@ -1967,3 +1967,25 @@ int UtcDaliWebProfileRegistryDefaultRegistrationPrunesP(void)
   DALI_TEST_CHECK(!profiles.at("Default").GetHandle());
   END_TEST;
 }
+
+int UtcDaliWebViewNativeImageVisualAfterLayoutP(void)
+{
+  UiTestApplication application;
+  auto view = WebView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(90.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  auto image = TestNativeImage::New(160u, 90u);
+  auto& impl = GetWebViewImpl(view);
+  Test::WebEngine::SetNativeImageInterface(impl.mWebEngine, image);
+  impl.OnFrameRendered();
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(image->mTargetTextureCalls > 0);
+  END_TEST;
+}
