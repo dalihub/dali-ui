@@ -97,7 +97,7 @@ std::string GetCanonicalMatch(const KeyEvent& event)
 {
   struct KeyMatch
   {
-    Dali::KEY   key;
+    Dali::Key   key;
     const char* name;
   };
 
