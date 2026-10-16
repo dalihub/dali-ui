@@ -587,11 +587,11 @@ void WebViewImpl::OnFrameRendered()
   // Web engine surfaces are pre-multiplied, which the engine's native image does not declare itself.
   Dali::Texture nativeTexture = Dali::Texture::New(*nativeImagePtr);
   Dali::Integration::SetTextureAlphaPreMultiplied(nativeTexture, true);
-  Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::ImageUrl::New(nativeTexture);
+  mNativeImageUrl = Dali::Ui::ImageUrl::New(nativeTexture);
 
   Dali::Property::Map imageVisualMap;
   imageVisualMap.Insert(Dali::Ui::Integration::Visual::Property::TYPE, Dali::Ui::Integration::InternalVisualType::IMAGE);
-  imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::URL, nativeImageUrl.GetUrl());
+  imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::URL, mNativeImageUrl.GetUrl());
   imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::PIXEL_AREA, FULL_TEXTURE_RECT);
   imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_U, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
   imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
@@ -609,6 +609,9 @@ void WebViewImpl::OnFrameRendered()
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
+    // External textures do not necessarily request automatic fitting. Engine
+    // frames arrive asynchronously, so initialize their control size explicitly.
+    mVisual.SetTransformAndSize({}, mWebViewSize, GetEffectiveScale());
     viewData.RegisterVisual(WebViewImpl::Property::URL, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
     EnableBlendMode(!mVideoHoleEnabled);
   }
