@@ -88,7 +88,14 @@ private:
     window.SetBackgroundColor(Color::BLACK);
 
     // ---- Create WebView ------------------------------------------------
+    WebView::SetWebEngineType(WebEngineType::LWE);
     mWebView = WebView::New();
+    if(!mWebView)
+    {
+      DALI_LOG_ERROR("WebView initialization failed\n");
+      application.Quit();
+      return;
+    }
     mWebView.SetRequestedWidth(static_cast<float>(windowSize.width));
     mWebView.SetRequestedHeight(static_cast<float>(windowSize.height));
     mWebView.SetRequestedX(0.0f);
@@ -315,7 +322,6 @@ int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
   UiConfig    config      = UiConfig::New();
-  config.SetWebEngineType(WebEngineType::LWE);
   config.Apply();
   WebViewSampleController sample(application);
   application.MainLoop();

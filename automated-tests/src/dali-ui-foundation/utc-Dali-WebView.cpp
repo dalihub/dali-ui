@@ -17,8 +17,12 @@
 
 #include <dali-ui-test-suite-utils.h>
 #include <test-native-image.h>
+#include <ui-event-thread-callback.h>
+#include <ui-lifecycle-controller.h>
 #include <ui-web-engine.h>
 #include <dali.h>
+#include <dali/devel-api/object/type-info.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
@@ -28,8 +32,10 @@
 #define private public
 #define protected public
 #include <dali-ui-foundation/integration-api/web-view-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #undef protected
 #undef private
+#include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -1777,6 +1783,7 @@ int UtcDaliWebViewLweDefaultAndUnsupportedProfilesP(void)
   UiTestApplication application;
   char program[] = "browser";
   char* arguments[] = {program};
+  Test::WebEngine::SetDirectRenderingSupported(true);
   WebView::SetWebEngineType(WebEngineType::LWE);
   DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
   auto& state = Test::WebEngine::GetRuntimeState();
@@ -1852,6 +1859,7 @@ int UtcDaliWebViewArgumentsFixDefaultTypeP(void)
 int UtcDaliWebViewArgumentsFixExplicitTypeP(void)
 {
   UiTestApplication application;
+  Test::WebEngine::SetDirectRenderingSupported(true);
   WebView::SetWebEngineType(WebEngineType::LWE);
   WebView::SetWebEngineType(WebEngineType::CHROMIUM);
   WebView::SetWebEngineType(WebEngineType::LWE);
@@ -1982,10 +1990,206 @@ int UtcDaliWebViewNativeImageVisualAfterLayoutP(void)
   auto& impl = GetWebViewImpl(view);
   Test::WebEngine::SetNativeImageInterface(impl.mWebEngine, image);
   impl.OnFrameRendered();
+  DALI_TEST_CHECK(impl.mVisual);
+  // Check the frame-created visual before another layout can supply its size.
+  const auto& visual = Dali::Ui::GetImplementation(impl.mVisual);
+  DALI_TEST_EQUALS(visual.mImpl->mControlSize, Size(160.0f, 90.0f), TEST_LOCATION);
   application.SendNotification();
   application.Render();
   application.SendNotification();
   DALI_TEST_CHECK(view.GetRendererCount() > 0u);
   DALI_TEST_CHECK(image->mTargetTextureCalls > 0);
   END_TEST;
+}
+
+int UtcDaliWebViewDirectRenderingUnsupportedN(void)
+{
+  UiTestApplication application;
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  DALI_TEST_CHECK(!WebView::New());
+  DALI_TEST_CHECK(!WebView::New(0u, nullptr));
+  // Keep a successful view alive to obtain an explicit default profile.
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  auto view = WebView::New();
+  DALI_TEST_CHECK(view);
+  auto profile = view.GetProfile();
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  DALI_TEST_CHECK(!WebView::New(profile));
+  DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().viewCreates, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewDirectRenderingSessionP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  auto direct = WebView::New();
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  DALI_TEST_CHECK(direct);
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  auto sameProfile = WebView::New(direct.GetProfile());
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  DALI_TEST_CHECK(sameProfile);
+  DALI_TEST_CHECK(sameProfile.GetProfile() == direct.GetProfile());
+  DALI_TEST_CHECK(GetWebViewImpl(sameProfile).mDirectConnection);
+  auto& impl = GetWebViewImpl(direct);
+  DALI_TEST_CHECK(impl.mDirectConnection);
+  DALI_TEST_CHECK(!impl.mVisual);
+  DALI_TEST_EQUALS(direct.GetRendererCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(direct.GetRendererAt(0u) == impl.mDirectConnection.GetRenderer());
+  unsigned frames = 0;
+  direct.FrameRenderedSignal().Connect(&application, [&](WebView) { ++frames; });
+  auto submitted = Test::WebEngine::GetDirectFrameSubmitted(impl.mDirectConnection);
+  submitted();
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  auto lateCallback = Test::WebEngine::GetPageLoadStartedCallback(impl.mWebEngine);
+  unsigned loads = 0;
+  direct.PageLoadStartedSignal().Connect(&application, [&](WebView, const Dali::String&) { ++loads; });
+  lateCallback("before-destruction");
+  DALI_TEST_EQUALS(loads, 1u, TEST_LOCATION);
+  direct.Reset();
+  lateCallback("after-destruction");
+  submitted();
+  DALI_TEST_EQUALS(loads, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewCreationFailuresAndEngineArgumentsP(void)
+{
+  UiTestApplication application;
+  char argument[] = "--test-web-engine";
+  char* arguments[] = {argument};
+  auto withArguments = WebView::New(1u, arguments);
+  DALI_TEST_CHECK(withArguments);
+  DALI_TEST_CHECK(!GetWebViewImpl(withArguments).mDirectConnection);
+  auto explicitProfile = WebView::New(WebProfile::New("Native", true));
+  DALI_TEST_CHECK(explicitProfile);
+  DALI_TEST_CHECK(!GetWebViewImpl(explicitProfile).mDirectConnection);
+
+  Test::WebEngine::SetNativeImageInitializationResult(false);
+  auto failed = WebView::New();
+  auto failedWithArguments = WebView::New(1u, arguments);
+  auto typeInfo = TypeRegistry::Get().GetTypeInfo("WebView");
+  auto failedFromRegistry = typeInfo.CreateInstance();
+  Test::WebEngine::SetNativeImageInitializationResult(true);
+  DALI_TEST_CHECK(!failed);
+  DALI_TEST_CHECK(!failedWithArguments);
+  DALI_TEST_CHECK(!failedFromRegistry);
+  DALI_TEST_CHECK(typeInfo.CreateInstance());
+
+  Test::WebEngine::SetCreationEnabled(false);
+  auto nativeWithoutEngine = WebView::New();
+  auto nativeWithArgumentsWithoutEngine = WebView::New(1u, arguments);
+  Test::WebEngine::SetCreationEnabled(true);
+  DALI_TEST_CHECK(!nativeWithoutEngine);
+  DALI_TEST_CHECK(!nativeWithArgumentsWithoutEngine);
+  END_TEST;
+}
+
+int UtcDaliWebViewQueuedCallbacksAfterDestructionP(void)
+{
+  UiTestApplication application;
+  auto view = WebView::New();
+  unsigned calls = 0;
+  view.PageLoadStartedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadInProgressSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadFinishedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadErrorSignal().Connect(&application, [&calls](WebView, const WebViewPageLoadError&) { ++calls; });
+  view.ScrollEdgeReachedSignal().Connect(&application, [&calls](WebView, WebViewScrollEdge) { ++calls; });
+  view.OverScrolledSignal().Connect(&application, [&calls](WebView, WebViewOverScrolled) { ++calls; });
+  view.UrlChangedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.FrameRenderedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.FullscreenEnteredSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.FullscreenExitedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.TextFoundSignal().Connect(&application, [&calls](WebView, uint32_t) { ++calls; });
+  view.GeolocationPermissionSignal().Connect(&application, [&calls](WebView, const Dali::String&, const Dali::String&) { ++calls; return true; });
+  view.WebProcessCrashedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  gScreenshotCallbackCount = 0u;
+  DALI_TEST_CHECK(view.GetScreenshotAsynchronously(Dali::BoundsInteger(0, 0, 1, 1), 1.0f,
+      WebView::ScreenshotCapturedCallback::New(OnScreenshotCallback)));
+  auto queued = Test::WebEngine::CaptureViewCallbacks(GetWebViewImpl(view).mWebEngine);
+  DALI_TEST_CHECK(queued());
+  DALI_TEST_EQUALS(calls, 13u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gScreenshotCallbackCount, 1u, TEST_LOCATION);
+  view.Reset();
+  // A queued permission request must deny access and every notification must be ignored.
+  DALI_TEST_CHECK(!queued());
+  DALI_TEST_EQUALS(calls, 13u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gScreenshotCallbackCount, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewDirectCallbacksAfterDestructionP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  auto view = WebView::New();
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  DALI_TEST_CHECK(view);
+  application.GetScene().Add(view);
+  unsigned frames = 0;
+  view.FrameRenderedSignal().Connect(&application, [&frames](WebView) { ++frames; });
+  auto connection = GetWebViewImpl(view).mDirectConnection;
+  auto request = Test::WebEngine::GetDirectFrameRequest(connection);
+  auto submitted = Test::WebEngine::GetDirectFrameSubmitted(connection);
+  request();
+  submitted();
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  application.GetScene().Remove(view);
+  view.Reset();
+  DALI_TEST_CHECK(Test::WebEngine::IsDirectConnectionClosed(connection));
+  DALI_TEST_CHECK(!Test::WebEngine::GetDirectFrameRequest(connection));
+  DALI_TEST_CHECK(!Test::WebEngine::GetDirectFrameSubmitted(connection));
+  request();
+  submitted();
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+static int CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType type)
+{
+  UiTestApplication application;
+  WebView::SetWebEngineType(type);
+  {
+    Test::WebEngine::SetDirectRenderingSupported(true);
+    auto view = WebView::New();
+    Test::WebEngine::SetDirectRenderingSupported(false);
+    DALI_TEST_CHECK(view);
+    gJavaScriptCallbackCount = 0u;
+    gPlainTextCallbackCount = 0u;
+    gVideoCallbackCount = 0u;
+    view.EvaluateJavaScript(Dali::String("1"), WebView::JavaScriptCallback::New(OnJavaScriptCallback));
+    view.AddJavaScriptMessageHandler(Dali::String("object"), WebView::JavaScriptCallback::New(OnJavaScriptCallback));
+    view.AddJavaScriptMessageHandler(Dali::String("object"), Dali::Callback<void(const Dali::String&, const Dali::String&)>::New(OnJavaScriptMessageWithNameCallback));
+    view.RegisterJavaScriptAlertCallback(WebView::JavaScriptAlertCallback::New(OnJavaScriptAlertCallback));
+    view.RegisterJavaScriptConfirmCallback(WebView::JavaScriptConfirmCallback::New(OnJavaScriptConfirmCallback));
+    view.RegisterJavaScriptPromptCallback(WebView::JavaScriptPromptCallback::New(OnJavaScriptPromptCallback));
+    view.GetPlainTextAsynchronously(WebView::PlainTextCallback::New(OnPlainTextCallback));
+    view.CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback::New(OnVideoPlayingCallback));
+    auto queued = Test::WebEngine::CaptureApplicationCallbacks(GetWebViewImpl(view).mWebEngine);
+    DALI_TEST_CHECK(queued());
+    DALI_TEST_EQUALS(gJavaScriptCallbackCount, 2u, TEST_LOCATION);
+    DALI_TEST_EQUALS(gPlainTextCallbackCount, 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(gVideoCallbackCount, 1u, TEST_LOCATION);
+    view.Reset();
+    DALI_TEST_CHECK(!queued());
+    DALI_TEST_EQUALS(gJavaScriptCallbackCount, 2u, TEST_LOCATION);
+    DALI_TEST_EQUALS(gPlainTextCallbackCount, 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(gVideoCallbackCount, 1u, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliWebViewApplicationCallbacksAfterDestructionP(void)
+{
+  return CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType::CHROMIUM);
+}
+
+int UtcDaliWebViewDirectApplicationCallbacksAfterDestructionP(void)
+{
+  return CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType::LWE);
 }

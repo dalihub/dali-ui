@@ -50,6 +50,15 @@ struct RuntimeState
 RuntimeState& GetRuntimeState();
 void TerminateRuntime();
 
+Dali::WebEnginePlugin::WebEnginePageLoadCallback GetPageLoadStartedCallback(Dali::WebEngine engine);
+void SetCreationEnabled(bool enabled);
+void SetNativeImageInitializationResult(bool success);
+std::function<bool()> CaptureViewCallbacks(Dali::WebEngine engine);
+std::function<bool()> CaptureApplicationCallbacks(Dali::WebEngine engine);
+void SetDirectRenderingSupported(bool supported);
+std::function<void()> GetDirectFrameRequest(Dali::WebEngineDirectRenderingConnection connection);
+std::function<void()> GetDirectFrameSubmitted(Dali::WebEngineDirectRenderingConnection connection);
+bool IsDirectConnectionClosed(Dali::WebEngineDirectRenderingConnection connection);
 void SetNativeImageInterface(Dali::WebEngine engine, Dali::NativeImageInterfacePtr nativeImage);
 void SetWebViewAccessible(Dali::Accessibility::Accessible* webAccessible);
 void SetWebAccessibleActivatedAddress(Dali::Devel::Accessibility::Address address);
