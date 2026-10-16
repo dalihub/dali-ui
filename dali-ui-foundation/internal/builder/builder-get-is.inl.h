@@ -297,23 +297,6 @@ inline OptionalInsets IsInsets(const OptionalChild& node)
   return insets;
 }
 
-inline OptionalExtents IsExtents(const OptionalChild& node)
-{
-  OptionalExtents extents;
-  if(node && (*node).Size())
-  {
-    if((*node).Size() >= 4)
-    {
-      float v[4];
-      if(CopyNumbers((*node).CBegin(), v))
-      {
-        extents = OptionalExtents(Dali::Extents(static_cast<uint16_t>(v[0]), static_cast<uint16_t>(v[1]), static_cast<uint16_t>(v[2]), static_cast<uint16_t>(v[3])));
-      }
-    }
-  }
-  return extents;
-}
-
 //
 //
 //
@@ -365,11 +348,6 @@ inline OptionalMatrix3 IsMatrix3(const TreeNode& parent, const std::string& chil
 inline OptionalRect IsRect(const TreeNode& parent, const std::string& childName)
 {
   return IsRect(IsChild(&parent, childName));
-}
-
-inline OptionalExtents IsExtents(const TreeNode& parent, const std::string& childName)
-{
-  return IsExtents(IsChild(&parent, childName));
 }
 
 inline OptionalInsets IsInsets(const TreeNode& parent, const std::string& childName)
@@ -428,11 +406,6 @@ inline OptionalMatrix3 IsMatrix3(const TreeNode& node)
 inline OptionalRect IsRect(const TreeNode& node)
 {
   return IsRect(OptionalChild(node));
-}
-
-inline OptionalExtents IsExtents(const TreeNode& node)
-{
-  return IsExtents(OptionalChild(node));
 }
 
 inline OptionalInsets IsInsets(const TreeNode& node)

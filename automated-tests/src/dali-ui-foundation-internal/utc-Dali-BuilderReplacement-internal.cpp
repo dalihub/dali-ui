@@ -99,7 +99,6 @@ int UtcDaliBuilderReplacementCompositeTypesP(void)
                                      "matrix":"{MATRIX}",
                                      "matrix3":"{MATRIX3}",
                                      "rect":"{RECT}",
-                                     "extents":"{EXTENTS}",
                                      "insets":"{INSETS}"
                                    })");
 
@@ -115,7 +114,6 @@ int UtcDaliBuilderReplacementCompositeTypesP(void)
   defaults.Insert("MATRIX", matrix);
   defaults.Insert("MATRIX3", matrix3);
   defaults.Insert("RECT", Rect<int>(1, 2, 3, 4));
-  defaults.Insert("EXTENTS", Extents(1, 2, 3, 4));
   defaults.Insert("INSETS", Insets(1.0f, 2.0f, 3.0f, 4.0f));
 
   Replacement replacement(defaults);
@@ -125,7 +123,6 @@ int UtcDaliBuilderReplacementCompositeTypesP(void)
   OptionalMatrix matrixValue = replacement.IsMatrix(*root.GetChild("matrix"));
   OptionalMatrix3 matrix3Value = replacement.IsMatrix3(*root.GetChild("matrix3"));
   OptionalRect rect = replacement.IsRect(*root.GetChild("rect"));
-  OptionalExtents extents = replacement.IsExtents(*root.GetChild("extents"));
   OptionalInsets insets = replacement.IsInsets(*root.GetChild("insets"));
 
   DALI_TEST_CHECK(vector2);
@@ -137,7 +134,6 @@ int UtcDaliBuilderReplacementCompositeTypesP(void)
   DALI_TEST_CHECK(matrixValue && *matrixValue == matrix);
   DALI_TEST_CHECK(matrix3Value && *matrix3Value == matrix3);
   DALI_TEST_CHECK(rect && *rect == Rect<int>(1, 2, 3, 4));
-  DALI_TEST_CHECK(extents && *extents == Extents(1, 2, 3, 4));
   DALI_TEST_CHECK(insets && *insets == Insets(1.0f, 2.0f, 3.0f, 4.0f));
 
   END_TEST;
@@ -208,7 +204,6 @@ int UtcDaliBuilderReplacementDirectNodesAndMissingChildrenP(void)
                                      "matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
                                      "matrix3":[1,0,0,0,1,0,0,0,1],
                                      "rect":[1,2,3,4],
-                                     "extents":[1,2,3,4],
                                      "insets":[1,2,3,4]
                                    })");
 
@@ -223,7 +218,6 @@ int UtcDaliBuilderReplacementDirectNodesAndMissingChildrenP(void)
   DALI_TEST_CHECK(replacement.IsMatrix(Child(root, "matrix")));
   DALI_TEST_CHECK(replacement.IsMatrix3(Child(root, "matrix3")));
   DALI_TEST_CHECK(replacement.IsRect(Child(root, "rect")));
-  DALI_TEST_CHECK(replacement.IsExtents(Child(root, "extents")));
   DALI_TEST_CHECK(replacement.IsInsets(Child(root, "insets")));
 
   OptionalChild missing;
@@ -237,7 +231,6 @@ int UtcDaliBuilderReplacementDirectNodesAndMissingChildrenP(void)
   DALI_TEST_CHECK(!replacement.IsMatrix(missing));
   DALI_TEST_CHECK(!replacement.IsMatrix3(missing));
   DALI_TEST_CHECK(!replacement.IsRect(missing));
-  DALI_TEST_CHECK(!replacement.IsExtents(missing));
   DALI_TEST_CHECK(!replacement.IsInsets(missing));
 
   END_TEST;

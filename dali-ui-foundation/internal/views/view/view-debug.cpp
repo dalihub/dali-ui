@@ -59,15 +59,6 @@ public:
 
   void ToStream(std::ostream& stream)
   {
-    // DevelProperty::EXTENTS cannot be a case label of a Property::Type switch.
-    if(mValue.GetType() == DevelProperty::EXTENTS)
-    {
-      Extents extents;
-      GetExtents(mValue, extents);
-      stream << extents;
-      return;
-    }
-
     switch(mValue.GetType())
     {
       case Dali::Property::BOOLEAN:
