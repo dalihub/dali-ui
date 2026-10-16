@@ -58,8 +58,8 @@ SelectableImageInterface MakeSampleIcon()
   Dali::String             url         = LottieAnimationView::DownCast(defaultIcon.GetView()).GetResourceUrl();
   return SelectableLottieAnimationView::New(
     SelectableLottieImage(url,
-                          SelectableLottieImage::FrameRange(0, 19),
-                          SelectableLottieImage::FrameRange(20, 38),
+                          LottieAnimation::FrameRange(0, 19),
+                          LottieAnimation::FrameRange(20, 38),
                           "check_box .inner_fill.color"));
 }
 

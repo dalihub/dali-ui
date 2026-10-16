@@ -28,7 +28,7 @@ namespace
 {
 using Binding     = SelectableLottieColorBinding;
 using ColorPolicy = Binding::ColorPolicy;
-using FrameRange  = SelectableLottieImage::FrameRange;
+using FrameRange  = LottieAnimation::FrameRange;
 
 constexpr char MOVED_FROM_ASSERTION[] = "Cannot use a moved-from SelectableLottieColorBinding object";
 } //namespace
@@ -57,8 +57,8 @@ int UtcDaliSelectableLottieColorBindingRoundTripP(void)
   DALI_TEST_EQUALS(binding.GetKeyPath(), std::string("radio_outline.outline_stroke.color"), TEST_LOCATION);
   DALI_TEST_CHECK(binding.GetProperty() == LottieAnimation::ContentProperty::STROKE_COLOR);
   DALI_TEST_CHECK(binding.GetColorPolicy() == ColorPolicy::SELECTED_IN_FRAME_RANGE);
-  DALI_TEST_EQUALS(binding.GetSelectedColorRange().startFrame, 7, TEST_LOCATION);
-  DALI_TEST_EQUALS(binding.GetSelectedColorRange().endFrame, 26, TEST_LOCATION);
+  DALI_TEST_EQUALS(binding.GetSelectedColorRange().GetStartFrame(), 7, TEST_LOCATION);
+  DALI_TEST_EQUALS(binding.GetSelectedColorRange().GetEndFrame(), 26, TEST_LOCATION);
   END_TEST;
 }
 
@@ -70,8 +70,8 @@ int UtcDaliSelectableLottieColorBindingReverseRangeNormalizesP(void)
                             ColorPolicy::SELECTED_IN_FRAME_RANGE,
                             FrameRange(26, 7));
 
-  DALI_TEST_EQUALS(binding.GetSelectedColorRange().startFrame, 7, TEST_LOCATION);
-  DALI_TEST_EQUALS(binding.GetSelectedColorRange().endFrame, 26, TEST_LOCATION);
+  DALI_TEST_EQUALS(binding.GetSelectedColorRange().GetStartFrame(), 7, TEST_LOCATION);
+  DALI_TEST_EQUALS(binding.GetSelectedColorRange().GetEndFrame(), 26, TEST_LOCATION);
   END_TEST;
 }
 

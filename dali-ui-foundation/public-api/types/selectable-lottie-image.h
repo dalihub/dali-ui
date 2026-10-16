@@ -19,10 +19,11 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
-#include <cstdint>
+#include <dali/public-api/common/unique-ptr.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-frame-range.h>
 
 namespace DALI_NAMESPACE
 {
@@ -43,46 +44,23 @@ namespace Ui
  * The frame ranges are EXPLICIT integer frame numbers (not marker names); they map
  * directly onto LottieAnimationView::SetMinMaxFrame() / JumpToFrame().
  *
- * SelectableLottieImage is plain, copyable, immutable value data (icon description held by
- * a style). The live scene view that renders it is SelectableLottieAnimationView, created
- * per control instance.
+ * SelectableLottieImage is copyable, immutable value data consumed when creating a
+ * SelectableLottieAnimationView. The view copies the description data it needs and
+ * does not retain this object.
+ *
+ * A moved-from image is invalid and must only be destroyed or assigned a new value.
  *
  * @code
  *   // url + select segment [0,19] + deselect segment [20,38] + inner-fill recolour key path
  *   SelectableLottieImage image("checkbox.json",
- *                               SelectableLottieImage::FrameRange(0, 19),
- *                               SelectableLottieImage::FrameRange(20, 38),
+ *                               LottieAnimation::FrameRange(0, 19),
+ *                               LottieAnimation::FrameRange(20, 38),
  *                               "check_box .inner_fill.color");
  * @endcode
  */
 class DALI_UI_API SelectableLottieImage
 {
 public:
-  /**
-   * @brief An inclusive integer frame span [startFrame, endFrame].
-   *
-   * The public members map directly onto the signed-int Lottie frame API, following
-   * the Dali::Insets value-struct convention (public members + a plain constructor).
-   */
-  struct FrameRange
-  {
-    /**
-     * @brief Default constructor which provides an initialized FrameRange(0, 0).
-     */
-    FrameRange() = default;
-
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] start The first frame of the segment
-     * @param[in] end   The last frame of the segment
-     */
-    DALI_UI_API FrameRange(int32_t start, int32_t end);
-
-    int32_t startFrame{0}; ///< The first frame of the segment
-    int32_t endFrame{0};   ///< The last frame of the segment
-  };
-
   /**
    * @brief Creates a SelectableLottieImage from a url and both frame ranges.
    *
@@ -95,15 +73,30 @@ public:
    * @param[in] innerFillKeyPath The asset key path of the inner fill recoloured with the state
    *                             colours; an empty string keeps the renderer's generic default
    */
-  SelectableLottieImage(const Dali::String& url,
-                        const FrameRange&   selectRange,
-                        const FrameRange&   deselectRange,
-                        const Dali::String& innerFillKeyPath = Dali::String());
+  SelectableLottieImage(const Dali::String&                url,
+                        const LottieAnimation::FrameRange& selectRange,
+                        const LottieAnimation::FrameRange& deselectRange,
+                        const Dali::String&                innerFillKeyPath = Dali::String());
 
   /**
    * @brief Deleted default constructor: a url is inseparable from both frame ranges.
    */
   SelectableLottieImage() = delete;
+
+  /** @brief Copies the image description. */
+  SelectableLottieImage(const SelectableLottieImage& rhs);
+
+  /** @brief Transfers ownership of the image description. */
+  SelectableLottieImage(SelectableLottieImage&& rhs) noexcept;
+
+  /** @brief Copies the image description. */
+  SelectableLottieImage& operator=(const SelectableLottieImage& rhs);
+
+  /** @brief Transfers ownership of the image description. */
+  SelectableLottieImage& operator=(SelectableLottieImage&& rhs) noexcept;
+
+  /** @brief Destroys the image description. */
+  ~SelectableLottieImage();
 
   /**
    * @brief Returns the Lottie animation url.
@@ -117,14 +110,14 @@ public:
    *
    * @return The select frame range
    */
-  const FrameRange& GetSelectRange() const;
+  LottieAnimation::FrameRange GetSelectRange() const;
 
   /**
    * @brief Returns the frame segment played when the control becomes deselected.
    *
    * @return The deselect frame range
    */
-  const FrameRange& GetDeselectRange() const;
+  LottieAnimation::FrameRange GetDeselectRange() const;
 
   /**
    * @brief Returns the asset key path of the inner fill recoloured with the state colours.
@@ -134,10 +127,8 @@ public:
   const Dali::String& GetInnerFillKeyPath() const;
 
 private:
-  Dali::String mUrl;              ///< The Lottie animation url
-  FrameRange   mSelectRange;      ///< The segment played when the control becomes selected
-  FrameRange   mDeselectRange;    ///< The segment played when the control becomes deselected
-  Dali::String mInnerFillKeyPath; ///< The asset key path of the inner fill to recolour
+  struct Impl;
+  Dali::UniquePtr<Impl> mImpl;
 };
 
 } // namespace Ui

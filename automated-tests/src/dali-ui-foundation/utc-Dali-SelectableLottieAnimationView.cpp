@@ -44,7 +44,7 @@ Dali::Property::Value EvaluateDynamicProperty(const std::string&                
 
 namespace
 {
-using FrameRange = SelectableLottieImage::FrameRange;
+using FrameRange = LottieAnimation::FrameRange;
 using Binding    = SelectableLottieColorBinding;
 using Policy     = Binding::ColorPolicy;
 
