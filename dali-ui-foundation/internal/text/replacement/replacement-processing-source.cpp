@@ -16,10 +16,13 @@
 
 // EXTERNAL INCLUDES
 #include <algorithm>
+#include <cstring>
+#include <memory>
 #include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
@@ -156,8 +159,30 @@ void ApplyTextProcessingSource(const TextProcessingSource& source, LogicalModel&
     // glyphPaintIndices is derived from the projected character runs after shaping.
   }
 
-  target.mText                          = *source.text;
-  target.mFontDescriptionRuns           = *source.fontDescriptionRuns;
+  // Projected runs borrow family buffers and may even refer to the target's
+  // current strings. Finish all copies before releasing any target ownership.
+  Dali::Ui::Internal::Text::StyledTextApplyResult ownedRuns;
+  ownedRuns.fontDescriptionRuns.Reserve(source.fontDescriptionRuns->Count());
+  for(const FontDescriptionRun& sourceRun : *source.fontDescriptionRuns)
+  {
+    FontDescriptionRun      run = sourceRun;
+    std::unique_ptr<char[]> family;
+    if(sourceRun.familyName)
+    {
+      family.reset(new char[sourceRun.familyLength > 0u ? sourceRun.familyLength : 1u]);
+      if(sourceRun.familyLength > 0u)
+      {
+        std::memcpy(family.get(), sourceRun.familyName, sourceRun.familyLength);
+      }
+    }
+    run.familyName = family.get();
+    ownedRuns.fontDescriptionRuns.PushBack(run);
+    family.release();
+  }
+
+  target.mText = *source.text;
+  target.ClearFontDescriptionRuns();
+  ownedRuns.TransferFontDescriptionRunsTo(target.mFontDescriptionRuns);
   target.mColorRuns                     = *source.colorRuns;
   target.mBackgroundColorRuns           = *source.backgroundRuns;
   target.mUnderlinedCharacterRuns       = *source.underlineRuns;
