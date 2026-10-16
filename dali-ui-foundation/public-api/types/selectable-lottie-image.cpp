@@ -32,8 +32,8 @@ namespace Ui
 struct SelectableLottieImage::Impl
 {
   Impl(const Dali::String& url,
-       const FrameRange&   selectRange,
-       const FrameRange&   deselectRange,
+       const Int32Pair&    selectRange,
+       const Int32Pair&    deselectRange,
        const Dali::String& innerFillKeyPath)
   : mUrl(url),
     mSelectRange(selectRange),
@@ -43,14 +43,14 @@ struct SelectableLottieImage::Impl
   }
 
   Dali::String mUrl;
-  FrameRange   mSelectRange;
-  FrameRange   mDeselectRange;
+  Int32Pair    mSelectRange;
+  Int32Pair    mDeselectRange;
   Dali::String mInnerFillKeyPath;
 };
 
 SelectableLottieImage::SelectableLottieImage(const Dali::String& url,
-                                             const FrameRange&   selectRange,
-                                             const FrameRange&   deselectRange,
+                                             const Int32Pair&    selectRange,
+                                             const Int32Pair&    deselectRange,
                                              const Dali::String& innerFillKeyPath)
 : mImpl(Dali::MakeUnique<Impl>(url, selectRange, deselectRange, innerFillKeyPath))
 {
@@ -85,13 +85,13 @@ const Dali::String& SelectableLottieImage::GetUrl() const
   return mImpl->mUrl;
 }
 
-FrameRange SelectableLottieImage::GetSelectRange() const
+Int32Pair SelectableLottieImage::GetSelectRange() const
 {
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_IMAGE(mImpl);
   return mImpl->mSelectRange;
 }
 
-FrameRange SelectableLottieImage::GetDeselectRange() const
+Int32Pair SelectableLottieImage::GetDeselectRange() const
 {
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_IMAGE(mImpl);
   return mImpl->mDeselectRange;

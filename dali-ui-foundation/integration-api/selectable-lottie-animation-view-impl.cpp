@@ -136,8 +136,8 @@ Dali::Property::Value OnBindingColor(int32_t id,
 } // namespace
 
 SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(const Dali::String& url,
-                                                                          const FrameRange&   selectRange,
-                                                                          const FrameRange&   deselectRange,
+                                                                          const Int32Pair&    selectRange,
+                                                                          const Int32Pair&    deselectRange,
                                                                           const Dali::String& keyPath)
 {
   SelectableLottieColorBindings colorBindings;
@@ -150,8 +150,8 @@ SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(const 
 
 SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(
   const Dali::String&                  url,
-  const FrameRange&                    selectRange,
-  const FrameRange&                    deselectRange,
+  const Int32Pair&                     selectRange,
+  const Int32Pair&                     deselectRange,
   const SelectableLottieColorBindings& colorBindings)
 {
   ValidateColorBindings(colorBindings);
@@ -170,12 +170,12 @@ Ui::View SelectableLottieAnimationViewImpl::GetView() const
   return mLottie;
 }
 
-void SelectableLottieAnimationViewImpl::SetFrameRanges(const FrameRange& selectRange, const FrameRange& deselectRange)
+void SelectableLottieAnimationViewImpl::SetFrameRanges(const Int32Pair& selectRange, const Int32Pair& deselectRange)
 {
-  mSelectStart   = selectRange.startFrame;
-  mSelectEnd     = selectRange.endFrame;
-  mDeselectStart = deselectRange.startFrame;
-  mDeselectEnd   = deselectRange.endFrame;
+  mSelectStart   = selectRange.GetStart();
+  mSelectEnd     = selectRange.GetEnd();
+  mDeselectStart = deselectRange.GetStart();
+  mDeselectEnd   = deselectRange.GetEnd();
 }
 
 void SelectableLottieAnimationViewImpl::SetStateColors(const Vector4& deselected, const Vector4& selected)
@@ -255,12 +255,12 @@ void SelectableLottieAnimationViewImpl::SetColorBindings(const SelectableLottieC
 {
   for(const auto& binding : colorBindings)
   {
-    const FrameRange selectedColorRange = binding.GetSelectedColorRange();
+    const Int32Pair selectedColorRange = binding.GetSelectedColorRange();
     mColorBindings.push_back(ColorBindingData{binding.GetKeyPath(),
                                               binding.GetProperty(),
                                               binding.GetColorPolicy(),
-                                              selectedColorRange.startFrame,
-                                              selectedColorRange.endFrame,
+                                              selectedColorRange.GetStart(),
+                                              selectedColorRange.GetEnd(),
                                               AllocateDynamicPropertyId()});
   }
 }

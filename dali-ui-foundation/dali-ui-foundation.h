@@ -42,7 +42,6 @@
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/types/cutout-policy.h>
-#include <dali-ui-foundation/public-api/types/frame-range.h>
 #include <dali-ui-foundation/public-api/types/inner-shadow.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>

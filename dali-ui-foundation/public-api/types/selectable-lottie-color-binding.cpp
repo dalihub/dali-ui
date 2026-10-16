@@ -32,26 +32,26 @@ struct SelectableLottieColorBinding::Impl
   Impl(Dali::StringView                 bindingKeyPath,
        LottieAnimation::ContentProperty bindingProperty,
        ColorPolicy                      bindingColorPolicy,
-       const FrameRange&                bindingSelectedColorRange)
+       const Int32Pair&                 bindingSelectedColorRange)
   : keyPath(bindingKeyPath),
     property(bindingProperty),
     colorPolicy(bindingColorPolicy),
-    selectedColorRange(std::min(bindingSelectedColorRange.startFrame, bindingSelectedColorRange.endFrame),
-                       std::max(bindingSelectedColorRange.startFrame, bindingSelectedColorRange.endFrame))
+    selectedColorRange(std::min(bindingSelectedColorRange.GetStart(), bindingSelectedColorRange.GetEnd()),
+                       std::max(bindingSelectedColorRange.GetStart(), bindingSelectedColorRange.GetEnd()))
   {
   }
 
   Dali::String                     keyPath;
   LottieAnimation::ContentProperty property;
   ColorPolicy                      colorPolicy;
-  FrameRange                       selectedColorRange;
+  Int32Pair                        selectedColorRange;
 };
 
 SelectableLottieColorBinding::SelectableLottieColorBinding(
   Dali::StringView                 keyPath,
   LottieAnimation::ContentProperty property,
   ColorPolicy                      colorPolicy,
-  const FrameRange&                selectedColorRange)
+  const Int32Pair&                 selectedColorRange)
 : mImpl(nullptr)
 {
   DALI_ASSERT_ALWAYS(!keyPath.Empty() && "SelectableLottieColorBinding key path must not be empty");
@@ -102,7 +102,7 @@ SelectableLottieColorBinding::ColorPolicy SelectableLottieColorBinding::GetColor
   return mImpl->colorPolicy;
 }
 
-FrameRange SelectableLottieColorBinding::GetSelectedColorRange() const
+Int32Pair SelectableLottieColorBinding::GetSelectedColorRange() const
 {
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_COLOR_BINDING(mImpl);
   return mImpl->selectedColorRange;

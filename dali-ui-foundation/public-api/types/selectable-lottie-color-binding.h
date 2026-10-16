@@ -21,12 +21,12 @@
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/math/int-pair.h>
 #include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
-#include <dali-ui-foundation/public-api/types/frame-range.h>
 
 namespace DALI_NAMESPACE
 {
@@ -85,7 +85,7 @@ public:
     Dali::StringView                 keyPath,
     LottieAnimation::ContentProperty property,
     ColorPolicy                      colorPolicy,
-    const FrameRange&                selectedColorRange = {});
+    const Int32Pair&                 selectedColorRange = {});
 
   /**
    * @brief Copy constructor.
@@ -144,7 +144,7 @@ public:
    *
    * @return The frame range
    */
-  FrameRange GetSelectedColorRange() const;
+  Int32Pair GetSelectedColorRange() const;
 
 private:
   struct Impl;
