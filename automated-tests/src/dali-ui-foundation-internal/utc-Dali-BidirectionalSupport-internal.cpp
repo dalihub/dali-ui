@@ -44,6 +44,18 @@ void utc_dali_bidirectional_support_internal_cleanup(void)
 
 namespace
 {
+#if defined(__cpp_char8_t) && (__cpp_char8_t >= 201811L)
+inline const char* u8s(const char8_t* s)
+{
+  return reinterpret_cast<const char*>(s);
+}
+#else
+inline const char* u8s(const char* s)
+{
+  return s;
+}
+#endif
+
 struct ReorderRequest
 {
   TextAbstraction::BidiInfoIndex paragraph;
@@ -268,7 +280,7 @@ int UtcDaliBidirectionalLayoutParagraphDispatchP(void)
 {
   UiTestApplication             application;
   ScopedReorderOracle           oracle;
-  auto                          controller = CreateBidiLayoutController(u8"ab\n\u05D0\u05D1\n\u05D2\u05D3");
+  auto                          controller = CreateBidiLayoutController(u8s(u8"ab\n\u05D0\u05D1\n\u05D2\u05D3"));
   auto                          model      = Controller::Impl::GetImplementation(*controller.Get()).mModel;
   auto&                         logical    = *model->mLogicalModel;
   BidirectionalParagraphInfoRun paragraph;
@@ -310,7 +322,7 @@ int UtcDaliBidirectionalLayoutShortenedMapP(void)
 {
   UiTestApplication   application;
   ScopedReorderOracle oracle;
-  auto                controller = CreateBidiLayoutController(u8"\u05D0\u05D1\u05D2\u05D3");
+  auto                controller = CreateBidiLayoutController(u8s(u8"\u05D0\u05D1\u05D2\u05D3"));
   auto                model      = Controller::Impl::GetImplementation(*controller.Get()).mModel;
   auto&               logical    = *model->mLogicalModel;
   auto&               visual     = *model->mVisualModel;
@@ -391,7 +403,7 @@ int UtcDaliBidirectionalLayoutTrailingWhitespaceP(void)
 {
   UiTestApplication             application;
   ScopedReorderOracle           oracle;
-  auto                          controller = CreateBidiLayoutController(u8"\u05D0\u05D1\u05D2 ");
+  auto                          controller = CreateBidiLayoutController(u8s(u8"\u05D0\u05D1\u05D2 "));
   auto                          model      = Controller::Impl::GetImplementation(*controller.Get()).mModel;
   BidirectionalParagraphInfoRun paragraph;
   paragraph.characterRun           = {0u, 4u};
@@ -421,7 +433,7 @@ int UtcDaliBidirectionalLayoutEndEllipsisP(void)
   ScopedReorderOracle oracle;
   for(bool multiline : {false, true})
   {
-    auto                          controller = CreateBidiLayoutController(u8"\u05D0\u05D1 \u05D2\u05D3 \u05D4\u05D5");
+    auto                          controller = CreateBidiLayoutController(u8s(u8"\u05D0\u05D1 \u05D2\u05D3 \u05D4\u05D5"));
     auto                          model      = Controller::Impl::GetImplementation(*controller.Get()).mModel;
     auto&                         logical    = *model->mLogicalModel;
     auto&                         visual     = *model->mVisualModel;
