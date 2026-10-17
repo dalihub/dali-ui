@@ -115,6 +115,7 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-async-task-manager.cpp
     ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
     ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
+    ../dali-test-suite-utils/dali-ui/ui-icu.cpp
     ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
     ../dali-test-suite-utils/dali-ui/ui-native-image-queue.cpp
     ../dali-test-suite-utils/dali-ui/ui-native-image-surface.cpp
