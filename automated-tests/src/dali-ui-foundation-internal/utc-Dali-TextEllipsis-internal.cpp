@@ -48,6 +48,18 @@ using namespace Dali::Ui;
 
 namespace
 {
+#if defined(__cpp_char8_t) && (__cpp_char8_t >= 201811L)
+inline const char* u8s(const char8_t* s)
+{
+  return reinterpret_cast<const char*>(s);
+}
+#else
+inline const char* u8s(const char* s)
+{
+  return s;
+}
+#endif
+
 float CalculateMarqueeAnchorControlX(float textureX, float viewportOrigin, float initialDelta)
 {
   return textureX - viewportOrigin - initialDelta;
@@ -2863,7 +2875,7 @@ int UtcDaliTextViewEllipsisTallerThanControlP(void)
 int UtcDaliTextEndEllipsisTwoBidiParagraphsTinyViewportP(void)
 {
   UiTestApplication application;
-  const std::string source = u8"Latin אבג العربية 123 first paragraph\nעברית ABC مرحبا second paragraph";
+  const std::string source = u8s(u8"Latin אבג العربية 123 first paragraph\nעברית ABC مرحبا second paragraph");
   for(bool multiline : {false, true})
   {
     for(float width : {1.0f, 15.0f, 80.0f})
