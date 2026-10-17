@@ -105,6 +105,7 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-canvas-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
     ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
+    ../dali-test-suite-utils/dali-ui/ui-icu.cpp
     ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
     ../dali-test-suite-utils/dali-ui/ui-native-image-queue.cpp
     ../dali-test-suite-utils/dali-ui/ui-native-image-surface.cpp
@@ -166,6 +167,25 @@ LIST(REMOVE_ITEM ${CAPI_LIB}_CFLAGS_OTHER_FOR_TESTS "-Wno-unused-command-line-ar
 ADD_COMPILE_OPTIONS( -rdynamic )
 ADD_COMPILE_OPTIONS( -O0 -ggdb --coverage -Wall -Werror )
 ADD_COMPILE_OPTIONS( ${${CAPI_LIB}_CFLAGS_OTHER_FOR_TESTS} )
+
+# Ignore some warning options
+# TODO : Why it is not be ignored at root CMakeLists.txt?
+INCLUDE(CheckCXXCompilerFlag)
+
+CHECK_CXX_COMPILER_FLAG(-Wno-self-assign-overloaded HAVE_NO_SELF_ASSIGN_OVERLOADED)
+IF (HAVE_NO_SELF_ASSIGN_OVERLOADED)
+  ADD_COMPILE_OPTIONS( -Wno-self-assign-overloaded )
+ENDIF()
+
+CHECK_CXX_COMPILER_FLAG(-Wno-pessimizing-move HAVE_NO_PESSIMIZING_MOVE)
+IF (HAVE_NO_PESSIMIZING_MOVE)
+  ADD_COMPILE_OPTIONS( -Wno-pessimizing-move )
+ENDIF()
+
+CHECK_CXX_COMPILER_FLAG(-Wno-self-move HAVE_NO_SELF_MOVE)
+IF (HAVE_NO_SELF_MOVE)
+  ADD_COMPILE_OPTIONS( -Wno-self-move )
+ENDIF()
 
 FOREACH(directory ${${CAPI_LIB}_LIBRARY_DIRS})
     SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -L${directory}")
