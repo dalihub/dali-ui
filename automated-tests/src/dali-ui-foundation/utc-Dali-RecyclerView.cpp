@@ -142,10 +142,10 @@ public:
   int boundsUpdates = 0;
   Dali::Signal<void()> invalidated;
 
-  ItemOffsets GetItemOffsets(const ItemViewHolder&) const override
+  Insets GetItemOffsets(const ItemViewHolder&) const override
   {
     ++offsets;
-    return {1.0f, 2.0f, 1.0f, 3.0f};
+    return {1.0f, 4.0f, 2.0f, 8.0f};
   }
 
   void OnLayoutStart() override
@@ -857,6 +857,62 @@ int UtcDaliRecyclerViewDecorationLifecycleP(void)
   withoutLayouter.AddItemDecoration(early);
   DALI_TEST_CHECK(GetRecyclerImpl(withoutLayouter).mDecorations.size() == 1u);
   withoutLayouter.RemoveItemDecoration(early);
+  END_TEST;
+}
+
+// Distinct physical edges catch constructor-order mistakes and verify that
+// multiple decorations are summed before either orientation is laid out.
+int UtcDaliRecyclerViewDecorationInsetsGeometryP(void)
+{
+  UiTestApplication application;
+  for(auto orientation : {LinearItemsLayouter::Orientation::VERTICAL, LinearItemsLayouter::Orientation::HORIZONTAL})
+  {
+    ResetCounters();
+    ItemAdapter adapter = ItemAdapter::New();
+    LinearItemsLayouter layouter = LinearItemsLayouter::New(orientation);
+    RecyclerView recycler = BuildRecycler(application, application.GetWindow(), adapter, layouter);
+    CountingDecoration firstDecoration;
+    CountingDecoration secondDecoration;
+    recycler.AddItemDecoration(firstDecoration);
+    recycler.AddItemDecoration(secondDecoration);
+    application.SendNotification();
+
+    auto& impl = GetRecyclerImpl(recycler);
+    impl.OnArrange(LayoutRect(0.0f, 0.0f, RECYCLER_WIDTH, RECYCLER_HEIGHT));
+    const bool horizontal = orientation == LinearItemsLayouter::Orientation::HORIZONTAL;
+    const float crossExtent = horizontal ? RECYCLER_HEIGHT : RECYCLER_WIDTH;
+    const LayoutRect firstSlot = layouter.GetItemBounds(0u, crossExtent);
+    const LayoutRect secondSlot = layouter.GetItemBounds(1u, crossExtent);
+    if(horizontal)
+    {
+      DALI_TEST_EQUALS(firstSlot.width, RECYCLER_WIDTH + 10.0f, 0.001f, TEST_LOCATION);
+      DALI_TEST_EQUALS(secondSlot.x, firstSlot.width, 0.001f, TEST_LOCATION);
+    }
+    else
+    {
+      DALI_TEST_EQUALS(firstSlot.height, RECYCLER_ITEM_HEIGHT + 20.0f, 0.001f, TEST_LOCATION);
+      DALI_TEST_EQUALS(secondSlot.y, firstSlot.height, 0.001f, TEST_LOCATION);
+    }
+
+    bool foundFirst = false;
+    for(const auto& holder : impl.mActiveItems)
+    {
+      if(holder.position == 0u)
+      {
+        foundFirst = true;
+        const Vector3 position = holder.view.GetProperty<Vector3>(Actor::Property::POSITION);
+        const Vector3 size = holder.view.GetProperty<Vector3>(Actor::Property::SIZE);
+        DALI_TEST_EQUALS(position.x, 2.0f, 0.001f, TEST_LOCATION);
+        DALI_TEST_EQUALS(position.y, 4.0f, 0.001f, TEST_LOCATION);
+        DALI_TEST_EQUALS(size.width, horizontal ? RECYCLER_WIDTH : RECYCLER_WIDTH - 10.0f, 0.001f, TEST_LOCATION);
+        DALI_TEST_EQUALS(size.height, horizontal ? RECYCLER_HEIGHT - 20.0f : RECYCLER_ITEM_HEIGHT, 0.001f, TEST_LOCATION);
+      }
+    }
+    DALI_TEST_CHECK(foundFirst);
+    recycler.RemoveItemDecoration(secondDecoration);
+    recycler.RemoveItemDecoration(firstDecoration);
+    application.GetWindow().Remove(recycler);
+  }
   END_TEST;
 }
 

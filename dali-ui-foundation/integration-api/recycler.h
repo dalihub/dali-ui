@@ -62,8 +62,9 @@ public:
 
   // Returns the sum of all registered ItemDecoration::GetItemOffsets() for the
   // item at @a position. Called by the layouter in LayoutChunk after
-  // GetViewForPosition() has populated the holder.
-  virtual ItemOffsets GetDecorationOffsets(uint32_t position) const = 0;
+  // GetViewForPosition() has populated the holder. start/end mean physical
+  // left/right and are not swapped for a right-to-left layout direction.
+  virtual Insets GetDecorationOffsets(uint32_t position) const = 0;
 };
 
 } // namespace Ui

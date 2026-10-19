@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/recycler/item-view-holder.h>
 #include <dali-ui-foundation/public-api/views/view.h>
+#include <dali/public-api/common/insets.h>
 #include <dali/public-api/signals/dali-signal.h>
 
 namespace DALI_NAMESPACE
@@ -40,29 +41,6 @@ public:
   virtual ~ItemDecorationInvalidationSupport() = default;
 
   virtual Dali::Signal<void()>& LayoutInvalidatedSignal() = 0;
-};
-
-/**
- * @brief Per-item offsets returned by ItemDecoration::GetItemOffsets.
- *
- * Equivalent to Android's RecyclerView.ItemDecoration.getItemOffsets() Rect.
- * For a vertical list: top/bottom add space in the scroll direction; left/right
- * add space along the cross axis.
- *
- * Multiple decorations' offsets are summed before being applied to each item.
- * The item view is placed inside the offset area; the total slot consumed in the
- * layout axis is (top + itemHeight + bottom) for VERTICAL (or left + itemWidth + right
- * for HORIZONTAL).
- *
- * If a decoration changes its offsets at runtime, the caller is responsible for
- * triggering a RecyclerView layout pass to pick up the new values.
- */
-struct DALI_UI_API ItemOffsets
-{
-  float left{0.0f};
-  float top{0.0f};
-  float right{0.0f};
-  float bottom{0.0f};
 };
 
 /**
@@ -102,12 +80,21 @@ public:
    * before the item is positioned. Multiple decorations' results are summed.
    * The default returns zero offsets (no extra space).
    *
+   * Insets use physical edges: start is left and end is right. They are not
+   * swapped for a right-to-left layout direction. Constructor arguments are
+   * ordered as (left, right, top, bottom).
+   *
+   * For a vertical list, top/bottom add space along the scroll axis and
+   * start/end along the cross axis; for a horizontal list, the axes reverse.
+   * The item view is placed inside this area. If offsets change at runtime,
+   * the caller must trigger a RecyclerView layout pass.
+   *
    * Equivalent to Android's RecyclerView.ItemDecoration.getItemOffsets().
    *
    * @param holder  The item being laid out (position, rowType, groupIndex populated).
    * @return Offsets in pixels to reserve around the item.
    */
-  virtual ItemOffsets GetItemOffsets(const ItemViewHolder& holder) const
+  virtual Insets GetItemOffsets(const ItemViewHolder& holder) const
   {
     return {};
   }

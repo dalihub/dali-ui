@@ -303,7 +303,7 @@ bool LinearItemsLayouterImpl::LayoutChunk(Recycler& recycler, LayoutState& state
   constexpr float kUnconstrained = std::numeric_limits<float>::max() * 0.25f;
 
   const ItemInset   crossInset = GetItemCrossInset(pos);
-  const ItemOffsets decoOffs   = recycler.GetDecorationOffsets(pos);
+  const Insets decoOffs = recycler.GetDecorationOffsets(pos);
 
   float itemExtent;
   if(mOrientation == Orientation::HORIZONTAL)
@@ -315,15 +315,15 @@ bool LinearItemsLayouterImpl::LayoutChunk(Recycler& recycler, LayoutState& state
 
     const MeasuredSize measured = view.Measure(kUnconstrained, effectiveCross);
     itemExtent                  = measured.width;
-    MeasureUpdate(pos, decoOffs.left + itemExtent + decoOffs.right);
-    view.Arrange(LayoutRect(state.currentOffset + decoOffs.left, totalLeadingCross, itemExtent, effectiveCross));
-    state.currentOffset += decoOffs.left + itemExtent + decoOffs.right + mItemSpacing;
+    MeasureUpdate(pos, decoOffs.start + itemExtent + decoOffs.end);
+    view.Arrange(LayoutRect(state.currentOffset + decoOffs.start, totalLeadingCross, itemExtent, effectiveCross));
+    state.currentOffset += decoOffs.start + itemExtent + decoOffs.end + mItemSpacing;
   }
   else
   {
     // Main axis = Y (top/bottom offsets). Cross axis = X (left/right offsets).
-    const float totalLeadingCross  = crossInset.leadingCrossOffset + decoOffs.left;
-    const float totalTrailingCross = crossInset.trailingCrossOffset + decoOffs.right;
+    const float totalLeadingCross  = crossInset.leadingCrossOffset + decoOffs.start;
+    const float totalTrailingCross = crossInset.trailingCrossOffset + decoOffs.end;
     const float effectiveCross     = std::max(0.0f, mCrossExtent - totalLeadingCross - totalTrailingCross);
 
     const MeasuredSize measured = view.Measure(effectiveCross, kUnconstrained);

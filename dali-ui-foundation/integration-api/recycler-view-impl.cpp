@@ -135,7 +135,7 @@ struct RecyclerViewImpl::RecyclerImpl : public Recycler
     return rv.mCacheAfter;
   }
 
-  ItemOffsets GetDecorationOffsets(uint32_t position) const override
+  Insets GetDecorationOffsets(uint32_t position) const override
   {
     if(rv.mDecorations.empty())
     {
@@ -156,13 +156,13 @@ struct RecyclerViewImpl::RecyclerImpl : public Recycler
       return {};
     }
 
-    ItemOffsets total;
+    Insets total;
     for(auto* dec : rv.mDecorations)
     {
-      const ItemOffsets offs = dec->GetItemOffsets(*holder);
-      total.left += offs.left;
+      const Insets offs = dec->GetItemOffsets(*holder);
+      total.start += offs.start;
       total.top += offs.top;
-      total.right += offs.right;
+      total.end += offs.end;
       total.bottom += offs.bottom;
     }
     return total;

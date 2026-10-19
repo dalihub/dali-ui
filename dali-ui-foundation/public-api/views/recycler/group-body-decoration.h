@@ -63,7 +63,7 @@ public:
   void SetBodyHorizontalMargin(float left, float right);
   void SetBodyCornerRadius(float radius);
 
-  ItemOffsets           GetItemOffsets(const ItemViewHolder& holder) const override;
+  Insets GetItemOffsets(const ItemViewHolder& holder) const override;
   void                  OnLayoutStart() override;
   void                  OnItemActivated(ItemViewHolder& holder, View scroller) override;
   void                  OnItemRecycled(const ItemViewHolder& holder) override;

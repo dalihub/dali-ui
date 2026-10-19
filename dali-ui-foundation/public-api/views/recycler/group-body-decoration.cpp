@@ -84,11 +84,11 @@ Dali::Signal<void()>& GroupBodyDecoration::LayoutInvalidatedSignal()
   return mLayoutInvalidatedSignal;
 }
 
-ItemOffsets GroupBodyDecoration::GetItemOffsets(const ItemViewHolder& holder) const
+Insets GroupBodyDecoration::GetItemOffsets(const ItemViewHolder& holder) const
 {
   if(IsBodyType(holder.rowType))
   {
-    return {mMarginLeft, 0.0f, mMarginRight, 0.0f};
+    return {mMarginLeft, mMarginRight, 0.0f, 0.0f};
   }
   return {};
 }
