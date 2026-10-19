@@ -1212,3 +1212,245 @@ int UtcDaliPageScrollViewNestedInstantPageRequestDuringFirstLayoutP(void)
   DALI_TEST_EQUALS(recorder.signals[1].second, 5, TEST_LOCATION);
   END_TEST;
 }
+
+// ─── Viewport clamps of a settled pager with a fixed page size ──────────────────────
+
+namespace
+{
+// A fixed page size keeps the count and the page length when the viewport grows, but the
+// clamp still moves a settled pager: the page must follow the offset.
+//
+// Pager 100 over 500 with an explicit page size of 100 along the scroll axis: five pages.
+// ScrollToPage(4, false) rests at 400. A 350 viewport leaves a range of 500 - 350 = 150, so
+// the layout clamps the offset to 150 while the count (5) and the page length (100) stay:
+// the page becomes round(150 / 100) = round(1.5) = 2, reported once as (2, 5). Another
+// layout reports nothing, and a 300 viewport (range 200) does not move the offset and
+// reports nothing either.
+// Fails at 3d2c266e (and at the parent of this change) because the geometry and the count
+// were unchanged: the clamped pager kept page 4 and reported nothing.
+void CheckFixedPageSizeViewportClamp(ScrollDirection direction)
+{
+  UiTestApplication application;
+  const bool        vertical = (direction == ScrollDirection::Vertical);
+  View              content;
+  PageScrollView    pager = BuildPagerAlong(direction, content);
+  application.GetWindow().Add(pager);
+  application.SendNotification();
+  application.Render();
+
+  pager.SetPageSize(vertical ? Vector2(PAGER_HEIGHT, PAGER_WIDTH) : Vector2(PAGER_WIDTH, PAGER_HEIGHT));
+  pager.ScrollToPage(4, false);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, vertical), -400.0f, 0.001f, TEST_LOCATION);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+
+  ResizeAlong(pager, vertical, 350.0f);
+  application.SendNotification();
+  application.Render();
+
+  const Vector2 clamped = pager.GetScrollPosition();
+  DALI_TEST_EQUALS(vertical ? clamped.y : clamped.x, 150.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(vertical ? clamped.x : clamped.y, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, vertical), -150.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 5, TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+
+  ResizeAlong(pager, vertical, 300.0f);
+  application.SendNotification();
+  application.Render();
+  const Vector2 unclamped = pager.GetScrollPosition();
+  DALI_TEST_EQUALS(vertical ? unclamped.y : unclamped.x, 150.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+}
+
+} // namespace
+
+int UtcDaliPageScrollViewFixedPageSizeViewportClampHorizontalP(void)
+{
+  CheckFixedPageSizeViewportClamp(ScrollDirection::Horizontal);
+  END_TEST;
+}
+
+int UtcDaliPageScrollViewFixedPageSizeViewportClampVerticalP(void)
+{
+  CheckFixedPageSizeViewportClamp(ScrollDirection::Vertical);
+  END_TEST;
+}
+
+// Guard: a snap that settles on the partial last page records the offset it settled at.
+//
+// ScrollToPage(3, true) on the 160-over-500 pager snaps to 340 and commits (3, 4). A
+// cross-axis resize (80 -> 90) then repeats the callback with the same geometry, count and
+// offset: nothing may change.
+// Guard: fails if OnScrollFinished stopped recording the offset it committed the page at
+// (the callback would compare 340 with the 0 recorded by the first layout, take it for a
+// clamp and re-round to page round(340 / 160) = 2). Passes at the parent of this change,
+// which never re-derives on an unchanged geometry and count.
+int UtcDaliPageScrollViewSettledPartialPageSurvivesCrossAxisResizeP(void)
+{
+  UiTestApplication application;
+  View              content;
+  PageScrollView    pager = BuildPartialLastPagePager(application, ScrollDirection::Horizontal, content);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+  pager.ScrollToPage(3, true);
+  DALI_TEST_CHECK(pager.IsScrolling());
+  SettleScroll(application);
+  CheckPartialLastPageSelected(pager, content, false);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 4, TEST_LOCATION);
+
+  pager.SetRequestedHeight(90.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 90.0f, 0.001f, TEST_LOCATION);
+  CheckPartialLastPageSelected(pager, content, false);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+// Guard: a nested instant request that commits its page itself also records that page's
+// offset.
+//
+// A one-shot ScrollFinished handler requests ScrollToPage(3, false) on the 160-over-500
+// pager. ScrollToPage(1, false) commits (1, 4) at offset 160; the handler's request then
+// moves the content to 340 and, its own ScrollFinished being dropped, commits (3, 4)
+// itself. A cross-axis resize (80 -> 90) repeats the callback with the same geometry, count
+// and offset: nothing may change.
+// Guard: fails if that commit stopped recording the offset (the callback would compare 340
+// with the 160 recorded for page 1, take it for a clamp and re-round to page 2). Passes at
+// the parent of this change, which never re-derives on an unchanged geometry and count.
+int UtcDaliPageScrollViewNestedPartialPageSurvivesCrossAxisResizeP(void)
+{
+  UiTestApplication application;
+  View              content;
+  PageScrollView    pager = BuildPartialLastPagePager(application, ScrollDirection::Horizontal, content);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+
+  ConnectionTracker tracker;
+  bool              requested = false;
+  pager.ScrollFinishedSignal().Connect(&tracker, [&pager, &requested](ScrollView)
+  {
+    if(!requested)
+    {
+      requested = true;
+      pager.ScrollToPage(3, false);
+    }
+  });
+
+  pager.ScrollToPage(1, false);
+  DALI_TEST_CHECK(requested);
+  CheckPartialLastPageSelected(pager, content, false);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[1].first, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[1].second, 4, TEST_LOCATION);
+
+  pager.SetRequestedHeight(90.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 90.0f, 0.001f, TEST_LOCATION);
+  CheckPartialLastPageSelected(pager, content, false);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 2, TEST_LOCATION);
+  END_TEST;
+}
+
+// A half-unit maximum offset must not read as a clamp. A pager 124.5 long over 500 has
+// ceil(500 / 124.5) = 5 pages and a maximum offset of 500 - 124.5 = 375.5; its last page is a
+// sliver resting there although round(375.5 / 124.5) = 3. An instant scroll caches the
+// ROUNDED content position, 376 here, while the content actor rests at -375.5, until the next
+// layout re-clamps the cache to 375.5 without moving anything.
+//
+// ScrollToPage(4, false) selects page 4: (4, 5) once, content -375.5, offset within half a
+// unit of 375.5 (the rounded cache). A cross-axis resize (80 -> 90) re-clamps the cache to
+// 375.5 and must report nothing: page 4, offset 375.5.
+// Fails at ed9b5bd1 (the commit before this fix) because the settled offset was recorded as
+// the rounded 376, so the re-clamp to 375.5 compared as a half-unit move and re-rounded the
+// page to 3, emitting (3, 5). Fails at 3d2c266e already at the request, which selected page
+// round(376 / 124.5) = 3.
+int UtcDaliPageScrollViewHalfPixelMaximumKeepsPartialPageP(void)
+{
+  UiTestApplication application;
+  View              content;
+  PageScrollView    pager = BuildPager(content);
+  pager.SetRequestedWidth(124.5f);
+  application.GetWindow().Add(pager);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+
+  pager.ScrollToPage(4, false);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetScrollPosition().x, 375.5f, 0.501f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, false), -375.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 5, TEST_LOCATION);
+
+  pager.SetRequestedHeight(90.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 90.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetScrollPosition().x, 375.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, false), -375.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+// Guard against a regression of 3d2c266e on the same half-unit pager: a page selected by
+// NotifyPagesInserted before the first layout is applied by that layout and kept.
+//
+// Before any layout the count reads 1, so four insertions make five pages and select page 4,
+// reporting (4, 5). The first layout's width callback applies page 4 (content -375.5, the
+// instant scroll caching 376); its height callback, in the same pass, re-clamps the cache to
+// 375.5. The selection must survive with nothing more reported: page 4 of 5 at 375.5.
+// Passes at 3d2c266e. Fails at ed9b5bd1 (the commit before this fix) because the height
+// callback took the re-clamp for a move and re-rounded the selection to page 3, emitting
+// (3, 5) while the last page was shown.
+int UtcDaliPageScrollViewHalfPixelMaximumKeepsNotifiedPartialPageP(void)
+{
+  UiTestApplication application;
+  View              content;
+  PageScrollView    pager = BuildPager(content);
+  pager.SetRequestedWidth(124.5f);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+  pager.NotifyPagesInserted(0, 4);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 4, TEST_LOCATION);
+
+  application.GetWindow().Add(pager);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetScrollPosition().x, 375.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, false), -375.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 5, TEST_LOCATION);
+  END_TEST;
+}

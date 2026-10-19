@@ -42,7 +42,8 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_PAG
 #endif
 
 // Attachment storage preserves the published implementation object's size. A layout can
-// report width, height and viewport separately; only a new geometry may rederive a page.
+// report width, height and viewport separately; only a new geometry, or a clamp that moved
+// the offset a settled page was resolved at, may rederive a page.
 const AttachmentId PAGE_GEOMETRY = AttachmentId::Alloc();
 struct PageGeometry
 {
@@ -50,6 +51,7 @@ struct PageGeometry
   float           pageLength{0};
   ScrollDirection direction{ScrollDirection::Vertical};
   bool            valid{false};
+  float           offset{0}; ///< Primary-axis scroll offset the current page was last resolved at
 };
 PageGeometry& LastPageGeometry(Ui::View view)
 {
@@ -62,6 +64,24 @@ PageGeometry& LastPageGeometry(Ui::View view)
 
   DALI_ASSERT_ALWAYS(geometry && "PageScrollView geometry attachment creation failed");
   return *geometry;
+}
+
+// The scroll offset along the paging axis. Every caller passes the CLAMPED scroll position
+// (AdjustScrollPosition): an instant ScrollTo caches the ROUNDED content position, which can
+// lie half a unit past a fractional maximum (376 for a maximum of 375.5) until the next
+// layout re-clamps it, and that re-clamp must not read as a move.
+float PrimaryOffset(const Vector2& position, ScrollDirection direction)
+{
+  return (direction == ScrollDirection::Horizontal) ? position.x : position.y;
+}
+
+// Records the offset a settled page was just committed at. Every commit of a settled page
+// records it (OnScrollFinished, and ScrollToPage when it commits a target that no
+// ScrollFinished consumed), so OnScrollableAreaChanged can tell a clamp that moved a settled
+// pager from a pass that left its offset alone. `position` is the clamped scroll position.
+void RecordSettledOffset(Ui::View view, const Vector2& position, ScrollDirection direction)
+{
+  LastPageGeometry(view).offset = PrimaryOffset(position, direction);
 }
 
 // Restores mNotifyInProgress on every exit, including an exception thrown by an application
@@ -144,7 +164,7 @@ void PageScrollViewImpl::SetPageSize(const Vector2& size)
   const Vector2 effective  = GetEffectivePageSize();
   const float   pageLength = dir == ScrollDirection::Horizontal ? effective.x : effective.y;
   if(pageLength >= 1.0f)
-    LastPageGeometry(Ui::View::DownCast(Self())) = {primary, pageLength, dir, true};
+    LastPageGeometry(Ui::View::DownCast(Self())) = {primary, pageLength, dir, true, PrimaryOffset(AdjustScrollPosition(GetScrollPosition()), dir)};
 
   int newCount = GetPageCount();
   int newPage  = (newCount > 0)
@@ -226,6 +246,7 @@ void PageScrollViewImpl::ScrollToPage(int page, bool animate)
     mSnapTargetPage = -1;
     const int count = GetPageCount();
     CommitPage(count > 0 ? std::max(0, std::min(count - 1, target)) : 0);
+    RecordSettledOffset(Ui::View::DownCast(Self()), AdjustScrollPosition(GetScrollPosition()), GetScrollDirection());
   }
 }
 
@@ -392,8 +413,14 @@ void PageScrollViewImpl::OnScrollableAreaChanged()
   const bool geometryChanged = !geometry.valid || geometry.direction != dir ||
                                std::abs(geometry.primary - primary) >= 0.01f ||
                                std::abs(geometry.pageLength - pageLen) >= 0.01f;
+  // A clamp can move a settled pager without changing its geometry: with a fixed page size
+  // a growing viewport keeps the count and the page length but shrinks the range. The
+  // offset the page was last resolved at tells that move from a pass that kept the offset.
+  // Both sides are clamped offsets, so a rounding artefact compares equal; a real move of at
+  // least half a unit is the same threshold the pending apply below uses.
+  const bool offsetMoved = geometry.valid && std::abs(geometry.offset - PrimaryOffset(AdjustScrollPosition(GetScrollPosition()), dir)) >= 0.5f;
   // Publish before applying a pending selection: instant scrolling may re-enter layout.
-  geometry = {primary, pageLen, dir, true};
+  geometry = {primary, pageLen, dir, true, geometry.offset};
 
   // Layout has now set correct dimensions — release the expected-count override that
   // NotifyPages* left in place, and apply the page it selected.
@@ -444,6 +471,10 @@ void PageScrollViewImpl::OnScrollableAreaChanged()
     }
   }
 
+  // Later callbacks detect a clamp against the offset seen here; a scroll in flight records
+  // its own offset again when it finishes.
+  geometry.offset = PrimaryOffset(AdjustScrollPosition(GetScrollPosition()), dir);
+
   // A count change is always reported. The reported page is the page the view will settle
   // on: while a snap is in flight it is the snap target clamped to the new count, which is
   // exactly what OnScrollFinished commits, so the transient and the settled notification
@@ -454,14 +485,17 @@ void PageScrollViewImpl::OnScrollableAreaChanged()
   // is the newer intent and is kept; one that was NOT applied, because a scroll owns the
   // position or the layout is empty, is superseded and re-derived like any other state.
   // A geometry change that keeps the count re-derives only on a settled view, because a
-  // snap target that is still valid must not be replaced by the nearest page.
+  // snap target that is still valid must not be replaced by the nearest page. So does a
+  // clamp that moved the offset the page was resolved at: the page then follows the offset
+  // the view shows, which demotes an explicitly selected page whose resting offset the
+  // clamp moved (an explicit selection is kept only while its offset is).
   // ScrollToPage commits a target that no ScrollFinished consumed, so an explicit page
   // request never leaves a stale target behind.
   const int  newCount     = GetPageCount();
   const bool countChanged = (newCount != mLastNotifiedPageCount);
   const bool settled      = !IsScrolling() && mSnapTargetPage < 0;
   int        newPage      = mCurrentPage;
-  if(!selectionKept && (countChanged || (geometryChanged && settled)))
+  if(!selectionKept && (countChanged || ((geometryChanged || offsetMoved) && settled)))
   {
     newPage = (mSnapTargetPage >= 0) ? mSnapTargetPage : PageForScrollPosition(GetScrollPosition());
   }
@@ -522,6 +556,7 @@ void PageScrollViewImpl::OnScrollFinished(Ui::ScrollView /*scrollView*/)
   const int total = GetPageCount();
   settled         = total > 0 ? std::max(0, std::min(total - 1, settled)) : 0;
   CommitPage(settled);
+  RecordSettledOffset(Ui::View::DownCast(Self()), AdjustScrollPosition(GetScrollPosition()), GetScrollDirection());
 }
 
 // ─── Dynamic page insertion / removal ────────────────────────────────────────

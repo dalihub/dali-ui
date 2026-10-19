@@ -183,6 +183,12 @@ protected:
    * so an explicit page request never leaves a stale target behind. Repeated callbacks for
    * the same geometry emit nothing.
    *
+   * On a settled view, a clamp that moved the offset the page was last resolved at also
+   * re-derives the page: with a fixed page size a growing viewport moves the offset without
+   * changing the count or the page length. The page then follows the offset the view shows,
+   * which demotes an explicitly selected page whose resting offset the clamp moved; an
+   * explicit selection is kept only while its offset is.
+   *
    * This is also where a page SELECTED before the first layout is applied: with a zero
    * page length ScrollToPage could only record the page, so the first call that has real
    * dimensions scrolls to it while preserving the selected page. A
