@@ -236,7 +236,6 @@ SelectableImageInterface MakePaymentRadioIcon()
 {
   using Binding     = SelectableLottieColorBinding;
   using ColorPolicy = Binding::ColorPolicy;
-  using FrameRange  = SelectableLottieImage::FrameRange;
 
   SelectableLottieColorBindings bindings;
   bindings.PushBack(Binding("payment_radio.inner_fill.color",
@@ -245,11 +244,11 @@ SelectableImageInterface MakePaymentRadioIcon()
   bindings.PushBack(Binding("payment_radio.outline.color",
                             LottieAnimation::VectorProperty::STROKE_COLOR,
                             ColorPolicy::SELECTED_IN_FRAME_RANGE,
-                            FrameRange(7, 26)));
+                            Int32Pair(7, 26)));
 
   SelectableLottieImage image("/opt/usr/share/my-app/payment-radio.json",
-                              FrameRange(0, 19),
-                              FrameRange(20, 37));
+                              Int32Pair(0, 19),
+                              Int32Pair(20, 37));
   return SelectableLottieAnimationView::New(image, bindings);
 }
 
