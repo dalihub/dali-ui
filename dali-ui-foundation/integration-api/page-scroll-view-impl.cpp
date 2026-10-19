@@ -361,18 +361,22 @@ void PageScrollViewImpl::OnScrollableAreaChanged()
 
   // LayoutManager calls SetScrollableWidth then SetScrollableHeight in separate
   // steps, and RefreshViewport adds a third call for a viewport-only resize; each
-  // triggers this callback.  Skip a call where the primary-axis scrollable dimension
-  // or the page length is not real yet, so we neither emit a page count derived from a
-  // partially-updated layout nor resolve a page position against a zero page length.
+  // triggers this callback.  Skip a call where the page length is not real yet, so we
+  // never resolve a page position against a zero page length, and a call where the
+  // primary-axis scrollable dimension is not real yet while this direction has never been
+  // measured, so we never emit a page count derived from a partially-updated layout.
+  // Once this direction has been measured, an empty extent is real (empty) content: it
+  // releases a pending count and is reported like any other count change.
   //
-  // The guard runs BEFORE the override is released: a cross-axis call must leave the
+  // The guards run BEFORE the override is released: a cross-axis call must leave the
   // pre-layout state intact for the call that does have real dimensions.
   const ScrollDirection dir      = GetScrollDirection();
   const Vector2         pageSize = GetEffectivePageSize();
   const float           primary  = (dir == ScrollDirection::Horizontal) ? GetScrollableWidth() : GetScrollableHeight();
   const float           pageLen  = (dir == ScrollDirection::Horizontal) ? pageSize.x : pageSize.y;
-  if(primary < 1.0f || pageLen < 1.0f) return;
+  if(pageLen < 1.0f) return;
   auto& geometry = LastPageGeometry(Ui::View::DownCast(Self()));
+  if(primary < 1.0f && (!geometry.valid || geometry.direction != dir)) return;
   // 0.01 is the tolerance ScrollViewImpl itself uses for these dimensions
   // (SetScrollableWidth, SetScrollableHeight, RefreshViewport).
   const bool geometryChanged = !geometry.valid || geometry.direction != dir ||
@@ -398,12 +402,18 @@ void PageScrollViewImpl::OnScrollableAreaChanged()
   //    re-applying the selected page is exactly the wanted outcome.
   //
   // Only when nothing else owns the scroll position: a scroll in flight, or a snap
-  // target waiting for its OnScrollFinished, is a newer intent than the recorded one.
+  // target waiting for its OnScrollFinished, is a newer intent than the recorded one, and
+  // then the page is re-derived from that newer intent below exactly as it is without a
+  // pending selection. A post-layout NotifyPages* leaves its selection pending until the
+  // next callback that gets this far, or a settled scroll, releases it: the layout pass
+  // right after the notify measures the very extent the notify already set and never
+  // reaches this point, so a scroll started in that window arrives here still in flight.
   // Known residual: a user ScrollTo issued pre-layout after NotifyPages* clears the
   // override through OnScrollFinished, and is then indistinguishable from a settled
   // post-layout state.
   const bool pendingSelection = (mExpectedPageCount >= 0);
   mExpectedPageCount          = -1;
+  bool selectionKept          = false;
   if(pendingSelection && !IsScrolling() && mSnapTargetPage < 0)
   {
     const int total = GetPageCount();
@@ -413,6 +423,7 @@ void PageScrollViewImpl::OnScrollableAreaChanged()
       const Vector2 target  = ScrollPositionForPage(page);
       const Vector2 current = GetScrollPosition();
       mCurrentPage          = page;
+      selectionKept         = true;
       if(std::abs(target.x - current.x) >= 0.5f || std::abs(target.y - current.y) >= 0.5f)
       {
         // A partial last page can clamp to an offset rounding to the previous page.
@@ -430,16 +441,17 @@ void PageScrollViewImpl::OnScrollableAreaChanged()
   // page below it). A free scroll (no snap target) or a settled view re-derives from the
   // scroll position; during an animated scroll that is the LIVE current position kept by
   // OnContentPositionChanged, not the target. A NotifyPages* selection just applied above
-  // is the newer intent and is kept. A geometry change that keeps the count re-derives
-  // only on a settled view, because a snap target that is still valid must not be
-  // replaced by the nearest page. ScrollToPage clears a target whose animated scroll never
-  // started, so an explicit page request that had nothing to scroll leaves no stale target
-  // behind.
+  // is the newer intent and is kept; one that was NOT applied, because a scroll owns the
+  // position or the layout is empty, is superseded and re-derived like any other state.
+  // A geometry change that keeps the count re-derives only on a settled view, because a
+  // snap target that is still valid must not be replaced by the nearest page.
+  // ScrollToPage clears a target whose animated scroll never started, so an explicit page
+  // request that had nothing to scroll leaves no stale target behind.
   const int  newCount     = GetPageCount();
   const bool countChanged = (newCount != mLastNotifiedPageCount);
   const bool settled      = !IsScrolling() && mSnapTargetPage < 0;
   int        newPage      = mCurrentPage;
-  if(!pendingSelection && (countChanged || (geometryChanged && settled)))
+  if(!selectionKept && (countChanged || (geometryChanged && settled)))
   {
     newPage = (mSnapTargetPage >= 0) ? mSnapTargetPage : PageForScrollPosition(GetScrollPosition());
   }

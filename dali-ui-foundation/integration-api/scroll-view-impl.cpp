@@ -2326,6 +2326,10 @@ void ScrollViewImpl::UpdateScrollingProperties()
   if(!mScrollAnimation)
   {
     ApplyScrollPosition(mScrollPosition);
+    // Drags and duration-based scrolls start from this cache. Keep it on the position
+    // just applied (padding included): a layout that re-applies a clamped position would
+    // otherwise leave the next drag or snap starting from the old offset.
+    mCurrentPosition = Vector2(mMaximumStartX - mScrollPosition.x, mMaximumStartY - mScrollPosition.y);
   }
 
 #ifdef DEBUG_SCROLL

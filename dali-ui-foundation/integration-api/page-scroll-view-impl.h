@@ -170,11 +170,14 @@ protected:
    * the last page is partial. A free scroll (no snap target) or a settled view re-derives
    * from the scroll position, which during an animated scroll is the LIVE current position,
    * not the target. A page selected by NotifyPagesInserted / NotifyPagesRemoved that has
-   * just been applied is the newer intent and is kept. A changed viewport that leaves the
-   * count alone re-derives only on a settled view, so a snap target that is still valid is
-   * never replaced by the nearest page. ScrollToPage clears a target whose animated scroll
-   * never started, so an explicit page request that had nothing to scroll does not leave a
-   * stale target behind. Repeated callbacks for the same geometry emit nothing.
+   * just been applied is the newer intent and is kept; one that a scroll in flight kept
+   * from being applied yields to that scroll. Once this direction has been measured, an
+   * empty layout releases a pending count and reports page -1 with count 0.
+   * A changed viewport that leaves the count alone re-derives only on a settled view, so a
+   * snap target that is still valid is never replaced by the nearest page. ScrollToPage
+   * clears a target whose animated scroll never started, so an explicit page request that
+   * had nothing to scroll does not leave a stale target behind. Repeated callbacks for the
+   * same geometry emit nothing.
    *
    * This is also where a page SELECTED before the first layout is applied: with a zero
    * page length ScrollToPage could only record the page, so the first call that has real
