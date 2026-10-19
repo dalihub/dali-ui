@@ -846,3 +846,31 @@ int UtcDaliGridLayoutRowSpanGrowsAutoTracksP(void)
   DALI_TEST_EQUALS(tall.GetSize().height, 100.0f, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliGridLayoutDefinitionSnapshotsP(void)
+{
+  UiTestApplication        application;
+  GridLayout               layout = GridLayout::New();
+  Dali::Vector<GridLength> rows;
+  Dali::Vector<GridLength> columns;
+  rows.PushBack(GridLength::Absolute(40.0f));
+  columns.PushBack(GridLength::Star(2.0f));
+  layout.SetRowDefinitions(rows);
+  layout.SetColumnDefinitions(columns);
+
+  rows[0] = GridLength::Auto();
+  columns.Clear();
+  Dali::Vector<GridLength> returnedRows    = layout.GetRowDefinitions();
+  Dali::Vector<GridLength> returnedColumns = layout.GetColumnDefinitions();
+  DALI_TEST_CHECK(returnedRows[0].GetType() == GridLengthType::ABSOLUTE);
+  DALI_TEST_EQUALS(returnedRows[0].GetValue(), 40.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(returnedColumns[0].GetType() == GridLengthType::STAR);
+  DALI_TEST_EQUALS(returnedColumns[0].GetValue(), 2.0f, TEST_LOCATION);
+
+  returnedRows[0] = GridLength::Star(3.0f);
+  returnedColumns.Release();
+  DALI_TEST_CHECK(layout.GetRowDefinitions()[0].GetType() == GridLengthType::ABSOLUTE);
+  DALI_TEST_EQUALS(layout.GetRowDefinitions()[0].GetValue(), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(layout.GetColumnDefinitions()[0].GetValue(), 2.0f, TEST_LOCATION);
+  END_TEST;
+}

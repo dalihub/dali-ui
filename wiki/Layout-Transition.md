@@ -44,9 +44,9 @@ When both are configured for a slot, **animator mode wins**.
 
 ### Causes
 
-`LayoutAnimatorContext::changeCause` distinguishes CHANGE scenarios. It is
-meaningful only when `slot == CHANGE`; for ENTER / EXIT it defaults to
-`OTHER` and must not be branched on.
+`LayoutAnimatorContext::GetChangeCause()` distinguishes CHANGE scenarios. It is
+meaningful only when `GetSlot() == LayoutTransitionSlot::CHANGE`; for ENTER / EXIT
+it defaults to `OTHER` and must not be branched on.
 
 | Cause             | Meaning                                              |
 |-------------------|------------------------------------------------------|
@@ -105,18 +105,20 @@ depending on which slot consumes it. `LayoutBoundsEffects::SlideFrom` and
 ```cpp
 auto onChange = [](const LayoutAnimatorContext& ctx)
 {
-    Actor actor = ctx.view;
+    Actor actor = ctx.GetView();
     if (!actor) return;
-    const float p = ctx.progress;
-    const float x = ctx.fromBounds.x + (ctx.toBounds.x - ctx.fromBounds.x) * p;
-    const float y = ctx.fromBounds.y + (ctx.toBounds.y - ctx.fromBounds.y) * p;
+    const float p = ctx.GetProgress();
+    const LayoutRect fromBounds = ctx.GetFromBounds();
+    const LayoutRect toBounds = ctx.GetToBounds();
+    const float x = fromBounds.x + (toBounds.x - fromBounds.x) * p;
+    const float y = fromBounds.y + (toBounds.y - fromBounds.y) * p;
     actor.SetPositionX(x);
     actor.SetPositionY(y);
 };
 
 LayoutAnimatorTiming timing;
-timing.duration = Duration(0.3f);
-timing.alpha    = AlphaFunction(AlphaFunction::EASE_IN_OUT);
+timing.SetDuration(Duration(0.3f));
+timing.SetAlpha(AlphaFunction(AlphaFunction::EASE_IN_OUT));
 
 LayoutTransition transition = LayoutTransition::New();
 transition.SetChangeAnimator(LayoutAnimatorCallback::New(onChange), timing);
@@ -298,7 +300,7 @@ children at runtime after the parent has completed its first arrange.
 `OnFinished` fires when a transition reaches **normal completion** —
 the configured timing has fully elapsed (animator mode: `rawProgress`
 reaches 1.0; spec mode: dali-core `Animation::FinishedSignal` fires).
-The shaped `ctx.progress` is not necessarily 1.0 at that moment:
+The shaped `ctx.GetProgress()` is not necessarily 1.0 at that moment:
 a `CUSTOM_FUNCTION` pointer may return any value at the final tick.
 (`AlphaFunction::REVERSE` is rejected by LayoutTransition validation —
 see AlphaFunction restrictions below. `BOUNCE` and `SIN` are additionally
@@ -319,7 +321,7 @@ cancel in-flight transitions — see the caveat below.
   `LayoutTransition` (which owns the callback), and the `View` holds the
   `LayoutTransition`. Capturing the target `View` by value inside an
   animator or lifecycle closure forms a cycle. Use `WeakHandle<View>` if
-  a captured reference is required, or read `ctx.view` inside the
+  a captured reference is required, or read `ctx.GetView()` inside the
   callback body each frame.
 
 - **No view-tree mutations from animator callbacks.** Do not call
@@ -356,7 +358,7 @@ cancel in-flight transitions — see the caveat below.
 - **Cancellation is silent.** `OnFinished` fires only when a transition
   reaches normal timing completion (animator mode: `rawProgress` reaches
   1.0; spec mode: dali-core `Animation::FinishedSignal` fires). Note that
-  shaped `ctx.progress` is not necessarily 1.0 at completion — see the
+  shaped `ctx.GetProgress()` is not necessarily 1.0 at completion — see the
   Lifecycle section. Cancellation paths drop the in-flight callback
   silently:
     - same-slot supersession (a new spec/animator started for the same
@@ -449,7 +451,7 @@ cancel in-flight transitions — see the caveat below.
       restrictions section below.
 
 - **Animator-mode `duration` should be positive.** A non-positive
-  `LayoutAnimatorTiming::duration` collapses progress to `1.0` on the
+  `LayoutAnimatorTiming::GetDuration()` collapses progress to `1.0` on the
   first tick regardless of `delay`. To delay an animator's start,
   combine a positive `duration` with the desired `delay`.
 
@@ -478,8 +480,8 @@ before applying the spec:
 For `LayoutAnimatorTiming` and `LayoutTransitionTiming`, validation is
 configuration-time only because those values are stored by value.
 
-For layout-bounds timing (`SetChangeTiming` and
-`LayoutBoundsEffect::timing`), `BOUNCE` and `SIN` are also rejected
+When registering layout-bounds timing through `SetChangeTiming`,
+`SetEnterBoundsEffect`, or `SetExitBoundsEffect`, `BOUNCE` and `SIN` are also rejected
 because dali-core evaluates them back to the initial state at completion.
 A layout transition must finish on the layout target bounds.
 
@@ -527,6 +529,74 @@ as the lifecycle completion contract.
 `rawProgress` is still useful as a per-frame linear elapsed signal.
 For example, the primary effect can follow the alpha-shaped `progress`,
 while a secondary visual effect follows `rawProgress`.
+
+---
+
+## Value types and API migration
+
+`LayoutTransitionTiming`, `LayoutAnimatorTiming`, `LayoutBoundsEffect`, and
+`LayoutAnimatorContext` keep their fields in private implementations. Future
+implementation fields can be added without changing these public object layouts.
+The conversion from the previous directly stored types is itself an intentional
+source and ABI break: applications and dependent libraries must migrate their
+sources and rebuild.
+
+| Previous use | Current API |
+|---|---|
+| `effect.offset` | `GetOffset()` returns a const reference; copy it, edit the public axis values, then call `SetOffset()` |
+| `timing.duration`, `timing.alpha`, `timing.delay` | `GetDuration()`, `GetAlpha()`, `GetDelay()`; update through the corresponding chainable `Set...()` methods |
+| `effect.timing` | `GetTiming()` returns a const reference; copy it, update the copy, and call `SetTiming()` |
+| `effect.hasOffset`, `effect.hasSizeFactor` | `HasOffset()`, `HasSizeFactor()`; use `SetOffset()` / `ClearOffset()` and `SetSizeFactor()` / `ClearSizeFactor()` to update the options and their values together |
+| Remaining effect fields | `GetSizeFactorX()`, `GetSizeFactorY()`, `GetAnchorX()`, `GetAnchorY()`, `GetClipMode()` and the existing grouped setters |
+| Context fields | `GetView()`, `GetSlot()`, `GetChangeCause()`, `GetProgress()`, `GetRawProgress()`, `GetFromBounds()`, `GetToBounds()` |
+
+Both timing types still support default construction and brace construction with
+one, two, or three arguments in the order `Duration`, `AlphaFunction`, `Duration`.
+Their default values and registration-time validation are unchanged. Timing and
+effect copies are independent values, including the timing nested in an effect.
+After moving a timing or effect, the source can be destroyed or assigned a new
+value; it must not otherwise be used.
+
+`LayoutBoundsLength` remains an aggregate with public `float value` and
+`LayoutBoundsUnit unit` fields. It supports `{}`, `{value}`, and `{value, unit}`
+initialization, plus `Pixel()`, `SelfFraction()`, and `ParentFraction()` factories.
+Signed and non-finite field values can be stored; finite-value validation still
+occurs when the containing effect is registered.
+`GridLength` retains its private type and scalar value, with inline `Absolute()`,
+`Star()`, `Auto()`, `GetType()`, and `GetValue()`. Assign a new factory result to
+change a grid length. Both length types are trivially copyable and destructible;
+they store their values directly without per-value heap allocation.
+`Dali::Vector<GridLength>` retains its scalar storage path, including filling
+every new element in `Resize(n, GridLength::Star())`.
+The field types, order and count, and each unit/type enum's underlying type, are
+fixed ABI representations. Compound length expressions, grid track constraints,
+or additional metadata require separate types or APIs rather than extra fields.
+These scalar representations match the original types; binaries built against
+an intermediate PIMPL version of either length type still need a rebuild.
+
+`GetOffset()` returns `const LayoutBoundsOffset&` referring to the stored axes.
+The reference is valid until the effect is assigned, moved from, or destroyed;
+`SetOffset()` and `ClearOffset()` update what it observes. Use
+`auto offset = effect.GetOffset();` for an independent editable copy, then change
+`offset.x.value` / `offset.x.unit` or the corresponding y-axis fields and pass the
+copy to `SetOffset()`.
+
+The framework constructs each callback context from stack storage. Applications
+cannot default-construct, aggregate-initialize, or set a context. The callback's
+reference expires when the callback returns. Copying it produces an independent
+snapshot that survives the callback and subsequent ticks; assigning or passing
+an rvalue also copies the snapshot. Store such copies outside the callback when
+needed, for example by calling `snapshot.emplace(ctx)` on a
+`std::optional<LayoutAnimatorContext>` variable.
+A snapshot retains the same target `View` handle; it does not clone the view.
+Keeping that snapshot inside the target's own callback closure can create a
+reference cycle, just like capturing the target `View` directly. Use a
+`WeakHandle<View>` and copy only the required scalar/bounds values when retaining
+the target is unnecessary.
+
+`MeasuredSize` retains its two public size fields, and `LayoutBoundsOffset`
+retains its two public length axes. These representations are fixed; additional
+measurement or offset metadata requires a separate type.
 
 ---
 

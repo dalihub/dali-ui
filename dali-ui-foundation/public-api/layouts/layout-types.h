@@ -110,6 +110,8 @@ enum class LayoutMode : uint8_t
  * @brief Class representing measured LayoutDimensions.
  *
  * This class stores the measured width and height of a view.
+ * The two public fields are a fixed ABI representation. Additional measurement
+ * metadata belongs in a separate type rather than new fields in this class.
  */
 class DALI_UI_API MeasuredSize
 {
@@ -507,6 +509,11 @@ enum class GridLengthType : uint8_t
 
 /**
  * @brief Class representing grid length specification.
+ *
+ * The type and scalar value form a fixed ABI representation. Their types,
+ * order and count, and the underlying type of GridLengthType, must remain
+ * unchanged. Compound sizing rules or additional metadata require a separate
+ * type or API. Copies store their values directly.
  */
 class DALI_UI_API GridLength
 {

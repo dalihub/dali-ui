@@ -71,3 +71,19 @@ Output: `com.samsung.dali.gridlayout-2.0.0-1.armv7l.rpm`
 ## Controls
 
 - **Escape** or **Back**: Quit the application.
+
+## Grid length values
+
+`GridLength` stores its type and scalar value directly in a fixed ABI
+representation. `Absolute()`, `Star()`, `Auto()`, `GetType()`, and `GetValue()`
+remain inline APIs. Copies contain independent values without per-value heap
+allocation. Compound sizing rules or additional metadata require separate types
+or APIs rather than changing these fields.
+
+`Dali::Vector<GridLength>` retains its scalar storage path. A temporary fill
+value initializes every new element:
+
+```cpp
+Dali::Vector<GridLength> rows;
+rows.Resize(3u, GridLength::Star());
+```

@@ -348,7 +348,7 @@ LayoutTransition NewTextEntranceTransition(float delay, float slideDuration)
                                       AlphaFunction(AlphaFunction::EASE_OUT_SQUARE),
                                       Duration(delay)};
   ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
-  enterSpec.Opacity(1.0f, timing.duration, timing.alpha, timing.delay);
+  enterSpec.Opacity(1.0f, timing.GetDuration(), timing.GetAlpha(), timing.GetDelay());
   LayoutTransition transition = LayoutTransition::New();
   transition.SetEnterVisualSpec(enterSpec)
     .SetEnterBoundsEffect(LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::BOTTOM,
@@ -426,7 +426,7 @@ LayoutTransition NewCardEntranceTransition()
                                       Duration(0.06f)};
 
   ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
-  enterSpec.Opacity(1.0f, timing.duration, timing.alpha, timing.delay);
+  enterSpec.Opacity(1.0f, timing.GetDuration(), timing.GetAlpha(), timing.GetDelay());
 
   LayoutTransition transition = LayoutTransition::New();
   transition.SetEnterVisualSpec(enterSpec)
@@ -445,7 +445,7 @@ LayoutTransition NewAffordanceTransition(LayoutBoundsEdge edge)
                                       Duration()};
 
   ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
-  enterSpec.Opacity(1.0f, timing.duration, timing.alpha, timing.delay);
+  enterSpec.Opacity(1.0f, timing.GetDuration(), timing.GetAlpha(), timing.GetDelay());
 
   LayoutTransition transition = LayoutTransition::New();
   transition.SetEnterVisualSpec(enterSpec)
@@ -464,7 +464,7 @@ LayoutTransition NewMarkdownEntranceTransition()
                                       Duration()};
 
   ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
-  enterSpec.Opacity(1.0f, timing.duration, timing.alpha, timing.delay);
+  enterSpec.Opacity(1.0f, timing.GetDuration(), timing.GetAlpha(), timing.GetDelay());
 
   LayoutTransition transition = LayoutTransition::New();
   transition.SetEnterVisualSpec(enterSpec)

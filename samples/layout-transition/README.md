@@ -54,6 +54,26 @@ bounds change.
   drag can start, free scrolling uses the empty margins between cells; the
   auto-scroll keeps off-screen cells reachable during a reorder.
 
+## Value access
+
+Timing values use `SetDuration()`, `SetAlpha()`, and `SetDelay()` with matching
+getters. Animator callbacks read `GetView()`, `GetProgress()`, `GetFromBounds()`,
+and `GetToBounds()` from the supplied context. The callback reference is valid
+only during that callback; an explicit copy is an independent snapshot that
+retains the target `View`.
+
+Bounds lengths retain public `value` and `unit` fields as a fixed scalar
+representation. `LayoutBoundsOffset::x/y` remain public length values.
+`GetOffset()` returns a const reference, valid until the effect is assigned,
+moved from, or destroyed. To edit it independently:
+
+```cpp
+auto offset = effect.GetOffset();
+offset.x.value = 24.0f;
+offset.x.unit = LayoutBoundsUnit::PIXEL;
+effect.SetOffset(offset);
+```
+
 ## Controls
 
 - **Tap "Click to ENTER"**: append a new colored child (ENTER expands

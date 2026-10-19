@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/internal/layouts/layout-direction-utils.h>
 #include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-transition-types-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-validation.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
@@ -189,20 +190,21 @@ LayoutRect ComputeBoundsEndpoint(const LayoutRect&         base,
 {
   LayoutRect result = base;
 
-  if(effect.hasSizeFactor)
+  if(effect.HasSizeFactor())
   {
-    const float width  = base.width * effect.sizeFactorX;
-    const float height = base.height * effect.sizeFactorY;
-    result.x           = base.x + (base.width - width) * effect.anchorX;
-    result.y           = base.y + (base.height - height) * effect.anchorY;
+    const float width  = base.width * effect.GetSizeFactorX();
+    const float height = base.height * effect.GetSizeFactorY();
+    result.x           = base.x + (base.width - width) * effect.GetAnchorX();
+    result.y           = base.y + (base.height - height) * effect.GetAnchorY();
     result.width       = width;
     result.height      = height;
   }
 
-  if(effect.hasOffset)
+  if(effect.HasOffset())
   {
-    result.x += ResolveBoundsLength(effect.offset.x, true, base, parentLocalBounds);
-    result.y += ResolveBoundsLength(effect.offset.y, false, base, parentLocalBounds);
+    const LayoutBoundsOffset& offset = effect.GetOffset();
+    result.x += ResolveBoundsLength(offset.x, true, base, parentLocalBounds);
+    result.y += ResolveBoundsLength(offset.y, false, base, parentLocalBounds);
   }
 
   return result;
@@ -213,7 +215,7 @@ void ApplyBoundsEndpointAtBoundsAnimation(Animation&                animation,
                                           const LayoutRect&         target,
                                           const LayoutBoundsEffect& effect)
 {
-  const float durationSec = effect.timing.duration.InSeconds();
+  const float durationSec = effect.GetTiming().GetDuration().InSeconds();
 
   if(durationSec <= 0.0f)
   {
@@ -226,7 +228,7 @@ void ApplyBoundsEndpointAtBoundsAnimation(Animation&                animation,
     return;
   }
 
-  const float delaySec         = effect.timing.delay.InSeconds();
+  const float delaySec         = effect.GetTiming().GetDelay().InSeconds();
   const float requiredDuration = delaySec + durationSec;
   if(requiredDuration > animation.GetDuration())
   {
@@ -234,10 +236,10 @@ void ApplyBoundsEndpointAtBoundsAnimation(Animation&                animation,
   }
 
   TimePeriod period(delaySec, durationSec);
-  animation.AnimateTo(Property(actor, Actor::Property::POSITION_X), target.x, effect.timing.alpha, period);
-  animation.AnimateTo(Property(actor, Actor::Property::POSITION_Y), target.y, effect.timing.alpha, period);
-  animation.AnimateTo(Property(actor, Actor::Property::SIZE_WIDTH), target.width, effect.timing.alpha, period);
-  animation.AnimateTo(Property(actor, Actor::Property::SIZE_HEIGHT), target.height, effect.timing.alpha, period);
+  animation.AnimateTo(Property(actor, Actor::Property::POSITION_X), target.x, effect.GetTiming().GetAlpha(), period);
+  animation.AnimateTo(Property(actor, Actor::Property::POSITION_Y), target.y, effect.GetTiming().GetAlpha(), period);
+  animation.AnimateTo(Property(actor, Actor::Property::SIZE_WIDTH), target.width, effect.GetTiming().GetAlpha(), period);
+  animation.AnimateTo(Property(actor, Actor::Property::SIZE_HEIGHT), target.height, effect.GetTiming().GetAlpha(), period);
 }
 
 void SetActorBoundsImmediate(Dali::Actor actor, const LayoutRect& bounds)
@@ -263,9 +265,9 @@ ApplyTransientStateForBoundsEffect(Dali::Actor               actor,
   }
 
   const bool shouldClip =
-    (effect->clipMode == LayoutBoundsClipMode::AUTO &&
+    (effect->GetClipMode() == LayoutBoundsClipMode::AUTO &&
      HasTimedSizeEffect(*effect)) ||
-    (effect->clipMode == LayoutBoundsClipMode::CLIP_TO_BOUNDING_BOX &&
+    (effect->GetClipMode() == LayoutBoundsClipMode::CLIP_TO_BOUNDING_BOX &&
      IsTimedEffect(*effect));
 
   if(!shouldClip)
@@ -1474,8 +1476,8 @@ void LayoutTransitionDispatcher::StartChangeTransition(ViewImpl*             chi
     return;
   }
 
-  const float durationSec = spec.duration.InSeconds();
-  const float delaySec    = spec.delay.InSeconds();
+  const float durationSec = spec.GetDuration().InSeconds();
+  const float delaySec    = spec.GetDelay().InSeconds();
 
   Actor actor = child->Self();
   if(!actor)
@@ -1538,10 +1540,10 @@ void LayoutTransitionDispatcher::StartChangeTransition(ViewImpl*             chi
 
   Animation  anim = Animation::New(durationSec + delaySec);
   TimePeriod period(delaySec, durationSec);
-  anim.AnimateTo(Property(actor, Actor::Property::POSITION_X), to.x, spec.alpha, period);
-  anim.AnimateTo(Property(actor, Actor::Property::POSITION_Y), to.y, spec.alpha, period);
-  anim.AnimateTo(Property(actor, Actor::Property::SIZE_WIDTH), to.width, spec.alpha, period);
-  anim.AnimateTo(Property(actor, Actor::Property::SIZE_HEIGHT), to.height, spec.alpha, period);
+  anim.AnimateTo(Property(actor, Actor::Property::POSITION_X), to.x, spec.GetAlpha(), period);
+  anim.AnimateTo(Property(actor, Actor::Property::POSITION_Y), to.y, spec.GetAlpha(), period);
+  anim.AnimateTo(Property(actor, Actor::Property::SIZE_WIDTH), to.width, spec.GetAlpha(), period);
+  anim.AnimateTo(Property(actor, Actor::Property::SIZE_HEIGHT), to.height, spec.GetAlpha(), period);
 
   anim.FinishedSignal().Connect(this, &LayoutTransitionDispatcher::OnAnimationFinished);
   anim.Play();
@@ -1929,7 +1931,7 @@ void LayoutTransitionDispatcher::StartAnimatorExit(ViewImpl*             parent,
   // logic in StartAnimatorChange / StartChangeTransition.
   //
   // Without this, the actor's visual position at the moment of removal
-  // (mid-CHANGE) would not match `ctx.fromBounds` / `ctx.toBounds` (both
+  // (mid-CHANGE) would not match `ctx.GetFromBounds()` / `ctx.GetToBounds()` (both
   // set to the arranged layout bounds), so an EXIT animator that drives
   // POSITION/SIZE from those values would jump on the first tick.
   Ui::View parentHandle = Ui::View::DownCast(parent->Self());
@@ -2002,8 +2004,8 @@ void LayoutTransitionDispatcher::DispatchOneTick(ViewImpl* child)
   }
   AnimatorState& state = it->second;
 
-  const float delaySec    = state.timing.delay.InSeconds();
-  const float durationSec = state.timing.duration.InSeconds();
+  const float delaySec    = state.timing.GetDelay().InSeconds();
+  const float durationSec = state.timing.GetDuration().InSeconds();
 
   float effectiveElapsed = state.elapsed - delaySec;
   if(effectiveElapsed < 0.0f)
@@ -2015,21 +2017,23 @@ void LayoutTransitionDispatcher::DispatchOneTick(ViewImpl* child)
   // Apply the timing's alpha function to the linear progress. Builtin
   // ease curves and custom function pointers are evaluated here; bezier
   // and spring modes fall back to linear (see ApplyAlpha).
-  const float progress = ApplyAlpha(state.timing.alpha, rawProgress);
+  const float progress = ApplyAlpha(state.timing.GetAlpha(), rawProgress);
 
   state.lastLerped.x      = Lerp1D(state.fromBounds.x, state.toBounds.x, progress);
   state.lastLerped.y      = Lerp1D(state.fromBounds.y, state.toBounds.y, progress);
   state.lastLerped.width  = Lerp1D(state.fromBounds.width, state.toBounds.width, progress);
   state.lastLerped.height = Lerp1D(state.fromBounds.height, state.toBounds.height, progress);
 
-  LayoutAnimatorContext ctx;
-  ctx.view        = Ui::View::DownCast(child->Self());
-  ctx.slot        = state.slot;
-  ctx.changeCause = state.cause;
-  ctx.progress    = progress;
-  ctx.rawProgress = rawProgress;
-  ctx.fromBounds  = state.fromBounds;
-  ctx.toBounds    = state.toBounds;
+  // Keep the callback snapshot on this stack even if callback misuse removes
+  // the animator state. Only an application copy of the context allocates.
+  LayoutAnimatorContext::Impl contextImpl{Ui::View::DownCast(child->Self()),
+                                          state.slot,
+                                          state.cause,
+                                          progress,
+                                          rawProgress,
+                                          state.fromBounds,
+                                          state.toBounds};
+  const LayoutAnimatorContext ctx(&contextImpl);
 
   Internal::LayoutTransitionImpl& impl = GetImpl(state.transition);
   LayoutAnimatorCallback*         cb   = nullptr;
@@ -2188,8 +2192,8 @@ void LayoutTransitionDispatcher::TickAnimators()
       // dispatch yet. Defer end-of-animation evaluation to the next tick.
       continue;
     }
-    const float delaySec    = entry.second.timing.delay.InSeconds();
-    const float durationSec = entry.second.timing.duration.InSeconds();
+    const float delaySec    = entry.second.timing.GetDelay().InSeconds();
+    const float durationSec = entry.second.timing.GetDuration().InSeconds();
     const float effElapsed  = std::max(0.0f, entry.second.elapsed - delaySec);
     const bool  atEnd       = (durationSec > 0.0f) ? (effElapsed >= durationSec) : true;
     if(atEnd)

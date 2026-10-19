@@ -165,7 +165,7 @@ const LayoutBoundsEffect& LayoutTransitionImpl::GetExitBoundsEffect() const
 void LayoutTransitionImpl::SetChangeTiming(const LayoutTransitionTiming& timing)
 {
   AbortIfNonFiniteTiming(timing);
-  AbortIfNonTerminalLayoutAlpha(timing.alpha);
+  AbortIfNonTerminalLayoutAlpha(timing.GetAlpha());
   mChangeTiming        = timing;
   mChangeTimingEnabled = true;
 }
@@ -174,7 +174,7 @@ void LayoutTransitionImpl::SetChangeTiming(LayoutChangeCause             cause,
                                            const LayoutTransitionTiming& timing)
 {
   AbortIfNonFiniteTiming(timing);
-  AbortIfNonTerminalLayoutAlpha(timing.alpha);
+  AbortIfNonTerminalLayoutAlpha(timing.GetAlpha());
   const size_t index             = LayoutChangeCauseIndex(cause);
   mChangeTimingsByCause[index]   = timing;
   mChangeTimingByCauseSet[index] = true;
@@ -221,7 +221,7 @@ bool LayoutTransitionImpl::TryGetChangeTiming(LayoutChangeCause       cause,
 void LayoutTransitionImpl::SetEnterAnimator(LayoutAnimatorCallback callback, const LayoutAnimatorTiming& timing)
 {
   AbortIfNonFiniteAnimatorTiming(timing);
-  AbortIfReverseAlpha(timing.alpha);
+  AbortIfReverseAlpha(timing.GetAlpha());
   mEnterAnimator       = std::move(callback);
   mEnterAnimatorTiming = timing;
   mEnterAnimatorSet    = static_cast<bool>(mEnterAnimator);
@@ -230,7 +230,7 @@ void LayoutTransitionImpl::SetEnterAnimator(LayoutAnimatorCallback callback, con
 void LayoutTransitionImpl::SetExitAnimator(LayoutAnimatorCallback callback, const LayoutAnimatorTiming& timing)
 {
   AbortIfNonFiniteAnimatorTiming(timing);
-  AbortIfReverseAlpha(timing.alpha);
+  AbortIfReverseAlpha(timing.GetAlpha());
   mExitAnimator       = std::move(callback);
   mExitAnimatorTiming = timing;
   mExitAnimatorSet    = static_cast<bool>(mExitAnimator);
@@ -239,7 +239,7 @@ void LayoutTransitionImpl::SetExitAnimator(LayoutAnimatorCallback callback, cons
 void LayoutTransitionImpl::SetChangeAnimator(LayoutAnimatorCallback callback, const LayoutAnimatorTiming& timing)
 {
   AbortIfNonFiniteAnimatorTiming(timing);
-  AbortIfReverseAlpha(timing.alpha);
+  AbortIfReverseAlpha(timing.GetAlpha());
   mChangeAnimator       = std::move(callback);
   mChangeAnimatorTiming = timing;
   mChangeAnimatorSet    = static_cast<bool>(mChangeAnimator);

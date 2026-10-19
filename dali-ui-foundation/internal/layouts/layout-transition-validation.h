@@ -124,9 +124,10 @@ bool HasTimedSizeEffect(const Dali::Ui::LayoutBoundsEffect& effect);
 /**
  * @brief Returns true if @p effect would produce a visible timed animation.
  *
- * True iff @c timing.duration > 0 AND @c !IsNoopBoundsEffect(effect).
- * The non-noop check is required so that an effect with @c hasOffset set
- * to true but every offset value zero (i.e. a logical no-op) is not
+ * True iff @c effect.GetTiming().GetDuration().InSeconds() > 0 and
+ * @c !IsNoopBoundsEffect(effect).
+ * The non-noop check is required so that an effect with @c HasOffset() returning
+ * true but every offset value zero (i.e. a logical no-op) is not
  * mistaken for a timed effect.
  */
 bool IsTimedEffect(const Dali::Ui::LayoutBoundsEffect& effect);
