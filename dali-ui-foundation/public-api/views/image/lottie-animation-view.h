@@ -240,7 +240,9 @@ public: // Frame Range
    *
    * @param[in] minFrame The start frame index
    * @param[in] maxFrame The end frame index
+   * @deprecated Use SetPlaybackRange() instead.
    */
+  [[deprecated("Use SetPlaybackRange() instead.")]]
   void SetMinMaxFrame(int minFrame, int maxFrame);
 
   /**
@@ -251,7 +253,9 @@ public: // Frame Range
    *
    * @param[out] minFrame The configured start frame index
    * @param[out] maxFrame The configured end frame index
+   * @deprecated Use GetPlaybackRange() instead.
    */
+  [[deprecated("Use GetPlaybackRange() instead.")]]
   void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
 
   /**
@@ -263,7 +267,9 @@ public: // Frame Range
    *
    * @param[in] minMarker Name of the start marker
    * @param[in] maxMarker Name of the end marker (optional)
+   * @deprecated Use SetPlaybackRangeByMarker() instead.
    */
+  [[deprecated("Use SetPlaybackRangeByMarker() instead.")]]
   void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker = "");
 
 public: // Playback Options
@@ -446,11 +452,11 @@ public: // Content Info
    * | Key   | Property::STRING             | The marker's name                          |
    * | Value | Property::ARRAY of 2 INTEGER | The first and last frame numbers it covers |
    *
-   * A key taken from this map can be passed straight to SetMinMaxFrameByMarker().
+   * A key taken from this map can be passed straight to SetPlaybackRangeByMarker().
    *
    * @return A Property::Map of marker info, or an empty map until the file has loaded
    * @note This property is read-only.
-   * @see SetMinMaxFrameByMarker()
+   * @see SetPlaybackRangeByMarker()
    */
   Dali::Property::Map GetMarkerInfo() const;
 
@@ -646,6 +652,39 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
+public: // Playback ranges
+  /**
+   * @brief Sets the playback range by frame numbers.
+   *
+   * The animation will play between @p startFrame and @p endFrame.
+   *
+   * @param[in] startFrame The start frame index
+   * @param[in] endFrame The end frame index
+   */
+  void SetPlaybackRange(int startFrame, int endFrame);
+
+  /**
+   * @brief Gets the numerically configured playback frame range.
+   *
+   * When no numerical range is configured, including when marker names were
+   * used, this returns the composition range `[0, GetTotalFrameCount()]`.
+   *
+   * @param[out] startFrame The configured start frame index
+   * @param[out] endFrame The configured end frame index
+   */
+  void GetPlaybackRange(int& startFrame, int& endFrame) const;
+
+  /**
+   * @brief Sets the playback range using marker names embedded in the Lottie file.
+   *
+   * If only @p startMarker is given, the animation plays the range of that marker.
+   * If both are given, the animation plays from the start of @p startMarker to the
+   * end of @p endMarker.
+   *
+   * @param[in] startMarker Name of the start marker
+   * @param[in] endMarker Name of the end marker (optional)
+   */
+  void SetPlaybackRangeByMarker(const Dali::String& startMarker, const Dali::String& endMarker = "");
 };
 
 } // namespace Ui

@@ -35,14 +35,14 @@ constexpr uint32_t C_STATUS_BG   = 0x222222;
 constexpr uint32_t C_STATUS_TEXT = 0xCCCCCC;
 constexpr uint32_t C_BG          = 0x1A1A1A;
 
-// GetMinMaxFrame() was added after the manual test package shipped. Keep this
+// GetPlaybackRange() was added after the manual test package shipped. Keep this
 // app buildable against the current public headers while automatically using
 // the getter once it becomes available.
 template<typename ViewType>
 auto ReadMinMaxFrame(ViewType& view, int& minFrame, int& maxFrame, int)
-  -> decltype(view.GetMinMaxFrame(minFrame, maxFrame), bool())
+  -> decltype(view.GetPlaybackRange(minFrame, maxFrame), bool())
 {
-  view.GetMinMaxFrame(minFrame, maxFrame);
+  view.GetPlaybackRange(minFrame, maxFrame);
   return true;
 }
 
@@ -55,11 +55,11 @@ bool ReadMinMaxFrame(ViewType&, int&, int&, ...)
 
 /**
  * @brief Verifies LottieAnimationView frame range control:
- *   SetMinMaxFrame / SetMinMaxFrameByMarker
+ *   SetPlaybackRange / SetPlaybackRangeByMarker
  *   SetFrameSpeedFactor / GetFrameSpeedFactor
  *
  * Steps:
- *   [SetMinMaxFrame verification]:
+ *   [SetPlaybackRange verification]:
  *   1. [Play] -> confirm full frame range (0~TotalFrame) plays
  *   2. [First Half] -> confirm only first half plays (frame counter loops at midpoint)
  *   3. [Second Half] -> confirm only second half plays
@@ -71,19 +71,19 @@ bool ReadMinMaxFrame(ViewType&, int&, int&, ...)
  *   2. [Speed 2.0x] -> fast playback
  *
  * Expected result:
- *   After SetMinMaxFrame the frame counter changes only within the specified range during playback.
+ *   After SetPlaybackRange the frame counter changes only within the specified range during playback.
  */
 class TcLottieFrameRange : public ManualTest::TestCase, public ConnectionTracker
 {
 public:
   Dali::String GetName() const override
   {
-    return "12. Lottie: SetMinMaxFrame / FrameSpeedFactor";
+    return "12. Lottie: SetPlaybackRange / FrameSpeedFactor";
   }
 
   Dali::String GetDescription() const override
   {
-    return "Limit playback range with SetMinMaxFrame; verify speed adjustment with FrameSpeedFactor";
+    return "Limit playback range with SetPlaybackRange; verify speed adjustment with FrameSpeedFactor";
   }
 
   void OnEnter(View contentArea) override
@@ -164,7 +164,7 @@ private:
   {
     mRequestedMinFrame = minFrame;
     mRequestedMaxFrame = maxFrame;
-    mView.SetMinMaxFrame(minFrame, maxFrame);
+    mView.SetPlaybackRange(minFrame, maxFrame);
   }
 
   View MakeCentered(View child)

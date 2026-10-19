@@ -32,27 +32,27 @@ namespace Ui
 struct SelectableLottieImage::Impl
 {
   Impl(const Dali::String& url,
-       const Int32Pair&    selectRange,
-       const Int32Pair&    deselectRange,
+       const Int32Pair&    selectionPlaybackRange,
+       const Int32Pair&    deselectionPlaybackRange,
        const Dali::String& innerFillKeyPath)
   : mUrl(url),
-    mSelectRange(selectRange),
-    mDeselectRange(deselectRange),
+    mSelectionPlaybackRange(selectionPlaybackRange),
+    mDeselectionPlaybackRange(deselectionPlaybackRange),
     mInnerFillKeyPath(innerFillKeyPath)
   {
   }
 
   Dali::String mUrl;
-  Int32Pair    mSelectRange;
-  Int32Pair    mDeselectRange;
+  Int32Pair    mSelectionPlaybackRange;
+  Int32Pair    mDeselectionPlaybackRange;
   Dali::String mInnerFillKeyPath;
 };
 
 SelectableLottieImage::SelectableLottieImage(const Dali::String& url,
-                                             const Int32Pair&    selectRange,
-                                             const Int32Pair&    deselectRange,
+                                             const Int32Pair&    selectionPlaybackRange,
+                                             const Int32Pair&    deselectionPlaybackRange,
                                              const Dali::String& innerFillKeyPath)
-: mImpl(Dali::MakeUnique<Impl>(url, selectRange, deselectRange, innerFillKeyPath))
+: mImpl(Dali::MakeUnique<Impl>(url, selectionPlaybackRange, deselectionPlaybackRange, innerFillKeyPath))
 {
 }
 
@@ -87,14 +87,24 @@ const Dali::String& SelectableLottieImage::GetUrl() const
 
 Int32Pair SelectableLottieImage::GetSelectRange() const
 {
+  return GetSelectionPlaybackRange();
+}
+
+Int32Pair SelectableLottieImage::GetSelectionPlaybackRange() const
+{
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_IMAGE(mImpl);
-  return mImpl->mSelectRange;
+  return mImpl->mSelectionPlaybackRange;
 }
 
 Int32Pair SelectableLottieImage::GetDeselectRange() const
 {
+  return GetDeselectionPlaybackRange();
+}
+
+Int32Pair SelectableLottieImage::GetDeselectionPlaybackRange() const
+{
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_IMAGE(mImpl);
-  return mImpl->mDeselectRange;
+  return mImpl->mDeselectionPlaybackRange;
 }
 
 const Dali::String& SelectableLottieImage::GetInnerFillKeyPath() const

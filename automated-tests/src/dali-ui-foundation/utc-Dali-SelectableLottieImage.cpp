@@ -74,16 +74,16 @@ int UtcDaliSelectableLottieImageConstructRoundTripP(void)
   selectRange.SetStart(7);
 
   DALI_TEST_EQUALS(image.GetUrl(), std::string("checkbox.json"), TEST_LOCATION);
-  DALI_TEST_EQUALS(image.GetSelectRange().GetStart(), 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(image.GetSelectRange().GetEnd(), 30, TEST_LOCATION);
-  DALI_TEST_EQUALS(image.GetDeselectRange().GetStart(), 30, TEST_LOCATION);
-  DALI_TEST_EQUALS(image.GetDeselectRange().GetEnd(), 48, TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetSelectionPlaybackRange().GetStart(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetSelectionPlaybackRange().GetEnd(), 30, TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetDeselectionPlaybackRange().GetStart(), 30, TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetDeselectionPlaybackRange().GetEnd(), 48, TEST_LOCATION);
 
   // Returned ranges are independent values as well.
-  Int32Pair returnedRange = image.GetSelectRange();
+  Int32Pair returnedRange = image.GetSelectionPlaybackRange();
   returnedRange.SetEnd(12);
   DALI_TEST_EQUALS(returnedRange.GetEnd(), 12, TEST_LOCATION);
-  DALI_TEST_EQUALS(image.GetSelectRange().GetEnd(), 30, TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetSelectionPlaybackRange().GetEnd(), 30, TEST_LOCATION);
 
   END_TEST;
 }
@@ -141,15 +141,15 @@ int UtcDaliSelectableLottieImageCopyMoveP(void)
 
   SelectableLottieImage copy(image);
   DALI_TEST_EQUALS(copy.GetUrl(), std::string("radio.json"), TEST_LOCATION);
-  DALI_TEST_EQUALS(copy.GetSelectRange().GetStart(), 1, TEST_LOCATION);
-  DALI_TEST_EQUALS(copy.GetSelectRange().GetEnd(), 12, TEST_LOCATION);
-  DALI_TEST_EQUALS(copy.GetDeselectRange().GetStart(), 12, TEST_LOCATION);
-  DALI_TEST_EQUALS(copy.GetDeselectRange().GetEnd(), 24, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetSelectionPlaybackRange().GetStart(), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetSelectionPlaybackRange().GetEnd(), 12, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetDeselectionPlaybackRange().GetStart(), 12, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetDeselectionPlaybackRange().GetEnd(), 24, TEST_LOCATION);
 
   SelectableLottieImage assigned("other.json", {}, {});
   assigned = image;
   DALI_TEST_EQUALS(assigned.GetUrl(), std::string("radio.json"), TEST_LOCATION);
-  DALI_TEST_EQUALS(assigned.GetSelectRange().GetEnd(), 12, TEST_LOCATION);
+  DALI_TEST_EQUALS(assigned.GetSelectionPlaybackRange().GetEnd(), 12, TEST_LOCATION);
 
   // Replacing the source must not change independently owned copies.
   image = SelectableLottieImage("replacement.json", {}, {}, "replacement.fill");
@@ -158,11 +158,11 @@ int UtcDaliSelectableLottieImageCopyMoveP(void)
 
   SelectableLottieImage moved(std::move(copy));
   DALI_TEST_EQUALS(moved.GetUrl(), std::string("radio.json"), TEST_LOCATION);
-  DALI_TEST_EQUALS(moved.GetSelectRange().GetEnd(), 12, TEST_LOCATION);
-  DALI_TEST_EQUALS(moved.GetDeselectRange().GetEnd(), 24, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetSelectionPlaybackRange().GetEnd(), 12, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetDeselectionPlaybackRange().GetEnd(), 24, TEST_LOCATION);
   DALI_TEST_ASSERTION(copy.GetUrl(), MOVED_FROM_ASSERTION);
-  DALI_TEST_ASSERTION(copy.GetSelectRange(), MOVED_FROM_ASSERTION);
-  DALI_TEST_ASSERTION(copy.GetDeselectRange(), MOVED_FROM_ASSERTION);
+  DALI_TEST_ASSERTION(copy.GetSelectionPlaybackRange(), MOVED_FROM_ASSERTION);
+  DALI_TEST_ASSERTION(copy.GetDeselectionPlaybackRange(), MOVED_FROM_ASSERTION);
   DALI_TEST_ASSERTION(copy.GetInnerFillKeyPath(), MOVED_FROM_ASSERTION);
 
   // Copy assignment restores a moved-from destination.
@@ -182,7 +182,20 @@ int UtcDaliSelectableLottieImageCopyMoveP(void)
   // Self-copy must preserve the owned description.
   const SelectableLottieImage& self = image;
   image = self;
-  DALI_TEST_EQUALS(image.GetSelectRange().GetStart(), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetSelectionPlaybackRange().GetStart(), 1, TEST_LOCATION);
 
   END_TEST;
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+int UtcDaliSelectableLottieImageLegacyPlaybackRanges(void)
+{
+  SelectableLottieImage image("checkbox.json", Int32Pair(1, 12), Int32Pair(13, 24));
+  DALI_TEST_EQUALS(image.GetSelectRange().GetStart(), image.GetSelectionPlaybackRange().GetStart(), TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetSelectRange().GetEnd(), image.GetSelectionPlaybackRange().GetEnd(), TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetDeselectRange().GetStart(), image.GetDeselectionPlaybackRange().GetStart(), TEST_LOCATION);
+  DALI_TEST_EQUALS(image.GetDeselectRange().GetEnd(), image.GetDeselectionPlaybackRange().GetEnd(), TEST_LOCATION);
+  END_TEST;
+}
+#pragma GCC diagnostic pop

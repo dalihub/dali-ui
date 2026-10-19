@@ -29,8 +29,8 @@ namespace Ui
 SelectableLottieAnimationView SelectableLottieAnimationView::New(const SelectableLottieImage& image)
 {
   auto* impl = Integration::SelectableLottieAnimationViewImpl::New(image.GetUrl(),
-                                                                   image.GetSelectRange(),
-                                                                   image.GetDeselectRange(),
+                                                                   image.GetSelectionPlaybackRange(),
+                                                                   image.GetDeselectionPlaybackRange(),
                                                                    image.GetInnerFillKeyPath());
   return SelectableLottieAnimationView(impl);
 }
@@ -39,8 +39,8 @@ SelectableLottieAnimationView SelectableLottieAnimationView::New(const Selectabl
                                                                  const SelectableLottieColorBindings& colorBindings)
 {
   auto* impl = Integration::SelectableLottieAnimationViewImpl::New(image.GetUrl(),
-                                                                   image.GetSelectRange(),
-                                                                   image.GetDeselectRange(),
+                                                                   image.GetSelectionPlaybackRange(),
+                                                                   image.GetDeselectionPlaybackRange(),
                                                                    colorBindings);
   return SelectableLottieAnimationView(impl);
 }

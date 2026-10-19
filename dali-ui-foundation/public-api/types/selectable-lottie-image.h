@@ -42,7 +42,7 @@ namespace Ui
  * no way to register a url without also supplying both frame ranges.
  *
  * The frame ranges are EXPLICIT integer frame numbers (not marker names); they map
- * directly onto LottieAnimationView::SetMinMaxFrame() / JumpToFrame().
+ * directly onto LottieAnimationView::SetPlaybackRange() / JumpToFrame().
  * Each Int32Pair represents an inclusive [GetStart(), GetEnd()] segment. Range
  * normalization and clamping are performed by the consuming animation view.
  *
@@ -70,14 +70,14 @@ public:
    * the select and the deselect frame ranges.
    *
    * @param[in] url              The Lottie animation url
-   * @param[in] selectRange      The frame segment played when the control becomes selected
-   * @param[in] deselectRange    The frame segment played when the control becomes deselected
+   * @param[in] selectionPlaybackRange The frame segment played when the control becomes selected
+   * @param[in] deselectionPlaybackRange The frame segment played when the control becomes deselected
    * @param[in] innerFillKeyPath The asset key path of the inner fill recoloured with the state
    *                             colours; an empty string keeps the renderer's generic default
    */
   SelectableLottieImage(const Dali::String& url,
-                        const Int32Pair&    selectRange,
-                        const Int32Pair&    deselectRange,
+                        const Int32Pair&    selectionPlaybackRange,
+                        const Int32Pair&    deselectionPlaybackRange,
                         const Dali::String& innerFillKeyPath = Dali::String());
 
   /**
@@ -111,14 +111,18 @@ public:
    * @brief Returns the frame segment played when the control becomes selected.
    *
    * @return The select frame range
+   * @deprecated Use GetSelectionPlaybackRange() instead.
    */
+  [[deprecated("Use GetSelectionPlaybackRange() instead.")]]
   Int32Pair GetSelectRange() const;
 
   /**
    * @brief Returns the frame segment played when the control becomes deselected.
    *
    * @return The deselect frame range
+   * @deprecated Use GetDeselectionPlaybackRange() instead.
    */
+  [[deprecated("Use GetDeselectionPlaybackRange() instead.")]]
   Int32Pair GetDeselectRange() const;
 
   /**
@@ -127,6 +131,21 @@ public:
    * @return The inner-fill key path (empty when the renderer's generic default should apply)
    */
   const Dali::String& GetInnerFillKeyPath() const;
+
+public: // Playback ranges
+  /**
+   * @brief Returns the frame segment played when the control becomes selected.
+   *
+   * @return The select frame range
+   */
+  Int32Pair GetSelectionPlaybackRange() const;
+
+  /**
+   * @brief Returns the frame segment played when the control becomes deselected.
+   *
+   * @return The deselect frame range
+   */
+  Int32Pair GetDeselectionPlaybackRange() const;
 
 private:
   struct Impl;

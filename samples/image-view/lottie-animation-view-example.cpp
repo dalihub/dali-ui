@@ -33,7 +33,7 @@ using namespace Dali::Ui;
  *   - LoopingMode  (RESTART / AUTO_REVERSE)
  *   - FrameSpeedFactor  (0.5x / 1.0x / 2.0x)
  *   - StopBehavior  (CURRENT / FIRST / LAST)
- *   - SetMinMaxFrame  (full / first-half / second-half)
+ *   - SetPlaybackRange  (full / first-half / second-half)
  *   - RenderScale  (0.5x / 1.0x / 2.0x)
  *   - PlaceholderUrl  (show placeholder while new URL loads)
  *   - GetPlayState / GetCurrentFrameNumber / GetTotalFrameCount  (logged on each button press)
@@ -423,17 +423,17 @@ private:
     switch(mFrameRangeIndex)
     {
       case 0: // full range
-        mLottieView.SetMinMaxFrame(0, total > 0 ? total - 1 : 0);
+        mLottieView.SetPlaybackRange(0, total > 0 ? total - 1 : 0);
         break;
       case 1: // first half
-        mLottieView.SetMinMaxFrame(0, total > 0 ? total / 2 : 0);
+        mLottieView.SetPlaybackRange(0, total > 0 ? total / 2 : 0);
         break;
       case 2: // second half
-        mLottieView.SetMinMaxFrame(total > 0 ? total / 2 : 0, total > 0 ? total - 1 : 0);
+        mLottieView.SetPlaybackRange(total > 0 ? total / 2 : 0, total > 0 ? total - 1 : 0);
         break;
     }
     Label::DownCast(mFrameRangeButton).SetText(FRAME_RANGE_LABELS[mFrameRangeIndex]);
-    DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetMinMaxFrame - range=%s total=%d\n",
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetPlaybackRange - range=%s total=%d\n",
                           FRAME_RANGE_LABELS[mFrameRangeIndex], total);
   }
 
