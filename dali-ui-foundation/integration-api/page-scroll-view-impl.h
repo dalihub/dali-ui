@@ -105,6 +105,10 @@ public: // Page API
 
   /**
    * @brief Scrolls to the given page with an optional animation.
+   *
+   * The page, clamped to the page count, is the page committed when the scroll settles,
+   * also when it is a partial last page whose resting offset rounds to the page before
+   * it. A request that has nothing to scroll commits its page at once.
    */
   void ScrollToPage(int page, bool animate = true) override;
 
@@ -175,9 +179,9 @@ protected:
    * empty layout releases a pending count and reports page -1 with count 0.
    * A changed viewport that leaves the count alone re-derives only on a settled view, so a
    * snap target that is still valid is never replaced by the nearest page. ScrollToPage
-   * clears a target whose animated scroll never started, so an explicit page request that
-   * had nothing to scroll does not leave a stale target behind. Repeated callbacks for the
-   * same geometry emit nothing.
+   * records its target in both modes and commits a target that no ScrollFinished consumed,
+   * so an explicit page request never leaves a stale target behind. Repeated callbacks for
+   * the same geometry emit nothing.
    *
    * This is also where a page SELECTED before the first layout is applied: with a zero
    * page length ScrollToPage could only record the page, so the first call that has real
@@ -242,7 +246,7 @@ private:
 private:
   Vector2                                        mPageSize{0.0f, 0.0f};      ///< Explicit page size; (0,0) = use viewport
   int                                            mCurrentPage{0};            ///< Settled page index
-  int                                            mSnapTargetPage{-1};        ///< Page targeted by the in-flight snap animation; -1 = not animating
+  int                                            mSnapTargetPage{-1};        ///< Page a snap or an explicit ScrollToPage settles on until committed; -1 = none
   int                                            mExpectedPageCount{-1};     ///< >=0: overrides layout-based count; -1: use layout (sentinel)
   int                                            mLastNotifiedPageCount{-2}; ///< Page count last passed to PageChangedSignal; -2 = never emitted
   bool                                           mNotifyInProgress{false};   ///< Suppress OnScrollFinished re-derive during NotifyPages*

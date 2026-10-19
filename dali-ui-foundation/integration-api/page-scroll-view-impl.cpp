@@ -202,21 +202,31 @@ void PageScrollViewImpl::ScrollToPage(int page, bool animate)
 
   Vector2 targetPos = ScrollPositionForPage(target);
 
+  // Both modes record the explicit target, so OnScrollFinished commits it instead of
+  // rounding the settled offset, which names the previous page when the last page is
+  // partial.
+  mSnapTargetPage = target;
   if(animate)
   {
-    mSnapTargetPage = target;
     ScrollToWithDuration(targetPos, PAGE_SNAP_DURATION);
-    // A target within half a unit of the current position, or a pager without content,
-    // finishes synchronously: no scroll starts (SendScrollStarted is what sets the
-    // scrolling state), so no OnScrollFinished will ever clear the target. Nothing is in
-    // flight, so nothing may stay pending.
-    if(!IsScrolling())
-    {
-      mSnapTargetPage = -1;
-    }
   }
   else
+  {
     ScrollTo(targetPos, false);
+  }
+
+  // Nothing in flight and the target still recorded: no ScrollFinished reached
+  // OnScrollFinished. Either nothing had to move (a target within half a unit of the
+  // current position, or a pager without content: no scroll starts, and SendScrollStarted
+  // is what sets the scrolling state), or this is an instant request made from inside a
+  // ScrollFinished handler, whose nested emission the signal drops. Commit the target now,
+  // clamped to the count a handler may have changed meanwhile, rather than leave it pending.
+  if(!IsScrolling() && mSnapTargetPage == target)
+  {
+    mSnapTargetPage = -1;
+    const int count = GetPageCount();
+    CommitPage(count > 0 ? std::max(0, std::min(count - 1, target)) : 0);
+  }
 }
 
 PageScrollableInterface::PageChangedSignalType& PageScrollViewImpl::PageChangedSignal()
@@ -445,8 +455,8 @@ void PageScrollViewImpl::OnScrollableAreaChanged()
   // position or the layout is empty, is superseded and re-derived like any other state.
   // A geometry change that keeps the count re-derives only on a settled view, because a
   // snap target that is still valid must not be replaced by the nearest page.
-  // ScrollToPage clears a target whose animated scroll never started, so an explicit page
-  // request that had nothing to scroll leaves no stale target behind.
+  // ScrollToPage commits a target that no ScrollFinished consumed, so an explicit page
+  // request never leaves a stale target behind.
   const int  newCount     = GetPageCount();
   const bool countChanged = (newCount != mLastNotifiedPageCount);
   const bool settled      = !IsScrolling() && mSnapTargetPage < 0;
@@ -484,9 +494,9 @@ void PageScrollViewImpl::OnScrollFinished(Ui::ScrollView /*scrollView*/)
   // authoritative layout-derived value.
   mExpectedPageCount = -1;
 
-  // When a snap animation was in flight (mSnapTargetPage >= 0), use the intended
-  // target page rather than the current scroll position.  CancelScrollAnimation()
-  // calls SendScrollFinished() while content is mid-animation, so
+  // When a target is recorded (mSnapTargetPage >= 0: a snap, or an explicit ScrollToPage
+  // in either mode), use that page rather than the current scroll position.
+  // CancelScrollAnimation() calls SendScrollFinished() while content is mid-animation, so
   // PageForScrollPosition on the intermediate position would otherwise round
   // incorrectly (e.g. 0.5 → page 1 while actually heading back to page 0).
   int settled;
@@ -497,7 +507,14 @@ void PageScrollViewImpl::OnScrollFinished(Ui::ScrollView /*scrollView*/)
   }
   else
   {
-    settled = PageForScrollPosition(GetScrollPosition());
+    // A view resting where its current page rests keeps that page: rounding the offset of
+    // a partial last page names the page before it (e.g. when a snap whose target was
+    // committed at its cancellation settles). Any other offset is rounded to the nearest
+    // page; a free scroll that ends exactly on the current page's resting offset keeps it.
+    const Vector2 position = GetScrollPosition();
+    const Vector2 resting  = ScrollPositionForPage(mCurrentPage);
+    const bool    atRest   = std::abs(position.x - resting.x) < 0.5f && std::abs(position.y - resting.y) < 0.5f;
+    settled                = atRest ? mCurrentPage : PageForScrollPosition(position);
   }
 
   // The count can shrink while a snap keeps its original target. Preserve a valid

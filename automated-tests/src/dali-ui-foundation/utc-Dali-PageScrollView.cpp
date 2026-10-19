@@ -933,3 +933,282 @@ int UtcDaliPageScrollViewNotifyPagesRemovedOverlapP(void)
   DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
   END_TEST;
 }
+
+// ─── Explicit page requests on partial last pages ───────────────────────────────────
+
+namespace
+{
+/// A pager 160 long over 500 units of content: ceil(500 / 160) = 4 pages, maximum offset
+/// 500 - 160 = 340. The last page is partial: page 3 rests at min(3 * 160, 340) = 340, an
+/// offset that rounds to page round(340 / 160) = round(2.125) = 2.
+PageScrollView BuildPartialLastPagePager(UiTestApplication& application, ScrollDirection direction, View& content)
+{
+  const bool     vertical = (direction == ScrollDirection::Vertical);
+  PageScrollView pager    = BuildPagerAlong(direction, content);
+  ResizeAlong(pager, vertical, 160.0f);
+  application.GetWindow().Add(pager);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetPageCount(), 4, TEST_LOCATION);
+  return pager;
+}
+
+/// The partial last page of BuildPartialLastPagePager is selected and shown.
+void CheckPartialLastPageSelected(PageScrollView pager, View content, bool vertical)
+{
+  DALI_TEST_CHECK(!pager.IsScrolling());
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 4, TEST_LOCATION);
+  const Vector2 offset = pager.GetScrollPosition();
+  DALI_TEST_EQUALS(vertical ? offset.y : offset.x, 340.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(vertical ? offset.x : offset.y, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, vertical), -340.0f, 0.001f, TEST_LOCATION);
+}
+
+// An instant ScrollToPage to the partial last page selects that page.
+//
+// ScrollToPage(3, false) on the 160-over-500 pager moves to offset 340 and must report
+// (3, 4) once; repeating the request and letting the frames run reports nothing more.
+// Fails at 3d2c266e (and at this change's parent) because the instant request recorded no
+// target, so OnScrollFinished rounded the settled offset 340 and selected page 2.
+void CheckPartialPageInstantSelection(ScrollDirection direction)
+{
+  UiTestApplication application;
+  const bool        vertical = (direction == ScrollDirection::Vertical);
+  View              content;
+  PageScrollView    pager = BuildPartialLastPagePager(application, direction, content);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+  pager.ScrollToPage(3, false);
+  CheckPartialLastPageSelected(pager, content, vertical);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 4, TEST_LOCATION);
+
+  pager.ScrollToPage(3, false);
+  SettleScroll(application);
+  CheckPartialLastPageSelected(pager, content, vertical);
+  DALI_TEST_EQUALS(CurrentContentPositionAlong(content, vertical), -340.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+}
+
+// A snap retargeted onto the partial last page settles on that page.
+//
+// ScrollToPage(1, true) on the 160-over-500 pager starts a 300 ms snap to 160. 116 ms in,
+// ScrollToPage(3, true) cancels it (the cancellation's ScrollFinished commits the new
+// target, (3, 4)) and snaps from the live position to 340. That snap settles at 340, which
+// rounds to page 2: the pager must stay on page 3 with no further report. While the frames
+// run, the cancelled animation's own Finished arrives late and is ignored.
+// Fails at 3d2c266e (and at this change's parent) because the settle re-rounded the offset:
+// it reported (2, 4) after (3, 4) and ended on page 2.
+void CheckPartialPageRetarget(ScrollDirection direction)
+{
+  UiTestApplication application;
+  const bool        vertical = (direction == ScrollDirection::Vertical);
+  View              content;
+  PageScrollView    pager = BuildPartialLastPagePager(application, direction, content);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+  pager.ScrollToPage(1, true);
+  application.SendNotification();
+  application.Render(16);
+  application.Render(100);
+  application.SendNotification();
+  DALI_TEST_CHECK(pager.IsScrolling());
+  DALI_TEST_CHECK(CurrentContentPositionAlong(content, vertical) < -1.0f);
+
+  pager.ScrollToPage(3, true);
+  DALI_TEST_CHECK(pager.IsScrolling());
+
+  SettleScroll(application);
+  CheckPartialLastPageSelected(pager, content, vertical);
+  DALI_TEST_EQUALS(CurrentContentPositionAlong(content, vertical), -340.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 4, TEST_LOCATION);
+}
+
+} // namespace
+
+int UtcDaliPageScrollViewPartialPageInstantSelectionHorizontalP(void)
+{
+  CheckPartialPageInstantSelection(ScrollDirection::Horizontal);
+  END_TEST;
+}
+
+int UtcDaliPageScrollViewPartialPageInstantSelectionVerticalP(void)
+{
+  CheckPartialPageInstantSelection(ScrollDirection::Vertical);
+  END_TEST;
+}
+
+int UtcDaliPageScrollViewPartialPageRetargetHorizontalP(void)
+{
+  CheckPartialPageRetarget(ScrollDirection::Horizontal);
+  END_TEST;
+}
+
+int UtcDaliPageScrollViewPartialPageRetargetVerticalP(void)
+{
+  CheckPartialPageRetarget(ScrollDirection::Vertical);
+  END_TEST;
+}
+
+// An animated ScrollToPage whose target rests where the view already is starts no scroll,
+// yet it names a page: it must select it.
+//
+// Pager 250 x 80 over 500: two pages of 250. An explicit page size of 100 set after the
+// layout makes five pages and reports (0, 5). Pages 3 and 4 both rest at the maximum offset
+// 500 - 250 = 250. ScrollToPage(3, false) moves there and reports (3, 5) (round(2.5) = 3 is
+// page 3 either way). ScrollToPage(4, true) targets the same offset, so nothing scrolls;
+// the request commits page 4 itself and reports (4, 5). A further layout reports nothing.
+// Fails at 3d2c266e (and at this change's parent) because the animated request that started
+// no scroll only dropped its target: the pager stayed on page 3.
+int UtcDaliPageScrollViewCoincidingPageRequestSelectsPageP(void)
+{
+  UiTestApplication application;
+  View              content;
+  PageScrollView    pager = BuildPager(content);
+  pager.SetRequestedWidth(250.0f);
+  application.GetWindow().Add(pager);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetPageCount(), 2, TEST_LOCATION);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+
+  pager.SetPageSize(Vector2(100.0f, 80.0f));
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 0, TEST_LOCATION);
+
+  pager.ScrollToPage(3, false);
+  DALI_TEST_EQUALS(pager.GetScrollPosition().x, 250.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 3, TEST_LOCATION);
+
+  pager.ScrollToPage(4, true);
+  DALI_TEST_CHECK(!pager.IsScrolling());
+  DALI_TEST_EQUALS(pager.GetScrollPosition().x, 250.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 4, TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[1].first, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[1].second, 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[2].first, 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[2].second, 5, TEST_LOCATION);
+  END_TEST;
+}
+
+// An instant ScrollToPage made from inside a ScrollFinished handler moves the content within
+// that emission, and the ScrollFinished it sends itself is dropped (a signal ignores a
+// nested Emit of itself), so OnScrollFinished never sees it. The request must still commit
+// its page.
+//
+// Pager 100 over 500. A one-shot ScrollFinished handler requests ScrollToPage(2, false).
+// ScrollToPage(1, false): the outer ScrollFinished commits (1, 5) first (the pager's own
+// slot was connected first); the handler then moves the content to 200 and the request
+// commits (2, 5). A later ScrollTo(400, false) settles on page 4, so no stale target is
+// left behind. (The nested emission logs an error; it is expected.)
+// Fails at 3d2c266e (and at this change's parent) because nothing consumed the nested
+// request: the pager stayed on page 1 while showing offset 200.
+int UtcDaliPageScrollViewNestedInstantPageRequestCommitsP(void)
+{
+  UiTestApplication application;
+  View              content;
+  PageScrollView    pager = BuildPager(content);
+  application.GetWindow().Add(pager);
+  application.SendNotification();
+  application.Render();
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+
+  ConnectionTracker tracker;
+  bool              requested = false;
+  pager.ScrollFinishedSignal().Connect(&tracker, [&pager, &requested](ScrollView)
+  {
+    if(!requested)
+    {
+      requested = true;
+      pager.ScrollToPage(2, false);
+    }
+  });
+
+  pager.ScrollToPage(1, false);
+
+  DALI_TEST_CHECK(requested);
+  DALI_TEST_CHECK(!pager.IsScrolling());
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetScrollPosition().x, 200.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, false), -200.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[1].first, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[1].second, 5, TEST_LOCATION);
+
+  pager.ScrollTo(Vector2(400.0f, 0.0f), false);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[2].first, 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[2].second, 5, TEST_LOCATION);
+  END_TEST;
+}
+
+// The same nested instant request, issued from the ScrollFinished that the first layout's
+// pending-selection apply sends from inside the layout pass.
+//
+// Before the first layout the count reads 1, so three insertions make four pages and select
+// page 3, reporting (3, 4). The first layout applies page 3 (offset 300) and a one-shot
+// ScrollFinished handler, connected after the insertion, then requests ScrollToPage(1,
+// false). The request commits (1, 5) itself (five real pages); the apply keeps that newer
+// page and reports nothing more: page 1 at offset 100.
+// Fails at 3d2c266e (and at this change's parent) because the nested request was never
+// committed: the apply reported its own selection, (3, 5), while the content showed page 1.
+int UtcDaliPageScrollViewNestedInstantPageRequestDuringFirstLayoutP(void)
+{
+  UiTestApplication application;
+  View              content;
+  PageScrollView    pager = BuildPager(content);
+
+  PageSignalRecorder recorder;
+  pager.PageChangedSignal().Connect(&recorder, &PageSignalRecorder::OnPageChanged);
+  pager.NotifyPagesInserted(0, 3);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 4, TEST_LOCATION);
+
+  ConnectionTracker tracker;
+  bool              requested = false;
+  pager.ScrollFinishedSignal().Connect(&tracker, [&pager, &requested](ScrollView)
+  {
+    if(!requested)
+    {
+      requested = true;
+      pager.ScrollToPage(1, false);
+    }
+  });
+
+  application.GetWindow().Add(pager);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(requested);
+  DALI_TEST_CHECK(!pager.IsScrolling());
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetScrollPosition().x, 100.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, false), -100.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].first, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[0].second, 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[1].first, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.signals[1].second, 5, TEST_LOCATION);
+  END_TEST;
+}
