@@ -68,6 +68,7 @@ Searches, scripts, or manual checks that can detect likely violations.
 - [Public API and ABI](public-api-abi.md)
 - [Bit-field Enums](bitfield-enums.md)
 - [Handle-Body Pattern](handle-body-pattern.md)
+- [Locale-Safe Numeric Formatting and Parsing](locale-safe-numeric-formatting.md)
 - [Component Boundaries](component-boundaries.md)
 - [Docs and Wiki](docs-and-wiki.md)
 - [Validation Checks](validation-checks.md)
