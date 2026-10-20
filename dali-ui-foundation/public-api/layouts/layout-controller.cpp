@@ -753,6 +753,21 @@ public:
   }
 
   /**
+   * @brief The narrow counterpart of UnregisterView: drops the root registration and nothing else.
+   *
+   * For a view that stays alive and on scene but stops being a layout root of its own (a
+   * STANDALONE view with a View parent switched to DEFAULT). No generation advance, no
+   * completion tombstones, no collector scrub and no dispatcher notification: the view's
+   * layout work is re-owned by its parent chain, which the caller invalidates. A batch that
+   * still names the view skips it at the tracked-and-alive check in ProcessLayouts.
+   */
+  void ReleaseLayoutRoot(ViewImpl* view)
+  {
+    mAllLayoutRoots.erase(view);
+    mPendingViews.erase(view);
+  }
+
+  /**
    * @brief Gets the current window handle managed by this layout controller.
    *
    * Retrieves the window that this layout controller instance is associated with.
@@ -806,20 +821,38 @@ public:
       mTransitionDispatcher->NotifyWindowResize();
     }
 
-    // Invalidate ALL known layout roots (not just pending ones)
-    // Collect dead entries to remove after iteration
-    std::vector<ViewImpl*> deadEntries;
-    for(auto& pair : mAllLayoutRoots)
+    // Invalidate ALL known layout roots (not just pending ones).
+    //
+    // Over a SNAPSHOT of the keys, never the live map: InvalidateMeasure() can insert into
+    // mAllLayoutRoots while the loop runs (a standalone root with a transition-bearing parent
+    // invalidates that parent, which may register itself through RequestLayout), and an
+    // unordered_map insert that rehashes invalidates every iterator. Each key is looked up
+    // again because an entry may have been withdrawn meanwhile (ReleaseLayoutRoot /
+    // UnregisterView). A root registered during the loop needs nothing more: it is already
+    // pending. Dead entries are collected and removed after the iteration.
+    std::vector<ViewImpl*> roots;
+    roots.reserve(mAllLayoutRoots.size());
+    for(const auto& pair : mAllLayoutRoots)
     {
-      if(pair.second.weakHandle.GetHandle())
+      roots.push_back(pair.first);
+    }
+    std::vector<ViewImpl*> deadEntries;
+    for(ViewImpl* root : roots)
+    {
+      auto it = mAllLayoutRoots.find(root);
+      if(it == mAllLayoutRoots.end())
+      {
+        continue;
+      }
+      if(it->second.weakHandle.GetHandle())
       {
         // Through the internal primitive, not ViewImpl::InvalidateMeasure(): a
         // window resize is a framework-internal event, not an application call.
-        Internal::ViewDataImpl::Get(*pair.second.view).InvalidateMeasure();
+        Internal::ViewDataImpl::Get(*it->second.view).InvalidateMeasure();
       }
       else
       {
-        deadEntries.push_back(pair.first);
+        deadEntries.push_back(root);
       }
     }
     for(auto* dead : deadEntries)
@@ -1278,9 +1311,10 @@ private:
     // layout root), the parent must run first so its arrange pass can
     // measure the descendant via MeasureStandaloneChildren / parent's
     // recursive arrange. Without this ordering the descendant would
-    // measure with a stale or zero parent SIZE, dispatch its transitions
-    // with bad bounds, and then have those transitions cancelled when
-    // the parent's later pass corrects the bounds.
+    // resolve its MATCH_PARENT axes against a stale or zero parent SIZE,
+    // dispatch its transitions with bad bounds, and then have those
+    // transitions cancelled when the parent's later pass corrects the
+    // bounds.
     std::vector<ViewImpl*> viewsToProcess(viewsSet.begin(), viewsSet.end());
 
     // Armed from HERE, before the sort: from this point the member pending set names none
@@ -1388,15 +1422,25 @@ private:
   /**
    * @brief Processes a single view with layout capability (layout root).
    *
-   * Constraint priority chain (per-dimension):
+   * A STANDALONE view with a parent is measured through the derivation every
+   * other pass uses -- Internal::DeriveStandaloneMeasureConstraint -- and at the
+   * very constraint the parent's placement (ArrangeStandaloneChild) measures it
+   * at: the parent's layout target (the bounds a View parent was last arranged
+   * at; the parent actor SIZE when the parent is not a View or holds no arrange
+   * result) is the extent its MATCH_PARENT axes fill, the window size bounds its
+   * WRAP_CONTENT axes, each less the view's own margin, and an explicit size is
+   * measured as is; its slot is Internal::DeriveStandaloneRootBounds over the
+   * same snapshot and available extent. Given the same snapshot, the same parent
+   * layout target and the same window, sharing both calls with the parent-driven
+   * placement makes the two passes agree: this pass after a parent pass is a
+   * measure and arrange cache hit, and the parent's next miss reproduces this
+   * pass's bounds. A parent extent of 0 (parent not arranged yet) affects only
+   * MATCH_PARENT axes, and the parent's own pass re-places the view.
+   *
+   * Every other root keeps the constraint priority chain (per-dimension):
    *   1. Explicit RequestedWidth/Height (>= 0): use that value.
    *   2. Else if the view's Actor has a parent: use parent.Actor.SIZE (as-is,
-   *      including 0). When this view is a standalone (boundary) child, a
-   *      parent size of 0 means the parent has not been arranged yet —
-   *      measuring with 0 is correct because the parent's subsequent
-   *      Measure/Arrange pass will re-measure this child via
-   *      MeasureStandaloneChildren/ArrangeStandaloneChildren with the real
-   *      size.
+   *      including 0).
    *   3. Else (no parent actor): use the window-size constraint passed in.
    *
    * - WRAP_CONTENT / MATCH_PARENT: RequestedWidth/Height < 0 → fall through
@@ -1427,6 +1471,56 @@ private:
 
     Actor self   = view->Self();
     Actor parent = self.GetParent();
+
+    // A boundary view with a parent: the shared standalone derivation, the very calls
+    // ArrangeStandaloneChild makes, fed the same parent LAYOUT TARGET -- the bounds a View
+    // parent was last arranged at, which are exactly the extent its
+    // ArrangeStandaloneChildren hands the placement (the batch is depth-sorted, so a parent
+    // in the same batch runs first). Not the parent actor SIZE: a layout transition animator
+    // may hold that at its animated value (a CHANGE that reverts SIZE to the from-value
+    // before animating), which would leak into this child. The actor SIZE is only the
+    // fallback, for a parent that is not a View (a Layer, the window's root layer) or that
+    // holds no arrange result yet; a View parent's own pass re-places the view afterwards.
+    // Only a MATCH_PARENT axis -- or a WRAP_CONTENT axis of a view in no window -- reads
+    // this extent: a WRAP_CONTENT axis is bounded by the window the snapshot captured and an
+    // explicit size is measured as is.
+    if(parent && view->GetLayoutMode() == LayoutMode::STANDALONE)
+    {
+      float    parentWidth     = 0.0f;
+      float    parentHeight    = 0.0f;
+      bool     hasLayoutTarget = false;
+      Ui::View parentView      = Ui::View::DownCast(parent);
+      if(parentView)
+      {
+        const Internal::ViewDataImpl& parentData = Internal::ViewDataImpl::Get(GetImpl(parentView));
+        if(parentData.HasArrangeResult())
+        {
+          const LayoutRect parentBounds = parentData.GetArrangedBounds();
+          parentWidth                   = parentBounds.width;
+          parentHeight                  = parentBounds.height;
+          hasLayoutTarget               = true;
+        }
+      }
+      if(!hasLayoutTarget)
+      {
+        parentWidth  = parent.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+        parentHeight = parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+      }
+
+      const Internal::StandaloneExtent available    = Internal::ResolveStandaloneAvailableExtent(inputs, parentWidth, parentHeight);
+      const Internal::StandaloneExtent constraint   = Internal::DeriveStandaloneMeasureConstraint(inputs, available);
+      const MeasuredSize               measuredSize = view->Measure(constraint.width, constraint.height);
+      const LayoutRect                 bounds       = Internal::DeriveStandaloneRootBounds(inputs, available.width, available.height, measuredSize);
+
+      // Use the internal root entry point rather than the public Arrange path: it
+      // identifies this framework-owned self pass, whose bounds are the ones the
+      // parent's ArrangeStandaloneChild derives, so the parent's arrange entry survives
+      // it (InvalidateParentArrangeCacheForOutOfBandArrange). An application calling
+      // View::Arrange directly carries no such ownership and retracts the parent's
+      // arrange entry when it rewrites the child's records.
+      Internal::ViewDataImpl::Get(*view).ArrangeAsLayoutRoot(bounds);
+      return;
+    }
 
     // The requested size is stored in NATURAL units, and the constraint this
     // function builds is VISUAL, like the other two sources (the window size
@@ -1467,17 +1561,15 @@ private:
     // Arrange pass: use the user-set position (parent is not a layout).
     // MATCH_PARENT roots fill the available constraint rather than using their
     // measured (minimum) size, and the root's own min/max is enforced on the result.
-    // The whole derivation -- position, extents and clamp -- is the shared helper, so
-    // this root pass and the parent-driven ArrangeStandaloneChild placement of the
-    // same view cannot drift apart.
+    // It is the same shared derivation the STANDALONE branch above ends on; a
+    // STANDALONE view with a parent has already returned there, which is where its
+    // convergence with ArrangeStandaloneChild is established.
     const LayoutRect bounds = Internal::DeriveStandaloneRootBounds(inputs, widthConstraint, heightConstraint, measuredSize);
 
-    // Use the internal root entry point rather than the public Arrange path. For a
-    // STANDALONE boundary this identifies the framework-owned self pass whose bounds
-    // are derived by the SAME helper as the parent's ArrangeStandaloneChild path
-    // (DeriveStandaloneRootBounds); an application calling View::Arrange directly
-    // carries no such ownership and retracts the parent's arrange entry when it
-    // rewrites the child's records.
+    // The internal root entry point, as in the STANDALONE branch above. Its
+    // framework-root-pass exemption (InvalidateParentArrangeCacheForOutOfBandArrange)
+    // applies only to a STANDALONE view, so for a regular root it behaves exactly like
+    // the public Arrange path.
     Internal::ViewDataImpl::Get(*view).ArrangeAsLayoutRoot(bounds);
   }
 
@@ -1572,6 +1664,23 @@ void LayoutController::UnregisterFromAll(ViewImpl* view)
     for(auto& controller : gDetachedLayoutControllers)
     {
       controller->UnregisterView(view);
+    }
+  }
+}
+
+void LayoutController::ReleaseLayoutRootInternal(ViewImpl* view)
+{
+  // Every controller, live and detached, for the reason UnregisterFromAll gives: a detached
+  // controller still holds raw ViewImpl pointers until it is reaped.
+  if(DALI_LIKELY(Adaptor::IsAvailable()))
+  {
+    for(auto& pair : gLayoutControllers)
+    {
+      pair.second->mImpl->ReleaseLayoutRoot(view);
+    }
+    for(auto& controller : gDetachedLayoutControllers)
+    {
+      controller->mImpl->ReleaseLayoutRoot(view);
     }
   }
 }

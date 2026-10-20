@@ -315,6 +315,19 @@ public: // Not intended for application developers
    * @param[in] child The view whose self transition was just detached
    */
   DALI_INTERNAL void ClearDetachedSelfState(ViewImpl* child);
+
+  /**
+   * @brief Withdraws @p view's automatic layout-root registration from every controller
+   * (live and detached), erasing it from the tracked-root map and the pending set only.
+   *
+   * @note For internal framework use only (see RequestLayoutInternal). Unlike UnregisterView
+   * it advances no invalidation generation, tombstones no completion record and notifies no
+   * dispatcher: the view stays alive and on scene; its layout work is re-owned by its parent
+   * chain. Called when a STANDALONE view with a View parent becomes DEFAULT.
+   *
+   * @param[in] view The view whose root registration is withdrawn
+   */
+  DALI_INTERNAL static void ReleaseLayoutRootInternal(ViewImpl* view);
   /// @endcond
 
 private:

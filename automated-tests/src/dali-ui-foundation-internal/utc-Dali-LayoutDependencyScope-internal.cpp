@@ -302,14 +302,12 @@ LayoutRect SpanProbeArrangeCallback(View, const LayoutRect& bounds)
 
 } // namespace
 
-// The arrange-owned scopes span 15 Measure() statements at 14 scope objects (the grid
-// auto-fill scope spans two of the statements). Twelve statements at eleven scope objects
-// live in this suite's reach; the cases below drive nine of them -- ViewDataImpl::ArrangeDefault
-// and the five LayoutManagers -- reading the owner frame from inside the re-measured child.
-// The two remaining in-reach scopes are ArrangeStandaloneChild's pair (the slot-correcting
-// re-measure and the MATCH_PARENT placement re-measure), driven by
-// UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP below. The remaining three
-// (CheckBox x2, TextButton x1) live in dali-ui-components and are out of this suite's reach.
+// The arrange-owned scopes span eleven Measure() statements at ten scope objects (the grid
+// auto-fill scope spans two of the statements), all of them in dali-ui-foundation and so all
+// in this suite's reach; dali-ui-components opens none. The cases below drive nine of them --
+// ViewDataImpl::ArrangeDefault and the five LayoutManagers -- reading the owner frame from
+// inside the re-measured child. The remaining scope is ArrangeStandaloneChild's single
+// placement Measure(), driven by UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP below.
 int UtcDaliLayoutDependencyArrangeOwnerIdentityP(void)
 {
   UiTestApplication application;
@@ -419,21 +417,23 @@ int UtcDaliLayoutDependencyArrangeOwnerIdentityP(void)
   END_TEST;
 }
 
-// ArrangeStandaloneChild's two re-measures, which a black-box test cannot attribute:
+// ArrangeStandaloneChild's single Measure(), which a black-box test cannot attribute:
 // the ancestor-invalidation walk returns early for standalone views, so it never reads
-// the owner stack on this path and no walk behaviour can distinguish these frames from
+// the owner stack on this path and no walk behaviour can distinguish this frame from
 // no frame at all. What is pinned here is therefore SCOPE IDENTITY, not walk behaviour --
-// that both re-measures are attributed to the arranging PARENT, so that a future consumer
-// of the owner stack (or a third-party stop) sees a uniform, correctly-named frame.
+// that the placement measure is attributed to the arranging PARENT, so that a future
+// consumer of the owner stack (or a third-party stop) sees a uniform, correctly-named
+// frame.
 //
-// Case A drives the MATCH_PARENT placement re-measure, case B the slot-correcting one
-// (only reachable with an unconsumed slot, i.e. after an out-of-band Measure()).
+// Case A drives it for a MATCH_PARENT child whose parent extent changed between measure
+// and arrange, case B for a WRAP_CONTENT child after an out-of-band Measure() overwrote
+// its slot.
 int UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  // Case A -- MATCH_PARENT standalone child, placement re-measure.
+  // Case A -- MATCH_PARENT standalone child, the placement's single Measure().
   {
     View root = View::New();
     root.SetRequestedWidth(OWNER_CASE_ROOT_WIDTH);
@@ -441,7 +441,7 @@ int UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP(void)
 
     // WRAP_CONTENT, sized by an ordinary fixed child: the parent's arrange extent
     // (100x40) differs from the constraint it forwards to MeasureStandaloneChildren
-    // (200x100), so the placement re-measure is a genuine cache miss and reaches the
+    // (200x100), so the placement measure is a genuine cache miss and reaches the
     // recording callback.
     View parent = View::New();
 
@@ -481,7 +481,8 @@ int UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP(void)
   }
 
   // Case B -- non-MATCH_PARENT standalone child whose slot was overwritten
-  // out-of-band, i.e. the slot-correcting re-measure.
+  // out-of-band, i.e. the placement's single Measure(), which replaces the
+  // out-of-band slot.
   {
     View root = View::New();
     root.SetRequestedWidth(OWNER_CASE_ROOT_WIDTH);
@@ -503,7 +504,7 @@ int UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP(void)
     application.SendNotification();
 
     // Overwrite the slot from outside any pass, then re-arrange only: the sole
-    // Measure() the pass can issue on this child is the corrective one.
+    // Measure() the pass can issue on this child is the placement's.
     standalone.Measure(30.0f, 20.0f);
 
     gRecords.clear();

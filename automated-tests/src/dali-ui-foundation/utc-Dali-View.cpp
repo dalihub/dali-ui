@@ -845,11 +845,10 @@ MeasuredSize MeasureUnrelatedTreeMeasure(View, float, float)
   return MeasuredSize(100.0f, 50.0f);
 }
 
-// A second constraint-clamping producer whose natural size is deliberately LARGER
-// than the arrange extent used in the standalone steady-state test, so the size it
-// reports depends on WHICH constraint it was last measured against: the parent's
-// measure constraint (the standalone slot's steady-state source) or the parent's
-// smaller arrange extent.
+// A second constraint-clamping producer whose natural size (150x90) is deliberately
+// LARGER than the 120x60 extent NarrowParentMeasure reports, so a standalone child
+// measured against its parent would visibly shrink while one measured against the
+// window keeps its natural size.
 const float WIDE_CLAMP_NATURAL_WIDTH  = 150.0f;
 const float WIDE_CLAMP_NATURAL_HEIGHT = 90.0f;
 
@@ -863,17 +862,59 @@ MeasuredSize WideClampToConstraintMeasure(View, float widthConstraint, float hei
   return MeasuredSize(width, height);
 }
 
-// A parent that measures SMALLER than the constraint it was handed, so its arrange
-// extent (its own final size, which is what its standalone children are placed
-// against) and the constraint it forwards to MeasureStandaloneChildren are two
-// different numbers -- the only way to tell those two constraints apart from the
-// arranged geometry.
+// A parent that measures SMALLER than the constraint it was handed, so its own final
+// size (what its standalone children's MATCH_PARENT axes fill) and the constraint it
+// was measured at are two different numbers.
 const float NARROW_PARENT_MEASURED_WIDTH  = 120.0f;
 const float NARROW_PARENT_MEASURED_HEIGHT = 60.0f;
 
 MeasuredSize NarrowParentMeasure(View, float, float)
 {
   return MeasuredSize(NARROW_PARENT_MEASURED_WIDTH, NARROW_PARENT_MEASURED_HEIGHT);
+}
+
+// A constraint-clamping producer whose natural size exceeds the default 480x800 test window on
+// both axes. It records the constraint it was last run at, so a test can assert both the
+// window-minus-margin constraint a standalone child is measured at and the clamped result.
+const float OVERSIZE_CLAMP_NATURAL_WIDTH  = 1000.0f;
+const float OVERSIZE_CLAMP_NATURAL_HEIGHT = 1000.0f;
+
+int   gOversizeClampMeasureProducerCount = 0;
+float gOversizeClampLastWidthConstraint  = -1.0f;
+float gOversizeClampLastHeightConstraint = -1.0f;
+
+MeasuredSize OversizeClampToConstraintMeasure(View, float widthConstraint, float heightConstraint)
+{
+  ++gOversizeClampMeasureProducerCount;
+  gOversizeClampLastWidthConstraint  = widthConstraint;
+  gOversizeClampLastHeightConstraint = heightConstraint;
+
+  float width  = (widthConstraint >= 0.0f) ? std::min(widthConstraint, OVERSIZE_CLAMP_NATURAL_WIDTH) : OVERSIZE_CLAMP_NATURAL_WIDTH;
+  float height = (heightConstraint >= 0.0f) ? std::min(heightConstraint, OVERSIZE_CLAMP_NATURAL_HEIGHT) : OVERSIZE_CLAMP_NATURAL_HEIGHT;
+  return MeasuredSize(width, height);
+}
+
+// A producer that reports exactly the constraint it is handed, so the constraint a view is
+// measured at becomes its size. It records the constraint of its last run, which is the
+// value the producer actually received: Measure() clamps the incoming constraint by the
+// view's own minimum/maximum before the producer runs.
+int   gFillMeasureProducerCount = 0;
+float gFillLastWidthConstraint  = -1.0f;
+float gFillLastHeightConstraint = -1.0f;
+
+MeasuredSize FillConstraintMeasure(View, float widthConstraint, float heightConstraint)
+{
+  ++gFillMeasureProducerCount;
+  gFillLastWidthConstraint  = widthConstraint;
+  gFillLastHeightConstraint = heightConstraint;
+  return MeasuredSize(std::max(0.0f, widthConstraint), std::max(0.0f, heightConstraint));
+}
+
+void ResetFillMeasureProducer()
+{
+  gFillMeasureProducerCount = 0;
+  gFillLastWidthConstraint  = -1.0f;
+  gFillLastHeightConstraint = -1.0f;
 }
 
 Shadow GetShadowProperty(View view)
@@ -5591,12 +5632,12 @@ int UtcDaliViewUnrelatedTreeMeasureFromCallbackWalksToRootP(void)
 //
 // The child itself is nevertheless CORRECTED, without any ancestor cache being
 // touched: the measure publish leaves the slot marked unconsumed, and
-// ArrangeStandaloneChild re-measures the child against the parent's own extent
-// before placing it. The correction sits on the ARRANGE side, which is why it is
-// reached on this very pass even though the parent served a measure cache hit and
-// MeasureStandaloneChildren never ran. It costs exactly ONE producer run, and the
-// second pass below pins that it is not paid again (the slot is consumed, so a
-// steady state cannot spin).
+// ArrangeStandaloneChild re-measures the child at its derived standalone constraint
+// (the window bound for this WRAP_CONTENT child) before placing it. The correction
+// sits on the ARRANGE side, which is why it is reached on this very pass even though
+// the parent served a measure cache hit and MeasureStandaloneChildren never ran. It
+// costs exactly ONE producer run, and the second pass below pins that it is not paid
+// again (the slot is consumed, so a steady state cannot spin).
 int UtcDaliViewStandaloneDirectMeasureStopsAtBoundaryP(void)
 {
   UiTestApplication application;
@@ -5641,11 +5682,12 @@ int UtcDaliViewStandaloneDirectMeasureStopsAtBoundaryP(void)
   DALI_TEST_EQUALS(gCountingMeasureProducerCount, parentCountAfterLayout, TEST_LOCATION);
 
   // The standalone child, however, was corrected on the arrange side: exactly one
-  // re-measure, against the parent's extent. It is a genuine miss because the
-  // child's measure cache holds the out-of-band 30x20 constraint.
+  // re-measure, at its derived standalone constraint (the window bound for this
+  // WRAP_CONTENT child). It is a genuine miss because the child's measure cache holds
+  // the out-of-band 30x20 constraint.
   DALI_TEST_EQUALS(gClampMeasureProducerCount, standaloneCountAfterExternal + 1, TEST_LOCATION);
 
-  // ... so it is placed at the size the parent's extent produces, not at the
+  // ... so it is placed at the size its derived constraint produces, not at the
   // out-of-band size the external Measure() left in the slot.
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), CLAMP_MEASURE_NATURAL_WIDTH, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), CLAMP_MEASURE_NATURAL_HEIGHT, TEST_LOCATION);
@@ -5666,10 +5708,9 @@ int UtcDaliViewStandaloneDirectMeasureStopsAtBoundaryP(void)
 
 // The first-party standalone shape -- MATCH_PARENT on BOTH axes, which is what the
 // ScrollBar and the focus indicator use -- must be a strict no-op under the slot
-// correction. Its measured value is discarded on both axes, and the placement
-// re-measure runs at exactly the extent the correction would have used, so the
-// correction is skipped: the pass costs ONE producer run, not two, and an
-// out-of-band Measure() cannot move the geometry at all.
+// correction: its measured value is discarded on both axes, and ArrangeStandaloneChild
+// issues exactly ONE Measure() per placement, at the parent's extent, so the pass costs
+// one producer run and an out-of-band Measure() cannot move the geometry at all.
 int UtcDaliViewStandaloneMatchParentSlotUnaffectedP(void)
 {
   UiTestApplication application;
@@ -5705,7 +5746,7 @@ int UtcDaliViewStandaloneMatchParentSlotUnaffectedP(void)
   root.InvalidateArrange();
   application.SendNotification();
 
-  // Exactly one producer run in the pass: the MATCH_PARENT placement re-measure.
+  // Exactly one producer run in the pass: the placement's single Measure().
   DALI_TEST_EQUALS(gClampMeasureProducerCount, countAfterExternal + 1, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 100.0f, TEST_LOCATION);
@@ -5759,7 +5800,7 @@ int UtcDaliViewStandaloneSlotCorrectedOnArrangeOnlyPassP(void)
   // Nothing was re-measured from the measure side ...
   DALI_TEST_EQUALS(gCountingMeasureProducerCount, parentCountAfterLayout, TEST_LOCATION);
   // ... yet the standalone child was corrected exactly once, and placed at the
-  // size its parent's extent yields rather than the out-of-band 30x20.
+  // size its derived constraint yields rather than the out-of-band 30x20.
   DALI_TEST_EQUALS(gClampMeasureProducerCount, standaloneCountAfterExternal + 1, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), CLAMP_MEASURE_NATURAL_WIDTH, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), CLAMP_MEASURE_NATURAL_HEIGHT, TEST_LOCATION);
@@ -5767,14 +5808,12 @@ int UtcDaliViewStandaloneSlotCorrectedOnArrangeOnlyPassP(void)
   END_TEST;
 }
 
-// The steady state must keep using the parent's MEASURE constraint, not its
-// (generally smaller) arrange extent: MeasureStandaloneChildren is the parent's
-// consumption of the slot, so the arrange-time correction must not fire behind it.
-// The two constraints are told apart by a producer whose natural size falls
-// between them -- 150x90 fits the 200x100 measure constraint but not the 120x60
-// arrange extent -- so a correction that ran unconditionally would visibly shrink
-// the child.
-int UtcDaliViewStandaloneSteadyStateUsesMeasureConstraintP(void)
+// A WRAP_CONTENT standalone child is measured against the WINDOW (480x800 here) by its
+// parent's measure, its parent's placement and its own layout-root pass alike, so it keeps
+// its natural 150x90 although its parent reports (and is placed at) only 120x60, and no pass
+// after the first runs its producer again. The parent constraint it is measured at no longer
+// matters for a WRAP_CONTENT axis.
+int UtcDaliViewStandaloneSteadyStateUsesWindowBoundP(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
@@ -5785,9 +5824,6 @@ int UtcDaliViewStandaloneSteadyStateUsesMeasureConstraintP(void)
   root.SetRequestedWidth(200.0f);
   root.SetRequestedHeight(100.0f);
 
-  // WRAP_CONTENT, but its producer reports 120x60: the constraint it forwards to
-  // its standalone children (200x100) and the extent they are arranged in
-  // (120x60) are therefore different numbers.
   View parent = View::New();
   parent.SetMeasureCallback(MeasureCallback::New(&NarrowParentMeasure));
 
@@ -5802,37 +5838,1163 @@ int UtcDaliViewStandaloneSteadyStateUsesMeasureConstraintP(void)
   application.SendNotification();
   application.SendNotification();
 
-  DALI_TEST_CHECK(gWideClampMeasureProducerCount > 0);
+  // One producer run: the parent's measure (miss); the placement and the child's own pass hit.
+  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), NARROW_PARENT_MEASURED_WIDTH, TEST_LOCATION);
   DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), NARROW_PARENT_MEASURED_HEIGHT, TEST_LOCATION);
-
-  // Drive a pass through the PARENT (a standalone view self-registers as its own
-  // layout root when it is invalidated, and LayoutController::ProcessLayoutRoot
-  // then measures it against the parent's SIZE -- the initial mount above goes
-  // through that path, which is not what this test is about). Invalidating the
-  // parent instead re-runs MeasureStandaloneChildren, which is the consumption
-  // point under test.
-  const int countBeforePass = gWideClampMeasureProducerCount;
-  parent.InvalidateMeasure();
-  application.SendNotification();
-
-  // MeasureStandaloneChildren re-measured the child at the parent's own 200x100
-  // measure constraint and marked the slot consumed, so the arrange placed it from
-  // that slot: 150x90, overflowing the parent's 120x60 extent. A correction that
-  // fired here would re-measure at 120x60 and shrink it.
-  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, countBeforePass + 1, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
 
-  // Steady state, and free: an identical pass re-issues the SAME 200x100
-  // constraint, so the child's measure cache hits and the arrange again finds the
-  // slot consumed. Nothing runs, nothing moves.
-  const int countAfterPass = gWideClampMeasureProducerCount;
+  // A pass through the PARENT: MeasureStandaloneChildren re-issues the same window-bounded
+  // constraint, so the child's measure cache hits; the placement hits too.
   parent.InvalidateMeasure();
   application.SendNotification();
-  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, countAfterPass, TEST_LOCATION);
+  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // The child's own pass (its arrange invalidation stops at the boundary): same constraint, same size.
+  standalone.InvalidateArrange();
+  application.SendNotification();
+  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A WRAP_CONTENT standalone child of a parent that has no size at all keeps its natural
+// size: every pass measures it against the window (480x800 here), never against the
+// parent's 0x0, so its producer runs once -- at the parent's measure; the placement and the
+// child's own pass hit -- and again only when the child's own measure is invalidated. The
+// parent's placement after such an own pass is a hit as well, because both derive the same
+// constraint.
+//
+// Non-vacuity: before the shared derivation the child's own layout-root pass measured it
+// against the parent actor's 0x0 SIZE, so the first settle ended at 0x0.
+int UtcDaliViewStandaloneWrapContentUnderZeroSizedParentKeepsNaturalSizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  gClampMeasureProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(0.0f);
+  parent.SetRequestedHeight(0.0f);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetMeasureCallback(MeasureCallback::New(&ClampToConstraintMeasure));
+
+  parent.Add(standalone);
+  root.Add(parent);
+  window.Add(root);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(gClampMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), CLAMP_MEASURE_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), CLAMP_MEASURE_NATURAL_HEIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, TEST_LOCATION);
+
+  // A pass through the parent re-issues the same window-bounded constraint: a hit.
+  parent.InvalidateMeasure();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gClampMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), CLAMP_MEASURE_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), CLAMP_MEASURE_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // The child's own pass alone (its measure invalidation stops at the boundary): a miss,
+  // at the same window-bounded constraint, so the size does not move.
+  standalone.InvalidateMeasure();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gClampMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), CLAMP_MEASURE_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), CLAMP_MEASURE_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // The parent's placement after that own pass derives the same constraint: a hit.
+  parent.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gClampMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), CLAMP_MEASURE_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), CLAMP_MEASURE_NATURAL_HEIGHT, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The window bound is the window size less the child's OWN margin, per axis, and the
+// margin still offsets the child: a producer larger than the window on both axes is run at
+// exactly (480 - 10 - 20, 800 - 30 - 40) and placed at (10, 30), whatever its 50x50
+// parent offers.
+//
+// Non-vacuity: before the shared derivation the child's own layout-root pass measured it
+// against the parent actor's SIZE less its margin, (50 - 30, 50 - 70) floored at zero, so
+// it settled at 20x0.
+int UtcDaliViewStandaloneWrapContentClampedToWindowMinusMarginP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  gOversizeClampMeasureProducerCount = 0;
+  gOversizeClampLastWidthConstraint  = -1.0f;
+  gOversizeClampLastHeightConstraint = -1.0f;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(50.0f);
+  parent.SetRequestedHeight(50.0f);
+
+  // Margin start 10, end 20, top 30, bottom 40.
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetMargin(Insets(10.0f, 20.0f, 30.0f, 40.0f));
+  standalone.SetMeasureCallback(MeasureCallback::New(&OversizeClampToConstraintMeasure));
+
+  parent.Add(standalone);
+  root.Add(parent);
+  window.Add(root);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(gOversizeClampLastWidthConstraint, 450.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gOversizeClampLastHeightConstraint, 730.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gOversizeClampMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 450.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 730.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_X), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_Y), 30.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The two axes of one standalone child follow two different sources: its WRAP_CONTENT
+// width is bounded by the window, so its natural 150 overflows the 100 wide parent, while
+// its MATCH_PARENT height fills the parent's 120 -- and follows the parent when it grows
+// to 200. The parent's measure runs the producer at (480, 120); the placement and the
+// child's own pass derive that same constraint and hit.
+//
+// Non-vacuity: before the shared derivation the child's own layout-root pass measured the
+// WRAP_CONTENT width against the parent actor's 100 wide SIZE, so it settled at width 100.
+int UtcDaliViewStandaloneMixedAxesUseWindowAndParentExtentP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  gWideClampMeasureProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(400.0f);
+  root.SetRequestedHeight(300.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(100.0f);
+  parent.SetRequestedHeight(120.0f);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetRequestedWidth(WRAP_CONTENT);
+  standalone.SetRequestedHeight(MATCH_PARENT);
+  standalone.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+
+  parent.Add(standalone);
+  root.Add(parent);
+  window.Add(root);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 120.0f, TEST_LOCATION);
+
+  // A re-placement by the parent derives the same constraint: a hit, and nothing moves.
+  parent.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 120.0f, TEST_LOCATION);
+
+  // The parent grows: only the MATCH_PARENT axis reads its extent, so the constraint becomes
+  // (480, 200), one producer run, and the height follows while the width stays put.
+  parent.SetRequestedHeight(200.0f);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 200.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A WRAP_CONTENT standalone child follows the WINDOW, not its parent: shrinking the window
+// below the child's natural size clamps it, and restoring the window restores the natural
+// size. The resize reaches the child because every on-scene window-bounded standalone view
+// is a tracked layout root of its window's LayoutController, which invalidates every
+// tracked root on a resize.
+//
+// Non-vacuity: before the shared derivation the child's own layout-root pass measured it
+// against the parent actor's 0x0 SIZE, so the first settle already ended at 0x0.
+int UtcDaliViewStandaloneWrapContentFollowsWindowResizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(0.0f);
+  parent.SetRequestedHeight(0.0f);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+
+  parent.Add(standalone);
+  root.Add(parent);
+  window.Add(root);
+
+  SettleLayout(application);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  window.SetPositionSize(PositionSize(0, 0, 100, 60));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  window.SetPositionSize(PositionSize(0, 0, 480, 800));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The same window bound after the child has left and re-joined the scene while CLEAN
+// (nothing invalidated it in between): a scene disconnection untracks every view, so the
+// re-connection itself has to make the child a tracked layout root again, or the next
+// window resize could not reach it.
+//
+// Non-vacuity: without the OnViewSceneConnection registration of a clean window-bounded
+// standalone view the child is not a tracked layout root after the re-connection, the
+// resize invalidates only `root`, `parent` serves its arrange cache hit and the child
+// keeps 150x90.
+int UtcDaliViewStandaloneReconnectedCleanChildFollowsWindowResizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(0.0f);
+  parent.SetRequestedHeight(0.0f);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+
+  parent.Add(standalone);
+  root.Add(parent);
+  window.Add(root);
+
+  SettleLayout(application);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // Leave and re-join the scene without invalidating the child.
+  window.Remove(root);
+  window.Add(root);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  window.SetPositionSize(PositionSize(0, 0, 100, 60));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Off scene there is no window to bound a WRAP_CONTENT standalone child, so each pass falls
+// back to the extent the parent offers, less the child's margin: the parent's PROVISIONAL
+// extent at its measure, and its FINAL extent at its placement. A WRAP_CONTENT parent's
+// provisional extent is the constraint it is measured at (200x100), so the placement
+// re-measures at the 120x60 rect it is arranged in; a FIXED 120x60 parent hands down its
+// own requested size, so the placement measure is a cache hit.
+//
+// Non-vacuity: before the shared derivation the placement kept the slot the parent's
+// measure produced at the parent's 200x100 constraint, so the child stayed at its natural
+// 150x90 in both parts.
+int UtcDaliViewStandaloneOffSceneFallsBackToParentExtentP(void)
+{
+  UiTestApplication application;
+
+  // Part 1: a WRAP_CONTENT parent.
+  {
+    gWideClampMeasureProducerCount = 0;
+
+    View wrapParent = View::New();
+
+    View child = View::New();
+    child.SetLayoutMode(LayoutMode::STANDALONE);
+    child.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+    wrapParent.Add(child);
+
+    wrapParent.Measure(200.0f, 100.0f);
+    wrapParent.Arrange(LayoutRect(0.0f, 0.0f, 120.0f, 60.0f));
+
+    // 200x100 at the parent's measure (provisional), then 120x60 at its placement.
+    DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 2, TEST_LOCATION);
+    DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 120.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+  }
+
+  // Part 2: a FIXED parent of the same final size.
+  {
+    gWideClampMeasureProducerCount = 0;
+
+    View fixedParent = View::New();
+    fixedParent.SetRequestedWidth(120.0f);
+    fixedParent.SetRequestedHeight(60.0f);
+
+    View child = View::New();
+    child.SetLayoutMode(LayoutMode::STANDALONE);
+    child.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+    fixedParent.Add(child);
+
+    fixedParent.Measure(200.0f, 100.0f);
+    fixedParent.Arrange(LayoutRect(0.0f, 0.0f, 120.0f, 60.0f));
+
+    // The provisional extent is the parent's own 120x60, so the placement measure hits.
+    DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 1, TEST_LOCATION);
+    DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 120.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+// A WRAP_CONTENT standalone CONTAINER is bounded by the window too, so its children get the
+// window as their budget and the container wraps them, although its parent has no size. The
+// bound is finite on purpose: Measure() floors a negative ("unbounded") constraint at the
+// view's minimum and the StackLayoutManager clamps its content constraint to zero, so an
+// unbounded sentinel would measure the children at 0x0 and collapse the container.
+//
+// Non-vacuity: before the shared derivation the container's own layout-root pass measured
+// it against the parent actor's 0x0 SIZE, so it and both children ended at 0x0.
+int UtcDaliViewStandaloneStackLayoutWrapsChildrenAtWindowBoundP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(0.0f);
+  parent.SetRequestedHeight(0.0f);
+
+  StackLayout stack = StackLayout::New(StackOrientation::VERTICAL);
+  stack.SetLayoutMode(LayoutMode::STANDALONE);
+  stack.SetRequestedWidth(WRAP_CONTENT);
+  stack.SetRequestedHeight(WRAP_CONTENT);
+
+  View first = View::New();
+  first.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+  stack.Add(first);
+
+  View second = View::New();
+  second.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+  stack.Add(second);
+
+  parent.Add(stack);
+  root.Add(parent);
+  window.Add(root);
+
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(stack.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(stack.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 2.0f * WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(first.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(first.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(first.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::POSITION_Y), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// An explicitly sized standalone view is measured at its requested size, with or without a
+// window, so a producer that reports the constraint it is handed settles at the requested
+// size, and a window resize does not move it.
+//
+// Non-vacuity: when every axis that is not MATCH_PARENT was bounded by the window, this
+// producer ran at the window's 480x800, settled there and followed the window to 100x60.
+int UtcDaliViewStandaloneFixedUnderWindowMeasuresAtRequestedSizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  ResetFillMeasureProducer();
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetRequestedWidth(40.0f);
+  standalone.SetRequestedHeight(30.0f);
+  standalone.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+  window.Add(standalone);
+
+  // Trace: only the view's own layout-root pass runs (its parent is the window's root layer,
+  // not a View). Both axes are explicit, so the constraint is the requested 40x30 and no
+  // window size is read; the producer reports it (count 1) and the slot is that measured
+  // 40x30 at (0, 0).
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillLastWidthConstraint, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillLastHeightConstraint, 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  // Trace: the resize invalidates the view, a tracked layout root, so its own pass misses once
+  // (count 2) -- still at the requested 40x30.
+  window.SetPositionSize(PositionSize(0, 0, 100, 60));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillLastWidthConstraint, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillLastHeightConstraint, 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The parent's measure, the parent's placement and the child's own layout-root pass derive
+// ONE constraint for an explicitly sized standalone child -- its requested size -- so after
+// the first measurement each of them is a measure cache hit until the child's own measure is
+// invalidated, whichever order they run in, and the child keeps its requested size.
+//
+// Non-vacuity: with the window bound all three passes ran the producer at 480x800, so the
+// child settled at 480x800.
+int UtcDaliViewStandaloneFixedUnderFixedParentMeasuresAtRequestedSizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  ResetFillMeasureProducer();
+
+  View parent = View::New();
+  parent.SetRequestedWidth(120.0f);
+  parent.SetRequestedHeight(60.0f);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+
+  parent.Add(child);
+  window.Add(parent);
+
+  // Trace: the parent's measure runs the producer at (40, 30) (count 1); the placement and the
+  // child's own pass derive the same (40, 30) and hit.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  // Trace: the parent's measure misses, MeasureStandaloneChildren re-issues (40, 30): a hit.
+  parent.InvalidateMeasure();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+
+  // Trace: the parent's placement alone re-derives (40, 30): a hit.
+  parent.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+
+  // Trace: the child's own measure invalidated (it stops at the boundary): its own pass misses
+  // once (count 2), at the same constraint, so the size does not move.
+  child.InvalidateMeasure();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  // Trace: the child's own arrange alone: its measure hits.
+  child.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+
+  // Trace: the parent's placement after that own pass derives the same constraint: a hit.
+  parent.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The same ladder under a WRAP_CONTENT parent whose own parent is wider: the parent hands its
+// standalone child its incoming 200x100 constraint as the provisional extent and is placed at
+// its own 150x80, but an explicitly sized child reads neither -- every pass measures it at its
+// requested 40x30.
+//
+// Non-vacuity: with the window bound every pass ran the producer at 480x800; before the
+// shared derivation the parent's measure ran it at the parent's incoming 200x100.
+int UtcDaliViewStandaloneFixedUnderWiderAncestorMeasuresAtRequestedSizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  ResetFillMeasureProducer();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New(); // WRAP_CONTENT x WRAP_CONTENT
+
+  View seed = View::New();
+  seed.SetRequestedWidth(150.0f);
+  seed.SetRequestedHeight(80.0f);
+  parent.Add(seed);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+  parent.Add(child);
+
+  root.Add(parent);
+  window.Add(root);
+
+  // Trace: root measures the parent at (200, 100); the parent wraps the seed to 150x80 and
+  // hands the child its provisional 200x100, which the child does not read: the producer runs
+  // at (40, 30) (count 1). The parent is placed at 150x80, and its placement and the child's
+  // own pass derive (40, 30) again and hit.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  // Trace: root and parent re-measure; MeasureStandaloneChildren re-issues (40, 30): a hit.
+  parent.InvalidateMeasure();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+
+  // Trace: the parent's placement alone: a hit.
+  parent.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+
+  // Trace: the child's own pass misses once (count 2), at the same constraint.
+  child.InvalidateMeasure();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  // Trace: the child's own arrange alone: its measure hits.
+  child.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+
+  // Trace: the parent's placement after the own pass: a hit.
+  parent.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// An explicitly sized standalone view whose parent is not a View -- the window's root layer,
+// or a plain Layer -- is measured at its requested size too.
+//
+// Non-vacuity: with the window bound both views settled at 480x800.
+int UtcDaliViewStandaloneFixedUnderLayerP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  ResetFillMeasureProducer();
+
+  // (a) Directly under the window's root layer.
+  View onRootLayer = View::New();
+  onRootLayer.SetLayoutMode(LayoutMode::STANDALONE);
+  onRootLayer.SetRequestedWidth(40.0f);
+  onRootLayer.SetRequestedHeight(30.0f);
+  onRootLayer.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+  window.Add(onRootLayer);
+
+  // (b) Under a plain Layer.
+  Layer layer = Layer::New();
+  window.Add(layer);
+  View onLayer = View::New();
+  onLayer.SetLayoutMode(LayoutMode::STANDALONE);
+  onLayer.SetRequestedWidth(40.0f);
+  onLayer.SetRequestedHeight(30.0f);
+  onLayer.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+  layer.Add(onLayer);
+
+  // Trace: each view is a layout root (no View parent) whose own pass reads its parent's actor
+  // SIZE as the available extent -- which an explicit axis does not use -- and runs the
+  // producer at the requested (40, 30): two runs, one per view.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(onRootLayer.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(onRootLayer.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(onLayer.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(onLayer.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A WRAP_CONTENT standalone view whose parent is not a View is bounded by the window it is
+// shown in, under the window's root layer and under a plain Layer alike, and follows a
+// window resize.
+int UtcDaliViewStandaloneWrapContentUnderLayerP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  // (a) Directly under the window's root layer.
+  View onRootLayer = View::New();
+  onRootLayer.SetLayoutMode(LayoutMode::STANDALONE);
+  onRootLayer.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+  window.Add(onRootLayer);
+
+  // (b) Under a plain Layer.
+  Layer layer = Layer::New();
+  window.Add(layer);
+  View onLayer = View::New();
+  onLayer.SetLayoutMode(LayoutMode::STANDALONE);
+  onLayer.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+  layer.Add(onLayer);
+
+  // Trace: both WRAP_CONTENT axes are measured against the 480x800 window, so each view keeps
+  // its natural 150x90.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(onRootLayer.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(onRootLayer.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(onLayer.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(onLayer.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // Trace: both views are tracked layout roots, so the resize invalidates them and each is
+  // re-measured against the 100x60 window, which clamps the producer.
+  window.SetPositionSize(PositionSize(0, 0, 100, 60));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(onRootLayer.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(onRootLayer.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(onLayer.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(onLayer.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The explicit-size constraint is the requested size times the UI scale, with no margin
+// subtracted, and Measure() still clamps it by the view's own maximum before the producer
+// runs; the margin offsets the position only, and the slot is the measured size clamped by
+// the view's own minimum/maximum.
+//
+// Non-vacuity: with the window bound the producer ran at the window less the visual margin,
+// (480 - 60, 800 - 140), clamped to (70, 660), and the view settled 660 tall.
+int UtcDaliViewStandaloneFixedAtScaleWithMarginAndMaximumP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(2.0f);
+
+  ResetFillMeasureProducer();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  // Margin start 10, end 20, top 30, bottom 40.
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetMargin(Insets(10.0f, 20.0f, 30.0f, 40.0f));
+  child.SetRequestedX(5.0f);
+  child.SetRequestedY(0.0f);
+  child.SetMaximumWidth(35.0f);
+  child.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+  root.Add(child);
+  window.Add(root);
+
+  // Trace at scale 2: the derived constraint is (40 * 2, 30 * 2) = (80, 60). Measure()
+  // normalises it to (40, 30), clamps the width by the maximum 35 and hands the producer
+  // (35 * 2, 30 * 2) = (70, 60) (count 1); ApplyConstraints keeps (70, 60). The placement and
+  // the child's own pass derive the same key and hit. The slot is the measured (70, 60), the
+  // width already within its 70 maximum, at ((5 + 10) * 2, (0 + 30) * 2) = (30, 60).
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillLastWidthConstraint, 70.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillLastHeightConstraint, 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 70.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 60.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// A parent whose producers never touch their children still places its standalone
+// children: ArrangeStandaloneChildren runs after every arrange producer, so a WRAP_CONTENT
+// child gets its window-bounded natural size and an explicitly sized child its requested
+// size, and the WRAP_CONTENT child's own re-measure lands on the same size.
+//
+// Non-vacuity: with the window bound the explicitly sized child settled at 480x800.
+int UtcDaliViewStandaloneUnderLabelStyleParentIsPlacedP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  ResetFillMeasureProducer();
+  gWideClampMeasureProducerCount = 0;
+
+  View parent = View::New();
+  parent.SetMeasureCallback(MeasureCallback::New(&IgnoringChildrenMeasure));
+  parent.SetArrangeCallback(ArrangeCallback::New(&IgnoringChildrenArrange));
+
+  View wrapChild = View::New();
+  wrapChild.SetLayoutMode(LayoutMode::STANDALONE);
+  wrapChild.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+  parent.Add(wrapChild);
+
+  View fixedChild = View::New();
+  fixedChild.SetLayoutMode(LayoutMode::STANDALONE);
+  fixedChild.SetRequestedWidth(40.0f);
+  fixedChild.SetRequestedHeight(30.0f);
+  fixedChild.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+  parent.Add(fixedChild);
+
+  window.Add(parent);
+
+  // Trace: the parent measures as 200x100 without touching its children, then
+  // MeasureStandaloneChildren runs the WRAP_CONTENT child against the window (480, 800)
+  // -> 150x90 and the explicit child at (40, 30) -> 40x30. The parent's arrange producer
+  // returns its bounds, and ArrangeStandaloneChildren places both children from the same
+  // keys (hits); their own passes hit too.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(wrapChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(wrapChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixedChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixedChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  // Trace: the WRAP_CONTENT child's own pass misses once (count 2) at the same window bound.
+  wrapChild.InvalidateMeasure();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gWideClampMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(wrapChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(wrapChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixedChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixedChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A MATCH_PARENT x MATCH_PARENT standalone view whose parent is not a View fills that
+// parent's actor SIZE: the fallback of the own pass when there is no View parent whose
+// arranged bounds it could read.
+//
+// The test window does not resize its scene's root layer when the window is resized (the
+// device adaptor does), so the second half resizes both, as a device resize would.
+int UtcDaliViewStandaloneMatchParentUnderWindowFillsWindowP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetRequestedWidth(MATCH_PARENT);
+  standalone.SetRequestedHeight(MATCH_PARENT);
+  window.Add(standalone);
+
+  // Trace: the own pass reads the root layer's 480x800 actor SIZE as the available extent;
+  // both axes are measured and placed at it.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 480.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 800.0f, TEST_LOCATION);
+
+  // Trace: the resize invalidates the view, a tracked layout root, and its own pass reads the
+  // root layer's new 100x60.
+  Layer rootLayer = window.GetRootLayer();
+  rootLayer.SetProperty(Actor::Property::SIZE_WIDTH, 100.0f);
+  rootLayer.SetProperty(Actor::Property::SIZE_HEIGHT, 60.0f);
+  window.SetPositionSize(PositionSize(0, 0, 100, 60));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Clean standalone views re-join the scene as tracked layout roots and run their own pass:
+// their parent is never arranged (its parent's producers ignore it), so nothing else could
+// bring them to the scale that changed while they were off scene.
+//
+// Non-vacuity: without the registration of every standalone view on scene connection both
+// children stay clean after the reconnection, no pass reaches them, and they keep their
+// scale-1 sizes (40x30 and 20x10).
+int UtcDaliViewStandaloneReconnectAfterOffSceneScaleChangeRelayoutsCleanChildP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(1.0f);
+
+  ResetFillMeasureProducer();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  root.SetMeasureCallback(MeasureCallback::New(&IgnoringChildrenMeasure));
+  root.SetArrangeCallback(ArrangeCallback::New(&IgnoringChildrenArrange));
+
+  View parent = View::New(); // never measured nor arranged by root's producers
+  root.Add(parent);
+
+  View fixedChild = View::New();
+  fixedChild.SetLayoutMode(LayoutMode::STANDALONE);
+  fixedChild.SetRequestedWidth(40.0f);
+  fixedChild.SetRequestedHeight(30.0f);
+  fixedChild.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+  parent.Add(fixedChild);
+
+  View matchChild = View::New();
+  matchChild.SetLayoutMode(LayoutMode::STANDALONE);
+  matchChild.SetRequestedWidth(MATCH_PARENT);
+  matchChild.SetRequestedHeight(MATCH_PARENT);
+  matchChild.SetMinimumWidth(20.0f);
+  matchChild.SetMinimumHeight(10.0f);
+  parent.Add(matchChild);
+
+  window.Add(root);
+
+  // Trace at scale 1: only the children's own passes reach them. The parent holds no arrange
+  // result, so its 0x0 actor SIZE is the available extent: the explicit child is measured at
+  // (40, 30) -> 40x30, the MATCH_PARENT child at (0, 0) and placed at 0x0 clamped up to its
+  // minimum, 20x10.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(fixedChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixedChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(matchChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(matchChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 10.0f, TEST_LOCATION);
+
+  // Off scene, nothing is registered with UiScaleManager, so the scale change reaches no view.
+  window.Remove(root);
+  UiScaleManager::Get().SetScale(2.0f);
+  window.Add(root);
+
+  // Trace at scale 2: the reconnecting root drops the subtree's caches and scales without
+  // raising dirty; both children register on connection and their own passes run: the
+  // explicit child at (40 * 2, 30 * 2) -> 80x60, the MATCH_PARENT child clamped up to its
+  // minimum (20 * 2, 10 * 2) -> 40x20.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(fixedChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(fixedChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(matchChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(matchChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 20.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// The same reconnection after an off-scene scale-policy change on the child's PARENT: the
+// change resets the child's scale and caches (the parent's subtree reset) but raises no dirty
+// bit on the child, and a direct Measure() of the child at the new scale publishes a slot
+// without placing it. So the child re-joins clean on both axes, its actor still at the
+// geometry of the old scale, and only its own pass on connection re-places it.
+//
+// Non-vacuity: without the registration of every standalone view on scene connection the
+// clean child is reached by no pass (its parent's own parent ignores the parent), and it
+// keeps the 80x60 it was placed at under scale 2.
+int UtcDaliViewStandaloneReconnectAfterScalePolicyChangeAndDirectMeasureRelayoutsP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(2.0f);
+
+  ResetFillMeasureProducer();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  root.SetMeasureCallback(MeasureCallback::New(&IgnoringChildrenMeasure));
+  root.SetArrangeCallback(ArrangeCallback::New(&IgnoringChildrenArrange));
+
+  View parent = View::New(); // never measured nor arranged by root's producers
+  root.Add(parent);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetMeasureCallback(MeasureCallback::New(&FillConstraintMeasure));
+  parent.Add(child);
+
+  window.Add(root);
+
+  // Trace at scale 2: only the child's own pass reaches it (root's producers ignore `parent`,
+  // which therefore holds no arrange result and leaves its 0x0 actor SIZE as the available
+  // extent, unused by an explicit axis). It measures the child at (40 * 2, 30 * 2) = (80, 60)
+  // (count 1) and places it at 80x60; the pass consumes both of the child's dirty bits.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  // Trace off scene: the disconnection untracks the child (an explicitly sized view drops no
+  // cache there). DISABLED on `parent` runs parent's subtree reset -- the child's cached scale
+  // and both its cache entries go, and NO dirty bit is raised on it -- and then invalidates
+  // `parent` and `root` only (nothing registers without a window). The child INHERITs, so its
+  // scale is parent's 1.0 now: the direct Measure() runs the producer at (40, 30) (count 2)
+  // and publishes a 40x30 slot, but places nothing, so the actor stays 80x60. The child's
+  // dirty bits are both still false: it re-joins clean.
+  window.Remove(root);
+  parent.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  const MeasuredSize direct = child.Measure(40.0f, 30.0f);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(direct.GetWidth(), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(direct.GetHeight(), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, TEST_LOCATION);
+  window.Add(root);
+
+  // Trace: the reconnecting root drops the subtree's caches without raising dirty; the clean
+  // child registers on connection (as every standalone view does) and its own pass is the only
+  // one that reaches it: at scale 1 it measures (40, 30) again -- a miss on the dropped entry
+  // (count 3) -- and places the child at 40x30.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gFillMeasureProducerCount, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillLastWidthConstraint, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gFillLastHeightConstraint, 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// A view added as a DEFAULT child and switched to STANDALONE in the same invalidation
+// generation still becomes a tracked layout root: the add's walk recorded the generation
+// against the OLD root identity, and the mode switch retires that record so its own walk
+// reaches the self-registration. A window resize then reaches the child directly.
+//
+// Non-vacuity: without the retired record the switch's walk returns at the propagation
+// check, the child is never tracked, the resize invalidates only `root`, `mid` serves its
+// measure and arrange cache hits, and the child keeps 150x90.
+int UtcDaliViewStandaloneModeSwitchInSameGenerationRegistersSelfP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View mid = View::New();
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+  window.Add(root);
+  SettleLayout(application);
+
+  // From here to the next settle no pass runs: one invalidation generation.
+  View child = View::New();
+  child.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+  mid.Add(child);                              // DEFAULT: the add walks up to root and records the generation
+  child.SetLayoutMode(LayoutMode::STANDALONE); // the same generation
+
+  // Trace: root's pass re-measures mid, whose MeasureStandaloneChildren runs the child against
+  // the window (480, 800) -> 150x90; mid's placement hits; the child's own pass hits.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // Trace: the resize invalidates root and the child (both tracked). Root's pass: mid's measure
+  // hits, but mid's arrange replay is refused by the child's dropped arrange entry, so mid's
+  // placement re-measures the child against the 100x60 window -> 100x60.
+  window.SetPositionSize(PositionSize(0, 0, 100, 60));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A STANDALONE child with a pending self pass that switches to DEFAULT gives up its own
+// layout-root registration: its parent lays it out from then on, and the pending self turn
+// is cancelled instead of re-placing it at its requested position after the parent's pass.
+//
+// Non-vacuity: without the withdrawal the pending turn runs after the Stack's pass, takes the
+// regular layout-root path and moves the child back to x = 0.
+int UtcDaliViewStandaloneToDefaultSwitchCancelsPendingSelfPassP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  StackLayout stack = StackLayout::New(StackOrientation::HORIZONTAL);
+  stack.SetRequestedWidth(200.0f);
+  stack.SetRequestedHeight(100.0f);
+
+  View first = View::New();
+  first.SetRequestedWidth(20.0f);
+  first.SetRequestedHeight(20.0f);
+  stack.Add(first);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(30.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetRequestedX(0.0f);
+  stack.Add(child);
+
+  window.Add(stack);
+
+  // Trace: the Stack places `first` at x 0 and skips the standalone child, which
+  // ArrangeStandaloneChildren places at its requested x 0.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, TEST_LOCATION);
+
+  child.InvalidateMeasure(); // pending as its own layout root
+  child.SetLayoutMode(LayoutMode::DEFAULT);
+
+  // Trace: the child's registration is withdrawn, so only the Stack's pass runs: it measures
+  // the child as a regular 30x30 child and places it after `first`, at x 20.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  // Trace: nothing is pending any more, so nothing moves it.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A WRAP_CONTENT standalone view drops its cached measure and arrange results when it leaves
+// the scene, because they were measured against the window it left. An off-scene arrange of
+// its old parent therefore recomputes it against the parent extent instead of replaying the
+// window-bounded size.
+//
+// Non-vacuity: without the drop the child's entries stay valid, root's arrange replays the
+// subtree, and the child keeps 150x90.
+int UtcDaliViewStandaloneWindowBoundedChildRecomputedAfterOffSceneArrangeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(120.0f);
+  root.SetRequestedHeight(60.0f);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+  root.Add(child);
+  window.Add(root);
+
+  // Trace: the child is measured against the 480x800 window -> 150x90.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // Trace: leaving the scene drops the child's entries. root's measure hits its (120, 60)
+  // entry; root's arrange replay is refused by the child's dropped arrange entry, so root's
+  // placement re-measures the child -- in no window now -- at root's extent (120, 60) -> 120x60.
+  window.Remove(root);
+  root.Measure(120.0f, 60.0f);
+  root.Arrange(LayoutRect(0.0f, 0.0f, 120.0f, 60.0f));
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 120.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Behaviour pin: a window resize reaches a standalone child whose standalone parent carries a
+// layout transition, after both re-joined the scene. The resize invalidates every tracked root;
+// the child's invalidation also invalidates its transition-bearing parent (the transition-parent
+// hook), and the child is still re-measured against the new window.
+//
+// This shape does not make the hook insert a NEW key into the controller's tracked-root map
+// during the resize walk: the parent is already a tracked root once it has re-joined the scene
+// (every standalone view registers on scene connection). It therefore does not discriminate
+// the walk over a key snapshot from a walk over the live map; it pins the outcome.
+int UtcDaliViewStandaloneTransitionParentWindowResizeReachesChildP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetLayoutMode(LayoutMode::STANDALONE);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetMeasureCallback(MeasureCallback::New(&WideClampToConstraintMeasure));
+
+  parent.Add(child);
+  root.Add(parent);
+  window.Add(root);
+
+  // Trace: the child is measured against the 480x800 window -> 150x90.
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // Trace: re-joining registers root and both standalone views again; the child's dropped
+  // entries are recomputed at the same window bound -> 150x90.
+  window.Remove(root);
+  window.Add(root);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), WIDE_CLAMP_NATURAL_WIDTH, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), WIDE_CLAMP_NATURAL_HEIGHT, TEST_LOCATION);
+
+  // Trace: the resize invalidates root, the parent and the child; the child's invalidation
+  // also invalidates its transition-bearing parent. The parent is re-measured and re-places
+  // the child against the 100x60 window -> 100x60 (a standalone child is outside its parent's
+  // transition scope).
+  parent.SetLayoutTransition(LayoutTransition::New());
+  window.SetPositionSize(PositionSize(0, 0, 100, 60));
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -8028,11 +9190,10 @@ int UtcDaliViewArrangeCacheMissWhenDescendantIsDirtyP(void)
 
   const LayoutRect rootSlot = ActorRectOf(root);
 
-  // Warm-up, and NOT part of what is under test. A standalone view is its own layout
-  // root, so the settle batch drives it after its parent and its measure publish
-  // leaves the slot marked unconsumed -- which the node-local predicate rejects on
-  // `mid` in its own right. One pass consumes it (ArrangeStandaloneChildren clears the
-  // bit), and only after that is a hit reachable at all.
+  // Warm-up, and NOT part of what is under test. (The standalone view's own pass in the
+  // settle batch is a measure cache hit -- its parent's measure and its own pass derive
+  // one constraint -- so it leaves no unconsumed slot behind and this is already a hit;
+  // kept so the control below starts from a re-served entry.)
   root.Arrange(rootSlot);
 
   const int midBase = CountingContainerImplOf(mid).GetArrangeCallCount();

@@ -308,10 +308,9 @@ public:
    *
    * MeasurePassGuard / ArrangePassGuard CONSUME mMeasureDirty / mArrangeDirty at ENTRY,
    * because a pass that runs to completion is what services them. A pass abandoned
-   * mid-flight serviced nothing, so the record has to come back: the view would otherwise
-   * be "clean but never laid out", and the one consumer that reads the bits outside a pass
-   * -- OnViewSceneConnection's standalone isDirty self-registration -- would decline to
-   * re-register a reconnecting standalone root that genuinely has work pending.
+   * mid-flight serviced nothing, so the record has to come back: the bits would otherwise
+   * report "clean" (IsMeasureDirty() / IsArrangeDirty()) for a view that was never laid
+   * out.
    *
    * Deliberately NOT InvalidateMeasure(): that walks the ancestor chain and registers at
    * whatever root it reaches (not necessarily the one being restored), and it asks the
@@ -1328,12 +1327,13 @@ private:
    *
    * Standalone views are excluded outright (an early return): no ancestor's
    * measured value is a function of a standalone child's slot, so there is
-   * nothing for this walk to invalidate. Their slot is corrected on the ARRANGE
-   * side instead -- mMeasuredSlotUnconsumed plus the corrective re-measure in
-   * ArrangeStandaloneChild -- which is reached whenever the parent arranges,
-   * rather than only on an ancestor's measure miss. The arrange cache-HIT path
-   * keeps that reachable by testing HasUnconsumedStandaloneChild(): a parent with
-   * an unconsumed standalone child cannot hit.
+   * nothing for this walk to invalidate. Their slot is re-derived on the ARRANGE
+   * side instead: ArrangeStandaloneChild re-measures every standalone child at its
+   * derived constraint (Internal::DeriveStandaloneMeasureConstraint) on every
+   * placement, which is reached whenever the parent arranges, rather than only on
+   * an ancestor's measure miss. The arrange cache-HIT path keeps that reachable by
+   * testing HasUnconsumedStandaloneChild(): a parent with an unconsumed standalone
+   * child cannot hit.
    */
   void InvalidateAncestorLayoutCachesForMeasureMiss();
 
@@ -1368,10 +1368,12 @@ private:
    *  - a RecyclerLayoutOwnerScope is open (the RecyclerView/ItemsLayouter cycle,
    *    whose item geometry the recycler owns under its own invalidation contract);
    *  - this is the framework-owned layout-root pass of a STANDALONE view:
-   *    ProcessLayoutRoot derives the same requested-position / measured-extent bounds
-   *    as ArrangeStandaloneChild, so the parent's replay premise survives. A public
-   *    Arrange() on that same standalone view is NOT excluded -- arbitrary bounds
-   *    break the premise exactly as they do for a normal child.
+   *    ProcessLayoutRoot measures it at the same constraint
+   *    (Internal::DeriveStandaloneMeasureConstraint) and derives the same bounds
+   *    (Internal::DeriveStandaloneRootBounds) as ArrangeStandaloneChild, so the
+   *    parent's replay premise survives. A public Arrange() on that same standalone
+   *    view is NOT excluded -- arbitrary bounds break the premise exactly as they do
+   *    for a normal child.
    *
    * @param[in] frameworkLayoutRootPass True only for ArrangeAsLayoutRoot()
    */
@@ -1431,12 +1433,14 @@ private:
    * slot this view has not consumed yet.
    *
    * A term of the arrange cache-HIT predicate, and the reason the forward note on
-   * ArrangeStandaloneChildren (see view-data-impl.cpp) exists: the corrective
-   * re-measure for an unconsumed standalone slot lives on the ARRANGE path, so an
-   * Arrange() that returns early on a cache hit would silently skip it. Declining
-   * the hit while such a child exists keeps the correction reachable; the very
-   * next (missing) pass consumes the slot and clears the bit, so this can decline
-   * at most one pass per out-of-band Measure().
+   * ArrangeStandaloneChildren (see view-data-impl.cpp) exists: the placement that
+   * re-measures a standalone child at its derived constraint lives on the ARRANGE
+   * path, so an Arrange() that returns early on a cache hit would skip it.
+   * Declining the hit while such a child exists guarantees that a slot written by a
+   * Measure() this view did not issue -- an out-of-band View::Measure(), or the
+   * child's own layout-root pass whose measure missed -- is consumed by a MISS; the
+   * very next (missing) pass clears the bit, so this can decline at most one pass
+   * per such Measure().
    *
    * Cost-ordered on purpose, and the SELECTIVE term goes first:
    * mMeasuredSlotUnconsumed is set unconditionally at every measure publish and is
@@ -1596,7 +1600,23 @@ private:
   void ReplayArrangeSubtreeFromCache(bool mirrorUnderParentRtl, float parentArrangedWidth);
 
   MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
-  void         MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
+
+  /**
+   * @brief Measures every STANDALONE direct child at its derived constraint.
+   *
+   * Called at the end of every measure MISS, whatever produced this view's own size, so a producer
+   * that never iterates its children (Label) still measures them. Each child is measured at
+   * Internal::DeriveStandaloneMeasureConstraint() of the extent given here less the child's own
+   * margin; only the child's MATCH_PARENT axes, and the WRAP_CONTENT axes of a child in no window,
+   * read that extent. ArrangeStandaloneChild re-derives those axes from this view's final size.
+   *
+   * @param[in] parentExtentWidth This view's provisional width in visual units: its requested width
+   *            clamped by its own min/max when it has one, otherwise the incoming constraint after the
+   *            same clamp
+   * @param[in] parentExtentHeight Likewise for the height
+   */
+  void MeasureStandaloneChildren(float parentExtentWidth, float parentExtentHeight);
+
   void         ArrangeStandaloneChildren(const LayoutRect& bounds);
   void         ApplyLayoutDirection(float parentWidth);
   MeasuredSize DispatchMeasureWithLayoutManager(LayoutManager* manager, float widthConstraint, float heightConstraint);
@@ -1776,6 +1796,22 @@ private:
   }
   /// @}
 
+  /// Retire the propagation records of both axes, but ONLY where the union slot holds a
+  /// record (the axis's cache entry is absent); a live KEY is never overwritten. Used when a
+  /// view's layout-root identity changes (LAYOUT_MODE switch): a record written against the
+  /// old root does not prove the NEW root is registered, so the next walk must run in full.
+  void RetirePropagationRecords()
+  {
+    if(!mMeasureCacheValid)
+    {
+      mMeasureKeyOrPropagation.propagationGeneration = 0u;
+    }
+    if(!mArrangeCacheValid)
+    {
+      mArrangeKeyOrPropagation.propagationGeneration = 0u;
+    }
+  }
+
   ViewImpl&                            mViewImpl;
   ViewState                            mState;
   UiScalePolicy                        mScalePolicy{UiScalePolicy::INHERIT};
@@ -1876,7 +1912,7 @@ private:
   bool         mMeasureDirty : 1;                                 ///< True when invalidated since the last measure.
   bool         mMeasureInProgress : 1;                            ///< True while this view's own Measure() is on the stack.
   bool         mMeasurePassPoisoned : 1;                          ///< True when an invalidation arrived while this view's measure pass was running.
-  bool         mMeasuredSlotUnconsumed : 1;                       ///< True while the measured size published by the last completed measure pass has not been consumed by this view's parent. Set unconditionally at the publish; cleared by the parent in MeasureStandaloneChildren / ArrangeStandaloneChildren. Read only on the standalone path: it tells ArrangeStandaloneChild that the slot may be the leftover of an out-of-band Measure() and must be re-measured against the parent's extent before it is placed.
+  bool         mMeasuredSlotUnconsumed : 1;                       ///< True while the measured size published by the last completed measure pass has not been consumed by this view's parent. Set unconditionally at the publish; cleared by the parent in MeasureStandaloneChildren / ArrangeStandaloneChildren. Read only by HasUnconsumedStandaloneChild(), for standalone children: it makes the parent's arrange cache refuse a hit while the slot was written by a Measure() the parent did not issue, so that ArrangeStandaloneChild's derived-constraint Measure() consumes it.
   bool         mArrangeCacheValid : 1;                            ///< True when The input key + mArrangedBounds hold a usable cache entry. Cleared ONLY via DropArrangeCacheEntry(), which also retracts the record sharing the KEY slot.
   bool         mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
   bool         mArrangeInProgress : 1;                            ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy.

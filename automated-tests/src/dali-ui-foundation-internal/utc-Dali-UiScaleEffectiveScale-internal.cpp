@@ -745,3 +745,55 @@ int UtcDaliUiScaleSetScaleWhileDisabledStoresButDefersP(void)
   UiScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
+
+// A STANDALONE view with a View parent that becomes DEFAULT stops being a scale root: its
+// UiScaleManager registration is withdrawn with its layout-root registration, so a later
+// scale change reaches it only through the root it now belongs to.
+//
+// Trace: the child registers as a root (with the controller and with UiScaleManager) while it
+// is STANDALONE. The switch withdraws both registrations and the next pass measures it as a
+// regular child of `parent`, publishing its measure entry. Removing `root` from the scene
+// unregisters root (a parentless view) but not the child (a DEFAULT view with a View parent),
+// so the scale change below finds no registered root that covers the child, and its entry
+// survives.
+//
+// Non-vacuity (by mutation): dropping the UiScaleManager unregistration from the LAYOUT_MODE
+// setter leaves the child registered, the scale change resets its subtree caches
+// (InvalidateAllLayoutRoots), and the second check fails.
+int UtcDaliUiScaleStandaloneToDefaultSwitchLeavesScaleRootSetP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A standalone view switched to DEFAULT under a View parent is no longer a UiScaleManager root");
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(1.0f);
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(120.0f);
+  parent.SetRequestedHeight(60.0f);
+  root.Add(parent);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(30.0f);
+  child.SetRequestedHeight(25.0f);
+  parent.Add(child);
+
+  application.GetScene().Add(root);
+  Settle(application);
+
+  child.SetLayoutMode(LayoutMode::DEFAULT);
+  Settle(application);
+  DALI_TEST_CHECK(DataOf(child).IsMeasureCacheValid());
+
+  application.GetScene().Remove(root);
+  UiScaleManager::Get().SetScale(1.5f);
+  DALI_TEST_CHECK(DataOf(child).IsMeasureCacheValid());
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}

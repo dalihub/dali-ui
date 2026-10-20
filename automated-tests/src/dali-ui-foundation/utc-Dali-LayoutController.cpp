@@ -1458,9 +1458,9 @@ int UtcDaliLayoutControllerFixedRootConstraintUnchangedAtUnitScaleP(void)
 // Unlike the two tests above this one does NOT discriminate the FIXED-branch conversion,
 // and deliberately so: it is the geometry regression guard for the shape the conversion
 // touches. A FIXED root's own size comes from its requested size rather than from the
-// constraint, and a boundary child is re-measured by its own root pass from the parent's
-// (already visual) actor SIZE, so the constraint the root's producer is run at -- what the
-// two tests above assert directly -- is not observable in the settled geometry here.
+// constraint, and a boundary child's WRAP_CONTENT axis is measured against the window size
+// (visual) at every pass, so the constraint the root's producer is run at -- what the two
+// tests above assert directly -- is not observable in the settled geometry here.
 int UtcDaliLayoutControllerFixedRootStandaloneChildGetsFullExtentP(void)
 {
   UiTestApplication application;

@@ -971,6 +971,81 @@ int UtcDaliViewLayoutBoundary_FixJUsesParentActorSize_P(void)
   END_TEST;
 }
 
+// T4.3b: an explicitly sized boundary child converges across every pass that measures
+// it. Its parent's measure, its parent's placement and its own layout-root pass all
+// derive one constraint (its requested size, for an explicitly sized axis), so after the
+// first measurement each of those passes is a measure cache hit until the child's own
+// measure is invalidated -- whichever order they run in.
+//
+// Non-vacuity: before the shared derivation the parent's measure ran the child at the
+// parent's incoming 200x100 constraint and its own layout-root pass at its requested
+// 40x30, two different cache keys, so the first settle already cost two OnMeasure calls.
+int UtcDaliViewLayoutBoundary_StandaloneFixedChildConvergesAcrossPasses_P(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  auto settle = [&application]()
+  {
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+  };
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(120.0f);
+  parent.SetRequestedHeight(60.0f);
+
+  View child = CreateCounterView();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+
+  parent.Add(child);
+  root.Add(parent);
+  window.Add(root);
+
+  auto& cImpl = GetCounterImpl(child);
+  cImpl.ResetCounters();
+
+  // The parent's measure misses; its placement and the child's own pass hit.
+  settle();
+  DALI_TEST_EQUALS(cImpl.GetMeasureCallCount(), 1, TEST_LOCATION);
+  Vector3 childSize = child.GetProperty<Vector3>(Actor::Property::SIZE);
+  DALI_TEST_EQUALS(childSize.width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childSize.height, 30.0f, TEST_LOCATION);
+
+  // The child's own pass alone: a hit.
+  child.InvalidateArrange();
+  settle();
+  DALI_TEST_EQUALS(cImpl.GetMeasureCallCount(), 1, TEST_LOCATION);
+
+  // The parent's placement alone: a hit.
+  parent.InvalidateArrange();
+  settle();
+  DALI_TEST_EQUALS(cImpl.GetMeasureCallCount(), 1, TEST_LOCATION);
+
+  // The child's own measure invalidated: its own pass misses once...
+  child.InvalidateMeasure();
+  settle();
+  DALI_TEST_EQUALS(cImpl.GetMeasureCallCount(), 2, TEST_LOCATION);
+
+  // ...and the parent's placement after it derives the same constraint: a hit.
+  parent.InvalidateArrange();
+  settle();
+  DALI_TEST_EQUALS(cImpl.GetMeasureCallCount(), 2, TEST_LOCATION);
+  childSize = child.GetProperty<Vector3>(Actor::Property::SIZE);
+  DALI_TEST_EQUALS(childSize.width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childSize.height, 30.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
 // T4.4: WRAP_CONTENT parent with padding does not accumulate the child's
 // arranged offset on repeated measure passes.
 //

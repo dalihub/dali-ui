@@ -999,19 +999,27 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * this View's size and position normally.
    *
    * LayoutMode::STANDALONE excludes this View from the parent's accumulation,
-   * spacing and index calculations. The View's size is still measured normally
-   * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
+   * spacing and index calculations. The View's size is still measured (so
+   * MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
    * but its position is taken from SetRequestedX/SetRequestedY instead of being
    * decided by the parent layout. This is useful for floating overlays, drag
    * previews, tooltips and absolute positioning inside any LayoutManager.
    *
-   * Standalone children ignore the parent's padding entirely. Their measured
-   * size is the parent's full inner size minus the child's own margin, and
-   * their final position is SetRequestedX/SetRequestedY plus the child's own
-   * margin in the parent's coordinate space. This keeps size and position
-   * consistent: a Standalone child with MATCH_PARENT fills the parent edge
-   * to edge regardless of parent padding, and any margin set on the child
-   * shifts it inward in both axes.
+   * Standalone children ignore the parent's padding entirely. A MATCH_PARENT
+   * axis is measured against the parent's size minus the child's own margin,
+   * and measured again when the parent places the child if the parent's final
+   * size differs from the size it was first measured against. A WRAP_CONTENT
+   * axis is measured against the size of the window the View is shown in minus
+   * its own margin, whichever layout pass measures it (against the parent's size
+   * minus its margin while the View is in no window). An explicitly sized axis
+   * is measured at that size. A WRAP_CONTENT Standalone child is therefore not
+   * limited to its parent's size; use SetMaximumWidth() / SetMaximumHeight() to
+   * bound it. The window is not a display bound: the View's own minimum and
+   * maximum size, which are applied to the result, and an explicit size may
+   * exceed it. Its final position is SetRequestedX/SetRequestedY plus its own
+   * margin in the parent's coordinate space, so a Standalone child with
+   * MATCH_PARENT fills the parent edge to edge regardless of parent padding, and
+   * any margin set on the child shifts it inward in both axes.
    *
    * @param[in] mode The layout mode to set
    */

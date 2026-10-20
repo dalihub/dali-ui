@@ -363,6 +363,8 @@ For a `WRAP_CONTENT` view, the measured result (children bounding box for a cont
 
 This clamp bounds a `WRAP_CONTENT` result to the available budget. Setting `SetMaximumWidth()` / `SetMaximumHeight()` is therefore not needed to stop a `WRAP_CONTENT` child from overflowing its parent's budget — those are a separate min/max bounds mechanism applied earlier in Measure.
 
+A `LayoutMode::STANDALONE` child is the exception: a `WRAP_CONTENT` axis is budgeted by the size of the window it is shown in (minus its own margin) rather than by its parent's, so it may extend past its parent; an explicit size is measured as is, and a `MATCH_PARENT` axis against the parent -- see LayoutMode::STANDALONE below.
+
 ### Requested vs Minimum/Maximum (max-wins)
 
 Each view can carry independent minimum and maximum size bounds
@@ -566,14 +568,77 @@ A Standalone child:
   flex-grow / flex-shrink, weight distribution and visible-child counting,
   in both `ViewImpl::OnMeasure` (plain View parent) and the Stack / Grid /
   Flex / Absolute layout managers.
-- Is still measured normally so `WRAP_CONTENT` and explicit
-  `RequestedWidth` / `RequestedHeight` all resolve. `MATCH_PARENT` reports
-  minimum desired in Measure and fills the parent's full size (minus own
-  margin) in Arrange.
-- **Ignores the parent's padding entirely.** Its measured size is the
-  parent's full inner size minus the child's own margin, and its final
-  position is `PositionX` / `PositionY` plus the child's own margin in the
-  parent's coordinate space. Size and position therefore follow the same rule
+- Is measured through **one derivation, whichever pass measures it** -- the
+  parent's measure pass, the parent's arrange pass, or its own layout-root pass
+  (a Standalone view is a scheduling boundary and registers itself with the
+  `LayoutController`). `Internal::DeriveStandaloneMeasureConstraint`
+  (`internal/layouts/standalone-bounds-utils.h`) is that derivation, per axis:
+  - `MATCH_PARENT`: the parent's full size minus the child's own margin. At the
+    parent's measure time its final size is not known yet, so the parent's
+    provisional size is used -- its own requested size when it has one (clamped
+    by its own minimum/maximum), otherwise the constraint it was measured at --
+    and the parent's arrange pass re-measures the child at the final size.
+    `MATCH_PARENT` still reports the minimum size from Measure; the slot is the
+    parent extent.
+  - `WRAP_CONTENT`: the size of the window the View is shown in, minus its own
+    margin. The window size is the whole `Window::GetPositionSize()` extent:
+    platform insets, input-method panels and window decorations are not
+    accounted for. A `WRAP_CONTENT` Standalone child is therefore not clamped to
+    its parent: a label or a container sizes to its content with the window size
+    as its budget. Use `SetMaximumWidth` / `SetMaximumHeight` (or an explicit
+    size) to bound it more tightly. Outside any window (a direct `Measure()` on
+    an off-scene tree) the parent's size minus the child's margin is used
+    instead.
+  - An explicit size: that size (times the UI scale), with or without a window.
+    The margin is not subtracted from it; the margin offsets the position.
+
+  An explicitly sized axis is therefore measured at the same constraint by every
+  pass, and so is a `WRAP_CONTENT` axis while the View is in a window (off
+  scene, the parent's measure pass and its arrange pass may hand it two
+  different parent extents). A `MATCH_PARENT` axis is measured at the same
+  constraint by the parent's arrange pass and by the child's own pass, which both
+  read the parent's **layout target** -- the bounds the parent was last arranged
+  at (the parent actor's size only when the parent is not a View, such as a
+  `Layer`, or has not been arranged yet); the parent's measure pass agrees with
+  them only when the parent's provisional size is its final size. Given the same
+  inputs, the same parent layout target and the same window, the child's own pass
+  after its parent's pass is a measure cache hit, and its slot does not depend on
+  which of the two ran last. Following the layout target rather than the parent
+  actor's size also keeps a parent's layout transition (an animator that holds
+  the parent's size at its animated value) out of the child's size.
+- **Stays a tracked layout root.** Every on-scene Standalone view is a tracked
+  layout root of its window's controller, so `LayoutController::OnWindowResize`,
+  which invalidates every tracked root, reaches it directly. The bookkeeping that
+  keeps it so:
+  - on **scene connection** every Standalone view registers itself, dirty or not,
+    and runs one self pass (a cache hit after its parent's pass in a normal
+    tree). This is also what brings a Standalone view whose parent is never
+    arranged (one inside a regular child of a `Label`, for instance) to the
+    current scale and window after it re-joins the scene;
+  - on a **layout-mode switch** the root registration is handed over: a view that
+    becomes `STANDALONE` registers itself (the switch invalidates it, and a
+    Standalone invalidation self-registers), and a Standalone view with a View
+    parent that becomes `DEFAULT` withdraws its own registration, because its
+    parent chain owns its layout from then on;
+  - on **scene disconnection** a Standalone view with a `WRAP_CONTENT` axis drops
+    its cached measure and arrange results, which were measured against the
+    window it leaves; the next pass that reaches it recomputes them.
+- **Is not bounded by the window for display.** The window only bounds the
+  `WRAP_CONTENT` measurement: the View's own minimum/maximum and an explicit size
+  may exceed it, its position is not taken into account, and parent clipping
+  still applies (`ScrollView` and `RecyclerView` clip to their bounds, as do
+  offscreen effects).
+- **Uses a finite window bound by choice.** A negative ("unbounded") constraint
+  is floored at the view's minimum before it reaches a producer, so it would
+  collapse a wrapped container's children; a large finite value would not (it is
+  what `ScrollView` hands its scrollable axes), but the window size also keeps a
+  wrapped Standalone container's children and a `Label`'s wrapping width finite,
+  at the cost that a `WRAP_CONTENT` axis never measures larger than the window.
+  Which convention a producer prefers is not settled here.
+- **Ignores the parent's padding entirely.** Its final position is
+  `PositionX` / `PositionY` plus the child's own margin in the parent's
+  coordinate space, and a `MATCH_PARENT` axis spans the parent's full size minus
+  the child's own margin. Size and position therefore follow the same rule
   (parent padding ignored, own margin honored), so a Standalone child with
   `MATCH_PARENT` fills the parent edge to edge regardless of parent padding,
   and any margin set on the Standalone child shifts it inward consistently in
@@ -584,6 +649,16 @@ A Standalone child:
   slot comes from the parent's arrange pass or from the child's own
   layout-root pass, so both agree; for a `MATCH_PARENT` axis it is the only
   place the clamp reaches, because the measured value is discarded there.
+
+**Behaviour change.** Compared with the earlier derivation, an explicitly sized
+Standalone view is measured at its requested size instead of the parent's
+incoming constraint (in the parent's measure pass) or its requested size minus
+its margin (in its own pass); a `WRAP_CONTENT` Standalone view is bounded by the
+window instead of its parent; every Standalone view re-registers on scene
+connection; a layout-mode switch hands the root registration over; and a scene
+disconnection drops a window-bounded Standalone view's caches. A Standalone
+view's own layout-root pass also takes a View parent's last arranged size as the
+parent extent, instead of the parent actor's size.
 
 ### Invalidation flow
 

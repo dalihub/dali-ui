@@ -1205,18 +1205,19 @@ int UtcDaliArrangeCacheSubtreeHitAssertsEffectiveScaleSyncP(void)
   END_TEST;
 }
 
-// I4 at depth: the corrective re-measure for an unconsumed standalone slot lives on the
-// ARRANGE path (ArrangeStandaloneChildren), and !HasUnconsumedStandaloneChild() is
-// O(direct children) -- so a standalone GRANDCHILD holding one is invisible to the
-// node-local predicate at the root. The subtree gate re-evaluates the term at every
-// node, which is what keeps the correction reachable.
+// I4 at depth: the placement's single derived-constraint Measure(), which consumes an
+// unconsumed standalone slot, lives on the ARRANGE path (ArrangeStandaloneChildren), and
+// !HasUnconsumedStandaloneChild() is O(direct children) -- so a standalone GRANDCHILD
+// holding one is invisible to the node-local predicate at the root. The subtree gate
+// re-evaluates the term at every node, which is what keeps that placement reachable.
 //
-// The fixture is the state a plain settle leaves behind, and it is the ONLY state in
-// which this term decides anything. A standalone view is its own layout root, so the
-// settle batch drives it AFTER its parent (depth-sorted): its measure publish marks the
-// slot unconsumed, and its own arrange republishes a live entry. So `standalone` ends
-// the settle with a VALID arrange cache AND an unconsumed slot, and nothing else in the
-// subtree can refuse the hit.
+// The fixture is a standalone view's OWN layout-root pass whose measure MISSED: its
+// invalidation stops at the boundary and self-registers, so only that pass runs; the
+// measure publish marks the slot unconsumed and the framework root arrange republishes a
+// live entry, while the boundary stop and the root-pass exemption leave every ancestor
+// entry live. That is the ONLY state in which this term decides anything. (A plain settle
+// no longer leaves it behind: the parent's measure and the standalone view's own pass
+// derive one constraint, so the own pass is a measure cache hit and raises nothing.)
 //
 // An out-of-band Measure() would raise the bit too, but it is NOT a sharp fixture: the
 // measure pass clears that view's own arrange cache in the same breath, so the gate
@@ -1250,6 +1251,9 @@ int UtcDaliArrangeCacheSubtreeGateRejectsUnconsumedStandaloneDescendantP(void)
 
   Settle(application);
 
+  standalone.InvalidateMeasure();
+  Settle(application);
+
   const LayoutRect rootSlot = SettledSlotOf(root);
   const int        midBase  = PolicyCounterImplOf(mid).GetArrangeCallCount();
   DALI_TEST_CHECK(midBase > 0);
@@ -1276,8 +1280,8 @@ int UtcDaliArrangeCacheSubtreeGateRejectsUnconsumedStandaloneDescendantP(void)
   root.Arrange(rootSlot);
   DALI_TEST_EQUALS(PolicyCounterImplOf(mid).GetArrangeCallCount(), midBase + 1, TEST_LOCATION);
 
-  // ...and the correction landed: the standalone child sits at the size its parent's
-  // extent gives it.
+  // ...and the correction landed: the standalone child sits at the size its derived
+  // constraint gives it.
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 30.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 25.0f, TEST_LOCATION);
 
@@ -1659,8 +1663,10 @@ int UtcDaliArrangeCacheStandaloneSelfPassKeepsParentEntryP(void)
 // ---------------------------------------------------------------------------
 // The exemption above (a boundary view's framework root pass leaves the parent's
 // entry standing) is sound only while the two derivations of that view's own slot
-// agree. They now agree BY CONSTRUCTION: LayoutController::ProcessLayoutRoot and
-// ArrangeStandaloneChild both end on Internal::DeriveStandaloneRootBounds(). These
+// agree. They agree whenever they are fed the same snapshot, the same parent layout
+// target and the same window: LayoutController::ProcessLayoutRoot and
+// ArrangeStandaloneChild both read the parent's layout target and both end on
+// Internal::DeriveStandaloneRootBounds(). These
 // two tests pin the two halves of that -- the min/max clamp, which only one of the
 // two used to apply, and the float association, which the exact arrange cache KEY
 // makes observable at a non-unit scale.
@@ -1817,7 +1823,7 @@ namespace
 //   1. the parent's MEASURE, via MeasureStandaloneChildren, at the parent's measure
 //      constraint -- which is BEFORE ArrangeStandaloneChild exists, so a mutation there
 //      is already visible to everything the arrange does and pins nothing;
-//   2. the parent's ARRANGE, via the MATCH-axis re-measure inside
+//   2. the parent's ARRANGE, via the single derived-constraint Measure() inside
 //      ArrangeStandaloneChild, at the extent the child is about to be placed in --
 //      which is the one invocation that sits BETWEEN the snapshot and the derivation.
 // Only (2) can split the two, so only (2) mutates.
@@ -1849,10 +1855,12 @@ MeasuredSize MutateRequestedWidthMidArrangeMeasure(View view, float widthConstra
 // measured size. The inputs are snapshotted once now and threaded through, so the mixing
 // is impossible by construction.
 //
-// The parent's measure constraint and its arrange rect differ on purpose (the same drive
-// shape as the boundary tests in utc-Dali-ViewLayoutBoundary.cpp): it makes the two
-// standalone measures land on two different keys, so the second one is a genuine MISS
-// that runs the producer where it matters.
+// The parent is WRAP_CONTENT on purpose, so the extent it hands its standalone children
+// at measure time is the constraint it is measured at (500), which differs from the rect
+// it is then arranged in (400): the two standalone measures land on two different keys
+// and the second is a genuine MISS that runs the producer where it matters. (A FIXED
+// parent would hand down its own requested size -- its provisional extent -- and the
+// placement measure would hit the cache.)
 //
 // Caveat, deliberately: the follow-up pass legitimately re-settles the view at its new
 // FIXED shape (the mid-pass invalidation declined the measure publish, so the mutation is
@@ -1873,8 +1881,6 @@ int UtcDaliArrangeCacheStandaloneSlotInputsAreOnePassSnapshotP(void)
   gSlotInputMeasureConstraints[1] = -1.0f;
 
   View parent = View::New();
-  parent.SetRequestedWidth(400.0f);
-  parent.SetRequestedHeight(300.0f);
 
   View standalone = View::New();
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
