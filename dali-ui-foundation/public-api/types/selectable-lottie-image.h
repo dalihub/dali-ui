@@ -113,7 +113,6 @@ public:
    * @return The select frame range
    * @deprecated Use GetSelectionPlaybackRange() instead.
    */
-  [[deprecated("Use GetSelectionPlaybackRange() instead.")]]
   Int32Pair GetSelectRange() const;
 
   /**
@@ -122,7 +121,6 @@ public:
    * @return The deselect frame range
    * @deprecated Use GetDeselectionPlaybackRange() instead.
    */
-  [[deprecated("Use GetDeselectionPlaybackRange() instead.")]]
   Int32Pair GetDeselectRange() const;
 
   /**

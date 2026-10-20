@@ -882,8 +882,6 @@ int UtcDaliVectorAnimationTaskPlaybackAndRangeP(void)
   END_TEST;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 int UtcDaliLottieAnimationViewImplLegacyPlaybackRange(void)
 {
   UiTestApplication application;
@@ -908,4 +906,3 @@ int UtcDaliLottieAnimationViewImplLegacyPlaybackRange(void)
   DALI_TEST_EQUALS(endFrame, view.GetTotalFrameCount(), TEST_LOCATION);
   END_TEST;
 }
-#pragma GCC diagnostic pop

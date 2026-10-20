@@ -346,7 +346,6 @@ public: // Properties
    * @see SetPlaybackRangeByMarker()
    * @deprecated Use SetPlaybackRange() instead.
    */
-  [[deprecated("Use SetPlaybackRange() instead.")]]
   void SetMinMaxFrame(int minFrame, int maxFrame);
 
   /**
@@ -360,7 +359,6 @@ public: // Properties
    * @param[out] maxFrame The end frame number
    * @deprecated Use GetPlaybackRange() instead.
    */
-  [[deprecated("Use GetPlaybackRange() instead.")]]
   void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
 
   /**
@@ -374,7 +372,6 @@ public: // Properties
    * @see GetMarkerInfo()
    * @deprecated Use SetPlaybackRangeByMarker() instead.
    */
-  [[deprecated("Use SetPlaybackRangeByMarker() instead.")]]
   void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker = "");
 
   /**

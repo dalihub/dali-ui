@@ -187,8 +187,6 @@ int UtcDaliSelectableLottieImageCopyMoveP(void)
   END_TEST;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 int UtcDaliSelectableLottieImageLegacyPlaybackRanges(void)
 {
   SelectableLottieImage image("checkbox.json", Int32Pair(1, 12), Int32Pair(13, 24));
@@ -198,4 +196,3 @@ int UtcDaliSelectableLottieImageLegacyPlaybackRanges(void)
   DALI_TEST_EQUALS(image.GetDeselectRange().GetEnd(), image.GetDeselectionPlaybackRange().GetEnd(), TEST_LOCATION);
   END_TEST;
 }
-#pragma GCC diagnostic pop
