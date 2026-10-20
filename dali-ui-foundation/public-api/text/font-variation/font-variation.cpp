@@ -22,8 +22,6 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 
 #include <cmath>
-#include <cstdlib>
-#include <iostream>
 #include <locale>
 #include <sstream>
 #include <string>
@@ -160,11 +158,10 @@ bool ParseValue(const std::string& text, std::size_t& pos, float& value)
     return false;
   }
 
-  const char* begin = text.c_str() + pos;
-  char*       end   = nullptr;
-  value             = std::strtof(begin, &end);
-
-  if(end == begin)
+  std::istringstream valueStream(text.substr(pos));
+  valueStream.imbue(std::locale::classic());
+  valueStream >> value;
+  if(valueStream.fail())
   {
     return false;
   }
@@ -174,7 +171,10 @@ bool ParseValue(const std::string& text, std::size_t& pos, float& value)
     return false;
   }
 
-  pos = static_cast<std::size_t>(end - text.c_str());
+  const std::streampos parsedLength = valueStream.tellg();
+  pos                               = parsedLength == std::streampos(-1)
+                                        ? text.size()
+                                        : pos + static_cast<std::size_t>(parsedLength);
   return true;
 }
 

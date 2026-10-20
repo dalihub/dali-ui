@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/string-utils.h>
 
+#include <locale>
 #include <sstream>
 
 // INTERNAL INCLUDES
@@ -90,6 +91,7 @@ template<typename Container>
 std::string SerializeLanguageSpans(const Container& spans)
 {
   std::ostringstream stream;
+  stream.imbue(std::locale::classic());
   stream << '[';
   for(std::size_t index = 0u; index < spans.size(); ++index)
   {
