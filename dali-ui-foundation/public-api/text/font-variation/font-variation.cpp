@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 
 #include <cmath>
+#include <iomanip>
 #include <locale>
 #include <sstream>
 #include <string>
@@ -234,10 +235,13 @@ std::string FloatToString(float value)
     return "0";
   }
 
-  // This text is exchanged with callers outside DALi, so its numeric formatting must remain
-  // compatible with the font-variation format they use. Do not force the classic locale here.
-  std::string text = std::to_string(value);
+  std::ostringstream oss;
+  oss.imbue(std::locale::classic());
+  oss << std::fixed << std::setprecision(6) << value;
 
+  std::string text = oss.str();
+
+  // Remove trailing zeros and decimal point if necessary.
   if(text.find('.') != std::string::npos)
   {
     while(!text.empty() && text.back() == '0')
@@ -253,8 +257,10 @@ std::string FloatToString(float value)
 
   if(text.empty() || text == "-")
   {
+    // This should not happen, but just in case, return "0" to avoid returning an empty string or just a minus sign.
     text += '0';
   }
+
   return text;
 }
 

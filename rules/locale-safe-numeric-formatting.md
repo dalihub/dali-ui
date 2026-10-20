@@ -69,11 +69,6 @@ temporarily affect unrelated code.
   conversion is intentionally omitted for this reason, add a code comment at
   the conversion explaining why the classic locale must not be applied and
   identifying the external format or contract that requires this behavior.
-- For example, a public conversion such as `FontVariation::ToString()` may
-  produce text exchanged with callers outside DALi. Its numeric formatting
-  should be chosen to remain compatible with the font-variation text format
-  used by those callers, rather than applying the classic locale solely
-  because the conversion is implemented inside DALi.
 - A printf-style variadic API may not be convertible to streams without changing
   its call contract. Keep its guard local, document the API limitation, and
   leave a clear follow-up note to replace or redesign the variadic interface.
