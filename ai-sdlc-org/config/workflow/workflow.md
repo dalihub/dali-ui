@@ -14,6 +14,8 @@ All workflows executed for `dali-ui` MUST load
 `rules/dali-ui-context.md`. Planning, implementation, build, and validation use
 Ubuntu as the development baseline. A different environment requires an
 explicitly recorded exception and must not be presented as Ubuntu evidence.
+For implementation work that formats or parses numeric values, load and apply
+`rules/locale-safe-numeric-formatting.md`.
 
 ---
 
@@ -60,7 +62,9 @@ When triggered:
 
 - Load `rules/public-api-abi.md`, `rules/handle-body-pattern.md`,
   `rules/api-naming.md`, `rules/docs-and-wiki.md`, and
-  `rules/validation-checks.md`. Load `rules/test-and-sample-development.md`
+  `rules/validation-checks.md`. Load
+  `rules/locale-safe-numeric-formatting.md` when numeric formatting or parsing
+  is affected. Load `rules/test-and-sample-development.md`
   whenever affected tests, manual tests, or samples are planned or changed.
 - Classify the change as ordinary compatibility-preserving work or an explicit
   pre-release redesign.
@@ -134,6 +138,7 @@ C4 → C5[SKIP]
 - `rules/handle-body-pattern.md`
 - `rules/component-boundaries.md`
 - `rules/api-naming.md`
+- `rules/locale-safe-numeric-formatting.md`
 - `rules/docs-and-wiki.md`
 - `rules/test-and-sample-development.md`
 - `rules/build-and-test.md`

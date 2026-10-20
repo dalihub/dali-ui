@@ -234,6 +234,8 @@ std::string FloatToString(float value)
     return "0";
   }
 
+  // This text is exchanged with callers outside DALi, so its numeric formatting must remain
+  // compatible with the font-variation format they use. Do not force the classic locale here.
   std::string text = std::to_string(value);
 
   if(text.find('.') != std::string::npos)
