@@ -44,7 +44,6 @@ Dali::Property::Value EvaluateDynamicProperty(const std::string&                
 
 namespace
 {
-using FrameRange = SelectableLottieImage::FrameRange;
 using Binding    = SelectableLottieColorBinding;
 using Policy     = Binding::ColorPolicy;
 
@@ -56,12 +55,12 @@ const Vector4  SELECTED_COLOR(0.0f, 1.0f, 0.0f, 1.0f);
 SelectableLottieAnimationView NewGlyph()
 {
   return SelectableLottieAnimationView::New(
-    SelectableLottieImage("checkbox.json", FrameRange(0, 30), FrameRange(30, 48)));
+    SelectableLottieImage("checkbox.json", Int32Pair(0, 30), Int32Pair(30, 48)));
 }
 
 SelectableLottieImage NewImage(const Dali::String& keyPath = Dali::String())
 {
-  return SelectableLottieImage("radio.json", FrameRange(0, 19), FrameRange(20, 38), keyPath);
+  return SelectableLottieImage("radio.json", Int32Pair(0, 19), Int32Pair(20, 38), keyPath);
 }
 
 SelectableLottieColorBindings NewRadioBindings()
@@ -73,7 +72,7 @@ SelectableLottieColorBindings NewRadioBindings()
   bindings.PushBack(Binding(OUTLINE_PATH,
                             LottieAnimation::ContentProperty::STROKE_COLOR,
                             Policy::SELECTED_IN_FRAME_RANGE,
-                            FrameRange(7, 26)));
+                            Int32Pair(7, 26)));
   return bindings;
 }
 
@@ -243,7 +242,7 @@ int UtcDaliSelectableLottieAnimationViewSnapClampsToLoadedFrameRangeP(void)
   Test::UiVectorAnimationRenderer::ResetDynamicPropertyProbe();
 
   SelectableLottieAnimationView view = SelectableLottieAnimationView::New(
-    SelectableLottieImage("checkbox.json", FrameRange(0, 19), FrameRange(20, 39)));
+    SelectableLottieImage("checkbox.json", Int32Pair(0, 19), Int32Pair(20, 39)));
   View drawingView = view.GetView();
   LottieAnimationView::DownCast(drawingView).SetSynchronousLoading(true);
   drawingView.SetRequestedWidth(36.0f);

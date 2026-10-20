@@ -20,11 +20,11 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/selectable-image-interface-impl.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-color-binding.h>
-#include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/math/int-pair.h>
 #include <dali/public-api/math/vector4.h>
 #include <cstdint>
 #include <vector>
@@ -51,8 +51,6 @@ namespace Integration
 class SelectableLottieAnimationViewImpl : public SelectableImageInterfaceImpl
 {
 public:
-  using FrameRange = Ui::SelectableLottieImage::FrameRange;
-
   /**
    * @brief Creates a new SelectableLottieAnimationViewImpl.
    *
@@ -63,8 +61,8 @@ public:
    * @return A raw pointer to the newly allocated implementation (reference count 0)
    */
   static SelectableLottieAnimationViewImpl* New(const Dali::String& url,
-                                                const FrameRange&   selectRange,
-                                                const FrameRange&   deselectRange,
+                                                const Int32Pair&    selectRange,
+                                                const Int32Pair&    deselectRange,
                                                 const Dali::String& keyPath = Dali::String());
 
   /**
@@ -77,8 +75,8 @@ public:
    * @return A raw pointer to the newly allocated implementation
    */
   static SelectableLottieAnimationViewImpl* New(const Dali::String&                  url,
-                                                const FrameRange&                    selectRange,
-                                                const FrameRange&                    deselectRange,
+                                                const Int32Pair&                     selectRange,
+                                                const Int32Pair&                     deselectRange,
                                                 const SelectableLottieColorBindings& colorBindings);
 
 public: // From Integration::SelectableImageInterfaceImpl
@@ -128,7 +126,7 @@ private:
    * @param[in] selectRange   The segment played (or snapped to) when becoming selected
    * @param[in] deselectRange The segment played (or snapped to) when becoming deselected
    */
-  void SetFrameRanges(const FrameRange& selectRange, const FrameRange& deselectRange);
+  void SetFrameRanges(const Int32Pair& selectRange, const Int32Pair& deselectRange);
 
   void SetColorBindings(const SelectableLottieColorBindings& colorBindings);
 

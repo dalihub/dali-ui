@@ -73,8 +73,8 @@ SelectableImageInterface MakeTestIcon()
 {
   return SelectableLottieAnimationView::New(
     SelectableLottieImage("i_check_box.json",
-                          SelectableLottieImage::FrameRange(0, 30),
-                          SelectableLottieImage::FrameRange(30, 48)));
+                          Int32Pair(0, 30),
+                          Int32Pair(30, 48)));
 }
 
 // ---------------------------------------------------------------------------

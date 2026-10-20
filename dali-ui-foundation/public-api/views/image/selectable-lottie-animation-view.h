@@ -51,8 +51,8 @@ class SelectableLottieAnimationViewImpl;
  * @code
  * SelectableLottieAnimationView image = SelectableLottieAnimationView::New(
  *   SelectableLottieImage("checkbox.json",
- *                         SelectableLottieImage::FrameRange(0, 19),     // select segment
- *                         SelectableLottieImage::FrameRange(20, 38),    // deselect segment
+ *                         Int32Pair(0, 19),     // select segment
+ *                         Int32Pair(20, 38),    // deselect segment
  *                         "check_box .inner_fill.color"));             // inner-fill key path
  * Self().Add(image.GetView());
  * image.SetStateColors(deselectedRgba, selectedRgba);

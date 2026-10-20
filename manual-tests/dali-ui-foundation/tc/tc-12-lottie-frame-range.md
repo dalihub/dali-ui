@@ -11,7 +11,7 @@ setMaxFrame / setSpeed를 애니메이터 파라미터로 다루는 것과 같�
 
 - 중앙: Lottie 애니메이션 프리뷰 (240x240)
 - 상태 라벨: `Frame: n/N | Range: min-max | Speed: x.xxxxxx`
-  - `Frame`은 `GetCurrentFrame()/GetTotalFrame()`, `Speed`는 `GetFrameSpeedFactor()`를 읽는다
+  - `Frame`은 `GetCurrentFrameNumber()/GetTotalFrameCount()`, `Speed`는 `GetFrameSpeedFactor()`를 읽는다
   - 빌드 대상에 `GetMinMaxFrame()`이 있으면 `Range`도 getter를 읽고, 현재 공개 API처럼 해당
     getter가 없으면 `Range(requested)`로 명시하여 마지막 요청 범위임을 구분한다
   - 범위를 아직 설정하지 않았으면 `Range`는 컴포지션 전체 `0-N`을 표시한다

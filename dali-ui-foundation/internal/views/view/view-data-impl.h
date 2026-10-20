@@ -200,9 +200,9 @@ public:
   void               SetBackgroundColor(const UiColor& color);
   void               SetBackgroundImage(const Dali::String& url);
   void               SetBackgroundGradient(const Gradient::Base& gradient);
-  UiColor            GetColor() const;
-  void               SetColor(const UiColor& color);
-  UiColor            GetCurrentColor() const;
+  UiColor            GetColorMultiplier() const;
+  void               SetColorMultiplier(const UiColor& multiplier);
+  UiColor            GetCurrentColorMultiplier() const;
   Vector4            GetCornerRadius() const;
   void               SetCornerRadius(const Vector4& radius);
   CornerRadiusPolicy GetCornerRadiusPolicy() const;
@@ -605,7 +605,7 @@ public:
   void SetBackgroundColorInternal(const Vector4& color);
   void SetBackgroundGradientInternal(const Gradient::Base& gradient);
   void SetBorderlineColorInternal(const Vector4& color);
-  void SetColorInternal(const Vector4& color);
+  void SetColorMultiplierInternal(const Vector4& multiplier);
 
   /**
    * @brief Returns this impl's private VisualData context, creating it on first use.
@@ -1617,14 +1617,6 @@ private:
   bool OnIdleCallback();
 
   /**
-   * Sets offscreen rendering from the legacy integer property value.
-   * @param[in] offscreenRenderingValue 0 to disable, or an OffscreenRefreshRate value to enable
-   * @note When offscreen rendering is on, changing visual's depth index may not apply instantaneously. Turn it off and
-   * on again.
-   */
-  void SetOffscreenRendering(int32_t offscreenRenderingValue);
-
-  /**
    * Notify to this view's corner radius changed.
    */
   void UpdateCornerRadius();
@@ -1979,7 +1971,6 @@ private:
   static const PropertyRegistration           PROPERTY_22;
   static const PropertyRegistration           PROPERTY_24;
   static const PropertyRegistration           PROPERTY_25;
-  static const PropertyRegistration           PROPERTY_31;
   static const PropertyRegistration           PROPERTY_32;
   static const PropertyRegistration           PROPERTY_33;
   static const PropertyRegistration           PROPERTY_34;

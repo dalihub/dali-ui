@@ -361,37 +361,5 @@ AnimatedImageView::AnimatedImageView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::AnimatedImageViewImpl>(internal);
 }
 
-// TODO: remove these together with the old names they keep alive.
-
-void AnimatedImageView::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
-{
-  SetResourceUrlList(urls);
-}
-
-Dali::Vector<Dali::String> AnimatedImageView::GetResourceUrls() const
-{
-  return GetResourceUrlList();
-}
-
-int AnimatedImageView::GetCurrentFrame() const
-{
-  return GetCurrentFrameNumber();
-}
-
-int AnimatedImageView::GetTotalFrame() const
-{
-  return GetTotalFrameCount();
-}
-
-void AnimatedImageView::SetMaskingMode(Ui::Image::MaskingPolicy maskingPolicy)
-{
-  SetMaskingPolicy(maskingPolicy);
-}
-
-Ui::Image::MaskingPolicy AnimatedImageView::GetMaskingMode() const
-{
-  return GetMaskingPolicy();
-}
-
 } //namespace Ui
 } //namespace DALI_NAMESPACE

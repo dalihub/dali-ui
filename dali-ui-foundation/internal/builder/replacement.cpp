@@ -443,25 +443,6 @@ OptionalRect Replacement::IsRect(const TreeNode& node) const
   return ret;
 }
 
-OptionalExtents Replacement::IsExtents(const TreeNode& node) const
-{
-  OptionalExtents extents;
-  if(OptionalString replace = HasFullReplacement(node))
-  {
-    Property::Value value = GetFullReplacement(*replace);
-    Extents         extentsValue;
-    if(DevelProperty::EXTENTS == value.GetType() && GetExtents(value, extentsValue))
-    {
-      extents = extentsValue;
-    }
-  }
-  else
-  {
-    extents = ::IsExtents(node);
-  }
-  return extents;
-}
-
 OptionalInsets Replacement::IsInsets(const TreeNode& node) const
 {
   OptionalInsets insets;
@@ -624,18 +605,6 @@ bool Replacement::IsArray(OptionalChild child, Property::Value& out) const
   }
 
   return ret;
-}
-
-OptionalExtents Replacement::IsExtents(OptionalChild child) const
-{
-  if(child)
-  {
-    return IsExtents(*child);
-  }
-  else
-  {
-    return OptionalExtents();
-  }
 }
 
 OptionalInsets Replacement::IsInsets(OptionalChild child) const

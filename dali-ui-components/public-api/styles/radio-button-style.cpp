@@ -53,7 +53,6 @@ SelectableImageInterface MakeDefaultRadioButtonIcon()
 {
   using Binding     = SelectableLottieColorBinding;
   using ColorPolicy = Binding::ColorPolicy;
-  using FrameRange  = SelectableLottieImage::FrameRange;
 
   SelectableLottieColorBindings colorBindings;
   colorBindings.PushBack(Binding("radio_inner.inner_fill.color",
@@ -62,11 +61,11 @@ SelectableImageInterface MakeDefaultRadioButtonIcon()
   colorBindings.PushBack(Binding("radio_outline.outline_stroke.color",
                                  LottieAnimation::ContentProperty::STROKE_COLOR,
                                  ColorPolicy::SELECTED_IN_FRAME_RANGE,
-                                 FrameRange(7, 26)));
+                                 Int32Pair(7, 26)));
 
   SelectableLottieImage image(Internal::ResolveComponentImageUrl("radio-button.json"),
-                              FrameRange(0, 19),
-                              FrameRange(20, 37));
+                              Int32Pair(0, 19),
+                              Int32Pair(20, 37));
   return SelectableLottieAnimationView::New(image, colorBindings);
 }
 } // unnamed namespace

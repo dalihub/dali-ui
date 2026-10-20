@@ -317,17 +317,5 @@ ImageView::ImageView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::ImageViewImpl>(internal);
 }
 
-// TODO: remove these together with the old names they keep alive.
-
-void ImageView::SetMaskingMode(Image::MaskingPolicy maskingPolicy)
-{
-  SetMaskingPolicy(maskingPolicy);
-}
-
-Image::MaskingPolicy ImageView::GetMaskingMode() const
-{
-  return GetMaskingPolicy();
-}
-
 } // namespace Ui
 } //namespace DALI_NAMESPACE

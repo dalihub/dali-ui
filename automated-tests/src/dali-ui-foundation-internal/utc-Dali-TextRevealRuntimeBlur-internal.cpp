@@ -4606,7 +4606,7 @@ int CheckRuntimeGaussianDecorations(bool async)
     label.SetRequestedHeight(160.0f);
     label.SetMultiLine(true);
     label.SetAsyncRendering(async);
-    label.SetProperty(Actor::Property::COLOR_ALPHA, 0.35f);
+    label.SetProperty(Actor::Property::COLOR_MULTIPLIER_ALPHA, 0.35f);
     Text::Reveal reveal;
     reveal.SetUnit(Text::Reveal::Unit::PIXEL);
     reveal.SetSequence(sequence);

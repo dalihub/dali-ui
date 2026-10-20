@@ -467,29 +467,14 @@ UiColor View::GetColorMultiplier() const
   return GetImpl(*this).GetColorMultiplier();
 }
 
-UiColor View::GetColor() const
-{
-  return GetColorMultiplier();
-}
-
 void View::SetColorMultiplier(const UiColor& multiplier)
 {
   GetImpl(*this).SetColorMultiplier(multiplier);
 }
 
-void View::SetColor(const UiColor& color)
-{
-  SetColorMultiplier(color);
-}
-
 UiColor View::GetCurrentColorMultiplier() const
 {
   return GetImpl(*this).GetCurrentColorMultiplier();
-}
-
-UiColor View::GetCurrentColor() const
-{
-  return GetCurrentColorMultiplier();
 }
 
 bool View::IsEffectivelyFocused() const
@@ -1081,11 +1066,6 @@ View::ResourceReadySignalType& View::ResourceReadySignal()
   Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
 
   return viewDataImpl.ResourceReadySignal();
-}
-
-View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSignal()
-{
-  return OffscreenRenderingFinishedSignal();
 }
 
 View::OffscreenRenderingFinishedSignalType& View::OffscreenRenderingFinishedSignal()

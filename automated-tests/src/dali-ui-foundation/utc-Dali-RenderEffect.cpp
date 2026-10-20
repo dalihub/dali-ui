@@ -247,54 +247,37 @@ int UtcDaliRenderEffectBlurDownscaleFactorP(void)
   END_TEST;
 }
 
-int UtcDaliRenderEffectOffscreenRenderingPropertyP(void)
+int UtcDaliRenderEffectOffscreenRenderingP(void)
 {
   UiTestApplication application;
-  tet_infoline("UtcDaliRenderEffectOffscreenRenderingPropertyP");
+  tet_infoline("UtcDaliRenderEffectOffscreenRenderingP");
 
   View view = CreateView(application);
 
   DALI_TEST_CHECK(view.OffscreenRenderingFinishedSignal().Empty());
-  DALI_TEST_CHECK(&view.OffscreenRenderingFinishedSignal() == &view.OffScreenRenderingFinishedSignal());
   DALI_TEST_CHECK(!view.IsOffscreenRenderingEnabled());
   DALI_TEST_CHECK(view.GetOffscreenRenderingRefreshRate() == View::OffscreenRefreshRate::REFRESH_ALWAYS);
-  DALI_TEST_EQUALS(view.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING), 0, TEST_LOCATION);
 
   view.SetOffscreenRenderingEnabled(true);
   application.SendNotification();
   application.Render();
   DALI_TEST_CHECK(view.IsOffscreenRenderingEnabled());
-  DALI_TEST_EQUALS(view.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING), static_cast<int32_t>(View::OffscreenRefreshRate::REFRESH_ALWAYS), TEST_LOCATION);
 
   view.SetOffscreenRenderingRefreshRate(View::OffscreenRefreshRate::REFRESH_ONCE);
   application.SendNotification();
   application.Render();
   DALI_TEST_CHECK(view.IsOffscreenRenderingEnabled());
   DALI_TEST_CHECK(view.GetOffscreenRenderingRefreshRate() == View::OffscreenRefreshRate::REFRESH_ONCE);
-  DALI_TEST_EQUALS(view.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING), static_cast<int32_t>(View::OffscreenRefreshRate::REFRESH_ONCE), TEST_LOCATION);
 
   view.SetOffscreenRenderingEnabled(false);
   application.SendNotification();
   application.Render();
   DALI_TEST_CHECK(!view.IsOffscreenRenderingEnabled());
   DALI_TEST_CHECK(view.GetOffscreenRenderingRefreshRate() == View::OffscreenRefreshRate::REFRESH_ONCE);
-  DALI_TEST_EQUALS(view.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING), 0, TEST_LOCATION);
 
   view.SetOffscreenRenderingRefreshRate(View::OffscreenRefreshRate::REFRESH_ALWAYS);
   DALI_TEST_CHECK(!view.IsOffscreenRenderingEnabled());
   DALI_TEST_CHECK(view.GetOffscreenRenderingRefreshRate() == View::OffscreenRefreshRate::REFRESH_ALWAYS);
-
-  view.SetProperty(View::Property::OFFSCREEN_RENDERING, View::OffScreenRenderingType::REFRESH_ONCE);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_CHECK(view.IsOffscreenRenderingEnabled());
-  DALI_TEST_CHECK(view.GetOffscreenRenderingRefreshRate() == View::OffscreenRefreshRate::REFRESH_ONCE);
-
-  view.SetProperty(View::Property::OFFSCREEN_RENDERING, View::OffScreenRenderingType::NONE);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_CHECK(!view.IsOffscreenRenderingEnabled());
-  DALI_TEST_CHECK(view.GetOffscreenRenderingRefreshRate() == View::OffscreenRefreshRate::REFRESH_ONCE);
 
   END_TEST;
 }

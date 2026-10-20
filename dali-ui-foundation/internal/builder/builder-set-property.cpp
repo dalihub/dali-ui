@@ -96,10 +96,6 @@ bool Disambiguated(const TreeNode& child, Dali::Property::Value& value, const Re
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::ARRAY, value, replacement);
     }
-    else if(*childType == "extents")
-    {
-      return DeterminePropertyFromNode(*childValue, DevelProperty::EXTENTS, value, replacement);
-    }
     else if(*childType == "insets")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::INSETS, value, replacement);
@@ -120,17 +116,6 @@ bool DeterminePropertyFromNode(const TreeNode& node, Property::Type type, Proper
                                const Replacement& replacer)
 {
   bool done = false;
-
-  // DevelProperty::EXTENTS cannot be a case label of a Property::Type switch.
-  if(type == DevelProperty::EXTENTS)
-  {
-    if(OptionalExtents v = replacer.IsExtents(node))
-    {
-      value = *v;
-      done  = true;
-    }
-    return done;
-  }
 
   switch(type)
   {

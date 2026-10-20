@@ -414,39 +414,18 @@ public: // Advanced Rendering & Masking
   bool IsCropToMask() const;
 
   /**
-   * @brief Sets the masking mode.
+   * @brief Sets the masking policy.
    *
-   * @param[in] maskingPolicy The masking mode to use
+   * @param[in] maskingPolicy The masking policy to use
    */
   void SetMaskingPolicy(Image::MaskingPolicy maskingPolicy);
 
   /**
-   * @brief Gets the masking mode.
+   * @brief Gets the masking policy.
    *
-   * @return The current masking mode
+   * @return The current masking policy
    */
   Image::MaskingPolicy GetMaskingPolicy() const;
-
-  /**
-   * @brief Sets when the alpha mask is applied.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @param[in] maskingPolicy The masking policy to set
-   * @see SetMaskingPolicy()
-   */
-  void SetMaskingMode(Image::MaskingPolicy maskingPolicy);
-
-  /**
-   * @brief Gets when the alpha mask is applied.
-   *
-   * TODO: remove. Kept only so applications written against the old name keep
-   * compiling.
-   *
-   * @see GetMaskingPolicy()
-   */
-  Image::MaskingPolicy GetMaskingMode() const;
 
 public: // Loading Behavior
   /**

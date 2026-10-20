@@ -302,29 +302,14 @@ public: // Non-virtual API (safe to reorder / extend)
   UiColor GetColorMultiplier() const;
 
   /**
-   * @copydoc Ui::View::GetColor()
-   */
-  UiColor GetColor() const;
-
-  /**
    * @copydoc Ui::View::SetColorMultiplier()
    */
   void SetColorMultiplier(const UiColor& multiplier);
 
   /**
-   * @copydoc Ui::View::SetColor()
-   */
-  void SetColor(const UiColor& color);
-
-  /**
    * @copydoc Ui::View::GetCurrentColorMultiplier()
    */
   UiColor GetCurrentColorMultiplier() const;
-
-  /**
-   * @copydoc Ui::View::GetCurrentColor()
-   */
-  UiColor GetCurrentColor() const;
 
   /**
    * @copydoc Ui::View::GetCornerRadius()
@@ -1070,14 +1055,6 @@ protected:
    * @param[in] behaviourFlags Behavioural flags from ViewBehaviour enum
    */
   ViewImpl(ViewBehaviour behaviourFlags);
-
-  /**
-   * @brief Gets texture output of offscreen rendering.
-   * @return The offscreen rendering output texture
-   * @note Valid only inside OffscreenRenderingFinishedSignal() with REFRESH_ONCE type.
-   * @deprecated Use GetOffscreenRenderingOutput() instead.
-   */
-  Dali::Texture GetOffScreenRenderingOutput() const;
 
   /**
    * @brief Registers a color binding for theme-aware color updates.

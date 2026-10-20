@@ -89,7 +89,7 @@ Dali::Ui::ImageView DefaultWindowDecorationImpl::MakeBuiltInIcon(const char* nam
   // both themes: the view colour multiplies through to the requested icon
   // colour. An application icon gets neither treatment - see MakeIcon().
   Dali::Ui::ImageView icon = MakeIcon(GetBuiltInIconUrl(name), size);
-  icon.SetColor(GetIconColor());
+  icon.SetColorMultiplier(GetIconColor());
   return icon;
 }
 

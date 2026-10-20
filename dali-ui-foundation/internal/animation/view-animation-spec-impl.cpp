@@ -339,16 +339,27 @@ void ViewAnimationSpecImpl::ApplyScaleYBy(Animation& animation, View view, const
   animation.AnimateBy(Property(view, Actor::Property::SCALE_Y), entry.value, entry.alpha, period);
 }
 
-void ViewAnimationSpecImpl::ApplyColorTo(Animation& animation, View view, const Entry& entry)
+void ViewAnimationSpecImpl::ApplyColorMultiplierTo(Animation& animation, View view, const Entry& entry)
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
   animation.AnimateTo(Property(view, Actor::Property::COLOR_MULTIPLIER), entry.value, entry.alpha, period);
 }
 
-void ViewAnimationSpecImpl::ApplyColorBy(Animation& animation, View view, const Entry& entry)
+void ViewAnimationSpecImpl::ApplyColorMultiplierBy(Animation& animation, View view, const Entry& entry)
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
   animation.AnimateBy(Property(view, Actor::Property::COLOR_MULTIPLIER), entry.value, entry.alpha, period);
+}
+
+// Temporary compatibility aliases until applications migrate to ColorMultiplier.
+void ViewAnimationSpecImpl::ApplyColorTo(Animation& animation, View view, const Entry& entry)
+{
+  ApplyColorMultiplierTo(animation, view, entry);
+}
+
+void ViewAnimationSpecImpl::ApplyColorBy(Animation& animation, View view, const Entry& entry)
+{
+  ApplyColorMultiplierBy(animation, view, entry);
 }
 
 void ViewAnimationSpecImpl::ApplyOpacityTo(Animation& animation, View view, const Entry& entry)

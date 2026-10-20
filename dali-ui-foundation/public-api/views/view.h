@@ -516,6 +516,7 @@ public: // Properties
   // @ANIMATABLE_MANUAL(Scale, Vector3)
   // @ANIMATABLE_MANUAL(ScaleX, float)
   // @ANIMATABLE_MANUAL(ScaleY, float)
+  // @ANIMATABLE_MANUAL(ColorMultiplier, Vector4)
   // @ANIMATABLE_MANUAL(Color, Vector4)
   // @ANIMATABLE_MANUAL(Opacity, float)
 
@@ -991,14 +992,6 @@ public:
   UiColor GetColorMultiplier() const;
 
   /**
-   * @brief Gets the color.
-   *
-   * @deprecated Use GetColorMultiplier() instead.
-   * @return The color
-   */
-  UiColor GetColor() const;
-
-  /**
    * @brief Sets the component-wise color multiplier for this View's rendered content.
    *
    * This does not draw content or change the background. The resolved red, green, blue,
@@ -1021,27 +1014,11 @@ public:
   void SetColorMultiplier(const UiColor& multiplier);
 
   /**
-   * @brief Sets the color.
-   *
-   * @deprecated Use SetColorMultiplier() instead.
-   * @param[in] color The color to set
-   */
-  void SetColor(const UiColor& color);
-
-  /**
    * @brief Gets the current component-wise color multiplier from the previous update.
    *
    * @return The current color multiplier
    */
   UiColor GetCurrentColorMultiplier() const;
-
-  /**
-   * @brief Gets the current color.
-   *
-   * @deprecated Use GetCurrentColorMultiplier() instead.
-   * @return The current color
-   */
-  UiColor GetCurrentColor() const;
 
   /**
    * @brief Gets the corner radius of the view.
@@ -1792,18 +1769,6 @@ public: // Not intended for application developers
 
 public:
   /**
-   * @brief Enumeration for the offscreen rendering mode.
-   * @deprecated Use SetOffscreenRenderingEnabled(), IsOffscreenRenderingEnabled(), SetOffscreenRenderingRefreshRate(), and
-   * GetOffscreenRenderingRefreshRate() instead. This type is planned for removal together with Property::OFFSCREEN_RENDERING.
-   */
-  enum OffScreenRenderingType
-  {
-    NONE,
-    REFRESH_ONCE,
-    REFRESH_ALWAYS
-  };
-
-  /**
    * @brief Enumeration for the offscreen rendering refresh rate.
    */
   enum class OffscreenRefreshRate
@@ -1893,15 +1858,6 @@ public:
        * @details Name "counterClockwiseFocusableViewId", type Property::INTEGER.
        */
       COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief Whether to draw offscreen or not.
-       * @details Name "offScreenRendering", type Property::INTEGER.
-       * @note Use OffScreenRenderingType values to configure the mode.
-       * @deprecated Use SetOffscreenRenderingEnabled(), IsOffscreenRenderingEnabled(), SetOffscreenRenderingRefreshRate(), and
-       * GetOffscreenRenderingRefreshRate() instead. This property is planned for removal.
-       */
-      OFFSCREEN_RENDERING,
 
       /**
        * @brief The width requested by the View for measurement.
@@ -2029,12 +1985,6 @@ public:
 
   /// @brief ResourceReady signal type.
   typedef Signal<void(View)> ResourceReadySignalType;
-
-  /**
-   * @brief Offscreen rendering finished signal type.
-   * @deprecated Use OffscreenRenderingFinishedSignalType instead.
-   */
-  typedef Signal<void(View)> OffScreenRenderingFinishedSignalType;
 
   /// @brief Offscreen rendering finished signal type.
   using OffscreenRenderingFinishedSignalType = Signal<void(View)>;
@@ -2518,22 +2468,6 @@ public:
    * @note A RelayoutRequest is queued by View before this signal is emitted
    */
   ResourceReadySignalType& ResourceReadySignal();
-
-  /**
-   * @brief This signal is emitted when offscreen rendering is finished.
-   *
-   * A callback of the following type may be connected:
-   * @code
-   *   void YourCallbackName( View view );
-   * @endcode
-   *
-   * @return The signal to connect to
-   * @pre The View has been initialized.
-   * @note This signal is emitted when the offscreen rendering task is completed.
-   * @note This signal is only emitted when OffscreenRefreshRate is set to REFRESH_ONCE.
-   * @deprecated Use OffscreenRenderingFinishedSignal() instead.
-   */
-  OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
 
   /**
    * @brief This signal is emitted when key event is received.

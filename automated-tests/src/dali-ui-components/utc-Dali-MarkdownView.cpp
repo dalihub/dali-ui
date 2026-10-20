@@ -78,9 +78,8 @@ UiStyle CreateMarkdownStyleOverride()
 SelectableImageInterface CreateTaskCheckBoxIcon()
 {
   ++gTaskCheckBoxIconCreateCount;
-  using FrameRange = SelectableLottieImage::FrameRange;
   return SelectableLottieAnimationView::New(
-    SelectableLottieImage("i_check_box.json", FrameRange(0, 0), FrameRange(0, 0)));
+    SelectableLottieImage("i_check_box.json", Int32Pair(0, 0), Int32Pair(0, 0)));
 }
 
 SelectableImageInterface CreateEmptyTaskCheckBoxIcon()

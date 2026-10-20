@@ -58,6 +58,8 @@ struct TextProcessingSource
 
 /**
  * @brief Owns the projected source buffers that differ from the original model.
+ *
+ * Font family strings are borrowed from the original logical model.
  */
 struct ProjectedTextProcessingSource
 {
@@ -96,6 +98,12 @@ bool PrepareProjectedTextProcessingSource(const Model&                   origina
 
 /**
  * @brief Applies processing source buffers to a target logical model.
+ *
+ * Font family buffers are copied before releasing the target's previous runs.
+ * The target owns the copies; null families remain null and lengths exclude a
+ * terminator. Temporary copies are released if allocation fails.
+ * If the source borrows the target's old families, those borrowed pointers are
+ * invalidated on success; subsequent consumers must use the target's new runs.
  *
  * @param[in] source The source buffers to apply.
  * @param[in,out] target The logical model receiving the source buffers.

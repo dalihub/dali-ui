@@ -1205,8 +1205,7 @@ int UtcDaliViewBackgroundColorSetterP(void)
   View              view            = View::New();
   const UiColor     backgroundColor = UiColor(0xFFFFFF);
   const UiColor     colorMultiplier = UiColor(0xFF0000);
-  const UiColor     legacyColor     = UiColor(0x00FF00);
-  const UiColor     implLegacyColor = UiColor(0x0000FF);
+  const UiColor     implColor       = UiColor(0x0000FF);
 
   application.GetScene().Add(view);
   view.SetBackgroundColor(backgroundColor);
@@ -1219,20 +1218,13 @@ int UtcDaliViewBackgroundColorSetterP(void)
   application.Render();
   DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), colorMultiplier.GetRgba(), TEST_LOCATION);
 
-  // Verify that the legacy public API delegates to the color multiplier API.
-  view.SetColor(legacyColor);
-  DALI_TEST_EQUALS(view.GetColor().GetRgba(), legacyColor.GetRgba(), TEST_LOCATION);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_EQUALS(view.GetCurrentColor().GetRgba(), legacyColor.GetRgba(), TEST_LOCATION);
-
-  // Verify the same compatibility path on ViewImpl.
+  // Verify the same path on ViewImpl.
   ViewImpl& viewImpl = GetImpl(view);
-  viewImpl.SetColor(implLegacyColor);
-  DALI_TEST_EQUALS(viewImpl.GetColor().GetRgba(), implLegacyColor.GetRgba(), TEST_LOCATION);
+  viewImpl.SetColorMultiplier(implColor);
+  DALI_TEST_EQUALS(viewImpl.GetColorMultiplier().GetRgba(), implColor.GetRgba(), TEST_LOCATION);
   application.SendNotification();
   application.Render();
-  DALI_TEST_EQUALS(viewImpl.GetCurrentColor().GetRgba(), implLegacyColor.GetRgba(), TEST_LOCATION);
+  DALI_TEST_EQUALS(viewImpl.GetCurrentColorMultiplier().GetRgba(), implColor.GetRgba(), TEST_LOCATION);
   END_TEST;
 }
 
@@ -1522,12 +1514,94 @@ int UtcDaliViewShadowAnimationNoShadowP(void)
   ViewAnimationSpec spec = View::NewAnimationSpec();
   spec.ShadowBlurRadius(4.0f, Duration(0.1f))
     .ShadowOpacity(0.5f, Duration(0.1f))
-    .Color(Vector4(0.8f, 0.7f, 0.6f, 0.5f), Duration(0.1f))
-    .ColorBy(Vector4(0.1f, 0.1f, 0.1f, 0.1f), Duration(0.1f));
+    .ColorMultiplier(Vector4(0.8f, 0.7f, 0.6f, 0.5f), Duration(0.1f))
+    .ColorMultiplierBy(Vector4(0.1f, 0.1f, 0.1f, 0.1f), Duration(0.1f));
 
   Animation specAnimation = Animation::New(0.0f);
   spec.ApplyTo(specAnimation, view);
   DALI_TEST_EQUALS(specAnimation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewColorMultiplierAnimationP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  application.GetWindow().Add(view);
+
+  // Bridge, multiplier names
+  Animation bridgeAnimation = Animation::New(0.0f);
+  view.Animate(bridgeAnimation)
+    .ColorMultiplier(Vector4(0.8f, 0.7f, 0.6f, 0.5f), Duration(0.1f))
+    .ColorMultiplierBy(Vector4(0.05f, 0.05f, 0.05f, 0.05f), Duration(0.1f));
+  DALI_TEST_EQUALS(bridgeAnimation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  // Legacy alias names on the bridge animate the same multiplier property.
+  const Vector4 legacyTarget(0.4f, 0.3f, 0.2f, 1.0f);
+  Animation     legacyToAnimation = Animation::New(0.0f);
+  view.Animate(legacyToAnimation).Color(legacyTarget, Duration(0.1f));
+  legacyToAnimation.Play();
+  application.SendNotification();
+  application.Render(200);
+  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), legacyTarget, 0.001f, TEST_LOCATION);
+
+  const Vector4 legacyDelta(0.1f, 0.1f, 0.1f, 0.0f);
+  Animation     legacyByAnimation = Animation::New(0.0f);
+  view.Animate(legacyByAnimation).ColorBy(legacyDelta, Duration(0.1f));
+  legacyByAnimation.Play();
+  application.SendNotification();
+  application.Render(200);
+  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), legacyTarget + legacyDelta, 0.001f, TEST_LOCATION);
+
+  // Legacy alias entries on the spec reach the same apply path as the multiplier entries.
+  ViewAnimationSpec spec = View::NewAnimationSpec();
+  spec.ColorMultiplier(Vector4(0.6f, 0.5f, 0.4f, 1.0f), Duration(0.1f))
+    .ColorMultiplierBy(Vector4(0.1f, 0.1f, 0.1f, 0.0f), Duration(0.1f))
+    .Color(Vector4(0.2f, 0.2f, 0.2f, 1.0f), Duration(0.1f))
+    .ColorBy(Vector4(0.05f, 0.05f, 0.05f, 0.0f), Duration(0.1f));
+
+  Animation specAnimation = Animation::New(0.0f);
+  spec.ApplyTo(specAnimation, view);
+  DALI_TEST_EQUALS(specAnimation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewColorMultiplierTokenBindingP(void)
+{
+  UiTestApplication application;
+  UiColorManager    manager = UiColorManager::Get();
+  View              view    = View::New();
+  application.GetWindow().Add(view);
+
+  gUseAlternateBackgroundColors = false;
+  manager.SetColorOverride(OverrideBackgroundColors);
+
+  // A token color with no existing binding registers one.
+  view.SetColorMultiplier(UiColor(BACKGROUND_COLOR_TOKEN));
+  DALI_TEST_EQUALS(view.GetColorMultiplier().GetRgba(), BACKGROUND_COLOR_A, TEST_LOCATION);
+
+  // A theme change refreshes the bound multiplier through the binding callback.
+  gUseAlternateBackgroundColors = true;
+  manager.SetColorOverride(OverrideBackgroundColors);
+  DALI_TEST_EQUALS(view.GetColorMultiplier().GetRgba(), BACKGROUND_COLOR_B, TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), BACKGROUND_COLOR_B, TEST_LOCATION);
+
+  // Setting a token again takes the update path of the existing binding.
+  view.SetColorMultiplier(UiColor(BACKGROUND_COLOR_TOKEN));
+  DALI_TEST_EQUALS(view.GetColorMultiplier().GetRgba(), BACKGROUND_COLOR_B, TEST_LOCATION);
+
+  // A direct RGBA value clears the binding.
+  const UiColor direct(0.25f, 0.5f, 0.75f, 1.0f);
+  view.SetColorMultiplier(direct);
+  DALI_TEST_EQUALS(view.GetColorMultiplier().GetRgba(), direct.GetRgba(), TEST_LOCATION);
+
+  manager.ClearColorOverride();
+  gUseAlternateBackgroundColors = false;
 
   END_TEST;
 }

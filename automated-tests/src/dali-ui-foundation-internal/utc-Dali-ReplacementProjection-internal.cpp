@@ -18,9 +18,11 @@
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/public-api/rendering/texture.h>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -32,6 +34,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
+#include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
@@ -49,6 +52,7 @@
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
@@ -56,6 +60,8 @@
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-async-task-manager.h>
+#include <dali-ui/ui-event-thread-callback.h>
 #include "inline-replacement-manager-test-accessor.h"
 #include "replacement-layout-test-adapter.h"
 
@@ -6482,5 +6488,429 @@ int UtcDaliReplacementMultilineEndRetentionMetricsP(void)
   checkGeometry(asyncScaleTwo, asyncScaleOne);
   syncState.Clear(services.bidirectionalSupport);
 
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyOwnershipP(void)
+{
+  UiTestApplication application;
+  {
+    Text::ControllerPtr     controller = Text::Controller::New();
+    Text::StyledTextBuilder builder    = Text::StyledTextBuilder::New("A [icon] trailing text");
+    Text::FontAttributes    font;
+    font.SetFamily("Ownership Test Family");
+    builder.SetSpan(Text::FontSpan::New(font), 0u, 2u);
+    builder.SetSpan(Text::ImageSpan::New(Text::ImageAttributes("unused.png", Vector2(24.0f, 20.0f))), 2u, 8u);
+    controller->SetStyledText(builder.Build());
+    controller->Relayout(Size(320.0f, 120.0f));
+    const auto&                         impl   = Text::Controller::Impl::GetImplementation(*controller);
+    const Text::Model&                  source = *impl.mModel;
+    const Text::ReplacementRenderState* state  = impl.GetReplacementRenderStatePtr();
+    DALI_TEST_CHECK(state && state->processingModel);
+    const auto& sourceRuns = source.mLogicalModel->mFontDescriptionRuns;
+    const auto& targetRuns = state->processingModel->mLogicalModel->mFontDescriptionRuns;
+    DALI_TEST_EQUALS(sourceRuns.Count(), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(targetRuns.Count(), 1u, TEST_LOCATION);
+    tet_printf("font family source=%p target=%p\n", static_cast<void*>(sourceRuns[0u].familyName), static_cast<void*>(targetRuns[0u].familyName));
+    DALI_TEST_CHECK(sourceRuns[0u].familyName != targetRuns[0u].familyName);
+    DALI_TEST_EQUALS(std::string(targetRuns[0u].familyName, targetRuns[0u].familyLength), std::string("Ownership Test Family"), TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+namespace
+{
+/**
+ * @brief Builds font runs crossing an image range using arbitrary family names.
+ * @param[in] family The family whose ownership is checked, not a required host font.
+ * @param[in] image Whether to include the image replacement.
+ * @return Styled text with a crossing run and an overriding suffix run.
+ */
+Text::StyledText MakeFontOwnershipText(const char* family, bool image = true)
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("abICONcd");
+  Text::FontAttributes    font;
+  font.SetFamily(family);
+  builder.SetSpan(Text::FontSpan::New(font), 0u, 8u);
+  font.SetFamily("Ownership Suffix");
+  builder.SetSpan(Text::FontSpan::New(font), 6u, 8u);
+  if(image)
+  {
+    builder.SetSpan(Text::ImageSpan::New(Text::ImageAttributes("unused.png", Vector2(24.0f, 20.0f))), 2u, 6u);
+  }
+  return builder.Build();
+}
+
+/**
+ * @brief Checks projected ranges, family values and independent ownership.
+ * @param[in] controller The controller laid out with MakeFontOwnershipText().
+ * @param[in] family The expected family of the crossing run.
+ */
+void CheckFontOwnership(const Text::ControllerPtr& controller, const char* family)
+{
+  const auto& impl  = Text::Controller::Impl::GetImplementation(*controller);
+  const auto* state = impl.GetReplacementRenderStatePtr();
+  DALI_TEST_CHECK(state && state->processingModel);
+  const auto& source = impl.mModel->mLogicalModel->mFontDescriptionRuns;
+  const auto& target = state->processingModel->mLogicalModel->mFontDescriptionRuns;
+  DALI_TEST_EQUALS(source.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(target.Count(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(source[0u].familyName, source[0u].familyLength), std::string(family), TEST_LOCATION);
+  const std::array<Text::CharacterRun, 3u> ranges = {{{0u, 2u}, {3u, 2u}, {3u, 2u}}};
+  for(uint32_t i = 0u; i < target.Count(); ++i)
+  {
+    const auto& run = target[i];
+    DALI_TEST_EQUALS(std::string(run.familyName, run.familyLength), std::string(i < 2u ? family : "Ownership Suffix"), TEST_LOCATION);
+    DALI_TEST_EQUALS(run.characterRun.characterIndex, ranges[i].characterIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(run.characterRun.numberOfCharacters, ranges[i].numberOfCharacters, TEST_LOCATION);
+    DALI_TEST_CHECK(run.familyDefined);
+    for(const auto& original : source)
+    {
+      DALI_TEST_CHECK(run.familyName != original.familyName);
+    }
+    for(uint32_t j = 0u; j < i; ++j)
+    {
+      DALI_TEST_CHECK(run.familyName != target[j].familyName);
+    }
+  }
+}
+} // unnamed namespace
+
+int UtcDaliReplacementFontFamilyMultipleRunsP(void)
+{
+  UiTestApplication   application;
+  Text::ControllerPtr controller = Text::Controller::New();
+  controller->SetStyledText(MakeFontOwnershipText("Ownership Multiple"));
+  controller->Relayout(Size(320.0f, 120.0f));
+  CheckFontOwnership(controller, "Ownership Multiple");
+
+  // Keep the independently owned target alive after destroying its source.
+  Text::ModelPtr target = Text::Controller::Impl::GetImplementation(*controller).GetReplacementRenderState().processingModel;
+  controller.Reset();
+  const auto& runs = target->mLogicalModel->mFontDescriptionRuns;
+  DALI_TEST_EQUALS(std::string(runs[0u].familyName, runs[0u].familyLength), std::string("Ownership Multiple"), TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(runs[2u].familyName, runs[2u].familyLength), std::string("Ownership Suffix"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyRelayoutP(void)
+{
+  UiTestApplication   application;
+  Text::ControllerPtr controller = Text::Controller::New();
+  controller->SetStyledText(MakeFontOwnershipText("Ownership Relayout"));
+  auto&    impl       = Text::Controller::Impl::GetImplementation(*controller);
+  uint64_t generation = 0u;
+  for(uint32_t i = 0u; i < 16u; ++i)
+  {
+    controller->Relayout(Size(320.0f + static_cast<float>(i), 120.0f));
+    CheckFontOwnership(controller, "Ownership Relayout");
+    DALI_TEST_CHECK(impl.GetReplacementRenderState().layoutGeneration > generation);
+    generation = impl.GetReplacementRenderState().layoutGeneration;
+  }
+  // Release the target first, then read and lay out the retained source again.
+  impl.InvalidateReplacementRenderState();
+  const auto& source = impl.mModel->mLogicalModel->mFontDescriptionRuns;
+  DALI_TEST_EQUALS(std::string(source[0u].familyName, source[0u].familyLength), std::string("Ownership Relayout"), TEST_LOCATION);
+  controller->Relayout(Size(400.0f, 120.0f));
+  CheckFontOwnership(controller, "Ownership Relayout");
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyStyleUpdatesP(void)
+{
+  UiTestApplication application;
+  for(uint32_t lifetime = 0u; lifetime < 8u; ++lifetime)
+  {
+    Text::ControllerPtr controller = Text::Controller::New();
+    for(uint32_t update = 0u; update < 8u; ++update)
+    {
+      const char* family = update % 2u == 0u ? "Ownership First" : "Ownership Second";
+      controller->SetStyledText(MakeFontOwnershipText(family));
+      controller->Relayout(Size(320.0f, 120.0f));
+      CheckFontOwnership(controller, family);
+      controller->SetText("plain replacement");
+      controller->Relayout(Size(320.0f, 120.0f));
+      DALI_TEST_CHECK(Text::Controller::Impl::GetImplementation(*controller).mModel->mLogicalModel->mFontDescriptionRuns.Empty());
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyWithoutImageP(void)
+{
+  UiTestApplication   application;
+  Text::ControllerPtr controller = Text::Controller::New();
+  controller->SetStyledText(MakeFontOwnershipText("Ownership Ordinary", false));
+  controller->Relayout(Size(320.0f, 120.0f));
+  const auto& impl = Text::Controller::Impl::GetImplementation(*controller);
+  const auto& runs = impl.mModel->mLogicalModel->mFontDescriptionRuns;
+  DALI_TEST_EQUALS(runs.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(runs[0u].familyName, runs[0u].familyLength), std::string("Ownership Ordinary"), TEST_LOCATION);
+  DALI_TEST_EQUALS(runs[0u].characterRun.numberOfCharacters, 8u, TEST_LOCATION);
+  DALI_TEST_CHECK(!impl.GetReplacementRenderStatePtr());
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyEndEllipsisP(void)
+{
+  UiTestApplication   application;
+  Text::ControllerPtr controller = Text::Controller::New();
+  controller->SetTextElideEnabled(true);
+  controller->SetMaximumNumberOfLines(1u);
+  controller->SetStyledText(MakeFontOwnershipText("Ownership Ellipsis"));
+  const Vector3 natural = controller->GetNaturalSize();
+  const float   width   = natural.x * 0.5f;
+  controller->GetHeightForWidth(width);
+  controller->Relayout(Size(width, natural.y));
+  CheckFontOwnership(controller, "Ownership Ellipsis");
+  const auto& state = Text::Controller::Impl::GetImplementation(*controller).GetReplacementRenderState();
+  DALI_TEST_CHECK(state.finalElision.textElided);
+  CheckFinalElisionContract(state);
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyCopyBoundariesP(void)
+{
+  UiTestApplication application;
+  Text::ModelPtr    source     = Text::Model::New();
+  source->mLogicalModel->mText = Utf32("abc");
+  Text::FontDescriptionRun run;
+  run.characterRun = Text::CharacterRun{0u, 1u};
+  source->mLogicalModel->mFontDescriptionRuns.PushBack(run); // No family allocation.
+  run.characterRun  = Text::CharacterRun{1u, 1u};
+  run.familyDefined = true;
+  run.familyName    = new char[1u]; // Explicit empty family owns a buffer, with no terminator contract.
+  source->mLogicalModel->mFontDescriptionRuns.PushBack(run);
+  run.characterRun  = Text::CharacterRun{2u, 1u};
+  run.familyLength  = 3u;
+  run.familyName    = new char[3u]{'a', 'b', 'c'};
+  run.weightDefined = true;
+  run.weight        = TextAbstraction::FontWeight::BOLD;
+  source->mLogicalModel->mFontDescriptionRuns.PushBack(run);
+  Text::ModelPtr target = Text::Model::New();
+  for(uint32_t i = 0u; i < 3u; ++i)
+  {
+    Text::ApplyTextProcessingSource(Text::MakeTextProcessingSource(*source), *target->mLogicalModel);
+    const auto& copy = target->mLogicalModel->mFontDescriptionRuns;
+    DALI_TEST_EQUALS(copy.Count(), 3u, TEST_LOCATION);
+    DALI_TEST_CHECK(copy[0u].familyName == nullptr);
+    DALI_TEST_CHECK(copy[1u].familyName != nullptr);
+    DALI_TEST_EQUALS(copy[1u].familyLength, 0u, TEST_LOCATION);
+    DALI_TEST_CHECK(copy[1u].familyName != source->mLogicalModel->mFontDescriptionRuns[1u].familyName);
+    DALI_TEST_CHECK(copy[2u].familyName != run.familyName);
+    DALI_TEST_EQUALS(std::string(copy[2u].familyName, copy[2u].familyLength), std::string("abc"), TEST_LOCATION);
+    DALI_TEST_CHECK(copy[2u].weightDefined);
+    DALI_TEST_EQUALS(copy[2u].weight, TextAbstraction::FontWeight::BOLD, TEST_LOCATION);
+  }
+  // The source view may alias the target, as in the async projection path.
+  Text::ApplyTextProcessingSource(Text::MakeTextProcessingSource(*target), *target->mLogicalModel);
+  DALI_TEST_EQUALS(std::string(target->mLogicalModel->mFontDescriptionRuns[2u].familyName, 3u), std::string("abc"), TEST_LOCATION);
+  source->mLogicalModel->ClearFontDescriptionRuns();
+  Text::ApplyTextProcessingSource(Text::MakeTextProcessingSource(*source), *target->mLogicalModel);
+  DALI_TEST_CHECK(target->mLogicalModel->mFontDescriptionRuns.Empty());
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyAsyncP(void)
+{
+  UiTestApplication     application;
+  Text::AsyncTextLoader loader = Text::AsyncTextLoader::New();
+  for(uint32_t i = 0u; i < 8u; ++i)
+  {
+    const Text::StyledText    styled = MakeFontOwnershipText("Ownership Async");
+    Text::AsyncTextParameters parameters;
+    parameters.text                       = "abICONcd";
+    parameters.fontSize                   = 18.0f;
+    parameters.textWidth                  = 320.0f;
+    parameters.textHeight                 = 120.0f;
+    parameters.hasStyledTextStyleSnapshot = true;
+    parameters.styledTextStyleSnapshot    = Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(styled, 96.0f);
+    parameters.replacementSourceSnapshot  = Dali::Ui::Internal::Text::StyledTextApplier::BuildReplacementSourceSnapshot(styled, i + 1u);
+    loader.GetHeightForWidth(parameters);
+    const auto* state = Text::GetImplementation(loader).GetReplacementRenderState();
+    DALI_TEST_CHECK(state && state->processingModel);
+    const auto& runs = state->processingModel->mLogicalModel->mFontDescriptionRuns;
+    DALI_TEST_EQUALS(runs.Count(), 3u, TEST_LOCATION);
+    DALI_TEST_CHECK(runs[0u].familyName != runs[1u].familyName);
+    DALI_TEST_EQUALS(std::string(runs[0u].familyName, runs[0u].familyLength), std::string("Ownership Async"), TEST_LOCATION);
+    DALI_TEST_EQUALS(std::string(runs[2u].familyName, runs[2u].familyLength), std::string("Ownership Suffix"), TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+namespace
+{
+/**
+ * @brief Builds three image gaps and overlapping font ranges for projection checks.
+ * @param[in] families Whether font ranges own family names or only style values.
+ * @return Text whose four surviving character ranges have fixed, font-independent bounds.
+ */
+Text::StyledText MakeMultiImageFontText(bool families)
+{
+  Text::StyledTextBuilder                  builder = Text::StyledTextBuilder::New("abXXcdYYYefZZgh");
+  const std::array<Text::CharacterRun, 3u> ranges  = {{{0u, 15u}, {4u, 7u}, {9u, 6u}}};
+  const std::array<std::string, 3u>        names   = {{std::string(256u, 'f'), "", "Family \xED\x95\x9C\xEA\xB8\x80"}};
+  for(uint32_t i = 0u; i < ranges.size(); ++i)
+  {
+    Text::FontAttributes font;
+    if(families)
+    {
+      font.SetFamily(names[i].c_str());
+    }
+    font.SetSize(16.0f + static_cast<float>(i));
+    font.SetWeight(i == 1u ? Text::FontWeight::BOLD : Text::FontWeight::NORMAL);
+    font.SetSlant(i == 2u ? Text::FontSlant::ITALIC : Text::FontSlant::NORMAL);
+    DALI_TEST_CHECK(builder.SetSpan(Text::FontSpan::New(font), ranges[i].characterIndex,
+                                    ranges[i].characterIndex + ranges[i].numberOfCharacters));
+  }
+  for(const Text::CharacterRun& range : std::array<Text::CharacterRun, 3u>{{{2u, 2u}, {6u, 3u}, {11u, 2u}}})
+  {
+    DALI_TEST_CHECK(builder.SetSpan(Text::ImageSpan::New(Text::ImageAttributes("unused.png", Vector2(12.0f, 12.0f))),
+                                    range.characterIndex, range.characterIndex + range.numberOfCharacters));
+  }
+  return builder.Build();
+}
+
+/**
+ * @brief Checks authored run order, explicit empty/UTF-8 families and image-gap projection.
+ * @param[in] families Whether family ownership is expected.
+ */
+void CheckMultiImageFontProjection(bool families)
+{
+  Text::ControllerPtr controller = Text::Controller::New();
+  controller->SetStyledText(MakeMultiImageFontText(families));
+  controller->Relayout(Size(320.0f, 120.0f));
+  const auto&    impl     = Text::Controller::Impl::GetImplementation(*controller);
+  const auto&    state    = impl.GetReplacementRenderState();
+  const auto&    source   = impl.mModel->mLogicalModel->mFontDescriptionRuns;
+  Text::ModelPtr retained = state.processingModel;
+  const auto&    target   = retained->mLogicalModel->mFontDescriptionRuns;
+  DALI_TEST_EQUALS(source.Count(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(target.Count(), 8u, TEST_LOCATION);
+  // Authored run order is retained: last matching run still overrides earlier runs.
+  const std::array<uint32_t, 8u>           sourceIndices = {{0u, 0u, 0u, 0u, 1u, 1u, 2u, 2u}};
+  const std::array<Text::CharacterRun, 8u> ranges        = {{{0u, 2u}, {3u, 2u}, {6u, 2u}, {9u, 2u}, {3u, 2u}, {6u, 2u}, {6u, 2u}, {9u, 2u}}};
+  DALI_TEST_EQUALS(retained->mLogicalModel->mText.Count(), 11u, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.placements.Count(), 3u, TEST_LOCATION);
+  const std::array<Text::CharacterIndex, 11u> logicalIndices = {{0u, 1u, 2u, 4u, 5u, 6u, 9u, 10u, 11u, 13u, 14u}};
+  for(uint32_t i = 0u; i < logicalIndices.size(); ++i)
+  {
+    DALI_TEST_EQUALS(state.projection.ProjectedCharacterToLogical(i), logicalIndices[i], TEST_LOCATION);
+  }
+  for(uint32_t i = 0u; i < target.Count(); ++i)
+  {
+    const auto& run      = target[i];
+    const auto& original = source[sourceIndices[i]];
+    DALI_TEST_EQUALS(run.characterRun.characterIndex, ranges[i].characterIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(run.characterRun.numberOfCharacters, ranges[i].numberOfCharacters, TEST_LOCATION);
+    DALI_TEST_EQUALS(run.size, original.size, TEST_LOCATION);
+    DALI_TEST_EQUALS(run.weight, original.weight, TEST_LOCATION);
+    DALI_TEST_EQUALS(run.slant, original.slant, TEST_LOCATION);
+    DALI_TEST_EQUALS(run.familyDefined, families, TEST_LOCATION);
+    DALI_TEST_EQUALS(run.familyLength, original.familyLength, TEST_LOCATION);
+    if(families)
+    {
+      DALI_TEST_CHECK(run.familyName);
+      DALI_TEST_EQUALS(std::string(run.familyName, run.familyLength), std::string(original.familyName, original.familyLength), TEST_LOCATION);
+      for(const auto& other : source)
+      {
+        DALI_TEST_CHECK(run.familyName != other.familyName);
+      }
+      for(uint32_t j = 0u; j < i; ++j)
+      {
+        DALI_TEST_CHECK(run.familyName != target[j].familyName);
+      }
+    }
+    else
+    {
+      DALI_TEST_CHECK(run.familyName == nullptr);
+    }
+  }
+  CheckFinalElisionContract(state);
+  controller.Reset();
+  if(families)
+  {
+    DALI_TEST_EQUALS(std::string(target[0u].familyName, target[0u].familyLength), std::string(256u, 'f'), TEST_LOCATION);
+    DALI_TEST_EQUALS(target[4u].familyLength, 0u, TEST_LOCATION);
+    DALI_TEST_EQUALS(std::string(target[7u].familyName, target[7u].familyLength), std::string("Family \xED\x95\x9C\xEA\xB8\x80"), TEST_LOCATION);
+  }
+}
+
+/** Receives real TextLoadingTask completions without retaining the caller's source. */
+struct FontFamilyLoadObserver : TextLoadObserver
+{
+  void LoadComplete(bool success, const TextInformation& information) override
+  {
+    DALI_TEST_CHECK(success);
+    ++completions;
+    revision = information.parameters.replacementSourceSnapshot.sourceRevision;
+    DALI_TEST_EQUALS(information.renderInfo.replacementSourceRevision, revision, TEST_LOCATION);
+    DALI_TEST_EQUALS(information.renderInfo.replacementPlacements.Count(), 3u, TEST_LOCATION);
+    DALI_TEST_CHECK(information.renderInfo.size.width > 0.0f);
+  }
+  uint32_t completions = 0u;
+  uint64_t revision    = 0u;
+};
+
+/**
+ * @brief Creates an owned async request from a temporary complex StyledText.
+ * @param[in] revision Identifies the result that is allowed to reach the observer.
+ * @return Request whose source builder and StyledText have already been destroyed.
+ */
+Text::AsyncTextParameters MakeFontFamilyWorkerParameters(uint64_t revision)
+{
+  Text::AsyncTextParameters parameters;
+  const auto                styled      = MakeMultiImageFontText(true);
+  parameters.text                       = "abXXcdYYYefZZgh";
+  parameters.fontSize                   = 18.0f;
+  parameters.textWidth                  = 160.0f;
+  parameters.textHeight                 = 60.0f;
+  parameters.maxTextureSize             = 4096u;
+  parameters.requestType                = Dali::Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
+  parameters.hasStyledTextStyleSnapshot = true;
+  parameters.styledTextStyleSnapshot    = Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(styled, 96.0f);
+  parameters.replacementSourceSnapshot  = Dali::Ui::Internal::Text::StyledTextApplier::BuildReplacementSourceSnapshot(styled, revision);
+  return parameters;
+}
+} // unnamed namespace
+
+int UtcDaliReplacementFontFamilyMultiImageOverlapP(void)
+{
+  UiTestApplication application;
+  CheckMultiImageFontProjection(true);
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyMultiImageStyleOnlyP(void)
+{
+  UiTestApplication application;
+  CheckMultiImageFontProjection(false);
+  END_TEST;
+}
+
+int UtcDaliReplacementFontFamilyWorkerCompletionP(void)
+{
+  UiTestApplication      application;
+  auto                   manager = Text::AsyncTextManager::Get();
+  FontFamilyLoadObserver observer;
+  for(uint64_t revision = 1u; revision <= 8u; ++revision)
+  {
+    const auto cancelled = manager.RequestLoad(MakeFontFamilyWorkerParameters(revision * 2u), &observer);
+    // The event is produced by a real worker; hold its completion on the event thread.
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5, false));
+    manager.RequestCancel(cancelled);
+    Test::AsyncTaskManager::ProcessAllCompletedTasks();
+    DALI_TEST_EQUALS(observer.completions, static_cast<uint32_t>(revision - 1u), TEST_LOCATION);
+    manager.RequestLoad(MakeFontFamilyWorkerParameters(revision * 2u + 1u), &observer);
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+    DALI_TEST_EQUALS(observer.completions, static_cast<uint32_t>(revision), TEST_LOCATION);
+    DALI_TEST_EQUALS(observer.revision, revision * 2u + 1u, TEST_LOCATION);
+  }
+  {
+    FontFamilyLoadObserver destroyed;
+    manager.RequestLoad(MakeFontFamilyWorkerParameters(100u), &destroyed);
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5, false));
+  }
+  Test::AsyncTaskManager::ProcessAllCompletedTasks();
   END_TEST;
 }

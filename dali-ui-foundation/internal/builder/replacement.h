@@ -138,13 +138,6 @@ public:
    * @param node The TreeNode to check
    * @return Optional value
    */
-  OptionalExtents IsExtents(const TreeNode& node) const;
-
-  /* @brief Check node for a type
-   *
-   * @param node The TreeNode to check
-   * @return Optional value
-   */
   OptionalInsets IsInsets(const TreeNode& node) const;
 
   /* @brief Check node for a type
@@ -230,13 +223,6 @@ public:
    * @return Optional value
    */
   bool IsArray(OptionalChild child, Property::Value& out) const;
-
-  /* @brief Check node for a type
-   *
-   * @param child The optional child TreeNode
-   * @return Optional value
-   */
-  OptionalExtents IsExtents(OptionalChild child) const;
 
   /* @brief Check node for a type
    *

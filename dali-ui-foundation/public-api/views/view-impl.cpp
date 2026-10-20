@@ -292,32 +292,17 @@ void ViewImpl::SetBackgroundGradient(const Gradient::Base& gradient)
 
 UiColor ViewImpl::GetColorMultiplier() const
 {
-  return mImpl->GetColor();
-}
-
-UiColor ViewImpl::GetColor() const
-{
-  return GetColorMultiplier();
+  return mImpl->GetColorMultiplier();
 }
 
 void ViewImpl::SetColorMultiplier(const UiColor& multiplier)
 {
-  mImpl->SetColor(multiplier);
-}
-
-void ViewImpl::SetColor(const UiColor& color)
-{
-  SetColorMultiplier(color);
+  mImpl->SetColorMultiplier(multiplier);
 }
 
 UiColor ViewImpl::GetCurrentColorMultiplier() const
 {
-  return mImpl->GetCurrentColor();
-}
-
-UiColor ViewImpl::GetCurrentColor() const
-{
-  return GetCurrentColorMultiplier();
+  return mImpl->GetCurrentColorMultiplier();
 }
 
 Vector4 ViewImpl::GetCornerRadius() const
@@ -1039,11 +1024,6 @@ Ui::View::KeyEventSignalType& ViewImpl::KeyEventSignal()
 Ui::View::FocusChangedSignalType& ViewImpl::FocusChangedSignal()
 {
   return mImpl->FocusChangedSignal();
-}
-
-Dali::Texture ViewImpl::GetOffScreenRenderingOutput() const
-{
-  return GetOffscreenRenderingOutput();
 }
 
 Dali::Texture ViewImpl::GetOffscreenRenderingOutput() const

@@ -6664,7 +6664,7 @@ int UtcDaliViewAnimationSpecVisualAndActorPropertyMatrixP(void)
   to.Scale(Vector3(1.2f, 1.1f, 1.0f), Duration(0.3f));
   to.ScaleX(1.2f, Duration(0.3f));
   to.ScaleY(1.1f, Duration(0.3f));
-  to.Color(Vector4(0.8f, 0.7f, 0.6f, 1.0f), Duration(0.3f));
+  to.ColorMultiplier(Vector4(0.8f, 0.7f, 0.6f, 1.0f), Duration(0.3f));
   to.Opacity(0.8f, Duration(0.3f));
   to.CornerRadius(Vector4(4.0f, 4.0f, 4.0f, 4.0f), Duration(0.3f));
   to.CornerSquareness(Vector4(0.2f, 0.2f, 0.2f, 0.2f), Duration(0.3f));
@@ -6685,7 +6685,7 @@ int UtcDaliViewAnimationSpecVisualAndActorPropertyMatrixP(void)
   by.ScaleBy(Vector3(0.1f, 0.1f, 0.0f), Duration(0.2f));
   by.ScaleXBy(0.1f, Duration(0.2f));
   by.ScaleYBy(0.1f, Duration(0.2f));
-  by.ColorBy(Vector4(0.1f, 0.0f, 0.0f, 0.0f), Duration(0.2f));
+  by.ColorMultiplierBy(Vector4(0.1f, 0.0f, 0.0f, 0.0f), Duration(0.2f));
   by.OpacityBy(-0.1f, Duration(0.2f));
   by.CornerRadiusBy(Vector4(1.0f, 1.0f, 1.0f, 1.0f), Duration(0.2f));
   by.CornerSquarenessBy(Vector4(0.1f, 0.1f, 0.1f, 0.1f), Duration(0.2f));

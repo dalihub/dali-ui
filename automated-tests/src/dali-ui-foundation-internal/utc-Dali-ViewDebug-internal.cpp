@@ -58,7 +58,6 @@ int UtcDaliViewDebugPropertyTypesP(void)
   map.Insert("first", 1);
   map.Insert("second", Vector2::ONE);
   actor.RegisterProperty("map", map, Property::READ_WRITE);
-  actor.RegisterProperty("extents", Extents(1u, 2u, 3u, 4u), Property::READ_WRITE);
   actor.RegisterProperty("insets", Insets(1, 2, 3, 4), Property::READ_WRITE);
 
   std::ostringstream properties;

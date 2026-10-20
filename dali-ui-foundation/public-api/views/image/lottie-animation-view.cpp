@@ -339,22 +339,5 @@ LottieAnimationView::LottieAnimationView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::LottieAnimationViewImpl>(internal);
 }
 
-// TODO: remove these together with the old names they keep alive.
-
-int LottieAnimationView::GetCurrentFrame() const
-{
-  return GetCurrentFrameNumber();
-}
-
-int LottieAnimationView::GetTotalFrame() const
-{
-  return GetTotalFrameCount();
-}
-
-void LottieAnimationView::SetNotifyAfterRasterization(bool notify)
-{
-  SetNotifyAfterRasterizationEnabled(notify);
-}
-
 } // namespace Ui
 } //namespace DALI_NAMESPACE

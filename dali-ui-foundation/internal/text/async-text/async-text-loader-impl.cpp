@@ -601,8 +601,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     {
       processingSource = projectedSourceStorage.source;
       ApplyTextProcessingSource(processingSource, *mTextModel->mLogicalModel);
-      numberOfCharacters               = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
-      replacementState.processingModel = mTextModel;
+      // Applying in place releases the families borrowed by projectedSourceStorage.
+      processingSource.fontDescriptionRuns = &fontDescriptionRuns;
+      numberOfCharacters                   = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
+      replacementState.processingModel     = mTextModel;
     }
   }
 
