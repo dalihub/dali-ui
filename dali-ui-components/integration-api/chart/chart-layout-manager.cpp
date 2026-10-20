@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <cmath>
 #include <iomanip>
+#include <locale>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -56,6 +57,7 @@ Dali::String ChartLayoutManager::FormatTickValue(float value)
     return Dali::String(std::to_string(static_cast<int>(value)).c_str());
   }
   std::ostringstream ss;
+  ss.imbue(std::locale::classic());
   ss << std::fixed << std::setprecision(2) << value;
   std::string s   = ss.str();
   auto        dot = s.find('.');

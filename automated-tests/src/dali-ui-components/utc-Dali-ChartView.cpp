@@ -581,6 +581,22 @@ int UtcDaliChartViewRenderGaugeP(void)
   END_TEST;
 }
 
+int UtcDaliChartViewRenderGaugeDefaultCenterLabelP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView         chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
+
+  const float maxValue = std::numeric_limits<float>::max();
+  chartView.SetGaugeMaximumValue(maxValue);
+  chartView.SetGaugeValue(maxValue);
+  RenderChart(application, chartView);
+
+  auto& impl = GetChartImpl(chartView);
+  DALI_TEST_EQUALS(impl.mDataLabels.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mDataLabels[0].GetProperty<Dali::String>(Label::Property::TEXT).Size(), 31u, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliChartViewInternalPropertiesP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
@@ -710,6 +726,10 @@ int UtcDaliChartViewInternalOverlayAndLegendP(void)
   secondHit.seriesIndex = 1;
 
   DALI_TEST_EQUALS(impl.BuildMultiTooltipText({firstHit, secondHit}), std::string("first: 4\nsecond: 6"), TEST_LOCATION);
+  impl.UpdateOverlay(firstHit);
+  DALI_TEST_EQUALS(impl.mTooltipLabel.GetProperty<Dali::String>(Label::Property::TEXT),
+                   Dali::String("first\nB : 4"),
+                   TEST_LOCATION);
   impl.SetTooltipFormatter([](const Dali::String& series, const Dali::String&, float) { return series; });
   DALI_TEST_EQUALS(impl.BuildMultiTooltipText({firstHit, secondHit}), std::string("first\nsecond"), TEST_LOCATION);
   impl.UpdateOverlay(firstHit);

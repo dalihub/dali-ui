@@ -35,10 +35,15 @@
 #include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/locale-numeric-guard.h>
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
+#include <iomanip>
+#include <locale>
 #include <map>
 #include <numeric>
+#include <sstream>
 
 namespace DALI_NAMESPACE
 {
@@ -55,6 +60,15 @@ namespace
 {
 
 using PointVec = std::vector<std::pair<float, float>>;
+
+std::string FormatDataLabel(const Dali::String& format, float value)
+{
+  char buffer[64];
+  // TODO: Replace the printf-style data-label API before removing this locale guard.
+  Dali::LocaleNumericGuard localeGuard;
+  std::snprintf(buffer, sizeof(buffer), format.CStr(), value);
+  return buffer;
+}
 
 PointVec DecimateMinMax(const PointVec& src, size_t targetCount)
 {
@@ -996,8 +1010,7 @@ void DataRenderer::RenderDataLabels(const ChartModel& model, const ScaleEngine& 
     float               size      = impl.GetDataLabelSize();
     float               offset    = impl.IsMarkersVisible() ? impl.GetMarkerRadius() + 6.0f : 6.0f;
 
-    char buf[64];
-    int  pi = 0;
+    int pi = 0;
     for(const auto& pt : points)
     {
       if(std::isnan(pt.second))
@@ -1015,8 +1028,7 @@ void DataRenderer::RenderDataLabels(const ChartModel& model, const ScaleEngine& 
       }
       else
       {
-        std::snprintf(buf, sizeof(buf), formatStr.CStr(), pt.second);
-        text = buf;
+        text = FormatDataLabel(formatStr, pt.second);
       }
 
       DataLabelInfo info;
@@ -1098,7 +1110,6 @@ void DataRenderer::RenderBarDataLabels(const ChartModel&                       m
         continue;
       }
 
-      char        buf[64];
       const auto& pts = GetImplementation(model.mSeriesList[idx]).GetValues();
       for(const auto& pt : pts)
       {
@@ -1110,10 +1121,10 @@ void DataRenderer::RenderBarDataLabels(const ChartModel&                       m
         const float barH     = std::abs(baseCY - barEndCY);
         if(barH < MIN_BAR_PX) continue;
 
-        std::snprintf(buf, sizeof(buf), impl.GetDataLabelFormat().CStr(), pt.second);
+        const std::string text = FormatDataLabel(impl.GetDataLabelFormat(), pt.second);
 
         DataLabelInfo info;
-        info.text  = buf;
+        info.text  = text.c_str();
         info.color = impl.GetDataLabelColor();
         info.size  = impl.GetDataLabelSize();
         if(pt.second >= 0.0f)
@@ -1143,7 +1154,6 @@ void DataRenderer::RenderBarDataLabels(const ChartModel&                       m
       const auto& impl      = GetImplementation(bs);
       const bool  showLabel = impl.IsDataLabelsVisible();
 
-      char        buf[64];
       const auto& pts = GetImplementation(model.mSeriesList[idx]).GetValues();
       for(const auto& pt : pts)
       {
@@ -1161,9 +1171,9 @@ void DataRenderer::RenderBarDataLabels(const ChartModel&                       m
 
           if(!showLabel || layerH < MIN_BAR_PX) continue;
 
-          std::snprintf(buf, sizeof(buf), impl.GetDataLabelFormat().CStr(), pt.second);
-          DataLabelInfo info;
-          info.text     = buf;
+          const std::string text = FormatDataLabel(impl.GetDataLabelFormat(), pt.second);
+          DataLabelInfo     info;
+          info.text     = text.c_str();
           info.color    = impl.GetDataLabelColor();
           info.size     = impl.GetDataLabelSize();
           info.position = Vector2(cx, topCY - LABEL_GAP);
@@ -1179,9 +1189,9 @@ void DataRenderer::RenderBarDataLabels(const ChartModel&                       m
 
           if(!showLabel || layerH < MIN_BAR_PX) continue;
 
-          std::snprintf(buf, sizeof(buf), impl.GetDataLabelFormat().CStr(), pt.second);
-          DataLabelInfo info;
-          info.text     = buf;
+          const std::string text = FormatDataLabel(impl.GetDataLabelFormat(), pt.second);
+          DataLabelInfo     info;
+          info.text     = text.c_str();
           info.color    = impl.GetDataLabelColor();
           info.size     = impl.GetDataLabelSize();
           info.position = Vector2(cx, bottomCY + LABEL_GAP);
@@ -1261,14 +1271,21 @@ void DataRenderer::RenderPie(Dali::CanvasRenderer::DrawableGroup&    group,
 
     if(pieImpl->IsDataLabelsVisible() && renderSweep >= pieImpl->GetDataLabelMinAngle())
     {
-      const float midRad = (renderStart + renderSweep * 0.5f) * Math::PI / 180.0f;
-      const float labelR = isDonut ? (outerR + innerR) * 0.5f : outerR * 0.65f;
-      const float pct    = (sl.value / total) * 100.0f;
-      char        buf[64];
-      std::snprintf(buf, sizeof(buf), "%s\n%.0f%%", sl.label.CStr(), pct);
+      const float        midRad = (renderStart + renderSweep * 0.5f) * Math::PI / 180.0f;
+      const float        labelR = isDonut ? (outerR + innerR) * 0.5f : outerR * 0.65f;
+      const float        pct    = (sl.value / total) * 100.0f;
+      std::ostringstream labelStream;
+      labelStream.imbue(std::locale::classic());
+      labelStream << sl.label.CStr() << '\n'
+                  << std::fixed << std::setprecision(0) << pct << '%';
+      std::string labelText = labelStream.str();
+      if(labelText.size() >= 64u)
+      {
+        labelText.resize(63u);
+      }
 
       DataLabelInfo lbl;
-      lbl.text     = buf;
+      lbl.text     = labelText.c_str();
       lbl.position = Vector2(center.x + labelR * std::cos(midRad),
                              center.y + labelR * std::sin(midRad));
       lbl.pivot    = Pivot::CENTER;
@@ -1407,9 +1424,14 @@ void DataRenderer::RenderGauge(Dali::CanvasRenderer::DrawableGroup&    group,
   std::string labelText = g.centerLabel.CStr();
   if(labelText.empty())
   {
-    char buf[32];
-    std::snprintf(buf, sizeof(buf), "%.0f", clampedV);
-    labelText = buf;
+    std::ostringstream labelStream;
+    labelStream.imbue(std::locale::classic());
+    labelStream << std::fixed << std::setprecision(0) << clampedV;
+    labelText = labelStream.str();
+    if(labelText.size() >= 32u)
+    {
+      labelText.resize(31u);
+    }
   }
   DataLabelInfo lbl;
   lbl.text     = labelText.c_str();

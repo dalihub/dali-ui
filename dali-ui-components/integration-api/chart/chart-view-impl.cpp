@@ -34,8 +34,11 @@
 #include <algorithm>
 #include <chrono>
 #include <functional>
+#include <iomanip>
 #include <limits>
+#include <locale>
 #include <map>
+#include <sstream>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/bar-series-impl.h>
@@ -1699,9 +1702,10 @@ std::string ChartViewImpl::BuildMultiTooltipText(const std::vector<HitResult>& h
     }
     else
     {
-      char buf[64];
-      std::snprintf(buf, sizeof(buf), "%.4g", h.dataY);
-      text += std::string(h.seriesName.CStr()) + ": " + buf;
+      std::ostringstream valueStream;
+      valueStream.imbue(std::locale::classic());
+      valueStream << std::setprecision(4) << h.dataY;
+      text += std::string(h.seriesName.CStr()) + ": " + valueStream.str();
     }
   }
   return text;
@@ -1740,15 +1744,16 @@ void ChartViewImpl::UpdateOverlay(const HitResult& hit)
   mOverlayCanvas.RequestRasterization();
 
   std::string text;
-  char        buf[64];
   if(mTooltipFormatter)
   {
     text = mTooltipFormatter(hit.seriesName, hit.xLabel, hit.dataY).CStr();
   }
   else
   {
-    std::snprintf(buf, sizeof(buf), "%.4g", hit.dataY);
-    text = std::string(hit.seriesName.CStr()) + "\n" + hit.xLabel.CStr() + " : " + buf;
+    std::ostringstream valueStream;
+    valueStream.imbue(std::locale::classic());
+    valueStream << std::setprecision(4) << hit.dataY;
+    text = std::string(hit.seriesName.CStr()) + "\n" + hit.xLabel.CStr() + " : " + valueStream.str();
   }
 
   const Vector2 tooltipSize(130.0f, 52.0f);

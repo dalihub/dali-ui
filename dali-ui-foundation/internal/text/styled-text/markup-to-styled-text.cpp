@@ -24,11 +24,11 @@
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
 #include <algorithm>
-#include <cerrno>
 #include <cmath>
-#include <cstdlib>
 #include <cstring>
 #include <limits>
+#include <locale>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -394,20 +394,24 @@ bool TryParseFloat(const std::string& value, float& result)
     return false;
   }
 
-  errno     = 0;
-  char* end = nullptr;
-  result    = std::strtof(value.c_str(), &end);
-  if((end == value.c_str()) || (errno == ERANGE) || !std::isfinite(result))
+  std::istringstream valueStream(value);
+  valueStream.imbue(std::locale::classic());
+  valueStream >> result;
+  if(valueStream.fail() || !std::isfinite(result))
   {
     return false;
   }
 
-  if(*end == '\0')
+  const std::streampos parsedLength = valueStream.tellg();
+  const std::size_t    consumed     = parsedLength == std::streampos(-1)
+                                        ? value.size()
+                                        : static_cast<std::size_t>(parsedLength);
+  if(consumed == value.size())
   {
     return true;
   }
 
-  if(((*end == 'f') || (*end == 'F')) && (*(end + 1) == '\0'))
+  if((consumed + 1u == value.size()) && ((value[consumed] == 'f') || (value[consumed] == 'F')))
   {
     return true;
   }
