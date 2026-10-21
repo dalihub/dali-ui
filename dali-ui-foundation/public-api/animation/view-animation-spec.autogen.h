@@ -67,6 +67,101 @@ public:
   ////////////////////////////////////////////////////////////////////////////
 
   /**
+   * @brief Animates the corner radius.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the corner radius by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the corner squareness.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the corner squareness by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline width.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline width by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline color.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline color by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline offset.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline offset by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationSpec& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
    * @brief Animates the background color.
    *
    * @param[in] target The target value
@@ -369,101 +464,6 @@ public:
    * @param[in] delay The delay before starting (default: 0)
    */
   ViewAnimationSpec& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the corner radius.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the corner radius by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the corner squareness.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the corner squareness by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the borderline width.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the borderline width by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the borderline color.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the borderline color by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the borderline offset.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the borderline offset by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationSpec& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
 
   /**

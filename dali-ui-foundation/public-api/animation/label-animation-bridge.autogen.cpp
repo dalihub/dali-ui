@@ -36,6 +36,66 @@ LabelAnimationBridge::LabelAnimationBridge(Animation animation, Label view)
 {
 }
 
+LabelAnimationBridge& LabelAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerRadius(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerRadiusBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerSquareness(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerSquarenessBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineWidth(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineWidthBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineColor(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineColorBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationBridge& LabelAnimationBridge::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::BackgroundColor(target, duration, alpha, delay);
@@ -225,66 +285,6 @@ LabelAnimationBridge& LabelAnimationBridge::Opacity(float target, Duration durat
 LabelAnimationBridge& LabelAnimationBridge::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::OpacityBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerRadius(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerRadiusBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerSquareness(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerSquarenessBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineWidth(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineWidthBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineColor(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineColorBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineOffset(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineOffsetBy(relative, duration, alpha, delay);
   return *this;
 }
 

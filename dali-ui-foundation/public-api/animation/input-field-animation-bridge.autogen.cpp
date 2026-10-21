@@ -36,6 +36,66 @@ InputFieldAnimationBridge::InputFieldAnimationBridge(Animation animation, InputF
 {
 }
 
+InputFieldAnimationBridge& InputFieldAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerRadius(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerRadiusBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerSquareness(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerSquarenessBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineWidth(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineWidthBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineColor(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineColorBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputFieldAnimationBridge& InputFieldAnimationBridge::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::BackgroundColor(target, duration, alpha, delay);
@@ -225,66 +285,6 @@ InputFieldAnimationBridge& InputFieldAnimationBridge::Opacity(float target, Dura
 InputFieldAnimationBridge& InputFieldAnimationBridge::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::OpacityBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerRadius(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerRadiusBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerSquareness(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerSquarenessBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineWidth(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineWidthBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineColor(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineColorBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineOffset(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineOffsetBy(relative, duration, alpha, delay);
   return *this;
 }
 

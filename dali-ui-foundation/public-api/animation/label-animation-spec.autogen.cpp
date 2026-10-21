@@ -125,6 +125,66 @@ LabelAnimationSpec::LabelAnimationSpec(Internal::LabelAnimationSpecImpl* impl)
 // Property methods (AddEntry calls)
 ///////////////////////////////////////////////////////////////////////////////
 
+LabelAnimationSpec& LabelAnimationSpec::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerRadius(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerRadiusBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerSquareness(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerSquarenessBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineWidth(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineWidthBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineColor(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineColorBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationSpec& LabelAnimationSpec::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::BackgroundColor(target, duration, alpha, delay);
@@ -314,66 +374,6 @@ LabelAnimationSpec& LabelAnimationSpec::Opacity(float target, Duration duration,
 LabelAnimationSpec& LabelAnimationSpec::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::OpacityBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerRadius(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerRadiusBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerSquareness(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerSquarenessBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineWidth(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineWidthBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineColor(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineColorBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineOffset(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineOffsetBy(relative, duration, alpha, delay);
   return *this;
 }
 

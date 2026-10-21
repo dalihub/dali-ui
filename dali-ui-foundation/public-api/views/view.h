@@ -83,6 +83,215 @@ class ViewImpl;
  */
 class DALI_UI_API View : public CustomActor
 {
+public: // Property & enumeration declarations
+  /**
+   * @brief Enumeration for the start and end property ranges for this control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_START_INDEX,
+    PROPERTY_END_INDEX   = Ui::VIEW_PROPERTY_END_INDEX,
+
+    ANIMATABLE_PROPERTY_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_START_INDEX,
+    ANIMATABLE_PROPERTY_END_INDEX   = Ui::VIEW_ANIMATABLE_PROPERTY_END_INDEX,
+
+    ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
+    ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX   = Ui::VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX,
+  };
+
+  /**
+   * @brief Enumeration for the instance of properties belonging to the View class.
+   */
+  struct Property
+  {
+    /**
+     * @brief Enumeration for the instance of properties belonging to the View class.
+     */
+    enum
+    {
+      /**
+       * @brief The outer space around the View.
+       * @details Name "margin", type Property::VECTOR4, ordered as start, end, top, bottom.
+       * @note Margin property is to be supported by Layout algorithms and containers in future.
+       */
+      MARGIN = PROPERTY_START_INDEX,
+
+      /**
+       * @brief The inner space of the View.
+       * @details Name "padding", type Property::VECTOR4, ordered as start, end, top, bottom.
+       */
+      PADDING,
+
+      /**
+       * @brief The width requested by the View for measurement.
+       * @details Name "requestedWidth", type Property::FLOAT.
+       * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
+       */
+      REQUESTED_WIDTH,
+
+      /**
+       * @brief The height requested by the View for measurement.
+       * @details Name "requestedHeight", type Property::FLOAT.
+       * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
+       */
+      REQUESTED_HEIGHT,
+
+      /**
+       * @brief The minimum width applied during measurement.
+       * @details Name "minimumWidth", type Property::FLOAT.
+       */
+      MINIMUM_WIDTH,
+
+      /**
+       * @brief The minimum height applied during measurement.
+       * @details Name "minimumHeight", type Property::FLOAT.
+       */
+      MINIMUM_HEIGHT,
+
+      /**
+       * @brief The maximum width applied during measurement.
+       * @details Name "maximumWidth", type Property::FLOAT.
+       * @note max-wins: if the minimum exceeds the maximum, the MAXIMUM wins
+       * (measurement floors to the minimum then ceils to the maximum).
+       * See SetMaximumWidth().
+       */
+      MAXIMUM_WIDTH,
+
+      /**
+       * @brief The maximum height applied during measurement.
+       * @details Name "maximumHeight", type Property::FLOAT.
+       */
+      MAXIMUM_HEIGHT,
+
+      /**
+       * @brief The layout mode that controls how the View participates in its parent's layout.
+       * @details Name "layoutMode", type Property::INTEGER (Ui::LayoutMode enum).
+       */
+      LAYOUT_MODE,
+
+      /**
+       * @brief The ID of the left focusable View.
+       * @details Name "leftFocusableViewId", type Property::INTEGER.
+       */
+      LEFT_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief The ID of the right focusable View.
+       * @details Name "rightFocusableViewId", type Property::INTEGER.
+       */
+      RIGHT_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief The ID of the up focusable View.
+       * @details Name "upFocusableViewId", type Property::INTEGER.
+       */
+      UP_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief The ID of the down focusable View.
+       * @details Name "downFocusableViewId", type Property::INTEGER.
+       */
+      DOWN_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief The ID of the clockwise focusable View.
+       * @details Name "clockwiseFocusableViewId", type Property::INTEGER.
+       */
+      CLOCKWISE_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief The ID of the counter-clockwise focusable View.
+       * @details Name "counterClockwiseFocusableViewId", type Property::INTEGER.
+       */
+      COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief The ID of the forward focusable View (used for Tab key navigation).
+       * @details Name "forwardFocusableViewId", type Property::INTEGER.
+       */
+      FORWARD_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief The ID of the backward focusable View (used for Shift+Tab key navigation).
+       * @details Name "backwardFocusableViewId", type Property::INTEGER.
+       */
+      BACKWARD_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief Whether the View acts as a focus group boundary.
+       * @details Name "focusGroup", type Property::BOOLEAN.
+       */
+      FOCUS_GROUP,
+
+      /**
+       * @brief Whether a View and its descendants can emit key signals.
+       * @details Name "dispatchKeyEvents", type Property::BOOLEAN
+       * @note If a View's dispatchKeyEvents is set to false, then it's children will not emit a key event signal
+       * either.
+       */
+      DISPATCH_KEY_EVENTS,
+
+      /**
+       * @brief The radius for the rounded corners of the View.
+       * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
+       * @note By default, it is Vector::ZERO.
+       * @note Applies to specific visuals inside the View.
+       * @note Only Property::Vector4 can be animated.
+       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
+       */
+      CORNER_RADIUS = ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
+
+      /**
+       * @brief Whether the corner radius value is relative (percentage [0.0f to 0.5f] of the visual size) or absolute
+       * (in world units).
+       * @details Name "viewCornerRadiusPolicy", type Property::INTEGER.
+       * @see Policy::Type
+       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
+       */
+      CORNER_RADIUS_POLICY,
+
+      /**
+       * @brief The squareness for the rounded corners of the View.
+       * @details Name "viewCornerSquareness", type Property::VECTOR4 or Property::FLOAT
+       * @note By default, it is Vector::ZERO.
+       * @note Applies to specific visuals inside the View.
+       * @note Only Property::Vector4 can be animated.
+       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
+       */
+      CORNER_SQUARENESS,
+
+      /**
+       * @brief The width for the borderline of the View. It will update borderline visual
+       * @details Name "viewBorderlineWidth", type Property::FLOAT.
+       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
+       */
+      BORDERLINE_WIDTH,
+
+      /**
+       * @brief The color for the borderline of the View. It will update borderline visual
+       * @details Name "viewBorderlineColor", type Property::VECTOR4
+       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
+       */
+      BORDERLINE_COLOR,
+
+      /**
+       * @brief The offset for the borderline of the View. It will update borderline visual
+       * @details Name "viewBorderlineOffset", type Property::FLOAT.
+       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
+       */
+      BORDERLINE_OFFSET,
+    };
+  };
+
+  /**
+   * @brief Enumeration for the offscreen rendering refresh rate.
+   */
+  enum class OffscreenRefreshRate
+  {
+    REFRESH_ONCE   = 1,
+    REFRESH_ALWAYS = 2
+  };
+
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized View handle.
@@ -502,29 +711,11 @@ public: // Measure / Arrange API
    */
   void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
 
-public: // Properties
-  // @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
-  // @ANIMATABLE_MANUAL(BackgroundGradientStartOffset, float)
-  // @ANIMATABLE_MANUAL(ShadowBlurRadius, float)
-  // @ANIMATABLE_MANUAL(ShadowOpacity, float)
-  // @ANIMATABLE_MANUAL(Size, Vector3)
-  // @ANIMATABLE_MANUAL(SizeWidth, float)
-  // @ANIMATABLE_MANUAL(SizeHeight, float)
-  // @ANIMATABLE_MANUAL(Position, Vector3)
-  // @ANIMATABLE_MANUAL(PositionX, float)
-  // @ANIMATABLE_MANUAL(PositionY, float)
-  // @ANIMATABLE_MANUAL(Scale, Vector3)
-  // @ANIMATABLE_MANUAL(ScaleX, float)
-  // @ANIMATABLE_MANUAL(ScaleY, float)
-  // @ANIMATABLE_MANUAL(ColorMultiplier, Vector4)
-  // @ANIMATABLE_MANUAL(Color, Vector4)
-  // @ANIMATABLE_MANUAL(Opacity, float)
-
+public: // View configuration (scale, size, layout, focus, appearance) & hierarchy
   /**
    * @brief Sets the UiScale participation policy for this view.
    *
    * @param[in] policy The UiScalePolicy to apply
-   * @return Reference to this View for fluent chaining
    */
   void SetUiScalePolicy(UiScalePolicy policy);
 
@@ -801,26 +992,6 @@ public: // Properties
    */
   Insets GetPadding() const;
 
-  // The Dali::Actor geometry setters below are deleted on View because a View's
-  // rendered geometry (size and position) is owned by the layout system: every
-  // Measure/Arrange pass writes the Actor POSITION_* and SIZE_* properties
-  // directly (see OnArrange), so any value set through them would be silently
-  // overwritten on the next layout pass. They are kept private so the
-  // invoke-method generator, which scans only public members, does not emit
-  // wrappers that would call the deleted functions. Public callers use the
-  // layout-aware API (SetRequestedWidth/Height, SetRequestedX/Y) or the
-  // Dali::Ui::Extension geometry setters instead.
-private:
-  void SetSize(const Vector3& size)         = delete;
-  void SetSizeWidth(float width)            = delete;
-  void SetSizeHeight(float height)          = delete;
-  void SetSizeDepth(float depth)            = delete;
-  void SetPosition(const Vector3& position) = delete;
-  void SetPositionX(float x)                = delete;
-  void SetPositionY(float y)                = delete;
-  void SetPositionZ(float z)                = delete;
-
-public:
   /**
    * @brief Sets the layout mode of this View.
    *
@@ -853,6 +1024,26 @@ public:
    */
   LayoutMode GetLayoutMode() const;
 
+  // The Dali::Actor geometry setters below are deleted on View because a View's
+  // rendered geometry (size and position) is owned by the layout system: every
+  // Measure/Arrange pass writes the Actor POSITION_* and SIZE_* properties
+  // directly (see OnArrange), so any value set through them would be silently
+  // overwritten on the next layout pass. They are kept private so the
+  // invoke-method generator, which scans only public members, does not emit
+  // wrappers that would call the deleted functions. Public callers use the
+  // layout-aware API (SetRequestedWidth/Height, SetRequestedX/Y) or the
+  // Dali::Ui::Extension geometry setters instead.
+private:
+  void SetSize(const Vector3& size)         = delete;
+  void SetSizeWidth(float width)            = delete;
+  void SetSizeHeight(float height)          = delete;
+  void SetSizeDepth(float depth)            = delete;
+  void SetPosition(const Vector3& position) = delete;
+  void SetPositionX(float x)                = delete;
+  void SetPositionY(float y)                = delete;
+  void SetPositionZ(float z)                = delete;
+
+public: // View configuration & hierarchy (continued: focus, appearance, traits, children)
   /**
    * @brief Sets the left focusable View for keyboard navigation.
    *
@@ -968,6 +1159,11 @@ public:
   void SetBackgroundGradient(const Gradient::Base& gradient);
 
   /**
+   * @brief Clears the background.
+   */
+  void ClearBackground();
+
+  /**
    * @brief Sets a single shadow for this View.
    *
    * This replaces all shadows previously set by SetShadow(). Pass
@@ -983,6 +1179,35 @@ public:
    * @param[in] shadowStack The ordered shadow stack to apply
    */
   void SetShadow(const ShadowStack& shadowStack);
+
+  /**
+   * @brief Sets the inner shadow for this View.
+   *
+   * Pass InnerShadow::None() to clear the inner shadow from this View.
+   *
+   * @param[in] innerShadow The inner shadow value to apply
+   */
+  void SetInnerShadow(const InnerShadow& innerShadow);
+
+  /**
+   * @brief Sets RenderEffect to this View.
+   *
+   * @param[in] effect RenderEffect to add.
+   *
+   * @note Every effect inherits RenderEffect.
+   */
+  void SetRenderEffect(Ui::RenderEffect effect);
+
+  /**
+   * @brief Retrieves View's render effect
+   * @return RenderEffect set on this View
+   */
+  Ui::RenderEffect GetRenderEffect() const;
+
+  /**
+   * @brief Clears RenderEffect of this View, if exists.
+   */
+  void ClearRenderEffect();
 
   /**
    * @brief Gets the target component-wise color multiplier of this View.
@@ -1161,58 +1386,26 @@ public:
    */
   void SetBorderlineOffset(float offset);
 
-  /**
-   * @brief Returns true if this view or any of its View ancestors is focused.
-   *
-   * Unlike the Focused bit in GetState(), this method walks up the scene
-   * hierarchy and returns true if any ancestor View carries ViewState::FOCUSED.
-   *
-   * @return True if the view itself or at least one ancestor is focused
-   */
-  bool IsEffectivelyFocused() const;
+  // Manually implemented animatable entries (no setter to bind to; see the
+  // @ANIMATABLE tags on the corner/borderline setters above for the bound form).
+  // @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+  // @ANIMATABLE_MANUAL(BackgroundGradientStartOffset, float)
+  // @ANIMATABLE_MANUAL(ShadowBlurRadius, float)
+  // @ANIMATABLE_MANUAL(ShadowOpacity, float)
+  // @ANIMATABLE_MANUAL(Size, Vector3)
+  // @ANIMATABLE_MANUAL(SizeWidth, float)
+  // @ANIMATABLE_MANUAL(SizeHeight, float)
+  // @ANIMATABLE_MANUAL(Position, Vector3)
+  // @ANIMATABLE_MANUAL(PositionX, float)
+  // @ANIMATABLE_MANUAL(PositionY, float)
+  // @ANIMATABLE_MANUAL(Scale, Vector3)
+  // @ANIMATABLE_MANUAL(ScaleX, float)
+  // @ANIMATABLE_MANUAL(ScaleY, float)
+  // @ANIMATABLE_MANUAL(ColorMultiplier, Vector4)
+  // @ANIMATABLE_MANUAL(Color, Vector4)
+  // @ANIMATABLE_MANUAL(Opacity, float)
 
   DALI_UI_VIEW_WITH(View)
-
-  /**
-   * @brief Attaches the interaction trait to this View and returns it.
-   *
-   * If this View already has an InteractiveTrait, the existing trait is reused.
-   *
-   * @return InteractiveTrait handle
-   */
-  InteractiveTrait AsInteractive();
-
-  /**
-   * @brief Attaches the selectable trait to this View.
-   *
-   * Selectable implies Interactive. Calling this method also enables this View's
-   * interactive behavior, including click handling, pressed state handling, and
-   * the default StateEffect for interactive Views when no explicit StateEffect
-   * has been assigned.
-   *
-   * A View can have at most one selectable trait. If the View already has a
-   * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused.
-   *
-   * @return SelectableTrait handle
-   */
-  SelectableTrait AsSelectable();
-
-  /**
-   * @brief Attaches the group-selectable trait to this View.
-   *
-   * GroupSelectable implies Selectable implies Interactive. Calling this method
-   * also enables this View's selectable behavior (a boolean selected state and
-   * SelectionChangedSignal) and its interactive behavior (click handling, pressed
-   * state, the default StateEffect for interactive Views).
-   *
-   * A View can have at most one group-selectable trait. If the View already has a
-   * GroupSelectableTrait, the existing trait is reused. Membership in a SelectionGroup
-   * is declarative: an on-scene View with no group name auto-joins its parent View's
-   * group, or GroupSelectableTrait::SetGroupName(name) joins a named group.
-   *
-   * @return GroupSelectableTrait handle
-   */
-  GroupSelectableTrait AsGroupSelectable();
 
   /**
    * @brief Sets layout parameters on this View.
@@ -1241,24 +1434,17 @@ public:
   void SetLayoutParams(const StackLayoutParams& params);
 
   /**
-   * @brief Adds a list of visuals to this View in a declarative way.
-   * This method allows for append visuals construction by passing
-   * a brace-enclosed initializer list of VisualBase objects.
+   * @brief Copies the attached layout parameters into @p params.
    *
-   * Assert if too many visuals are added, or duplicated VisualBase added.
-   * Please use AddVisual() API if you need to control error cases.
-   *
-   * @param[in] depthLayer The layer to add the visual to.
-   * @param[in] visuals The initializer list containing VisualBase handles to be added.
+   * @param[out] params Receives an independent copy of the attached parameters;
+   *                    left unchanged if none of the requested type are attached
+   * @return true if parameters of the requested type are attached; otherwise
+   *         false, leaving @p params unchanged
    */
-  void AddVisuals(Dali::Ui::Visual::DepthLayer depthLayer, std::initializer_list<Dali::Ui::VisualBase> visuals)
-  {
-    for(const auto& visual : visuals)
-    {
-      bool added = AddVisual(visual, depthLayer);
-      DALI_ASSERT_ALWAYS(added && "Too many visuals are added by declarative method, or try to add duplicated VisualBase!");
-    }
-  }
+  bool TryGetLayoutParams(AbsoluteLayoutParams& params) const;
+  bool TryGetLayoutParams(FlexLayoutParams& params) const;
+  bool TryGetLayoutParams(GridLayoutParams& params) const;
+  bool TryGetLayoutParams(StackLayoutParams& params) const;
 
   /**
    * @brief Sets an attachment from uniquely owned data.
@@ -1286,6 +1472,14 @@ public:
     DALI_ASSERT_ALWAYS(data && "SetAttachment requires non-null data");
     View::SetAttachment(id, UniqueAny(Dali::Move(data)));
   }
+
+  /**
+   * @brief Sets an attachment internally.
+   *
+   * @param[in] id The key to identify the attachment
+   * @param[in] attachment The attachment whose ownership is transferred to this View
+   */
+  void SetAttachment(AttachmentId id, UniqueAny attachment);
 
   /**
    * @brief Removes an attachment.
@@ -1568,23 +1762,7 @@ public:
    */
   void LowerBelow(View target, LayoutOrderPolicy policy);
 
-  /**
-   * @brief Copies the attached layout parameters into @p params.
-   *
-   * @param[out] params Receives an independent copy of the attached parameters;
-   *                    left unchanged if none of the requested type are attached
-   * @return true if parameters of the requested type are attached; otherwise
-   *         false, leaving @p params unchanged
-   */
-  bool TryGetLayoutParams(AbsoluteLayoutParams& params) const;
-  bool TryGetLayoutParams(FlexLayoutParams& params) const;
-  bool TryGetLayoutParams(GridLayoutParams& params) const;
-  bool TryGetLayoutParams(StackLayoutParams& params) const;
-
-public: // State API (non-chaining)
-  using StateChangedSignalType   = Signal<void(View, StateEvent)>;
-  using LayoutFinishedSignalType = Signal<void(View, LayoutRect)>;
-
+public: // State API
   /**
    * @brief Gets the current state of this View.
    *
@@ -1593,103 +1771,99 @@ public: // State API (non-chaining)
   const ViewState& GetState() const;
 
   /**
-   * @brief Returns the state changed signal.
+   * @brief Returns true if this view or any of its View ancestors is focused.
    *
-   * Emitted whenever the view's ViewState changes.
+   * Unlike the Focused bit in GetState(), this method walks up the scene
+   * hierarchy and returns true if any ancestor View carries ViewState::FOCUSED.
    *
-   * @code
-   * view.StateChangedSignal().Connect(tracker, [](View v, StateEvent e) {
-   *   if(e.Added(ViewState::FOCUSED)) { ... }
-   * });
-   * @endcode
-   *
-   * @return The StateChangedSignal
+   * @return True if the view itself or at least one ancestor is focused
    */
-  StateChangedSignalType& StateChangedSignal();
+  bool IsEffectivelyFocused() const;
 
   /**
-   * @brief Emitted after a layout pass that arranged this View completes.
+   * @brief Query if all resources required by a View are loaded and ready.
    *
-   * A layout pass is one LayoutController batch of Measure and Arrange for this View's
-   * window. Every pass that arranged this View -- including one that served its arrange
-   * cache -- notifies it at the pass's delivery point: the post-process phase that follows
-   * DALi core size negotiation (Relayout), before the window's
-   * LayoutController::LayoutFinishedSignal. This holds even when another layout root of the
-   * same pass throws afterwards. Further layout work may still be pending at that point;
-   * pending work never suppresses or defers this notification, so it does not mean that
-   * the window's layout has settled. Passes completed up to the end of an automatic
-   * pre-process phase are delivered by the post-process phase of the same ProcessEvents
-   * cycle. A pass run by a manual LayoutController::ProcessLayouts() is delivered after the
-   * next automatic pre-process phase, never inside that call. A call made after the
-   * automatic pre-process phase of the current cycle -- from a LayoutFinishedSignal slot or
-   * from another window's post-process callback -- requests no ProcessEvents cycle of its
-   * own: its pass is delivered by the next independently triggered cycle (input, a timer,
-   * an animation or any other wake), which on a quiescent application may be indefinitely
-   * later. When prompt delivery is required, invalidate layout at event time, which
-   * requests a cycle, or call LayoutController::ProcessLayouts() from an input event
-   * handler, whose cycle then delivers the pass.
-   *
-   * The callback receives this View and its arranged target as a LayoutRect in
-   * PARENT-relative, visual (scale-applied) units. Under RIGHT_TO_LEFT the x is
-   * the mirrored (final) position. The bounds are the PRE-transition target,
-   * snapshotted after the arrange, not intermediate animated values.
-   *
-   * One delivery notifies this View at most ONCE, however many passes it covers, with the
-   * bounds of the most recent of them. The payload is the result of the delivered pass:
-   * when layout ran again in the meantime -- for example a slot called
-   * LayoutController::ProcessLayouts() during this delivery -- the payload can differ from
-   * the live Actor properties, and the newer result is delivered by the next delivery.
-   *
-   * Recurs: the signal fires again for every later pass that re-arranges this View. A View
-   * is recorded only while it has a connection when it is arranged, and a slot is called
-   * only if it is still connected at delivery, so connecting after a pass does not replay
-   * that pass. A View that is destroyed or leaves the scene before the delivery is not
-   * notified for the earlier passes.
-   *
-   * A slot may NOT invalidate layout. The emit runs inside the layout processing
-   * window, so a direct InvalidateMeasure() / InvalidateArrange() call is a contract
-   * violation and is logged once for that View. The invalidation is nevertheless
-   * retained in full: affected caches and ancestors are invalidated and the layout root
-   * remains pending. It is PARKED rather than allowed to request an idle ProcessEvents
-   * wake, which prevents a pass->emit->invalidate loop from keeping the main loop awake.
-   * Parked work does not withdraw the notification being delivered or the rest of the
-   * delivery; it is processed by a later pass when an independently triggered
-   * ProcessEvents, an explicit LayoutController::ProcessLayouts(), or an out-of-processing
-   * request drains it, and that pass notifies again. Property changes and tree mutations
-   * from a slot (Add / Remove) follow the same scheduling rule; framework-internal routing
-   * is not an exemption. Defer layout-affecting work to event time when a prompt follow-up
-   * is required.
-   *
-   * @warning This signal fires whenever the View is (re-)arranged in a completed pass,
-   * INCLUDING when its bounds did NOT change (e.g. it was re-arranged only because a
-   * sibling or ancestor changed) -- do NOT assume "signal fired" means "this View's
-   * geometry changed". Guard any layout-affecting work in the slot behind a real
-   * condition, e.g. compare @p bounds against a value you cached from the previous emit
-   * and act only on an actual change, or use a one-shot flag.
-   *
-   * @note Fires only for a View whose own Arrange() runs during the pass. All
-   * built-in LayoutManagers and the default arrange route through child.Arrange().
-   * A custom parent ArrangeCallback that positions a non-standalone child by
-   * writing Actor properties directly, without calling that child's Arrange(),
-   * will NOT fire the child's signal. A direct manual View::Arrange() creates no
-   * controller pass and does not emit this signal. The framework fits a View's registered
-   * fitting-mode visuals (an SVG image, for example) to the arranged size when this signal
-   * is delivered, so such a manual Arrange() does not trigger that framework-driven
-   * fitting. A View type that fits its own content in OnArrange() (LottieAnimationView,
-   * for example) still does so when a manual Arrange() runs its OnArrange(); an
-   * arrange-cache hit replays the cached result without calling OnArrange().
-   *
-   * @return The layout-finished signal
+   * Most resources are only loaded when the View is placed on stage.
+   * @return true if the resources are loaded and ready, false otherwise
    */
-  LayoutFinishedSignalType& LayoutFinishedSignal();
+  bool IsResourceReady() const;
 
-public: // Trait accessors (non-chaining)
+  /**
+   * @brief Sets a StateEffect on this View.
+   *
+   * The effect receives this View's state changes. If this View receives an
+   * interactive trait, for example through AsInteractive() or during
+   * InteractiveView initialization, this explicitly assigned effect takes
+   * priority over the UiConfig default for interactive Views.
+   *
+   * The effect handle is stored as-is and may be shared with other Views. This
+   * method does not clone or snapshot the effect. If an effect type exposes
+   * mutable APIs, modifying the effect after assigning it may affect this View
+   * and any other Views sharing the same effect object.
+   *
+   * StateEffect implementations should keep per-View runtime state outside the
+   * effect object.
+   *
+   * Pass StateEffect::None() to explicitly disable state effects for this View.
+   *
+   * @param[in] effect A StateEffect, or StateEffect::None() to disable state effects
+   */
+  void SetStateEffect(StateEffect effect);
+
+  /**
+   * @brief Sets the target used by state effects.
+   *
+   * The target must be this View or one of its descendants. StateEffect
+   * implementations may use this target instead of the owner View when applying
+   * effects for state changes.
+   *
+   * Pass an empty View to clear the target. If no target is set, the owner View
+   * is used.
+   *
+   * @param[in] target The state effect target View, or an empty View to clear
+   */
+  void SetStateEffectTarget(View target);
+
+  /**
+   * @brief Gets the target used by state effects.
+   *
+   * If no target has been set, this View is returned.
+   *
+   * @return The state effect target View
+   */
+  View GetStateEffectTarget() const;
+
+public: // Traits (attach & query)
+  /**
+   * @brief Attaches the interaction trait to this View and returns it.
+   *
+   * If this View already has an InteractiveTrait, the existing trait is reused.
+   *
+   * @return InteractiveTrait handle
+   */
+  InteractiveTrait AsInteractive();
+
   /**
    * @brief Returns whether this View has an interaction trait attached.
    *
    * @return True if this View has an InteractiveTrait
    */
   bool IsInteractive() const;
+
+  /**
+   * @brief Attaches the selectable trait to this View.
+   *
+   * Selectable implies Interactive. Calling this method also enables this View's
+   * interactive behavior, including click handling, pressed state handling, and
+   * the default StateEffect for interactive Views when no explicit StateEffect
+   * has been assigned.
+   *
+   * A View can have at most one selectable trait. If the View already has a
+   * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused.
+   *
+   * @return SelectableTrait handle
+   */
+  SelectableTrait AsSelectable();
 
   /**
    * @brief Returns whether this View has a selectable trait attached.
@@ -1699,13 +1873,30 @@ public: // Trait accessors (non-chaining)
   bool IsSelectable() const;
 
   /**
+   * @brief Attaches the group-selectable trait to this View.
+   *
+   * GroupSelectable implies Selectable implies Interactive. Calling this method
+   * also enables this View's selectable behavior (a boolean selected state and
+   * SelectionChangedSignal) and its interactive behavior (click handling, pressed
+   * state, the default StateEffect for interactive Views).
+   *
+   * A View can have at most one group-selectable trait. If the View already has a
+   * GroupSelectableTrait, the existing trait is reused. Membership in a SelectionGroup
+   * is declarative: an on-scene View with no group name auto-joins its parent View's
+   * group, or GroupSelectableTrait::SetGroupName(name) joins a named group.
+   *
+   * @return GroupSelectableTrait handle
+   */
+  GroupSelectableTrait AsGroupSelectable();
+
+  /**
    * @brief Returns whether this View has a group-selectable trait attached.
    *
    * @return True if this View has a GroupSelectableTrait
    */
   bool IsGroupSelectable() const;
 
-public: // VisualBase (non-chaining)
+public: // VisualBase
   /**
    * @brief Add a Dali::Ui::VisualBase to the view.
    *
@@ -1722,6 +1913,26 @@ public: // VisualBase (non-chaining)
    * @return True if the visual was added successfully, false otherwise.
    */
   bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer);
+
+  /**
+   * @brief Adds a list of visuals to this View in a declarative way.
+   * This method allows for append visuals construction by passing
+   * a brace-enclosed initializer list of VisualBase objects.
+   *
+   * Assert if too many visuals are added, or duplicated VisualBase added.
+   * Please use AddVisual() API if you need to control error cases.
+   *
+   * @param[in] depthLayer The layer to add the visual to.
+   * @param[in] visuals The initializer list containing VisualBase handles to be added.
+   */
+  void AddVisuals(Dali::Ui::Visual::DepthLayer depthLayer, std::initializer_list<Dali::Ui::VisualBase> visuals)
+  {
+    for(const auto& visual : visuals)
+    {
+      bool added = AddVisual(visual, depthLayer);
+      DALI_ASSERT_ALWAYS(added && "Too many visuals are added by declarative method, or try to add duplicated VisualBase!");
+    }
+  }
 
   /**
    * @brief Remove a Dali::Ui::VisualBase from the view.
@@ -1750,287 +1961,73 @@ public: // VisualBase (non-chaining)
    */
   Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const;
 
-public: // Not intended for application developers
-  /// @cond internal
+public: // Animation
   /**
-   * @brief Creates a handle using the Internal implementation.
+   * @brief Creates a ViewAnimationBridge for this View.
    *
-   * @param[in] implementation The View implementation
-   */
-  explicit View(ViewImpl& implementation);
-
-  /**
-   * @brief Allows the creation of this View from an Internal::CustomActor pointer.
+   * Returns a lightweight, stack-allocated proxy that applies animations
+   * directly to the given Animation for this View.
    *
-   * @param[in] internal A pointer to the internal CustomActor
-   */
-  explicit View(Dali::Internal::CustomActor* internal);
-  /// @endcond
-
-public:
-  /**
-   * @brief Enumeration for the offscreen rendering refresh rate.
-   */
-  enum class OffscreenRefreshRate
-  {
-    REFRESH_ONCE   = 1,
-    REFRESH_ALWAYS = 2
-  };
-
-  /**
-   * @brief Enumeration for the start and end property ranges for this control.
-   */
-  enum PropertyRange
-  {
-    PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_START_INDEX,
-    PROPERTY_END_INDEX   = Ui::VIEW_PROPERTY_END_INDEX,
-
-    ANIMATABLE_PROPERTY_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_START_INDEX,
-    ANIMATABLE_PROPERTY_END_INDEX   = Ui::VIEW_ANIMATABLE_PROPERTY_END_INDEX,
-
-    ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
-    ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX   = Ui::VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX,
-  };
-
-  /**
-   * @brief Enumeration for the instance of properties belonging to the View class.
-   */
-  struct Property
-  {
-    /**
-     * @brief Enumeration for the instance of properties belonging to the View class.
-     */
-    enum
-    {
-      /**
-       * @brief The outer space around the View.
-       * @details Name "margin", type Property::VECTOR4, ordered as start, end, top, bottom.
-       * @note Margin property is to be supported by Layout algorithms and containers in future.
-       */
-      MARGIN = PROPERTY_START_INDEX,
-
-      /**
-       * @brief The inner space of the View.
-       * @details Name "padding", type Property::VECTOR4, ordered as start, end, top, bottom.
-       */
-      PADDING,
-
-      /**
-       * @brief The ID of the left focusable View.
-       * @details Name "leftFocusableViewId", type Property::INTEGER.
-       */
-      LEFT_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief The ID of the right focusable View.
-       * @details Name "rightFocusableViewId", type Property::INTEGER.
-       */
-      RIGHT_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief The ID of the up focusable View.
-       * @details Name "upFocusableViewId", type Property::INTEGER.
-       */
-      UP_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief The ID of the down focusable View.
-       * @details Name "downFocusableViewId", type Property::INTEGER.
-       */
-      DOWN_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief Whether a View and its descendants can emit key signals.
-       * @details Name "dispatchKeyEvents", type Property::BOOLEAN
-       * @note If a View's dispatchKeyEvents is set to false, then it's children will not emit a key event signal
-       * either.
-       */
-      DISPATCH_KEY_EVENTS,
-
-      /**
-       * @brief The ID of the clockwise focusable View.
-       * @details Name "clockwiseFocusableViewId", type Property::INTEGER.
-       */
-      CLOCKWISE_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief The ID of the counter-clockwise focusable View.
-       * @details Name "counterClockwiseFocusableViewId", type Property::INTEGER.
-       */
-      COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief The width requested by the View for measurement.
-       * @details Name "requestedWidth", type Property::FLOAT.
-       * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
-       */
-      REQUESTED_WIDTH,
-
-      /**
-       * @brief The height requested by the View for measurement.
-       * @details Name "requestedHeight", type Property::FLOAT.
-       * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
-       */
-      REQUESTED_HEIGHT,
-
-      /**
-       * @brief The minimum width applied during measurement.
-       * @details Name "minimumWidth", type Property::FLOAT.
-       */
-      MINIMUM_WIDTH,
-
-      /**
-       * @brief The minimum height applied during measurement.
-       * @details Name "minimumHeight", type Property::FLOAT.
-       */
-      MINIMUM_HEIGHT,
-
-      /**
-       * @brief The maximum width applied during measurement.
-       * @details Name "maximumWidth", type Property::FLOAT.
-       * @note max-wins: if the minimum exceeds the maximum, the MAXIMUM wins
-       * (measurement floors to the minimum then ceils to the maximum).
-       * See SetMaximumWidth().
-       */
-      MAXIMUM_WIDTH,
-
-      /**
-       * @brief The maximum height applied during measurement.
-       * @details Name "maximumHeight", type Property::FLOAT.
-       */
-      MAXIMUM_HEIGHT,
-
-      /**
-       * @brief The layout mode that controls how the View participates in its parent's layout.
-       * @details Name "layoutMode", type Property::INTEGER (Ui::LayoutMode enum).
-       */
-      LAYOUT_MODE,
-
-      /**
-       * @brief Whether the View acts as a focus group boundary.
-       * @details Name "focusGroup", type Property::BOOLEAN.
-       */
-      FOCUS_GROUP,
-
-      /**
-       * @brief The ID of the forward focusable View (used for Tab key navigation).
-       * @details Name "forwardFocusableViewId", type Property::INTEGER.
-       */
-      FORWARD_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief The ID of the backward focusable View (used for Shift+Tab key navigation).
-       * @details Name "backwardFocusableViewId", type Property::INTEGER.
-       */
-      BACKWARD_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief The radius for the rounded corners of the View.
-       * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
-       * @note By default, it is Vector::ZERO.
-       * @note Applies to specific visuals inside the View.
-       * @note Only Property::Vector4 can be animated.
-       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
-       */
-      CORNER_RADIUS = ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
-
-      /**
-       * @brief Whether the corner radius value is relative (percentage [0.0f to 0.5f] of the visual size) or absolute
-       * (in world units).
-       * @details Name "viewCornerRadiusPolicy", type Property::INTEGER.
-       * @see Policy::Type
-       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
-       */
-      CORNER_RADIUS_POLICY,
-
-      /**
-       * @brief The squareness for the rounded corners of the View.
-       * @details Name "viewCornerSquareness", type Property::VECTOR4 or Property::FLOAT
-       * @note By default, it is Vector::ZERO.
-       * @note Applies to specific visuals inside the View.
-       * @note Only Property::Vector4 can be animated.
-       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
-       */
-      CORNER_SQUARENESS,
-
-      /**
-       * @brief The width for the borderline of the View. It will update borderline visual
-       * @details Name "viewBorderlineWidth", type Property::FLOAT.
-       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
-       */
-      BORDERLINE_WIDTH,
-
-      /**
-       * @brief The color for the borderline of the View. It will update borderline visual
-       * @details Name "viewBorderlineColor", type Property::VECTOR4
-       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
-       */
-      BORDERLINE_COLOR,
-
-      /**
-       * @brief The offset for the borderline of the View. It will update borderline visual
-       * @details Name "viewBorderlineOffset", type Property::FLOAT.
-       * @note It will not create UniformMap internally. So this property don't be used at Render phase.
-       */
-      BORDERLINE_OFFSET,
-
-    };
-  };
-
-  /// @brief Key Event signal type.
-  typedef Signal<bool(View, KeyEvent)> KeyEventSignalType;
-
-  /// @brief Focus changed signal type.
-  typedef Signal<void(View, bool)> FocusChangedSignalType;
-
-  /// @brief ResourceReady signal type.
-  typedef Signal<void(View)> ResourceReadySignalType;
-
-  /// @brief Offscreen rendering finished signal type.
-  using OffscreenRenderingFinishedSignalType = Signal<void(View)>;
-
-  /// @brief Accessibility reading lifecycle signal type.
-  using AccessibilityReadingStatusChangedSignalType = Signal<void(View, Accessibility::ReadingStatus)>;
-
-  /// @brief Accessibility highlight state signal type.
-  using AccessibilityHighlightedSignalType = Signal<void(View, bool)>;
-
-  /// @brief Visual Event signal type.
-  typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
-
-  /**
-   * @brief Clears the background.
-   */
-  void ClearBackground();
-
-  /**
-   * @brief Sets RenderEffect to this View.
+   * @code
+   *   auto anim = Animation::New();
+   *   view.Animate(anim).Opacity(0.5f, 300_ms);
+   *   anim.Play();
+   * @endcode
    *
-   * @param[in] effect RenderEffect to add.
+   * @param[in] animation The Animation to apply to
+   * @return A ViewAnimationBridge
+   */
+  ViewAnimationBridge Animate(Animation animation);
+
+  /**
+   * @brief Creates a new ViewAnimationSpec.
    *
-   * @note Every effect inherits RenderEffect.
-   */
-  void SetRenderEffect(Ui::RenderEffect effect);
-
-  /**
-   * @brief Retrieves View's render effect
-   * @return RenderEffect set on this View
-   */
-  Ui::RenderEffect GetRenderEffect() const;
-
-  /**
-   * @brief Clears RenderEffect of this View, if exists.
-   */
-  void ClearRenderEffect();
-
-  /**
-   * @brief Query if all resources required by a View are loaded and ready.
+   * @code
+   *   auto spec = View::NewAnimationSpec()
+   *     .Opacity(1.0f, 300_ms);
+   *   spec.ApplyTo(anim, view);
+   * @endcode
    *
-   * Most resources are only loaded when the View is placed on stage.
-   * @return true if the resources are loaded and ready, false otherwise
+   * @return A new ViewAnimationSpec
    */
-  bool IsResourceReady() const;
+  static ViewAnimationSpec NewAnimationSpec();
 
+public: // Offscreen rendering
+  /**
+   * @brief Enables or disables offscreen rendering for this View.
+   *
+   * Enabling uses the refresh rate set by SetOffscreenRenderingRefreshRate().
+   * Disabling preserves the refresh rate for the next time offscreen rendering is enabled.
+   *
+   * @param[in] enabled True to enable offscreen rendering, false to disable it
+   */
+  void SetOffscreenRenderingEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether offscreen rendering is enabled for this View.
+   *
+   * @return True if offscreen rendering is enabled, false otherwise
+   */
+  bool IsOffscreenRenderingEnabled() const;
+
+  /**
+   * @brief Sets the offscreen rendering refresh rate for this View.
+   *
+   * Setting the refresh rate does not enable offscreen rendering.
+   * The default refresh rate is REFRESH_ALWAYS.
+   *
+   * @param[in] refreshRate The offscreen rendering refresh rate
+   */
+  void SetOffscreenRenderingRefreshRate(OffscreenRefreshRate refreshRate);
+
+  /**
+   * @brief Gets the offscreen rendering refresh rate for this View.
+   *
+   * @return The current offscreen rendering refresh rate
+   */
+  OffscreenRefreshRate GetOffscreenRenderingRefreshRate() const;
+
+public: // Accessibility
   /**
    * @brief Sets the explicit accessibility name.
    *
@@ -2373,7 +2370,6 @@ public:
   /**
    * @brief Adds the given accessibility state to this View.
    *
-   * @SINCE_2_5.30
    * @param[in] state The accessibility state to enable
    * @see Dali::Ui::Accessibility::State
    */
@@ -2382,7 +2378,6 @@ public:
   /**
    * @brief Removes the given accessibility state from this View.
    *
-   * @SINCE_2_5.30
    * @param[in] state The accessibility state to disable
    * @see Dali::Ui::Accessibility::State
    */
@@ -2391,7 +2386,6 @@ public:
   /**
    * @brief Clears all accessibility states from this View.
    *
-   * @SINCE_2_5.30
    */
   void ClearAccessibilityStates();
 
@@ -2406,7 +2400,6 @@ public:
    * recommended so that assistive technologies can correctly identify the
    * relationship.
    *
-   * @SINCE_2_5.34
    * @param[in] descendant The active descendant View, which should be a child
    *                       of this View. An empty handle is allowed and clears
    *                       the current active descendant.
@@ -2416,27 +2409,138 @@ public:
   /**
    * @brief Returns whether the given accessibility state is set on this View.
    *
-   * @SINCE_2_5.30
    * @param[in] state The accessibility state to query
    * @return True if the state is set
    * @see Dali::Ui::Accessibility::State
    */
   bool HasAccessibilityState(Accessibility::State state) const;
 
+public: // Signals
+  using StateChangedSignalType = Signal<void(View, StateEvent)>;
   /**
-   * @brief Returns the signal emitted when this View's reading lifecycle changes.
+   * @brief Returns the state changed signal.
    *
-   * @return The accessibility reading status changed signal
+   * Emitted whenever the view's ViewState changes.
+   *
+   * @code
+   * view.StateChangedSignal().Connect(tracker, [](View v, StateEvent e) {
+   *   if(e.Added(ViewState::FOCUSED)) { ... }
+   * });
+   * @endcode
+   *
+   * @return The StateChangedSignal
    */
-  AccessibilityReadingStatusChangedSignalType& AccessibilityReadingStatusChangedSignal();
+  StateChangedSignalType& StateChangedSignal();
 
+  using LayoutFinishedSignalType = Signal<void(View, LayoutRect)>;
   /**
-   * @brief Returns the signal emitted when accessibility highlight changes.
+   * @brief Emitted after a layout pass that arranged this View completes.
    *
-   * @return The accessibility highlighted signal
+   * A layout pass is one LayoutController batch of Measure and Arrange for this View's
+   * window. Every pass that arranged this View -- including one that served its arrange
+   * cache -- notifies it at the pass's delivery point: the post-process phase that follows
+   * DALi core size negotiation (Relayout), before the window's
+   * LayoutController::LayoutFinishedSignal. This holds even when another layout root of the
+   * same pass throws afterwards. Further layout work may still be pending at that point;
+   * pending work never suppresses or defers this notification, so it does not mean that
+   * the window's layout has settled. Passes completed up to the end of an automatic
+   * pre-process phase are delivered by the post-process phase of the same ProcessEvents
+   * cycle. A pass run by a manual LayoutController::ProcessLayouts() is delivered after the
+   * next automatic pre-process phase, never inside that call. A call made after the
+   * automatic pre-process phase of the current cycle -- from a LayoutFinishedSignal slot or
+   * from another window's post-process callback -- requests no ProcessEvents cycle of its
+   * own: its pass is delivered by the next independently triggered cycle (input, a timer,
+   * an animation or any other wake), which on a quiescent application may be indefinitely
+   * later. When prompt delivery is required, invalidate layout at event time, which
+   * requests a cycle, or call LayoutController::ProcessLayouts() from an input event
+   * handler, whose cycle then delivers the pass.
+   *
+   * The callback receives this View and its arranged target as a LayoutRect in
+   * PARENT-relative, visual (scale-applied) units. Under RIGHT_TO_LEFT the x is
+   * the mirrored (final) position. The bounds are the PRE-transition target,
+   * snapshotted after the arrange, not intermediate animated values.
+   *
+   * One delivery notifies this View at most ONCE, however many passes it covers, with the
+   * bounds of the most recent of them. The payload is the result of the delivered pass:
+   * when layout ran again in the meantime -- for example a slot called
+   * LayoutController::ProcessLayouts() during this delivery -- the payload can differ from
+   * the live Actor properties, and the newer result is delivered by the next delivery.
+   *
+   * Recurs: the signal fires again for every later pass that re-arranges this View. A View
+   * is recorded only while it has a connection when it is arranged, and a slot is called
+   * only if it is still connected at delivery, so connecting after a pass does not replay
+   * that pass. A View that is destroyed or leaves the scene before the delivery is not
+   * notified for the earlier passes.
+   *
+   * A slot may NOT invalidate layout. The emit runs inside the layout processing
+   * window, so a direct InvalidateMeasure() / InvalidateArrange() call is a contract
+   * violation and is logged once for that View. The invalidation is nevertheless
+   * retained in full: affected caches and ancestors are invalidated and the layout root
+   * remains pending. It is PARKED rather than allowed to request an idle ProcessEvents
+   * wake, which prevents a pass->emit->invalidate loop from keeping the main loop awake.
+   * Parked work does not withdraw the notification being delivered or the rest of the
+   * delivery; it is processed by a later pass when an independently triggered
+   * ProcessEvents, an explicit LayoutController::ProcessLayouts(), or an out-of-processing
+   * request drains it, and that pass notifies again. Property changes and tree mutations
+   * from a slot (Add / Remove) follow the same scheduling rule; framework-internal routing
+   * is not an exemption. Defer layout-affecting work to event time when a prompt follow-up
+   * is required.
+   *
+   * @warning This signal fires whenever the View is (re-)arranged in a completed pass,
+   * INCLUDING when its bounds did NOT change (e.g. it was re-arranged only because a
+   * sibling or ancestor changed) -- do NOT assume "signal fired" means "this View's
+   * geometry changed". Guard any layout-affecting work in the slot behind a real
+   * condition, e.g. compare @p bounds against a value you cached from the previous emit
+   * and act only on an actual change, or use a one-shot flag.
+   *
+   * @note Fires only for a View whose own Arrange() runs during the pass. All
+   * built-in LayoutManagers and the default arrange route through child.Arrange().
+   * A custom parent ArrangeCallback that positions a non-standalone child by
+   * writing Actor properties directly, without calling that child's Arrange(),
+   * will NOT fire the child's signal. A direct manual View::Arrange() creates no
+   * controller pass and does not emit this signal. The framework fits a View's registered
+   * fitting-mode visuals (an SVG image, for example) to the arranged size when this signal
+   * is delivered, so such a manual Arrange() does not trigger that framework-driven
+   * fitting. A View type that fits its own content in OnArrange() (LottieAnimationView,
+   * for example) still does so when a manual Arrange() runs its OnArrange(); an
+   * arrange-cache hit replays the cached result without calling OnArrange().
+   *
+   * @return The layout-finished signal
    */
-  AccessibilityHighlightedSignalType& AccessibilityHighlightedSignal();
+  LayoutFinishedSignalType& LayoutFinishedSignal();
 
+  /// @brief Key Event signal type.
+  typedef Signal<bool(View, KeyEvent)> KeyEventSignalType;
+  /**
+   * @brief This signal is emitted when key event is received.
+   *
+   * A callback of the following type may be connected:
+   * @code
+   *   bool YourCallbackName(View view, KeyEvent event);
+   * @endcode
+   * The return value of True, indicates that the event should be consumed.
+   * Otherwise the signal will be emitted on the next parent of the actor.
+   * @return The signal to connect to
+   * @pre The View has been initialized.
+   */
+  KeyEventSignalType& KeyEventSignal();
+
+  /// @brief Focus changed signal type.
+  typedef Signal<void(View, bool)> FocusChangedSignalType;
+  /**
+   * @brief This signal is emitted when the view gets or loses focus.
+   *
+   * A callback of the following type may be connected:
+   * @code
+   *   bool YourCallbackName(View view, bool focused);
+   * @endcode
+   * @return The signal to connect to
+   * @pre The View has been initialized.
+   */
+  FocusChangedSignalType& FocusChangedSignal();
+
+  /// @brief ResourceReady signal type.
+  typedef Signal<void(View)> ResourceReadySignalType;
   /**
    * @brief This signal is emitted after all resources required by a View are loaded and ready.
    *
@@ -2469,160 +2573,8 @@ public:
    */
   ResourceReadySignalType& ResourceReadySignal();
 
-  /**
-   * @brief This signal is emitted when key event is received.
-   *
-   * A callback of the following type may be connected:
-   * @code
-   *   bool YourCallbackName(View view, KeyEvent event);
-   * @endcode
-   * The return value of True, indicates that the event should be consumed.
-   * Otherwise the signal will be emitted on the next parent of the actor.
-   * @return The signal to connect to
-   * @pre The View has been initialized.
-   */
-  KeyEventSignalType& KeyEventSignal();
-
-  /**
-   * @brief This signal is emitted when the view gets or loses focus.
-   *
-   * A callback of the following type may be connected:
-   * @code
-   *   bool YourCallbackName(View view, bool focused);
-   * @endcode
-   * @return The signal to connect to
-   * @pre The View has been initialized.
-   */
-  FocusChangedSignalType& FocusChangedSignal();
-
-public: // Animation
-  /**
-   * @brief Creates a ViewAnimationBridge for this View.
-   *
-   * Returns a lightweight, stack-allocated proxy that applies animations
-   * directly to the given Animation for this View.
-   *
-   * @code
-   *   auto anim = Animation::New();
-   *   view.Animate(anim).Opacity(0.5f, 300_ms);
-   *   anim.Play();
-   * @endcode
-   *
-   * @param[in] animation The Animation to apply to
-   * @return A ViewAnimationBridge
-   */
-  ViewAnimationBridge Animate(Animation animation);
-
-  /**
-   * @brief Creates a new ViewAnimationSpec.
-   *
-   * @code
-   *   auto spec = View::NewAnimationSpec()
-   *     .Opacity(1.0f, 300_ms);
-   *   spec.ApplyTo(anim, view);
-   * @endcode
-   *
-   * @return A new ViewAnimationSpec
-   */
-  static ViewAnimationSpec NewAnimationSpec();
-
-public:
-  /**
-   * @brief Sets an attachment internally.
-   *
-   * @param[in] id The key to identify the attachment
-   * @param[in] attachment The attachment whose ownership is transferred to this View
-   */
-  void SetAttachment(AttachmentId id, UniqueAny attachment);
-
-  /**
-   * @brief Sets a StateEffect on this View.
-   *
-   * The effect receives this View's state changes. If this View receives an
-   * interactive trait, for example through AsInteractive() or during
-   * InteractiveView initialization, this explicitly assigned effect takes
-   * priority over the UiConfig default for interactive Views.
-   *
-   * The effect handle is stored as-is and may be shared with other Views. This
-   * method does not clone or snapshot the effect. If an effect type exposes
-   * mutable APIs, modifying the effect after assigning it may affect this View
-   * and any other Views sharing the same effect object.
-   *
-   * StateEffect implementations should keep per-View runtime state outside the
-   * effect object.
-   *
-   * Pass StateEffect::None() to explicitly disable state effects for this View.
-   *
-   * @param[in] effect A StateEffect, or StateEffect::None() to disable state effects
-   */
-  void SetStateEffect(StateEffect effect);
-
-  /**
-   * @brief Sets the target used by state effects.
-   *
-   * The target must be this View or one of its descendants. StateEffect
-   * implementations may use this target instead of the owner View when applying
-   * effects for state changes.
-   *
-   * Pass an empty View to clear the target. If no target is set, the owner View
-   * is used.
-   *
-   * @param[in] target The state effect target View, or an empty View to clear
-   */
-  void SetStateEffectTarget(View target);
-
-  /**
-   * @brief Gets the target used by state effects.
-   *
-   * If no target has been set, this View is returned.
-   *
-   * @return The state effect target View
-   */
-  View GetStateEffectTarget() const;
-
-  /**
-   * @brief Sets the inner shadow for this View.
-   *
-   * Pass InnerShadow::None() to clear the inner shadow from this View.
-   *
-   * @param[in] innerShadow The inner shadow value to apply
-   */
-  void SetInnerShadow(const InnerShadow& innerShadow);
-
-  /**
-   * @brief Enables or disables offscreen rendering for this View.
-   *
-   * Enabling uses the refresh rate set by SetOffscreenRenderingRefreshRate().
-   * Disabling preserves the refresh rate for the next time offscreen rendering is enabled.
-   *
-   * @param[in] enabled True to enable offscreen rendering, false to disable it
-   */
-  void SetOffscreenRenderingEnabled(bool enabled);
-
-  /**
-   * @brief Returns whether offscreen rendering is enabled for this View.
-   *
-   * @return True if offscreen rendering is enabled, false otherwise
-   */
-  bool IsOffscreenRenderingEnabled() const;
-
-  /**
-   * @brief Sets the offscreen rendering refresh rate for this View.
-   *
-   * Setting the refresh rate does not enable offscreen rendering.
-   * The default refresh rate is REFRESH_ALWAYS.
-   *
-   * @param[in] refreshRate The offscreen rendering refresh rate
-   */
-  void SetOffscreenRenderingRefreshRate(OffscreenRefreshRate refreshRate);
-
-  /**
-   * @brief Gets the offscreen rendering refresh rate for this View.
-   *
-   * @return The current offscreen rendering refresh rate
-   */
-  OffscreenRefreshRate GetOffscreenRenderingRefreshRate() const;
-
+  /// @brief Offscreen rendering finished signal type.
+  using OffscreenRenderingFinishedSignalType = Signal<void(View)>;
   /**
    * @brief This signal is emitted when offscreen rendering is finished.
    *
@@ -2632,6 +2584,44 @@ public:
    * @note This signal is only emitted when OffscreenRefreshRate is set to REFRESH_ONCE.
    */
   OffscreenRenderingFinishedSignalType& OffscreenRenderingFinishedSignal();
+
+  /// @brief Accessibility reading lifecycle signal type.
+  using AccessibilityReadingStatusChangedSignalType = Signal<void(View, Accessibility::ReadingStatus)>;
+  /**
+   * @brief Returns the signal emitted when this View's reading lifecycle changes.
+   *
+   * @return The accessibility reading status changed signal
+   */
+  AccessibilityReadingStatusChangedSignalType& AccessibilityReadingStatusChangedSignal();
+
+  /// @brief Accessibility highlight state signal type.
+  using AccessibilityHighlightedSignalType = Signal<void(View, bool)>;
+  /**
+   * @brief Returns the signal emitted when accessibility highlight changes.
+   *
+   * @return The accessibility highlighted signal
+   */
+  AccessibilityHighlightedSignalType& AccessibilityHighlightedSignal();
+
+  /// @brief Visual Event signal type.
+  typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The View implementation
+   */
+  explicit View(ViewImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this View from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit View(Dali::Internal::CustomActor* internal);
+  /// @endcond
 
 public: // Templates for Deriving Classes
   /**

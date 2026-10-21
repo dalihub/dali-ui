@@ -94,17 +94,43 @@ public:
    */
   enum ViewBehaviour
   {
-    VIEW_BEHAVIOUR_DEFAULT = 0,      ///< Default behaviour: Visuals are enabled but doesn't receive event callbacks.
+    VIEW_BEHAVIOUR_DEFAULT = 0,      ///< Default behaviour: Visuals are enabled.
     DISABLE_VISUALS        = 1 << 0, ///< True if view should not use visuals
 
     LAST_VIEW_BEHAVIOUR_FLAG
   };
 
-public: // Virtual API
+public:
+  // ============================================================
+  // public: ABI-frozen virtual API
+  // WARNING: Do NOT add, reorder, remove, or change signatures.
+  //
+  // The vtable is a single frozen set: the declaration order of every
+  // virtual in this class -- public and protected sections alike --
+  // defines the slot order, and the base class list (order included)
+  // is part of the same frozen ABI.
+  // ============================================================
+
+  // Resource & offscreen-rendering queries
+
   /**
    * @copydoc Dali::Ui::View::IsResourceReady
    */
   virtual bool IsResourceReady() const;
+
+  /**
+   * @brief Retrieves SourceActor of the OffScreenRenderable.
+   * @return SourceActor of the OffScreenRenderable.
+   */
+  virtual Dali::Actor GetOffScreenRenderableSourceActor();
+
+  /**
+   * @brief Retrieves whether the OffScreen RenderTasks is exclusive or not.
+   * @return True if the RenderTask is exclusive.
+   */
+  virtual bool IsOffScreenRenderTaskExclusive();
+
+  // Accessibility hooks
 
   /**
    * @brief Called when accessibility activation is requested for this View.
@@ -194,38 +220,9 @@ public: // Virtual API
    */
   virtual bool OnAccessibilityRequestValue(Dali::String& value);
 
-  /**
-   * @brief Retrieves SourceActor of the OffScreenRenderable.
-   * @return SourceActor of the OffScreenRenderable.
-   */
-  virtual Dali::Actor GetOffScreenRenderableSourceActor();
-
-  /**
-   * @brief Retrieves whether the OffScreen RenderTasks is exclusive or not.
-   * @return True if the RenderTask is exclusive.
-   */
-  virtual bool IsOffScreenRenderTaskExclusive();
-
-  /**
-   * @brief Retrieves the extension for this view.
-   * @return The extension if available, NULL otherwise
-   */
-  virtual Extension* GetViewExtension()
-  {
-    return NULL;
-  }
-
-  /**
-   * @copydoc CustomActorImpl::HasIntrinsicHoverHandling
-   */
-  bool HasIntrinsicHoverHandling() const override;
-
-  /**
-   * @copydoc CustomActorImpl::OnHoverEvent
-   */
-  bool OnHoverEvent(const Dali::HoverEvent& event) override;
-
 public: // Non-virtual API (safe to reorder / extend)
+  // Creation & initialization
+
   /**
    * @brief Creates a new View.
    */
@@ -236,25 +233,114 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void Initialize();
 
-  /**
-   * @copydoc Ui::View::GetState()
-   */
-  const ViewState& GetState() const;
+  // Measure / Arrange API
 
   /**
-   * @copydoc Ui::View::IsEffectivelyFocused()
+   * @copydoc Ui::View::Measure()
    */
-  bool IsEffectivelyFocused() const;
+  MeasuredSize Measure(float widthConstraint, float heightConstraint);
 
   /**
-   * @copydoc Ui::View::StateChangedSignal()
+   * @copydoc Ui::View::Arrange()
    */
-  View::StateChangedSignalType& StateChangedSignal();
+  LayoutRect Arrange(const LayoutRect& bounds);
 
   /**
-   * @copydoc Ui::View::LayoutFinishedSignal()
+   * @copydoc Ui::View::InvalidateMeasure()
    */
-  View::LayoutFinishedSignalType& LayoutFinishedSignal();
+  void InvalidateMeasure();
+
+  /**
+   * @copydoc Ui::View::InvalidateArrange()
+   */
+  void InvalidateArrange();
+
+  /**
+   * @copydoc Ui::View::GetMeasuredSize()
+   */
+  MeasuredSize GetMeasuredSize() const;
+
+  /**
+   * @copydoc Ui::View::SetMeasureCallback()
+   */
+  void SetMeasureCallback(MeasureCallback callback);
+
+  /**
+   * @copydoc Ui::View::SetArrangeCallback(ArrangeCallback)
+   */
+  void SetArrangeCallback(ArrangeCallback callback);
+
+  /**
+   * @copydoc Ui::View::SetArrangeCallback(ArrangeCallback, ArrangePolicy)
+   */
+  void SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy);
+
+  /**
+   * @copydoc Ui::View::SetLayoutTransition()
+   */
+  void SetLayoutTransition(LayoutTransition transition);
+
+  /**
+   * @copydoc Ui::View::GetLayoutTransition()
+   */
+  LayoutTransition GetLayoutTransition() const;
+
+  /**
+   * @copydoc Ui::View::SetSelfLayoutTransition()
+   */
+  void SetSelfLayoutTransition(LayoutTransition transition);
+
+  /**
+   * @copydoc Ui::View::GetSelfLayoutTransition()
+   */
+  LayoutTransition GetSelfLayoutTransition() const;
+
+  /**
+   * @copydoc Ui::View::SetLayoutTransitionMode()
+   */
+  void SetLayoutTransitionMode(LayoutTransitionMode mode);
+
+  /**
+   * @copydoc Ui::View::GetLayoutTransitionMode()
+   */
+  LayoutTransitionMode GetLayoutTransitionMode() const;
+
+  /**
+   * @copydoc Ui::View::AttachLayoutManager()
+   */
+  void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
+
+  /**
+   * @brief Returns the bounds last applied during the layout pass.
+   *
+   * Internal helper used by the layout transition dispatcher to compare
+   * pre/post bounds for the CHANGE slot. Returns a zero rect if the view
+   * has never been arranged.
+   *
+   * @return The most recent arranged bounds
+   */
+  LayoutRect GetArrangedBounds() const;
+
+  // View configuration (scale, size, layout, focus, appearance) & hierarchy
+
+  /**
+   * @brief Sets the UiScale participation policy for this view.
+   * @param[in] policy The UiScalePolicy to apply
+   */
+  void SetUiScalePolicy(UiScalePolicy policy);
+
+  /**
+   * @brief Gets the UiScale participation policy of this view.
+   * @return The current UiScalePolicy
+   */
+  UiScalePolicy GetUiScalePolicy() const;
+
+  /**
+   * @brief Gets the effective scale for this view.
+   * Lazily computed on first call after invalidation; valid after first Measure.
+   * @return The effective scale factor
+   */
+  float GetEffectiveScale() const;
 
   /**
    * @copydoc Ui::View::SetRequestedX()
@@ -262,19 +348,130 @@ public: // Non-virtual API (safe to reorder / extend)
   void SetRequestedX(float x);
 
   /**
-   * @copydoc Ui::View::SetRequestedY()
-   */
-  void SetRequestedY(float y);
-
-  /**
    * @copydoc Ui::View::GetRequestedX()
    */
   float GetRequestedX() const;
 
   /**
+   * @copydoc Ui::View::SetRequestedY()
+   */
+  void SetRequestedY(float y);
+
+  /**
    * @copydoc Ui::View::GetRequestedY()
    */
   float GetRequestedY() const;
+
+  /**
+   * @copydoc Ui::View::SetRequestedWidth()
+   */
+  void SetRequestedWidth(float width);
+
+  /**
+   * @copydoc Ui::View::GetRequestedWidth()
+   */
+  float GetRequestedWidth() const;
+
+  /**
+   * @copydoc Ui::View::SetRequestedHeight()
+   */
+  void SetRequestedHeight(float height);
+
+  /**
+   * @copydoc Ui::View::GetRequestedHeight()
+   */
+  float GetRequestedHeight() const;
+
+  /**
+   * @copydoc Ui::View::SetMinimumWidth()
+   */
+  void SetMinimumWidth(float width);
+
+  /**
+   * @copydoc Ui::View::GetMinimumWidth()
+   */
+  float GetMinimumWidth() const;
+
+  /**
+   * @copydoc Ui::View::SetMinimumHeight()
+   */
+  void SetMinimumHeight(float height);
+
+  /**
+   * @copydoc Ui::View::GetMinimumHeight()
+   */
+  float GetMinimumHeight() const;
+
+  /**
+   * @copydoc Ui::View::SetMaximumWidth()
+   */
+  void SetMaximumWidth(float width);
+
+  /**
+   * @copydoc Ui::View::GetMaximumWidth()
+   */
+  float GetMaximumWidth() const;
+
+  /**
+   * @copydoc Ui::View::SetMaximumHeight()
+   */
+  void SetMaximumHeight(float height);
+
+  /**
+   * @copydoc Ui::View::GetMaximumHeight()
+   */
+  float GetMaximumHeight() const;
+
+  /**
+   * @copydoc Ui::View::SetMargin()
+   */
+  void SetMargin(const Insets& margin);
+
+  /**
+   * @copydoc Ui::View::GetMargin()
+   */
+  Insets GetMargin() const;
+
+  /**
+   * @copydoc Ui::View::SetPadding()
+   */
+  void SetPadding(const Insets& padding);
+
+  /**
+   * @copydoc Ui::View::GetPadding()
+   */
+  Insets GetPadding() const;
+
+  /**
+   * @copydoc Ui::View::SetLayoutMode()
+   */
+  void SetLayoutMode(Ui::LayoutMode mode);
+
+  /**
+   * @copydoc Ui::View::GetLayoutMode()
+   */
+  Ui::LayoutMode GetLayoutMode() const;
+
+  void SetLayoutParams(const AbsoluteLayoutParams& params);
+  void SetLayoutParams(const FlexLayoutParams& params);
+  void SetLayoutParams(const GridLayoutParams& params);
+  void SetLayoutParams(const StackLayoutParams& params);
+
+  bool TryGetLayoutParams(AbsoluteLayoutParams& params) const;
+  bool TryGetLayoutParams(FlexLayoutParams& params) const;
+  bool TryGetLayoutParams(GridLayoutParams& params) const;
+  bool TryGetLayoutParams(StackLayoutParams& params) const;
+
+  /**
+   * @brief Sets a callback for focus navigation within this view's children.
+   *
+   * When set, the callback takes priority over the OnFocusNavigationRequested()
+   * virtual method. The focus manager calls RequestFocusNavigation() which
+   * dispatches to the callback if set, otherwise to the virtual method.
+   *
+   * @param[in] callback The focus navigation callback (move-only, ownership transferred)
+   */
+  void SetFocusNavigationCallback(FocusNavigationCallback callback);
 
   /**
    * @copydoc Ui::View::SetBackgroundColor()
@@ -295,6 +492,46 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::SetBackgroundGradient()
    */
   void SetBackgroundGradient(const Gradient::Base& gradient);
+
+  /**
+   * @copydoc Ui::View::ClearBackground()
+   */
+  void ClearBackground();
+
+  /**
+   * @copydoc Ui::View::SetShadow()
+   */
+  void SetShadow(const Shadow& shadow);
+
+  /**
+   * @copydoc Ui::View::SetShadow(const ShadowStack&)
+   */
+  void SetShadow(const ShadowStack& shadowStack);
+
+  /**
+   * @brief Clears all shadows from this View.
+   */
+  void ClearShadow();
+
+  /**
+   * @copydoc Ui::View::SetInnerShadow()
+   */
+  void SetInnerShadow(const InnerShadow& innerShadow);
+
+  /**
+   * @copydoc Ui::View::SetRenderEffect()
+   */
+  void SetRenderEffect(Ui::RenderEffect effect);
+
+  /**
+   * @copydoc Ui::View::GetRenderEffect()
+   */
+  RenderEffect GetRenderEffect() const;
+
+  /**
+   * @copydoc Ui::View::ClearRenderEffect()
+   */
+  void ClearRenderEffect();
 
   /**
    * @copydoc Ui::View::GetColorMultiplier()
@@ -372,86 +609,6 @@ public: // Non-virtual API (safe to reorder / extend)
   void SetBorderlineOffset(float offset);
 
   /**
-   * @copydoc Ui::View::ClearBackground()
-   */
-  void ClearBackground();
-
-  /**
-   * @copydoc Ui::View::SetShadow()
-   */
-  void SetShadow(const Shadow& shadow);
-
-  /**
-   * @copydoc Ui::View::SetShadow(const ShadowStack&)
-   */
-  void SetShadow(const ShadowStack& shadowStack);
-
-  /**
-   * @brief Clears all shadows from this View.
-   */
-  void ClearShadow();
-
-  /**
-   * @copydoc Ui::View::SetRenderEffect()
-   */
-  void SetRenderEffect(Ui::RenderEffect effect);
-
-  /**
-   * @copydoc Ui::View::GetRenderEffect()
-   */
-  RenderEffect GetRenderEffect() const;
-
-  /**
-   * @copydoc Ui::View::ClearRenderEffect()
-   */
-  void ClearRenderEffect();
-
-  /**
-   * @brief Ensures this View has an interaction trait and returns it.
-   */
-  Ui::InteractiveTrait EnsureInteractiveTrait();
-
-  /**
-   * @copydoc Ui::View::IsInteractive()
-   */
-  bool IsInteractive() const;
-
-  /**
-   * @copydoc Ui::View::SetStateEffect()
-   */
-  void SetStateEffect(StateEffect effect);
-
-  /**
-   * @copydoc Ui::View::SetStateEffectTarget()
-   */
-  void SetStateEffectTarget(View target);
-
-  /**
-   * @copydoc Ui::View::GetStateEffectTarget()
-   */
-  View GetStateEffectTarget() const;
-
-  /**
-   * @brief Ensures this View has a selectable trait and returns it.
-   */
-  Ui::SelectableTrait EnsureSelectableTrait();
-
-  /**
-   * @copydoc Ui::View::IsSelectable()
-   */
-  bool IsSelectable() const;
-
-  /**
-   * @brief Ensures this View has a group-selectable trait and returns it.
-   */
-  Ui::GroupSelectableTrait EnsureGroupSelectableTrait();
-
-  /**
-   * @copydoc Ui::View::IsGroupSelectable()
-   */
-  bool IsGroupSelectable() const;
-
-  /**
    * @copydoc Ui::View::SetAttachment()
    */
   DALI_INTERNAL void SetAttachment(AttachmentId id, UniqueAny attachment);
@@ -484,249 +641,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @return The stored attachment, or an empty UniqueAny if missing
    */
   DALI_INTERNAL UniqueAny DetachAttachment(AttachmentId id);
-
-  // VisualBase
-
-  /**
-   * @copydoc Ui::View::AddVisual()
-   */
-  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer);
-
-  /**
-   * @copydoc Ui::View::RemoveVisual()
-   */
-  void RemoveVisual(Dali::Ui::VisualBase visualBase);
-
-  /**
-   * @copydoc Ui::View::GetVisualCount()
-   */
-  uint32_t GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const;
-
-  /**
-   * @copydoc Ui::View::GetVisualAt()
-   */
-  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const;
-
-  // Measure / Arrange
-
-  /**
-   * @copydoc Ui::View::Measure()
-   */
-  MeasuredSize Measure(float widthConstraint, float heightConstraint);
-
-  /**
-   * @copydoc Ui::View::Arrange()
-   */
-  LayoutRect Arrange(const LayoutRect& bounds);
-
-  /**
-   * @copydoc Ui::View::InvalidateMeasure()
-   */
-  void InvalidateMeasure();
-
-  // UiScale API
-
-  /**
-   * @brief Sets the UiScale participation policy for this view.
-   * @param[in] policy The UiScalePolicy to apply
-   */
-  void SetUiScalePolicy(UiScalePolicy policy);
-
-  /**
-   * @brief Gets the UiScale participation policy of this view.
-   * @return The current UiScalePolicy
-   */
-  UiScalePolicy GetUiScalePolicy() const;
-
-  /**
-   * @brief Gets the effective scale for this view.
-   * Lazily computed on first call after invalidation; valid after first Measure.
-   * @return The effective scale factor
-   */
-  float GetEffectiveScale() const;
-
-  /**
-   * @copydoc Ui::View::InvalidateArrange()
-   */
-  void InvalidateArrange();
-
-  /**
-   * @copydoc Ui::View::GetMeasuredSize()
-   */
-  MeasuredSize GetMeasuredSize() const;
-
-  // Requested Size
-
-  /**
-   * @copydoc Ui::View::SetRequestedWidth()
-   */
-  void SetRequestedWidth(float width);
-
-  /**
-   * @copydoc Ui::View::GetRequestedWidth()
-   */
-  float GetRequestedWidth() const;
-
-  /**
-   * @copydoc Ui::View::SetRequestedHeight()
-   */
-  void SetRequestedHeight(float height);
-
-  /**
-   * @copydoc Ui::View::GetRequestedHeight()
-   */
-  float GetRequestedHeight() const;
-
-  /**
-   * @copydoc Ui::View::SetMinimumWidth()
-   */
-  void SetMinimumWidth(float width);
-
-  /**
-   * @copydoc Ui::View::GetMinimumWidth()
-   */
-  float GetMinimumWidth() const;
-
-  /**
-   * @copydoc Ui::View::SetMinimumHeight()
-   */
-  void SetMinimumHeight(float height);
-
-  /**
-   * @copydoc Ui::View::GetMinimumHeight()
-   */
-  float GetMinimumHeight() const;
-
-  /**
-   * @copydoc Ui::View::SetMaximumWidth()
-   */
-  void SetMaximumWidth(float width);
-
-  /**
-   * @copydoc Ui::View::GetMaximumWidth()
-   */
-  float GetMaximumWidth() const;
-
-  /**
-   * @copydoc Ui::View::SetMaximumHeight()
-   */
-  void SetMaximumHeight(float height);
-
-  /**
-   * @copydoc Ui::View::GetMaximumHeight()
-   */
-  float GetMaximumHeight() const;
-
-  // Layout Params
-
-  void SetLayoutParams(const AbsoluteLayoutParams& params);
-  void SetLayoutParams(const FlexLayoutParams& params);
-  void SetLayoutParams(const GridLayoutParams& params);
-  void SetLayoutParams(const StackLayoutParams& params);
-
-  bool TryGetLayoutParams(AbsoluteLayoutParams& params) const;
-  bool TryGetLayoutParams(FlexLayoutParams& params) const;
-  bool TryGetLayoutParams(GridLayoutParams& params) const;
-  bool TryGetLayoutParams(StackLayoutParams& params) const;
-
-  // Layout Properties
-
-  /**
-   * @copydoc Ui::View::SetMargin()
-   */
-  void SetMargin(const Insets& margin);
-
-  /**
-   * @copydoc Ui::View::GetMargin()
-   */
-  Insets GetMargin() const;
-
-  /**
-   * @copydoc Ui::View::SetPadding()
-   */
-  void SetPadding(const Insets& padding);
-
-  /**
-   * @copydoc Ui::View::GetPadding()
-   */
-  Insets GetPadding() const;
-
-  /**
-   * @copydoc Ui::View::SetLayoutMode()
-   */
-  void SetLayoutMode(Ui::LayoutMode mode);
-
-  /**
-   * @copydoc Ui::View::GetLayoutMode()
-   */
-  Ui::LayoutMode GetLayoutMode() const;
-
-  // Layout Callbacks
-
-  /**
-   * @copydoc Ui::View::SetMeasureCallback()
-   */
-  void SetMeasureCallback(MeasureCallback callback);
-
-  /**
-   * @copydoc Ui::View::SetArrangeCallback(ArrangeCallback)
-   */
-  void SetArrangeCallback(ArrangeCallback callback);
-
-  /**
-   * @copydoc Ui::View::SetArrangeCallback(ArrangeCallback, ArrangePolicy)
-   */
-  void SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy);
-
-  // Layout Manager
-
-  /**
-   * @copydoc Ui::View::AttachLayoutManager()
-   */
-  void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
-
-  /**
-   * @copydoc Ui::View::SetLayoutTransition()
-   */
-  void SetLayoutTransition(LayoutTransition transition);
-
-  /**
-   * @copydoc Ui::View::GetLayoutTransition()
-   */
-  LayoutTransition GetLayoutTransition() const;
-
-  /**
-   * @copydoc Ui::View::SetSelfLayoutTransition()
-   */
-  void SetSelfLayoutTransition(LayoutTransition transition);
-
-  /**
-   * @copydoc Ui::View::GetSelfLayoutTransition()
-   */
-  LayoutTransition GetSelfLayoutTransition() const;
-
-  /**
-   * @copydoc Ui::View::SetLayoutTransitionMode()
-   */
-  void SetLayoutTransitionMode(LayoutTransitionMode mode);
-
-  /**
-   * @copydoc Ui::View::GetLayoutTransitionMode()
-   */
-  LayoutTransitionMode GetLayoutTransitionMode() const;
-
-  /**
-   * @brief Returns the bounds last applied during the layout pass.
-   *
-   * Internal helper used by the layout transition dispatcher to compare
-   * pre/post bounds for the CHANGE slot. Returns a zero rect if the view
-   * has never been arranged.
-   *
-   * @return The most recent arranged bounds
-   */
-  LayoutRect GetArrangedBounds() const;
-
-  // Child Management
 
   /**
    * @copydoc Ui::View::Remove(Ui::View, RemovePolicy)
@@ -788,20 +702,98 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
 
-  // Focus Navigation
+  // State API
 
   /**
-   * @brief Sets a callback for focus navigation within this view's children.
-   *
-   * When set, the callback takes priority over the OnFocusNavigationRequested()
-   * virtual method. The focus manager calls RequestFocusNavigation() which
-   * dispatches to the callback if set, otherwise to the virtual method.
-   *
-   * @param[in] callback The focus navigation callback (move-only, ownership transferred)
+   * @copydoc Ui::View::GetState()
    */
-  void SetFocusNavigationCallback(FocusNavigationCallback callback);
+  const ViewState& GetState() const;
+
+  /**
+   * @copydoc Ui::View::IsEffectivelyFocused()
+   */
+  bool IsEffectivelyFocused() const;
+
+  /**
+   * @copydoc Ui::View::SetStateEffect()
+   */
+  void SetStateEffect(StateEffect effect);
+
+  /**
+   * @copydoc Ui::View::SetStateEffectTarget()
+   */
+  void SetStateEffectTarget(View target);
+
+  /**
+   * @copydoc Ui::View::GetStateEffectTarget()
+   */
+  View GetStateEffectTarget() const;
+
+  // Traits (attach & query)
+
+  /**
+   * @brief Ensures this View has an interaction trait and returns it.
+   */
+  Ui::InteractiveTrait EnsureInteractiveTrait();
+
+  /**
+   * @copydoc Ui::View::IsInteractive()
+   */
+  bool IsInteractive() const;
+
+  /**
+   * @brief Ensures this View has a selectable trait and returns it.
+   */
+  Ui::SelectableTrait EnsureSelectableTrait();
+
+  /**
+   * @copydoc Ui::View::IsSelectable()
+   */
+  bool IsSelectable() const;
+
+  /**
+   * @brief Ensures this View has a group-selectable trait and returns it.
+   */
+  Ui::GroupSelectableTrait EnsureGroupSelectableTrait();
+
+  /**
+   * @copydoc Ui::View::IsGroupSelectable()
+   */
+  bool IsGroupSelectable() const;
+
+  // VisualBase
+
+  /**
+   * @copydoc Ui::View::AddVisual()
+   */
+  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer);
+
+  /**
+   * @copydoc Ui::View::RemoveVisual()
+   */
+  void RemoveVisual(Dali::Ui::VisualBase visualBase);
+
+  /**
+   * @copydoc Ui::View::GetVisualCount()
+   */
+  uint32_t GetVisualCount(Dali::Ui::Visual::DepthLayer depthLayer) const;
+
+  /**
+   * @copydoc Ui::View::GetVisualAt()
+   */
+  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::DepthLayer depthLayer, uint32_t siblingOrder) const;
 
   // Signals
+
+  /**
+   * @copydoc Ui::View::StateChangedSignal()
+   */
+  View::StateChangedSignalType& StateChangedSignal();
+
+  /**
+   * @copydoc Ui::View::LayoutFinishedSignal()
+   */
+  View::LayoutFinishedSignalType& LayoutFinishedSignal();
 
   /**
    * @copydoc Ui::View::KeyEventSignal()
@@ -816,11 +808,6 @@ public: // Non-virtual API (safe to reorder / extend)
   /// @cond internal
   DALI_INTERNAL void NotifyFocusChanged(bool focused);
   /// @endcond
-
-  /**
-   * @copydoc Ui::View::SetInnerShadow()
-   */
-  void SetInnerShadow(const InnerShadow& innerShadow);
 
 protected:
   // ============================================================
@@ -945,18 +932,6 @@ protected:
    */
   virtual View OnFocusRequested();
 
-  /**
-   * @brief Called when the effective scale changes.
-   *
-   * Subclasses (Label, InputField) override this to update scale-dependent
-   * content such as font sizes.
-   *
-   * @param[in] newScale The new effective scale factor
-   */
-  virtual void OnEffectiveScaleChanged(float newScale)
-  {
-  }
-
   // ============================================================
   // protected: Framework overrides (CustomActorImpl)
   // ============================================================
@@ -990,6 +965,16 @@ protected:
    * @copydoc Dali::CustomActorImpl::OnFinalizeTouchEventDispatch()
    */
   void OnFinalizeTouchEventDispatch(const Dali::TouchEvent& event) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::HasIntrinsicHoverHandling()
+   */
+  bool HasIntrinsicHoverHandling() const override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnHoverEvent()
+   */
+  bool OnHoverEvent(const Dali::HoverEvent& event) override;
 
   /**
    * @copydoc Dali::CustomActorImpl::OnChildAdd()
@@ -1041,6 +1026,22 @@ protected:
    */
   void SignalDisconnected(SlotObserver* slotObserver, CallbackBase* callback) override;
 
+public:
+  /**
+   * @brief Retrieves the extension for this view.
+   *
+   * Deliberately the LAST virtual declared in this class: the overrides above
+   * fill dali-core base-class slots and introduce none, so this is the final
+   * slot of the frozen vtable.
+   *
+   * @return The extension if available, nullptr otherwise
+   */
+  virtual Extension* GetViewExtension()
+  {
+    return nullptr;
+  }
+
+protected:
   // ============================================================
   // protected: Construction & helpers
   // ============================================================

@@ -89,6 +89,66 @@ InputFieldAnimationSpec::InputFieldAnimationSpec(Internal::InputFieldAnimationSp
 // Property methods (AddEntry calls)
 ///////////////////////////////////////////////////////////////////////////////
 
+InputFieldAnimationSpec& InputFieldAnimationSpec::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerRadius(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerRadiusBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerSquareness(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerSquarenessBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineWidth(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineWidthBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineColor(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineColorBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputFieldAnimationSpec& InputFieldAnimationSpec::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::BackgroundColor(target, duration, alpha, delay);
@@ -278,66 +338,6 @@ InputFieldAnimationSpec& InputFieldAnimationSpec::Opacity(float target, Duration
 InputFieldAnimationSpec& InputFieldAnimationSpec::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::OpacityBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerRadius(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerRadiusBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerSquareness(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerSquarenessBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineWidth(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineWidthBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineColor(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineColorBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineOffset(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationSpec& InputFieldAnimationSpec::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineOffsetBy(relative, duration, alpha, delay);
   return *this;
 }
 
