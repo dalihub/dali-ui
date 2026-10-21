@@ -62,7 +62,7 @@ if [ ! -s "$TOP_LEVEL_INFO" ] ; then
 fi
 
 FASTCOV_OPTS=(--branch-coverage --lcov --gcov "$GCOV_BIN")
-EXCLUDED_SOURCES=(/usr/include /usr/local/include automated-tests dali-env third-party generated/ .autogen.cpp)
+EXCLUDED_SOURCES=(/usr/include /usr/local/include automated-tests dali-env third-party generated/)
 echo "Using fastcov.py for coverage data collection"
 
 "$FASTCOV_BIN" "${FASTCOV_OPTS[@]}" \
