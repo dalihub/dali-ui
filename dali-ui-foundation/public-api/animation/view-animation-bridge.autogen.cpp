@@ -37,6 +37,76 @@ ViewAnimationBridge::ViewAnimationBridge(Animation animation, View view)
 {
 }
 
+ViewAnimationBridge& ViewAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateTo(Property(mView, View::Property::CORNER_RADIUS), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateBy(Property(mView, View::Property::CORNER_RADIUS), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateTo(Property(mView, View::Property::CORNER_SQUARENESS), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateBy(Property(mView, View::Property::CORNER_SQUARENESS), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_WIDTH), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_WIDTH), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_COLOR), target.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_COLOR), relative.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_OFFSET), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_OFFSET), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
 ViewAnimationBridge& ViewAnimationBridge::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
@@ -258,76 +328,6 @@ ViewAnimationBridge& ViewAnimationBridge::OpacityBy(float relative, Duration dur
 {
   ExtendIfNeeded(delay, duration);
   Internal::ViewAnimationSpecImpl::ApplyOpacityBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, View::Property::CORNER_RADIUS), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, View::Property::CORNER_RADIUS), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, View::Property::CORNER_SQUARENESS), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, View::Property::CORNER_SQUARENESS), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_WIDTH), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_WIDTH), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_COLOR), target.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_COLOR), relative.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_OFFSET), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_OFFSET), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
   return *this;
 }
 

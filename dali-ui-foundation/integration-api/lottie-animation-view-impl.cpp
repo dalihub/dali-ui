@@ -579,13 +579,18 @@ void LottieAnimationViewImpl::JumpToFrame(int frame)
 
 void LottieAnimationViewImpl::SetMinMaxFrame(int minFrame, int maxFrame)
 {
-  if(mPlayRangeType == PlayRangeType::FRAME && mMinFrame == minFrame && mMaxFrame == maxFrame)
+  SetPlaybackRange(minFrame, maxFrame);
+}
+
+void LottieAnimationViewImpl::SetPlaybackRange(int startFrame, int endFrame)
+{
+  if(mPlayRangeType == PlayRangeType::FRAME && mMinFrame == startFrame && mMaxFrame == endFrame)
   {
     return;
   }
   mPlayRangeType = PlayRangeType::FRAME;
-  mMinFrame      = minFrame;
-  mMaxFrame      = maxFrame;
+  mMinFrame      = startFrame;
+  mMaxFrame      = endFrame;
 
   Dali::Property::Array range;
   range.PushBack(mMinFrame);
@@ -595,26 +600,36 @@ void LottieAnimationViewImpl::SetMinMaxFrame(int minFrame, int maxFrame)
 
 void LottieAnimationViewImpl::GetMinMaxFrame(int& minFrame, int& maxFrame) const
 {
+  GetPlaybackRange(minFrame, maxFrame);
+}
+
+void LottieAnimationViewImpl::GetPlaybackRange(int& startFrame, int& endFrame) const
+{
   if(mPlayRangeType == PlayRangeType::FRAME)
   {
-    minFrame = mMinFrame;
-    maxFrame = mMaxFrame;
+    startFrame = mMinFrame;
+    endFrame   = mMaxFrame;
     return;
   }
 
-  minFrame = 0;
-  maxFrame = GetTotalFrameCount();
+  startFrame = 0;
+  endFrame   = GetTotalFrameCount();
 }
 
 void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
 {
-  if(mPlayRangeType == PlayRangeType::MARKER && mMinFrameMarker == minMarker && mMaxFrameMarker == maxMarker)
+  SetPlaybackRangeByMarker(minMarker, maxMarker);
+}
+
+void LottieAnimationViewImpl::SetPlaybackRangeByMarker(const Dali::String& startMarker, const Dali::String& endMarker)
+{
+  if(mPlayRangeType == PlayRangeType::MARKER && mMinFrameMarker == startMarker && mMaxFrameMarker == endMarker)
   {
     return;
   }
   mPlayRangeType  = PlayRangeType::MARKER;
-  mMinFrameMarker = minMarker;
-  mMaxFrameMarker = maxMarker;
+  mMinFrameMarker = startMarker;
+  mMaxFrameMarker = endMarker;
 
   Dali::Property::Array range;
   range.PushBack(mMinFrameMarker);

@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/integration-api/items-layouter-impl.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <cstdint>
+#include <limits>
 
 namespace DALI_NAMESPACE
 {
@@ -101,22 +102,43 @@ private:
   struct LayoutState
   {
     uint32_t nextPosition{0u};
-    uint32_t endPosition{0u};     // exclusive upper bound
-    float    currentOffset{0.0f}; // running main-axis accumulator
+    uint32_t endPosition{0u};                                // exclusive upper bound
+    float    currentOffset{0.0f};                            // running main-axis accumulator
+    float    limitOffset{std::numeric_limits<float>::max()}; // stop once currentOffset reaches it
+  };
+
+  // An item's measured slot: the item extent plus its decoration offsets on the main axis, and
+  // its placement on the cross axis.
+  struct ItemSlot
+  {
+    View  view;
+    float extent{0.0f};
+    float leading{0.0f};
+    float trailing{0.0f};
+    float crossStart{0.0f};
+    float cross{0.0f};
   };
 
   // Non-virtual end-class methods: not part of ItemsLayouterImpl interface.
   void Fill(LayoutState& state, Recycler& recycler);
   bool LayoutChunk(Recycler& recycler, LayoutState& state);
+  bool MeasureSlot(Recycler& recycler, uint32_t position, ItemSlot& slot);
   void MeasureUpdate(uint32_t position, float extent);
+  void RecycleLeading(Recycler& recycler, uint32_t& first, uint32_t end, float& firstOffset, float windowStart);
+
+  // Realises exactly the items that meet the window around mScrollOffset and returns the
+  // coordinate correction it applied (see the definition).
+  float LayoutWindow(Recycler& recycler, uint32_t itemCount, bool rebuild, float request);
+  // Moves the offset by delta and repeats LayoutWindow until measurement stops moving the target.
+  float SettleBy(float delta, Recycler& recycler, uint32_t itemCount, bool rebuild);
 
   float GetItemExtentAt(uint32_t position) const;
   float GetItemOffset(uint32_t position) const;
   // Walks forward (targetPos > anchorPos) or backward using cached extents.
   float    GetItemOffsetFrom(uint32_t anchorPos, float anchorOffset, uint32_t targetPos) const;
   float    GetEstimatedContentExtent(uint32_t itemCount) const;
+  float    ClampScrollOffset(float offset, uint32_t itemCount) const;
   uint32_t FindFirstVisiblePosition(float scrollOffset, float cacheBefore, uint32_t itemCount) const;
-  uint32_t FindLastVisiblePosition(float scrollOffset, float viewportExtent, float cacheAfter, uint32_t itemCount) const;
   float    ScrollBy(float delta, Recycler& recycler);
 
   Orientation         mOrientation;
@@ -135,7 +157,8 @@ private:
   uint32_t mLastActive;
   bool     mHasActiveItems;
 
-  // Main-axis offset of mFirstActive (start of first active item).
+  // Main-axis offset of mFirstActive (start of first active item). Kept equal to
+  // GetItemOffset(mFirstActive): measuring items above it shifts the window instead.
   float mFirstActiveOffset;
   // Main-axis offset just past mLastActive (start of next potential item, including spacing).
   float mLastActiveEndOffset;

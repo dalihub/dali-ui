@@ -32,7 +32,7 @@ Slot은 **spec mode** 또는 **animator mode**로 설정할 수 있습니다.
 
 ### Cause
 
-`LayoutAnimatorContext::changeCause`는 CHANGE 상황을 구분합니다. `slot == CHANGE`일 때만 의미가 있으며, ENTER / EXIT에서는 `OTHER`로 기본 설정됩니다.
+`LayoutAnimatorContext::GetChangeCause()`는 CHANGE 상황을 구분합니다. `GetSlot() == LayoutTransitionSlot::CHANGE`일 때만 의미가 있으며, ENTER / EXIT에서는 `OTHER`로 기본 설정됩니다.
 
 | Cause | 의미 |
 |---|---|
@@ -86,19 +86,21 @@ Bounds effect channel은 mirror semantics를 사용합니다. 하나의 `LayoutB
 ```cpp
 auto onChange = [](const LayoutAnimatorContext& ctx)
 {
-  Actor actor = ctx.view;
+  Actor actor = ctx.GetView();
   if(!actor) return;
 
-  const float p = ctx.progress;
-  const float x = ctx.fromBounds.x + (ctx.toBounds.x - ctx.fromBounds.x) * p;
-  const float y = ctx.fromBounds.y + (ctx.toBounds.y - ctx.fromBounds.y) * p;
+  const float p = ctx.GetProgress();
+  const LayoutRect fromBounds = ctx.GetFromBounds();
+  const LayoutRect toBounds = ctx.GetToBounds();
+  const float x = fromBounds.x + (toBounds.x - fromBounds.x) * p;
+  const float y = fromBounds.y + (toBounds.y - fromBounds.y) * p;
   actor.SetPositionX(x);
   actor.SetPositionY(y);
 };
 
 LayoutAnimatorTiming timing;
-timing.duration = Duration(0.3f);
-timing.alpha = AlphaFunction(AlphaFunction::EASE_IN_OUT);
+timing.SetDuration(Duration(0.3f));
+timing.SetAlpha(AlphaFunction(AlphaFunction::EASE_IN_OUT));
 
 LayoutTransition transition = LayoutTransition::New();
 transition.SetChangeAnimator(LayoutAnimatorCallback::New(onChange), timing);
@@ -205,7 +207,7 @@ other.SetSelfLayoutTransition(LayoutTransition());                     // handle
 
 ## 주의 사항
 
-- **Callback reference cycle 금지.** Animator 또는 lifecycle closure 안에서 target `View`를 값으로 capture하면 cycle이 생길 수 있습니다. 필요한 경우 `WeakHandle<View>`를 사용하거나 callback 안의 `ctx.view`를 읽으세요.
+- **Callback reference cycle 금지.** Animator 또는 lifecycle closure 안에서 target `View`를 값으로 capture하면 cycle이 생길 수 있습니다. 필요한 경우 `WeakHandle<View>`를 사용하거나 callback 안의 `ctx.GetView()`를 읽으세요.
 - **Animator callback에서 view tree 변경 금지.** `Add`, `Remove`, `Unparent`, `InvalidateMeasure`는 animator callback에서 호출하지 마세요. Tree mutation은 lifecycle callback에서만 수행하세요.
 - **Transition 교체는 in-flight transition을 취소하지 않음.** `SetLayoutTransition`으로 새 handle을 설정해도 이미 실행 중인 transition은 시작 당시 handle의 timing으로 끝까지 진행됩니다.
 - **기본 ENTER / EXIT 없음.** Slot에 spec이나 animator가 없으면 해당 slot은 건너뜁니다.
@@ -221,9 +223,38 @@ other.SetSelfLayoutTransition(LayoutTransition());                     // handle
 
 `AlphaFunction::REVERSE`는 `LayoutTransition`에서 지원되지 않습니다. Transition 방향은 ENTER / EXIT / CHANGE slot semantics와 captured bounds로 결정되며, alpha function은 그 transition의 진행 형태만 조정합니다.
 
-Layout bounds timing(`SetChangeTiming`, `LayoutBoundsEffect::timing`)에서는 최종 bounds가 layout target과 일치해야 하므로 `BOUNCE`, `SIN`도 거부됩니다. `CUSTOM_FUNCTION`의 출력은 애플리케이션 책임입니다.
+`SetChangeTiming`, `SetEnterBoundsEffect`, `SetExitBoundsEffect`로 layout bounds timing을 등록할 때는 최종 bounds가 layout target과 일치해야 하므로 `BOUNCE`, `SIN`도 거부됩니다. `CUSTOM_FUNCTION`의 출력은 애플리케이션 책임입니다.
 
 Animator mode는 일부 alpha만 직접 평가합니다. `BOUNCE`, `SIN`, `EASE_OUT_BACK`, `BEZIER`, `SPRING`, `CUSTOM_SPRING`은 현재 linear fallback으로 처리됩니다.
+
+---
+
+## 값 타입과 API migration
+
+`LayoutTransitionTiming`, `LayoutAnimatorTiming`, `LayoutBoundsEffect`, `LayoutAnimatorContext`는 field를 private implementation에 저장합니다. 이후 implementation에 field를 추가해도 공개 object layout은 유지할 수 있습니다. 기존 직접 저장 타입을 전환하는 이번 변경 자체는 의도적인 source/ABI break이므로, 애플리케이션과 의존 library의 source migration 및 rebuild가 필요합니다.
+
+| 기존 사용 | 현재 API |
+|---|---|
+| `effect.offset` | `GetOffset()`은 const reference를 반환합니다. 복사본의 public axis 값을 수정한 뒤 `SetOffset()`으로 설정합니다. |
+| `timing.duration`, `timing.alpha`, `timing.delay` | `GetDuration()`, `GetAlpha()`, `GetDelay()`로 조회하고 대응하는 chainable `Set...()`으로 수정합니다. |
+| `effect.timing` | `GetTiming()`은 const reference를 반환합니다. 복사본을 수정한 뒤 `SetTiming()`으로 설정합니다. |
+| `effect.hasOffset`, `effect.hasSizeFactor` | `HasOffset()`, `HasSizeFactor()`로 조회합니다. `SetOffset()` / `ClearOffset()`, `SetSizeFactor()` / `ClearSizeFactor()`로 option과 값을 함께 변경합니다. |
+| 나머지 effect field | `GetSizeFactorX()`, `GetSizeFactorY()`, `GetAnchorX()`, `GetAnchorY()`, `GetClipMode()`와 기존의 값 묶음 Setter를 사용합니다. |
+| Context field | `GetView()`, `GetSlot()`, `GetChangeCause()`, `GetProgress()`, `GetRawProgress()`, `GetFromBounds()`, `GetToBounds()`를 사용합니다. |
+
+두 Timing 타입은 default 생성과 `Duration`, `AlphaFunction`, `Duration` 순서의 인자 1~3개 brace 생성을 계속 지원합니다. 기본값과 등록 시점의 validation도 유지합니다. Timing과 Effect의 복사본은 독립된 값이며, Effect 내부 Timing도 독립적으로 복사됩니다. Timing과 Effect를 move한 이후 원본은 소멸하거나 새 값을 대입할 수 있으며, 그 외에는 사용하지 않습니다.
+
+`LayoutBoundsLength`는 public `float value`, `LayoutBoundsUnit unit`을 가진 aggregate로 유지합니다. `{}`, `{value}`, `{value, unit}` 초기화와 `Pixel()`, `SelfFraction()`, `ParentFraction()` factory를 지원합니다. field에 음수와 non-finite 값을 저장할 수 있으며, finite validation은 기존과 같이 effect 등록 시점에 수행합니다. `GridLength`는 private type과 scalar value, inline `Absolute()`, `Star()`, `Auto()`, `GetType()`, `GetValue()`를 유지합니다. Grid length를 변경하려면 새 factory 결과를 대입합니다.
+
+두 length 타입은 trivially copyable/destructible하며 값마다 heap allocation을 하지 않고 직접 저장합니다. `Dali::Vector<GridLength>`도 scalar 저장 경로를 유지하며 `Resize(n, GridLength::Star())`는 새 원소를 모두 같은 값으로 채웁니다. field의 타입·순서·개수와 unit/type enum의 underlying type을 ABI 계약으로 고정합니다. 복합 길이 표현, grid track 제약, 추가 metadata는 기존 field를 늘리지 않고 별도 타입이나 API로 제공합니다. 두 타입의 표현은 원래 정의와 같지만, 중간 PIMPL 버전으로 빌드한 binary는 rebuild해야 합니다.
+
+`GetOffset()`은 저장된 axis를 가리키는 `const LayoutBoundsOffset&`를 반환합니다. reference는 Effect 대입·이동·소멸 전까지 유효하며 `SetOffset()`과 `ClearOffset()`이 관찰되는 값을 갱신합니다. 독립적으로 수정하려면 `auto offset = effect.GetOffset();`으로 복사하고 `offset.x.value` / `offset.x.unit` 또는 y축 field를 변경한 뒤 수정본을 `SetOffset()`에 전달합니다.
+
+framework는 stack storage로 매 callback의 Context를 생성합니다. 애플리케이션에서는 Context를 default 생성하거나 aggregate 초기화하거나 Setter로 수정할 수 없습니다. callback으로 전달된 reference는 callback 반환 시 만료됩니다. Context를 복사하면 callback 종료와 다음 tick 이후에도 유지되는 독립된 snapshot이 됩니다. 대입하거나 rvalue로 전달해도 snapshot을 복사합니다. 저장이 필요하면 callback 외부의 `std::optional<LayoutAnimatorContext>` 변수에 `snapshot.emplace(ctx)`를 호출하는 방식으로 복사할 수 있습니다.
+
+snapshot은 동일한 target `View` handle을 유지하며 View 자체를 복제하지는 않습니다. target 자신의 callback closure 안에 snapshot을 보관하면 `View`를 직접 capture한 경우처럼 reference cycle이 생길 수 있습니다. target의 수명을 유지할 필요가 없다면 `WeakHandle<View>`와 필요한 scalar/bounds 값만 따로 저장하세요.
+
+`MeasuredSize`의 두 public 크기 field와 `LayoutBoundsOffset`의 두 public length axis는 고정된 표현으로 유지합니다. 추가 측정 또는 offset metadata는 별도 타입으로 제공합니다.
 
 ---
 

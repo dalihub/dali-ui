@@ -1,6 +1,6 @@
-# 12. Lottie: SetMinMaxFrame / FrameSpeedFactor
+# 12. Lottie: SetPlaybackRange / FrameSpeedFactor
 
-SetMinMaxFrame / SetMinMaxFrameByMarker로 재생 프레임 범위를 제한하고, SetFrameSpeedFactor /
+SetPlaybackRange / SetMinMaxFrameByMarker로 재생 프레임 범위를 제한하고, SetFrameSpeedFactor /
 GetFrameSpeedFactor로 속도를 조절하는지 확인한다.
 
 구간과 속도는 "무엇을 그릴지"가 아니라 **"어떻게 재생할지"**다. 두 setter 모두 재생 중인
@@ -12,14 +12,14 @@ setMaxFrame / setSpeed를 애니메이터 파라미터로 다루는 것과 같�
 - 중앙: Lottie 애니메이션 프리뷰 (240x240)
 - 상태 라벨: `Frame: n/N | Range: min-max | Speed: x.xxxxxx`
   - `Frame`은 `GetCurrentFrameNumber()/GetTotalFrameCount()`, `Speed`는 `GetFrameSpeedFactor()`를 읽는다
-  - 빌드 대상에 `GetMinMaxFrame()`이 있으면 `Range`도 getter를 읽고, 현재 공개 API처럼 해당
+  - 빌드 대상에 `GetPlaybackRange()`이 있으면 `Range`도 getter를 읽고, 현재 공개 API처럼 해당
     getter가 없으면 `Range(requested)`로 명시하여 마지막 요청 범위임을 구분한다
   - 범위를 아직 설정하지 않았으면 `Range`는 컴포지션 전체 `0-N`을 표시한다
 - 버튼 행 1: Play / Stop
 - 버튼 행 2: Full / First Half / Second Half / First 10
 - 버튼 행 3: Speed 0.25x / Speed 0.5x / Speed 1.0x / Speed 2.0x
 
-## 테스트 1: SetMinMaxFrame (재생 유지 + 범위 준수)
+## 테스트 1: SetPlaybackRange (재생 유지 + 범위 준수)
 
 1. [Play] 버튼을 탭한다 — 프레임 카운터가 계속 변한다
 2. [Second Half] 버튼을 탭한다
@@ -48,8 +48,8 @@ setMaxFrame / setSpeed를 애니메이터 파라미터로 다루는 것과 같�
 
 ## 통과 기준
 
-- 재생 중 SetMinMaxFrame / SetFrameSpeedFactor가 **재생을 중단하지 않아야 한다**
-- SetMinMaxFrame 후 관측되는 모든 프레임 값이 지정한 범위 안이어야 한다
+- 재생 중 SetPlaybackRange / SetFrameSpeedFactor가 **재생을 중단하지 않아야 한다**
+- SetPlaybackRange 후 관측되는 모든 프레임 값이 지정한 범위 안이어야 한다
 - `Speed` 라벨은 getter 반환값이어야 한다. `Range`는 getter 제공 빌드에서 getter 반환값이어야
   하며, 호환 경로에서는 `requested` 표시와 실제 관측 프레임 범위가 일치해야 한다
 - 속도 배율에 따라 같은 시간 동안의 진행량이 뚜렷하게 달라져야 한다

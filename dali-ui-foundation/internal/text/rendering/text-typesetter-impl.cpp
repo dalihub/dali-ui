@@ -2009,8 +2009,9 @@ void Internal::Reveal::ExpandMetadataOwnership(uint8_t* metadata, uint32_t width
   uint32_t*             previous   = rows.data();
   uint32_t*             current    = previous + width;
   uint32_t*             next       = current + width;
-  const auto            collectRow = [metadata, width, rowBytes, PIXEL_SIZE](uint32_t y, uint32_t* output)
+  const auto            collectRow = [metadata, width, rowBytes](uint32_t y, uint32_t* output)
   {
+    constexpr uint32_t PIXEL_SIZE = 4u;
     memset(output, 0u, static_cast<size_t>(width) * sizeof(uint32_t));
     RowBounds      bounds{width, 0u};
     const uint8_t* row = metadata + static_cast<size_t>(y) * rowBytes;

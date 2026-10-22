@@ -36,6 +36,66 @@ InputEditorAnimationBridge::InputEditorAnimationBridge(Animation animation, Inpu
 {
 }
 
+InputEditorAnimationBridge& InputEditorAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerRadius(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerRadiusBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerSquareness(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::CornerSquarenessBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineWidth(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineWidthBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineColor(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineColorBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BorderlineOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputEditorAnimationBridge& InputEditorAnimationBridge::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::BackgroundColor(target, duration, alpha, delay);
@@ -225,66 +285,6 @@ InputEditorAnimationBridge& InputEditorAnimationBridge::Opacity(float target, Du
 InputEditorAnimationBridge& InputEditorAnimationBridge::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::OpacityBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerRadius(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerRadiusBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerSquareness(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::CornerSquarenessBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineWidth(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineWidthBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineColor(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineColorBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineOffset(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationBridge& InputEditorAnimationBridge::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::BorderlineOffsetBy(relative, duration, alpha, delay);
   return *this;
 }
 

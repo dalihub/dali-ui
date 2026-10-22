@@ -30,6 +30,13 @@ namespace Ui
 
 namespace Internal
 {
+namespace
+{
+// A scroll settles in one window pass, or two when measurement moves an edge; later passes only
+// follow measurement that moved it again, and the bound is never reached in practice.
+constexpr uint32_t MAX_SETTLE_PASSES = 8u;
+constexpr float    SETTLE_EPSILON    = 0.001f;
+} // namespace
 
 LinearItemsLayouterImplPtr LinearItemsLayouterImpl::New(Orientation orientation)
 {
@@ -64,14 +71,6 @@ LinearItemsLayouterImpl::~LinearItemsLayouterImpl() = default;
 
 void LinearItemsLayouterImpl::OnLayoutChildren(Recycler& recycler)
 {
-  // Save anchor before clearing active-item flag (used below for O(delta) offset lookup).
-  const bool     hasAnchor = mHasActiveItems;
-  const uint32_t anchorPos = mFirstActive;
-  const float    anchorOff = mFirstActiveOffset;
-
-  recycler.RecycleAllViews();
-  mHasActiveItems = false;
-
   const uint32_t itemCount = recycler.GetItemCount();
   mCachedItemCount         = itemCount;
   mViewportExtent          = recycler.GetViewportExtent();
@@ -81,41 +80,17 @@ void LinearItemsLayouterImpl::OnLayoutChildren(Recycler& recycler)
 
   if(itemCount == 0u || mViewportExtent <= 0.0f)
   {
+    recycler.RecycleAllViews();
+    mHasActiveItems      = false;
     mFirstActiveOffset   = 0.0f;
     mLastActiveEndOffset = 0.0f;
     return;
   }
 
-  const float maxOffset = std::max(0.0f, GetEstimatedContentExtent(itemCount) - mViewportExtent);
-  mScrollOffset         = std::min(mScrollOffset, maxOffset);
-
-  const uint32_t first = FindFirstVisiblePosition(mScrollOffset, mCacheBefore, itemCount);
-  const uint32_t last  = FindLastVisiblePosition(mScrollOffset, mViewportExtent, mCacheAfter, itemCount);
-
-  // Compute starting offset for 'first' using the saved anchor when possible.
-  // This keeps OnLayoutChildren O(|first - anchorPos|) after a simple resize,
-  // instead of O(first) from a cold GetItemOffset walk.
-  float firstOffset;
-  if(hasAnchor)
-  {
-    firstOffset = GetItemOffsetFrom(anchorPos, anchorOff, first);
-  }
-  else
-  {
-    firstOffset = GetItemOffset(first);
-  }
-
-  LayoutState state;
-  state.nextPosition  = first;
-  state.endPosition   = last + 1u;
-  state.currentOffset = firstOffset;
-  Fill(state, recycler);
-
-  mFirstActive         = first;
-  mFirstActiveOffset   = firstOffset;
-  mLastActive          = last;
-  mLastActiveEndOffset = state.currentOffset;
-  mHasActiveItems      = true;
+  // Rebuild every window item from the saved anchor (O(|first - anchor|) after a simple resize),
+  // re-measuring each. Nothing above the window is measured here, so the anchor stays exact; a
+  // re-measured end of the content is settled like a scroll.
+  SettleBy(0.0f, recycler, itemCount, true);
 }
 
 float LinearItemsLayouterImpl::ScrollVerticallyBy(float dy, Recycler& recycler)
@@ -276,7 +251,7 @@ LinearItemsLayouterImpl::ItemInset LinearItemsLayouterImpl::GetItemCrossInset(ui
 
 void LinearItemsLayouterImpl::Fill(LayoutState& state, Recycler& recycler)
 {
-  while(state.nextPosition < state.endPosition)
+  while(state.nextPosition < state.endPosition && state.currentOffset < state.limitOffset)
   {
     if(!LayoutChunk(recycler, state))
     {
@@ -293,47 +268,47 @@ bool LinearItemsLayouterImpl::LayoutChunk(Recycler& recycler, LayoutState& state
     return false;
   }
 
-  View view = recycler.GetViewForPosition(pos);
-  if(!view)
+  ItemSlot slot;
+  if(!MeasureSlot(recycler, pos, slot))
   {
-    DALI_LOG_ERROR("LinearItemsLayouterImpl: adapter returned null view for position %u\n", pos);
+    return false;
+  }
+
+  const float main = state.currentOffset + slot.leading;
+  slot.view.Arrange(mOrientation == Orientation::HORIZONTAL ? LayoutRect(main, slot.crossStart, slot.extent, slot.cross)
+                                                            : LayoutRect(slot.crossStart, main, slot.cross, slot.extent));
+  // Advance by the recorded slot extent: placement and GetItemOffset then use the same value.
+  state.currentOffset += GetItemExtentAt(pos) + mItemSpacing;
+
+  ++state.nextPosition;
+  return true;
+}
+
+bool LinearItemsLayouterImpl::MeasureSlot(Recycler& recycler, uint32_t position, ItemSlot& slot)
+{
+  slot.view = recycler.GetViewForPosition(position);
+  if(!slot.view)
+  {
+    DALI_LOG_ERROR("LinearItemsLayouterImpl: adapter returned null view for position %u\n", position);
     return false;
   }
 
   constexpr float kUnconstrained = std::numeric_limits<float>::max() * 0.25f;
 
-  const ItemInset   crossInset = GetItemCrossInset(pos);
-  const ItemOffsets decoOffs   = recycler.GetDecorationOffsets(pos);
+  const ItemInset crossInset = GetItemCrossInset(position);
+  const Insets    decoOffs   = recycler.GetDecorationOffsets(position);
+  const bool      horizontal = (mOrientation == Orientation::HORIZONTAL);
 
-  float itemExtent;
-  if(mOrientation == Orientation::HORIZONTAL)
-  {
-    // Main axis = X (left/right offsets). Cross axis = Y (top/bottom offsets).
-    const float totalLeadingCross  = crossInset.leadingCrossOffset + decoOffs.top;
-    const float totalTrailingCross = crossInset.trailingCrossOffset + decoOffs.bottom;
-    const float effectiveCross     = std::max(0.0f, mCrossExtent - totalLeadingCross - totalTrailingCross);
+  // Main axis = X with start/end offsets for a horizontal list, Y with top/bottom otherwise.
+  slot.leading              = horizontal ? decoOffs.start : decoOffs.top;
+  slot.trailing             = horizontal ? decoOffs.end : decoOffs.bottom;
+  slot.crossStart           = crossInset.leadingCrossOffset + (horizontal ? decoOffs.top : decoOffs.start);
+  const float trailingCross = crossInset.trailingCrossOffset + (horizontal ? decoOffs.bottom : decoOffs.end);
+  slot.cross                = std::max(0.0f, mCrossExtent - slot.crossStart - trailingCross);
 
-    const MeasuredSize measured = view.Measure(kUnconstrained, effectiveCross);
-    itemExtent                  = measured.width;
-    MeasureUpdate(pos, decoOffs.left + itemExtent + decoOffs.right);
-    view.Arrange(LayoutRect(state.currentOffset + decoOffs.left, totalLeadingCross, itemExtent, effectiveCross));
-    state.currentOffset += decoOffs.left + itemExtent + decoOffs.right + mItemSpacing;
-  }
-  else
-  {
-    // Main axis = Y (top/bottom offsets). Cross axis = X (left/right offsets).
-    const float totalLeadingCross  = crossInset.leadingCrossOffset + decoOffs.left;
-    const float totalTrailingCross = crossInset.trailingCrossOffset + decoOffs.right;
-    const float effectiveCross     = std::max(0.0f, mCrossExtent - totalLeadingCross - totalTrailingCross);
-
-    const MeasuredSize measured = view.Measure(effectiveCross, kUnconstrained);
-    itemExtent                  = measured.height;
-    MeasureUpdate(pos, decoOffs.top + itemExtent + decoOffs.bottom);
-    view.Arrange(LayoutRect(totalLeadingCross, state.currentOffset + decoOffs.top, effectiveCross, itemExtent));
-    state.currentOffset += decoOffs.top + itemExtent + decoOffs.bottom + mItemSpacing;
-  }
-
-  ++state.nextPosition;
+  const MeasuredSize measured = horizontal ? slot.view.Measure(kUnconstrained, slot.cross) : slot.view.Measure(slot.cross, kUnconstrained);
+  slot.extent                 = horizontal ? measured.width : measured.height;
+  MeasureUpdate(position, slot.leading + slot.extent + slot.trailing);
   return true;
 }
 
@@ -355,12 +330,24 @@ void LinearItemsLayouterImpl::MeasureUpdate(uint32_t position, float extent)
     mTotalMeasuredExtent += clamped;
     ++mMeasuredItemCount;
   }
-  else
+  else if(mExtentCache[position] != clamped)
   {
-    // Re-measure (e.g. after dynamic content change).
-    mTotalMeasuredExtent -= mExtentCache[position];
+    // Re-measure (e.g. after dynamic content change). An unchanged value leaves the total alone,
+    // so that repeated re-measures do not accumulate rounding.
+    mTotalMeasuredExtent += clamped - mExtentCache[position];
     mExtentCache[position] = clamped;
-    mTotalMeasuredExtent += clamped;
+  }
+}
+
+void LinearItemsLayouterImpl::RecycleLeading(Recycler& recycler, uint32_t& first, uint32_t end, float& firstOffset, float windowStart)
+{
+  // Items that end at or above the window start leave the window. The last realised item stays: it
+  // is the boundary an anchor placed past the end of shorter content glues upward from.
+  while(first + 1u < end && firstOffset + GetItemExtentAt(first) <= windowStart)
+  {
+    recycler.RecycleViewForPosition(first);
+    firstOffset += GetItemExtentAt(first) + mItemSpacing;
+    ++first;
   }
 }
 
@@ -421,16 +408,18 @@ float LinearItemsLayouterImpl::GetEstimatedContentExtent(uint32_t itemCount) con
     return 0.0f;
   }
 
-  // Use measured average; fall back to default extent when no measurements yet.
-  const float avgExtent = (mMeasuredItemCount > 0u)
-                            ? (mTotalMeasuredExtent / static_cast<float>(mMeasuredItemCount))
-                            : mItemExtent;
-
+  // The per-item rule of GetItemExtentAt, kept in O(1): measured extents plus the estimate for every
+  // item not measured yet. The content therefore ends exactly where the last item's offset says.
   const uint32_t unmeasured   = itemCount - std::min(itemCount, mMeasuredItemCount);
-  const float    totalExtent  = mTotalMeasuredExtent + static_cast<float>(unmeasured) * avgExtent;
+  const float    totalExtent  = mTotalMeasuredExtent + static_cast<float>(unmeasured) * mItemExtent;
   const float    totalSpacing = mItemSpacing * static_cast<float>(itemCount - 1u);
 
   return totalExtent + totalSpacing;
+}
+
+float LinearItemsLayouterImpl::ClampScrollOffset(float offset, uint32_t itemCount) const
+{
+  return std::min(std::max(0.0f, offset), std::max(0.0f, GetEstimatedContentExtent(itemCount) - mViewportExtent));
 }
 
 uint32_t LinearItemsLayouterImpl::FindFirstVisiblePosition(float scrollOffset, float cacheBefore, uint32_t itemCount) const
@@ -453,25 +442,6 @@ uint32_t LinearItemsLayouterImpl::FindFirstVisiblePosition(float scrollOffset, f
   return itemCount - 1u;
 }
 
-uint32_t LinearItemsLayouterImpl::FindLastVisiblePosition(float scrollOffset, float viewportExtent, float cacheAfter, uint32_t itemCount) const
-{
-  if(itemCount == 0u)
-  {
-    return 0u;
-  }
-  const float end    = scrollOffset + viewportExtent + cacheAfter;
-  float       cursor = 0.0f;
-  for(uint32_t i = 0u; i < itemCount; ++i)
-  {
-    if(cursor >= end)
-    {
-      return i == 0u ? 0u : i - 1u;
-    }
-    cursor += GetItemExtentAt(i) + mItemSpacing;
-  }
-  return itemCount - 1u;
-}
-
 float LinearItemsLayouterImpl::ScrollBy(float delta, Recycler& recycler)
 {
   const uint32_t itemCount = recycler.GetItemCount();
@@ -486,95 +456,130 @@ float LinearItemsLayouterImpl::ScrollBy(float delta, Recycler& recycler)
     return 0.0f;
   }
 
-  const float maxOffset = std::max(0.0f, GetEstimatedContentExtent(itemCount) - mViewportExtent);
-  const float newOffset = std::min(maxOffset, std::max(0.0f, mScrollOffset + delta));
-  const float consumed  = newOffset - mScrollOffset;
-  mScrollOffset         = newOffset;
+  return SettleBy(delta, recycler, itemCount, false);
+}
 
-  const uint32_t newFirst = FindFirstVisiblePosition(mScrollOffset, mCacheBefore, itemCount);
-  const uint32_t newLast  = FindLastVisiblePosition(mScrollOffset, mViewportExtent, mCacheAfter, itemCount);
-
-  if(!mHasActiveItems)
+float LinearItemsLayouterImpl::SettleBy(float delta, Recycler& recycler, uint32_t itemCount, bool rebuild)
+{
+  // Measuring can move the end of the content, and a correction moves the coordinates the request
+  // was made in, so the window pass repeats until the clamped target stops moving. A correction is
+  // carried in the request but is not scroll.
+  const float origin     = mScrollOffset;
+  const bool  inRange    = (ClampScrollOffset(origin + delta, itemCount) == origin + delta);
+  float       shift      = 0.0f;
+  float       correction = 0.0f;
+  for(uint32_t pass = 0u; pass < MAX_SETTLE_PASSES; ++pass)
   {
-    // Cold start: compute starting offset from scratch.
-    const float firstOffset = GetItemOffset(newFirst);
-    LayoutState state;
-    state.nextPosition  = newFirst;
-    state.endPosition   = newLast + 1u;
-    state.currentOffset = firstOffset;
-    Fill(state, recycler);
-    mFirstActive         = newFirst;
-    mFirstActiveOffset   = firstOffset;
-    mLastActive          = newLast;
-    mLastActiveEndOffset = state.currentOffset;
-    mHasActiveItems      = true;
-    return consumed;
-  }
-
-  const uint32_t oldFirst      = mFirstActive;
-  const uint32_t oldLast       = mLastActive;
-  const float    oldFirstOff   = mFirstActiveOffset;
-  const float    oldLastEndOff = mLastActiveEndOffset;
-
-  // ---------------------------------------------------------------------------
-  // Recycle items that scroll out of range.
-  // Update anchor offsets incrementally as we remove items (O(recycled count)).
-  // ---------------------------------------------------------------------------
-
-  // Recycle from top (items that are now above the visible+cache window).
-  float newFirstOff = oldFirstOff;
-  for(uint32_t pos = oldFirst; pos < newFirst && pos <= oldLast; ++pos)
-  {
-    recycler.RecycleViewForPosition(pos);
-    newFirstOff += GetItemExtentAt(pos) + mItemSpacing;
-  }
-
-  // Recycle from bottom (items now below the visible+cache window).
-  float newLastEndOff = oldLastEndOff;
-  if(oldLast > newLast)
-  {
-    for(uint32_t pos = oldLast; pos > newLast; --pos)
+    const float request = origin + shift + delta;
+    const float target  = ClampScrollOffset(request, itemCount);
+    // A pass that corrected is followed by one more, which drops what the correction moved out.
+    if(pass > 0u && correction == 0.0f && std::abs(target - mScrollOffset) <= SETTLE_EPSILON)
     {
-      recycler.RecycleViewForPosition(pos);
-      newLastEndOff -= GetItemExtentAt(pos) + mItemSpacing;
+      break;
+    }
+    mScrollOffset = target;
+    correction    = LayoutWindow(recycler, itemCount, rebuild && pass == 0u, request);
+    shift += correction;
+  }
+
+  // A request inside the content as estimated is consumed whole: an edge that measurement moved
+  // toward it is not overscroll. Past an edge, report the movement, within the request.
+  const float moved = mScrollOffset - shift - origin;
+  return inRange ? delta : std::min(std::max(moved, std::min(0.0f, delta)), std::max(0.0f, delta));
+}
+
+float LinearItemsLayouterImpl::LayoutWindow(Recycler& recycler, uint32_t itemCount, bool rebuild, float request)
+{
+  const float windowStart = std::max(0.0f, mScrollOffset - mCacheBefore);
+  const float windowEnd   = mScrollOffset + mViewportExtent + mCacheAfter;
+
+  uint32_t first    = mFirstActive;
+  uint32_t end      = mLastActive + 1u;
+  float    firstOff = mFirstActiveOffset;
+  float    endOff   = mLastActiveEndOffset;
+
+  // A window with no item in the new range has no surviving boundary: filling from it would
+  // materialize the skipped gap. Rebuild from the first item the estimated offsets place in the
+  // range; its offset is exact because anchor coordinates always equal those offsets.
+  const bool rebuilt = rebuild || !mHasActiveItems || endOff - mItemSpacing <= windowStart || firstOff >= windowEnd;
+  if(rebuilt)
+  {
+    const uint32_t anchor = FindFirstVisiblePosition(mScrollOffset, mCacheBefore, itemCount);
+    firstOff              = mHasActiveItems ? GetItemOffsetFrom(mFirstActive, mFirstActiveOffset, anchor) : GetItemOffset(anchor);
+    recycler.RecycleAllViews();
+    first  = anchor;
+    end    = anchor;
+    endOff = firstOff;
+  }
+  else
+  {
+    RecycleLeading(recycler, first, end, firstOff, windowStart);
+    // Items that start at or below the window end leave it as well.
+    while(end > first && endOff - mItemSpacing - GetItemExtentAt(end - 1u) >= windowEnd)
+    {
+      --end;
+      recycler.RecycleViewForPosition(end);
+      endOff -= GetItemExtentAt(end) + mItemSpacing;
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Fill newly visible items at top (items before old first).
-  // ---------------------------------------------------------------------------
-  if(newFirst < oldFirst)
+  // Below: each item starts where the previous measured one ends. A request past the end fills
+  // to the last item, so that the end of the content is measured rather than estimated.
+  LayoutState below;
+  below.nextPosition  = end;
+  below.endPosition   = itemCount;
+  below.currentOffset = endOff;
+  below.limitOffset   = (request > mScrollOffset) ? std::numeric_limits<float>::max() : windowEnd;
+  Fill(below, recycler);
+  end    = below.nextPosition;
+  endOff = below.currentOffset;
+  if(rebuilt)
   {
-    // Walk backward from the old anchor to find the starting offset for newFirst.
-    const float fillStartOffset = GetItemOffsetFrom(oldFirst, oldFirstOff, newFirst);
-    LayoutState state;
-    state.nextPosition  = newFirst;
-    state.endPosition   = std::min(oldFirst, newLast + 1u);
-    state.currentOffset = fillStartOffset;
-    Fill(state, recycler);
-    newFirstOff = fillStartOffset;
+    // The anchor was chosen with estimated extents: drop leading items that measured short.
+    RecycleLeading(recycler, first, end, firstOff, windowStart);
   }
 
-  // ---------------------------------------------------------------------------
-  // Fill newly visible items at bottom (items after old last).
-  // ---------------------------------------------------------------------------
-  if(newLast > oldLast)
+  // Above: glue upward from the first item's top edge with measured extents, so the boundary
+  // neither opens nor overlaps. Every glued item moves each offset below it by its measured minus
+  // its previously assumed extent; the window top is compared in those corrected coordinates, and
+  // a request that reaches the start glues up to the first item.
+  const uint32_t survivors  = first;
+  float          start      = firstOff;
+  float          correction = 0.0f;
+  ItemSlot       slot;
+  while(first > 0u)
   {
-    LayoutState state;
-    state.nextPosition  = oldLast + 1u;
-    state.endPosition   = newLast + 1u;
-    state.currentOffset = newLastEndOff; // O(1): end of surviving window
-    Fill(state, recycler);
-    newLastEndOff = state.currentOffset;
+    const float windowTop = (request <= 0.0f) ? 0.0f : std::max(0.0f, mScrollOffset + correction - mCacheBefore);
+    const float assumed   = GetItemExtentAt(first - 1u);
+    if(start + correction - mItemSpacing <= windowTop || !MeasureSlot(recycler, first - 1u, slot))
+    {
+      break;
+    }
+    --first;
+    start -= GetItemExtentAt(first) + mItemSpacing;
+    correction += GetItemExtentAt(first) - assumed;
+  }
+  if(first < survivors)
+  {
+    // Arrange top-down from the corrected start: the glued items and, when the correction moved
+    // the anchor, every item below them, so that each realised item sits at its item offset.
+    LayoutState above;
+    above.nextPosition  = first;
+    above.endPosition   = (correction != 0.0f) ? end : survivors;
+    above.currentOffset = start + correction;
+    Fill(above, recycler);
+    firstOff = start + correction;
+    endOff   = (correction != 0.0f) ? above.currentOffset : endOff;
   }
 
-  mFirstActive         = newFirst;
-  mFirstActiveOffset   = newFirstOff;
-  mLastActive          = newLast;
-  mLastActiveEndOffset = newLastEndOff;
-  mHasActiveItems      = (newFirst <= newLast);
-
-  return consumed;
+  mFirstActive         = first;
+  mFirstActiveOffset   = firstOff;
+  mLastActive          = end - 1u;
+  mLastActiveEndOffset = endOff;
+  mHasActiveItems      = (first < end);
+  // The visible items keep their screen position: the offset moves with them.
+  mScrollOffset += correction;
+  return correction;
 }
 
 } // namespace Internal

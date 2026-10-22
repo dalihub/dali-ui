@@ -32,6 +32,11 @@ namespace DALI_NAMESPACE
 namespace Ui
 {
 
+namespace Internal DALI_INTERNAL
+{
+class LayoutTransitionDispatcher;
+}
+
 /**
  * @brief Identifies which layout transition slot is being applied to a view.
  *
@@ -49,8 +54,8 @@ enum class LayoutTransitionSlot : uint8_t
  *
  * Only the CHANGE slot has multiple causes — for ENTER and EXIT the slot
  * itself implies the cause (child added / removed). @c LayoutAnimatorContext
- * exposes a @c changeCause field that is meaningful only when
- * @c slot == CHANGE.
+ * exposes @c GetChangeCause(), which is meaningful only when
+ * @c GetSlot() returns @c CHANGE.
  *
  * @note @c SIBLING_ADDED and @c SIBLING_REMOVED do NOT mean "this child was
  * added/removed". They mean "this existing child moved BECAUSE a sibling was
@@ -109,7 +114,7 @@ enum class LayoutReflowScope : uint8_t
  * @brief Per-slot timing for declarative spec-mode layout transitions.
  *
  * Used by:
- *  - @c LayoutBoundsEffect::timing (ENTER/EXIT bounds channel)
+ *  - @c LayoutBoundsEffect::GetTiming() (ENTER/EXIT bounds channel)
  *  - default CHANGE timing (via @c LayoutTransition::SetChangeTiming(timing))
  *  - cause-specific CHANGE timing (via @c SetChangeTiming(cause, timing))
  *
@@ -122,8 +127,8 @@ enum class LayoutReflowScope : uint8_t
  *  - @c AlphaFunction::SIN
  * Target-ending curves such as @c EASE_OUT_BACK are accepted.
  *
- * @note Distinct from @c LayoutAnimatorTiming. The field layout is identical
- * but the semantics differ:
+ * @note Distinct from @c LayoutAnimatorTiming. Both expose duration, alpha,
+ * and delay, but the semantics differ:
  *  - @c LayoutTransitionTiming: dali-core Animation entry timing (declarative).
  *  - @c LayoutAnimatorTiming: callback progress driver (imperative).
  * The two types are not interchangeable — setter signatures enforce this.
@@ -135,13 +140,64 @@ enum class LayoutReflowScope : uint8_t
  * immediately, no animation". In that case @c delay is also ignored —
  * the endpoint is applied synchronously without any waiting period.
  * To delay an instant settle, schedule the operation from application
- * code instead of relying on @c LayoutTransitionTiming::delay.
+ * code instead of relying on @c LayoutTransitionTiming::SetDelay().
  */
 struct DALI_UI_API LayoutTransitionTiming
 {
-  Duration      duration{0.3f};
-  AlphaFunction alpha{AlphaFunction::EASE_IN_OUT};
-  Duration      delay;
+  /** @brief Creates timing with a 300ms duration, EASE_IN_OUT alpha, and no delay. */
+  LayoutTransitionTiming();
+
+  /**
+   * @brief Creates timing from a duration, alpha function, and optional delay.
+   * @param[in] duration The duration of the transition
+   * @param[in] alpha The alpha function
+   * @param[in] delay The delay before the transition
+   * @note Validation is performed when this timing is registered with a LayoutTransition.
+   */
+  LayoutTransitionTiming(Duration      duration,
+                         AlphaFunction alpha = AlphaFunction(AlphaFunction::EASE_IN_OUT),
+                         Duration      delay = Duration());
+
+  /** @brief Copies the timing into independent storage. */
+  LayoutTransitionTiming(const LayoutTransitionTiming& other);
+
+  /** @brief Moves the timing. The source may only be destroyed or reassigned. */
+  LayoutTransitionTiming(LayoutTransitionTiming&& other) noexcept;
+
+  /** @brief Copies the timing into independent storage. */
+  LayoutTransitionTiming& operator=(const LayoutTransitionTiming& other);
+
+  /** @brief Moves the timing. The source may only be destroyed or reassigned. */
+  LayoutTransitionTiming& operator=(LayoutTransitionTiming&& other) noexcept;
+
+  /** @brief Destroys the timing. */
+  ~LayoutTransitionTiming();
+
+  /** @brief Sets the duration and returns this timing. Non-positive values are permitted. */
+  LayoutTransitionTiming& SetDuration(Duration duration);
+
+  /** @brief Returns the duration. */
+  Duration GetDuration() const;
+
+  /** @brief Sets the alpha function and returns this timing. */
+  LayoutTransitionTiming& SetAlpha(AlphaFunction alpha);
+
+  /**
+   * @brief Returns the alpha function.
+   * @return A reference valid until this timing is assigned, moved from, or destroyed
+   * @note SetAlpha() updates the value observed through this reference.
+   */
+  const AlphaFunction& GetAlpha() const;
+
+  /** @brief Sets the delay and returns this timing. */
+  LayoutTransitionTiming& SetDelay(Duration delay);
+
+  /** @brief Returns the delay. */
+  Duration GetDelay() const;
+
+private:
+  struct Impl;
+  Impl* mImpl;
 };
 
 /**
@@ -164,6 +220,11 @@ enum class LayoutBoundsUnit : uint8_t
  *
  * Negative values are permitted — they encode a direction (e.g. a slide
  * starts from the negative side of an edge).
+ *
+ * @note The public value and unit fields form a fixed ABI representation.
+ * Their types, order and count, and the underlying type of LayoutBoundsUnit,
+ * must remain unchanged. Compound lengths require a separate type or API.
+ * Finite-value validation occurs when the containing effect is registered.
  *
  * @code
  *   LayoutBoundsLength::Pixel(40.0f);          // 40px
@@ -196,6 +257,9 @@ struct DALI_UI_API LayoutBoundsLength
  * Used for bounds-effect translation (slide offsets). Each axis may use its
  * own unit; mixing PIXEL on one axis and SELF_FRACTION on the other is
  * supported.
+ *
+ * @note The two public axes and their scalar lengths are a fixed ABI
+ * representation. Copies contain independent axis values.
  */
 struct DALI_UI_API LayoutBoundsOffset
 {
@@ -213,7 +277,7 @@ struct DALI_UI_API LayoutBoundsOffset
  *
  * Modes:
  *  - @c AUTO: clip only when the effect changes the view's size factor
- *    (timed non-identity @c sizeFactorX/Y). Offset-only slides are not
+ *    (timed non-identity size factors). Offset-only slides are not
  *    clipped automatically because the effect is intended to be visible
  *    outside the layout-arranged region.
  *  - @c NONE: never apply transient clipping. Use when the parent already
@@ -234,8 +298,8 @@ enum class LayoutBoundsClipMode : uint8_t
 /**
  * @brief Declarative bounds effect attached to the ENTER or EXIT slot.
  *
- * A @c LayoutBoundsEffect describes a translation (@c offset) and/or scale
- * (@c sizeFactorX/Y around @c anchorX/Y) that the dispatcher composes onto
+ * A @c LayoutBoundsEffect describes an offset and/or size factors around
+ * an anchor that the dispatcher composes onto
  * the layout-arranged bounds. The dispatcher synthesises a single
  * @c Animation for each ENTER/EXIT slot dispatch that combines the visual
  * spec entries and the bounds endpoint, so lifecycle callbacks fire
@@ -248,87 +312,100 @@ enum class LayoutBoundsClipMode : uint8_t
  * | ENTER | final layout bounds      | ComputeEndpoint(base, effect) | base                         |
  * | EXIT  | current visual bounds    | base                          | ComputeEndpoint(base, effect)|
  *
- * Chained setters are provided so callers do not silently produce a no-op
- * effect by setting @c offset / @c sizeFactor without flipping the
- * @c hasOffset / @c hasSizeFactor flags. Use the @c LayoutBoundsEffects
- * factory functions (slide / expand / shrink) for the common cases.
+ * SetOffset() and SetSizeFactor() enable their channels; ClearOffset() and
+ * ClearSizeFactor() disable and reset them. Copies hold independent settings.
+ * Use the @c LayoutBoundsEffects factory functions (slide / expand / shrink)
+ * for the common cases.
  *
  * Validation: @c AlphaFunction::REVERSE, @c AlphaFunction::BOUNCE, and
- * @c AlphaFunction::SIN in @c timing, negative @c sizeFactorX/Y, and
- * @c anchorX/Y outside @c [0,1] are rejected at registration with
- * @c DALI_ABORT. Negative @c offset values and
- * @c sizeFactor > 1 are permitted.
+ * @c AlphaFunction::SIN in the timing, negative size factors, and
+ * anchor values outside @c [0,1] are rejected at registration with
+ * @c DALI_ABORT. Negative offsets and size factors greater than 1 are
+ * permitted.
  */
 struct DALI_UI_API LayoutBoundsEffect
 {
-  LayoutTransitionTiming timing;
+  /** @brief Creates an effect with no offset or size-factor channel enabled. */
+  LayoutBoundsEffect();
 
-  bool               hasOffset{false};
-  LayoutBoundsOffset offset;
+  /** @brief Copies the effect and its timing into independent storage. */
+  LayoutBoundsEffect(const LayoutBoundsEffect& other);
 
-  bool  hasSizeFactor{false};
-  float sizeFactorX{1.0f};
-  float sizeFactorY{1.0f};
-  float anchorX{0.5f};
-  float anchorY{0.5f};
+  /** @brief Moves the effect. The source may only be destroyed or reassigned. */
+  LayoutBoundsEffect(LayoutBoundsEffect&& other) noexcept;
 
-  LayoutBoundsClipMode clipMode{LayoutBoundsClipMode::AUTO};
+  /** @brief Copies the effect and its timing into independent storage. */
+  LayoutBoundsEffect& operator=(const LayoutBoundsEffect& other);
 
-  LayoutBoundsEffect& SetTiming(const LayoutTransitionTiming& t)
-  {
-    timing = t;
-    return *this;
-  }
+  /** @brief Moves the effect. The source may only be destroyed or reassigned. */
+  LayoutBoundsEffect& operator=(LayoutBoundsEffect&& other) noexcept;
 
-  LayoutBoundsEffect& SetOffset(LayoutBoundsOffset value)
-  {
-    hasOffset = true;
-    offset    = value;
-    return *this;
-  }
+  /** @brief Destroys the effect. */
+  ~LayoutBoundsEffect();
 
-  LayoutBoundsEffect& SetOffset(LayoutBoundsLength xv, LayoutBoundsLength yv)
-  {
-    hasOffset = true;
-    offset    = {xv, yv};
-    return *this;
-  }
+  /** @brief Copies the timing and returns this effect. */
+  LayoutBoundsEffect& SetTiming(const LayoutTransitionTiming& timing);
 
-  LayoutBoundsEffect& ClearOffset()
-  {
-    hasOffset = false;
-    offset    = {};
-    return *this;
-  }
+  /**
+   * @brief Returns the effect's timing.
+   * @return A reference valid until this effect is assigned, moved from, or destroyed
+   * @note SetTiming() updates the value observed through this reference.
+   */
+  const LayoutTransitionTiming& GetTiming() const;
 
-  LayoutBoundsEffect& SetSizeFactor(float x, float y)
-  {
-    hasSizeFactor = true;
-    sizeFactorX   = x;
-    sizeFactorY   = y;
-    return *this;
-  }
+  /** @brief Enables the offset channel, sets its value, and returns this effect. */
+  LayoutBoundsEffect& SetOffset(LayoutBoundsOffset value);
 
-  LayoutBoundsEffect& ClearSizeFactor()
-  {
-    hasSizeFactor = false;
-    sizeFactorX   = 1.0f;
-    sizeFactorY   = 1.0f;
-    return *this;
-  }
+  /** @brief Enables the offset channel, sets both axes, and returns this effect. */
+  LayoutBoundsEffect& SetOffset(LayoutBoundsLength x, LayoutBoundsLength y);
 
-  LayoutBoundsEffect& SetAnchor(float x, float y)
-  {
-    anchorX = x;
-    anchorY = y;
-    return *this;
-  }
+  /** @brief Disables the offset channel, resets it to zero pixels, and returns this effect. */
+  LayoutBoundsEffect& ClearOffset();
 
-  LayoutBoundsEffect& SetClipMode(LayoutBoundsClipMode mode)
-  {
-    clipMode = mode;
-    return *this;
-  }
+  /** @brief Returns whether the offset channel is enabled. */
+  bool HasOffset() const;
+
+  /**
+   * @brief Returns the offset without copying its axis values.
+   * @return A reference valid until this effect is assigned, moved from, or destroyed
+   * @note SetOffset() and ClearOffset() update the value observed through this
+   * reference. To edit an offset, copy it, modify the copy, then call SetOffset().
+   */
+  const LayoutBoundsOffset& GetOffset() const;
+
+  /** @brief Enables the size-factor channel, sets both axes, and returns this effect. */
+  LayoutBoundsEffect& SetSizeFactor(float x, float y);
+
+  /** @brief Disables the size-factor channel, resets both axes to 1, and returns this effect. */
+  LayoutBoundsEffect& ClearSizeFactor();
+
+  /** @brief Returns whether the size-factor channel is enabled. */
+  bool HasSizeFactor() const;
+
+  /** @brief Returns the horizontal size factor. */
+  float GetSizeFactorX() const;
+
+  /** @brief Returns the vertical size factor. */
+  float GetSizeFactorY() const;
+
+  /** @brief Sets the anchor on both axes and returns this effect. */
+  LayoutBoundsEffect& SetAnchor(float x, float y);
+
+  /** @brief Returns the horizontal anchor, which defaults to 0.5. */
+  float GetAnchorX() const;
+
+  /** @brief Returns the vertical anchor, which defaults to 0.5. */
+  float GetAnchorY() const;
+
+  /** @brief Sets the clipping mode and returns this effect. */
+  LayoutBoundsEffect& SetClipMode(LayoutBoundsClipMode mode);
+
+  /** @brief Returns the clipping mode, which defaults to AUTO. */
+  LayoutBoundsClipMode GetClipMode() const;
+
+private:
+  struct Impl;
+  Impl* mImpl;
 };
 
 /**
@@ -358,10 +435,10 @@ struct DALI_UI_API LayoutBoundsEffect
  * Spec-mode visual specs and bounds animations route entries that pass
  * LayoutTransition validation through dali-core's @c Animation. Visual
  * specs reject @c AlphaFunction::REVERSE. CHANGE timing and
- * @c LayoutBoundsEffect::timing additionally reject @c BOUNCE and @c SIN
+ * bounds-effect timing additionally reject @c BOUNCE and @c SIN
  * because layout-owned bounds must finish at the target. See the
  * AlphaFunction restrictions section in
- * @c docs/layout-transition.md for the rationale.
+ * @c wiki/Layout-Transition.md for the rationale.
  *
  * @note @c duration should be positive. A non-positive @c duration
  * collapses @c rawProgress to @c 1.0 on the first (and only) tick,
@@ -374,69 +451,154 @@ struct DALI_UI_API LayoutBoundsEffect
  */
 struct DALI_UI_API LayoutAnimatorTiming
 {
-  Duration      duration{0.3f};                    ///< Total duration of the progress sweep (default 300ms; should be positive)
-  AlphaFunction alpha{AlphaFunction::EASE_IN_OUT}; ///< Shaping function applied to raw progress (BEZIER/SPRING fall back to linear in animator mode)
-  Duration      delay;                             ///< Delay before progress starts to advance (only honoured when duration is positive)
+  /** @brief Creates timing with a 300ms duration, EASE_IN_OUT alpha, and no delay. */
+  LayoutAnimatorTiming();
+
+  /**
+   * @brief Creates timing from a duration, alpha function, and optional delay.
+   * @param[in] duration The duration of the transition
+   * @param[in] alpha The alpha function
+   * @param[in] delay The delay before the transition
+   * @note Validation is performed when this timing is registered with a LayoutTransition.
+   */
+  LayoutAnimatorTiming(Duration      duration,
+                       AlphaFunction alpha = AlphaFunction(AlphaFunction::EASE_IN_OUT),
+                       Duration      delay = Duration());
+
+  /** @brief Copies the timing into independent storage. */
+  LayoutAnimatorTiming(const LayoutAnimatorTiming& other);
+
+  /** @brief Moves the timing. The source may only be destroyed or reassigned. */
+  LayoutAnimatorTiming(LayoutAnimatorTiming&& other) noexcept;
+
+  /** @brief Copies the timing into independent storage. */
+  LayoutAnimatorTiming& operator=(const LayoutAnimatorTiming& other);
+
+  /** @brief Moves the timing. The source may only be destroyed or reassigned. */
+  LayoutAnimatorTiming& operator=(LayoutAnimatorTiming&& other) noexcept;
+
+  /** @brief Destroys the timing. */
+  ~LayoutAnimatorTiming();
+
+  /** @brief Sets the duration and returns this timing. Non-positive values are permitted. */
+  LayoutAnimatorTiming& SetDuration(Duration duration);
+
+  /** @brief Returns the duration. */
+  Duration GetDuration() const;
+
+  /** @brief Sets the alpha function and returns this timing. */
+  LayoutAnimatorTiming& SetAlpha(AlphaFunction alpha);
+
+  /**
+   * @brief Returns the alpha function.
+   * @return A reference valid until this timing is assigned, moved from, or destroyed
+   * @note SetAlpha() updates the value observed through this reference.
+   */
+  const AlphaFunction& GetAlpha() const;
+
+  /** @brief Sets the delay and returns this timing. */
+  LayoutAnimatorTiming& SetDelay(Duration delay);
+
+  /** @brief Returns the delay. */
+  Duration GetDelay() const;
+
+private:
+  struct Impl;
+  Impl* mImpl;
 };
 
 /**
  * @brief Context passed to a layout animator callback on each frame.
  *
- * The framework allocates one context per (view, slot) pair while the
- * transition is in flight and updates @c progress / @c rawProgress every
- * frame. @c fromBounds / @c toBounds are captured at the start of the
- * transition and reset on interrupt.
+ * The framework supplies a read-only context for each callback invocation.
+ * The callback reference is valid only during that invocation. Copying the
+ * context creates an independently owned snapshot that remains valid after
+ * the callback returns and does not change on later ticks. The snapshot
+ * retains the same View handle; it does not copy the View itself.
+ *
+ * GetFromBounds() and GetToBounds() return bounds captured at the start of
+ * the transition and reset on interrupt. Contexts are created internally;
+ * applications obtain snapshots by copying a callback context.
  *
  * The callback should write to the view's @c Actor properties only
  * (POSITION_X/Y, SIZE_WIDTH/HEIGHT, OPACITY, SCALE etc.). It must not modify
  * the view tree, request layout, or rebind the LayoutTransition during the
  * callback.
  *
- * @note For ENTER and EXIT slots, @c fromBounds equals @c toBounds — the
+ * @note For ENTER and EXIT slots, GetFromBounds() equals GetToBounds() — the
  * layout system has already placed the child at its final position by
  * the time the animator runs, so the dispatcher has no concept of an
  * "enter from" or "exit to" position. The callback may write Actor
  * properties, including bounds properties, but any bounds override is
  * application-owned: the callback must provide the interpolation and
  * restore the desired final state. Only CHANGE animators see distinct
- * @c fromBounds (pre-pass) and @c toBounds (post-pass) from the
+ * GetFromBounds() (pre-pass) and GetToBounds() (post-pass) from the
  * dispatcher.
  *
- * @note @c changeCause is meaningful only when @c slot == CHANGE.
+ * @note GetChangeCause() is meaningful only when GetSlot() returns CHANGE.
  * For ENTER/EXIT it defaults to @c LayoutChangeCause::OTHER and
  * must not be branched on.
  */
 struct DALI_UI_API LayoutAnimatorContext
 {
-  View                 view; ///< Target view handle. Safe to use during the callback. Do NOT capture by value into a long-lived closure — the dispatcher holds the LayoutTransition (which owns the callback), and the View holds the LayoutTransition, so a captured @c View forms a reference cycle. Use @c WeakHandle<View> if a captured reference is required.
-  LayoutTransitionSlot slot;
-  LayoutChangeCause    changeCause; ///< CHANGE only; @c OTHER for ENTER/EXIT
-  /// Alpha-applied progress value passed to the animator callback.
-  ///
-  /// For the honoured built-in forward easing modes listed in the
-  /// LayoutTransition alpha support table, this value follows the
-  /// transition from 0 toward 1 as the transition advances.
-  ///
-  /// CUSTOM_FUNCTION output is application-owned and may produce values
-  /// outside [0, 1], non-monotonic values, or reverse-shaped values.
-  /// Do not use progress == 1.0 as a lifecycle completion signal; use
-  /// SetOnFinished for completion, chaining, or view-tree mutation.
-  float progress;
+  /** @brief Creates an independently owned snapshot of a callback context. */
+  LayoutAnimatorContext(const LayoutAnimatorContext& other);
 
-  /// Linear elapsed progress in [0, 1] before alpha.
-  ///
-  /// For positive duration, this remains 0 during delay, then advances
-  /// monotonically from 0 toward 1 over the active duration and is
-  /// clamped at 1 once the active duration has elapsed. For non-positive
-  /// duration, the animator collapses to rawProgress = 1.0 on its first
-  /// tick.
-  ///
-  /// rawProgress is useful as a per-frame linear signal. It is not the
-  /// lifecycle completion contract; use SetOnFinished for completion,
-  /// chaining, or view-tree mutation.
-  float      rawProgress;
-  LayoutRect fromBounds; ///< Bounds at slot entry (or last interrupt) — visual coords (RTL-mirrored on RTL parents)
-  LayoutRect toBounds;   ///< Bounds the layout pass produced — visual coords (RTL-mirrored on RTL parents)
+  /** @brief Replaces this snapshot with an independent copy of another context. */
+  LayoutAnimatorContext& operator=(const LayoutAnimatorContext& other);
+
+  /** @brief Destroys this context or snapshot. */
+  ~LayoutAnimatorContext();
+
+  /**
+   * @brief Returns the target View handle.
+   * @warning Do not retain this handle or a context snapshot in the owning
+   * transition's callback closure: View and LayoutTransition references can
+   * form a cycle. Use WeakHandle<View> for a captured reference.
+   */
+  View GetView() const;
+
+  /** @brief Returns the transition slot. */
+  LayoutTransitionSlot GetSlot() const;
+
+  /** @brief Returns the CHANGE cause, or OTHER for ENTER and EXIT. */
+  LayoutChangeCause GetChangeCause() const;
+
+  /**
+   * @brief Returns progress after the alpha function has been applied.
+   *
+   * Honoured built-in forward easing modes follow progress from 0 toward 1.
+   * CUSTOM_FUNCTION output is application-owned and may fall outside [0, 1],
+   * be non-monotonic, or be reverse-shaped. Use SetOnFinished for completion,
+   * chaining, or view-tree mutation instead of comparing progress with 1.
+   */
+  float GetProgress() const;
+
+  /**
+   * @brief Returns linear elapsed progress in [0, 1] before alpha.
+   *
+   * For positive duration, progress stays at 0 during delay and then advances
+   * to 1 over the active duration. Non-positive duration gives 1 on the first
+   * tick. Use SetOnFinished for lifecycle completion and view-tree mutation.
+   */
+  float GetRawProgress() const;
+
+  /** @brief Returns the entry bounds in visual coordinates, mirrored for RTL parents. */
+  LayoutRect GetFromBounds() const;
+
+  /** @brief Returns the target bounds in visual coordinates, mirrored for RTL parents. */
+  LayoutRect GetToBounds() const;
+
+private:
+  friend class Internal::LayoutTransitionDispatcher;
+
+  struct Impl;
+
+  /** @brief Borrows invocation-local storage owned by the dispatcher. */
+  DALI_INTERNAL explicit LayoutAnimatorContext(Impl* impl);
+
+  Impl* mImpl;
+  bool  mOwnsImpl;
 };
 
 } // namespace Ui

@@ -63,7 +63,18 @@ public:
   void SetBodyHorizontalMargin(float left, float right);
   void SetBodyCornerRadius(float radius);
 
-  ItemOffsets           GetItemOffsets(const ItemViewHolder& holder) const override;
+  /**
+   * @brief Returns the horizontal margins reserved around a group body item.
+   *
+   * The start/end values represent the physical left/right margins set by
+   * SetBodyHorizontalMargin(), without swapping for right-to-left layouts.
+   * Top and bottom are always zero. Non-body items receive zero offsets.
+   *
+   * @param[in] holder The item whose row type determines whether margins apply.
+   * @return Insets in pixels reserved around the item.
+   */
+  Insets GetItemOffsets(const ItemViewHolder& holder) const override;
+
   void                  OnLayoutStart() override;
   void                  OnItemActivated(ItemViewHolder& holder, View scroller) override;
   void                  OnItemRecycled(const ItemViewHolder& holder) override;

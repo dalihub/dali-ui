@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/events/pan-gesture-devel.h>
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <stdlib.h>
 #include <iostream>
@@ -2231,5 +2232,187 @@ int UtcDaliEdgeEffectStateTransitionsAndSignalsP(void)
   DALI_TEST_CHECK(&effect.ReleaseSignal());
   DALI_TEST_CHECK(&effect.AbsorbSignal());
   DALI_TEST_CHECK(&effect.FinishedSignal());
+  END_TEST;
+}
+
+// An animated scroll keeps its original endpoint while layout shrinks the scrollable
+// range underneath it. When the animation finishes, the settled position must be the
+// clamped one, and the content actor must agree with it: nothing may be left parked
+// past the new maximum.
+int UtcDaliScrollViewAnimationFinishClampsAfterRangeShrinkP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+  scrollView.SetContent(content);
+  window.Add(scrollView);
+
+  application.SendNotification();
+  application.Render();
+
+  // Scrollable 600 over a 200 viewport: the maximum scroll position is 400.
+  // Fixed fling duration so the animation length does not depend on the range.
+  scrollView.SetMinimumFlingDuration(100);
+  scrollView.SetMaximumFlingDuration(100);
+
+  scrollView.ScrollTo(Vector2(0.0f, 400.0f), true);
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(scrollView.IsScrolling());
+
+  // The content shrinks mid-animation: the maximum scroll position becomes 100.
+  content.SetRequestedHeight(300.0f);
+  application.SendNotification();
+
+  application.Render(100);
+  application.Render(100);
+  application.Render(100);
+  application.SendNotification();
+
+  DALI_TEST_CHECK(!scrollView.IsScrolling());
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 100.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -100.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// Coverage keeper: RefreshViewport returns before reading the viewport while a scroll view
+// has no content (UpdateScrollingProperties caches the viewport only once content exists).
+// A content-less scroll view laid out, resized and laid out again takes its new size, stays
+// at offset 0 and never starts scrolling.
+// Passes at 3d2c266e as well: it exists so that the content-less return is executed.
+int UtcDaliScrollViewRefreshViewportWithoutContentP(void)
+{
+  UiTestApplication application;
+  ScrollView        scrollView = ScrollView::New();
+  scrollView.SetRequestedWidth(100.0f);
+  scrollView.SetRequestedHeight(100.0f);
+  application.GetWindow().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  scrollView.SetRequestedHeight(300.0f);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(!scrollView.GetContent());
+  DALI_TEST_CHECK(!scrollView.IsScrolling());
+  DALI_TEST_EQUALS(scrollView.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 300.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition(), Vector2::ZERO, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// A layout that clamps the scroll position must also move the position drags start from.
+//
+// A 100 x 100 scroll view over 500 units of content, scrolled to 400 (content at -400). A 300
+// viewport leaves a range of 500 - 300 = 200, so the layout clamps the offset to 200 (content
+// at -200). A drag of +10 towards the start then moves the content to -190: Dragging reports
+// +10, the offset becomes 190, and no edge effect is pulled.
+// Fails at 3d2c266e because the drag started from the stale cached -400: AdjustDelta clamped
+// -390 into [-200, 0] and reported +200 (the content did not follow the finger), and the 190
+// units it could not apply were fed to the END edge effect as a pull although the finger
+// moved toward the start.
+int UtcDaliScrollViewDragAfterViewportClampFollowsFingerP(void)
+{
+  UiTestApplication application;
+  ScrollView        scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetRequestedWidth(100.0f);
+  scrollView.SetRequestedHeight(100.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(100.0f);
+  content.SetRequestedHeight(500.0f);
+  scrollView.SetContent(content);
+  EdgeEffect endEffect = EdgeEffect::New();
+  scrollView.SetEndEdgeEffect(endEffect);
+  application.GetWindow().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  scrollView.ScrollTo(Vector2(0.0f, 400.0f), false);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -400.0f, 0.001f, TEST_LOCATION);
+
+  scrollView.SetRequestedHeight(300.0f);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 200.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -200.0f, 0.001f, TEST_LOCATION);
+
+  DraggingCallback dragging;
+  scrollView.DraggingSignal().Connect(&dragging, &DraggingCallback::OnDragging);
+
+  auto&      impl = GetScrollImpl(scrollView);
+  PanGesture drag = DevelPanGesture::New(GestureState::CONTINUING);
+  DevelPanGesture::SetDisplacement(drag, Vector2(0.0f, 10.0f));
+  impl.OnDragging(drag);
+
+  DALI_TEST_CHECK(dragging.called);
+  DALI_TEST_EQUALS(dragging.deltaX, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(dragging.deltaY, 10.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -190.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 190.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_CHECK(!impl.mEndEdgeActive);
+  DALI_TEST_CHECK(endEffect.GetState() == EdgeEffect::State::IDLE);
+
+  impl.OnDragFinished(DevelPanGesture::New(GestureState::FINISHED));
+  DALI_TEST_CHECK(!scrollView.IsScrolling());
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 190.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// A padded scroll view rests its content at the padding: for offset 0, ApplyScrollPosition
+// puts the content at (padding.start, padding.top). The first drag must start from there.
+//
+// A 100 x 100 scroll view with a top padding of 20 over 500 units of content: at offset 0
+// the content sits at y = 20, and the drag range is [20 - (500 - 100), 20] = [-380, 20]. A
+// drag of -10 (towards the end) moves the content to 20 - 10 = 10, i.e. offset 10, and
+// Dragging reports -10.
+// Fails at 3d2c266e because layout applied the padding to the content but left the drag
+// cache at (0, 0): the drag started from 0 and put the content at -10 (offset 30), a jump of
+// the padding on the first touch.
+int UtcDaliScrollViewPaddedFirstDragStartsFromContentP(void)
+{
+  UiTestApplication application;
+  ScrollView        scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetRequestedWidth(100.0f);
+  scrollView.SetRequestedHeight(100.0f);
+  scrollView.SetTopPadding(20.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(100.0f);
+  content.SetRequestedHeight(500.0f);
+  scrollView.SetContent(content);
+  application.GetWindow().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), 20.0f, 0.001f, TEST_LOCATION);
+
+  DraggingCallback dragging;
+  scrollView.DraggingSignal().Connect(&dragging, &DraggingCallback::OnDragging);
+
+  auto&      impl = GetScrollImpl(scrollView);
+  PanGesture drag = DevelPanGesture::New(GestureState::CONTINUING);
+  DevelPanGesture::SetDisplacement(drag, Vector2(0.0f, -10.0f));
+  impl.OnDragging(drag);
+
+  DALI_TEST_CHECK(dragging.called);
+  DALI_TEST_EQUALS(dragging.deltaY, -10.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), 10.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 10.0f, 0.001f, TEST_LOCATION);
+
+  impl.OnDragFinished(DevelPanGesture::New(GestureState::FINISHED));
+  DALI_TEST_CHECK(!scrollView.IsScrolling());
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), 10.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }

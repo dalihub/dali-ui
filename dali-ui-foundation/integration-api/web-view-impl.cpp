@@ -54,26 +54,6 @@
 
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-
-// TEMP DEBUG (Windows LWE WebView bring-up): file logging kept while an
-// arrow-key input issue is under investigation. Remove once resolved.
-#include <cstdarg>
-#include <cstdio>
-static void WriteWebViewDebugLog(const char* format, ...)
-{
-  FILE* outputFile = nullptr;
-  if(fopen_s(&outputFile, "d:\\lwe_webview.log", "a") != 0 || outputFile == nullptr)
-  {
-    return;
-  }
-
-  va_list arguments;
-  va_start(arguments, format);
-  vfprintf(outputFile, format, arguments);
-  va_end(arguments);
-  fputc('\n', outputFile);
-  fclose(outputFile);
-}
 #endif
 
 namespace DALI_NAMESPACE
@@ -85,6 +65,10 @@ namespace Integration
 
 namespace
 {
+
+#if defined(DEBUG_ENABLED)
+Debug::Filter* gWebViewLogFilter = Debug::Filter::New(Debug::Verbose, false, "LOG_WEB_VIEW");
+#endif
 
 std::mutex    gWebEngineTypeMutex;
 WebEngineType gWebEngineType           = WebEngineType::CHROMIUM;
@@ -460,7 +444,7 @@ Dali::Property::Value WebViewImpl::GetProperty(Dali::BaseObject* object, Dali::P
 
 void WebViewImpl::OnInitialize()
 {
-  DALI_LOG_DEBUG_INFO("[WebViewImpl] OnInitialize()\n");
+  DALI_LOG_INFO(gWebViewLogFilter, Debug::Concise, "[WebViewImpl] OnInitialize()\n");
 
   ViewImpl::OnInitialize();
 
@@ -545,7 +529,7 @@ MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstrain
   float w = std::isinf(widthConstraint) ? mWebViewSize.width : widthConstraint;
   float h = std::isinf(heightConstraint) ? mWebViewSize.height : heightConstraint;
 
-  DALI_LOG_DEBUG_INFO("[WebViewImpl] OnMeasure: constraint=(%.0f,%.0f) -> (%.0f,%.0f)\n",
+  DALI_LOG_INFO(gWebViewLogFilter, Debug::Verbose, "[WebViewImpl] OnMeasure: constraint=(%.0f,%.0f) -> (%.0f,%.0f)\n",
                       widthConstraint, heightConstraint, w, h);
   return MeasuredSize(w, h);
 }
@@ -561,7 +545,7 @@ MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstrain
 // Pinned by UtcDaliArrangeCacheHitAlwaysFirstPartyLeavesNeverCacheP.
 LayoutRect WebViewImpl::OnArrange(const LayoutRect& bounds)
 {
-  DALI_LOG_DEBUG_INFO("[WebViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f)\n",
+  DALI_LOG_INFO(gWebViewLogFilter, Debug::Verbose, "[WebViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f)\n",
                       bounds.x, bounds.y, bounds.width, bounds.height);
 
   LayoutRect result = ViewImpl::OnArrange(bounds);
@@ -582,9 +566,10 @@ void WebViewImpl::OnFrameRendered()
   // Notify listeners that the web engine produced a new frame.
   EmitFrameRendered();
 
-#if defined(_MSC_VER)
-  WriteWebViewDebugLog("[WV] OnFrameRendered visualChangeReq=%d hasVisual=%d", static_cast<int>(mVisualChangeRequired), static_cast<int>(static_cast<bool>(mVisual)));
+  DALI_LOG_INFO(gWebViewLogFilter, Debug::Verbose, "[WebViewImpl] OnFrameRendered visualChangeReq=%d hasVisual=%d\n",
+                static_cast<int>(mVisualChangeRequired), static_cast<int>(static_cast<bool>(mVisual)));
 
+#if defined(_MSC_VER)
   // The web engine delivers frames asynchronously (via EventThreadCallback) rather than in
   // response to a scene change, so the DALi scene is not marked dirty and, under on-demand
   // rendering, no update/render cycle is scheduled - the freshly uploaded native-image texture
@@ -621,9 +606,6 @@ void WebViewImpl::OnFrameRendered()
   mLastRenderedNativeImageWidth  = nativeImagePtr->GetWidth();
   mLastRenderedNativeImageHeight = nativeImagePtr->GetHeight();
 
-  DALI_LOG_DEBUG_INFO("[WebViewImpl] OnFrameRendered: nativeImage=%ux%u\n",
-                      mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
-
   // Convert the native image into a URL understood by the ImageVisual.
   Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(nativeImagePtr, /*useNativeImage=*/true);
 
@@ -635,12 +617,13 @@ void WebViewImpl::OnFrameRendered()
   imageVisualMap.Insert(Dali::Ui::Integration::ImageVisual::Property::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
 
   mVisual = Ui::Integration::VisualFactory::Get().CreateVisual(imageVisualMap);
-#if defined(_MSC_VER)
+#if defined(DEBUG_ENABLED)
+  if(gWebViewLogFilter && gWebViewLogFilter->IsEnabledFor(Debug::General))
   {
-    Vector3 selfSize = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
-    WriteWebViewDebugLog("[WV] created visual=%d nativeImg=%ux%u selfSize=%.0fx%.0f",
-                         (int)(bool)mVisual, mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight,
-                         selfSize.width, selfSize.height);
+    const Vector3 selfSize = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
+    DALI_LOG_INFO(gWebViewLogFilter, Debug::General, "[WebViewImpl] created visual=%d nativeImage=%ux%u selfSize=%.0fx%.0f\n",
+                  static_cast<int>(static_cast<bool>(mVisual)), mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight,
+                  selfSize.width, selfSize.height);
   }
 #endif
   if(mVisual)
@@ -679,7 +662,7 @@ void WebViewImpl::SetDisplayArea(const Dali::BoundsInteger& displayArea)
     // A size/position change requires the visual to be re-created on the next frame.
     mVisualChangeRequired = true;
 
-    DALI_LOG_DEBUG_INFO("[WebViewImpl] SetDisplayArea: (%d,%d)%dx%d -> (%d,%d)%dx%d\n",
+    DALI_LOG_INFO(gWebViewLogFilter, Debug::General, "[WebViewImpl] SetDisplayArea: (%d,%d)%dx%d -> (%d,%d)%dx%d\n",
                         mWebViewArea.x, mWebViewArea.y, mWebViewArea.width, mWebViewArea.height,
                         displayArea.x, displayArea.y, displayArea.width, displayArea.height);
 
@@ -835,7 +818,7 @@ void WebViewImpl::LoadUrl(const Dali::String& url)
 {
   if(mWebEngine)
   {
-    DALI_LOG_DEBUG_INFO("[WebViewImpl] LoadUrl: %s\n", url.CStr());
+    DALI_LOG_INFO(gWebViewLogFilter, Debug::General, "[WebViewImpl] LoadUrl: %s\n", url.CStr());
     mWebEngine.LoadUrl(ToStdString(url));
   }
 }
@@ -1465,15 +1448,19 @@ bool WebViewImpl::OnTouchEvent(const Dali::TouchEvent& touch)
 {
   if(mMouseEventsEnabled && mWebEngine)
   {
-#if defined(_MSC_VER)
+#if defined(DEBUG_ENABLED)
+    if(gWebViewLogFilter && gWebViewLogFilter->IsEnabledFor(Debug::Verbose))
     {
-      Vector3 sz = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
-      Vector2 lp = touch.GetPointCount() ? touch.GetLocalPosition(0) : Vector2::ZERO;
-      Vector2 sp = touch.GetPointCount() ? touch.GetScreenPosition(0) : Vector2::ZERO;
-      WriteWebViewDebugLog("[TOUCH] actorSize=%.0fx%.0f local=(%.0f,%.0f) screen=(%.0f,%.0f) lastImg=%ux%u",
-                           sz.width, sz.height, lp.x, lp.y, sp.x, sp.y,
-                           mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
+      const Vector3 actorSize = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
+      const bool hasPoint = touch.GetPointCount() > 0;
+      const Vector2 localPosition = hasPoint ? touch.GetLocalPosition(0) : Vector2::ZERO;
+      const Vector2 screenPosition = hasPoint ? touch.GetScreenPosition(0) : Vector2::ZERO;
+      DALI_LOG_INFO(gWebViewLogFilter, Debug::Verbose, "[WebViewImpl] touch actorSize=%.0fx%.0f local=(%.0f,%.0f) screen=(%.0f,%.0f) lastImage=%ux%u\n",
+                    actorSize.width, actorSize.height, localPosition.x, localPosition.y, screenPosition.x, screenPosition.y,
+                    mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
     }
+#endif
+#if defined(_MSC_VER)
     // Clicking the page must also give it keyboard focus (like a real browser), otherwise
     // OnKeyEvent() never fires for this control and key events never reach the web engine.
     // Route key input focus here on press, mirroring InputEditorImpl's tap-to-focus.

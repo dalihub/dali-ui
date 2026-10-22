@@ -19,6 +19,7 @@
 #include <test-native-image.h>
 #include <ui-web-engine.h>
 #include <dali.h>
+#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
 #include <ui-web-engine.h>
@@ -1532,5 +1533,48 @@ int UtcDaliWebViewFrameRenderedNativeImageInterfaceP(void)
   DALI_TEST_EQUALS(impl.mLastRenderedNativeImageHeight, 180u, TEST_LOCATION);
   DALI_TEST_CHECK(!impl.mVisualChangeRequired);
   DALI_TEST_EQUALS(frames, 3u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewVerboseDiagnosticsP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(90.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetWebViewImpl(view);
+  auto nativeImage = TestNativeImage::New(160u, 90u);
+  Test::WebEngine::SetNativeImageInterface(impl.mWebEngine, nativeImage);
+  impl.mVisualChangeRequired = true;
+  unsigned int frames = 0u;
+  view.FrameRenderedSignal().Connect(&application, [&](WebView) { ++frames; });
+
+  TouchEvent emptyTouch = TouchEvent::New(0u);
+  TouchEvent touch = TouchEvent::New(1u);
+  touch.AddPoint(0, PointState::MOTION, Vector2(20.0f, 30.0f));
+
+#if defined(DEBUG_ENABLED)
+  // The test harness runs each case in its own process. Enable the existing
+  // filters after initialization so no environment or CI changes are needed.
+  Debug::Filter::SetGlobalLogLevel(Debug::Verbose);
+#endif
+  impl.OnFrameRendered();
+  const bool emptyTouchHandled = impl.OnTouchEvent(emptyTouch);
+  const bool touchHandled = impl.OnTouchEvent(touch);
+#if defined(DEBUG_ENABLED)
+  Debug::Filter::SetGlobalLogLevel(Debug::NoLogging);
+#endif
+
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.mVisual);
+  DALI_TEST_EQUALS(impl.mLastRenderedNativeImageWidth, 160u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mLastRenderedNativeImageHeight, 90u, TEST_LOCATION);
+  DALI_TEST_CHECK(!impl.mVisualChangeRequired);
+  DALI_TEST_CHECK(emptyTouchHandled);
+  DALI_TEST_CHECK(touchHandled);
   END_TEST;
 }

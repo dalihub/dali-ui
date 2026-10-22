@@ -175,7 +175,7 @@ int UtcDaliGroupBodyDecorationLifecycleP(void)
   header.rowType = GroupRowType::HEADER;
   decoration.OnItemActivated(header, scroller);
   DALI_TEST_EQUALS(scroller.GetChildCount(), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(decoration.GetItemOffsets(header).left, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(header).start, 0.0f, 0.001f, TEST_LOCATION);
 
   ItemViewHolder top;
   top.rowType = GroupRowType::BODY_TOP;
@@ -186,7 +186,10 @@ int UtcDaliGroupBodyDecorationLifecycleP(void)
   decoration.OnItemActivated(top, scroller);
   decoration.OnItemActivated(bottom, scroller);
   DALI_TEST_EQUALS(scroller.GetChildCount(), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(decoration.GetItemOffsets(top).right, 12.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(top).end, 12.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(top).start, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(top).top, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(top).bottom, 0.0f, 0.001f, TEST_LOCATION);
 
   decoration.OnLayoutStart();
   decoration.OnItemBoundsUpdated(header, LayoutRect(0.0f, 0.0f, 100.0f, 20.0f));

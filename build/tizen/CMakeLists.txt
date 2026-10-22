@@ -245,12 +245,12 @@ ELSE()
 
   CHECK_CXX_COMPILER_FLAG(-Wno-class-memaccess HAVE_NO_CLASS_MEMACCESS)
   IF(HAVE_NO_CLASS_MEMACCESS)
-    ADD_COMPILE_OPTIONS(-Wno-class-memaccess)
+    ADD_COMPILE_OPTIONS($<$<COMPILE_LANGUAGE:CXX>:-Wno-class-memaccess>)
   ENDIF()
 
   CHECK_CXX_COMPILER_FLAG(-Wno-enum-compare-switch HAVE_NO_ENUM_COMPARE_SWITCH)
   IF(HAVE_NO_ENUM_COMPARE_SWITCH)
-    ADD_COMPILE_OPTIONS(-Wno-enum-compare-switch)
+    ADD_COMPILE_OPTIONS($<$<COMPILE_LANGUAGE:CXX>:-Wno-enum-compare-switch>)
   ENDIF()
 ENDIF()
 
@@ -321,12 +321,12 @@ IF( ENABLE_COVERAGE )
 
     ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}rename_cov_data ./rename-cov-data )
 
-    # Measure product-authored sources. Generated invoke wrappers and animation
-    # bridges are validated through their generators rather than per-line UTCs.
+    # Include generated animation sources in line coverage. Generated invoke
+    # wrappers remain excluded through their generated/ directory.
     ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}cov_data
       COMMAND ${FASTCOV_BIN} ${FASTCOV_OPTS}
         -d .
-        --exclude dali-env /usr/include /usr/local/include third-party generated/ .autogen.cpp
+        --exclude dali-env /usr/include /usr/local/include third-party generated/
         -o dali.info )
 
     # genhtml works with fastcov.py output (lcov-compatible format)

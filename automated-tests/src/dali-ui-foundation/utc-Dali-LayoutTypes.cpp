@@ -15,10 +15,11 @@
  *
  */
 
+#include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <type_traits>
+#include <utility>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -163,6 +164,79 @@ int UtcDaliGridLengthAutoP(void)
   GridLength length = GridLength::Auto();
   DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::AUTO), TEST_LOCATION);
   DALI_TEST_EQUALS(length.GetValue(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliGridLengthValueSemanticsP(void)
+{
+  GridLength copied;
+  GridLength assigned;
+  {
+    const GridLength original = GridLength::Star(2.5f);
+    GridLength       constructed(original);
+    copied   = constructed;
+    assigned = original;
+  }
+  DALI_TEST_CHECK(copied.GetType() == GridLengthType::STAR);
+  DALI_TEST_EQUALS(copied.GetValue(), 2.5f, TEST_LOCATION);
+  copied = GridLength::Absolute(40.0f);
+  DALI_TEST_CHECK(assigned.GetType() == GridLengthType::STAR);
+  DALI_TEST_EQUALS(assigned.GetValue(), 2.5f, TEST_LOCATION);
+  const GridLength& self = assigned;
+  assigned               = self;
+
+  GridLength moved(std::move(copied));
+  DALI_TEST_EQUALS(copied.GetValue(), 40.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(copied.GetType() == GridLengthType::ABSOLUTE);
+  copied = GridLength::Auto();
+  DALI_TEST_EQUALS(moved.GetValue(), 40.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(copied.GetType() == GridLengthType::AUTO);
+  GridLength moveAssigned;
+  moveAssigned = std::move(moved);
+  moved        = assigned;
+  DALI_TEST_CHECK(moveAssigned.GetType() == GridLengthType::ABSOLUTE);
+  DALI_TEST_EQUALS(moveAssigned.GetValue(), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetValue(), 2.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliGridLengthVectorValueSemanticsP(void)
+{
+  static_assert(std::is_trivially_copyable<GridLength>::value, "Grid lengths must retain scalar copy semantics");
+  static_assert(std::is_trivially_destructible<GridLength>::value, "Grid lengths must not own dynamic storage");
+  DALI_TEST_CHECK(Dali::Vector<GridLength>::BaseType);
+  Dali::Vector<GridLength> lengths;
+  lengths.Reserve(1u);
+  {
+    const GridLength source = GridLength::Star(2.0f);
+    lengths.PushBack(source);
+  }
+  lengths.PushBack(GridLength::Absolute(40.0f));
+  lengths.PushBack(GridLength::Auto());
+  lengths.Reserve(32u);
+
+  Dali::Vector<GridLength> copied(lengths);
+  Dali::Vector<GridLength> assigned;
+  assigned   = lengths;
+  lengths[0] = GridLength::Absolute(80.0f);
+  lengths.Release();
+  DALI_TEST_CHECK(copied[0].GetType() == GridLengthType::STAR);
+  DALI_TEST_EQUALS(copied[0].GetValue(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copied[1].GetValue(), 40.0f, TEST_LOCATION);
+  copied.Erase(copied.Begin() + 1);
+  DALI_TEST_EQUALS(copied.Size(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(copied[1].GetType() == GridLengthType::AUTO);
+  DALI_TEST_EQUALS(assigned.Size(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(assigned[1].GetValue(), 40.0f, TEST_LOCATION);
+
+  // A temporary fill value must initialize every new slot.
+  copied.Resize(4u, GridLength::Star(3.0f));
+  DALI_TEST_EQUALS(copied[2].GetValue(), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copied[3].GetValue(), 3.0f, TEST_LOCATION);
+  copied[2] = GridLength::Auto();
+  DALI_TEST_CHECK(copied[3].GetType() == GridLengthType::STAR);
+  copied.Clear();
+  DALI_TEST_EQUALS(assigned[0].GetValue(), 2.0f, TEST_LOCATION);
   END_TEST;
 }
 

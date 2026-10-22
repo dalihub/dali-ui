@@ -136,8 +136,8 @@ Dali::Property::Value OnBindingColor(int32_t id,
 } // namespace
 
 SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(const Dali::String& url,
-                                                                          const Int32Pair&    selectRange,
-                                                                          const Int32Pair&    deselectRange,
+                                                                          const Int32Pair&    selectionPlaybackRange,
+                                                                          const Int32Pair&    deselectionPlaybackRange,
                                                                           const Dali::String& keyPath)
 {
   SelectableLottieColorBindings colorBindings;
@@ -145,18 +145,18 @@ SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(const 
     keyPath.Empty() ? Dali::String(DEFAULT_INNER_FILL_KEY_PATH) : keyPath,
     LottieAnimation::ContentProperty::FILL_COLOR,
     SelectableLottieColorBinding::ColorPolicy::BY_SELECTION_STATE));
-  return New(url, selectRange, deselectRange, colorBindings);
+  return New(url, selectionPlaybackRange, deselectionPlaybackRange, colorBindings);
 }
 
 SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(
   const Dali::String&                  url,
-  const Int32Pair&                     selectRange,
-  const Int32Pair&                     deselectRange,
+  const Int32Pair&                     selectionPlaybackRange,
+  const Int32Pair&                     deselectionPlaybackRange,
   const SelectableLottieColorBindings& colorBindings)
 {
   ValidateColorBindings(colorBindings);
   auto* impl = new SelectableLottieAnimationViewImpl();
-  impl->SetFrameRanges(selectRange, deselectRange);
+  impl->SetPlaybackRanges(selectionPlaybackRange, deselectionPlaybackRange);
   impl->SetColorBindings(colorBindings);
   if(!url.Empty())
   {
@@ -170,12 +170,12 @@ Ui::View SelectableLottieAnimationViewImpl::GetView() const
   return mLottie;
 }
 
-void SelectableLottieAnimationViewImpl::SetFrameRanges(const Int32Pair& selectRange, const Int32Pair& deselectRange)
+void SelectableLottieAnimationViewImpl::SetPlaybackRanges(const Int32Pair& selectionPlaybackRange, const Int32Pair& deselectionPlaybackRange)
 {
-  mSelectStart   = selectRange.GetStart();
-  mSelectEnd     = selectRange.GetEnd();
-  mDeselectStart = deselectRange.GetStart();
-  mDeselectEnd   = deselectRange.GetEnd();
+  mSelectionStartFrame   = selectionPlaybackRange.GetStart();
+  mSelectionEndFrame     = selectionPlaybackRange.GetEnd();
+  mDeselectionStartFrame = deselectionPlaybackRange.GetStart();
+  mDeselectionEndFrame   = deselectionPlaybackRange.GetEnd();
 }
 
 void SelectableLottieAnimationViewImpl::SetStateColors(const Vector4& deselected, const Vector4& selected)
@@ -206,8 +206,8 @@ void SelectableLottieAnimationViewImpl::OnSelectedChanged(bool selected, bool an
   // Record the logical state before rebuilding and re-registering the dynamic properties.
   mLastSelected = selected;
 
-  int start = selected ? mSelectStart : mDeselectStart;
-  int end   = selected ? mSelectEnd : mDeselectEnd;
+  int start = selected ? mSelectionStartFrame : mDeselectionStartFrame;
+  int end   = selected ? mSelectionEndFrame : mDeselectionEndFrame;
   NormalizeFrameRange(start, end);
 
   // A snap is a terminal state request. Cancel any in-flight segment before moving to the
@@ -220,7 +220,7 @@ void SelectableLottieAnimationViewImpl::OnSelectedChanged(bool selected, bool an
   // Apply the segment before the jump so both the Lottie view and its vector task clamp against
   // the same range. Re-apply bindings afterwards because a pending visual rebuild can replace
   // the visual that owned the previous callbacks.
-  mLottie.SetMinMaxFrame(start, end);
+  mLottie.SetPlaybackRange(start, end);
   mLottie.JumpToFrame(animated ? start : end);
   if(!mLottie.GetResourceUrl().Empty())
   {
@@ -295,10 +295,10 @@ SelectableLottieAnimationViewImpl::SelectableLottieAnimationViewImpl()
   mColorBindings(),
   mDeselectedColor(1.f, 1.f, 1.f, 1.f),
   mSelectedColor(1.f, 1.f, 1.f, 1.f),
-  mSelectStart(0),
-  mSelectEnd(0),
-  mDeselectStart(0),
-  mDeselectEnd(0)
+  mSelectionStartFrame(0),
+  mSelectionEndFrame(0),
+  mDeselectionStartFrame(0),
+  mDeselectionEndFrame(0)
 {
   mLottie.SetLoopCount(1); // a segment plays once
 }

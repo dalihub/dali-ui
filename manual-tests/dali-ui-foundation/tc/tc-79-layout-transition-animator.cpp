@@ -33,11 +33,14 @@ using namespace Dali::Ui;
  * spec. All three slots share a single 0.4s EASE_IN_OUT_SINE timing.
  *
  *   - Tap "Click to ENTER": append a new colored child.
- *   - Tap "Click to EXIT": remove the last child. The leaving child's
- *     height/opacity are printed per tick ([TC79][EXIT] lines, see
- *     layout-transition-probe.h) for automated checks.
+ *   - Tap "Click to EXIT": remove the last child.
  *   - Tap "Click to CHANGE": toggle every child's requested
  *     height between 80 and 160.
+ *
+ * After each tap the affected child's height/opacity are printed per tick
+ * ([TC79][ENTER] the added child, [TC79][EXIT] the leaving child,
+ * [TC79][CHANGE] the first child; see layout-transition-probe.h) for
+ * automated checks.
  */
 class TcLayoutTransitionAnimator : public ManualTest::TestCase, public ConnectionTracker
 {
@@ -74,8 +77,8 @@ public:
 
     // Single timing shared by ENTER / EXIT / CHANGE: 0.4s EASE_IN_OUT_SINE.
     LayoutAnimatorTiming timing;
-    timing.duration = Duration(0.4f);
-    timing.alpha    = AlphaFunction(AlphaFunction::EASE_IN_OUT_SINE);
+    timing.SetDuration(Duration(0.4f));
+    timing.SetAlpha(AlphaFunction(AlphaFunction::EASE_IN_OUT_SINE));
 
     LayoutTransition transition = LayoutTransition::New();
     transition
@@ -132,43 +135,45 @@ public:
   /// layout-applied values so the child grows down into its allocated slot.
   static void OnEnter(const LayoutAnimatorContext& ctx)
   {
-    Actor actor = ctx.view;
+    Actor actor = ctx.GetView();
     if(!actor)
     {
       return;
     }
-    const float p = ctx.progress;
+    const float p = ctx.GetProgress();
     actor.SetProperty(Actor::Property::OPACITY, p);
-    actor.SetSizeHeight(ctx.toBounds.height * p);
+    actor.SetSizeHeight(ctx.GetToBounds().height * p);
   }
 
   /// EXIT animator: height fromBounds.height → 0 anchored at the TOP edge,
   /// combined with opacity 1 → 0.
   static void OnExit(const LayoutAnimatorContext& ctx)
   {
-    Actor actor = ctx.view;
+    Actor actor = ctx.GetView();
     if(!actor)
     {
       return;
     }
-    const float p = ctx.progress;
+    const float p = ctx.GetProgress();
     actor.SetProperty(Actor::Property::OPACITY, 1.0f - p);
-    actor.SetSizeHeight(ctx.fromBounds.height * (1.0f - p));
+    actor.SetSizeHeight(ctx.GetFromBounds().height * (1.0f - p));
   }
 
   /// CHANGE animator: linear interpolation of arranged bounds.
   static void OnChange(const LayoutAnimatorContext& ctx)
   {
-    Actor actor = ctx.view;
+    Actor actor = ctx.GetView();
     if(!actor)
     {
       return;
     }
-    const float p   = ctx.progress;
-    const float x   = ctx.fromBounds.x      + (ctx.toBounds.x - ctx.fromBounds.x) * p;
-    const float y   = ctx.fromBounds.y      + (ctx.toBounds.y - ctx.fromBounds.y) * p;
-    const float w   = ctx.fromBounds.width  + (ctx.toBounds.width  - ctx.fromBounds.width)  * p;
-    const float h   = ctx.fromBounds.height + (ctx.toBounds.height - ctx.fromBounds.height) * p;
+    const float      p          = ctx.GetProgress();
+    const LayoutRect fromBounds = ctx.GetFromBounds();
+    const LayoutRect toBounds   = ctx.GetToBounds();
+    const float      x          = fromBounds.x + (toBounds.x - fromBounds.x) * p;
+    const float      y          = fromBounds.y + (toBounds.y - fromBounds.y) * p;
+    const float      w          = fromBounds.width + (toBounds.width - fromBounds.width) * p;
+    const float      h          = fromBounds.height + (toBounds.height - fromBounds.height) * p;
     // CHANGE can supersede an in-flight ENTER. Animator-owned visual
     // properties are preserved on cancellation, so settle ENTER's fade here.
     actor.SetProperty(Actor::Property::OPACITY, 1.0f);
@@ -178,7 +183,7 @@ public:
     actor.SetSizeHeight(h);
   }
 
-  void AppendChild()
+  View AppendChild()
   {
     static constexpr Vector4 palette[] = {
       Color::RED, Color::GREEN, Color::BLUE,
@@ -197,6 +202,7 @@ public:
     // here would leave initial-mount children stuck at the pre-set value.
     mStack.Add(child);
     ++mNextColorIndex;
+    return child;
   }
 
   void RemoveLastChild()
@@ -209,7 +215,7 @@ public:
     // The logical child list excludes any in-flight EXIT ghost, so the last
     // logical child is the last live item.
     View last = mStack.GetChildViewAt(count - 1u);
-    mExitProbe.Start(last, "EXIT");
+    mProbe.Start(last, "EXIT");
     mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
@@ -219,7 +225,7 @@ public:
     {
       return false;
     }
-    AppendChild();
+    mProbe.Start(AppendChild(), "ENTER");
     return true;
   }
 
@@ -246,12 +252,16 @@ public:
     {
       mStack.GetChildViewAt(i).SetRequestedHeight(newHeight);
     }
+    if(count > 0u)
+    {
+      mProbe.Start(mStack.GetChildViewAt(0u), "CHANGE");
+    }
     return true;
   }
 
   void OnExit() override
   {
-    mExitProbe.Stop();
+    mProbe.Stop();
     DisconnectAll();
     mStack.Reset();
     mEnterButton.Reset();
@@ -266,7 +276,7 @@ private:
   Label        mChangeButton;
   uint32_t     mNextColorIndex;
   bool         mExpanded;
-  LayoutTransitionProbe     mExitProbe{"TC79"};
+  LayoutTransitionProbe     mProbe{"TC79"};
 };
 
 REGISTER_MANUAL_TEST(TcLayoutTransitionAnimator)

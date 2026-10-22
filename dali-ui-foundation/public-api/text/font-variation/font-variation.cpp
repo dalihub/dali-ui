@@ -23,6 +23,9 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
+#include <locale>
+#include <sstream>
 #include <string>
 
 using Dali::Integration::ToStdString;
@@ -225,23 +228,31 @@ void UpsertAxis(Dali::Vector<Axis>& axes, const Axis& axis)
 
 std::string FloatToString(float value)
 {
-  std::string text = std::to_string(value);
-
-  while(!text.empty() && text.back() == '0')
+  // To make -0.0f and 0.0f both print as "0", we check for zero first.
+  if(Dali::EqualsZero(value))
   {
-    text.pop_back();
+    return "0";
   }
 
-  if(!text.empty() && text.back() == '.')
+  std::string text = std::to_string(value);
+
+  if(text.find('.') != std::string::npos)
   {
-    text.pop_back();
+    while(!text.empty() && text.back() == '0')
+    {
+      text.pop_back();
+    }
+
+    if(!text.empty() && text.back() == '.')
+    {
+      text.pop_back();
+    }
   }
 
   if(text.empty() || text == "-")
   {
     text += '0';
   }
-
   return text;
 }
 

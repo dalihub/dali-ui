@@ -33,9 +33,6 @@ public:
   static constexpr int DEFAULT_SIZE = 8;
 
   static Vector4 Get(int seriesIndex);
-
-private:
-  static const Vector4 sColors[DEFAULT_SIZE];
 };
 
 } // namespace Integration

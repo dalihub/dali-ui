@@ -23,7 +23,10 @@
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <limits>
+#include <memory>
 #include <set>
+#include <type_traits>
+#include <utility>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -362,7 +365,7 @@ int UtcDaliLayoutTransitionSetEnterAnimatorP(void)
   UiTestApplication    application;
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.5f);
+  timing.SetDuration(Duration(0.5f));
 
   LayoutTransition& result = transition.SetEnterAnimator(LayoutAnimatorCallback::New(&NoopAnimator), timing);
   DALI_TEST_CHECK(&result == &transition);
@@ -374,7 +377,7 @@ int UtcDaliLayoutTransitionSetExitAnimatorP(void)
   UiTestApplication    application;
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.25f);
+  timing.SetDuration(Duration(0.25f));
 
   LayoutTransition& result = transition.SetExitAnimator(LayoutAnimatorCallback::New(&NoopAnimator), timing);
   DALI_TEST_CHECK(&result == &transition);
@@ -386,8 +389,8 @@ int UtcDaliLayoutTransitionSetChangeAnimatorP(void)
   UiTestApplication    application;
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.4f);
-  timing.delay    = Duration(0.05f);
+  timing.SetDuration(Duration(0.4f));
+  timing.SetDelay(Duration(0.05f));
 
   LayoutTransition& result = transition.SetChangeAnimator(LayoutAnimatorCallback::New(&NoopAnimator), timing);
   DALI_TEST_CHECK(&result == &transition);
@@ -453,7 +456,7 @@ int UtcDaliLayoutTransitionOnFinishedMutationRequestsIdleWakeP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.0f);
+  timing.SetDuration(Duration(0.0f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&NoopAnimator), timing);
   transition.SetOnFinished(LayoutLifecycleCallback::New(&MutateRequestedWidthOnFinished));
   parent.SetLayoutTransition(transition);
@@ -509,15 +512,90 @@ int UtcDaliLayoutTransitionFullChainP(void)
 
 // ─── Types defaults ───────────────────────────────────────────────────────
 
+namespace
+{
+template<typename Timing>
+void CheckTimingValueSemantics()
+{
+  const Timing defaults{};
+  DALI_TEST_EQUALS(defaults.GetDuration().InSeconds(), 0.3f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(defaults.GetAlpha().GetBuiltinFunction(), AlphaFunction::EASE_IN_OUT, TEST_LOCATION);
+  DALI_TEST_EQUALS(defaults.GetDelay().InSeconds(), 0.0f, 0.0001f, TEST_LOCATION);
+
+  const Timing durationOnly{Duration(0.4f)};
+  DALI_TEST_EQUALS(durationOnly.GetDuration().InSeconds(), 0.4f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(durationOnly.GetAlpha().GetBuiltinFunction(), AlphaFunction::EASE_IN_OUT, TEST_LOCATION);
+  DALI_TEST_EQUALS(durationOnly.GetDelay().InSeconds(), 0.0f, 0.0001f, TEST_LOCATION);
+
+  const Timing durationAndAlpha{Duration(0.5f), AlphaFunction(AlphaFunction::LINEAR)};
+  DALI_TEST_EQUALS(durationAndAlpha.GetDuration().InSeconds(), 0.5f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(durationAndAlpha.GetAlpha().GetBuiltinFunction(), AlphaFunction::LINEAR, TEST_LOCATION);
+  DALI_TEST_EQUALS(durationAndAlpha.GetDelay().InSeconds(), 0.0f, 0.0001f, TEST_LOCATION);
+
+  Timing original = {Duration(0.6f), AlphaFunction(AlphaFunction::LINEAR), Duration(0.2f)};
+  DALI_TEST_EQUALS(original.GetDelay().InSeconds(), 0.2f, 0.0001f, TEST_LOCATION);
+  Timing& chained = original.SetDuration(Duration(0.8f))
+                      .SetAlpha(AlphaFunction(AlphaFunction::EASE_OUT))
+                      .SetDelay(Duration(0.15f));
+  DALI_TEST_CHECK(&chained == &original);
+
+  Timing copied(original);
+  Timing assigned;
+  assigned = original;
+  original.SetDuration(Duration(1.6f))
+    .SetAlpha(AlphaFunction(AlphaFunction::LINEAR))
+    .SetDelay(Duration());
+  for(const Timing* snapshot : {&copied, &assigned})
+  {
+    DALI_TEST_EQUALS(snapshot->GetDuration().InSeconds(), 0.8f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(snapshot->GetAlpha().GetBuiltinFunction(), AlphaFunction::EASE_OUT, TEST_LOCATION);
+    DALI_TEST_EQUALS(snapshot->GetDelay().InSeconds(), 0.15f, 0.0001f, TEST_LOCATION);
+  }
+
+  copied.SetDuration(Duration(0.9f));
+  DALI_TEST_EQUALS(assigned.GetDuration().InSeconds(), 0.8f, 0.0001f, TEST_LOCATION);
+  const Timing& self = assigned;
+  assigned          = self;
+  DALI_TEST_EQUALS(assigned.GetDuration().InSeconds(), 0.8f, 0.0001f, TEST_LOCATION);
+
+  Timing moved(std::move(copied));
+  DALI_TEST_EQUALS(moved.GetDuration().InSeconds(), 0.9f, 0.0001f, TEST_LOCATION);
+  // A moved-from value may be destroyed or assigned a new value.
+  copied = assigned;
+  DALI_TEST_EQUALS(copied.GetDuration().InSeconds(), 0.8f, 0.0001f, TEST_LOCATION);
+  Timing moveAssigned;
+  moveAssigned = std::move(moved);
+  moved        = Timing{};
+  DALI_TEST_EQUALS(moveAssigned.GetDuration().InSeconds(), 0.9f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moveAssigned.GetAlpha().GetBuiltinFunction(), AlphaFunction::EASE_OUT, TEST_LOCATION);
+  DALI_TEST_EQUALS(moveAssigned.GetDelay().InSeconds(), 0.15f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetDuration().InSeconds(), 0.3f, 0.0001f, TEST_LOCATION);
+}
+} // namespace
+
+int UtcDaliLayoutTransitionTimingValueSemanticsP(void)
+{
+  UiTestApplication application;
+  CheckTimingValueSemantics<LayoutTransitionTiming>();
+  END_TEST;
+}
+
+int UtcDaliLayoutAnimatorTimingValueSemanticsP(void)
+{
+  UiTestApplication application;
+  CheckTimingValueSemantics<LayoutAnimatorTiming>();
+  END_TEST;
+}
+
 int UtcDaliLayoutAnimatorTimingDefaultsP(void)
 {
   UiTestApplication    application;
   LayoutAnimatorTiming timing;
-  DALI_TEST_EQUALS(timing.duration.InSeconds(), 0.3f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(timing.alpha.GetBuiltinFunction()),
+  DALI_TEST_EQUALS(timing.GetDuration().InSeconds(), 0.3f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(timing.GetAlpha().GetBuiltinFunction()),
                    static_cast<int>(AlphaFunction::EASE_IN_OUT),
                    TEST_LOCATION);
-  DALI_TEST_EQUALS(timing.delay.InSeconds(), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(timing.GetDelay().InSeconds(), 0.0f, 0.0001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1119,10 +1197,10 @@ LayoutTransitionSlot gReorderedSlot = LayoutTransitionSlot::ENTER;
 
 void CaptureReorderedAnimator(const LayoutAnimatorContext& ctx)
 {
-  if(ctx.changeCause == LayoutChangeCause::REORDERED && ctx.view)
+  if(ctx.GetChangeCause() == LayoutChangeCause::REORDERED && ctx.GetView())
   {
-    gReorderedViewIds.insert(ctx.view.GetProperty<int32_t>(Actor::Property::ID));
-    gReorderedSlot = ctx.slot;
+    gReorderedViewIds.insert(ctx.GetView().GetProperty<int32_t>(Actor::Property::ID));
+    gReorderedSlot = ctx.GetSlot();
   }
 }
 
@@ -1170,7 +1248,7 @@ int UtcDaliLayoutTransitionInsertBelowMarksAllSiblingsReorderedP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming changeTiming;
-  changeTiming.duration = Duration(0.2f);
+  changeTiming.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureReorderedAnimator), changeTiming);
   parent.SetLayoutTransition(transition);
 
@@ -1731,6 +1809,145 @@ int UtcDaliLayoutBoundsLengthParentFractionP(void)
   END_TEST;
 }
 
+int UtcDaliLayoutBoundsLengthConstructionP(void)
+{
+  static_assert(std::is_aggregate<LayoutBoundsLength>::value, "Lengths must support aggregate initialization");
+  static_assert(std::is_trivially_copyable<LayoutBoundsLength>::value, "Lengths must retain scalar copy semantics");
+  static_assert(std::is_trivially_destructible<LayoutBoundsLength>::value, "Lengths must not own dynamic storage");
+  UiTestApplication        application;
+  const LayoutBoundsLength defaults   = {};
+  const LayoutBoundsLength scalar     = {-12.0f};
+  const LayoutBoundsLength fraction   = {0.5f, LayoutBoundsUnit::PARENT_FRACTION};
+  auto                     makeLength = []() -> LayoutBoundsLength
+  {
+    return {0.75f, LayoutBoundsUnit::SELF_FRACTION};
+  };
+  const LayoutBoundsLength returned = makeLength();
+  DALI_TEST_EQUALS(defaults.value, 0.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(defaults.unit == LayoutBoundsUnit::PIXEL);
+  DALI_TEST_EQUALS(scalar.value, -12.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(scalar.unit == LayoutBoundsUnit::PIXEL);
+  DALI_TEST_EQUALS(fraction.value, 0.5f, TEST_LOCATION);
+  DALI_TEST_CHECK(fraction.unit == LayoutBoundsUnit::PARENT_FRACTION);
+  DALI_TEST_EQUALS(returned.value, 0.75f, TEST_LOCATION);
+  DALI_TEST_CHECK(returned.unit == LayoutBoundsUnit::SELF_FRACTION);
+  END_TEST;
+}
+
+int UtcDaliLayoutBoundsLengthValueSemanticsP(void)
+{
+  UiTestApplication  application;
+  LayoutBoundsLength copied;
+  LayoutBoundsLength assigned;
+  {
+    LayoutBoundsLength original = LayoutBoundsLength::SelfFraction(0.5f);
+    LayoutBoundsLength constructed(original);
+    copied         = constructed;
+    assigned       = original;
+    original.value = -20.0f;
+    original.unit  = LayoutBoundsUnit::PIXEL;
+  }
+  DALI_TEST_EQUALS(copied.value, 0.5f, TEST_LOCATION);
+  DALI_TEST_CHECK(copied.unit == LayoutBoundsUnit::SELF_FRACTION);
+  copied.value = 12.0f;
+  copied.unit  = LayoutBoundsUnit::PIXEL;
+  DALI_TEST_EQUALS(assigned.value, 0.5f, TEST_LOCATION);
+  DALI_TEST_CHECK(assigned.unit == LayoutBoundsUnit::SELF_FRACTION);
+  const LayoutBoundsLength& self = assigned;
+  assigned                       = self;
+
+  LayoutBoundsLength moved(std::move(copied));
+  DALI_TEST_EQUALS(copied.value, 12.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(copied.unit == LayoutBoundsUnit::PIXEL);
+  copied = LayoutBoundsLength::ParentFraction(0.25f);
+  DALI_TEST_EQUALS(moved.value, 12.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(moved.unit == LayoutBoundsUnit::PIXEL);
+  LayoutBoundsLength moveAssigned;
+  moveAssigned = std::move(moved);
+  moved        = assigned;
+  DALI_TEST_EQUALS(moveAssigned.value, 12.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(copied.unit == LayoutBoundsUnit::PARENT_FRACTION);
+  DALI_TEST_EQUALS(moved.value, 0.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutBoundsOffsetValueSemanticsP(void)
+{
+  static_assert(std::is_aggregate<LayoutBoundsOffset>::value, "Offsets must support aggregate initialization");
+  static_assert(std::is_trivially_copyable<LayoutBoundsOffset>::value, "Offsets must retain scalar copy semantics");
+  UiTestApplication  application;
+  LayoutBoundsOffset copied;
+  LayoutBoundsOffset assigned;
+  {
+    LayoutBoundsOffset original{LayoutBoundsLength::Pixel(12.0f), LayoutBoundsLength::SelfFraction(0.5f)};
+    LayoutBoundsOffset constructed(original);
+    copied   = constructed;
+    assigned = original;
+    original.x.value = 80.0f;
+    original.y.unit  = LayoutBoundsUnit::PARENT_FRACTION;
+  }
+  copied.x.value = -20.0f;
+  copied.y.value = 0.25f;
+  copied.y.unit  = LayoutBoundsUnit::PARENT_FRACTION;
+  DALI_TEST_EQUALS(assigned.x.value, 12.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(assigned.x.unit == LayoutBoundsUnit::PIXEL);
+  DALI_TEST_EQUALS(assigned.y.value, 0.5f, TEST_LOCATION);
+  DALI_TEST_CHECK(assigned.y.unit == LayoutBoundsUnit::SELF_FRACTION);
+  END_TEST;
+}
+
+int UtcDaliLayoutBoundsEffectOffsetReferenceP(void)
+{
+  static_assert(std::is_same<decltype(std::declval<const LayoutBoundsEffect&>().GetOffset()),
+                             const LayoutBoundsOffset&>::value,
+                "Offset lookup must preserve its const-reference contract");
+  UiTestApplication  application;
+  LayoutBoundsEffect effect;
+  effect.SetOffset(LayoutBoundsLength::SelfFraction(0.5f), LayoutBoundsLength::ParentFraction(-0.25f));
+  const LayoutBoundsOffset& observed = effect.GetOffset();
+  LayoutBoundsOffset        edited   = observed;
+  edited.x.value                     = 20.0f;
+  edited.x.unit                      = LayoutBoundsUnit::PIXEL;
+  DALI_TEST_EQUALS(observed.x.value, 0.5f, TEST_LOCATION);
+  effect.SetOffset(edited);
+  DALI_TEST_CHECK(&observed == &effect.GetOffset());
+  DALI_TEST_EQUALS(observed.x.value, 20.0f, TEST_LOCATION);
+  edited.x.value = 80.0f;
+  DALI_TEST_EQUALS(observed.x.value, 20.0f, TEST_LOCATION);
+
+  LayoutBoundsEffect snapshot(effect);
+  effect.ClearOffset();
+  DALI_TEST_CHECK(!effect.HasOffset());
+  DALI_TEST_CHECK(&observed == &effect.GetOffset());
+  DALI_TEST_EQUALS(observed.x.value, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(observed.y.value, 0.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(observed.x.unit == LayoutBoundsUnit::PIXEL);
+  DALI_TEST_CHECK(observed.y.unit == LayoutBoundsUnit::PIXEL);
+  DALI_TEST_CHECK(snapshot.HasOffset());
+  DALI_TEST_EQUALS(snapshot.GetOffset().x.value, 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.GetOffset().y.value, -0.25f, TEST_LOCATION);
+  DALI_TEST_CHECK(snapshot.GetOffset().y.unit == LayoutBoundsUnit::PARENT_FRACTION);
+  END_TEST;
+}
+
+int UtcDaliLayoutBoundsEffectNonFiniteOffsetRejectedN(void)
+{
+  UiTestApplication  application;
+  LayoutTransition   transition = LayoutTransition::New();
+  LayoutBoundsLength length;
+  LayoutBoundsEffect effect;
+  length.value = std::numeric_limits<float>::quiet_NaN();
+  effect.SetOffset(length, LayoutBoundsLength::Pixel(0.0f));
+  DALI_TEST_ASSERTION(transition.SetEnterBoundsEffect(effect), "must be finite");
+  length.value = std::numeric_limits<float>::infinity();
+  length.unit  = LayoutBoundsUnit::SELF_FRACTION;
+  effect.SetOffset(LayoutBoundsLength::Pixel(0.0f), length);
+  DALI_TEST_ASSERTION(transition.SetExitBoundsEffect(effect), "must be finite");
+  effect.ClearOffset();
+  transition.SetEnterBoundsEffect(effect);
+  END_TEST;
+}
+
 // ─── LayoutBoundsEffect chained setters ───────────────────────────────────
 
 int UtcDaliLayoutBoundsEffectChainedSettersP(void)
@@ -1744,26 +1961,28 @@ int UtcDaliLayoutBoundsEffectChainedSettersP(void)
 
   LayoutBoundsEffect& b = effect.SetOffset(LayoutBoundsLength::Pixel(10.0f), LayoutBoundsLength::Pixel(-20.0f));
   DALI_TEST_CHECK(&b == &effect);
-  DALI_TEST_EQUALS(effect.hasOffset, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.HasOffset(), true, TEST_LOCATION);
 
   LayoutBoundsEffect& c = effect.SetSizeFactor(0.5f, 2.0f);
   DALI_TEST_CHECK(&c == &effect);
-  DALI_TEST_EQUALS(effect.hasSizeFactor, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.HasSizeFactor(), true, TEST_LOCATION);
 
   LayoutBoundsEffect& d = effect.SetAnchor(0.0f, 1.0f);
   DALI_TEST_CHECK(&d == &effect);
 
   LayoutBoundsEffect& e = effect.SetClipMode(LayoutBoundsClipMode::NONE);
   DALI_TEST_CHECK(&e == &effect);
-  DALI_TEST_EQUALS(static_cast<int>(effect.clipMode),
+  DALI_TEST_EQUALS(static_cast<int>(effect.GetClipMode()),
                    static_cast<int>(LayoutBoundsClipMode::NONE),
                    TEST_LOCATION);
 
   effect.ClearOffset();
-  DALI_TEST_EQUALS(effect.hasOffset, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.HasOffset(), false, TEST_LOCATION);
 
   effect.ClearSizeFactor();
-  DALI_TEST_EQUALS(effect.hasSizeFactor, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.HasSizeFactor(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetSizeFactorX(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetSizeFactorY(), 1.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1771,16 +1990,78 @@ int UtcDaliLayoutBoundsEffectDefaultsP(void)
 {
   UiTestApplication  application;
   LayoutBoundsEffect effect;
-  DALI_TEST_EQUALS(effect.hasOffset, false, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.hasSizeFactor, false, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.sizeFactorX, 1.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.sizeFactorY, 1.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.anchorX, 0.5f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.anchorY, 0.5f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(effect.clipMode),
+  DALI_TEST_EQUALS(effect.HasOffset(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.HasSizeFactor(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetSizeFactorX(), 1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetSizeFactorY(), 1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetAnchorX(), 0.5f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetAnchorY(), 0.5f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(effect.GetClipMode()),
                    static_cast<int>(LayoutBoundsClipMode::AUTO),
                    TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.timing.duration.InSeconds(), 0.3f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetTiming().GetDuration().InSeconds(), 0.3f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutBoundsEffectValueSemanticsP(void)
+{
+  UiTestApplication application;
+  LayoutTransitionTiming timing{Duration(0.6f), AlphaFunction(AlphaFunction::LINEAR), Duration(0.1f)};
+  LayoutBoundsEffect original;
+  original.SetTiming(timing)
+    .SetOffset(LayoutBoundsLength::Pixel(12.0f), LayoutBoundsLength::SelfFraction(-0.5f))
+    .SetSizeFactor(0.25f, 1.5f)
+    .SetAnchor(0.0f, 1.0f)
+    .SetClipMode(LayoutBoundsClipMode::CLIP_TO_BOUNDING_BOX);
+
+  LayoutBoundsEffect copied(original);
+  LayoutBoundsEffect assigned;
+  assigned = original;
+  timing.SetDuration(Duration(2.0f));
+  original.SetTiming({Duration(3.0f)})
+    .ClearOffset()
+    .ClearSizeFactor()
+    .SetAnchor(0.5f, 0.5f)
+    .SetClipMode(LayoutBoundsClipMode::NONE);
+
+  // Both the descriptor and its nested timing retain independent values.
+  for(const LayoutBoundsEffect* snapshot : {&copied, &assigned})
+  {
+    DALI_TEST_EQUALS(snapshot->GetTiming().GetDuration().InSeconds(), 0.6f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(snapshot->GetTiming().GetAlpha().GetBuiltinFunction(), AlphaFunction::LINEAR, TEST_LOCATION);
+    DALI_TEST_EQUALS(snapshot->GetTiming().GetDelay().InSeconds(), 0.1f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_CHECK(snapshot->HasOffset());
+    DALI_TEST_EQUALS(snapshot->GetOffset().x.value, 12.0f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(snapshot->GetOffset().y.value, -0.5f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_CHECK(snapshot->GetOffset().y.unit == LayoutBoundsUnit::SELF_FRACTION);
+    DALI_TEST_CHECK(snapshot->HasSizeFactor());
+    DALI_TEST_EQUALS(snapshot->GetSizeFactorX(), 0.25f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(snapshot->GetSizeFactorY(), 1.5f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(snapshot->GetAnchorX(), 0.0f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(snapshot->GetAnchorY(), 1.0f, 0.0001f, TEST_LOCATION);
+    DALI_TEST_CHECK(snapshot->GetClipMode() == LayoutBoundsClipMode::CLIP_TO_BOUNDING_BOX);
+  }
+
+  LayoutTransitionTiming editedTiming = copied.GetTiming();
+  editedTiming.SetDuration(Duration(0.9f));
+  copied.SetTiming(editedTiming);
+  DALI_TEST_EQUALS(assigned.GetTiming().GetDuration().InSeconds(), 0.6f, 0.0001f, TEST_LOCATION);
+  const LayoutBoundsEffect& self = assigned;
+  assigned                      = self;
+  DALI_TEST_CHECK(assigned.HasOffset());
+
+  LayoutBoundsEffect moved(std::move(copied));
+  DALI_TEST_EQUALS(moved.GetTiming().GetDuration().InSeconds(), 0.9f, 0.0001f, TEST_LOCATION);
+  copied = assigned;
+  DALI_TEST_EQUALS(copied.GetTiming().GetDuration().InSeconds(), 0.6f, 0.0001f, TEST_LOCATION);
+  LayoutBoundsEffect moveAssigned;
+  moveAssigned = std::move(moved);
+  moved        = LayoutBoundsEffect{};
+  DALI_TEST_CHECK(moveAssigned.HasOffset());
+  DALI_TEST_EQUALS(moveAssigned.GetOffset().x.value, 12.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moveAssigned.GetTiming().GetDuration().InSeconds(), 0.9f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_CHECK(!moved.HasOffset());
+  DALI_TEST_CHECK(!moved.HasSizeFactor());
   END_TEST;
 }
 
@@ -1933,9 +2214,9 @@ uint32_t          gChangeFireCount = 0u;
 
 void CaptureChangeCauseAnimator(const LayoutAnimatorContext& ctx)
 {
-  if(ctx.slot == LayoutTransitionSlot::CHANGE)
+  if(ctx.GetSlot() == LayoutTransitionSlot::CHANGE)
   {
-    gLastChangeCause = ctx.changeCause;
+    gLastChangeCause = ctx.GetChangeCause();
     ++gChangeFireCount;
   }
 }
@@ -1955,10 +2236,10 @@ LayoutRect gReparentToBounds;
 
 void CaptureReparentBoundsAnimator(const LayoutAnimatorContext& ctx)
 {
-  if(ctx.slot == LayoutTransitionSlot::CHANGE && gReparentBoundsFireCount++ == 0u)
+  if(ctx.GetSlot() == LayoutTransitionSlot::CHANGE && gReparentBoundsFireCount++ == 0u)
   {
-    gReparentFromBounds = ctx.fromBounds;
-    gReparentToBounds   = ctx.toBounds;
+    gReparentFromBounds = ctx.GetFromBounds();
+    gReparentToBounds   = ctx.GetToBounds();
   }
 }
 
@@ -2057,7 +2338,7 @@ int UtcDaliLayoutTransitionChangeCauseSiblingAddedP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing);
   parent.SetLayoutTransition(transition);
 
@@ -2110,7 +2391,7 @@ int UtcDaliLayoutTransitionChangeCauseSiblingRemovedP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing);
   parent.SetLayoutTransition(transition);
 
@@ -2156,7 +2437,7 @@ int UtcDaliLayoutTransitionChangeCauseReorderedBeatsSiblingAddedP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing);
   parent.SetLayoutTransition(transition);
 
@@ -2209,7 +2490,7 @@ int UtcDaliLayoutTransitionChangeOnWindowResizeFalseSkipsAnimatorP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing)
     .SetChangeOnWindowResize(false);
   DALI_TEST_CHECK(transition);
@@ -2233,11 +2514,11 @@ int UtcDaliLayoutBoundsEffectsSlideFromBottomDefaultDistanceP(void)
   LayoutBoundsEffect effect =
     LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::BOTTOM, timing);
 
-  DALI_TEST_EQUALS(effect.hasOffset, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.hasSizeFactor, false, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.offset.x.value, 0.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.offset.y.value, 1.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(effect.offset.y.unit),
+  DALI_TEST_EQUALS(effect.HasOffset(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.HasSizeFactor(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetOffset().x.value, 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetOffset().y.value, 1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(effect.GetOffset().y.unit),
                    static_cast<int>(LayoutBoundsUnit::SELF_FRACTION),
                    TEST_LOCATION);
   END_TEST;
@@ -2250,7 +2531,7 @@ int UtcDaliLayoutBoundsEffectsSlideFromTopNegativeYP(void)
   const LayoutTransitionTiming timing;
   LayoutBoundsEffect           effect =
     LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::TOP, timing);
-  DALI_TEST_EQUALS(effect.offset.y.value, -1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetOffset().y.value, -1.0f, 0.0001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2262,10 +2543,10 @@ int UtcDaliLayoutBoundsEffectsSlideFromLeftRightSignP(void)
     LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::LEFT, timing);
   LayoutBoundsEffect right =
     LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::RIGHT, timing);
-  DALI_TEST_EQUALS(left.offset.x.value, -1.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(right.offset.x.value, 1.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(left.offset.y.value, 0.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(right.offset.y.value, 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(left.GetOffset().x.value, -1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetOffset().x.value, 1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(left.GetOffset().y.value, 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetOffset().y.value, 0.0f, 0.0001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2275,8 +2556,8 @@ int UtcDaliLayoutBoundsEffectsSlideCustomDistanceP(void)
   const LayoutTransitionTiming timing;
   LayoutBoundsEffect           effect = LayoutBoundsEffects::SlideFrom(
     LayoutBoundsEdge::RIGHT, LayoutBoundsLength::Pixel(80.0f), timing);
-  DALI_TEST_EQUALS(effect.offset.x.value, 80.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(effect.offset.x.unit),
+  DALI_TEST_EQUALS(effect.GetOffset().x.value, 80.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(effect.GetOffset().x.unit),
                    static_cast<int>(LayoutBoundsUnit::PIXEL),
                    TEST_LOCATION);
   END_TEST;
@@ -2290,7 +2571,7 @@ int UtcDaliLayoutBoundsEffectsSlideNegativeDistanceFlipsDirectionP(void)
   LayoutBoundsEffect           effect = LayoutBoundsEffects::SlideFrom(
     LayoutBoundsEdge::BOTTOM, LayoutBoundsLength::Pixel(-50.0f), timing);
   // BOTTOM default sign positive, but distance negative ⇒ y becomes -50.
-  DALI_TEST_EQUALS(effect.offset.y.value, -50.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetOffset().y.value, -50.0f, 0.0001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2302,9 +2583,9 @@ int UtcDaliLayoutBoundsEffectsSlideToMirrorsSlideFromP(void)
     LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::BOTTOM, timing);
   LayoutBoundsEffect to =
     LayoutBoundsEffects::SlideTo(LayoutBoundsEdge::BOTTOM, timing);
-  DALI_TEST_EQUALS(from.offset.x.value, to.offset.x.value, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(from.offset.y.value, to.offset.y.value, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(from.hasOffset, to.hasOffset, TEST_LOCATION);
+  DALI_TEST_EQUALS(from.GetOffset().x.value, to.GetOffset().x.value, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(from.GetOffset().y.value, to.GetOffset().y.value, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(from.HasOffset(), to.HasOffset(), TEST_LOCATION);
   END_TEST;
 }
 
@@ -2314,11 +2595,11 @@ int UtcDaliLayoutBoundsEffectsExpandFromLeftP(void)
   const LayoutTransitionTiming timing;
   LayoutBoundsEffect           effect =
     LayoutBoundsEffects::ExpandFrom(LayoutBoundsEdge::LEFT, timing);
-  DALI_TEST_EQUALS(effect.hasSizeFactor, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.sizeFactorX, 0.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.sizeFactorY, 1.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.anchorX, 0.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.anchorY, 0.5f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.HasSizeFactor(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetSizeFactorX(), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetSizeFactorY(), 1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetAnchorX(), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetAnchorY(), 0.5f, 0.0001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2328,10 +2609,10 @@ int UtcDaliLayoutBoundsEffectsExpandFromBottomP(void)
   const LayoutTransitionTiming timing;
   LayoutBoundsEffect           effect =
     LayoutBoundsEffects::ExpandFrom(LayoutBoundsEdge::BOTTOM, timing);
-  DALI_TEST_EQUALS(effect.sizeFactorX, 1.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.sizeFactorY, 0.0f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.anchorX, 0.5f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.anchorY, 1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetSizeFactorX(), 1.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetSizeFactorY(), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetAnchorX(), 0.5f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetAnchorY(), 1.0f, 0.0001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2343,10 +2624,10 @@ int UtcDaliLayoutBoundsEffectsShrinkMirrorsExpandP(void)
     LayoutBoundsEffects::ExpandFrom(LayoutBoundsEdge::TOP, timing);
   LayoutBoundsEffect shrink =
     LayoutBoundsEffects::ShrinkTo(LayoutBoundsEdge::TOP, timing);
-  DALI_TEST_EQUALS(expand.sizeFactorX, shrink.sizeFactorX, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(expand.sizeFactorY, shrink.sizeFactorY, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(expand.anchorX, shrink.anchorX, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(expand.anchorY, shrink.anchorY, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(expand.GetSizeFactorX(), shrink.GetSizeFactorX(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(expand.GetSizeFactorY(), shrink.GetSizeFactorY(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(expand.GetAnchorX(), shrink.GetAnchorX(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(expand.GetAnchorY(), shrink.GetAnchorY(), 0.0001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2359,9 +2640,9 @@ int UtcDaliLayoutBoundsEffectsTimingPreservedP(void)
                                 Duration(0.05f)};
   LayoutBoundsEffect          effect =
     LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::LEFT, timing);
-  DALI_TEST_EQUALS(effect.timing.duration.InSeconds(), 0.45f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(effect.timing.delay.InSeconds(), 0.05f, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(effect.timing.alpha.GetBuiltinFunction()),
+  DALI_TEST_EQUALS(effect.GetTiming().GetDuration().InSeconds(), 0.45f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(effect.GetTiming().GetDelay().InSeconds(), 0.05f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(effect.GetTiming().GetAlpha().GetBuiltinFunction()),
                    static_cast<int>(AlphaFunction::EASE_IN),
                    TEST_LOCATION);
   END_TEST;
@@ -2466,7 +2747,7 @@ int UtcDaliLayoutTransitionDetachClearsPendingRemovalMarkerP(void)
   // because it directly fires on bounds changes.
   LayoutTransition     fresh = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   fresh.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing);
   parent.SetLayoutTransition(fresh);
 
@@ -2573,7 +2854,7 @@ int UtcDaliLayoutTransitionResizeWithSiblingAddKeepsSiblingAddedCauseP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing)
             .SetChangeOnWindowResize(false);
   parent.SetLayoutTransition(transition);
@@ -2628,7 +2909,7 @@ int UtcDaliLayoutTransitionResizeWithSiblingRemoveKeepsSiblingRemovedCauseP(void
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing)
             .SetChangeOnWindowResize(false);
   parent.SetLayoutTransition(transition);
@@ -2676,7 +2957,7 @@ int UtcDaliLayoutTransitionResizeWithReorderKeepsReorderedCauseP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing)
             .SetChangeOnWindowResize(false);
   parent.SetLayoutTransition(transition);
@@ -2900,7 +3181,7 @@ int UtcDaliLayoutTransitionActorRemoveSetsSiblingRemovedCauseP(void)
 
   LayoutTransition     transition = LayoutTransition::New();
   LayoutAnimatorTiming timing;
-  timing.duration = Duration(0.2f);
+  timing.SetDuration(Duration(0.2f));
   transition.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureChangeCauseAnimator), timing);
   parent.SetLayoutTransition(transition);
 
@@ -3454,11 +3735,11 @@ uint32_t             gInhInvokes  = 0;
 void CaptureInheritedAnimator(const LayoutAnimatorContext& ctx)
 {
   ++gInhInvokes;
-  gInhSlot     = ctx.slot;
-  gInhFromEqTo = (ctx.fromBounds.x == ctx.toBounds.x &&
-                  ctx.fromBounds.y == ctx.toBounds.y &&
-                  ctx.fromBounds.width == ctx.toBounds.width &&
-                  ctx.fromBounds.height == ctx.toBounds.height);
+  gInhSlot     = ctx.GetSlot();
+  gInhFromEqTo = (ctx.GetFromBounds().x == ctx.GetToBounds().x &&
+                  ctx.GetFromBounds().y == ctx.GetToBounds().y &&
+                  ctx.GetFromBounds().width == ctx.GetToBounds().width &&
+                  ctx.GetFromBounds().height == ctx.GetToBounds().height);
 }
 
 void ResetInherited()
@@ -4850,12 +5131,12 @@ void CaptureSelfChangeAnimator(const LayoutAnimatorContext& ctx)
 {
   if(gSelfAnimInvokes++ == 0u)
   {
-    gSelfAnimFrom = ctx.fromBounds;
-    gSelfAnimTo   = ctx.toBounds;
+    gSelfAnimFrom = ctx.GetFromBounds();
+    gSelfAnimTo   = ctx.GetToBounds();
   }
-  gSelfAnimSlot  = ctx.slot;
-  gSelfAnimCause = ctx.changeCause;
-  gSelfAnimView  = ctx.view.GetObjectPtr();
+  gSelfAnimSlot  = ctx.GetSlot();
+  gSelfAnimCause = ctx.GetChangeCause();
+  gSelfAnimView  = ctx.GetView().GetObjectPtr();
   if(gSelfTarget && gSelfAnimView != gSelfTarget)
   {
     gSelfAnimHitOtherView = true;
@@ -4865,7 +5146,7 @@ void CaptureSelfChangeAnimator(const LayoutAnimatorContext& ctx)
 void CaptureParentChangeAnimator(const LayoutAnimatorContext& ctx)
 {
   ++gParentAnimInvokes;
-  gParentAnimView = ctx.view.GetObjectPtr();
+  gParentAnimView = ctx.GetView().GetObjectPtr();
   if(gSelfTarget && gParentAnimView == gSelfTarget)
   {
     gParentAnimHitSelf = true;
@@ -6726,11 +7007,287 @@ int UtcDaliLayoutTransitionNonFiniteTimingRejectedN(void)
   LayoutTransition  transition = LayoutTransition::New();
 
   LayoutTransitionTiming timing;
-  timing.duration = Duration(std::numeric_limits<float>::quiet_NaN());
+  timing.SetDuration(Duration(std::numeric_limits<float>::quiet_NaN()));
   DALI_TEST_ASSERTION(transition.SetChangeTiming(timing), "must be finite");
 
   LayoutAnimatorTiming animatorTiming;
-  animatorTiming.duration = Duration(std::numeric_limits<float>::infinity());
+  animatorTiming.SetDuration(Duration(std::numeric_limits<float>::infinity()));
   DALI_TEST_ASSERTION(transition.SetChangeAnimator(LayoutAnimatorCallback::New(&NoopAnimator), animatorTiming), "must be finite");
+  END_TEST;
+}
+
+namespace
+{
+StackLayout MakeContextSnapshotParent(UiTestApplication& application, View& child)
+{
+  StackLayout parent = StackLayout::New(StackOrientation::HORIZONTAL);
+  parent.SetRequestedWidth(300.0f);
+  parent.SetRequestedHeight(100.0f);
+  child = View::New();
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(40.0f);
+  parent.Add(child);
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+  return parent;
+}
+
+struct ContextSnapshotProbe : ConnectionTracker
+{
+  void Animate(const LayoutAnimatorContext& context)
+  {
+    ++calls;
+    if(!first)
+    {
+      first = std::make_unique<LayoutAnimatorContext>(context);
+    }
+    if(!latest)
+    {
+      latest = std::make_unique<LayoutAnimatorContext>(context);
+    }
+    else
+    {
+      *latest = context;
+    }
+  }
+
+  void Finished(View, LayoutTransitionSlot)
+  {
+    ++finishes;
+  }
+
+  std::unique_ptr<LayoutAnimatorContext> first;
+  std::unique_ptr<LayoutAnimatorContext> latest;
+  uint32_t calls{0u};
+  uint32_t finishes{0u};
+};
+
+float gContextSnapshotAlpha = 0.0f;
+
+float ContextSnapshotAlpha(float)
+{
+  return gContextSnapshotAlpha;
+}
+
+void CheckFirstContextSnapshot(const LayoutAnimatorContext& context, View child, float progress, float rawProgress)
+{
+  DALI_TEST_CHECK(context.GetView() == child);
+  DALI_TEST_CHECK(context.GetSlot() == LayoutTransitionSlot::CHANGE);
+  DALI_TEST_CHECK(context.GetChangeCause() == LayoutChangeCause::OTHER);
+  DALI_TEST_EQUALS(context.GetProgress(), progress, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(context.GetRawProgress(), rawProgress, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(context.GetFromBounds().width, 100.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(context.GetToBounds().width, 120.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(context.GetFromBounds().height, 40.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(context.GetToBounds().height, 40.0f, 0.0001f, TEST_LOCATION);
+}
+
+void CheckChangeTimingRegistrationSnapshot(bool causeSpecific)
+{
+  UiTestApplication application;
+  ResetCaptures();
+  View child;
+  StackLayout parent = MakeContextSnapshotParent(application, child);
+  LayoutTransition transition = LayoutTransition::New();
+  LayoutTransitionTiming timing{Duration(), AlphaFunction(AlphaFunction::LINEAR), Duration(60.0f)};
+  if(causeSpecific)
+  {
+    transition.SetChangeTiming(LayoutChangeCause::OTHER, timing);
+  }
+  else
+  {
+    transition.SetChangeTiming(timing);
+  }
+  transition.SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  // Registration owns the zero-duration value. Mutating the source must not
+  // turn this change into a timed animation; its original delay is ignored.
+  timing.SetDuration(Duration(60.0f)).SetDelay(Duration());
+  child.SetRequestedWidth(120.0f);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::SIZE_WIDTH), 120.0f, 0.0001f, TEST_LOCATION);
+}
+
+struct RemovingContextProbe : ConnectionTracker
+{
+  void Animate(const LayoutAnimatorContext& context)
+  {
+    ++calls;
+    before = std::make_unique<LayoutAnimatorContext>(context);
+    // Tree mutation is forbidden to applications here. Preserve the defensive
+    // behavior: erasing the active state must not invalidate this callback's
+    // context, including a copy made after the erase.
+    parent.Remove(context.GetView(), RemovePolicy::IMMEDIATE);
+    removed = !context.GetView().GetParent();
+    after   = std::make_unique<LayoutAnimatorContext>(context);
+  }
+
+  View parent;
+  std::unique_ptr<LayoutAnimatorContext> before;
+  std::unique_ptr<LayoutAnimatorContext> after;
+  uint32_t calls{0u};
+  bool removed{false};
+};
+} // namespace
+
+int UtcDaliLayoutTransitionTimingRegistrationSnapshotP(void)
+{
+  CheckChangeTimingRegistrationSnapshot(false);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionCauseTimingRegistrationSnapshotP(void)
+{
+  CheckChangeTimingRegistrationSnapshot(true);
+  END_TEST;
+}
+
+int UtcDaliLayoutBoundsEffectRegistrationSnapshotP(void)
+{
+  UiTestApplication application;
+  View child;
+  StackLayout parent = MakeContextSnapshotParent(application, child);
+  LayoutTransitionTiming timing{Duration(), AlphaFunction(AlphaFunction::LINEAR), Duration(60.0f)};
+  LayoutBoundsEffect effect;
+  effect.SetTiming(timing)
+    .SetOffset(LayoutBoundsLength::Pixel(20.0f), LayoutBoundsLength::Pixel(10.0f))
+    .SetSizeFactor(0.5f, 0.25f)
+    .SetAnchor(0.0f, 0.0f);
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetExitBoundsEffect(effect);
+  parent.SetLayoutTransition(transition);
+
+  // Neither mutating the original timing nor changing the caller's descriptor
+  // may change the registered endpoint or make the instant EXIT wait.
+  timing.SetDuration(Duration(60.0f));
+  effect.SetOffset(LayoutBoundsLength::Pixel(80.0f), LayoutBoundsLength::Pixel(90.0f))
+    .SetSizeFactor(2.0f, 2.0f)
+    .SetAnchor(1.0f, 1.0f);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+  DALI_TEST_CHECK(!child.GetParent());
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 10.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 10.0f, 0.0001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutAnimatorTimingRegistrationSnapshotP(void)
+{
+  UiTestApplication application;
+  ContextSnapshotProbe probe;
+  View child;
+  StackLayout parent = MakeContextSnapshotParent(application, child);
+  LayoutAnimatorTiming timing{Duration(), AlphaFunction(AlphaFunction::LINEAR), Duration(60.0f)};
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetChangeAnimator(LayoutAnimatorCallback::New(&probe, &ContextSnapshotProbe::Animate), timing)
+    .SetOnFinished(LayoutLifecycleCallback::New(&probe, &ContextSnapshotProbe::Finished));
+  parent.SetLayoutTransition(transition);
+
+  timing.SetDuration(Duration(60.0f));
+  child.SetRequestedWidth(120.0f);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(probe.calls, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(probe.finishes, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(probe.first);
+  // A copied context survives the active state's natural completion. The
+  // registered non-positive duration settles raw progress despite its delay.
+  CheckFirstContextSnapshot(*probe.first, child, 1.0f, 1.0f);
+
+  child.SetRequestedWidth(160.0f);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(probe.calls, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(probe.finishes, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(probe.latest->GetToBounds().width, 160.0f, 0.0001f, TEST_LOCATION);
+  CheckFirstContextSnapshot(*probe.first, child, 1.0f, 1.0f);
+  parent.SetLayoutTransition(LayoutTransition());
+  END_TEST;
+}
+
+int UtcDaliLayoutAnimatorContextSnapshotAcrossTicksP(void)
+{
+  UiTestApplication application;
+  ContextSnapshotProbe probe;
+  View child;
+  StackLayout parent = MakeContextSnapshotParent(application, child);
+  // Custom alpha gives consecutive ticks distinct observable values without
+  // sleeping or depending on the dispatcher's wall clock. Raw progress remains
+  // zero during this long delay.
+  gContextSnapshotAlpha = 0.25f;
+  LayoutAnimatorTiming timing{Duration(60.0f), AlphaFunction(&ContextSnapshotAlpha), Duration(60.0f)};
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetChangeAnimator(LayoutAnimatorCallback::New(&probe, &ContextSnapshotProbe::Animate), timing);
+  parent.SetLayoutTransition(transition);
+  child.SetRequestedWidth(120.0f);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_CHECK(probe.first);
+  CheckFirstContextSnapshot(*probe.first, child, 0.25f, 0.0f);
+  const uint32_t firstCalls = probe.calls;
+
+  gContextSnapshotAlpha = 0.75f;
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_CHECK(probe.calls > firstCalls);
+  CheckFirstContextSnapshot(*probe.first, child, 0.25f, 0.0f);
+  CheckFirstContextSnapshot(*probe.latest, child, 0.75f, 0.0f);
+
+  LayoutAnimatorContext copied(*probe.first);
+  LayoutAnimatorContext fromRvalue(std::move(copied));
+  // Context deliberately has copy semantics for rvalues as well: the source
+  // retains its snapshot and every public copy owns independent storage.
+  CheckFirstContextSnapshot(copied, child, 0.25f, 0.0f);
+  copied = *probe.latest;
+  CheckFirstContextSnapshot(fromRvalue, child, 0.25f, 0.0f);
+  CheckFirstContextSnapshot(copied, child, 0.75f, 0.0f);
+  copied = std::move(fromRvalue);
+  CheckFirstContextSnapshot(fromRvalue, child, 0.25f, 0.0f);
+  CheckFirstContextSnapshot(copied, child, 0.25f, 0.0f);
+  const LayoutAnimatorContext& self = copied;
+  copied                           = self;
+
+  parent.Remove(child, RemovePolicy::IMMEDIATE);
+  parent.SetLayoutTransition(LayoutTransition());
+  probe.first.reset();
+  probe.latest.reset();
+  application.SendNotification();
+  application.Render(0);
+  CheckFirstContextSnapshot(copied, child, 0.25f, 0.0f);
+  CheckFirstContextSnapshot(fromRvalue, child, 0.25f, 0.0f);
+  END_TEST;
+}
+
+int UtcDaliLayoutAnimatorContextSurvivesCallbackRemovalP(void)
+{
+  UiTestApplication application;
+  RemovingContextProbe probe;
+  View child;
+  StackLayout parent = MakeContextSnapshotParent(application, child);
+  probe.parent = parent;
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetChangeAnimator(LayoutAnimatorCallback::New(&probe, &RemovingContextProbe::Animate),
+                               {Duration(60.0f), AlphaFunction(AlphaFunction::LINEAR), Duration(60.0f)});
+  parent.SetLayoutTransition(transition);
+  child.SetRequestedWidth(120.0f);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(probe.calls, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(probe.removed);
+  DALI_TEST_CHECK(probe.before);
+  DALI_TEST_CHECK(probe.after);
+  CheckFirstContextSnapshot(*probe.before, child, 0.0f, 0.0f);
+  CheckFirstContextSnapshot(*probe.after, child, 0.0f, 0.0f);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(probe.calls, 1u, TEST_LOCATION);
+  CheckFirstContextSnapshot(*probe.after, child, 0.0f, 0.0f);
+  parent.SetLayoutTransition(LayoutTransition());
   END_TEST;
 }

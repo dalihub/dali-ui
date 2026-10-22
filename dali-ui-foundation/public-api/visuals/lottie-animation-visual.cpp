@@ -194,34 +194,49 @@ void LottieAnimationVisual::SetLoopCount(int loopCount)
 
 void LottieAnimationVisual::SetMinMaxFrame(int minFrame, int maxFrame)
 {
+  SetPlaybackRange(minFrame, maxFrame);
+}
+
+void LottieAnimationVisual::SetPlaybackRange(int startFrame, int endFrame)
+{
   Dali::Property::Array range;
-  range.PushBack(minFrame);
-  range.PushBack(maxFrame);
+  range.PushBack(startFrame);
+  range.PushBack(endFrame);
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE, range);
 }
 
 void LottieAnimationVisual::GetMinMaxFrame(int& minFrame, int& maxFrame) const
 {
+  GetPlaybackRange(minFrame, maxFrame);
+}
+
+void LottieAnimationVisual::GetPlaybackRange(int& startFrame, int& endFrame) const
+{
   Dali::Property::Value  value    = GetImplementation(*this).GetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE);
   Dali::Property::Array* arrayPtr = value.GetArray();
   if(arrayPtr && arrayPtr->Count() >= 2u &&
-     arrayPtr->GetElementAt(0).Get(minFrame) && arrayPtr->GetElementAt(1).Get(maxFrame))
+     arrayPtr->GetElementAt(0).Get(startFrame) && arrayPtr->GetElementAt(1).Get(endFrame))
   {
     return;
   }
 
   // No numeric range is set, including when marker names were used.
-  minFrame = 0;
-  maxFrame = GetTotalFrameCount();
+  startFrame = 0;
+  endFrame   = GetTotalFrameCount();
 }
 
 void LottieAnimationVisual::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
 {
+  SetPlaybackRangeByMarker(minMarker, maxMarker);
+}
+
+void LottieAnimationVisual::SetPlaybackRangeByMarker(const Dali::String& startMarker, const Dali::String& endMarker)
+{
   Dali::Property::Array range;
-  range.PushBack(minMarker);
-  if(!maxMarker.Empty())
+  range.PushBack(startMarker);
+  if(!endMarker.Empty())
   {
-    range.PushBack(maxMarker);
+    range.PushBack(endMarker);
   }
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE, range);
 }

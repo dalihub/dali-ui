@@ -52,6 +52,9 @@ constexpr float    FLING_VMIN            = 0.08f;
 constexpr float    FLING_VSTOP           = 0.04f;
 constexpr size_t   MAX_RECYCLED_ITEMS    = 64u;
 constexpr size_t   MAX_RECYCLED_PER_TYPE = 8u;
+// An absolute scroll target is aimed at again after a scroll whose measurements moved it. Each
+// pass measures what the previous one brought in, so the distance left shrinks quickly.
+constexpr uint32_t MAX_AIM_PASSES = 3u;
 
 BaseHandle Create()
 {
@@ -135,7 +138,7 @@ struct RecyclerViewImpl::RecyclerImpl : public Recycler
     return rv.mCacheAfter;
   }
 
-  ItemOffsets GetDecorationOffsets(uint32_t position) const override
+  Insets GetDecorationOffsets(uint32_t position) const override
   {
     if(rv.mDecorations.empty())
     {
@@ -156,13 +159,13 @@ struct RecyclerViewImpl::RecyclerImpl : public Recycler
       return {};
     }
 
-    ItemOffsets total;
+    Insets total;
     for(auto* dec : rv.mDecorations)
     {
-      const ItemOffsets offs = dec->GetItemOffsets(*holder);
-      total.left += offs.left;
+      const Insets offs = dec->GetItemOffsets(*holder);
+      total.start += offs.start;
       total.top += offs.top;
-      total.right += offs.right;
+      total.end += offs.end;
       total.bottom += offs.bottom;
     }
     return total;
@@ -268,6 +271,14 @@ void RecyclerViewImpl::OnAdapterDataChanged(const ItemAdapter::ChangeInfo& info)
   if(!mLayouter || !mAdapter)
   {
     return;
+  }
+
+  if(info.changeType != ItemAdapter::ChangeType::CONTENT_CHANGED && info.changeType != ItemAdapter::ChangeType::CHANGED)
+  {
+    // The layouter discards its state for these changes and lays the list out again. A running scroll
+    // animation owns the scroller and would keep it where it was going: cancel it (its pending finish
+    // still ends the scroll once).
+    CancelScrollAnimation();
   }
 
   switch(info.changeType)
@@ -515,10 +526,31 @@ void RecyclerViewImpl::ScrollToPosition(uint32_t position, bool animation)
     return;
   }
 
+  // Synchronise first: a correction made on the way moves the item's offset too. The scroller has not
+  // rendered that correction yet, so the scroll below must not synchronise again.
+  const float base = mScrollAnimation ? SyncScrollOffsetFromScroller() : mLayouter.ComputeScrollOffset();
+  CancelScrollAnimation();
   const LayoutRect bounds    = mLayouter.GetItemBounds(position, GetCrossExtent());
   const float      itemStart = mLayouter.CanScrollVertically() ? bounds.y : bounds.x;
-  const float      base      = mScrollAnimation ? SyncScrollOffsetFromScroller() : mLayouter.ComputeScrollOffset();
   ScrollBy(ClampScrollOffset(itemStart) - base, animation);
+  if(animation)
+  {
+    return;
+  }
+
+  // Bringing the item in measures it and its neighbours, which refines its offset: aim again.
+  for(uint32_t pass = 0u; pass < MAX_AIM_PASSES; ++pass)
+  {
+    const LayoutRect measured = mLayouter.GetItemBounds(position, GetCrossExtent());
+    const float      distance = ClampScrollOffset(mLayouter.CanScrollVertically() ? measured.y : measured.x) - mLayouter.ComputeScrollOffset();
+    if(std::abs(distance) < 0.5f)
+    {
+      break;
+    }
+    ScrollByScoped(distance);
+  }
+  ApplyScrollerPosition();
+  UpdateScrollBar();
 }
 
 void RecyclerViewImpl::ScrollBy(float distance, bool animation)
@@ -562,6 +594,16 @@ void RecyclerViewImpl::SetScrollOffset(float offset)
   CancelScrollAnimation();
   const float delta = offset - mLayouter.ComputeScrollOffset();
   ScrollByScoped(delta);
+  // A correction made while measuring moves the coordinates the offset was requested in: aim again.
+  for(uint32_t pass = 0u; pass < MAX_AIM_PASSES; ++pass)
+  {
+    const float distance = ClampScrollOffset(offset) - mLayouter.ComputeScrollOffset();
+    if(std::abs(distance) < 0.5f)
+    {
+      break;
+    }
+    ScrollByScoped(distance);
+  }
   ApplyScrollerPosition();
   UpdateScrollBar();
 }
@@ -909,13 +951,79 @@ float RecyclerViewImpl::SyncScrollOffsetFromScroller()
     return mLayouter ? mLayouter.ComputeScrollOffset() : 0.0f;
   }
 
+  const bool    horizontal     = mLayouter.CanScrollHorizontally() && !mLayouter.CanScrollVertically();
   const Vector3 pos            = mScroller.GetCurrentProperty<Vector3>(Actor::Property::POSITION);
-  const float   physicalOffset = (mLayouter.CanScrollHorizontally() && !mLayouter.CanScrollVertically()) ? -pos.x : -pos.y;
+  const float   physicalOffset = horizontal ? -pos.x : -pos.y;
   const float   delta          = physicalOffset - mLayouter.ComputeScrollOffset();
+  const float   maxBefore      = GetMaxScrollOffset();
 
   if(std::abs(delta) > 0.001f)
   {
     ScrollByScoped(delta);
+  }
+
+  // The layouter can settle away from the scroller: it corrects its coordinates when items it
+  // measures above the window differ from their estimates, and it stops where the content ends.
+  // Measuring the items near the end moves the end too. A running animation owns the scroller, so
+  // the animation itself moves onto the layouter.
+  const float offset   = mLayouter.ComputeScrollOffset();
+  const float mismatch = offset - physicalOffset;
+  const float maxAfter = GetMaxScrollOffset();
+  if(mScrollAnimation)
+  {
+    const Property::Index axis   = horizontal ? Actor::Property::POSITION_X : Actor::Property::POSITION_Y;
+    const float           target = -mScroller.GetProperty<float>(axis); // A playing animation reports its target.
+    // A target at the top stays there and a target at the end follows the end, however little it moves
+    // per frame (the distance to the target adds up); any other target keeps its remaining distance.
+    const bool toTop = (target <= 0.5f);
+    const bool toEnd = (target >= maxBefore - 0.5f) || (target > maxAfter + 0.5f);
+    if(std::abs(mismatch) >= 0.5f || (toEnd && std::abs(maxAfter - target) >= 0.5f))
+    {
+      const float distance  = std::abs(target - physicalOffset);
+      const float duration  = mScrollAnimation.GetDuration();
+      const float newTarget = ClampScrollOffset(toTop ? 0.0f : (toEnd ? maxAfter : target + mismatch));
+      // An animation that has reached its target has no time left, whatever its progress reads.
+      float remaining = (distance < 0.5f) ? 0.0f : duration * (1.0f - mScrollAnimation.GetCurrentProgress());
+      if((toTop || toEnd) && remaining > 0.0f)
+      {
+        // The time scales with the distance to the edge, capped at the running duration: the speed holds unless the edge moves away faster than about a third of the motion.
+        remaining = std::min(duration, remaining * std::abs(newTarget - offset) / distance);
+      }
+      else if(toEnd && !toTop)
+      {
+        // The frame that ended the animation moved the end out: glide on to the new end.
+        remaining = CalculateScrollDuration(std::abs(newTarget - offset));
+      }
+
+      mScrollAnimation.FinishedSignal().Disconnect(this, &RecyclerViewImpl::OnScrollAnimationFinished);
+      mScrollAnimation.Stop();
+      mScrollAnimation.Reset();
+      if(remaining > 0.0f && std::abs(newTarget - offset) >= 0.5f)
+      {
+        if(std::abs(mismatch) >= 0.5f)
+        {
+          // The animation owns the position: the move is relative on purpose, so that a frame the
+          // update thread has already advanced is kept.
+          static_cast<Dali::Actor&>(mScroller).TranslateBy(horizontal ? Vector3(-mismatch, 0.0f, 0.0f) : Vector3(0.0f, -mismatch, 0.0f));
+        }
+        mScrollAnimation = Animation::New(remaining);
+        mScrollAnimation.AnimateTo(Property(mScroller, axis), -newTarget, AlphaFunction::EASE_OUT);
+        mScrollAnimation.FinishedSignal().Connect(this, &RecyclerViewImpl::OnScrollAnimationFinished);
+        mScrollAnimation.Play();
+      }
+      else
+      {
+        if(toTop && offset >= 0.5f)
+        {
+          // A scroll to the top ends there even when its last frame measured items larger than
+          // estimated: every item above is measured now, so this lands on the first one.
+          ScrollByScoped(-offset);
+        }
+        ApplyScrollerPosition();
+        UpdateScrollBar();
+        SendScrollFinished();
+      }
+    }
   }
 
   return mLayouter.ComputeScrollOffset();
@@ -1105,6 +1213,14 @@ void RecyclerViewImpl::ApplyScrollerPosition()
 {
   if(!mScroller || !mLayouter)
   {
+    return;
+  }
+
+  if(mScrollAnimation)
+  {
+    // A running scroll animation owns the scroller: an event-side write would re-base its
+    // interpolation mid-flight. SyncScrollOffsetFromScroller moves the animation instead.
+    NotifyDecorationBoundsUpdated();
     return;
   }
 
@@ -1441,7 +1557,33 @@ void RecyclerViewImpl::ScrollToItemMakeVisible(uint32_t position, bool animate)
     return; // Already fully visible.
   }
 
+  // The scroller has not rendered a correction the synchronisation above made, so the scroll below
+  // must not synchronise again.
+  CancelScrollAnimation();
   ScrollBy(ClampScrollOffset(target) - curOffset, animate);
+  if(animate)
+  {
+    return;
+  }
+
+  // Bringing the item in measures it and the items before it, which refines its bounds: aim again at
+  // the edge chosen above (an item longer than the viewport cannot show both edges).
+  const bool alignStart = (target < curOffset);
+  for(uint32_t pass = 0u; pass < MAX_AIM_PASSES; ++pass)
+  {
+    const LayoutRect measured = mLayouter.GetItemBounds(position, GetCrossExtent());
+    const float      start    = vertical ? measured.y : measured.x;
+    const float      end      = start + (vertical ? measured.height : measured.width);
+    const float      aim      = alignStart ? start - mFocusScrollPeek : end + mFocusScrollPeek - viewExtent;
+    const float      distance = ClampScrollOffset(aim) - mLayouter.ComputeScrollOffset();
+    if(std::abs(distance) < 0.5f)
+    {
+      break;
+    }
+    ScrollByScoped(distance);
+  }
+  ApplyScrollerPosition();
+  UpdateScrollBar();
 }
 
 void RecyclerViewImpl::StartKeyRepeatTimer()
@@ -1698,8 +1840,14 @@ void RecyclerViewImpl::OnScrollerPositionChanged(PropertyNotification /*source*/
   UpdateScrollBar();
 }
 
-void RecyclerViewImpl::OnScrollAnimationFinished(Animation /*animation*/)
+void RecyclerViewImpl::OnScrollAnimationFinished(Animation animation)
 {
+  // A cancelled animation still reports its finish a frame later. Once a newer animation owns the
+  // scroller, that report must neither drop nor finish it.
+  if(mScrollAnimation && animation != mScrollAnimation)
+  {
+    return;
+  }
   mScrollAnimation.Reset();
   SyncScrollOffsetFromScroller();
   ApplyScrollerPosition();

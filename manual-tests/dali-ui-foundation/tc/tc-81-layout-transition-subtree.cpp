@@ -35,7 +35,10 @@ using namespace Dali::Ui;
  * scope back to DIRECT_CHILDREN to see the inner items snap to their final
  * positions while only the card animates.
  *
- *   - Tap "Toggle layout": flip the spacer + inner-item sizes.
+ *   - Tap "Toggle layout": flip the spacer + inner-item sizes. The spacer's
+ *     height and the inner items' heights are printed per tick in one line
+ *     ([TC81][TOGGLE] ... inner=..., see layout-transition-probe.h) so an
+ *     automated check can see whether the nested items move with the spacer.
  *   - Tap "Scope: ...": toggle the root transition between SUBTREE and
  *     DIRECT_CHILDREN.
  *   - Tap "Add/Remove item": add or remove a magenta grand-child inside the
@@ -177,6 +180,12 @@ public:
       return false;
     }
     ToggleLayout();
+    std::vector<Actor> inner;
+    for(uint32_t i = 0; i < mCard.GetChildViewCount(); ++i)
+    {
+      inner.push_back(mCard.GetChildViewAt(i));
+    }
+    mProbe.Start(mSpacer, "TOGGLE", std::move(inner));
     return true;
   }
 
@@ -205,7 +214,7 @@ public:
     // instantly (visible, no animation).
     if(mExtraItem)
     {
-      mItemProbe.Start(mExtraItem, "EXIT");
+      mProbe.Start(mExtraItem, "EXIT");
       mCard.Remove(mExtraItem, RemovePolicy::ANIMATE_EXIT); // inherited EXIT fades it out, then unparents
       mExtraItem.Reset();
     }
@@ -224,7 +233,7 @@ public:
         item.SetProperty(Actor::Property::OPACITY, 0.0f);
       }
       mCard.Add(item);
-      mItemProbe.Start(item, "ENTER");
+      mProbe.Start(item, "ENTER");
       mExtraItem = item;
     }
     return true;
@@ -247,7 +256,7 @@ public:
 
   void OnExit() override
   {
-    mItemProbe.Stop();
+    mProbe.Stop();
     DisconnectAll();
     mRoot.Reset();
     mCard.Reset();
@@ -268,7 +277,7 @@ private:
   View         mExtraItem;
   bool         mExpanded;
   bool         mSubtree;
-  LayoutTransitionProbe mItemProbe{"TC81"};
+  LayoutTransitionProbe mProbe{"TC81"};
 };
 
 REGISTER_MANUAL_TEST(TcLayoutTransitionSubtree)

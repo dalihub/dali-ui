@@ -281,12 +281,16 @@ public: // Setters & actions
   /**
    * @brief Sets whether tiles are cleared when hidden.
    *
+   * @deprecated This API is deprecated.
+   *
    * @param[in] cleared True to clear tiles when hidden
    */
   void SetTilesClearedWhenHidden(bool cleared);
 
   /**
    * @brief Sets the tile cover area multiplier.
+   *
+   * @deprecated This API is deprecated.
    *
    * @param[in] multiplier The multiplier value
    */

@@ -164,16 +164,19 @@ public: // API
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetMinMaxFrame
+   * @deprecated Use SetPlaybackRange() instead.
    */
   void SetMinMaxFrame(int minFrame, int maxFrame);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetMinMaxFrame
+   * @deprecated Use GetPlaybackRange() instead.
    */
   void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetMinMaxFrameByMarker
+   * @deprecated Use SetPlaybackRangeByMarker() instead.
    */
   void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker);
 
@@ -410,6 +413,22 @@ protected: // From ViewImpl
    * @copydoc ViewImpl::OnArrange
    */
   LayoutRect OnArrange(const LayoutRect& bounds) override;
+
+public: // Playback ranges
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetPlaybackRange
+   */
+  void SetPlaybackRange(int startFrame, int endFrame);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetPlaybackRange
+   */
+  void GetPlaybackRange(int& startFrame, int& endFrame) const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetPlaybackRangeByMarker
+   */
+  void SetPlaybackRangeByMarker(const Dali::String& startMarker, const Dali::String& endMarker);
 
 private: // Internal methods
   /**

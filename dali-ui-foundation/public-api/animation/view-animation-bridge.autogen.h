@@ -55,6 +55,101 @@ public:
   ////////////////////////////////////////////////////////////////////////////
 
   /**
+   * @brief Animates the corner radius.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the corner radius by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the corner squareness.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the corner squareness by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline width.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline width by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline color.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline color by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the borderline offset.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the borderline offset by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
    * @brief Animates the background color.
    *
    * @param[in] target The target value
@@ -357,101 +452,6 @@ public:
    * @param[in] delay The delay before starting (default: 0)
    */
   ViewAnimationBridge& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the corner radius.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the corner radius by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the corner squareness.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the corner squareness by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the borderline width.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& BorderlineWidth(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the borderline width by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the borderline color.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the borderline color by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the borderline offset.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& BorderlineOffset(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the borderline offset by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
 
 protected:

@@ -421,49 +421,49 @@ int UtcDaliLottieAnimationViewJumpToFrameP(void)
   END_TEST;
 }
 
-// SetMinMaxFrame
+// SetPlaybackRange
 
-int UtcDaliLottieAnimationViewSetMinMaxFrameP(void)
+int UtcDaliLottieAnimationViewSetPlaybackRangeP(void)
 {
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
 
   int minFrame = -1;
   int maxFrame = -1;
-  view.GetMinMaxFrame(minFrame, maxFrame);
+  view.GetPlaybackRange(minFrame, maxFrame);
   DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(maxFrame, 0, TEST_LOCATION);
 
   // Should not crash even without visual
-  view.SetMinMaxFrame(0, 30);
-  view.GetMinMaxFrame(minFrame, maxFrame);
+  view.SetPlaybackRange(0, 30);
+  view.GetPlaybackRange(minFrame, maxFrame);
   DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(maxFrame, 30, TEST_LOCATION);
 
-  view.SetMinMaxFrame(10, 50);
-  view.GetMinMaxFrame(minFrame, maxFrame);
+  view.SetPlaybackRange(10, 50);
+  view.GetPlaybackRange(minFrame, maxFrame);
   DALI_TEST_EQUALS(minFrame, 10, TEST_LOCATION);
   DALI_TEST_EQUALS(maxFrame, 50, TEST_LOCATION);
 
-  view.SetMinMaxFrame(0, 100);
-  view.GetMinMaxFrame(minFrame, maxFrame);
+  view.SetPlaybackRange(0, 100);
+  view.GetPlaybackRange(minFrame, maxFrame);
   DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(maxFrame, 100, TEST_LOCATION);
   END_TEST;
 }
 
-// SetMinMaxFrameByMarker
+// SetPlaybackRangeByMarker
 
-int UtcDaliLottieAnimationViewSetMinMaxFrameByMarkerP(void)
+int UtcDaliLottieAnimationViewSetPlaybackRangeByMarkerP(void)
 {
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
 
   // Should not crash even without visual
-  view.SetMinMaxFrameByMarker("marker1");
+  view.SetPlaybackRangeByMarker("marker1");
   DALI_TEST_CHECK(view);
 
-  view.SetMinMaxFrameByMarker("marker1", "marker2");
+  view.SetPlaybackRangeByMarker("marker1", "marker2");
   DALI_TEST_CHECK(view);
   END_TEST;
 }
@@ -884,5 +884,29 @@ int UtcDaliLottieDynamicPropertyValueSemanticsP(void)
   assigned = std::move(moved);
   DALI_TEST_EQUALS(assigned.GetKeyPath(), String("Layer.Fill"), TEST_LOCATION);
   DALI_TEST_CHECK(assigned.GetCallback());
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewLegacyPlaybackRange(void)
+{
+  UiTestApplication application;
+  LottieAnimationView view = LottieAnimationView::New();
+  int startFrame = -1;
+  int endFrame = -1;
+
+  view.SetMinMaxFrame(4, 18);
+  view.GetPlaybackRange(startFrame, endFrame);
+  DALI_TEST_EQUALS(startFrame, 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(endFrame, 18, TEST_LOCATION);
+
+  view.SetPlaybackRange(8, 24);
+  view.GetMinMaxFrame(startFrame, endFrame);
+  DALI_TEST_EQUALS(startFrame, 8, TEST_LOCATION);
+  DALI_TEST_EQUALS(endFrame, 24, TEST_LOCATION);
+
+  view.SetMinMaxFrameByMarker("start", "end");
+  view.GetPlaybackRange(startFrame, endFrame);
+  DALI_TEST_EQUALS(startFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(endFrame, view.GetTotalFrameCount(), TEST_LOCATION);
   END_TEST;
 }

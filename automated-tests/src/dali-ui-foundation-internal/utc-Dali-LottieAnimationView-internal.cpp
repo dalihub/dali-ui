@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/lottie-animation-view-impl.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
@@ -192,7 +193,7 @@ int UtcDaliLottieAnimationViewJumpToFramePreservedAfterDesiredSizeChange(void)
 
   int minFrame = -1;
   int maxFrame = -1;
-  view.GetMinMaxFrame(minFrame, maxFrame);
+  view.GetPlaybackRange(minFrame, maxFrame);
   DALI_TEST_EQUALS(minFrame, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(maxFrame, 5, TEST_LOCATION);
 
@@ -372,7 +373,7 @@ int UtcDaliLottieAnimationViewRuntimePropertiesDoNotRecreateVisual(void)
   DALI_TEST_CHECK(originalVisual);
 
   view.SetLoopCount(2);
-  view.SetMinMaxFrame(1, 4);
+  view.SetPlaybackRange(1, 4);
   view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME);
   view.SetLoopingMode(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE);
   view.SetFrameSpeedFactor(0.5f);
@@ -563,7 +564,7 @@ int UtcDaliLottieAnimationViewDeferredCommandsDoNotLoad(void)
   view.SetSynchronousLoading(true);
   view.SetDesiredWidth(64);
   view.SetDesiredHeight(32);
-  view.SetMinMaxFrame(1, 4);
+  view.SetPlaybackRange(1, 4);
   view.Play();
   view.Pause();
   view.JumpToFrame(3);
@@ -878,5 +879,30 @@ int UtcDaliVectorAnimationTaskPlaybackAndRangeP(void)
   task->mNextFrameStartTime -= std::chrono::seconds(1);
   task->CalculateNextFrameTime(false);
   DALI_TEST_CHECK(task->mDroppedFrames > 0u);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationViewImplLegacyPlaybackRange(void)
+{
+  UiTestApplication application;
+  LottieAnimationView handle = LottieAnimationView::New();
+  auto& view = static_cast<Ui::Integration::LottieAnimationViewImpl&>(handle.GetImplementation());
+  int startFrame = -1;
+  int endFrame = -1;
+
+  view.SetMinMaxFrame(4, 18);
+  view.GetPlaybackRange(startFrame, endFrame);
+  DALI_TEST_EQUALS(startFrame, 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(endFrame, 18, TEST_LOCATION);
+
+  view.SetPlaybackRange(8, 24);
+  view.GetMinMaxFrame(startFrame, endFrame);
+  DALI_TEST_EQUALS(startFrame, 8, TEST_LOCATION);
+  DALI_TEST_EQUALS(endFrame, 24, TEST_LOCATION);
+
+  view.SetMinMaxFrameByMarker("start", "end");
+  view.GetPlaybackRange(startFrame, endFrame);
+  DALI_TEST_EQUALS(startFrame, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(endFrame, view.GetTotalFrameCount(), TEST_LOCATION);
   END_TEST;
 }

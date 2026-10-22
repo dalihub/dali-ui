@@ -33,7 +33,7 @@ getter를 다시 부른다.
 > `ParseLottieMetadata()`가 이를 **초로 해석해 fr을 곱한다**
 > (`vector-animation-renderer-native.cpp`: *"tm and dr are in seconds, need to convert"*).
 > 그래서 `on [0-18]`이 **[0-1080]**으로 보고된다 (18 × fr 60). 이 값은
-> `SetMinMaxFrameByMarker`가 쓰는 조회와 같은 경로라, 마커 기반 재생 범위도 같이 틀어진다.
+> `SetPlaybackRangeByMarker`가 쓰는 조회와 같은 경로라, 마커 기반 재생 범위도 같이 틀어진다.
 > 수정 전까지 테스트 2의 3번 기대 결과는 이 결함의 재현 절차다.
 
 ## 통과 기준

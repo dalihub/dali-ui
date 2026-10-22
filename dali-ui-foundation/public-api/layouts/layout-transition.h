@@ -46,14 +46,14 @@ class LayoutTransitionImpl;
  * The callback is invoked once per frame on the event thread, immediately
  * after the layout pass that started or updated the transition. The
  * callback should set the view's animatable properties from
- * @c ctx.fromBounds / @c ctx.toBounds and @c ctx.progress.
+ * @c ctx.GetFromBounds() / @c ctx.GetToBounds() and @c ctx.GetProgress().
  *
  * @warning Do NOT capture the target View by value inside the callback
  * closure. The dispatcher holds a strong reference to the LayoutTransition
  * (which owns the callback), and the View holds a strong reference to the
  * LayoutTransition — capturing the View by value forms a reference cycle
  * that prevents the View from being destroyed. Use @c WeakHandle<View>
- * if a captured reference is required, or read @c ctx.view inside the
+ * if a captured reference is required, or read @c ctx.GetView() inside the
  * callback body each frame.
  *
  * @warning Do NOT call @c LayoutTransition::SetEnter/Exit/ChangeAnimator
@@ -81,10 +81,10 @@ using LayoutAnimatorCallback = Callback<void(const LayoutAnimatorContext&)>;
  * completion** — i.e. the configured timing has fully elapsed
  * (@c rawProgress reaches 1.0 in animator mode, or dali-core's
  * @c Animation::FinishedSignal fires in spec mode). The shaped
- * @c ctx.progress value at that moment is not 1.0 in general: a
+ * @c ctx.GetProgress() value at that moment is not 1.0 in general: a
  * @c CUSTOM_FUNCTION pointer may return any value at the final tick.
  * (@c AlphaFunction::REVERSE is rejected by LayoutTransition
- * validation — see docs/layout-transition.md.) Cancellation paths drop the
+ * validation — see wiki/Layout-Transition.md.) Cancellation paths drop the
  * in-flight callback silently — @c OnFinished is NOT fired in any of
  * these cases:
  *   - Same-slot supersession: the application starts a new spec/animator

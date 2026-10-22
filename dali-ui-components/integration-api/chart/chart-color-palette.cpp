@@ -24,8 +24,9 @@ namespace Ui
 {
 namespace Integration
 {
-
-const Vector4 ChartColorPalette::sColors[DEFAULT_SIZE] = {
+namespace
+{
+const Vector4 gChartColorPaletteColors[ChartColorPalette::DEFAULT_SIZE] = {
   Vector4(0.259f, 0.522f, 0.957f, 1.0f), // Blue
   Vector4(0.918f, 0.263f, 0.208f, 1.0f), // Red
   Vector4(0.188f, 0.729f, 0.384f, 1.0f), // Green
@@ -35,10 +36,11 @@ const Vector4 ChartColorPalette::sColors[DEFAULT_SIZE] = {
   Vector4(0.949f, 0.769f, 0.067f, 1.0f), // Yellow
   Vector4(0.475f, 0.333f, 0.282f, 1.0f), // Brown
 };
+} // namespace
 
 Vector4 ChartColorPalette::Get(int seriesIndex)
 {
-  return sColors[seriesIndex % DEFAULT_SIZE];
+  return gChartColorPaletteColors[seriesIndex % DEFAULT_SIZE];
 }
 
 } // namespace Integration

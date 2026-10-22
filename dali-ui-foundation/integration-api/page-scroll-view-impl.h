@@ -105,6 +105,10 @@ public: // Page API
 
   /**
    * @brief Scrolls to the given page with an optional animation.
+   *
+   * The page, clamped to the page count, is the page committed when the scroll settles,
+   * also when it is a partial last page whose resting offset rounds to the page before
+   * it. A request that has nothing to scroll commits its page at once.
    */
   void ScrollToPage(int page, bool animate = true) override;
 
@@ -163,9 +167,40 @@ protected:
    * @brief Overrides ScrollViewImpl hook to detect when the layout pass first sets
    *        accurate viewport / scrollable-area dimensions.
    *
-   * Emits PageChangedSignal when the layout-derived page count differs from the
-   * last emitted count — most importantly on the very first layout pass when
-   * PageIndicator::Bind() was called before layout ran.
+   * Emits PageChangedSignal whenever the layout-derived count changes, and whenever the
+   * reported page changes. The reported page is the page the view will settle on: while a
+   * snap is in flight it is the snap target clamped to the new count, which is exactly what
+   * OnScrollFinished commits, so the transient and the settled notification agree even when
+   * the last page is partial. A free scroll (no snap target) or a settled view re-derives
+   * from the scroll position, which during an animated scroll is the LIVE current position,
+   * not the target. A page selected by NotifyPagesInserted / NotifyPagesRemoved that has
+   * just been applied is the newer intent and is kept; one that a scroll in flight kept
+   * from being applied yields to that scroll. Once this direction has been measured, an
+   * empty layout releases a pending count and reports page -1 with count 0.
+   * A changed viewport that leaves the count alone re-derives only on a settled view, so a
+   * snap target that is still valid is never replaced by the nearest page. ScrollToPage
+   * records its target in both modes and commits a target that no ScrollFinished consumed,
+   * so an explicit page request never leaves a stale target behind. Repeated callbacks for
+   * the same geometry emit nothing.
+   *
+   * On a settled view, a clamp that moved the offset the page was last resolved at also
+   * re-derives the page: with a fixed page size a growing viewport moves the offset without
+   * changing the count or the page length. The page then follows the offset the view shows,
+   * which demotes an explicitly selected page whose resting offset the clamp moved; an
+   * explicit selection is kept only while its offset is.
+   *
+   * This is also where a page SELECTED before the first layout is applied: with a zero
+   * page length ScrollToPage could only record the page, so the first call that has real
+   * dimensions scrolls to it while preserving the selected page. A
+   * pre-layout user ScrollTo after that selection releases the pre-layout state through
+   * OnScrollFinished and is therefore not covered.
+   *
+   * @note That apply calls ScrollToPage, which emits ScrollStarted / Scrolling /
+   * ScrollFinished SYNCHRONOUSLY from inside the layout pass. Two mechanisms bound the
+   * re-entrancy: mExpectedPageCount is reset BEFORE ScrollToPage runs, so a handler that
+   * triggers another pass finds no override and this block does not run again; and the
+   * apply holds the notify-in-progress flag for its duration (restored by a scope guard,
+   * including on an exception), so the nested ScrollFinished cannot demote the selection.
    *
    * @note ABI note: do NOT reorder or remove after first publication.
    */
@@ -217,7 +252,7 @@ private:
 private:
   Vector2                                        mPageSize{0.0f, 0.0f};      ///< Explicit page size; (0,0) = use viewport
   int                                            mCurrentPage{0};            ///< Settled page index
-  int                                            mSnapTargetPage{-1};        ///< Page targeted by the in-flight snap animation; -1 = not animating
+  int                                            mSnapTargetPage{-1};        ///< Page a snap or an explicit ScrollToPage settles on until committed; -1 = none
   int                                            mExpectedPageCount{-1};     ///< >=0: overrides layout-based count; -1: use layout (sentinel)
   int                                            mLastNotifiedPageCount{-2}; ///< Page count last passed to PageChangedSignal; -2 = never emitted
   bool                                           mNotifyInProgress{false};   ///< Suppress OnScrollFinished re-derive during NotifyPages*

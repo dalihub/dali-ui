@@ -119,7 +119,7 @@ void AbortIfNonFiniteTiming(const Dali::Ui::LayoutTransitionTiming& timing)
   // Same reasoning as the bounds-effect gate below: a relational test cannot reject a
   // NaN (`duration <= 0` is false for it), so the duration-zero opt-out lets it through
   // into Animation::New and TimePeriod.
-  if(!std::isfinite(timing.duration.InSeconds()) || !std::isfinite(timing.delay.InSeconds()))
+  if(!std::isfinite(timing.GetDuration().InSeconds()) || !std::isfinite(timing.GetDelay().InSeconds()))
   {
     DALI_ABORT(TIMING_NON_FINITE);
   }
@@ -127,7 +127,7 @@ void AbortIfNonFiniteTiming(const Dali::Ui::LayoutTransitionTiming& timing)
 
 void AbortIfNonFiniteAnimatorTiming(const Dali::Ui::LayoutAnimatorTiming& timing)
 {
-  if(!std::isfinite(timing.duration.InSeconds()) || !std::isfinite(timing.delay.InSeconds()))
+  if(!std::isfinite(timing.GetDuration().InSeconds()) || !std::isfinite(timing.GetDelay().InSeconds()))
   {
     DALI_ABORT(ANIMATOR_TIMING_NON_FINITE);
   }
@@ -135,7 +135,8 @@ void AbortIfNonFiniteAnimatorTiming(const Dali::Ui::LayoutAnimatorTiming& timing
 
 void AbortIfInvalidBoundsEffect(const Dali::Ui::LayoutBoundsEffect& effect)
 {
-  AbortIfNonTerminalLayoutAlpha(effect.timing.alpha);
+  AbortIfNonTerminalLayoutAlpha(effect.GetTiming().GetAlpha());
+  const LayoutBoundsOffset& offset = effect.GetOffset();
 
   // Checked BEFORE the range tests below, because a NaN silently PASSES every
   // relational test (`NaN < 0` and `NaN > 1` are both false) and would then be
@@ -145,23 +146,23 @@ void AbortIfInvalidBoundsEffect(const Dali::Ui::LayoutBoundsEffect& effect)
   // Animation::SetDuration. Registration is the last point at which the value
   // can still be reported to the caller, so every descriptor the endpoint maths
   // reads is required to be finite here.
-  if(!std::isfinite(effect.sizeFactorX) || !std::isfinite(effect.sizeFactorY) ||
-     !std::isfinite(effect.anchorX) || !std::isfinite(effect.anchorY) ||
-     !std::isfinite(effect.timing.duration.InSeconds()) ||
-     !std::isfinite(effect.timing.delay.InSeconds()) ||
-     (effect.hasOffset && (!std::isfinite(effect.offset.x.value) ||
-                           !std::isfinite(effect.offset.y.value))))
+  if(!std::isfinite(effect.GetSizeFactorX()) || !std::isfinite(effect.GetSizeFactorY()) ||
+     !std::isfinite(effect.GetAnchorX()) || !std::isfinite(effect.GetAnchorY()) ||
+     !std::isfinite(effect.GetTiming().GetDuration().InSeconds()) ||
+     !std::isfinite(effect.GetTiming().GetDelay().InSeconds()) ||
+     (effect.HasOffset() && (!std::isfinite(offset.x.value) ||
+                             !std::isfinite(offset.y.value))))
   {
     DALI_ABORT(BOUNDS_EFFECT_NON_FINITE);
   }
 
-  if(effect.sizeFactorX < 0.0f || effect.sizeFactorY < 0.0f)
+  if(effect.GetSizeFactorX() < 0.0f || effect.GetSizeFactorY() < 0.0f)
   {
     DALI_ABORT(BOUNDS_EFFECT_NEGATIVE_SIZE_FACTOR);
   }
 
-  if(effect.anchorX < 0.0f || effect.anchorX > 1.0f ||
-     effect.anchorY < 0.0f || effect.anchorY > 1.0f)
+  if(effect.GetAnchorX() < 0.0f || effect.GetAnchorX() > 1.0f ||
+     effect.GetAnchorY() < 0.0f || effect.GetAnchorY() > 1.0f)
   {
     DALI_ABORT(BOUNDS_EFFECT_ANCHOR_OUT_OF_RANGE);
   }
@@ -169,34 +170,35 @@ void AbortIfInvalidBoundsEffect(const Dali::Ui::LayoutBoundsEffect& effect)
 
 bool IsNoopBoundsEffect(const Dali::Ui::LayoutBoundsEffect& effect)
 {
-  const bool offsetIsZero = !effect.hasOffset ||
-                            (ApproxEqual(effect.offset.x.value, 0.0f) &&
-                             ApproxEqual(effect.offset.y.value, 0.0f));
+  const LayoutBoundsOffset& offset       = effect.GetOffset();
+  const bool                offsetIsZero = !effect.HasOffset() ||
+                            (ApproxEqual(offset.x.value, 0.0f) &&
+                             ApproxEqual(offset.y.value, 0.0f));
 
-  const bool sizeIsIdentity = !effect.hasSizeFactor ||
-                              (ApproxEqual(effect.sizeFactorX, 1.0f) &&
-                               ApproxEqual(effect.sizeFactorY, 1.0f));
+  const bool sizeIsIdentity = !effect.HasSizeFactor() ||
+                              (ApproxEqual(effect.GetSizeFactorX(), 1.0f) &&
+                               ApproxEqual(effect.GetSizeFactorY(), 1.0f));
 
   return offsetIsZero && sizeIsIdentity;
 }
 
 bool HasTimedSizeEffect(const Dali::Ui::LayoutBoundsEffect& effect)
 {
-  if(effect.timing.duration.InSeconds() <= 0.0f)
+  if(effect.GetTiming().GetDuration().InSeconds() <= 0.0f)
   {
     return false;
   }
-  if(!effect.hasSizeFactor)
+  if(!effect.HasSizeFactor())
   {
     return false;
   }
-  return !ApproxEqual(effect.sizeFactorX, 1.0f) ||
-         !ApproxEqual(effect.sizeFactorY, 1.0f);
+  return !ApproxEqual(effect.GetSizeFactorX(), 1.0f) ||
+         !ApproxEqual(effect.GetSizeFactorY(), 1.0f);
 }
 
 bool IsTimedEffect(const Dali::Ui::LayoutBoundsEffect& effect)
 {
-  return effect.timing.duration.InSeconds() > 0.0f &&
+  return effect.GetTiming().GetDuration().InSeconds() > 0.0f &&
          !IsNoopBoundsEffect(effect);
 }
 

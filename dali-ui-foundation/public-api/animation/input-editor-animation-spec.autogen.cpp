@@ -89,6 +89,66 @@ InputEditorAnimationSpec::InputEditorAnimationSpec(Internal::InputEditorAnimatio
 // Property methods (AddEntry calls)
 ///////////////////////////////////////////////////////////////////////////////
 
+InputEditorAnimationSpec& InputEditorAnimationSpec::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerRadius(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerRadiusBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerSquareness(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::CornerSquarenessBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineWidth(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineWidthBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineColor(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineColorBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::BorderlineOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputEditorAnimationSpec& InputEditorAnimationSpec::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::BackgroundColor(target, duration, alpha, delay);
@@ -278,66 +338,6 @@ InputEditorAnimationSpec& InputEditorAnimationSpec::Opacity(float target, Durati
 InputEditorAnimationSpec& InputEditorAnimationSpec::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::OpacityBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerRadius(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::CornerRadiusBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerRadiusBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::CornerSquareness(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerSquareness(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::CornerSquarenessBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::CornerSquarenessBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineWidth(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineWidthBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineWidthBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineColor(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineColorBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineOffset(target, duration, alpha, delay);
-  return *this;
-}
-
-InputEditorAnimationSpec& InputEditorAnimationSpec::BorderlineOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::BorderlineOffsetBy(relative, duration, alpha, delay);
   return *this;
 }
 
