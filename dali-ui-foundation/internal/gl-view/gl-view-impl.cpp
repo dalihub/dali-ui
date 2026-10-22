@@ -252,11 +252,12 @@ void GlViewImpl::OnSceneConnection(int depth)
 {
   ViewImpl::OnSceneConnection(depth);
 
-  mPlacementWindow = Dali::Window::Get(Self());
-  if(mPlacementWindow)
+  Dali::Window placementWindow = Dali::Window::Get(Self());
+  mPlacementWindow             = placementWindow;
+  if(placementWindow)
   {
     // The view can be on screen and yet not visible, because its window is hidden.
-    mPlacementWindow.VisibilityChangedSignal().Connect(this, &GlViewImpl::OnWindowVisibilityChanged);
+    placementWindow.VisibilityChangedSignal().Connect(this, &GlViewImpl::OnWindowVisibilityChanged);
   }
 
   UpdateVisibility();
@@ -264,11 +265,11 @@ void GlViewImpl::OnSceneConnection(int depth)
 
 void GlViewImpl::OnSceneDisconnection()
 {
-  if(mPlacementWindow)
+  if(Dali::Window placementWindow = mPlacementWindow.GetHandle())
   {
-    mPlacementWindow.VisibilityChangedSignal().Disconnect(this, &GlViewImpl::OnWindowVisibilityChanged);
-    mPlacementWindow.Reset();
+    placementWindow.VisibilityChangedSignal().Disconnect(this, &GlViewImpl::OnWindowVisibilityChanged);
   }
+  mPlacementWindow.Reset();
 
   UpdateVisibility();
 
@@ -333,8 +334,9 @@ void GlViewImpl::UpdateVisibility()
 {
   // Both have to hold: a view can be visible in the actor tree while the window it
   // is on is hidden, and nothing is produced for a hidden window.
-  const bool visible = Self().IsOnSceneVisible() &&
-                       mPlacementWindow && mPlacementWindow.IsVisible();
+  const Dali::Window placementWindow = mPlacementWindow.GetHandle();
+  const bool         visible         = Self().IsOnSceneVisible() &&
+                       placementWindow && placementWindow.IsVisible();
 
   mBackend->OnVisibilityChanged(visible);
 }

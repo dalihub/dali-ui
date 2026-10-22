@@ -22,6 +22,7 @@
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/callback.h>
 #include <memory>
 
@@ -224,7 +225,10 @@ private:
 
   UniquePtr<GlViewBackend> mBackend;
   Ui::GlViewRenderInfo     mRenderInfo;
-  Dali::Window             mPlacementWindow;
+  // Weak handle: the view must not keep its placement window alive. A strong
+  // reference here creates a Window -> Scene -> view -> impl -> window cycle,
+  // leaking the whole window/scene graph when the window should die.
+  Dali::WeakHandle<Dali::Window> mPlacementWindow;
 
   Dali::Callback<void(const GlViewRenderInfo&)> mInitCallback;
   Dali::Callback<bool(const GlViewRenderInfo&)> mRenderFrameCallback;

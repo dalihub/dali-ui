@@ -77,6 +77,15 @@ UiTestApplication::~UiTestApplication()
   // Need to delete core before we delete the adaptor.
   delete mCore;
   mCore = NULL;
+
+  // Explicitly release the main window created by CreateSceneFromMainWindow();
+  // Core does not own it. With no strong view -> window references left
+  // (GlViewImpl keeps only a weak handle on its placement window), this
+  // destroys the window/scene graph instead of leaking it.
+  // Note: the scene contents are deliberately NOT detached first - removing
+  // actors fires terminal (hover-out) events which can reach test callbacks
+  // whose captured state is already gone.
+  mMainWindow.Reset();
 }
 
 void UiTestApplication::InitializeAdaptor()
