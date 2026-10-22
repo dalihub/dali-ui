@@ -86,6 +86,7 @@ For details about the class structure and extensibility of `View`, see [here](ht
 * [In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop)
 * [State Management](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management)
 * [State Effect](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Effect)
+* [Render Effect](https://github.sec.samsung.net/NUI/dali-ui/wiki/Render-Effect)
 * [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI)
 * [Create New Component](https://github.sec.samsung.net/NUI/dali-ui/wiki/Create-New-Component)
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
