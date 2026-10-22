@@ -11,6 +11,7 @@ ENDIF()
 
 DALI_ADD_SAMPLE(chart-view.example chart-view-example.cpp)
 DALI_ADD_SAMPLE(chart-gallery.example chart-gallery.cpp)
+DALI_ADD_SAMPLE(chart-standard-gallery.example chart-standard-gallery.cpp chart-reference-cases.cpp chart-additional-cases.cpp chart-gallery-window.cpp chart-case-presenter.cpp chart-additional-presenter.cpp chart-number-transition.cpp)
 
 # This diagnostic uses Linux-only interfaces such as <features.h> and
 # /proc/self/statm.

@@ -61,6 +61,7 @@ Vector4 ChartSeries::GetColor() const
 
 void ChartSeries::SetValues(const std::vector<float>& values)
 {
+  mLowerValues.clear();
   mValues.clear();
   mValues.reserve(values.size());
   for(size_t i = 0; i < values.size(); ++i)
@@ -72,6 +73,7 @@ void ChartSeries::SetValues(const std::vector<float>& values)
 
 void ChartSeries::SetValues(const std::vector<std::pair<float, float>>& xyValues)
 {
+  mLowerValues.clear();
   mValues = xyValues;
   EmitDataChangedSignal();
 }
@@ -79,6 +81,18 @@ void ChartSeries::SetValues(const std::vector<std::pair<float, float>>& xyValues
 const std::vector<std::pair<float, float>>& ChartSeries::GetValues() const
 {
   return mValues;
+}
+
+void ChartSeries::SetRangeValues(const std::vector<Vector3>& values)
+{
+  mValues.clear();
+  mLowerValues.clear();
+  for(const auto& value : values)
+  {
+    mValues.emplace_back(value.x, value.z);
+    mLowerValues.push_back(value.y);
+  }
+  EmitDataChangedSignal();
 }
 
 void ChartSeries::SetVisible(bool visible)
@@ -93,6 +107,10 @@ void ChartSeries::SetVisible(bool visible)
 void ChartSeries::AppendValue(float y)
 {
   float nextX = mValues.empty() ? 0.0f : mValues.back().first + 1.0f;
+  if(!mLowerValues.empty())
+  {
+    mLowerValues.push_back(0.0f);
+  }
   mValues.push_back({nextX, y});
   TrimToMaxDataPoints();
   EmitDataChangedSignal();
@@ -100,6 +118,10 @@ void ChartSeries::AppendValue(float y)
 
 void ChartSeries::AppendValue(float x, float y)
 {
+  if(!mLowerValues.empty())
+  {
+    mLowerValues.push_back(0.0f);
+  }
   mValues.push_back({x, y});
   TrimToMaxDataPoints();
   EmitDataChangedSignal();
@@ -111,6 +133,10 @@ void ChartSeries::AppendValues(const std::vector<float>& values)
   mValues.reserve(mValues.size() + values.size());
   for(float v : values)
   {
+    if(!mLowerValues.empty())
+    {
+      mLowerValues.push_back(0.0f);
+    }
     mValues.push_back({nextX++, v});
   }
   TrimToMaxDataPoints();
@@ -131,6 +157,10 @@ void ChartSeries::TrimToMaxDataPoints()
 {
   if(mMaxDataPoints > 0 && static_cast<int>(mValues.size()) > mMaxDataPoints)
   {
+    if(!mLowerValues.empty())
+    {
+      mLowerValues.erase(mLowerValues.begin(), mLowerValues.begin() + (mValues.size() - mMaxDataPoints));
+    }
     mValues.erase(mValues.begin(),
                   mValues.begin() + (static_cast<int>(mValues.size()) - mMaxDataPoints));
   }

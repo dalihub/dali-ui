@@ -601,4 +601,18 @@ NaN points in either old or new values skip interpolation (the gap is shown imme
 
 ---
 
-[← Back to Components](Components.md) | [ChartView User Guide](ChartView.md)
+## Standard gallery and color updates
+
+The sample separates authored fixtures, persistent state, card presenters and the window. Theme changes and virtualization may recreate cards while retaining state. ContentUpdatedSignal restores selection after batched content changes; it is not a GPU presentation fence.
+
+New color APIs and ChartViewStyle own UiColor values. Layout and rendering resolve tokens; UiColorManager's color-table notification schedules background and data redraws. It does not reapply the construction style, so runtime background overrides remain effective. The existing BACKGROUND_COLOR property still uses Vector4.
+
+ChartViewStyle is a shared style handle. Its move-only Builder stores only `UniquePtr<Impl>` in the public header; the mutable style handle and the complete Impl are defined in the `.cpp`. Destruction and moves are defined out of line. Build consumes the Impl, and setters or Build on a moved-from or consumed builder assert before accessing its state. Configure creates an independent style clone.
+
+Use SetLegendTextColor for legend text and SetTooltipBackgroundColor for tooltip backgrounds. Existing API signatures and handle layouts are preserved; only the pre-release additions in this patch are refined.
+
+Bar transitions interpolate from the last displayed geometry. Pie and donut rendering and selection share sector geometry, excluding holes and gaps.
+
+![Bar and line example](assets/chartview/standard/combo-01-light.png)
+
+See the [standard design gallery recipes](ChartView.md#19-standard-design-gallery) for code, actual PNGs and run commands.

@@ -18,9 +18,12 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/math/vector2.h>
+#include <map>
+#include <string>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -39,16 +42,17 @@ class ChartLayoutManager
 public:
   struct TickLabel
   {
-    Vector2      position;
     Dali::String text;
+    UiColor      color{0.0f, 0.0f, 0.0f, 1.0f};
+    Vector2      position;
     float        angle{0.0f};
   };
 
   struct LegendItem
   {
+    Dali::String name;
     Vector2      iconCenter;
     Vector2      textPos;
-    Dali::String name;
   };
 
   struct LayoutResult
@@ -56,9 +60,10 @@ public:
     std::vector<TickLabel>  xTickLabels;
     std::vector<TickLabel>  yTickLabels;
     std::vector<LegendItem> legendItems;
+    std::vector<float>      xTicks; ///< Data coordinates, independent of label visibility and overlap culling.
     std::vector<float>      yTicks;
-    Vector2                 totalSize;
     Rect<float>             plotArea;
+    Vector2                 totalSize;
     Vector2                 titlePos;
     Vector2                 xAxisTitlePos;
     Vector2                 yAxisTitlePos;
@@ -80,9 +85,11 @@ public:
                              ScaleEngine&      scale);
 
 private:
-  static float        EstimateTextWidth(const Dali::String& text, float pointSize);
-  static float        EstimateTextHeight(float pointSize);
-  static Dali::String FormatTickValue(float value);
+  float                                          EstimateTextWidth(const Dali::String& text, float pointSize);
+  static float                                   EstimateTextHeight(float pointSize);
+  static Dali::String                            FormatTickValue(float value);
+  Ui::Label                                      mMeasureLabel;
+  std::map<std::pair<std::string, float>, float> mTextWidths;
 };
 
 } // namespace Integration

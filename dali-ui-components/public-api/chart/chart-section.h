@@ -201,6 +201,30 @@ public:
    */
   float GetStrokeWidth() const;
 
+  /**
+   * @brief Sets a finite non-negative corner radius for area sections.
+   * @param[in] radius The radius in pixels
+   */
+  void SetCornerRadius(float radius);
+
+  /**
+   * @brief Returns the area corner radius.
+   * @return The radius
+   */
+  float GetCornerRadius() const;
+
+  /**
+   * @brief Enables diagonal hatching inside area sections.
+   * @param[in] enabled Whether to draw hatching
+   */
+  void SetPatternEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether hatching is enabled.
+   * @return True when enabled
+   */
+  bool IsPatternEnabled() const;
+
 public:
   explicit ChartSection(Integration::ChartSection* impl);
 };

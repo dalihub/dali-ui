@@ -19,6 +19,7 @@
 #include <dali-ui-components/public-api/chart/chart-axis.h>
 
 // EXTERNAL INCLUDES
+#include <cmath>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -227,6 +228,81 @@ float ChartAxis::GetLabelsRotation() const
 ChartAxis::ChartAxis(Integration::ChartAxis* impl)
 : BaseHandle(impl)
 {
+}
+
+void ChartAxis::SetPosition(Position position)
+{
+  auto& impl     = GetImplementation(*this);
+  impl.mPosition = position;
+  impl.NotifyChanged();
+}
+
+ChartAxis::Position ChartAxis::GetPosition() const
+{
+  return GetImplementation(*this).mPosition;
+}
+
+void ChartAxis::SetScaleType(ScaleType scaleType)
+{
+  auto& impl      = GetImplementation(*this);
+  impl.mScaleType = scaleType;
+  impl.NotifyChanged();
+}
+
+ChartAxis::ScaleType ChartAxis::GetScaleType() const
+{
+  return GetImplementation(*this).mScaleType;
+}
+
+void ChartAxis::SetLabelsVisible(bool visible)
+{
+  auto& impl          = GetImplementation(*this);
+  impl.mLabelsVisible = visible;
+  impl.NotifyChanged();
+}
+
+bool ChartAxis::IsLabelsVisible() const
+{
+  return GetImplementation(*this).mLabelsVisible;
+}
+
+void ChartAxis::SetTickMarksVisible(bool visible)
+{
+  auto& impl             = GetImplementation(*this);
+  impl.mTickMarksVisible = visible;
+  impl.NotifyChanged();
+}
+
+bool ChartAxis::IsTickMarksVisible() const
+{
+  return GetImplementation(*this).mTickMarksVisible;
+}
+
+void ChartAxis::SetLabelColor(const UiColor& color)
+{
+  auto& impl       = GetImplementation(*this);
+  impl.mLabelColor = color;
+  impl.NotifyChanged();
+}
+
+UiColor ChartAxis::GetLabelColor() const
+{
+  return GetImplementation(*this).mLabelColor;
+}
+
+void ChartAxis::SetTickLabel(float value, Dali::StringView text, const UiColor& color)
+{
+  DALI_ASSERT_ALWAYS(std::isfinite(value));
+  auto& impl              = GetImplementation(*this);
+  impl.mTickLabels[value] = {Dali::String(text), color};
+  impl.NotifyChanged();
+}
+
+void ChartAxis::ClearTickLabels()
+{
+  auto& impl = GetImplementation(*this);
+  impl.mTickLabels.clear();
+  impl.NotifyChanged();
 }
 
 } // namespace Ui

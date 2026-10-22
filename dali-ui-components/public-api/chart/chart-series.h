@@ -18,10 +18,12 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/object/base-handle.h>
+#include <cstdint>
 #include <initializer_list>
 
 // INTERNAL INCLUDES
@@ -300,6 +302,25 @@ public:
    * @return The draw order index
    */
   int GetZIndex() const;
+
+  /**
+   * @brief Overrides one point's bar fill or marker color. Indices refer to the current data order.
+   * @param[in] pointIndex The point index
+   * @param[in] color The point color; theme identifiers are retained
+   */
+  void SetPointColor(uint32_t pointIndex, const UiColor& color);
+
+  /**
+   * @brief Returns the point override, or the series color when no override exists.
+   * @param[in] pointIndex The point index
+   * @return The authored point override, including its theme identifier, or the series color
+   */
+  UiColor GetPointColor(uint32_t pointIndex) const;
+
+  /**
+   * @brief Removes all point color overrides.
+   */
+  void ClearPointColors();
 
 public:
   explicit ChartSeries(Integration::ChartSeries* impl);

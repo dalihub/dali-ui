@@ -23,7 +23,11 @@
 #include <dali-ui-components/integration-api/chart/chart-color-palette.h>
 #include <dali-ui-components/integration-api/chart/chart-series-impl.h>
 #include <dali-ui-components/integration-api/chart/line-series-impl.h>
+#include <dali-ui-components/public-api/chart/chart-view.h>
 #include <dali-ui-components/public-api/chart/line-series.h>
+
+#include <dali-ui-components/integration-api/chart/chart-bar-geometry.h>
+#include <dali-ui-components/integration-api/chart/chart-pie-geometry.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>
@@ -50,7 +54,38 @@ HitResult ChartHitTester::FindNearest(const Vector2&     touchPos,
                                       float              threshold) const
 {
   HitResult best;
-  float     bestDist2 = threshold * threshold;
+  if(model.mChartType == static_cast<int>(Ui::ChartView::Type::PIE))
+  {
+    for(const auto& slice : BuildChartPieSlices(model, scale.GetPlotArea()))
+    {
+      if(slice.Contains(touchPos))
+      {
+        return slice.hit;
+      }
+    }
+    return best;
+  }
+  const auto bars = BuildChartBars(model, scale);
+  for(auto iter = bars.rbegin(); iter != bars.rend(); ++iter)
+  {
+    if(iter->Contains(touchPos))
+    {
+      const auto& impl  = GetImplementation(model.mSeriesList[iter->seriesIndex]);
+      best.isValid      = true;
+      best.seriesIndex  = static_cast<int>(iter->seriesIndex);
+      best.pointIndex   = static_cast<int>(iter->pointIndex);
+      best.dataX        = iter->dataX;
+      best.dataY        = iter->dataY;
+      best.canvasPos    = Vector2(iter->bounds.x + iter->bounds.width * 0.5f, std::clamp(scale.ToCanvasY(iter->dataY), iter->bounds.y, iter->bounds.y + iter->bounds.height));
+      best.seriesName   = impl.GetName();
+      best.seriesColor  = iter->color;
+      const auto labels = GetImplementation(model.mXAxis).GetLabels();
+      const int  x      = static_cast<int>(std::round(iter->dataX));
+      best.xLabel       = x >= 0 && x < static_cast<int>(labels.size()) ? labels[x] : Dali::String(std::to_string(iter->dataX).c_str());
+      return best;
+    }
+  }
+  float bestDist2 = threshold * threshold;
 
   const std::vector<Dali::String>& xLabels =
     GetImplementation(const_cast<Ui::ChartAxis&>(model.mXAxis)).GetLabels();
@@ -60,14 +95,20 @@ HitResult ChartHitTester::FindNearest(const Vector2&     touchPos,
   {
     Ui::ChartSeries& series = const_cast<Ui::ChartSeries&>(model.mSeriesList[static_cast<size_t>(si)]);
 
-    if(!GetImplementation(series).IsVisible()) continue;
+    if(!GetImplementation(series).IsVisible())
+    {
+      continue;
+    }
 
     const std::vector<std::pair<float, float>>& pts     = GetImplementation(series).GetValues();
     const int                                   ptCount = static_cast<int>(pts.size());
 
     for(int pi = 0; pi < ptCount; ++pi)
     {
-      if(std::isnan(pts[static_cast<size_t>(pi)].second)) continue;
+      if(!scale.IsValid(pts[static_cast<size_t>(pi)].first, pts[static_cast<size_t>(pi)].second))
+      {
+        continue;
+      }
 
       Vector2 cp = scale.ToCanvas(pts[static_cast<size_t>(pi)].first, pts[static_cast<size_t>(pi)].second);
       float   dx = cp.x - touchPos.x;
@@ -87,12 +128,16 @@ HitResult ChartHitTester::FindNearest(const Vector2&     touchPos,
 
         int xi = static_cast<int>(std::round(pts[static_cast<size_t>(pi)].first));
         if(xi >= 0 && xi < static_cast<int>(xLabels.size()))
+        {
           best.xLabel = xLabels[static_cast<size_t>(xi)];
+        }
         else
+        {
           best.xLabel = Dali::String(std::to_string(static_cast<int>(pts[static_cast<size_t>(pi)].first)).c_str());
+        }
 
         Ui::LineSeries ls = Ui::LineSeries::DownCast(series);
-        best.seriesColor  = ls ? ls.GetColor() : ChartColorPalette::Get(si);
+        best.seriesColor  = GetImplementation(series).PointColor(static_cast<uint32_t>(pi));
       }
     }
   }
@@ -107,32 +152,45 @@ std::vector<HitResult> ChartHitTester::FindBySameX(const Vector2&     touchPos,
                                                    bool               nearestY) const
 {
   std::vector<HitResult> results;
+  if(model.mChartType == static_cast<int>(Ui::ChartView::Type::PIE))
+  {
+    const auto hit = FindNearest(touchPos, model, scale, threshold);
+    if(hit.isValid)
+    {
+      results.push_back(hit);
+    }
+    return results;
+  }
 
   const std::vector<Dali::String>& xLabels =
     GetImplementation(const_cast<Ui::ChartAxis&>(model.mXAxis)).GetLabels();
-
-  const float touchDataX = scale.ToDataX(touchPos.x);
-  const float xThreshData =
-    threshold / (scale.GetPlotArea().width /
-                 std::max(1.0f, scale.GetXMax() - scale.GetXMin()));
 
   const int seriesCount = model.GetSeriesCount();
   for(int si = 0; si < seriesCount; ++si)
   {
     Ui::ChartSeries& series = const_cast<Ui::ChartSeries&>(model.mSeriesList[static_cast<size_t>(si)]);
-    if(!GetImplementation(series).IsVisible()) continue;
+    if(!GetImplementation(series).IsVisible())
+    {
+      continue;
+    }
 
     const auto& pts     = GetImplementation(series).GetValues();
     const int   ptCount = static_cast<int>(pts.size());
-    if(ptCount == 0) continue;
+    if(ptCount == 0)
+    {
+      continue;
+    }
 
-    float     bestDx2 = xThreshData * xThreshData;
+    float     bestDx2 = threshold * threshold;
     HitResult best;
     for(int pi = 0; pi < ptCount; ++pi)
     {
-      if(std::isnan(pts[static_cast<size_t>(pi)].second)) continue;
+      if(!scale.IsValid(pts[static_cast<size_t>(pi)].first, pts[static_cast<size_t>(pi)].second))
+      {
+        continue;
+      }
 
-      float dx = pts[static_cast<size_t>(pi)].first - touchDataX;
+      float dx = scale.ToCanvasX(pts[static_cast<size_t>(pi)].first) - touchPos.x;
       if(dx * dx < bestDx2)
       {
         bestDx2          = dx * dx;
@@ -146,15 +204,22 @@ std::vector<HitResult> ChartHitTester::FindBySameX(const Vector2&     touchPos,
 
         int xi = static_cast<int>(std::round(pts[static_cast<size_t>(pi)].first));
         if(xi >= 0 && xi < static_cast<int>(xLabels.size()))
+        {
           best.xLabel = xLabels[static_cast<size_t>(xi)];
+        }
         else
+        {
           best.xLabel = Dali::String(std::to_string(static_cast<int>(pts[static_cast<size_t>(pi)].first)).c_str());
+        }
 
         Ui::LineSeries ls = Ui::LineSeries::DownCast(series);
-        best.seriesColor  = ls ? ls.GetColor() : ChartColorPalette::Get(si);
+        best.seriesColor  = GetImplementation(series).PointColor(static_cast<uint32_t>(pi));
       }
     }
-    if(best.isValid) results.push_back(best);
+    if(best.isValid)
+    {
+      results.push_back(best);
+    }
   }
 
   if(nearestY && !results.empty())

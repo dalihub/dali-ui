@@ -599,4 +599,18 @@ canvasY = oldY + (newY - oldY) * t
 
 ---
 
-[← 컴포넌트 목록으로](Components.md) | [ChartView 사용자 가이드](ChartView-(kr).md)
+## 표준 갤러리와 색상 갱신
+
+샘플은 참조 데이터, 지속 상태, 카드 Presenter와 창을 분리합니다. 카드가 테마 변경이나 가상화로 다시 생성되어도 상태는 남습니다. 콘텐츠 일괄 갱신 후 ContentUpdatedSignal에서 선택을 복원하며, 이 신호는 GPU 표시 완료를 뜻하지 않습니다.
+
+신규 색상 API와 ChartViewStyle은 UiColor를 소유합니다. 토큰은 레이아웃·렌더링 시 해석하며, UiColorManager의 색상표 변경 알림은 배경과 데이터를 다시 그리도록 예약합니다. 스타일을 다시 적용하지 않으므로 런타임에 지정한 배경색은 유지됩니다. 기존 BACKGROUND_COLOR 프로퍼티의 Vector4 형식도 유지합니다.
+
+ChartViewStyle은 스타일을 공유하는 핸들입니다. 이동 전용 Builder의 public 헤더에는 `UniquePtr<Impl>`만 두고, 작성 중인 스타일 핸들과 Impl 정의는 `.cpp`에 둡니다. 소멸과 이동도 `.cpp`에서 정의합니다. Build는 Impl을 소비하며, 이동되었거나 소비된 Builder의 setter·Build는 상태에 접근하기 전에 assertion으로 차단합니다. Configure는 원본과 독립적인 스타일을 복제합니다.
+
+스타일의 범례 글자색은 SetLegendTextColor, 툴팁 배경색은 SetTooltipBackgroundColor로 지정합니다. 기존 API의 시그니처와 핸들 레이아웃은 유지하며, 이번 패치의 배포 전 신규 API만 정리했습니다.
+
+막대는 마지막 표시 geometry에서 다음 값으로 보간합니다. 파이·도넛은 렌더링과 선택이 같은 sector geometry를 공유하여 구멍과 간격을 제외합니다.
+
+![막대와 선 복합 예제](assets/chartview/standard/combo-01-light.png)
+
+코드와 실제 PNG, 실행 명령은 [사용법의 표준 디자인 갤러리](ChartView-(kr).md#19-표준-디자인-갤러리)를 참고합니다.

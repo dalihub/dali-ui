@@ -18,10 +18,13 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
+#include <cstdint>
 #include <initializer_list>
 
 // INTERNAL INCLUDES
@@ -53,6 +56,23 @@ class ChartAxis;
 class DALI_UI_COMPONENTS_API ChartAxis : public Dali::BaseHandle
 {
 public:
+  /**
+   * @brief Axis side relative to the plot.
+   */
+  enum class Position : uint32_t
+  {
+    NEAR = 0u, ///< Bottom for X axes, left for Y axes.
+    FAR  = 1u  ///< Top for X axes, right for Y axes.
+  };
+  /**
+   * @brief Supported coordinate mappings.
+   */
+  enum class ScaleType : uint32_t
+  {
+    LINEAR      = 0u, ///< Uniform spacing in data coordinates.
+    LOGARITHMIC = 1u  ///< Base-10 spacing; displayed coordinates must be positive.
+  };
+
   /**
    * @brief Creates an uninitialized ChartAxis handle.
    */
@@ -358,6 +378,79 @@ public:
    * @return The rotation angle, in degrees
    */
   float GetLabelsRotation() const;
+
+  /**
+   * @brief Selects the near or far side of the plot.
+   * @param[in] position The side of the axis; NEAR is the default
+   */
+  void SetPosition(Position position);
+
+  /**
+   * @brief Returns the configured axis side.
+   * @return The configured axis side
+   */
+  Position GetPosition() const;
+
+  /**
+   * @brief Selects linear or base-10 logarithmic coordinates.
+   * @param[in] scaleType The mapping; LINEAR is the default
+   */
+  void SetScaleType(ScaleType scaleType);
+
+  /**
+   * @brief Returns the configured coordinate mapping.
+   * @return The configured coordinate mapping
+   */
+  ScaleType GetScaleType() const;
+
+  /**
+   * @brief Sets whether axis tick labels are shown.
+   * @param[in] visible True to show labels; independent of grid and tick marks
+   */
+  void SetLabelsVisible(bool visible);
+
+  /**
+   * @brief Returns true when tick labels are shown.
+   * @return True when tick labels are shown
+   */
+  bool IsLabelsVisible() const;
+
+  /**
+   * @brief Sets whether short tick marks are drawn along the axis.
+   * @param[in] visible True to show marks; independent of labels and grid lines
+   */
+  void SetTickMarksVisible(bool visible);
+
+  /**
+   * @brief Returns true when tick marks are shown.
+   * @return True when tick marks are shown
+   */
+  bool IsTickMarksVisible() const;
+
+  /**
+   * @brief Sets the default color of axis tick labels.
+   * @param[in] color The color; explicit tick colors take precedence and tokens are retained
+   */
+  void SetLabelColor(const UiColor& color);
+
+  /**
+   * @brief Returns the authored default label color, including any theme identifier.
+   * @return The authored default label color, including any theme identifier
+   */
+  UiColor GetLabelColor() const;
+
+  /**
+   * @brief Adds or replaces a tick at an explicit value. Explicit ticks replace automatic ticks.
+   * @param[in] value The finite data coordinate
+   * @param[in] text The label text, copied into owned storage
+   * @param[in] color The explicit tick color, retaining any theme identifier
+   */
+  void SetTickLabel(float value, Dali::StringView text, const UiColor& color);
+
+  /**
+   * @brief Restores automatic ticks.
+   */
+  void ClearTickLabels();
 
 public:
   explicit ChartAxis(Integration::ChartAxis* impl);

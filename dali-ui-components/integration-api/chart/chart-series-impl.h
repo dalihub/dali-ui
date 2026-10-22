@@ -18,10 +18,13 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/math/vector3.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/dali-signal.h>
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -56,6 +59,7 @@ public:
   const std::vector<std::pair<float, float>>& GetValues() const;
 
   void SetVisible(bool visible);
+
   bool IsVisible() const
   {
     return mVisible;
@@ -66,7 +70,8 @@ public:
   void AppendValues(const std::vector<float>& values);
 
   void SetMaxDataPoints(int maxCount);
-  int  GetMaxDataPoints() const
+
+  int GetMaxDataPoints() const
   {
     return mMaxDataPoints;
   }
@@ -75,6 +80,7 @@ public:
   {
     mZIndex = zIndex;
   }
+
   int GetZIndex() const
   {
     return mZIndex;
@@ -82,18 +88,45 @@ public:
 
   DataChangedSignalType& DataChangedSignal();
 
+  void NotifyChanged()
+  {
+    EmitDataChangedSignal();
+  }
+
+  UiColor PointColor(uint32_t index) const
+  {
+    const auto iter = mPointColors.find(index);
+    return iter == mPointColors.end() ? UiColor(GetColor()) : iter->second;
+  }
+
+  float LowerValue(size_t index) const
+  {
+    return index < mLowerValues.size() ? mLowerValues[index] : 0.0f;
+  }
+
+  bool HasRangeValues() const
+  {
+    return !mLowerValues.empty();
+  }
+
+  void SetRangeValues(const std::vector<Vector3>& values);
+  // Ordered appearance storage
+  std::map<uint32_t, UiColor> mPointColors;
+  std::vector<float>          mLowerValues;
+  Ui::Gradient::Linear        mFillGradient;
+  bool                        mHasFillGradient{false};
+
 protected:
   ~ChartSeries() override;
 
   void EmitDataChangedSignal();
 
 private:
-  void TrimToMaxDataPoints();
-
-  DataChangedSignalType                mDataChangedSignal;
-  std::vector<std::pair<float, float>> mValues;
+  void                                 TrimToMaxDataPoints();
   Dali::String                         mName;
+  std::vector<std::pair<float, float>> mValues;
   Vector4                              mColor{0.3f, 0.6f, 1.0f, 1.0f};
+  DataChangedSignalType                mDataChangedSignal;
   int                                  mMaxDataPoints{0};
   int                                  mZIndex{0};
   bool                                 mVisible{true};

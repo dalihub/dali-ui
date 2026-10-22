@@ -16,7 +16,14 @@
  */
 
 // CLASS HEADER
+#include <dali-ui-components/integration-api/chart/chart-pie-geometry.h>
 #include <dali-ui-components/integration-api/chart/chart-view-impl.h>
+
+#include <dali-ui-components/integration-api/chart/chart-annotation-impl.h>
+#include <dali-ui-components/integration-api/chart/chart-bar-geometry.h>
+#include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry-helper.h>
@@ -96,8 +103,8 @@ DALI_TYPE_REGISTRATION_END()
 
 ChartViewImpl::ChartViewImpl(Ui::ChartView::Type type, const Vector2& size)
 : ViewImpl(),
-  mType(type),
-  mSize(size)
+  mSize(size),
+  mType(type)
 {
   mModel.mXAxis = Ui::ChartAxis::New();
   mModel.mYAxis = Ui::ChartAxis::New();
@@ -105,6 +112,25 @@ ChartViewImpl::ChartViewImpl(Ui::ChartView::Type type, const Vector2& size)
 
 ChartViewImpl::~ChartViewImpl()
 {
+  if(mColorManager)
+  {
+    mColorManager.ColorTableChangedSignal().Disconnect(this, &ChartViewImpl::OnColorsChanged);
+  }
+  if(mRedrawCallback && Dali::Adaptor::IsAvailable())
+  {
+    Dali::Adaptor::Get().RemoveIdle(mRedrawCallback);
+  }
+  mRedrawCallback = nullptr;
+  for(auto annotation : mAnnotations)
+  {
+    GetImplementation(annotation).mChanged.Disconnect(this, &ChartViewImpl::OnSeriesDataChanged);
+  }
+  mAnnotations.clear();
+  mAnnotationViews.clear();
+  for(auto section : mModel.mSections)
+  {
+    GetImplementation(section).mChanged.Disconnect(this, &ChartViewImpl::OnAxisConfigChanged);
+  }
   // Stop timers first so no callbacks fire after destruction begins.
   if(mUpdateThrottleTimer)
   {
@@ -224,6 +250,9 @@ void ChartViewImpl::OnInitialize()
   mTooltipLabel.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   self.Add(mTooltipLabel);
 
+  mColorManager = Ui::UiColorManager::Get();
+  mColorManager.ColorTableChangedSignal().Connect(this, &ChartViewImpl::OnColorsChanged);
+
   // Throttle timer (single-shot)
   mUpdateThrottleTimer = Timer::New(16);
   mUpdateThrottleTimer.TickSignal().Connect(this, &ChartViewImpl::OnUpdateThrottleTimer);
@@ -263,20 +292,66 @@ LayoutRect ChartViewImpl::OnArrange(const LayoutRect& bounds)
   // SyncLayerSizes is called inside RebuildBackground when mSize changes.
   // No need to call it unconditionally here: since ViewImpl::OnArrange is
   // skipped, canvas sizes are never reset between layout passes.
-  if(mNeedsBackgroundUpdate)
-  {
-    RebuildBackground();
-    mNeedsBackgroundUpdate = false;
-  }
-
-  if(mNeedsDataUpdate)
-  {
-    RebuildData();
-    mNeedsDataUpdate = false;
-  }
+  QueueRedraw();
 
   // Echo the layout-assigned bounds as this view's final self bounds.
   return bounds;
+}
+
+void ChartViewImpl::QueueRedraw()
+{
+  if(mRedrawCallback || (!mNeedsBackgroundUpdate && !mNeedsDataUpdate))
+  {
+    return;
+  }
+  if(Dali::Adaptor::IsAvailable())
+  {
+    mRedrawCallback = MakeCallback(this, &ChartViewImpl::FlushRedraw);
+    if(Dali::Adaptor::Get().AddIdle(mRedrawCallback, false))
+    {
+      return;
+    }
+    mRedrawCallback = nullptr;
+  }
+  mPendingUpdate = true;
+  mUpdateThrottleTimer.Start();
+}
+
+void ChartViewImpl::FlushRedraw()
+{
+  mRedrawCallback = nullptr;
+  // Keep the chart alive until all child updates have completed.
+  Ui::ChartView self    = Ui::ChartView::DownCast(Self());
+  const bool    updated = mNeedsBackgroundUpdate || mNeedsDataUpdate;
+  if(mNeedsBackgroundUpdate)
+  {
+    mNeedsBackgroundUpdate = false;
+    HideOverlay();
+    RebuildBackground();
+  }
+  if(mNeedsDataUpdate)
+  {
+    mNeedsDataUpdate = false;
+    RebuildData();
+  }
+  if(updated && !mAnimationActive && !(mPendingUpdate && !mAnimOldCanvasY.empty() && mModel.mStyle.animation.duration > 0.0f))
+  {
+    EmitContentUpdated();
+  }
+}
+
+void ChartViewImpl::OnColorsChanged()
+{
+  // Authored tokens stay in the model; resolve them again without reapplying the style.
+  mNeedsBackgroundUpdate = true;
+  mNeedsDataUpdate       = true;
+  QueueRedraw();
+}
+
+void ChartViewImpl::EmitContentUpdated()
+{
+  Ui::ChartView self = Ui::ChartView::DownCast(Self());
+  mContentUpdatedSignal.Emit(self);
 }
 
 // =============================================================================
@@ -295,8 +370,126 @@ void ChartViewImpl::AddSeries(Ui::ChartSeries series)
   InvalidateArrange();
 }
 
+void ChartViewImpl::ApplyStyle(const Ui::ChartViewStyle& style)
+{
+  DALI_ASSERT_ALWAYS(style);
+  auto& render                                 = mModel.mStyle.render;
+  render.backgroundColor                       = style.GetBackgroundColor();
+  render.labelColor                            = style.GetLabelColor();
+  render.legendTextColor                       = style.GetLegendTextColor();
+  render.tooltipBackgroundColor                = style.GetTooltipBackgroundColor();
+  render.tooltipTextColor                      = style.GetTooltipTextColor();
+  render.padding                               = style.GetPadding();
+  render.tooltipPadding                        = style.GetTooltipPadding();
+  GetImplementation(mModel.mXAxis).mLabelColor = render.labelColor;
+  GetImplementation(mModel.mYAxis).mLabelColor = render.labelColor;
+  mTooltipLabel.SetTextColor(Ui::UiColor(render.tooltipTextColor));
+  mTooltipLabel.SetBackgroundColor(Ui::UiColor(render.tooltipBackgroundColor));
+  mTooltipLabel.SetCornerRadius(8.0f);
+  mNeedsBackgroundUpdate = true;
+  mNeedsDataUpdate       = true;
+  InvalidateArrange();
+}
+
+void ChartViewImpl::SetViewport(const Vector4& range)
+{
+  DALI_ASSERT_ALWAYS(std::isfinite(range.x) && std::isfinite(range.y) &&
+                     std::isfinite(range.z) && std::isfinite(range.w) &&
+                     range.x < range.z && range.y < range.w &&
+                     (GetImplementation(mModel.mXAxis).mScaleType != Ui::ChartAxis::ScaleType::LOGARITHMIC || range.x > 0.0f) &&
+                     (GetImplementation(mModel.mYAxis).mScaleType != Ui::ChartAxis::ScaleType::LOGARITHMIC || range.y > 0.0f));
+  if(!mViewportActive)
+  {
+    // Keep the complete data bounds before the viewport replaces axis limits.
+    mModel.ComputeAutoRange();
+    InitViewportFromData();
+  }
+  mViewportActive = true;
+  mViewportXMin   = range.x;
+  mViewportYMin   = range.y;
+  mViewportXMax   = range.z;
+  mViewportYMax   = range.w;
+  ApplyViewportToScale();
+  OnSeriesDataChanged();
+  mNeedsBackgroundUpdate = true;
+  mNeedsDataUpdate       = true;
+  InvalidateArrange();
+}
+
+Vector4 ChartViewImpl::GetViewport() const
+{
+  return Vector4(mScale.GetXMin(), mScale.GetYMin(), mScale.GetXMax(), mScale.GetYMax());
+}
+
+bool ChartViewImpl::SelectPoint(uint32_t seriesIndex, uint32_t pointIndex)
+{
+  if(seriesIndex >= mModel.mSeriesList.size())
+  {
+    return false;
+  }
+  HitResult hit;
+  if(mModel.mChartType == static_cast<int>(Ui::ChartView::Type::PIE))
+  {
+    for(const auto& slice : BuildChartPieSlices(mModel, mScale.GetPlotArea()))
+    {
+      if(slice.hit.seriesIndex == static_cast<int>(seriesIndex) && slice.hit.pointIndex == static_cast<int>(pointIndex))
+      {
+        hit = slice.hit;
+        break;
+      }
+    }
+    if(!hit.isValid)
+    {
+      return false;
+    }
+  }
+  else
+  {
+    auto&       series = GetImplementation(mModel.mSeriesList[seriesIndex]);
+    const auto& values = series.GetValues();
+    if(!series.IsVisible() || pointIndex >= values.size() ||
+       !mScale.IsValid(values[pointIndex].first, values[pointIndex].second))
+    {
+      return false;
+    }
+    hit.isValid     = true;
+    hit.seriesIndex = static_cast<int>(seriesIndex);
+    hit.pointIndex  = static_cast<int>(pointIndex);
+    hit.dataX       = values[pointIndex].first;
+    hit.dataY       = values[pointIndex].second;
+    hit.canvasPos   = mScale.ToCanvas(hit.dataX, hit.dataY);
+    hit.seriesName  = series.GetName();
+    hit.seriesColor = series.PointColor(pointIndex);
+    for(const auto& geometry : BuildChartBars(mModel, mScale))
+    {
+      if(geometry.seriesIndex == seriesIndex && geometry.pointIndex == pointIndex)
+      {
+        hit.canvasPos   = Vector2(geometry.bounds.x + geometry.bounds.width * 0.5f,
+                                geometry.dataY >= 0.0f ? geometry.bounds.y : geometry.bounds.y + geometry.bounds.height);
+        hit.seriesColor = geometry.color;
+        break;
+      }
+    }
+    const auto labels = GetImplementation(mModel.mXAxis).GetLabels();
+    if(!mHitTester.IsInsidePlotArea(hit.canvasPos, mScale))
+    {
+      return false;
+    }
+    const int index = static_cast<int>(std::round(hit.dataX));
+    hit.xLabel      = index >= 0 && index < static_cast<int>(labels.size()) ? labels[index] : Dali::String(std::to_string(hit.dataX).c_str());
+  }
+  mLastHit = hit;
+  UpdateOverlay(hit);
+  Ui::ChartView self = Ui::ChartView::DownCast(Self());
+  self.SetAccessibilityValue(Dali::String((std::string(hit.seriesName.CStr()) + " " + hit.xLabel.CStr() + " " + std::to_string(hit.dataY)).c_str()));
+  mDataPointSelectedSignal.Emit(self, Ui::ChartPointEventArgs(hit.seriesIndex, hit.pointIndex, hit.dataX, hit.dataY, hit.seriesName, hit.xLabel));
+  return true;
+}
+
 void ChartViewImpl::SetXAxis(Ui::ChartAxis axis)
 {
+  DALI_ASSERT_ALWAYS(axis);
+  GetImplementation(mModel.mXAxis).ConfigChangedSignal().Disconnect(this, &ChartViewImpl::OnAxisConfigChanged);
   mModel.mXAxis = axis;
   GetImplementation(axis).ConfigChangedSignal().Connect(this, &ChartViewImpl::OnAxisConfigChanged);
 
@@ -309,6 +502,8 @@ void ChartViewImpl::SetXAxis(Ui::ChartAxis axis)
 
 void ChartViewImpl::SetYAxis(Ui::ChartAxis axis)
 {
+  DALI_ASSERT_ALWAYS(axis);
+  GetImplementation(mModel.mYAxis).ConfigChangedSignal().Disconnect(this, &ChartViewImpl::OnAxisConfigChanged);
   mModel.mYAxis = axis;
   GetImplementation(axis).ConfigChangedSignal().Connect(this, &ChartViewImpl::OnAxisConfigChanged);
 
@@ -321,10 +516,18 @@ void ChartViewImpl::SetYAxis(Ui::ChartAxis axis)
 
 void ChartViewImpl::OnSeriesDataChanged()
 {
-  if(mPendingUpdate) return;
+  HideOverlay();
+  if(mPendingUpdate)
+  {
+    return;
+  }
 
-  if(mModel.mStyle.animation.duration > 0.0f && !mAnimTimer.IsRunning())
+  if(mModel.mStyle.animation.duration > 0.0f)
+  {
     mAnimOldCanvasY = mLastRenderedCanvasY;
+    mAnimOldBars    = mLastRenderedBars;
+    mAnimProgress   = 0.0f;
+  }
 
   mPendingUpdate = true;
   if(mThrottleMs < 1.0f)
@@ -349,7 +552,10 @@ void ChartViewImpl::SetUpdateThrottle(float ms)
     const uint32_t interval = static_cast<uint32_t>(std::round(mThrottleMs));
     mUpdateThrottleTimer    = Timer::New(interval);
     mUpdateThrottleTimer.TickSignal().Connect(this, &ChartViewImpl::OnUpdateThrottleTimer);
-    if(pendingFire) mUpdateThrottleTimer.Start();
+    if(pendingFire)
+    {
+      mUpdateThrottleTimer.Start();
+    }
   }
   else if(pendingFire)
   {
@@ -359,19 +565,33 @@ void ChartViewImpl::SetUpdateThrottle(float ms)
 
 bool ChartViewImpl::OnUpdateThrottleTimer()
 {
-  mPendingUpdate = false;
+  Ui::ChartView self = Ui::ChartView::DownCast(Self());
+  mPendingUpdate     = false;
   mModel.ComputeAutoRange();
   UpdateScale();
 
   const float dur = mModel.mStyle.animation.duration;
   if(dur > 0.0f && !mAnimOldCanvasY.empty())
   {
-    mAnimStartTime = std::chrono::steady_clock::now();
-    if(!mAnimTimer.IsRunning()) mAnimTimer.Start();
+    mAnimationActive = true;
+    mAnimStartTime   = std::chrono::steady_clock::now();
+    mAnimProgress    = 0.0f;
+    if(!mLastLayout.plotArea.IsEmpty())
+    {
+      RebuildBackground();
+      RebuildDataAnimated(mAnimOldCanvasY, 0.0f);
+    }
+    if(!mAnimTimer.IsRunning())
+    {
+      mAnimTimer.Start();
+    }
   }
   else
   {
+    mAnimationActive = false;
+    mAnimTimer.Stop();
     mAnimOldCanvasY.clear();
+    mAnimOldBars.clear();
     if(!mLastLayout.plotArea.IsEmpty() && mSize.width > 0.0f)
     {
       // Bypass the layout system for data-only updates.
@@ -383,6 +603,7 @@ bool ChartViewImpl::OnUpdateThrottleTimer()
       // for the next layout pass.
       RebuildBackground();
       RebuildData();
+      EmitContentUpdated();
     }
     else
     {
@@ -421,24 +642,33 @@ float ChartViewImpl::ApplyEasing(float t, int easingType)
   switch(easingType)
   {
     case 1:
+    {
       return 1.0f - (1.0f - t) * (1.0f - t);
+    }
     case 2:
+    {
       return t < 0.5f ? 2.0f * t * t : 1.0f - 2.0f * (1.0f - t) * (1.0f - t);
+    }
     default:
+    {
       return t;
+    }
   }
 }
 
 bool ChartViewImpl::OnAnimTimer()
 {
-  const float dur = mModel.mStyle.animation.duration;
+  Ui::ChartView self = Ui::ChartView::DownCast(Self());
+  const float   dur  = mModel.mStyle.animation.duration;
   if(dur <= 0.0f)
   {
+    mAnimationActive = false;
     // Same direct-rebuild pattern as OnUpdateThrottleTimer: bypass the layout
     // system so RequestRasterization() wakes the Adaptor immediately.
     if(!mLastLayout.plotArea.IsEmpty() && mSize.width > 0.0f)
     {
       RebuildData();
+      EmitContentUpdated();
     }
     else
     {
@@ -454,13 +684,20 @@ bool ChartViewImpl::OnAnimTimer()
   float rawT = std::min(elapsed / dur, 1.0f);
   float t    = ApplyEasing(rawT, mModel.mStyle.animation.easing);
 
-  if(mAnimOldCanvasY.size() != mModel.mSeriesList.size()) t = 1.0f;
+  if(mAnimOldCanvasY.size() != mModel.mSeriesList.size())
+  {
+    t = 1.0f;
+  }
 
+  mAnimProgress = t;
   RebuildDataAnimated(mAnimOldCanvasY, t);
 
   if(rawT >= 1.0f)
   {
+    mAnimationActive = false;
     mAnimOldCanvasY.clear();
+    mAnimOldBars.clear();
+    EmitContentUpdated();
     return false;
   }
   return true;
@@ -468,9 +705,24 @@ bool ChartViewImpl::OnAnimTimer()
 
 void ChartViewImpl::RebuildDataAnimated(const std::vector<std::vector<float>>& oldY, float t)
 {
-  if(!mDataCanvas || mSize.width < 1.0f) return;
+  if(!mDataCanvas || mSize.width < 1.0f)
+  {
+    return;
+  }
 
-  auto labels = mDataRenderer.Render(mDataCanvas, mModel, mScale, mLastLayout, &oldY, t);
+  auto labels          = mDataRenderer.Render(mDataCanvas, mModel, mScale, mLastLayout, &oldY, t, &mAnimOldBars);
+  mLastRenderedBars    = mDataRenderer.GetRenderedBars();
+  mLastRenderedCanvasY = CaptureCanvasY();
+  for(size_t series = 0; series < mLastRenderedCanvasY.size() && series < oldY.size(); ++series)
+  {
+    for(size_t point = 0; point < mLastRenderedCanvasY[series].size() && point < oldY[series].size(); ++point)
+    {
+      if(std::isfinite(oldY[series][point]) && std::isfinite(mLastRenderedCanvasY[series][point]))
+      {
+        mLastRenderedCanvasY[series][point] = oldY[series][point] + (mLastRenderedCanvasY[series][point] - oldY[series][point]) * t;
+      }
+    }
+  }
   mDataCanvas.RequestRasterization();
 
   if(t >= 1.0f)
@@ -486,20 +738,32 @@ void ChartViewImpl::RebuildDataAnimated(const std::vector<std::vector<float>>& o
       label.SetProperty(Actor::Property::PIVOT, Pivot::BOTTOM_CENTER);
       label.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
       label.SetProperty(Actor::Property::POSITION, info.position);
+      const auto measured = label.Measure(std::max(1.0f, mSize.x), std::max(1.0f, mSize.y));
+      label.SetProperty(Actor::Property::SIZE, Vector2(measured.width + 1.0f, measured.height + 1.0f));
       label.SetProperty(Actor::Property::VISIBLE, true);
       ++used;
     }
     HideExcessLabels(mDataLabels, used);
+    RebuildAnnotations();
     mLastRenderedCanvasY = CaptureCanvasY();
   }
 }
 
 void ChartViewImpl::OnAxisConfigChanged()
 {
-  if(mViewportActive) return;
+  HideOverlay();
+  if(mViewportActive)
+  {
+    OnSeriesDataChanged();
+    mNeedsBackgroundUpdate = true;
+    mNeedsDataUpdate       = true;
+    InvalidateArrange();
+    return;
+  }
 
   mModel.ComputeAutoRange();
   UpdateScale();
+  OnSeriesDataChanged();
   mNeedsBackgroundUpdate = true;
   mNeedsDataUpdate       = true;
   InvalidateArrange();
@@ -544,13 +808,20 @@ void ChartViewImpl::SetZoomMode(int flags)
       mPinchDetector.Detach(Self());
       mPinchDetector.Reset();
     }
-    if(mViewportActive) ResetZoom();
+    if(mViewportActive)
+    {
+      ResetZoom();
+    }
   }
 
   if(wasZoom)
+  {
     Self().WheelEventSignal().Disconnect(this, &ChartViewImpl::OnWheel);
+  }
   if(isZoom)
+  {
     Self().WheelEventSignal().Connect(this, &ChartViewImpl::OnWheel);
+  }
 }
 
 void ChartViewImpl::ResetZoom()
@@ -584,8 +855,14 @@ void ChartViewImpl::ApplyViewportToScale()
 {
   auto& xImpl = GetImplementation(mModel.mXAxis);
   auto& yImpl = GetImplementation(mModel.mYAxis);
-  if(mViewportXMax - mViewportXMin < 1e-6f) mViewportXMax = mViewportXMin + 1e-6f;
-  if(mViewportYMax - mViewportYMin < 1e-6f) mViewportYMax = mViewportYMin + 1e-6f;
+  if(mViewportXMax - mViewportXMin < 1e-6f)
+  {
+    mViewportXMax = mViewportXMin + 1e-6f;
+  }
+  if(mViewportYMax - mViewportYMin < 1e-6f)
+  {
+    mViewportYMax = mViewportYMin + 1e-6f;
+  }
   xImpl.SetMinLimit(mViewportXMin);
   xImpl.SetMaxLimit(mViewportXMax);
   xImpl.SetAutoRange(false);
@@ -598,33 +875,44 @@ void ChartViewImpl::ApplyViewportToScale()
 
 void ChartViewImpl::ClampViewport()
 {
-  const float xViewW = mViewportXMax - mViewportXMin;
-  if(mViewportXMin < mDataXMin)
-  {
-    mViewportXMin = mDataXMin;
-    mViewportXMax = mViewportXMin + xViewW;
-  }
-  if(mViewportXMax > mDataXMax)
-  {
-    mViewportXMax = mDataXMax;
-    mViewportXMin = mViewportXMax - xViewW;
-  }
-  mViewportXMin = std::max(mViewportXMin, mDataXMin);
-  mViewportXMax = std::min(mViewportXMax, mDataXMax);
+  ClampViewport(true, true);
+}
 
-  const float yViewH = mViewportYMax - mViewportYMin;
-  if(mViewportYMin < mDataYMin)
+void ChartViewImpl::ClampViewport(bool clampX, bool clampY)
+{
+  if(clampX)
   {
-    mViewportYMin = mDataYMin;
-    mViewportYMax = mViewportYMin + yViewH;
+    const float xViewW = mViewportXMax - mViewportXMin;
+    if(mViewportXMin < mDataXMin)
+    {
+      mViewportXMin = mDataXMin;
+      mViewportXMax = mViewportXMin + xViewW;
+    }
+    if(mViewportXMax > mDataXMax)
+    {
+      mViewportXMax = mDataXMax;
+      mViewportXMin = mViewportXMax - xViewW;
+    }
+    mViewportXMin = std::max(mViewportXMin, mDataXMin);
+    mViewportXMax = std::min(mViewportXMax, mDataXMax);
   }
-  if(mViewportYMax > mDataYMax)
+
+  if(clampY)
   {
-    mViewportYMax = mDataYMax;
-    mViewportYMin = mViewportYMax - yViewH;
+    const float yViewH = mViewportYMax - mViewportYMin;
+    if(mViewportYMin < mDataYMin)
+    {
+      mViewportYMin = mDataYMin;
+      mViewportYMax = mViewportYMin + yViewH;
+    }
+    if(mViewportYMax > mDataYMax)
+    {
+      mViewportYMax = mDataYMax;
+      mViewportYMin = mViewportYMax - yViewH;
+    }
+    mViewportYMin = std::max(mViewportYMin, mDataYMin);
+    mViewportYMax = std::min(mViewportYMax, mDataYMax);
   }
-  mViewportYMin = std::max(mViewportYMin, mDataYMin);
-  mViewportYMax = std::min(mViewportYMax, mDataYMax);
 }
 
 void ChartViewImpl::FitYToViewport()
@@ -641,27 +929,49 @@ void ChartViewImpl::FitYToViewport()
     for(const auto& series : mModel.mSeriesList)
     {
       auto bs = Ui::BarSeries::DownCast(const_cast<Ui::ChartSeries&>(series));
-      if(!bs) continue;
+      if(!bs)
+      {
+        continue;
+      }
       const auto& bsImpl = GetImplementation(bs);
-      if(!bsImpl.IsVisible() || !bsImpl.IsStacked()) continue;
+      if(!bsImpl.IsVisible() || !bsImpl.IsStacked())
+      {
+        continue;
+      }
 
       hasStacked = true;
       for(const auto& pt : bsImpl.GetValues())
       {
-        if(std::isnan(pt.second)) continue;
-        if(pt.first < mViewportXMin || pt.first > mViewportXMax) continue;
+        if(std::isnan(pt.second))
+        {
+          continue;
+        }
+        if(pt.first < mViewportXMin || pt.first > mViewportXMax)
+        {
+          continue;
+        }
         const int xKey = static_cast<int>(std::round(pt.first));
         if(pt.second >= 0.0f)
+        {
           stackedPos[xKey] += pt.second;
+        }
         else
+        {
           stackedNeg[xKey] += pt.second;
+        }
       }
     }
 
     if(hasStacked)
     {
-      for(auto& [k, v] : stackedPos) yMax = std::max(yMax, v);
-      for(auto& [k, v] : stackedNeg) yMin = std::min(yMin, v);
+      for(auto& [k, v] : stackedPos)
+      {
+        yMax = std::max(yMax, v);
+      }
+      for(auto& [k, v] : stackedNeg)
+      {
+        yMin = std::min(yMin, v);
+      }
     }
   }
 
@@ -670,18 +980,27 @@ void ChartViewImpl::FitYToViewport()
   {
     {
       auto bs = Ui::BarSeries::DownCast(const_cast<Ui::ChartSeries&>(series));
-      if(bs && GetImplementation(bs).IsStacked()) continue;
+      if(bs && GetImplementation(bs).IsStacked())
+      {
+        continue;
+      }
     }
 
     const auto& impl = GetImplementation(const_cast<Ui::ChartSeries&>(series));
-    if(!impl.IsVisible()) continue;
+    if(!impl.IsVisible())
+    {
+      continue;
+    }
 
     const auto& pts = impl.GetValues();
     for(size_t i = 0; i < pts.size(); ++i)
     {
       const float x0 = pts[i].first;
       const float y0 = pts[i].second;
-      if(std::isnan(y0)) continue;
+      if(std::isnan(y0))
+      {
+        continue;
+      }
 
       if(x0 >= mViewportXMin && x0 <= mViewportXMax)
       {
@@ -689,13 +1008,22 @@ void ChartViewImpl::FitYToViewport()
         yMax = std::max(yMax, y0);
       }
 
-      if(i + 1 >= pts.size()) continue;
+      if(i + 1 >= pts.size())
+      {
+        continue;
+      }
       const float x1 = pts[i + 1].first;
       const float y1 = pts[i + 1].second;
-      if(std::isnan(y1)) continue;
+      if(std::isnan(y1))
+      {
+        continue;
+      }
 
       const float dx = x1 - x0;
-      if(std::abs(dx) < 1e-9f) continue;
+      if(std::abs(dx) < 1e-9f)
+      {
+        continue;
+      }
 
       if((x0 < mViewportXMin) != (x1 < mViewportXMin))
       {
@@ -713,7 +1041,10 @@ void ChartViewImpl::FitYToViewport()
     }
   }
 
-  if(yMin > yMax) return;
+  if(yMin > yMax)
+  {
+    return;
+  }
 
   const float range   = yMax - yMin;
   const float padding = (range > 1e-6f) ? range * 0.05f
@@ -733,11 +1064,17 @@ void ChartViewImpl::OnPanGesture(Actor /*actor*/, Dali::PanGesture pan)
   const int  flags = mModel.mStyle.interaction.zoomModeFlags;
   const bool panX  = flags & static_cast<int>(Ui::ChartView::ZoomMode::PAN_X);
   const bool panY  = flags & static_cast<int>(Ui::ChartView::ZoomMode::PAN_Y);
-  if(!panX && !panY) return;
+  if(!panX && !panY)
+  {
+    return;
+  }
 
   if(pan.GetState() == Dali::GestureState::STARTED)
   {
-    if(!mViewportActive) InitViewportFromData();
+    if(!mViewportActive)
+    {
+      InitViewportFromData();
+    }
     mPanStartXMin     = mViewportXMin;
     mPanStartYMin     = mViewportYMin;
     mPanStartLocalPos = pan.GetPosition();
@@ -751,7 +1088,10 @@ void ChartViewImpl::OnPanGesture(Actor /*actor*/, Dali::PanGesture pan)
     mPanActive = false;
     return;
   }
-  if(pan.GetState() != Dali::GestureState::CONTINUING) return;
+  if(pan.GetState() != Dali::GestureState::CONTINUING)
+  {
+    return;
+  }
 
   const Vector2      localDelta = pan.GetPosition() - mPanStartLocalPos;
   const Rect<float>& pa         = mLastLayout.plotArea;
@@ -774,8 +1114,14 @@ void ChartViewImpl::OnPanGesture(Actor /*actor*/, Dali::PanGesture pan)
     mViewportYMax     = mViewportYMin + viewH;
   }
 
-  if(mModel.mStyle.interaction.zoomClampEnabled) ClampViewport();
-  if(mModel.mStyle.interaction.autoFitY && panX) FitYToViewport();
+  if(mModel.mStyle.interaction.zoomClampEnabled)
+  {
+    ClampViewport(panX, panY);
+  }
+  if(mModel.mStyle.interaction.autoFitY && panX)
+  {
+    FitYToViewport();
+  }
   mViewportActive = true;
   ApplyViewportToScale();
   RebuildBackground();
@@ -787,11 +1133,17 @@ void ChartViewImpl::OnPinchGesture(Actor /*actor*/, Dali::PinchGesture gesture)
   const int  flags = mModel.mStyle.interaction.zoomModeFlags;
   const bool zoomX = flags & static_cast<int>(Ui::ChartView::ZoomMode::ZOOM_X);
   const bool zoomY = flags & static_cast<int>(Ui::ChartView::ZoomMode::ZOOM_Y);
-  if(!zoomX && !zoomY) return;
+  if(!zoomX && !zoomY)
+  {
+    return;
+  }
 
   if(gesture.GetState() == Dali::GestureState::STARTED)
   {
-    if(!mViewportActive) InitViewportFromData();
+    if(!mViewportActive)
+    {
+      InitViewportFromData();
+    }
     mPinchStartXMin             = mViewportXMin;
     mPinchStartXMax             = mViewportXMax;
     mPinchStartYMin             = mViewportYMin;
@@ -803,7 +1155,10 @@ void ChartViewImpl::OnPinchGesture(Actor /*actor*/, Dali::PinchGesture gesture)
     HideOverlay();
     return;
   }
-  if(gesture.GetState() != Dali::GestureState::CONTINUING) return;
+  if(gesture.GetState() != Dali::GestureState::CONTINUING)
+  {
+    return;
+  }
 
   const float scale = std::max(0.05f, gesture.GetScale());
 
@@ -825,8 +1180,14 @@ void ChartViewImpl::OnPinchGesture(Actor /*actor*/, Dali::PinchGesture gesture)
     mViewportYMax     = mViewportYMin + newH;
   }
 
-  if(mModel.mStyle.interaction.zoomClampEnabled) ClampViewport();
-  if(mModel.mStyle.interaction.autoFitY && zoomX) FitYToViewport();
+  if(mModel.mStyle.interaction.zoomClampEnabled)
+  {
+    ClampViewport(zoomX, zoomY);
+  }
+  if(mModel.mStyle.interaction.autoFitY && zoomX)
+  {
+    FitYToViewport();
+  }
   mViewportActive = true;
   ApplyViewportToScale();
   RebuildBackground();
@@ -835,14 +1196,23 @@ void ChartViewImpl::OnPinchGesture(Actor /*actor*/, Dali::PinchGesture gesture)
 
 bool ChartViewImpl::OnWheel(Actor /*actor*/, Dali::WheelEvent event)
 {
-  if(event.GetType() != Dali::WheelEvent::MOUSE_WHEEL) return false;
+  if(event.GetType() != Dali::WheelEvent::MOUSE_WHEEL)
+  {
+    return false;
+  }
 
   const int  flags = mModel.mStyle.interaction.zoomModeFlags;
   const bool zoomX = flags & static_cast<int>(Ui::ChartView::ZoomMode::ZOOM_X);
   const bool zoomY = flags & static_cast<int>(Ui::ChartView::ZoomMode::ZOOM_Y);
-  if(!zoomX && !zoomY) return false;
+  if(!zoomX && !zoomY)
+  {
+    return false;
+  }
 
-  if(!mViewportActive) InitViewportFromData();
+  if(!mViewportActive)
+  {
+    InitViewportFromData();
+  }
 
   constexpr float FACTOR_PER_NOTCH = 1.15f;
   const float     factor           = (event.GetDelta() > 0) ? (1.0f / FACTOR_PER_NOTCH) : FACTOR_PER_NOTCH;
@@ -854,7 +1224,9 @@ bool ChartViewImpl::OnWheel(Actor /*actor*/, Dali::WheelEvent event)
   const Rect<float>& pa = mLastLayout.plotArea;
   if(local.x < pa.x || local.x > pa.x + pa.width ||
      local.y < pa.y || local.y > pa.y + pa.height)
+  {
     return false;
+  }
 
   const float cursorDataX = mScale.ToDataX(local.x);
   const float cursorDataY = mScale.ToDataY(local.y);
@@ -877,8 +1249,14 @@ bool ChartViewImpl::OnWheel(Actor /*actor*/, Dali::WheelEvent event)
     mViewportYMax     = mViewportYMin + newH;
   }
 
-  if(mModel.mStyle.interaction.zoomClampEnabled) ClampViewport();
-  if(mModel.mStyle.interaction.autoFitY && zoomX) FitYToViewport();
+  if(mModel.mStyle.interaction.zoomClampEnabled)
+  {
+    ClampViewport(zoomX, zoomY);
+  }
+  if(mModel.mStyle.interaction.autoFitY && zoomX)
+  {
+    FitYToViewport();
+  }
   mViewportActive = true;
   ApplyViewportToScale();
   RebuildBackground();
@@ -934,6 +1312,12 @@ void ChartViewImpl::RemoveAllSeries()
 
 void ChartViewImpl::AddSection(Ui::ChartSection section)
 {
+  DALI_ASSERT_ALWAYS(section);
+  if(std::find(mModel.mSections.begin(), mModel.mSections.end(), section) != mModel.mSections.end())
+  {
+    return;
+  }
+  GetImplementation(section).mChanged.Connect(this, &ChartViewImpl::OnAxisConfigChanged);
   mModel.mSections.push_back(section);
   mNeedsBackgroundUpdate = true;
   InvalidateArrange();
@@ -941,6 +1325,10 @@ void ChartViewImpl::AddSection(Ui::ChartSection section)
 
 void ChartViewImpl::RemoveSection(Ui::ChartSection section)
 {
+  if(section)
+  {
+    GetImplementation(section).mChanged.Disconnect(this, &ChartViewImpl::OnAxisConfigChanged);
+  }
   auto& v = mModel.mSections;
   v.erase(std::remove(v.begin(), v.end(), section), v.end());
   mNeedsBackgroundUpdate = true;
@@ -949,9 +1337,155 @@ void ChartViewImpl::RemoveSection(Ui::ChartSection section)
 
 void ChartViewImpl::ClearSections()
 {
+  for(auto section : mModel.mSections)
+  {
+    GetImplementation(section).mChanged.Disconnect(this, &ChartViewImpl::OnAxisConfigChanged);
+  }
   mModel.mSections.clear();
   mNeedsBackgroundUpdate = true;
   InvalidateArrange();
+}
+
+void ChartViewImpl::AddAnnotation(Ui::ChartAnnotation annotation)
+{
+  DALI_ASSERT_ALWAYS(annotation);
+  if(std::find(mAnnotations.begin(), mAnnotations.end(), annotation) != mAnnotations.end())
+  {
+    return;
+  }
+  GetImplementation(annotation).mChanged.Connect(this, &ChartViewImpl::OnSeriesDataChanged);
+  mAnnotations.push_back(annotation);
+  mNeedsDataUpdate = true;
+  InvalidateArrange();
+}
+
+void ChartViewImpl::RemoveAnnotation(Ui::ChartAnnotation annotation)
+{
+  const auto found = std::find(mAnnotations.begin(), mAnnotations.end(), annotation);
+  if(found == mAnnotations.end())
+  {
+    return;
+  }
+  GetImplementation(annotation).mChanged.Disconnect(this, &ChartViewImpl::OnSeriesDataChanged);
+  mAnnotations.erase(found);
+  for(auto view : mAnnotationViews)
+  {
+    if(view)
+    {
+      view.Unparent();
+    }
+  }
+  mAnnotationViews.clear();
+  mNeedsDataUpdate = true;
+  InvalidateArrange();
+}
+
+void ChartViewImpl::ClearAnnotations()
+{
+  for(auto annotation : mAnnotations)
+  {
+    GetImplementation(annotation).mChanged.Disconnect(this, &ChartViewImpl::OnSeriesDataChanged);
+  }
+  mAnnotations.clear();
+  for(auto view : mAnnotationViews)
+  {
+    if(view)
+    {
+      view.Unparent();
+    }
+  }
+  mAnnotationViews.clear();
+}
+
+void ChartViewImpl::RebuildAnnotations()
+{
+  mAnnotationViews.resize(mAnnotations.size());
+  for(size_t i = 0; i < mAnnotations.size(); ++i)
+  {
+    const auto& annotation = GetImplementation(mAnnotations[i]);
+    Vector2     data       = annotation.mPosition;
+    bool        visible    = true;
+    if(annotation.mSeries)
+    {
+      const auto& series = GetImplementation(annotation.mSeries);
+      const auto& values = series.GetValues();
+      visible            = series.IsVisible() && annotation.mPointIndex < values.size() &&
+                std::find(mModel.mSeriesList.begin(), mModel.mSeriesList.end(), annotation.mSeries) != mModel.mSeriesList.end();
+      if(visible)
+      {
+        data = Vector2(values[annotation.mPointIndex].first, values[annotation.mPointIndex].second);
+      }
+    }
+    visible              = visible && mScale.IsValid(data.x, data.y);
+    const Vector2 anchor = visible ? mScale.ToCanvas(data.x, data.y) : Vector2::ZERO;
+    visible              = visible && mHitTester.IsInsidePlotArea(anchor, mScale);
+    auto&      view      = mAnnotationViews[i];
+    const bool created   = !view;
+    if(created)
+    {
+      switch(annotation.mType)
+      {
+        case Ui::ChartAnnotation::Type::TEXT:
+        {
+          auto label = Ui::Label::New();
+          label.SetFontSize(11.0f);
+          label.SetProperty(Ui::Label::Property::MULTI_LINE, false);
+          view = label;
+          break;
+        }
+        case Ui::ChartAnnotation::Type::IMAGE:
+        {
+          view = Ui::ImageView::New();
+          break;
+        }
+        default:
+        {
+          view = Ui::View::New();
+          break;
+        }
+      }
+      view.SetProperty(Actor::Property::SENSITIVE, false);
+      view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+      view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+    }
+    Vector2 size = annotation.mSize;
+    if(annotation.mType == Ui::ChartAnnotation::Type::TEXT)
+    {
+      auto label = Ui::Label::DownCast(view);
+      label.SetText(annotation.mText);
+      label.SetTextColor(Ui::UiColor(annotation.mColor));
+      label.SetTextOverflowMode(annotation.mTextOverflowMode);
+      const float available = std::max(1.0f, mSize.x - 20.0f);
+      const float width     = annotation.mTextMaximumWidth > 0.0f ? std::min(available, annotation.mTextMaximumWidth) : available;
+      const auto  measured  = label.Measure(width, std::max(1.0f, mSize.y - 20.0f));
+      size                  = Vector2(std::min(width, measured.width), measured.height);
+    }
+    else if(annotation.mType == Ui::ChartAnnotation::Type::IMAGE)
+    {
+      auto image = Ui::ImageView::DownCast(view);
+      if(image.GetResourceUrl() != annotation.mImageUrl)
+      {
+        image.SetResourceUrl(annotation.mImageUrl);
+        // Resolve the lazy SVG visual outside Measure/Arrange, before attachment.
+        image.Measure(std::max(1.0f, size.x), std::max(1.0f, size.y));
+      }
+    }
+    else
+    {
+      view.SetBackgroundColor(Ui::UiColor(annotation.mColor));
+      view.SetCornerRadius(std::min(size.x, size.y) * 0.5f);
+    }
+    Vector2 position = anchor + annotation.mOffset - size * 0.5f;
+    position.x       = std::clamp(position.x, 0.0f, std::max(0.0f, mSize.x - size.x));
+    position.y       = std::clamp(position.y, 0.0f, std::max(0.0f, mSize.y - size.y));
+    view.SetProperty(Actor::Property::POSITION, position);
+    view.SetProperty(Actor::Property::SIZE, size);
+    view.SetProperty(Actor::Property::VISIBLE, visible);
+    if(created)
+    {
+      Self().Add(view);
+    }
+  }
 }
 
 void ChartViewImpl::SetTitle(const Dali::String& title)
@@ -1077,27 +1611,43 @@ void ChartViewImpl::SetProperty(BaseObject* object, Property::Index propertyInde
     switch(propertyIndex)
     {
       case Ui::ChartView::Property::SHOW_GRID:
+      {
         value.Get(impl.mModel.mStyle.visibility.showGrid);
         impl.mNeedsBackgroundUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::SHOW_LEGEND:
+      {
         value.Get(impl.mModel.mStyle.visibility.showLegend);
         impl.mNeedsBackgroundUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::SHOW_TOOLTIP:
+      {
         value.Get(impl.mModel.mStyle.visibility.showTooltip);
         break;
+      }
       case Ui::ChartView::Property::BACKGROUND_COLOR:
-        value.Get(impl.mModel.mStyle.render.backgroundColor);
-        impl.mNeedsBackgroundUpdate = true;
+      {
+        Vector4 color;
+        if(value.Get(color))
+        {
+          impl.mModel.mStyle.render.backgroundColor = Ui::UiColor(color);
+          impl.mNeedsBackgroundUpdate               = true;
+        }
         break;
+      }
       case Ui::ChartView::Property::GRID_COLOR:
+      {
         value.Get(impl.mModel.mStyle.render.gridColor);
         impl.mNeedsBackgroundUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::ANIMATION_DURATION:
+      {
         value.Get(impl.mModel.mStyle.animation.duration);
         break;
+      }
       case Ui::ChartView::Property::Y_AXIS_AUTO_RANGE:
       {
         bool autoRange = true;
@@ -1114,30 +1664,43 @@ void ChartViewImpl::SetProperty(BaseObject* object, Property::Index propertyInde
         break;
       }
       case Ui::ChartView::Property::LEGEND_POSITION:
+      {
         value.Get(impl.mModel.mStyle.layout.legendPosition);
         impl.mNeedsBackgroundUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::AXIS_LABEL_SIZE:
+      {
         value.Get(impl.mModel.mStyle.layout.axisLabelSize);
         impl.mNeedsBackgroundUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::TITLE_SIZE:
+      {
         value.Get(impl.mModel.mStyle.layout.titleSize);
         impl.mNeedsBackgroundUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::LINE_WIDTH:
+      {
         value.Get(impl.mModel.mStyle.render.lineWidth);
         impl.mNeedsDataUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::SHOW_MARKERS:
+      {
         value.Get(impl.mModel.mStyle.visibility.showMarkers);
         impl.mNeedsDataUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::MARKER_RADIUS:
+      {
         value.Get(impl.mModel.mStyle.render.markerRadius);
         impl.mNeedsDataUpdate = true;
         break;
+      }
       case Ui::ChartView::Property::HOVER_ENABLED:
+      {
         value.Get(impl.mModel.mStyle.interaction.hoverEnabled);
         if(!impl.mModel.mStyle.interaction.hoverEnabled)
         {
@@ -1145,7 +1708,9 @@ void ChartViewImpl::SetProperty(BaseObject* object, Property::Index propertyInde
           impl.ClearLegendHighlight();
         }
         break;
+      }
       case Ui::ChartView::Property::TOUCH_ENABLED:
+      {
         value.Get(impl.mModel.mStyle.interaction.touchEnabled);
         if(!impl.mModel.mStyle.interaction.touchEnabled)
         {
@@ -1153,6 +1718,7 @@ void ChartViewImpl::SetProperty(BaseObject* object, Property::Index propertyInde
           impl.HideOverlay();
         }
         break;
+      }
     }
     impl.InvalidateArrange();
   }
@@ -1168,50 +1734,80 @@ Property::Value ChartViewImpl::GetProperty(BaseObject* object, Property::Index p
     switch(propertyIndex)
     {
       case Ui::ChartView::Property::SHOW_GRID:
+      {
         value = impl.mModel.mStyle.visibility.showGrid;
         break;
+      }
       case Ui::ChartView::Property::SHOW_LEGEND:
+      {
         value = impl.mModel.mStyle.visibility.showLegend;
         break;
+      }
       case Ui::ChartView::Property::SHOW_TOOLTIP:
+      {
         value = impl.mModel.mStyle.visibility.showTooltip;
         break;
+      }
       case Ui::ChartView::Property::BACKGROUND_COLOR:
-        value = impl.mModel.mStyle.render.backgroundColor;
+      {
+        value = impl.mModel.mStyle.render.backgroundColor.GetRgba();
         break;
+      }
       case Ui::ChartView::Property::GRID_COLOR:
+      {
         value = impl.mModel.mStyle.render.gridColor;
         break;
+      }
       case Ui::ChartView::Property::ANIMATION_DURATION:
+      {
         value = impl.mModel.mStyle.animation.duration;
         break;
+      }
       case Ui::ChartView::Property::Y_AXIS_AUTO_RANGE:
+      {
         value = GetImplementation(impl.mModel.mYAxis).GetAutoRange();
         break;
+      }
       case Ui::ChartView::Property::LEGEND_POSITION:
+      {
         value = impl.mModel.mStyle.layout.legendPosition;
         break;
+      }
       case Ui::ChartView::Property::AXIS_LABEL_SIZE:
+      {
         value = impl.mModel.mStyle.layout.axisLabelSize;
         break;
+      }
       case Ui::ChartView::Property::TITLE_SIZE:
+      {
         value = impl.mModel.mStyle.layout.titleSize;
         break;
+      }
       case Ui::ChartView::Property::LINE_WIDTH:
+      {
         value = impl.mModel.mStyle.render.lineWidth;
         break;
+      }
       case Ui::ChartView::Property::SHOW_MARKERS:
+      {
         value = impl.mModel.mStyle.visibility.showMarkers;
         break;
+      }
       case Ui::ChartView::Property::MARKER_RADIUS:
+      {
         value = impl.mModel.mStyle.render.markerRadius;
         break;
+      }
       case Ui::ChartView::Property::HOVER_ENABLED:
+      {
         value = impl.mModel.mStyle.interaction.hoverEnabled;
         break;
+      }
       case Ui::ChartView::Property::TOUCH_ENABLED:
+      {
         value = impl.mModel.mStyle.interaction.touchEnabled;
         break;
+      }
     }
   }
   return value;
@@ -1242,6 +1838,8 @@ void ChartViewImpl::SyncLayerSizes()
 
 void ChartViewImpl::UpdateScale()
 {
+  mScale.SetLogarithmic(GetImplementation(mModel.mXAxis).mScaleType == Ui::ChartAxis::ScaleType::LOGARITHMIC,
+                        GetImplementation(mModel.mYAxis).mScaleType == Ui::ChartAxis::ScaleType::LOGARITHMIC);
   auto& xAxisImpl = GetImplementation(mModel.mXAxis);
   auto& yAxisImpl = GetImplementation(mModel.mYAxis);
   mScale.SetDataRange(xAxisImpl.GetMinLimit(), xAxisImpl.GetMaxLimit(),
@@ -1254,11 +1852,20 @@ void ChartViewImpl::UpdateScale()
 
 void ChartViewImpl::RebuildBackground()
 {
-  if(!mBackgroundCanvas || mSize.width < 1.0f || mSize.height < 1.0f) return;
+  if(!mBackgroundCanvas || mSize.width < 1.0f || mSize.height < 1.0f)
+  {
+    return;
+  }
 
   mModel.mChartType = static_cast<int>(mType);
 
   SyncLayerSizes();
+  // A layout update can precede the data throttle timer. Resolve its pending
+  // range before reporting that coordinates and labels are ready.
+  if(mPendingUpdate)
+  {
+    mModel.ComputeAutoRange();
+  }
   UpdateScale();
 
   mLastLayout = mLayoutManager.ComputeLayout(mSize, mModel, mScale);
@@ -1277,9 +1884,19 @@ void ChartViewImpl::RebuildBackground()
 
 void ChartViewImpl::RebuildData()
 {
-  if(!mDataCanvas || mSize.width < 1.0f || mSize.height < 1.0f) return;
+  if(!mDataCanvas || mSize.width < 1.0f || mSize.height < 1.0f)
+  {
+    return;
+  }
 
-  auto labelInfos = mDataRenderer.Render(mDataCanvas, mModel, mScale, mLastLayout);
+  if((mAnimationActive || mPendingUpdate) && !mAnimOldCanvasY.empty() && mModel.mStyle.animation.duration > 0.0f)
+  {
+    RebuildDataAnimated(mAnimOldCanvasY, mAnimProgress);
+    return;
+  }
+
+  auto labelInfos   = mDataRenderer.Render(mDataCanvas, mModel, mScale, mLastLayout);
+  mLastRenderedBars = mDataRenderer.GetRenderedBars();
   mDataCanvas.RequestRasterization();
 
   size_t used = 0;
@@ -1293,11 +1910,14 @@ void ChartViewImpl::RebuildData()
     label.SetProperty(Actor::Property::PIVOT, info.pivot);
     label.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     label.SetProperty(Actor::Property::POSITION, info.position);
+    const auto measured = label.Measure(std::max(1.0f, mSize.x), std::max(1.0f, mSize.y));
+    label.SetProperty(Actor::Property::SIZE, Vector2(measured.width + 1.0f, measured.height + 1.0f));
     label.SetProperty(Actor::Property::VISIBLE, true);
     ++used;
   }
   HideExcessLabels(mDataLabels, used);
 
+  RebuildAnnotations();
   mLastRenderedCanvasY = CaptureCanvasY();
 }
 
@@ -1312,17 +1932,21 @@ void ChartViewImpl::PlaceTickLabels(std::vector<Ui::Label>&                     
   for(size_t i = 0; i < ticks.size(); ++i)
   {
     Ui::Label label = GetOrCreateLabel(pool, i);
+    label.SetProperty(Ui::Label::Property::MULTI_LINE, true);
     label.SetProperty(Ui::Label::Property::TEXT, ticks[i].text.CStr());
-    label.SetProperty(Ui::Label::Property::TEXT_COLOR, Color::BLACK);
+    label.SetTextColor(ticks[i].color);
     label.SetProperty(Ui::Label::Property::FONT_SIZE, ls.fontSize);
-    label.SetProperty(Ui::Label::Property::HORIZONTAL_ALIGNMENT, ls.horizontalAlign.CStr());
+    label.SetHorizontalTextAlignment(Ui::Text::Alignment::CENTER);
     if(!ls.verticalAlign.Empty())
+    {
       label.SetProperty(Ui::Label::Property::VERTICAL_ALIGNMENT, ls.verticalAlign.CStr());
+    }
     label.SetProperty(Actor::Property::PIVOT, ls.pivot);
     label.SetProperty(Actor::Property::PARENT_ORIGIN, ls.parentOrigin);
     label.SetProperty(Actor::Property::POSITION, Vector3(ticks[i].position.x, ticks[i].position.y, 0.0f));
-    if(std::abs(ticks[i].angle) > 0.01f)
-      label.SetProperty(Actor::Property::ORIENTATION, Quaternion(Degree(ticks[i].angle), Vector3::ZAXIS));
+    label.SetProperty(Actor::Property::ORIENTATION, Quaternion(Degree(ticks[i].angle), Vector3::ZAXIS));
+    const auto measured = label.Measure(std::max(1.0f, mSize.x), std::max(1.0f, mSize.y));
+    label.SetProperty(Actor::Property::SIZE, Vector2(measured.width + 1.0f, measured.height + 1.0f));
     label.SetProperty(Actor::Property::VISIBLE, true);
   }
   HideExcessLabels(pool, ticks.size());
@@ -1350,6 +1974,8 @@ void ChartViewImpl::PlaceTextLabels(const ChartLayoutManager::LayoutResult& layo
         Self().Add(label);
       }
       configure(label);
+      const auto measured = label.Measure(std::max(1.0f, mSize.x), std::max(1.0f, mSize.y));
+      label.SetProperty(Actor::Property::SIZE, Vector2(measured.width + 1.0f, measured.height + 1.0f));
       label.SetProperty(Actor::Property::VISIBLE, true);
     }
     else if(label)
@@ -1367,23 +1993,31 @@ void ChartViewImpl::PlaceTextLabels(const ChartLayoutManager::LayoutResult& layo
     switch(style.layout.titlePosition)
     {
       case 1:
+      {
         pivot  = Pivot::TOP_LEFT;
         origin = ParentOrigin::TOP_LEFT;
         pos.x  = ChartLayoutManager::PADDING;
         break;
+      }
       case 2:
+      {
         pivot  = Pivot::TOP_RIGHT;
         origin = ParentOrigin::TOP_RIGHT;
         pos.x  = -ChartLayoutManager::PADDING;
         break;
+      }
       case 3:
+      {
         pivot  = Pivot::BOTTOM_CENTER;
         origin = ParentOrigin::BOTTOM_CENTER;
         pos.x  = 0.0f;
         pos.y  = -ChartLayoutManager::PADDING;
         break;
+      }
       default:
+      {
         break;
+      }
     }
     l.SetProperty(Ui::Label::Property::TEXT, mModel.mTitle.CStr());
     l.SetProperty(Ui::Label::Property::TEXT_COLOR, style.render.titleColor);
@@ -1400,7 +2034,7 @@ void ChartViewImpl::PlaceTextLabels(const ChartLayoutManager::LayoutResult& layo
     l.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
     l.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     l.SetProperty(Ui::Label::Property::TEXT, GetImplementation(mModel.mXAxis).GetTitle().CStr());
-    l.SetProperty(Ui::Label::Property::TEXT_COLOR, Color::BLACK);
+    l.SetTextColor(style.render.labelColor);
     l.SetProperty(Ui::Label::Property::FONT_SIZE, style.layout.axisLabelSize);
     l.SetProperty(Ui::Label::Property::HORIZONTAL_ALIGNMENT, "CENTER");
     l.SetProperty(Actor::Property::POSITION, layout.xAxisTitlePos);
@@ -1413,7 +2047,7 @@ void ChartViewImpl::PlaceTextLabels(const ChartLayoutManager::LayoutResult& layo
     l.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     l.SetProperty(Actor::Property::ORIENTATION, Quaternion(Degree(-90.0f), Vector3::ZAXIS));
     l.SetProperty(Ui::Label::Property::TEXT, GetImplementation(mModel.mYAxis).GetTitle().CStr());
-    l.SetProperty(Ui::Label::Property::TEXT_COLOR, Color::BLACK);
+    l.SetTextColor(style.render.labelColor);
     l.SetProperty(Ui::Label::Property::FONT_SIZE, style.layout.axisLabelSize);
     l.SetProperty(Ui::Label::Property::HORIZONTAL_ALIGNMENT, "CENTER");
     l.SetProperty(Actor::Property::POSITION, layout.yAxisTitlePos);
@@ -1422,10 +2056,11 @@ void ChartViewImpl::PlaceTextLabels(const ChartLayoutManager::LayoutResult& layo
   const float fs = style.layout.axisLabelSize;
 
   PlaceTickLabels(mYTickLabels, layout.yTickLabels,
-                  {"END", "CENTER", Pivot::CENTER_RIGHT, ParentOrigin::TOP_LEFT, fs});
+                  {GetImplementation(mModel.mYAxis).mPosition == Ui::ChartAxis::Position::FAR ? "BEGIN" : "END", "CENTER",
+                   GetImplementation(mModel.mYAxis).mPosition == Ui::ChartAxis::Position::FAR ? Pivot::CENTER_LEFT : Pivot::CENTER_RIGHT, ParentOrigin::TOP_LEFT, fs});
 
   PlaceTickLabels(mXTickLabels, layout.xTickLabels,
-                  {"CENTER", "", Pivot::TOP_CENTER, ParentOrigin::TOP_LEFT, fs});
+                  {"CENTER", "", GetImplementation(mModel.mXAxis).mPosition == Ui::ChartAxis::Position::FAR ? Pivot::BOTTOM_CENTER : Pivot::TOP_CENTER, ParentOrigin::TOP_LEFT, fs});
 
   // Legend text labels
   if(layout.hasLegend && style.visibility.showLegend)
@@ -1435,12 +2070,14 @@ void ChartViewImpl::PlaceTextLabels(const ChartLayoutManager::LayoutResult& layo
       const ChartLayoutManager::LegendItem& item  = layout.legendItems[i];
       Ui::Label                             label = GetOrCreateLabel(mLegendLabels, i);
       label.SetProperty(Ui::Label::Property::TEXT, item.name.CStr());
-      label.SetProperty(Ui::Label::Property::TEXT_COLOR, Color::BLACK);
+      label.SetTextColor(style.render.legendTextColor);
       label.SetProperty(Ui::Label::Property::FONT_SIZE, fs);
-      label.SetProperty(Ui::Label::Property::HORIZONTAL_ALIGNMENT, "BEGIN");
+      label.SetHorizontalTextAlignment(Ui::Text::Alignment::CENTER);
       label.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
       label.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
       label.SetProperty(Actor::Property::POSITION, Vector3(item.textPos.x, item.textPos.y, 0.0f));
+      const auto measured = label.Measure(std::max(1.0f, mSize.x), std::max(1.0f, mSize.y));
+      label.SetProperty(Actor::Property::SIZE, Vector2(measured.width + 1.0f, measured.height + 1.0f));
       label.SetProperty(Actor::Property::VISIBLE, true);
     }
     HideExcessLabels(mLegendLabels, layout.legendItems.size());
@@ -1475,7 +2112,10 @@ Ui::Label ChartViewImpl::GetOrCreateLabel(std::vector<Ui::Label>& pool, size_t i
 
 void ChartViewImpl::HideExcessLabels(std::vector<Ui::Label>& pool, size_t usedCount)
 {
-  if(usedCount >= pool.size()) return;
+  if(usedCount >= pool.size())
+  {
+    return;
+  }
 
   Actor self = Self();
   for(size_t i = usedCount; i < pool.size(); ++i)
@@ -1507,7 +2147,10 @@ void ChartViewImpl::ClearLabelPool(std::vector<Ui::Label>& pool)
 
 bool ChartViewImpl::OnTouch(Actor actor, TouchEvent event)
 {
-  if(!mModel.mStyle.interaction.touchEnabled) return false;
+  if(!mModel.mStyle.interaction.touchEnabled)
+  {
+    return false;
+  }
 
   const PointState::Type state = event.GetState(0);
   const Vector2          local = event.GetLocalPosition(0u);
@@ -1519,19 +2162,9 @@ bool ChartViewImpl::OnTouch(Actor actor, TouchEvent event)
     {
       int       seriesIdx = -1;
       const int sliceIdx  = HitTestPie(local, seriesIdx);
-      if(sliceIdx >= 0 && seriesIdx >= 0 && !mDataPointSelectedSignal.Empty())
+      if(sliceIdx >= 0 && seriesIdx >= 0)
       {
-        auto ps = Ui::PieSeries::DownCast(
-          const_cast<Ui::ChartSeries&>(mModel.mSeriesList[static_cast<size_t>(seriesIdx)]));
-        const auto& slice = GetImplementation(ps).GetSlices()[static_cast<size_t>(sliceIdx)];
-
-        mDataPointSelectedSignal.Emit(Ui::ChartView::DownCast(Self()),
-                                      Ui::ChartPointEventArgs(seriesIdx,
-                                                              sliceIdx,
-                                                              static_cast<float>(sliceIdx),
-                                                              slice.value,
-                                                              GetImplementation(ps).GetName(),
-                                                              slice.label));
+        SelectPoint(static_cast<uint32_t>(seriesIdx), static_cast<uint32_t>(sliceIdx));
       }
     }
     return true;
@@ -1558,7 +2191,10 @@ bool ChartViewImpl::OnTouch(Actor actor, TouchEvent event)
 
   if(state == PointState::STARTED || state == PointState::MOTION)
   {
-    if(state == PointState::STARTED && HandleLegendTap(local)) return true;
+    if(state == PointState::STARTED && HandleLegendTap(local))
+    {
+      return true;
+    }
 
     if(!mHitTester.IsInsidePlotArea(local, mScale))
     {
@@ -1582,51 +2218,13 @@ bool ChartViewImpl::OnTouch(Actor actor, TouchEvent event)
 int ChartViewImpl::HitTestPie(const Vector2& local, int& outSeriesIdx) const
 {
   outSeriesIdx = -1;
-
-  const Integration::PieSeries* pieImpl = nullptr;
-  for(int i = 0; i < static_cast<int>(mModel.mSeriesList.size()); ++i)
+  for(const auto& slice : BuildChartPieSlices(mModel, mLastLayout.plotArea))
   {
-    auto ps = Ui::PieSeries::DownCast(
-      const_cast<Ui::ChartSeries&>(mModel.mSeriesList[static_cast<size_t>(i)]));
-    if(ps && GetImplementation(ps).IsVisible())
+    outSeriesIdx = slice.hit.seriesIndex;
+    if(slice.Contains(local))
     {
-      pieImpl      = &GetImplementation(ps);
-      outSeriesIdx = i;
-      break;
+      return slice.hit.pointIndex;
     }
-  }
-  if(!pieImpl || pieImpl->GetSliceCount() == 0) return -1;
-
-  const Rect<float>& pa     = mLastLayout.plotArea;
-  const float        side   = std::min(pa.width, pa.height);
-  const float        outerR = side * 0.5f;
-  const Vector2      center(pa.x + pa.width * 0.5f, pa.y + pa.height * 0.5f);
-  const float        innerR = outerR * pieImpl->GetInnerRadiusRatio();
-
-  const float dx   = local.x - center.x;
-  const float dy   = local.y - center.y;
-  const float dist = std::sqrt(dx * dx + dy * dy);
-  if(dist > outerR) return -1;
-  if(pieImpl->GetInnerRadiusRatio() > 0.0f && dist < innerR) return -1;
-
-  float angle = std::atan2(dy, dx) * 180.0f / Math::PI;
-  if(angle < 0.0f) angle += 360.0f;
-  angle = std::fmod(angle - 270.0f + 360.0f, 360.0f);
-
-  const auto& slices = pieImpl->GetSlices();
-  float       total  = 0.0f;
-  for(const auto& sl : slices) total += sl.value;
-  if(total <= 0.0f) return -1;
-
-  const float gap      = pieImpl->GetSliceGap();
-  float       cumAngle = 0.0f;
-  for(int i = 0; i < static_cast<int>(slices.size()); ++i)
-  {
-    const float fullSweep   = (slices[static_cast<size_t>(i)].value / total) * 360.0f;
-    const float renderStart = cumAngle + gap * 0.5f;
-    const float renderEnd   = cumAngle + fullSweep - gap * 0.5f;
-    if(angle >= renderStart && angle < renderEnd) return i;
-    cumAngle += fullSweep;
   }
   return -1;
 }
@@ -1695,7 +2293,10 @@ std::string ChartViewImpl::BuildMultiTooltipText(const std::vector<HitResult>& h
   for(size_t i = 0; i < hits.size(); ++i)
   {
     const auto& h = hits[i];
-    if(i > 0) text += "\n";
+    if(i > 0)
+    {
+      text += "\n";
+    }
     if(mTooltipFormatter)
     {
       text += mTooltipFormatter(h.seriesName, h.xLabel, h.dataY).CStr();
@@ -1713,64 +2314,118 @@ std::string ChartViewImpl::BuildMultiTooltipText(const std::vector<HitResult>& h
 
 void ChartViewImpl::UpdateOverlayMulti(const std::vector<HitResult>& hits)
 {
-  if(hits.empty()) return;
+  if(hits.empty())
+  {
+    return;
+  }
 
   mOverlayCanvas.RemoveAllDrawables();
   mOverlayRenderer.RenderCrosshair(mOverlayCanvas, hits[0].canvasPos, mScale, mModel.mStyle);
   for(const auto& h : hits)
+  {
     mOverlayRenderer.RenderHighlight(mOverlayCanvas, h.canvasPos,
                                      h.seriesColor, mModel.mStyle.render.markerRadius * 1.8f);
+  }
   mOverlayCanvas.RequestRasterization();
 
-  const std::string text = BuildMultiTooltipText(hits);
-  const Vector2     tooltipSize(150.0f, 20.0f + static_cast<float>(hits.size()) * 18.0f);
-  const Vector2     pos = ComputeTooltipPosition(hits[0].canvasPos, tooltipSize);
-
-  if(mModel.mStyle.visibility.showTooltip)
-  {
-    mTooltipLabel.SetProperty(Ui::Label::Property::TEXT, text.c_str());
-    mTooltipLabel.SetProperty(Actor::Property::POSITION, Vector3(pos.x, pos.y, 1.0f));
-    mTooltipLabel.SetProperty(Actor::Property::SIZE, Vector3(tooltipSize.x, tooltipSize.y, 0.0f));
-    mTooltipLabel.SetProperty(Actor::Property::VISIBLE, true);
-  }
+  UpdateTooltip(hits);
 }
 
 void ChartViewImpl::UpdateOverlay(const HitResult& hit)
 {
   mOverlayCanvas.RemoveAllDrawables();
-  mOverlayRenderer.RenderCrosshair(mOverlayCanvas, hit.canvasPos, mScale, mModel.mStyle);
+  if(mModel.mChartType != static_cast<int>(Ui::ChartView::Type::PIE))
+  {
+    mOverlayRenderer.RenderCrosshair(mOverlayCanvas, hit.canvasPos, mScale, mModel.mStyle);
+  }
   mOverlayRenderer.RenderHighlight(mOverlayCanvas, hit.canvasPos,
                                    hit.seriesColor, mModel.mStyle.render.markerRadius * 1.8f);
   mOverlayCanvas.RequestRasterization();
 
-  std::string text;
-  if(mTooltipFormatter)
+  UpdateTooltip({hit}, true);
+}
+
+void ChartViewImpl::SetTooltipContent(Ui::View content)
+{
+  for(Actor ancestor = Self(); content && ancestor; ancestor = ancestor.GetParent())
   {
-    text = mTooltipFormatter(hit.seriesName, hit.xLabel, hit.dataY).CStr();
+    DALI_ASSERT_ALWAYS(ancestor != content && "Tooltip content cannot be the chart or an ancestor");
   }
-  else
+  if(mTooltipContent)
   {
+    mTooltipContent.Unparent();
+  }
+  mTooltipContent = content;
+  if(content)
+  {
+    content.Unparent();
+    content.SetProperty(Actor::Property::SENSITIVE, false);
+    content.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+    content.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+    content.SetProperty(Actor::Property::VISIBLE, false);
+    Self().Add(content);
+  }
+  HideOverlay();
+}
+
+void ChartViewImpl::UpdateTooltip(const std::vector<HitResult>& hits, bool singlePoint)
+{
+  if(hits.empty())
+  {
+    HideOverlay();
+    return;
+  }
+  if(!mModel.mStyle.visibility.showTooltip)
+  {
+    mTooltipLabel.SetProperty(Actor::Property::VISIBLE, false);
+    if(mTooltipContent)
+    {
+      mTooltipContent.SetProperty(Actor::Property::VISIBLE, false);
+    }
+    return;
+  }
+  Dali::Vector<Ui::ChartPointEventArgs> points;
+  for(const auto& hit : hits)
+  {
+    points.PushBack(Ui::ChartPointEventArgs(hit.seriesIndex, hit.pointIndex, hit.dataX, hit.dataY, hit.seriesName, hit.xLabel));
+  }
+  mTooltipUpdatedSignal.Emit(Ui::ChartView::DownCast(Self()), points);
+  std::string text;
+  if(singlePoint && hits.size() == 1u && !mTooltipFormatter)
+  {
+    const auto&        hit = hits.front();
     std::ostringstream valueStream;
     valueStream.imbue(std::locale::classic());
     valueStream << std::setprecision(4) << hit.dataY;
     text = std::string(hit.seriesName.CStr()) + "\n" + hit.xLabel.CStr() + " : " + valueStream.str();
   }
-
-  const Vector2 tooltipSize(130.0f, 52.0f);
-  const Vector2 pos = ComputeTooltipPosition(hit.canvasPos, tooltipSize);
-
-  if(mModel.mStyle.visibility.showTooltip)
+  else
   {
-    mTooltipLabel.SetProperty(Ui::Label::Property::TEXT, text.c_str());
-    mTooltipLabel.SetProperty(Actor::Property::POSITION, Vector3(pos.x, pos.y, 1.0f));
-    mTooltipLabel.SetProperty(Actor::Property::SIZE, Vector3(tooltipSize.x, tooltipSize.y, 0.0f));
-    mTooltipLabel.SetProperty(Actor::Property::VISIBLE, true);
+    text = BuildMultiTooltipText(hits);
   }
+  mTooltipLabel.SetText(Dali::String(text.c_str()));
+  const float   padding   = mModel.mStyle.render.tooltipPadding;
+  const float   maxWidth  = std::max(1.0f, mSize.x - 20.0f);
+  const float   maxHeight = std::max(1.0f, mSize.y - 20.0f);
+  Ui::View      content   = mTooltipContent ? mTooltipContent : mTooltipLabel;
+  const auto    measured  = content.Measure(std::max(1.0f, maxWidth - 2.0f * padding), std::max(1.0f, maxHeight - 2.0f * padding));
+  const Vector2 size(std::min(maxWidth, measured.width + 2.0f * padding),
+                     std::min(maxHeight, measured.height + 2.0f * padding));
+  const Vector2 position = ComputeTooltipPosition(hits.front().canvasPos, size);
+  mTooltipLabel.SetProperty(Actor::Property::VISIBLE, !mTooltipContent);
+  content.SetProperty(Actor::Property::POSITION, Vector3(position.x, position.y, 2.0f));
+  content.SetProperty(Actor::Property::SIZE, size);
+  content.Arrange(LayoutRect(position.x, position.y, size.x, size.y));
+  content.SetProperty(Actor::Property::VISIBLE, true);
 }
 
 void ChartViewImpl::HideOverlay()
 {
   mOverlayRenderer.Clear(mOverlayCanvas);
+  if(mTooltipContent)
+  {
+    mTooltipContent.SetProperty(Actor::Property::VISIBLE, false);
+  }
   if(mTooltipLabel)
   {
     mTooltipLabel.SetProperty(Actor::Property::VISIBLE, false);
@@ -1784,15 +2439,22 @@ Vector2 ChartViewImpl::ComputeTooltipPosition(const Vector2& hitPos, const Vecto
   float x = hitPos.x - tooltipSize.x * 0.5f;
   float y = hitPos.y - tooltipSize.y - MARGIN;
 
-  if(y < MARGIN) y = hitPos.y + MARGIN;
+  if(y < MARGIN)
+  {
+    y = hitPos.y + MARGIN;
+  }
 
   x = std::max(MARGIN, std::min(x, mSize.x - tooltipSize.x - MARGIN));
+  y = std::clamp(y, MARGIN, std::max(MARGIN, mSize.y - tooltipSize.y - MARGIN));
   return Vector2(x, y);
 }
 
 int ChartViewImpl::FindLegendItemAt(const Vector2& pos) const
 {
-  if(!mLastLayout.hasLegend || !mModel.mStyle.visibility.showLegend) return -1;
+  if(!mLastLayout.hasLegend || !mModel.mStyle.visibility.showLegend)
+  {
+    return -1;
+  }
 
   constexpr float ITEM_HEIGHT = 20.0f;
   constexpr float HIT_PADDING = 8.0f;
@@ -1803,8 +2465,18 @@ int ChartViewImpl::FindLegendItemAt(const Vector2& pos) const
     const ChartLayoutManager::LegendItem& item = mLastLayout.legendItems[i];
     const bool                            yHit = pos.y >= item.textPos.y - HIT_PADDING &&
                       pos.y <= item.textPos.y + ITEM_HEIGHT + HIT_PADDING;
-    const bool xHit = pos.x >= item.iconCenter.x - ChartLayoutManager::LEGEND_SWATCH;
-    if(yHit && xHit) return static_cast<int>(i);
+    float width = 0.0f;
+    if(i < mLegendLabels.size())
+    {
+      auto label = mLegendLabels[i];
+      width      = label.Measure(mSize.x, mSize.y).width;
+    }
+    const bool xHit = pos.x >= item.iconCenter.x - ChartLayoutManager::LEGEND_SWATCH &&
+                      pos.x <= item.textPos.x + width + HIT_PADDING;
+    if(yHit && xHit)
+    {
+      return static_cast<int>(i);
+    }
   }
   return -1;
 }
@@ -1812,7 +2484,10 @@ int ChartViewImpl::FindLegendItemAt(const Vector2& pos) const
 bool ChartViewImpl::HandleLegendTap(const Vector2& tapPos)
 {
   const int idx = FindLegendItemAt(tapPos);
-  if(idx < 0) return false;
+  if(idx < 0)
+  {
+    return false;
+  }
 
   auto& series      = mModel.mSeriesList[static_cast<size_t>(idx)];
   bool  nextVisible = !GetImplementation(series).IsVisible();
@@ -1831,7 +2506,10 @@ bool ChartViewImpl::HandleLegendTap(const Vector2& tapPos)
 
 void ChartViewImpl::HighlightLegendItem(int index)
 {
-  if(mHoveredLegendIndex == index) return;
+  if(mHoveredLegendIndex == index)
+  {
+    return;
+  }
   ClearLegendHighlight();
 
   if(index >= 0 && index < static_cast<int>(mLegendLabels.size()) && mLegendLabels[static_cast<size_t>(index)])
@@ -1849,18 +2527,27 @@ void ChartViewImpl::ClearLegendHighlight()
      mLegendLabels[static_cast<size_t>(mHoveredLegendIndex)])
   {
     mLegendLabels[static_cast<size_t>(mHoveredLegendIndex)].SetProperty(Ui::Label::Property::TEXT_COLOR,
-                                                                        Color::BLACK);
+                                                                        mModel.mStyle.render.legendTextColor.GetRgba());
   }
   mHoveredLegendIndex = -1;
 }
 
 bool ChartViewImpl::OnHover(Actor actor, HoverEvent event)
 {
-  if(!mModel.mStyle.interaction.hoverEnabled) return false;
+  if(!mModel.mStyle.interaction.hoverEnabled)
+  {
+    return false;
+  }
 
-  if(mModel.mChartType == static_cast<int>(Ui::ChartView::Type::PIE)) return true;
+  if(mModel.mChartType == static_cast<int>(Ui::ChartView::Type::PIE))
+  {
+    return true;
+  }
 
-  if(mTouchActive || mPanActive) return true;
+  if(mTouchActive || mPanActive)
+  {
+    return true;
+  }
 
   const PointState::Type state = event.GetState(0);
   const Vector2          local = event.GetLocalPosition(0u);
