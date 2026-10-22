@@ -220,7 +220,7 @@ public:
   void               SetShadow(const ShadowStack& shadowStack);
 
   void                          SetFocusNavigationCallback(FocusNavigationCallback callback);
-  FocusNavigationResult         RequestFocusNavigation(View currentFocusedView, FocusNavigationContext context);
+  void                          RequestFocusNavigation(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result);
   View                          RequestFocus();
   bool                          IsFocusGroup() const;
   void                          SetAsFocusGroup(bool isFocusGroup);

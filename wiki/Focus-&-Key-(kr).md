@@ -292,12 +292,15 @@ focusMgr.FocusChangedSignal().Connect(&tracker, [](View oldFocus, View newFocus)
 View local callback과 application callback은 같은 signature를 사용합니다:
 
 ```cpp
-FocusNavigationResult GetNextFocusableView(
+void GetNextFocusableView(
   View current,
-  FocusNavigationContext context);
+  FocusNavigationContext context,
+  FocusNavigationResult& result);
 ```
 
-`FocusNavigationResult`는 처리 결과를 명확히 구분합니다:
+`FocusNavigationResult`는 프레임워크의 스택 데이터를 참조합니다. 직접 생성·복사·이동할 수 없으며,
+콜백 종료 후 포인터나 참조를 보관해서는 안 됩니다. 기본값은 `NOT_HANDLED`이며
+아무것도 기록하지 않으면 다음 정책으로 진행합니다. 다음 메소드는 이동 의사를 기록합니다:
 
 - `NotHandled()`: 다음 policy로 진행합니다.
 - `MoveTo(view)`: policy 탐색을 종료하고 framework가 candidate를 검증하고
@@ -308,22 +311,25 @@ FocusNavigationResult GetNextFocusableView(
 
 immutable context에서는 direction, device 종류, device name, 원본 `InputEvent`,
 source `Window`, 가장 가까운 Focus Group을 조회할 수 있습니다. Policy는 focus를
-직접 변경하거나 navigation API를 재귀 호출하지 말고 결과만 반환해야 합니다.
+직접 변경하거나 navigation API를 재귀 호출하지 말고 전달받은 결과 객체에 결정을 기록해야 합니다.
 
 #### Container policy
 
 ```cpp
-FocusNavigationResult NavigatePanel(View current, FocusNavigationContext context)
+void NavigatePanel(View current, FocusNavigationContext context,
+  FocusNavigationResult& result)
 {
   if(context.GetDirection() == FocusDirection::RIGHT)
   {
     if(View candidate = FindCustomRightTarget(current))
     {
-      return FocusNavigationResult::MoveTo(candidate);
+      result.MoveTo(candidate);
+      return;
     }
-    return FocusNavigationResult::Stay();
+    result.Stay();
+    return;
   }
-  return FocusNavigationResult::NotHandled();
+  result.NotHandled();
 }
 
 panel.SetFocusNavigationCallback(FocusNavigationCallback::New(&NavigatePanel));
@@ -339,20 +345,23 @@ member-function target이 파괴되기 전에 callback을 해제해야 합니다
 class ApplicationNavigation
 {
 public:
-  FocusNavigationResult GetNextFocusableView(
+  void GetNextFocusableView(
     View current,
-    FocusNavigationContext context)
+    FocusNavigationContext context,
+    FocusNavigationResult& result)
   {
     if(!current)
     {
-      return FocusNavigationResult::MoveTo(FindEntryView(context.GetWindow()));
+      result.MoveTo(FindEntryView(context.GetWindow()));
+      return;
     }
 
     if(View candidate = FindApplicationCandidate(current, context))
     {
-      return FocusNavigationResult::MoveTo(candidate);
+      result.MoveTo(candidate);
+      return;
     }
-    return FocusNavigationResult::NotHandled();
+    result.NotHandled();
   }
 };
 
@@ -388,7 +397,7 @@ navigation은 input source Window를 사용할 수 있습니다.
   `OnFocusNavigationRequested()` override로 이동
 - 앱 전체 공통 규칙은 `SetFocusNavigationFallback()`에 등록
 - 같은 fallback에서 빈 `current`를 처리하여 첫 focus 선택
-- 기본 탐색을 중단하려면 `Stay()`, 위임하려면 `NotHandled()` 반환
+- 기본 탐색을 중단하려면 `result.Stay()`, 위임하려면 `result.NotHandled()` 호출
 
 기존 raw algorithm pointer와 달리 manager는 callback object를 소유하고,
 input/window/scope context와 명시적인 결과 타입을 제공합니다. 단, member-function

@@ -1881,13 +1881,14 @@ void ViewDataImpl::SetFocusNavigationCallback(FocusNavigationCallback callback)
   }
 }
 
-FocusNavigationResult ViewDataImpl::RequestFocusNavigation(View currentFocusedView, FocusNavigationContext context)
+void ViewDataImpl::RequestFocusNavigation(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result)
 {
   if(mFocusNavigationData && mFocusNavigationData->callback)
   {
-    return mFocusNavigationData->callback.Invoke(currentFocusedView, context);
+    mFocusNavigationData->callback.Invoke(currentFocusedView, context, result);
+    return;
   }
-  return mViewImpl.OnFocusNavigationRequested(currentFocusedView, context);
+  mViewImpl.OnFocusNavigationRequested(currentFocusedView, context, result);
 }
 
 View ViewDataImpl::RequestFocus()

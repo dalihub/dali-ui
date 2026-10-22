@@ -2416,3 +2416,117 @@ int UtcDaliScrollViewPaddedFirstDragStartsFromContentP(void)
   DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), 10.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
+
+namespace
+{
+struct ScrollNavigationResultRecorder
+{
+  ScrollView scroll;
+  FocusNavigationResultType type{FocusNavigationResultType::NOT_HANDLED};
+  View candidate;
+
+  void Navigate(View current, FocusNavigationContext context, FocusNavigationResult& result)
+  {
+    GetScrollImpl(scroll).OnFocusNavigationRequested(current, context, result);
+    type = result.GetType();
+    candidate = result.GetCandidate();
+  }
+};
+
+void KeepFocusAfterUnhandledScroll(View, FocusNavigationContext, FocusNavigationResult& result)
+{
+  result.Stay();
+}
+} // namespace
+
+int UtcDaliScrollViewBorrowedNavigationResultOutcomesP(void)
+{
+  UiTestApplication application;
+  ScrollView scroll = ScrollView::New();
+  scroll.SetRequestedWidth(200.0f);
+  scroll.SetRequestedHeight(200.0f);
+  scroll.SetScrollDirection(ScrollDirection::Vertical);
+  scroll.SetKeyScrollEnabled(true);
+  scroll.SetScrollOnFocus(false);
+  scroll.SetFocusable(false);
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(700.0f);
+  View first = View::New();
+  first.SetRequestedWidth(40.0f);
+  first.SetRequestedHeight(40.0f);
+  first.SetRequestedY(20.0f);
+  first.SetFocusable(true);
+  View nextPage = View::New();
+  nextPage.SetRequestedWidth(40.0f);
+  nextPage.SetRequestedHeight(40.0f);
+  nextPage.SetRequestedY(240.0f);
+  nextPage.SetFocusable(true);
+  content.Add(first);
+  content.Add(nextPage);
+  scroll.SetContent(content);
+  application.GetScene().Add(scroll);
+  application.SendNotification();
+  application.Render();
+
+  ScrollNavigationResultRecorder recorder;
+  recorder.scroll = scroll;
+  scroll.SetFocusNavigationCallback(FocusNavigationCallback::New(&recorder, &ScrollNavigationResultRecorder::Navigate));
+  FocusManager manager = FocusManager::Get();
+  manager.SetFocusNavigationFallback(FocusNavigationCallback::New(&KeepFocusAfterUnhandledScroll));
+  DALI_TEST_CHECK(manager.RequestFocus(first));
+
+  // A direction outside the scroll axis delegates without selecting a candidate.
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::RIGHT));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::NOT_HANDLED);
+  DALI_TEST_CHECK(!recorder.candidate);
+
+  // Page navigation records the item in the destination viewport.
+  DALI_TEST_CHECK(manager.MoveFocus(FocusDirection::PAGE_DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::MOVE);
+  DALI_TEST_EQUALS(recorder.candidate, nextPage, TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetCurrentFocusView(), nextPage, TEST_LOCATION);
+  GetScrollImpl(scroll).CancelScrollAnimation();
+
+  // With no later candidate, scrolling keeps focus if the container is not focusable.
+  nextPage.SetFocusable(false);
+  scroll.ScrollToY(0.0f, false);
+  DALI_TEST_CHECK(manager.RequestFocus(first));
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::STAY);
+  DALI_TEST_CHECK(!recorder.candidate);
+  DALI_TEST_EQUALS(manager.GetCurrentFocusView(), first, TEST_LOCATION);
+  GetScrollImpl(scroll).CancelScrollAnimation();
+
+  // A focusable container takes over further key scrolling instead.
+  scroll.SetFocusable(true);
+  scroll.ScrollToY(0.0f, false);
+  DALI_TEST_CHECK(manager.MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::MOVE);
+  DALI_TEST_EQUALS(recorder.candidate, scroll, TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetCurrentFocusView(), scroll, TEST_LOCATION);
+  GetScrollImpl(scroll).CancelScrollAnimation();
+
+  // At the content boundary, the same missing candidate delegates to the fallback.
+  scroll.ScrollToY(500.0f, false);
+  DALI_TEST_CHECK(manager.RequestFocus(first));
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::NOT_HANDLED);
+  DALI_TEST_CHECK(!recorder.candidate);
+
+  // A focusable chrome child is not a descendant of the scroll content.
+  View chrome = View::New();
+  chrome.SetFocusable(true);
+  scroll.Add(chrome);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(manager.RequestFocus(chrome));
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::NOT_HANDLED);
+  DALI_TEST_CHECK(!recorder.candidate);
+
+  scroll.SetFocusNavigationCallback({});
+  manager.SetFocusNavigationFallback({});
+  manager.ClearFocus();
+  END_TEST;
+}

@@ -378,11 +378,6 @@ private:
    */
   bool IsLogicalFocusWindow(Dali::Integration::SceneHolder sceneHolder) const;
 
-  struct ParentNavigationResult
-  {
-    FocusNavigationResult result = FocusNavigationResult::NotHandled();
-  };
-
   /**
    * This will be called when the adaptor is initialized
    */
@@ -402,13 +397,13 @@ private:
   /**
    * Finds an explicitly configured directional target.
    */
-  FocusNavigationResult FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction);
+  void FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction, FocusNavigationResult& result);
 
   /**
    * Propagates navigation through the parent chain, including the Focus Group
    * View itself, and stops before policies outside that boundary.
    */
-  ParentNavigationResult FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context);
+  void FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context, FocusNavigationResult& result);
 
   /**
    * Finds the framework fallback using geometry or linear ordering.

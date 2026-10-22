@@ -352,14 +352,16 @@ public:
    * The fallback is invoked after View-local navigation policies and an
    * explicit directional target have not handled the request, and before the
    * framework FocusFinder. It is also the first policy invoked when there is
-   * no current focus and a navigation Window can be determined. Return
-   * NotHandled() to use FocusFinder, MoveTo() to select a candidate, or Stay()
+   * no current focus and a navigation Window can be determined. Leave the
+   * result unchanged or call result.NotHandled() to use FocusFinder,
+   * result.MoveTo() to select a candidate, or result.Stay()
    * to consume the request without moving focus.
    *
    * Only one fallback is stored. Setting a new callback replaces the previous
    * one, and passing an empty callback clears it. The callback target must
    * remain alive until the callback is replaced or cleared. The callback must
-   * return a result instead of changing focus directly.
+   * write the supplied result instead of changing focus directly. The result
+   * is valid only during the callback and must not be retained.
    *
    * @param[in] callback The move-only fallback callback
    */

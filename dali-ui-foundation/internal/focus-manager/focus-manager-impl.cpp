@@ -47,6 +47,7 @@
 
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-navigation-context-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-navigation-result-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -1022,16 +1023,18 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
     return false;
   }
 
-  FocusNavigationResult result = FindNextFocusByParentNavigation(currentFocusView, navigationContext).result;
+  FocusNavigationResultImpl resultImpl;
+  FocusNavigationResult     result(resultImpl);
+  FindNextFocusByParentNavigation(currentFocusView, navigationContext, result);
 
   if(result.GetType() == FocusNavigationResultType::NOT_HANDLED)
   {
-    result = FindNextFocusByProperty(currentFocusView, direction);
+    FindNextFocusByProperty(currentFocusView, direction, result);
   }
 
   if(result.GetType() == FocusNavigationResultType::NOT_HANDLED && mFocusNavigationFallback)
   {
-    result = mFocusNavigationFallback.Invoke(currentFocusView, navigationContext);
+    mFocusNavigationFallback.Invoke(currentFocusView, navigationContext, result);
   }
 
   if(result.GetType() == FocusNavigationResultType::NOT_HANDLED && mEnableDefaultAlgorithm)
@@ -1039,7 +1042,7 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
     View candidate = FindNextFocusByFinder(currentFocusView, navigationContext);
     if(candidate)
     {
-      result = FocusNavigationResult::MoveTo(candidate);
+      result.MoveTo(candidate);
     }
   }
 
@@ -1056,11 +1059,11 @@ void FocusManager::SetFocusNavigationFallback(FocusNavigationCallback callback)
   mFocusNavigationFallback = std::move(callback);
 }
 
-FocusNavigationResult FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction)
+void FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction, FocusNavigationResult& result)
 {
   if(!currentFocusView)
   {
-    return FocusNavigationResult::NotHandled();
+    return;
   }
 
   Property::Index index = Property::INVALID_INDEX;
@@ -1112,19 +1115,17 @@ FocusNavigationResult FocusManager::FindNextFocusByProperty(View currentFocusVie
           found = View::DownCast(window.GetRootLayer().FindChildById(viewId));
         }
       }
-      return FocusNavigationResult::MoveTo(found);
+      result.MoveTo(found);
+      return;
     }
   }
-  return FocusNavigationResult::NotHandled();
 }
 
-FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context)
+void FocusManager::FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context, FocusNavigationResult& result)
 {
-  ParentNavigationResult result;
-
   if(!currentFocusView)
   {
-    return result;
+    return;
   }
 
   Actor parent = currentFocusView.GetParent();
@@ -1133,10 +1134,10 @@ FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigati
     View parentView = View::DownCast(parent);
     if(parentView)
     {
-      result.result = ViewDataImpl::Get(GetImpl(parentView)).RequestFocusNavigation(currentFocusView, context);
-      if(result.result.GetType() != FocusNavigationResultType::NOT_HANDLED)
+      ViewDataImpl::Get(GetImpl(parentView)).RequestFocusNavigation(currentFocusView, context, result);
+      if(result.GetType() != FocusNavigationResultType::NOT_HANDLED)
       {
-        return result;
+        return;
       }
 
       if(parentView == context.GetFocusGroup())
@@ -1146,7 +1147,6 @@ FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigati
     }
     parent = parent.GetParent();
   }
-  return result;
 }
 
 FocusNavigationContext FocusManager::CreateFocusNavigationContext(View currentFocusView, Ui::FocusDirection direction, const FocusChangeContext& context)

@@ -40,9 +40,13 @@ class View;
  * view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigationFunc));
  * @endcode
  *
- * @note Signature: FocusNavigationResult(View currentFocusedView, FocusNavigationContext context)
+ * The result is borrowed for this invocation only and initially NOT_HANDLED.
+ * Write a decision with result.MoveTo(), result.Stay() or result.NotHandled().
+ * Do not retain its address or reference after returning.
+ *
+ * @note Signature: void(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result)
  */
-using FocusNavigationCallback = Callback<FocusNavigationResult(View, FocusNavigationContext)>;
+using FocusNavigationCallback = Callback<void(View, FocusNavigationContext, FocusNavigationResult&)>;
 
 } // namespace Ui
 } //namespace DALI_NAMESPACE

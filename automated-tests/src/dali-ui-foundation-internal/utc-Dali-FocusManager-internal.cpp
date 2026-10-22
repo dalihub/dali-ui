@@ -32,16 +32,16 @@ namespace
 View gFallbackTarget;
 int gFallbackCallCount = 0;
 
-FocusNavigationResult MoveFallback(View, FocusNavigationContext)
+void MoveFallback(View, FocusNavigationContext, FocusNavigationResult& result)
 {
   ++gFallbackCallCount;
-  return FocusNavigationResult::MoveTo(gFallbackTarget);
+  result.MoveTo(gFallbackTarget);
 }
 
-FocusNavigationResult NotHandledFallback(View, FocusNavigationContext)
+void NotHandledFallback(View, FocusNavigationContext, FocusNavigationResult& result)
 {
   ++gFallbackCallCount;
-  return FocusNavigationResult::NotHandled();
+  result.NotHandled();
 }
 } // namespace
 

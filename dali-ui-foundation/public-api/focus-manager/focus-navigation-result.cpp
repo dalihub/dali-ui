@@ -17,50 +17,49 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-result.h>
 
+// EXTERNAL INCLUDES
+#include <utility>
+
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/views/view.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-navigation-result-impl.h>
 
 namespace DALI_NAMESPACE
 {
 namespace Ui
 {
 
-FocusNavigationResult::FocusNavigationResult()
-: mType(FocusNavigationResultType::NOT_HANDLED),
-  mCandidate()
+FocusNavigationResult::FocusNavigationResult(Internal::FocusNavigationResultImpl& impl)
+: mImpl(&impl)
 {
 }
 
-FocusNavigationResult FocusNavigationResult::NotHandled()
+void FocusNavigationResult::NotHandled()
 {
-  return FocusNavigationResult(FocusNavigationResultType::NOT_HANDLED, View());
+  mImpl->type = FocusNavigationResultType::NOT_HANDLED;
+  mImpl->candidate.Reset();
 }
 
-FocusNavigationResult FocusNavigationResult::MoveTo(View candidate)
+void FocusNavigationResult::MoveTo(View candidate)
 {
-  return FocusNavigationResult(FocusNavigationResultType::MOVE, candidate);
+  mImpl->type      = FocusNavigationResultType::MOVE;
+  mImpl->candidate = std::move(candidate);
 }
 
-FocusNavigationResult FocusNavigationResult::Stay()
+void FocusNavigationResult::Stay()
 {
-  return FocusNavigationResult(FocusNavigationResultType::STAY, View());
+  mImpl->type = FocusNavigationResultType::STAY;
+  mImpl->candidate.Reset();
 }
 
 FocusNavigationResultType FocusNavigationResult::GetType() const
 {
-  return mType;
+  return mImpl->type;
 }
 
 View FocusNavigationResult::GetCandidate() const
 {
-  return mType == FocusNavigationResultType::MOVE ? View::DownCast(mCandidate) : View();
-}
-
-FocusNavigationResult::FocusNavigationResult(FocusNavigationResultType type, View candidate)
-: mType(type),
-  mCandidate(candidate)
-{
+  return mImpl->candidate;
 }
 
 } // namespace Ui
-} //namespace DALI_NAMESPACE
+} // namespace DALI_NAMESPACE

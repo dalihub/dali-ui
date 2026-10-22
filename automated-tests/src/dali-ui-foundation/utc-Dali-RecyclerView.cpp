@@ -2691,3 +2691,118 @@ int UtcDaliRecyclerViewAnimatedScrollToEndFollowsSmallDriftP(void)
   DALI_TEST_EQUALS(finished, 1, TEST_LOCATION);
   END_TEST;
 }
+
+namespace
+{
+struct RecyclerNavigationResultRecorder
+{
+  RecyclerView recycler;
+  FocusNavigationResultType type{FocusNavigationResultType::NOT_HANDLED};
+  View candidate;
+
+  void Navigate(View current, FocusNavigationContext context, FocusNavigationResult& result)
+  {
+    GetRecyclerImpl(recycler).OnFocusNavigationRequested(current, context, result);
+    type = result.GetType();
+    candidate = result.GetCandidate();
+  }
+};
+
+void KeepFocusAfterUnhandledRecycler(View, FocusNavigationContext, FocusNavigationResult& result)
+{
+  result.Stay();
+}
+} // namespace
+
+int UtcDaliRecyclerViewBorrowedNavigationResultOutcomesP(void)
+{
+  UiTestApplication application;
+  ResetCounters();
+  gItemCount = 3u;
+  gItemExtents = {300.0f, 300.0f, 300.0f};
+  ItemAdapter adapter = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  layouter.SetItemExtent(300.0f);
+  RecyclerView recycler = BuildRecycler(application, application.GetWindow(), adapter, layouter);
+  recycler.SetCacheExtent(1000.0f, 1000.0f);
+  recycler.SetKeyScrollEnabled(true);
+  recycler.SetScrollOnFocus(false);
+  recycler.SetKeyScrollStep(80.0f);
+  application.SendNotification();
+  application.Render();
+  auto& impl = GetRecyclerImpl(recycler);
+  View first = impl.FindActiveView(0u);
+  View second = impl.FindActiveView(1u);
+  View last = impl.FindActiveView(2u);
+  DALI_TEST_CHECK(first && second && last);
+  first.SetFocusable(true);
+  second.SetFocusable(true);
+  last.SetFocusable(true);
+
+  RecyclerNavigationResultRecorder recorder;
+  recorder.recycler = recycler;
+  recycler.SetFocusNavigationCallback(FocusNavigationCallback::New(&recorder, &RecyclerNavigationResultRecorder::Navigate));
+  FocusManager manager = FocusManager::Get();
+  manager.SetFocusNavigationFallback(FocusNavigationCallback::New(&KeepFocusAfterUnhandledRecycler));
+  DALI_TEST_CHECK(manager.RequestFocus(first));
+
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::RIGHT));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::NOT_HANDLED);
+  DALI_TEST_CHECK(!recorder.candidate);
+
+  // There is no preceding item, but the viewport can still scroll towards it.
+  recycler.ScrollBy(50.0f - recycler.GetScrollOffset(), false);
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::UP));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::STAY);
+  DALI_TEST_CHECK(!recorder.candidate);
+  DALI_TEST_EQUALS(manager.GetCurrentFocusView(), first, TEST_LOCATION);
+  impl.CancelScrollAnimation();
+
+  // Once the viewport reaches the edge, the missing preceding item is unhandled.
+  recycler.ScrollBy(0.0f - recycler.GetScrollOffset(), false);
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::UP));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::NOT_HANDLED);
+  DALI_TEST_CHECK(!recorder.candidate);
+
+  // Unfocusable trailing items keep focus while there is still room to scroll.
+  second.SetFocusable(false);
+  last.SetFocusable(false);
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::STAY);
+  DALI_TEST_CHECK(!recorder.candidate);
+  impl.CancelScrollAnimation();
+
+  recycler.ScrollBy(500.0f - recycler.GetScrollOffset(), false);
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::NOT_HANDLED);
+  DALI_TEST_CHECK(!recorder.candidate);
+
+  // A candidate farther away than one key step defers focus until scrolling completes.
+  recycler.ScrollBy(0.0f - recycler.GetScrollOffset(), false);
+  second.SetFocusable(true);
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::STAY);
+  DALI_TEST_CHECK(!recorder.candidate);
+  DALI_TEST_EQUALS(manager.GetCurrentFocusView(), first, TEST_LOCATION);
+  impl.StopKeyRepeatTimer();
+  impl.CancelScrollAnimation();
+
+  // Non-item children must not be interpreted as active adapter positions.
+  View chrome = View::New();
+  chrome.SetFocusable(true);
+  recycler.Add(chrome);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(manager.RequestFocus(chrome));
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_CHECK(recorder.type == FocusNavigationResultType::NOT_HANDLED);
+  DALI_TEST_CHECK(!recorder.candidate);
+
+  recycler.SetFocusNavigationCallback({});
+  manager.SetFocusNavigationFallback({});
+  manager.ClearFocus();
+  ResetCounters();
+  // Release edge-feedback animations while the test Core is still running.
+  recycler.Unparent();
+  END_TEST;
+}

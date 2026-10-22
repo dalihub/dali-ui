@@ -1108,7 +1108,9 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *
    * The callback target must remain alive until the callback is replaced or
    * cleared. Pass an empty callback to restore the View's virtual policy.
-   * The callback must return a result instead of changing focus directly.
+   * The callback must write the supplied result instead of changing focus directly.
+   * The result is initially NOT_HANDLED and is valid only during the callback.
+   * Do not retain its address or reference.
    *
    * @param[in] callback The focus navigation callback (move-only, ownership transferred)
    */

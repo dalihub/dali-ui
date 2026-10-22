@@ -299,12 +299,16 @@ Choose the narrowest extension point that owns the rule:
 Both View-local and application callbacks use this signature:
 
 ```cpp
-FocusNavigationResult GetNextFocusableView(
+void GetNextFocusableView(
   View current,
-  FocusNavigationContext context);
+  FocusNavigationContext context,
+  FocusNavigationResult& result);
 ```
 
-`FocusNavigationResult` makes handling explicit:
+`FocusNavigationResult` borrows framework-owned stack storage. Do not retain its
+address or reference after the callback. It cannot be constructed, copied or moved
+by applications. The initial decision is `NOT_HANDLED`; leaving it unchanged
+continues to the next policy. Its methods record decisions without moving focus:
 
 - `NotHandled()` continues to the next policy.
 - `MoveTo(view)` stops policy lookup and asks the framework to validate, resolve,
@@ -314,23 +318,26 @@ FocusNavigationResult GetNextFocusableView(
   returns `false`.
 
 The immutable context exposes direction, device category, device name, original
-`InputEvent`, source `Window`, and the nearest focus group. Policies must return a
+`InputEvent`, source `Window`, and the nearest focus group. Policies must write the supplied
 result and must not call focus-changing or navigation APIs recursively.
 
 #### Container policy
 
 ```cpp
-FocusNavigationResult NavigatePanel(View current, FocusNavigationContext context)
+void NavigatePanel(View current, FocusNavigationContext context,
+  FocusNavigationResult& result)
 {
   if(context.GetDirection() == FocusDirection::RIGHT)
   {
     if(View candidate = FindCustomRightTarget(current))
     {
-      return FocusNavigationResult::MoveTo(candidate);
+      result.MoveTo(candidate);
+      return;
     }
-    return FocusNavigationResult::Stay();
+    result.Stay();
+    return;
   }
-  return FocusNavigationResult::NotHandled();
+  result.NotHandled();
 }
 
 panel.SetFocusNavigationCallback(FocusNavigationCallback::New(&NavigatePanel));
@@ -346,20 +353,23 @@ so clear it before a member-function target is destroyed.
 class ApplicationNavigation
 {
 public:
-  FocusNavigationResult GetNextFocusableView(
+  void GetNextFocusableView(
     View current,
-    FocusNavigationContext context)
+    FocusNavigationContext context,
+    FocusNavigationResult& result)
   {
     if(!current)
     {
-      return FocusNavigationResult::MoveTo(FindEntryView(context.GetWindow()));
+      result.MoveTo(FindEntryView(context.GetWindow()));
+      return;
     }
 
     if(View candidate = FindApplicationCandidate(current, context))
     {
-      return FocusNavigationResult::MoveTo(candidate);
+      result.MoveTo(candidate);
+      return;
     }
-    return FocusNavigationResult::NotHandled();
+    result.NotHandled();
   }
 };
 
@@ -370,7 +380,7 @@ manager.SetFocusNavigationFallback(
 Only one application fallback is stored. A new callback replaces it and an
 empty callback clears it. It is invoked even when the framework default
 algorithm is disabled. With no current focus, it runs first once a navigation
-Window has been determined; if it returns `NotHandled()`, the default finder
+Window has been determined; if it leaves the result unhandled, the default finder
 runs when enabled. Programmatic `MoveFocus()` uses the current focus Window or
 the last focused Window. If neither is available, the request fails without
 invoking the fallback. Input-driven navigation can instead use its source
@@ -396,7 +406,7 @@ Replace `DevelKeyboardFocusManager::CustomAlgorithmInterface` as follows:
   `OnFocusNavigationRequested()` override.
 - Register application-wide rules with `SetFocusNavigationFallback()`.
 - Handle an empty `current` in the same fallback to select initial focus.
-- Return `Stay()` to stop default navigation, or `NotHandled()` to delegate.
+- Call `result.Stay()` to stop default navigation, or `result.NotHandled()` to delegate.
 
 Unlike the old raw algorithm pointer, the callback object is owned by the
 manager, provides input/window/scope context, and produces an explicit result.

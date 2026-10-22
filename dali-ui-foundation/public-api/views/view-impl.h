@@ -910,15 +910,15 @@ protected:
    * SetFocusNavigationCallback(), the callback takes priority and this method is not called.
    *
    * @param[in] currentFocusedView The current focused view
-   * Return NotHandled() to continue with the outer container or lower-priority
-   * navigation policy, MoveTo() to select a candidate, or Stay() to consume the
-   * request while keeping the current focus. Implementations must return a
+   * Leave result unchanged or call result.NotHandled() to continue with the outer container or lower-priority
+   * navigation policy, result.MoveTo() to select a candidate, or result.Stay() to consume the
+   * request while keeping the current focus. Implementations must record a
    * result instead of changing focus directly.
    *
    * @param[in] context Immutable information about the navigation request
-   * @return How this View handled the request
+   * @param[out] result Borrowed result, valid only during this call; initially NOT_HANDLED
    */
-  virtual FocusNavigationResult OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context);
+  virtual void OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result);
 
   /**
    * @brief Called when focus is requested on this view via RequestFocus().

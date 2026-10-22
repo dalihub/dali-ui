@@ -35,7 +35,10 @@ handle 의미는 그대로 복제하지 않는 것으로 결정했다. Toolkit �
 
 ### FocusNavigationResult
 
-모든 navigation policy는 다음 중 하나를 반환한다.
+모든 navigation policy는 전달받은 `FocusNavigationResult&`에 다음 중 하나를 기록한다.
+기본값은 `NOT_HANDLED`이며, 아무것도 기록하지 않으면 다음 policy로 진행한다.
+결과는 프레임워크의 스택 데이터를 참조하며 복사·이동·직접 생성할 수 없다.
+콜백이 끝난 뒤 결과 객체의 포인터나 참조를 보관해서는 안 된다.
 
 - `NotHandled()`: 다음 parent 또는 낮은 우선순위 policy로 진행
 - `MoveTo(view)`: 탐색 종료 후 candidate 검증, `RequestFocus()` resolve, commit 시도
@@ -65,9 +68,10 @@ Window를 manager callback의 별도 인자로 중복 전달하지 않고 contex
 따라서 View-level과 manager-level callback이 다음 한 가지 signature를 공유한다.
 
 ```cpp
-FocusNavigationResult GetNextFocusableView(
+void GetNextFocusableView(
   View current,
-  FocusNavigationContext context);
+  FocusNavigationContext context,
+  FocusNavigationResult& result);
 ```
 
 ### View-level customization
@@ -135,7 +139,7 @@ Focus Group은 user navigation trap이지 programmatic focus 권한 경계가 �
 
 ## Callback 실행 계약
 
-Policy callback은 candidate를 계산하여 결과만 반환한다. Callback 실행 중 다음
+Policy callback은 candidate를 계산하여 전달받은 결과 객체에 결정을 기록한다. Callback 실행 중 다음
 mutation은 거부한다.
 
 - nested `MoveFocus()`
@@ -200,7 +204,8 @@ Focus 자동 복원은 navigation algorithm과 다른 state/lifecycle 문제다.
 - View별 callback storage는 기존 optional data를 계속 사용하므로 callback을 쓰지
   않는 View의 per-instance memory 증가는 없다.
 - FocusManager에는 callback object와 reentrancy flag가 하나 추가된다.
-- `FocusNavigationResult`는 callback 반환 시 작은 value와 handle copy 비용을 가진다.
+- `FocusNavigationResult`는 포인터 하나로 내부 스택 데이터를 참조하며 결과 저장을 위한 힙 할당이 없다.
+  `MoveTo()`는 candidate의 수명을 유지하기 위한 View handle을 저장한다.
 
 따라서 극단적으로 깊은 tree에서 매우 높은 빈도로 navigation을 합성하는 경우만
 micro-benchmark 대상이며 일반 key/wheel navigation에서 체감 가능한 regression은

@@ -17,7 +17,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/base-handle.h>
 #include <cstdint>
 
 // INTERNAL INCLUDES
@@ -28,6 +27,11 @@ namespace DALI_NAMESPACE
 namespace Ui
 {
 class View;
+
+namespace Internal
+{
+struct FocusNavigationResultImpl;
+} //namespace Internal
 
 /**
  * @brief Describes how a focus-navigation policy handled a request.
@@ -40,35 +44,45 @@ enum class FocusNavigationResultType : uint8_t
 };
 
 /**
- * @brief Result returned by a custom focus-navigation policy.
+ * @brief Borrowed result written by a custom focus-navigation policy.
+ *
+ * The framework supplies a result initialized to NOT_HANDLED. Leaving it unchanged
+ * delegates to the next policy. Mutators record a decision; they do not move focus.
+ * The last decision written by the policy takes effect.
+ *
+ * @note Valid only during the policy invocation. Do not retain pointers or
+ * references to this object, including in asynchronous work.
+ * @note Applications must use the framework-supplied result. Copying and moving
+ * are not supported.
  */
 class DALI_UI_API FocusNavigationResult
 {
 public:
-  /**
-   * @brief Creates a result equivalent to NotHandled().
-   */
-  FocusNavigationResult();
+  FocusNavigationResult(const FocusNavigationResult&)            = delete;
+  FocusNavigationResult& operator=(const FocusNavigationResult&) = delete;
+  FocusNavigationResult(FocusNavigationResult&&)                 = delete;
+  FocusNavigationResult& operator=(FocusNavigationResult&&)      = delete;
 
   /**
-   * @brief Creates a result that delegates to the next policy.
+   * @brief Delegates to the next policy and clears any previously selected candidate.
    */
-  static FocusNavigationResult NotHandled();
+  void NotHandled();
 
   /**
-   * @brief Creates a result that selects a focus candidate.
+   * @brief Selects a focus candidate without immediately moving focus.
    *
-   * Returning an empty or otherwise invalid candidate stops fallback processing
-   * and causes the navigation request to fail.
+   * An empty or otherwise invalid candidate stops fallback processing and causes
+   * the navigation request to fail. The candidate is retained until overwritten
+   * or until the framework finishes processing the result.
    *
    * @param[in] candidate The View to resolve and focus
    */
-  static FocusNavigationResult MoveTo(View candidate);
+  void MoveTo(View candidate);
 
   /**
-   * @brief Creates a result that consumes the request without moving focus.
+   * @brief Consumes the request without moving focus and clears the candidate.
    */
-  static FocusNavigationResult Stay();
+  void Stay();
 
   /**
    * @brief Gets the result type.
@@ -82,12 +96,16 @@ public:
    */
   View GetCandidate() const;
 
-private:
-  FocusNavigationResult(FocusNavigationResultType type, View candidate);
+  /// @cond internal
+  /**
+   * @brief Connects the result to framework-owned storage.
+   * @param[in] impl Internal storage that must outlive this result
+   */
+  DALI_INTERNAL explicit FocusNavigationResult(Internal::FocusNavigationResultImpl& impl);
+  /// @endcond
 
 private:
-  FocusNavigationResultType mType;
-  BaseHandle                mCandidate;
+  Internal::FocusNavigationResultImpl* mImpl;
 };
 
 } // namespace Ui

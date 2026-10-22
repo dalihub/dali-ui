@@ -102,22 +102,25 @@ private:
     return view;
   }
 
-  FocusNavigationResult GetNextFocusableView(View current, FocusNavigationContext context)
+  void GetNextFocusableView(View current, FocusNavigationContext context, FocusNavigationResult& result)
   {
     if(mTraversalOrder.empty())
     {
-      return FocusNavigationResult::NotHandled();
+      result.NotHandled();
+      return;
     }
 
     if(!current)
     {
-      return FocusNavigationResult::MoveTo(mTraversalOrder.front());
+      result.MoveTo(mTraversalOrder.front());
+      return;
     }
 
     auto currentIterator = std::find(mTraversalOrder.begin(), mTraversalOrder.end(), current);
     if(currentIterator == mTraversalOrder.end())
     {
-      return FocusNavigationResult::NotHandled();
+      result.NotHandled();
+      return;
     }
 
     const FocusDirection direction = context.GetDirection();
@@ -131,21 +134,29 @@ private:
     if(forward)
     {
       ++currentIterator;
-      return currentIterator == mTraversalOrder.end()
-               ? FocusNavigationResult::Stay()
-               : FocusNavigationResult::MoveTo(*currentIterator);
+      if(currentIterator == mTraversalOrder.end())
+      {
+        result.Stay();
+      }
+      else
+      {
+        result.MoveTo(*currentIterator);
+      }
+      return;
     }
 
     if(backward)
     {
       if(currentIterator == mTraversalOrder.begin())
       {
-        return FocusNavigationResult::Stay();
+        result.Stay();
+        return;
       }
-      return FocusNavigationResult::MoveTo(*--currentIterator);
+      result.MoveTo(*--currentIterator);
+      return;
     }
 
-    return FocusNavigationResult::NotHandled();
+    result.NotHandled();
   }
 
   void OnFocusChanged(View previous, View current)

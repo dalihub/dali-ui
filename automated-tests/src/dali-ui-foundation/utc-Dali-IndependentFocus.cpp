@@ -34,11 +34,11 @@ namespace
 {
 struct InitialNavigation
 {
-  FocusNavigationResult Navigate(View current, FocusNavigationContext)
+  void Navigate(View current, FocusNavigationContext, FocusNavigationResult& result)
   {
     ++calls;
     currentWasEmpty = !current;
-    return FocusNavigationResult::MoveTo(target);
+    result.MoveTo(target);
   }
   View target;
   int  calls{0};
