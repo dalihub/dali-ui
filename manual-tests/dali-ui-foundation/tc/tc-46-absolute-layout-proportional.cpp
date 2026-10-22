@@ -15,6 +15,7 @@
  */
 
 #include "manual-test-case.h"
+#include "layout-test-controls.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
@@ -79,7 +80,7 @@ public:
       .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
     root.Add(greenBox);
 
-    contentArea.Add(root);
+    ManualTest::MountResizableLayout(contentArea, root, this);
   }
 
   void OnExit() override

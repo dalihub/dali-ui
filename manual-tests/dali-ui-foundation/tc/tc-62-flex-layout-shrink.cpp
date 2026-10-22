@@ -15,6 +15,7 @@
  */
 
 #include "manual-test-case.h"
+#include "layout-test-controls.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
@@ -124,7 +125,11 @@ public:
 
     outer.Add(row2);
 
-    contentArea.Add(outer);
+    // Outer and row padding consume 200 units: width 700 leaves 500 for
+    // the items, keeping every weighted-shrink result positive.
+    ManualTest::MountResizableLayout(contentArea, outer, this, {
+      {"Parent: Width 700 (Shrink)", 700.0f, MATCH_PARENT},
+      {"Parent: Full", MATCH_PARENT, MATCH_PARENT}});
   }
 
   void OnExit() override

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "layout-transition-probe.h"
 #include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -370,6 +371,7 @@ public:
   {
     CancelLongPress();
     StopAutoScrollTimer();
+    mProbe.Stop();
     DisconnectAll();
     mLongPressTimer.Reset();
     mAutoScrollTimer.Reset();
@@ -386,6 +388,8 @@ public:
   }
 
 private:
+  LayoutTransitionProbe mProbe{"TC82"};
+
   static bool IsDownState(PointState::Type state)
   {
     return state == PointState::DOWN || state == PointState::STARTED;
@@ -543,8 +547,27 @@ private:
       // layout pass right here to guarantee the cells move to their new cells;
       // the transition stays attached so the CHANGE slot animates the reflow.
       ApplyGridOrder();
+      StartLayoutProbe("REORDER");
       LayoutController::Get(mWindow).ProcessLayouts();
     }
+  }
+
+  void StartLayoutProbe(const char* phase, Actor primary = {})
+  {
+    std::vector<Actor> siblings;
+    for(View cell : mGridItems)
+    {
+      if(cell != mDraggedChild && cell != primary)
+      {
+        siblings.push_back(cell);
+      }
+    }
+    if(!primary && !siblings.empty())
+    {
+      primary = siblings.front();
+      siblings.erase(siblings.begin());
+    }
+    if(primary) mProbe.Start(primary, phase, std::move(siblings));
   }
 
   void FinishDrag()
@@ -575,6 +598,7 @@ private:
       SetCellContentOpacity(draggedChild, 1.0f);
     }
     mScrollView.SetPanScrollEnabled(true);
+    StartLayoutProbe("DROP", draggedChild);
   }
 
   void MoveDraggedItem(uint32_t from, uint32_t to)

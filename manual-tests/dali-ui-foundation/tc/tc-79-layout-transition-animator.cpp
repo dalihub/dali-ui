@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "manual-test-case.h"
 #include "layout-transition-probe.h"
+#include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <chrono>
 #include <dali/public-api/adaptor-framework/ui-context.h>
 
 using namespace Dali;
@@ -60,7 +61,7 @@ public:
     mNextColorIndex = 0u;
     mExpanded = false;
 
-    // Three Clickable labels, one per LayoutTransition slot.
+    // The three original slot actions keep their original timings.
     mEnterButton = MakeClickableLabel("Click to ENTER");
     mEnterButton.TouchEventSignal().Connect(this, &TcLayoutTransitionAnimator::OnEnterTouched);
 
@@ -97,7 +98,11 @@ public:
     AppendChild();
     AppendChild();
 
-    // Button row hosts the three Clickables; equal width via FlexGrow 1.
+    mInterruptButton = MakeClickableLabel("ENTER > CHANGE");
+    mInterruptButton.SetProperty(Actor::Property::NAME, "TC79.Interrupt");
+    mInterruptButton.TouchEventSignal().Connect(this, &TcLayoutTransitionAnimator::OnInterruptTouched);
+
+    // A timed action makes cancellation reachable despite slow external reads.
     FlexLayout buttonRow = FlexLayout::New();
     buttonRow.SetRequestedWidth(MATCH_PARENT);
     buttonRow.SetRequestedHeight(60.0f);
@@ -106,6 +111,7 @@ public:
     buttonRow.Add(mEnterButton);
     buttonRow.Add(mExitButton);
     buttonRow.Add(mChangeButton);
+    buttonRow.Add(mInterruptButton);
 
     StackLayout root = StackLayout::New();
     root.SetRequestedWidth(MATCH_PARENT);
@@ -135,6 +141,7 @@ public:
   /// layout-applied values so the child grows down into its allocated slot.
   static void OnEnter(const LayoutAnimatorContext& ctx)
   {
+    LayoutTransitionProbe::LogAnimator("TC79", ctx);
     Actor actor = ctx.GetView();
     if(!actor)
     {
@@ -149,6 +156,7 @@ public:
   /// combined with opacity 1 → 0.
   static void OnExit(const LayoutAnimatorContext& ctx)
   {
+    LayoutTransitionProbe::LogAnimator("TC79", ctx);
     Actor actor = ctx.GetView();
     if(!actor)
     {
@@ -162,6 +170,7 @@ public:
   /// CHANGE animator: linear interpolation of arranged bounds.
   static void OnChange(const LayoutAnimatorContext& ctx)
   {
+    LayoutTransitionProbe::LogAnimator("TC79", ctx);
     Actor actor = ctx.GetView();
     if(!actor)
     {
@@ -205,6 +214,20 @@ public:
     return child;
   }
 
+  void StartProbe(View child, const char* phase)
+  {
+    std::vector<Actor> siblings;
+    for(uint32_t i = 0u; i < mStack.GetChildViewCount(); ++i)
+    {
+      View sibling = mStack.GetChildViewAt(i);
+      if(sibling != child)
+      {
+        siblings.push_back(sibling);
+      }
+    }
+    mProbe.Start(child, phase, std::move(siblings));
+  }
+
   void RemoveLastChild()
   {
     const uint32_t count = mStack.GetChildViewCount();
@@ -215,7 +238,7 @@ public:
     // The logical child list excludes any in-flight EXIT ghost, so the last
     // logical child is the last live item.
     View last = mStack.GetChildViewAt(count - 1u);
-    mProbe.Start(last, "EXIT");
+    StartProbe(last, "EXIT");
     mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
@@ -225,7 +248,8 @@ public:
     {
       return false;
     }
-    mProbe.Start(AppendChild(), "ENTER");
+    CancelFollowup();
+    StartProbe(AppendChild(), "ENTER");
     return true;
   }
 
@@ -235,6 +259,7 @@ public:
     {
       return false;
     }
+    CancelFollowup();
     RemoveLastChild();
     return true;
   }
@@ -245,6 +270,13 @@ public:
     {
       return false;
     }
+    CancelFollowup();
+    ChangeChildren();
+    return true;
+  }
+
+  void ChangeChildren()
+  {
     mExpanded             = !mExpanded;
     const float newHeight = mExpanded ? 160.0f : 80.0f;
     const uint32_t count  = mStack.GetChildViewCount();
@@ -254,19 +286,45 @@ public:
     }
     if(count > 0u)
     {
-      mProbe.Start(mStack.GetChildViewAt(0u), "CHANGE");
+      StartProbe(mStack.GetChildViewAt(0u), "CHANGE");
     }
+  }
+
+  void CancelFollowup()
+  {
+    if(mFollowupTimer) mFollowupTimer.Stop();
+    mFollowupTimer.Reset();
+  }
+
+  bool OnInterruptTouched(Actor, TouchEvent touch)
+  {
+    if(touch.GetState(0) != PointState::STARTED) return false;
+    CancelFollowup();
+    StartProbe(AppendChild(), "ENTER");
+    mFollowupStart = std::chrono::steady_clock::now();
+    mFollowupTimer = Timer::New(100);
+    mFollowupTimer.TickSignal().Connect(this, [this]()
+    {
+      if(!mFollowupTimer) return false;
+      if(std::chrono::steady_clock::now() - mFollowupStart < std::chrono::milliseconds(100)) return true;
+      CancelFollowup();
+      ChangeChildren();
+      return false;
+    });
+    mFollowupTimer.Start();
     return true;
   }
 
   void OnExit() override
   {
+    CancelFollowup();
     mProbe.Stop();
     DisconnectAll();
     mStack.Reset();
     mEnterButton.Reset();
     mExitButton.Reset();
     mChangeButton.Reset();
+    mInterruptButton.Reset();
   }
 
 private:
@@ -274,9 +332,12 @@ private:
   Label        mEnterButton;
   Label        mExitButton;
   Label        mChangeButton;
+  Label                                 mInterruptButton;
+  Timer                                 mFollowupTimer;
+  std::chrono::steady_clock::time_point mFollowupStart{};
   uint32_t     mNextColorIndex;
   bool         mExpanded;
-  LayoutTransitionProbe     mProbe{"TC79"};
+  LayoutTransitionProbe                 mProbe{"TC79"};
 };
 
 REGISTER_MANUAL_TEST(TcLayoutTransitionAnimator)

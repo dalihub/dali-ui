@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "manual-test-case.h"
 #include "layout-transition-probe.h"
+#include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/public-api/adaptor-framework/ui-context.h>
@@ -173,6 +173,20 @@ public:
     return child;
   }
 
+  void StartProbe(View child, const char* phase)
+  {
+    std::vector<Actor> siblings;
+    for(uint32_t i = 0u; i < mStack.GetChildViewCount(); ++i)
+    {
+      View sibling = mStack.GetChildViewAt(i);
+      if(sibling != child)
+      {
+        siblings.push_back(sibling);
+      }
+    }
+    mProbe.Start(child, phase, std::move(siblings));
+  }
+
   void RemoveLastChild()
   {
     const uint32_t count = mStack.GetChildViewCount();
@@ -184,7 +198,7 @@ public:
     // logical child is the last live item. Use View::Remove so the EXIT slot
     // is honoured (deferred-remove).
     View last = mStack.GetChildViewAt(count - 1u);
-    mProbe.Start(last, "EXIT");
+    StartProbe(last, "EXIT");
     mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
@@ -194,7 +208,7 @@ public:
     {
       return false;
     }
-    mProbe.Start(AppendChild(), "ENTER");
+    StartProbe(AppendChild(), "ENTER");
     return true;
   }
 
@@ -223,7 +237,7 @@ public:
     }
     if(count > 0u)
     {
-      mProbe.Start(mStack.GetChildViewAt(0u), "CHANGE");
+      StartProbe(mStack.GetChildViewAt(0u), "CHANGE");
     }
     return true;
   }

@@ -15,6 +15,7 @@
  */
 
 #include "manual-test-case.h"
+#include "layout-test-controls.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
@@ -117,14 +118,29 @@ public:
 
     outer.Add(second);
 
-    // // Box 5: Cyan, basis 100, grow 4
-    // View box8 = View::New();
-    // box8.SetBackgroundColor(Color::CYAN);
-    // box8.SetRequestedHeight(100.0f);
-    // box8.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(50.0f).SetFlexGrow(1.0f));
-    // root.Add(box8);
-
-    contentArea.Add(outer);
+    auto controls = ManualTest::MakeLayoutControlRow();
+    ManualTest::AddLayoutControl(controls, this, "Parent: Width 350", [outer, first, second]() mutable
+    {
+      // 100 units of outer padding leave 250 per row. The lower row wraps
+      // and distributes positive free space independently on both lines.
+      outer.SetRequestedWidth(350.0f);
+      first.SetRequestedWidth(WRAP_CONTENT);
+      second.SetRequestedWidth(WRAP_CONTENT);
+    });
+    ManualTest::AddLayoutControl(controls, this, "Rows: 150 / 300", [outer, first, second]() mutable
+    {
+      // Exercise wrap + grow in both rows without shrinking a 200-unit item.
+      outer.SetRequestedWidth(450.0f);
+      first.SetRequestedWidth(150.0f);
+      second.SetRequestedWidth(300.0f);
+    });
+    ManualTest::AddLayoutControl(controls, this, "Parent: Full", [outer, first, second]() mutable
+    {
+      outer.SetRequestedWidth(MATCH_PARENT);
+      first.SetRequestedWidth(WRAP_CONTENT);
+      second.SetRequestedWidth(WRAP_CONTENT);
+    });
+    ManualTest::MountLayoutTest(contentArea, outer, controls);
   }
 
   void OnExit() override

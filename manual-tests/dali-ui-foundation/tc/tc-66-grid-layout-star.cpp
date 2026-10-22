@@ -15,6 +15,7 @@
  */
 
 #include "manual-test-case.h"
+#include "layout-test-controls.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
@@ -96,7 +97,7 @@ public:
     footer.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumnSpan(3));
     root.Add(footer);
 
-    contentArea.Add(root);
+    ManualTest::MountResizableLayout(contentArea, root, this);
   }
 
   void OnExit() override
