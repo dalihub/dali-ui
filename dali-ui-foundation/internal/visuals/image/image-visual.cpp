@@ -292,8 +292,10 @@ void ImageVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  // Load image immediately if LOAD_POLICY requires it
-  if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE)
+  // Load image immediately if LOAD_POLICY requires it.
+  // DoAction(UPDATE_PROPERTY) re-enters here; requesting again would register this
+  // observer twice for a loading texture while its destruction signal connects once.
+  if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE && mTextureId == TextureManager::INVALID_TEXTURE_ID)
   {
     LoadTexture(mTextures, loadSize, TextureManager::ReloadPolicy::CACHED);
   }
