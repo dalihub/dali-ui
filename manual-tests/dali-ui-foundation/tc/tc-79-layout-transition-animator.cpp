@@ -33,11 +33,14 @@ using namespace Dali::Ui;
  * spec. All three slots share a single 0.4s EASE_IN_OUT_SINE timing.
  *
  *   - Tap "Click to ENTER": append a new colored child.
- *   - Tap "Click to EXIT": remove the last child. The leaving child's
- *     height/opacity are printed per tick ([TC79][EXIT] lines, see
- *     layout-transition-probe.h) for automated checks.
+ *   - Tap "Click to EXIT": remove the last child.
  *   - Tap "Click to CHANGE": toggle every child's requested
  *     height between 80 and 160.
+ *
+ * After each tap the affected child's height/opacity are printed per tick
+ * ([TC79][ENTER] the added child, [TC79][EXIT] the leaving child,
+ * [TC79][CHANGE] the first child; see layout-transition-probe.h) for
+ * automated checks.
  */
 class TcLayoutTransitionAnimator : public ManualTest::TestCase, public ConnectionTracker
 {
@@ -180,7 +183,7 @@ public:
     actor.SetSizeHeight(h);
   }
 
-  void AppendChild()
+  View AppendChild()
   {
     static constexpr Vector4 palette[] = {
       Color::RED, Color::GREEN, Color::BLUE,
@@ -199,6 +202,7 @@ public:
     // here would leave initial-mount children stuck at the pre-set value.
     mStack.Add(child);
     ++mNextColorIndex;
+    return child;
   }
 
   void RemoveLastChild()
@@ -211,7 +215,7 @@ public:
     // The logical child list excludes any in-flight EXIT ghost, so the last
     // logical child is the last live item.
     View last = mStack.GetChildViewAt(count - 1u);
-    mExitProbe.Start(last, "EXIT");
+    mProbe.Start(last, "EXIT");
     mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
@@ -221,7 +225,7 @@ public:
     {
       return false;
     }
-    AppendChild();
+    mProbe.Start(AppendChild(), "ENTER");
     return true;
   }
 
@@ -248,12 +252,16 @@ public:
     {
       mStack.GetChildViewAt(i).SetRequestedHeight(newHeight);
     }
+    if(count > 0u)
+    {
+      mProbe.Start(mStack.GetChildViewAt(0u), "CHANGE");
+    }
     return true;
   }
 
   void OnExit() override
   {
-    mExitProbe.Stop();
+    mProbe.Stop();
     DisconnectAll();
     mStack.Reset();
     mEnterButton.Reset();
@@ -268,7 +276,7 @@ private:
   Label        mChangeButton;
   uint32_t     mNextColorIndex;
   bool         mExpanded;
-  LayoutTransitionProbe     mExitProbe{"TC79"};
+  LayoutTransitionProbe     mProbe{"TC79"};
 };
 
 REGISTER_MANUAL_TEST(TcLayoutTransitionAnimator)

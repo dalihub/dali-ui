@@ -22,10 +22,11 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include <vector>
 
 /**
- * Prints what an ENTER / EXIT transition does to the added / leaving child, one
- * line per tick, on stdout (dlog tag STDOUT on Tizen):
+ * Prints what a transition does to one actor, one line per tick, on stdout
+ * (dlog tag STDOUT on Tizen):
  *
  *   [TC78][EXIT] t=0.016 h=79.2 opacity=0.991 scene=1
  *   ...
@@ -34,6 +35,13 @@
  * t is seconds since the touch; h and opacity are the rendered (current)
  * values, scene is CONNECTED_TO_SCENE. The probe only reads — it changes
  * nothing about the transition.
+ *
+ * The phase is the slot that was triggered: ENTER (the added child), EXIT (the
+ * leaving child), CHANGE (a child whose requested size changed) or TOGGLE (a
+ * reflow). With inner actors the line also carries their rendered heights in
+ * the same tick, so a reflow of nested items can be compared with its parent:
+ *
+ *   [TC81][TOGGLE] t=0.112 h=77.0 opacity=1.000 scene=1 inner=72.0,72.0,72.0
  *
  * Why: an automated check reading the accessibility tree cannot see a 0.4 s
  * transition on a slow target — the first tree read after the change takes
@@ -49,11 +57,13 @@ public:
   }
 
   /// EXIT: call right BEFORE the remove, so the first line is the pre-EXIT state.
-  /// ENTER: call right AFTER the add.
-  void Start(Dali::Actor actor, std::string phase)
+  /// ENTER: call right AFTER the add. CHANGE / TOGGLE: call right AFTER the size
+  /// change (the first line is the pre-layout state).
+  void Start(Dali::Actor actor, std::string phase, std::vector<Dali::Actor> inner = {})
   {
     Stop();
     mActor   = actor;
+    mInner   = std::move(inner);
     mPhase   = std::move(phase);
     mStart   = Clock::now();
     mSamples = 0u;
@@ -71,6 +81,7 @@ public:
       mTimer.Reset();
     }
     mActor.Reset();
+    mInner.clear();
   }
 
 private:
@@ -92,7 +103,14 @@ private:
     char                line[128];
     std::snprintf(line, sizeof(line), "[%s][%s] t=%.3f h=%.1f opacity=%.3f scene=%d",
                   mTag.c_str(), mPhase.c_str(), Elapsed(), size.height, opacity, scene ? 1 : 0);
-    std::cout << line << std::endl;
+    std::string out(line);
+    for(std::size_t i = 0; i < mInner.size(); ++i)
+    {
+      std::snprintf(line, sizeof(line), "%s%.1f", i == 0u ? " inner=" : ",",
+                    mInner[i].GetCurrentProperty<Dali::Vector3>(Dali::Actor::Property::SIZE).height);
+      out += line;
+    }
+    std::cout << out << std::endl;
     ++mSamples;
   }
 
@@ -109,12 +127,14 @@ private:
     }
     std::cout << "[" << mTag << "][" << mPhase << "][END] samples=" << mSamples << std::endl;
     mActor.Reset();
+    mInner.clear();
     return false;
   }
 
   std::string       mTag;
   std::string       mPhase;
   Dali::Actor       mActor;
+  std::vector<Dali::Actor> mInner;
   Dali::Timer       mTimer;
   Clock::time_point mStart{};
   unsigned int      mSamples{0u};
