@@ -114,6 +114,8 @@ public:
   /**
    * @brief Sets the screen DPI.
    *
+   * @deprecated Use SetUnitDpi() instead.
+   *
    * @pre Must not be frozen.
    * @param[in] dpi The DPI value
    */
@@ -122,12 +124,16 @@ public:
   /**
    * @brief Retrieves the screen DPI.
    *
+   * @deprecated Use GetUnitDpi() instead.
+   *
    * @return The DPI value
    */
   int GetDpi() const;
 
   /**
    * @brief Sets the baseline DPI.
+   *
+   * @deprecated Use SetUnitBaselineDpi() instead.
    *
    * @pre Must not be frozen.
    * @param[in] baselineDpi The baseline DPI
@@ -136,6 +142,8 @@ public:
 
   /**
    * @brief Retrieves the baseline DPI.
+   *
+   * @deprecated Use GetUnitBaselineDpi() instead.
    *
    * @return The baseline DPI value
    */
@@ -670,6 +678,15 @@ public:
    * @return A ThemeLoaderInterface instance, or nullptr to use the default loader
    */
   virtual ThemeLoaderInterface* CreateThemeLoader();
+
+  /** @copydoc UiConfig::SetUnitDpi() */
+  void SetUnitDpi(int dpi);
+  /** @copydoc UiConfig::GetUnitDpi() */
+  int GetUnitDpi() const;
+  /** @copydoc UiConfig::SetUnitBaselineDpi() */
+  void SetUnitBaselineDpi(int baselineDpi);
+  /** @copydoc UiConfig::GetUnitBaselineDpi() */
+  int GetUnitBaselineDpi() const;
 
 protected:
   /**

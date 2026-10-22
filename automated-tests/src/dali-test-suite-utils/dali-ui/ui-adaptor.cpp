@@ -28,9 +28,7 @@ extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentProcessId();
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h> ///< For FileDownloadPluginProxy::Shutdown
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
-#if defined(_WIN32)
 #include <dali/devel-api/adaptor-framework/window-system-devel.h>
-#endif
 
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/scene.h>
@@ -50,11 +48,32 @@ extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentProcessId();
 #endif
 #include <cstdint>
 
+namespace
+{
+uint32_t gWindowSystemDpiQueryCount = 0u;
+}
+
 namespace DALI_NAMESPACE
 {
-#if defined(_WIN32)
 namespace DevelWindowSystem
 {
+void GetDpi(uint32_t& horizontalDpi, uint32_t& verticalDpi)
+{
+  ++gWindowSystemDpiQueryCount;
+  Vector2 dpi = Vector2::ZERO;
+  if(Dali::Adaptor::IsAvailable())
+  {
+    auto windows = Dali::Adaptor::Get().GetWindows();
+    if(!windows.empty())
+    {
+      dpi = windows.front().GetScene().GetDpi();
+    }
+  }
+  horizontalDpi = static_cast<uint32_t>(dpi.x);
+  verticalDpi = static_cast<uint32_t>(dpi.y);
+}
+
+#if defined(_WIN32)
 void SetGeometryHittestEnabled(bool enabled)
 {
   static_cast<void>(enabled);
@@ -64,8 +83,8 @@ bool IsGeometryHittestEnabled()
 {
   return true;
 }
-} // namespace DevelWindowSystem
 #endif
+} // namespace DevelWindowSystem
 
 namespace Internal
 {
@@ -691,6 +710,11 @@ Dali::Integration::RenderSurfaceInterface& Adaptor::GetSurface()
 
 namespace Test::UiAdaptor
 {
+uint32_t GetWindowSystemDpiQueryCount()
+{
+  return gWindowSystemDpiQueryCount;
+}
+
 void SetAdaptorAvailableForce(bool available)
 {
   Dali::Internal::Adaptor::gAvailableFlag = available;

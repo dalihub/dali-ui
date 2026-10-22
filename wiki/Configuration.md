@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 {
   // Apply() must be called before the application runs.
   UiConfig config = UiConfig::New();
-  config.SetDpi(320);
+  config.SetUnitDpi(320);
   config.SetScalingFactor(1.5f);
   config.Apply();
 
@@ -48,7 +48,7 @@ foundation configuration:
 
 ```cpp
 Components::UiConfig config = Components::UiConfig::New();
-config.SetDpi(320);
+config.SetUnitDpi(320);
 config.SetScalingFactor(1.5f);
 config.Apply();
 ```
@@ -64,8 +64,8 @@ The following describes key configuration options. For the full API, see [UiConf
 | Option | Method | Default | Description |
 |---|---|---|---|
 | Scaling Factor | `SetScalingFactor(float)` | `1.0f` | Scale multiplier applied to `spx` and `sdp` units |
-| DPI | `SetDpi(int)` | `160` | Physical DPI of the target display |
-| Baseline DPI | `SetBaselineDpi(int)` | `160` | Reference DPI used for `dp` calculations |
+| Unit DPI | `SetUnitDpi(int)`, `GetUnitDpi()` | `0` | Configured override only; 0 selects automatic system DPI for unit calculations |
+| Baseline DPI | `SetUnitBaselineDpi(int)` | `72` | Reference DPI used for `dp` calculations |
 | Default Font Size | `SetDefaultFontSize(float)` | `16.0f` | Default font size for text elements (pt) |
 | Default Text Color | `SetDefaultTextColor(Vector4)` | `Color::BLACK` | Default color for text elements |
 | Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Determines whether the Clicked event fires on key press or key release |
@@ -81,6 +81,8 @@ The following describes key configuration options. For the full API, see [UiConf
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | Whether touch interaction clears focus indication |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | Whether hovering outside the focused view clears focus indication |
 | Style Sheet | `ResetStyleSheet(UiStyleSheet)`, `StyleSheet()`, `GetStyle(UiStyleKey<T>)` | Component style overrides | Component style creator lookup table and style resolver |
+
+When Unit DPI is `0`, system DPI is used for `dp` and `sdp` calculations.
 
 <br/>
 
@@ -133,7 +135,7 @@ public:
   static TVConfig New()
   {
     TVConfig config(Dali::Ui::UiConfig::New());
-    config.SetDpi(72);
+    config.SetUnitDpi(72);
     config.SetScalingFactor(2.0f);
     config.SetDefaultFontSize(28.0f);
     return config;

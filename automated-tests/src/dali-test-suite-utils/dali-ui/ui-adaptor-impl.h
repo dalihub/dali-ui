@@ -130,6 +130,11 @@ private:
 namespace Test::UiAdaptor
 {
 /**
+ * @brief Returns the number of window system DPI queries made by the test.
+ */
+uint32_t GetWindowSystemDpiQueryCount();
+
+/**
  * @brief To make Dali::Adaptor::IsAvailable() return false forcibly.
  * @param[in] available False if we want to make Dali::Adaptor::IsAvailable() return false forcibly. True to restore.
  */

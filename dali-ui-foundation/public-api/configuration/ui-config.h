@@ -71,7 +71,7 @@ class UiConfigImpl;
  *  // In main(), before running the application:
  *  UiConfig config = UiConfig::New();
  *  config.SetScalingFactor(1.5f);
- *  config.SetDpi(320);
+ *  config.SetUnitDpi(320);
  *  config.Apply();
  * @endcode
  */
@@ -149,7 +149,7 @@ public:
   /**
    * @brief Creates a new UiConfig with default values.
    *
-   * Default: scalingFactor=1.0f, dpi=160, baselineDpi=160,
+   * Default: scalingFactor=1.0f, baselineDpi=72,
    * webEngineType=WebEngineType::CHROMIUM.
    *
    * @return An initialized UiConfig handle
@@ -198,6 +198,8 @@ public: // Properties
   /**
    * @brief Retrieves the DPI factor (dpi / baselineDpi).
    *
+   * @deprecated Use the _dp unit literals for unit conversions instead.
+   *
    * @pre The config must be frozen (i.e. Apply() must have been called).
    * @return The computed DPI factor
    */
@@ -205,6 +207,8 @@ public: // Properties
 
   /**
    * @brief Retrieves the scaled DPI factor (dpiFactor * scalingFactor).
+   *
+   * @deprecated Use the _sdp unit literals for unit conversions instead.
    *
    * @pre The config must be frozen (i.e. Apply() must have been called).
    * @return The computed scaled DPI factor
@@ -214,6 +218,8 @@ public: // Properties
   /**
    * @brief Sets the screen DPI used for dp and sdp unit calculations.
    *
+   * @deprecated Use SetUnitDpi() instead.
+   *
    * @pre The config must not be frozen.
    * @param[in] dpi The dots-per-inch value of the target display
    */
@@ -222,12 +228,16 @@ public: // Properties
   /**
    * @brief Retrieves the screen DPI.
    *
+   * @deprecated Use GetUnitDpi() instead.
+   *
    * @return The dots-per-inch value of the target display
    */
   int GetDpi() const;
 
   /**
    * @brief Sets the baseline DPI used as the reference for dp calculations.
+   *
+   * @deprecated Use SetUnitBaselineDpi() instead.
    *
    * @pre The config must not be frozen.
    * @param[in] baselineDpi The baseline dots-per-inch value
@@ -236,6 +246,8 @@ public: // Properties
 
   /**
    * @brief Retrieves the baseline DPI.
+   *
+   * @deprecated Use GetUnitBaselineDpi() instead.
    *
    * @return The baseline dots-per-inch used as the reference for dp calculations
    */
@@ -1106,6 +1118,37 @@ public: // Properties
    * @return The configured web engine type
    */
   WebEngineType GetWebEngineType() const;
+
+  /**
+   * @brief Sets the DPI override used only for dp and sdp unit calculations.
+   *
+   * Zero selects system DPI.
+   * @pre The config must not be frozen.
+   * @param[in] dpi A nonnegative DPI value. Default is 0.
+   */
+  void SetUnitDpi(int dpi);
+
+  /**
+   * @brief Retrieves the configured unit DPI override.
+   *
+   * Returns only the configured value.
+   * @return The configured override, or 0 for automatic system DPI.
+   */
+  int GetUnitDpi() const;
+
+  /**
+   * @brief Sets the reference DPI used as the denominator for dp calculations.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] baselineDpi The nonzero reference DPI. Default is 72.
+   */
+  void SetUnitBaselineDpi(int baselineDpi);
+
+  /**
+   * @brief Retrieves the configured reference DPI for unit calculations.
+   * @return The configured reference DPI. Default is 72.
+   */
+  int GetUnitBaselineDpi() const;
 
 public: // Not intended for Application developers
   /**

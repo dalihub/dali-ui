@@ -32,6 +32,11 @@
 namespace
 {
 
+const char* const UICONFIG_DPI_BEFORE_APPLICATION_CREATED_MESSAGE =
+  "UiConfig DPI is not available before application initialization unless SetUnitDpi() specifies a positive value. "
+  "Set DPI explicitly before Apply() or access DPI-dependent values after application initialization. "
+  "Using fallback DPI 72; previously returned values will not update automatically.\n";
+
 bool DefaultExecutionKeyPredicate(const Dali::String& keyName)
 {
   return keyName == "Return";
@@ -67,8 +72,8 @@ public:
     mSystemFontSizeScales{{0.87f, 1.0f, 1.13f, 1.26f, 1.4f}}, // SMALL, NORMAL, LARGE, EXTRA_LARGE, GIANT
     mDefaultMinimumFontSizeScale(0.01f),
     mDefaultMaximumFontSizeScale(10.0f),
-    mDpi(160),
-    mBaselineDpi(160),
+    mDpi(72),
+    mBaselineDpi(72),
     mMarqueeSpeed(80),
     mMarqueeLoopCount(2),
     mMarqueeLoopDelay(1.0f),
@@ -92,6 +97,32 @@ public:
   {
   }
 
+  void UpdateDpiFromWindowSystem()
+  {
+    if(mDpiInitialized)
+    {
+      return;
+    }
+    if(!mApplicationCreated)
+    {
+      DALI_LOG_ERROR("%s", UICONFIG_DPI_BEFORE_APPLICATION_CREATED_MESSAGE);
+      return;
+    }
+
+    uint32_t horizontalDpi = 0u;
+    uint32_t verticalDpi   = 0u;
+    Dali::DevelWindowSystem::GetDpi(horizontalDpi, verticalDpi);
+    if(horizontalDpi == 0u || horizontalDpi > static_cast<uint32_t>(std::numeric_limits<int>::max()))
+    {
+      return;
+    }
+
+    mDpi                   = static_cast<int>(horizontalDpi);
+    mCachedDpiFactor       = static_cast<float>(mDpi) / static_cast<float>(mBaselineDpi);
+    mCachedScaledDpiFactor = mCachedDpiFactor * mScalingFactor;
+    mDpiInitialized        = true;
+  }
+
 public:
   Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
 
@@ -107,7 +138,10 @@ public:
   std::array<float, 5>            mSystemFontSizeScales;
   float                           mDefaultMinimumFontSizeScale;
   float                           mDefaultMaximumFontSizeScale;
+  int                             mUnitDpi{0};
   int                             mDpi;
+  bool                            mDpiInitialized{false};
+  bool                            mApplicationCreated{false};
   int                             mBaselineDpi;
   int                             mMarqueeSpeed;
   int                             mMarqueeLoopCount;
@@ -179,11 +213,13 @@ bool UiConfigImpl::IsFrozen() const
 
 float UiConfigImpl::GetDpiFactor() const
 {
+  mImpl->UpdateDpiFromWindowSystem();
   return mImpl->mCachedDpiFactor;
 }
 
 float UiConfigImpl::GetScaledDpiFactor() const
 {
+  mImpl->UpdateDpiFromWindowSystem();
   return mImpl->mCachedScaledDpiFactor;
 }
 
@@ -200,12 +236,36 @@ float UiConfigImpl::GetScalingFactor() const
 
 void UiConfigImpl::SetDpi(int dpi)
 {
-  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mImpl->mDpi = dpi;
+  SetUnitDpi(dpi);
+}
+
+void UiConfigImpl::SetUnitDpi(int dpi)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  DALI_ASSERT_ALWAYS(dpi >= 0 && "Unit DPI must be greater than or equal to zero");
+  mImpl->mUnitDpi        = dpi;
+  mImpl->mDpi            = dpi == 0 ? 72 : dpi;
+  mImpl->mDpiInitialized = dpi != 0;
+}
+
+int UiConfigImpl::GetUnitDpi() const
+{
+  return mImpl->mUnitDpi;
+}
+
+void UiConfigImpl::SetUnitBaselineDpi(int baselineDpi)
+{
+  SetBaselineDpi(baselineDpi);
+}
+
+int UiConfigImpl::GetUnitBaselineDpi() const
+{
+  return GetBaselineDpi();
 }
 
 int UiConfigImpl::GetDpi() const
 {
+  mImpl->UpdateDpiFromWindowSystem();
   return mImpl->mDpi;
 }
 
@@ -794,6 +854,9 @@ void UiConfigImpl::OnApplied()
 
 void UiConfigImpl::OnApplicationCreated()
 {
+  mImpl->mApplicationCreated = true;
+  mImpl->UpdateDpiFromWindowSystem();
+
   Dali::TextAbstraction::EnableDesignCompatibility();
 
   Dali::DevelWindowSystem::SetGeometryHittestEnabled(true);
