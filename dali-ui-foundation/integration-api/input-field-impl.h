@@ -993,7 +993,7 @@ public: // From SelectableControlInterface
   /**
    * @copydoc Text::SelectableControlInterface::SelectText()
    */
-  void SelectText(const uint32_t start, const uint32_t end) override;
+  void SelectText(uint32_t start, uint32_t end) override;
 
   /**
    * @copydoc Text::SelectableControlInterface::SelectWholeText()
