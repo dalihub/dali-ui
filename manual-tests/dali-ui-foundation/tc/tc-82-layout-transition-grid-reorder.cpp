@@ -167,15 +167,19 @@ public:
     // A definite main-axis size is required for the weighted ScrollView child to
     // fill the remaining space; without it the stack wraps to its content and
     // the ScrollView grows to the grid's full (scrollable) height instead.
+    // 400x600 on a 1080p window. A shorter window (e.g. a 1024x600 panel) keeps the
+    // whole panel on screen: the height shrinks to what is left below the launcher
+    // header (60) and the panel's top offset (20), minus a 20px bottom margin.
+    const float panelHeight = std::min(600.0f, static_cast<float>(mWindow.GetPositionSize().height) - 60.0f - 20.0f - 20.0f);
     mOuterStack.SetRequestedWidth(400.0f);
-    mOuterStack.SetRequestedHeight(600.0f);
+    mOuterStack.SetRequestedHeight(panelHeight);
     mOuterStack.SetSpacing(20.0f);
     mOuterStack.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     mOuterStack.SetBackgroundColor(Vector4(0.5f, 0.5f, 0.5f, 0.5f));
     mOuterStack.SetCornerRadius(40.0f);
     // Compensate for the launcher's 60px header so the panel keeps the
     // original sample's window-relative Y position.
-    mOuterStack.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(80.0f, 20.0f, 400.0f, 600.0f)));
+    mOuterStack.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(80.0f, 20.0f, 400.0f, panelHeight)));
     mOuterStack.Add(topRow);
     mOuterStack.Add(midRow);
     mOuterStack.Add(mScrollView);

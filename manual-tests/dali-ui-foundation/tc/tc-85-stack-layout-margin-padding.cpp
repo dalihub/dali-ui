@@ -37,6 +37,11 @@ public:
     return "85. StackLayout: Margin and Padding";
   }
 
+  bool ScrollsOnShortWindow() const override
+  {
+    return true;
+  }
+
   Dali::String GetDescription() const override
   {
     return "Verify margins, padding, and a nested horizontal stack";

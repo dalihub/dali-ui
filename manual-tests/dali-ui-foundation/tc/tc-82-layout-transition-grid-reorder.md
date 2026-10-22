@@ -5,7 +5,7 @@
 ## 화면 구성
 
 - SVG 아이콘 12개의 3열 GridLayout
-- 상단 아이콘 행과 400x600 rounded panel
+- 상단 아이콘 행과 400x600 rounded panel (창 높이가 1080보다 작으면 패널 높이는 머리줄 아래 남은 높이에 맞춘다 — 패널 전체가 화면 안에 있어야 한다)
 - TC-local drag overlay
 
 ## 테스트 절차

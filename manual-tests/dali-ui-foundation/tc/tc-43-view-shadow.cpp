@@ -53,6 +53,11 @@ public:
     return "43. View Shadow";
   }
 
+  bool ScrollsOnShortWindow() const override
+  {
+    return true;
+  }
+
   Dali::String GetDescription() const override
   {
     return "Verify first shadow animation and shadow corner radius tracking";
