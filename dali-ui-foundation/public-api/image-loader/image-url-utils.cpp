@@ -41,7 +41,7 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, Pixel::Format pixe
   return imageUrl;
 }
 
-Dali::Ui::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, uint8_t index)
+Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, uint8_t index)
 {
   Texture texture = Dali::DevelFrameBuffer::GetColorTexture(frameBuffer, index);
   // TODO : Need to check frameBuffer result use preMultiplied color or not. By default, we use premultiplied
@@ -49,7 +49,7 @@ Dali::Ui::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, uint8_t inde
   return imageUrl;
 }
 
-Dali::Ui::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool preMultiplied)
+Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMultiplied)
 {
   Texture texture =
     Texture::New(TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
@@ -62,19 +62,19 @@ Dali::Ui::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool preMultipli
   return imageUrl;
 }
 
-Dali::Ui::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)
+Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)
 {
   Texture            texture  = Dali::Texture::New(*nativeImageInterface);
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, preMultiplied);
   return imageUrl;
 }
 
-Dali::Ui::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encodedImageBuffer)
+Dali::Ui::ImageUrl GenerateUrl(Dali::EncodedImageBuffer encodedImageBuffer)
 {
   return Dali::Ui::ImageUrl::New(encodedImageBuffer);
 }
 
-Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer)
+Dali::Ui::ImageUrl GenerateDepthUrl(Dali::FrameBuffer frameBuffer)
 {
   Texture            texture  = Dali::DevelFrameBuffer::GetDepthTexture(frameBuffer);
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, false);
