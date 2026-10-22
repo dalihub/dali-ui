@@ -15,6 +15,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$UseDefaultTimeout = -not $PSBoundParameters.ContainsKey("TimeoutSeconds")
 
 function ConvertTo-XmlSafeText
 {
@@ -247,10 +248,20 @@ foreach($Test in $Tests)
   $StdoutPath = Join-Path $LogsDirectory "$LogName.stdout.log"
   $StderrPath = Join-Path $LogsDirectory "$LogName.stderr.log"
   $CombinedPath = Join-Path $LogsDirectory "$LogName.log"
+  $TestTimeoutSeconds = $TimeoutSeconds
+  if($UseDefaultTimeout -and
+     $Test.Module -eq "dali-ui-foundation-internal" -and
+     $Test.Name -eq "UtcDaliTextRevealBlurImageCaptureLifecyclePerLineStressP")
+  {
+    # Four capture/teardown cycles can pass their assertions but exceed the
+    # default process deadline on Windows Debug runners. Preserve all cycles
+    # and checks, and allow their resource cleanup to finish before termination.
+    $TestTimeoutSeconds = 60
+  }
   $Stopwatch = [Diagnostics.Stopwatch]::StartNew()
   $ProcessStartInfo = [Diagnostics.ProcessStartInfo]::new()
   $ProcessStartInfo.FileName = $Test.Executable
-  $ProcessStartInfo.Arguments = "--test $($Test.Name) --timeout-ms $($TimeoutSeconds * 1000)"
+  $ProcessStartInfo.Arguments = "--test $($Test.Name) --timeout-ms $($TestTimeoutSeconds * 1000)"
   $ProcessStartInfo.UseShellExecute = $false
   $ProcessStartInfo.CreateNoWindow = $true
   $ProcessStartInfo.RedirectStandardOutput = $true
@@ -260,7 +271,7 @@ foreach($Test in $Tests)
   [void]$Process.Start()
   $StdoutTask = $Process.StandardOutput.ReadToEndAsync()
   $StderrTask = $Process.StandardError.ReadToEndAsync()
-  $Completed = $Process.WaitForExit($TimeoutSeconds * 1000 + 5000)
+  $Completed = $Process.WaitForExit($TestTimeoutSeconds * 1000 + 5000)
   $TimedOut = -not $Completed
   if($TimedOut)
   {
@@ -276,6 +287,7 @@ foreach($Test in $Tests)
     "Module: $($Test.Module)"
     "Test: $($Test.Name)"
     "Labels: $($Test.Labels -join ',')"
+    "TimeoutSeconds: $TestTimeoutSeconds"
     "ElapsedSeconds: $([Math]::Round($Stopwatch.Elapsed.TotalSeconds, 3))"
     "TimedOut: $TimedOut"
     "ExitCode: $(if($TimedOut) { 4 } else { $Process.ExitCode })"
@@ -305,7 +317,7 @@ foreach($Test in $Tests)
   $Passed = $ExitCode -eq 0
   $Message = if($TimedOut)
   {
-    "The external runner timed out after $TimeoutSeconds seconds."
+    "The external runner timed out after $TestTimeoutSeconds seconds."
   }
   elseif($Passed)
   {
