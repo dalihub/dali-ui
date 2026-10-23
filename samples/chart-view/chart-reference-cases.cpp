@@ -26,10 +26,10 @@
 
 namespace ChartStandard
 {
-std::vector<ReferenceCase> BuildReferenceCases()
+namespace
 {
-  std::vector<ReferenceCase> cases;
-  cases.reserve(141u);
+void AppendReferenceCases0To49(std::vector<ReferenceCase>& cases)
+{
   {
     ReferenceCase spec;
     spec.id             = "vertical-bar-01";
@@ -1698,6 +1698,10 @@ std::vector<ReferenceCase> BuildReferenceCases()
     spec.lines.push_back({0xBFD9FFu, 1.0f, 2.5f, 0.0f, 0x387AFFu, 1.0f});
     cases.push_back(std::move(spec));
   }
+}
+
+void AppendReferenceCases50To99(std::vector<ReferenceCase>& cases)
+{
   {
     ReferenceCase spec;
     spec.id             = "combo-02";
@@ -3876,6 +3880,10 @@ std::vector<ReferenceCase> BuildReferenceCases()
     spec.texts[9].darkBackground = 0x594000u;
     cases.push_back(std::move(spec));
   }
+}
+
+void AppendReferenceCases100To136(std::vector<ReferenceCase>& cases)
+{
   {
     ReferenceCase spec;
     spec.id                      = "pattern-11";
@@ -5121,6 +5129,17 @@ std::vector<ReferenceCase> BuildReferenceCases()
     spec.yAxis              = {{{"", 0.0f}, {"20", 20.0f}, {"40", 40.0f}, {"60", 60.0f}, {"80", 80.0f}}, true};
     cases.push_back(std::move(spec));
   }
+}
+
+} // unnamed namespace
+
+std::vector<ReferenceCase> BuildReferenceCases()
+{
+  std::vector<ReferenceCase> cases;
+  cases.reserve(141u);
+  AppendReferenceCases0To49(cases);
+  AppendReferenceCases50To99(cases);
+  AppendReferenceCases100To136(cases);
   AppendAdditionalCases(cases);
   for(auto& spec : cases)
   {
