@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 {
   // Apply()는 애플리케이션이 실행되기 전에 호출합니다.
   UiConfig config = UiConfig::New();
-  config.SetDpi(320);
+  config.SetUnitDpi(320);
   config.SetScalingFactor(1.5f);
   config.Apply();
 
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 
 ```cpp
 Components::UiConfig config = Components::UiConfig::New();
-config.SetDpi(320);
+config.SetUnitDpi(320);
 config.SetScalingFactor(1.5f);
 config.Apply();
 ```
@@ -60,8 +60,8 @@ config.Apply();
 | 항목 | 메서드 | 기본값 | 설명 |
 |---|---|---|---|
 | Scaling Factor | `SetScalingFactor(float)` | `1.0f` | `spx`, `sdp` 단위에 곱해지는 스케일 배율 |
-| DPI | `SetDpi(int)` | `160` | 디스플레이의 실제 DPI |
-| Baseline DPI | `SetBaselineDpi(int)` | `160` | `dp` 계산의 기준 DPI |
+| Unit DPI | `SetUnitDpi(int)`, `GetUnitDpi()` | `0` | 사용자 설정값만 저장·반환하며 0은 단위 계산 시 시스템 DPI 사용 |
+| Baseline DPI | `SetUnitBaselineDpi(int)` | `72` | `dp` 계산의 기준 DPI |
 | Default Font Size | `SetDefaultFontSize(float)` | `16.0f` | 텍스트 요소의 기본 폰트 크기 (pt) |
 | Default Text Color | `SetDefaultTextColor(Vector4)` | `Color::BLACK` | 텍스트 요소의 기본 색상 |
 | Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Clicked 이벤트 발생이 key press 시점인지 release 시점인지 설정 |
@@ -77,6 +77,8 @@ config.Apply();
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | 터치 입력 시 포커스 indication을 해제할지 여부 |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | 포커스된 뷰 밖을 hover했을 때 포커스 indication을 해제할지 여부 |
 | Style Sheet | `ResetStyleSheet(UiStyleSheet)`, `StyleSheet()`, `GetStyle(UiStyleKey<T>)` | 컴포넌트 style override | 컴포넌트 스타일 creator lookup table 및 style resolver |
+
+Unit DPI가 `0`이면 `dp`와 `sdp` 계산에 시스템 DPI를 사용합니다.
 
 <br/>
 
@@ -128,7 +130,7 @@ public:
   static TVConfig New()
   {
     TVConfig config(Dali::Ui::UiConfig::New());
-    config.SetDpi(72);
+    config.SetUnitDpi(72);
     config.SetScalingFactor(2.0f);
     config.SetDefaultFontSize(28.0f);
     return config;
