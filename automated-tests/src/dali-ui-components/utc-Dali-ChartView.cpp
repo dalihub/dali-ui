@@ -125,7 +125,7 @@ void RenderChart(UiTestApplication& application, ChartView chartView)
   application.Render();
 }
 
-Dali::Ui::Integration::ChartViewImpl& GetChartImpl(ChartView view)
+Dali::Ui::Integration::ChartViewImpl& GetChartImpl(ChartView& view)
 {
   return static_cast<Dali::Ui::Integration::ChartViewImpl&>(view.GetImplementation());
 }
