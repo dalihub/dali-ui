@@ -58,7 +58,7 @@ class DALI_UI_API CanvasViewImpl : public ViewImpl, public Dali::Integration::Pr
 {
 public: // Properties
   /**
-   * @brief Property indices aliased from the shared CanvasViewPropertyIndex.
+   * @brief Public property aliases and the internal content visual slot.
    */
   struct Property
   {
@@ -67,7 +67,14 @@ public: // Properties
       VIEW_BOX                       = Ui::CanvasViewPropertyIndex::VIEW_BOX,
       SYNCHRONOUS_LOADING            = Ui::CanvasViewPropertyIndex::SYNCHRONOUS_LOADING,
       RASTERIZATION_REQUEST_MANUALLY = Ui::CanvasViewPropertyIndex::RASTERIZATION_REQUEST_MANUALLY,
-      CANVAS_CONTENT_VISUAL          = Ui::CanvasViewPropertyIndex::CANVAS_CONTENT_VISUAL,
+
+      /**
+       * @brief Internal visual slot for the rasterized canvas texture.
+       * @details Registered as "canvasContentVisual" with type Dali::Property::MAP.
+       * @note Used for visual registration, not for configuring canvas content.
+       * @note The index may change when public properties are added.
+       */
+      CANVAS_CONTENT_VISUAL = Ui::CanvasViewPropertyIndex::PROPERTY_START_INDEX + 3,
     };
   };
 
