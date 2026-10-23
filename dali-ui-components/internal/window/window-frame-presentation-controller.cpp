@@ -66,7 +66,7 @@ bool WindowFramePresentationController::RequestPresentation(Dali::Window window,
   mPendingFrameId = NextFrameId();
   GetPresentationRegistry().emplace(mPendingFrameId, this);
 
-  window.AddFramePresentedCallback(Dali::MakeCallback(&WindowFramePresentationController::DispatchFramePresented), mPendingFrameId);
+  window.AddFramePresentedCallback(Dali::Callback<void(int32_t)>::New(&WindowFramePresentationController::DispatchFramePresented), mPendingFrameId);
   return true;
 }
 

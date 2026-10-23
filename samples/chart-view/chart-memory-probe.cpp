@@ -513,7 +513,7 @@ private:
   void RegisterFrameRenderedCallback()
   {
     mPendingFrameId = ++mFrameIdSeq;
-    mApp.GetWindow().AddFrameRenderedCallback(MakeCallback(this, &MemProbeApp::OnFrameRendered), mPendingFrameId);
+    mApp.GetWindow().AddFrameRenderedCallback(Callback<void(int32_t)>::New(this, &MemProbeApp::OnFrameRendered), mPendingFrameId);
   }
 
   // Frame-rendered callback (DevelWindow): fires when the graphics driver

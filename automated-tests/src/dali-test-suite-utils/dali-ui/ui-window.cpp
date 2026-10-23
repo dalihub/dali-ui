@@ -449,9 +449,13 @@ void Window::SetMaximumSize(WindowSize size)
   GetImplementation(*this).SetMaximumSize(size);
 }
 
-void Window::AddFramePresentedCallback(CallbackBase* callback, int32_t frameId)
+void Window::AddFramePresentedCallback(Callback<void(int32_t)> callback, int32_t frameId)
 {
-  GetImplementation(*this).AddFramePresentedCallback(callback, frameId);
+  // The real window ignores an empty callback, so the stub does too.
+  if(callback)
+  {
+    GetImplementation(*this).AddFramePresentedCallback(callback.Release(), frameId);
+  }
 }
 
 } // namespace Dali
