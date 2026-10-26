@@ -49,6 +49,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <limits>
+#include <typeinfo>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -93,12 +94,17 @@
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/grid-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
@@ -377,6 +383,7 @@ void ArrangeStandaloneChild(ViewImpl& owner, ViewImpl& childImpl, float parentFu
   // differ: a MATCH_PARENT axis, or a WRAP_CONTENT axis of a child in no window.
   const StandaloneExtent available  = ResolveStandaloneAvailableExtent(inputs, parentFullWidth, parentFullHeight);
   const StandaloneExtent constraint = DeriveStandaloneMeasureConstraint(inputs, available);
+  const MeasureModes     modes      = DeriveStandaloneMeasureModes(inputs);
 
   // ONE unconditional Measure(), and the slot is derived from ITS result. It is also
   // the correction for a slot that a Measure() this parent did not issue left behind
@@ -405,7 +412,7 @@ void ArrangeStandaloneChild(ViewImpl& owner, ViewImpl& childImpl, float parentFu
   MeasuredSize measured;
   {
     LayoutDependency::ArrangeOwnedMeasureScope ownerScope(&owner);
-    measured = childImpl.Measure(constraint.width, constraint.height);
+    measured = ViewDataImpl::Get(childImpl).Measure(constraint.width, constraint.height, modes.width, modes.height, MeasureModeCheck::MATCHES_DERIVATION);
   }
 
   // THE shared slot derivation, the same call LayoutController::ProcessLayoutRoot
@@ -1201,6 +1208,10 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   // mArrangeCacheValid starts false.
   mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
   mLayoutTransitionMode(LayoutTransitionMode::AUTO),
+  // AT_MOST is the zero value and the meaning every constraint had before modes existed.
+  // Never consulted as a KEY before the first publish (mMeasureCacheValid starts false).
+  mMeasureModeWidth(MeasureMode::AT_MOST),
+  mMeasureModeHeight(MeasureMode::AT_MOST),
   mKeyEventDispatchInProgress(false),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT))
 {
@@ -1278,8 +1289,12 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
   float pw = static_cast<float>(mPadding.start + mPadding.end);
   float ph = static_cast<float>(mPadding.top + mPadding.bottom);
 
-  float effectiveWidth  = (mRequestedWidth >= 0) ? mRequestedWidth : natW;
-  float effectiveHeight = (mRequestedHeight >= 0) ? mRequestedHeight : natH;
+  // An explicit size is laid out clamped by this view's own minimum/maximum (Measure() clamps
+  // the report, ArrangeImpl the slot), so the content is measured inside that clamped size --
+  // the size ArrangeDefault lays the children out in when the parent places this view at its
+  // measured size. The same expression as the provisional extent handed to STANDALONE children.
+  float effectiveWidth  = (mRequestedWidth >= 0) ? std::min(std::max(mRequestedWidth, GetMinimumWidth()), GetMaximumWidth()) : natW;
+  float effectiveHeight = (mRequestedHeight >= 0) ? std::min(std::max(mRequestedHeight, GetMinimumHeight()), GetMaximumHeight()) : natH;
 
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
@@ -1312,9 +1327,75 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
 
   if(hasContributingChild)
   {
-    float                 maxRight  = 0.0f;
-    float                 maxBottom = 0.0f;
+    // Measure modes. The default container is mode-aware only as exactly a plain ViewImpl
+    // with no layout callback; a ViewImpl subclass reaching this function through
+    // ViewImpl::OnMeasure (or a view with an arrange callback) passes its children the
+    // custom-parent modes (DeriveChildModesAsCustomParent) in one step, as before. Evaluated
+    // here only: the leaf branch below never measures a child, so a leaf pays no lookup.
+    //
+    // On an axis whose extent is DETERMINED (explicit, MATCH_PARENT, or measured EXACTLY), a
+    // MATCH_PARENT child is measured EXACTLY at the content extent in one step -- today's
+    // number. On an UNDETERMINED axis (WRAP_CONTENT measured AT_MOST) the extent is the aggregate
+    // of the children, so a MATCH_PARENT child is first measured as before (a probe: it
+    // reports what it always reported, so the aggregate is unchanged), and once the extent is
+    // resolved it is re-measured EXACTLY at the slot ArrangeDefault will give it. A step-2
+    // result feeds only the OTHER axis' aggregate.
+    const MeasureModeParent parentKind       = GetMeasureModeParent();
+    const bool              modeAware        = (parentKind == MeasureModeParent::DEFAULT);
+    const bool              legacyDerivation = (parentKind == MeasureModeParent::NONE);
+    const bool              widthDetermined  = !modeAware || IsWidthDetermined();
+    const bool              heightDetermined = !modeAware || IsHeightDetermined();
+
+    // Step 2 runs only for a MATCH_PARENT child on an axis this container cannot resolve before
+    // its children are measured. Without one, the loop below is the one-step loop and records
+    // nothing.
+    bool needStepTwo = false;
+    if(modeAware && (!widthDetermined || !heightDetermined))
+    {
+      for(Dali::Vector<View>::ConstIterator it = mChildren.Begin(), end = mChildren.End(); it != end; ++it)
+      {
+        const ViewImpl& childImpl = GetImpl(*it);
+        if(IntegrationView::IsLayoutModeStandalone(childImpl))
+        {
+          continue;
+        }
+        if((!widthDetermined && childImpl.GetRequestedWidth() == MATCH_PARENT) ||
+           (!heightDetermined && childImpl.GetRequestedHeight() == MATCH_PARENT))
+        {
+          needStepTwo = true;
+          break;
+        }
+      }
+    }
+    const bool twoStep = modeAware && needStepTwo;
+
+    // Per contributing child, recorded only on the two-step branch: what step 1 passed, and
+    // the bottom contribution step 2 may replace.
+    struct StepOneRecord
+    {
+      ViewImpl*   impl;
+      float       childY;
+      float       natMarginH;
+      float       visMarginW; ///< ArrangeDefault's expression, so step 2 hands out its slot
+      float       visMarginH;
+      float       widthConstraint;
+      float       heightConstraint;
+      MeasureMode modeW;
+      MeasureMode modeH;
+      bool        matchW;
+      bool        matchH;
+      float       bottom;
+    };
+    std::vector<StepOneRecord> records;
+
+    float                 maxRight    = 0.0f;
+    float                 maxRightOwn = 0.0f; ///< maxRight over the children that are not MATCH_PARENT on the width
+    float                 maxBottom   = 0.0f;
     std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+    if(twoStep)
+    {
+      records.reserve(childSnapshot.size());
+    }
     for(auto& childView : childSnapshot)
     {
       ViewImpl& childImpl = GetImpl(childView);
@@ -1323,13 +1404,36 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
         continue;
       }
 
-      float        childScale            = childImpl.GetEffectiveScale();
-      Insets       margin                = childImpl.GetMargin();
-      float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
-      float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
-      float        childWidthConstraint  = std::max(0.0f, contentWidth * s - marginW);
-      float        childHeightConstraint = std::max(0.0f, contentHeight * s - marginH);
-      MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+      float  childScale            = childImpl.GetEffectiveScale();
+      Insets margin                = childImpl.GetMargin();
+      float  marginW               = static_cast<float>(margin.start + margin.end) * childScale;
+      float  marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
+      float  childWidthConstraint  = std::max(0.0f, contentWidth * s - marginW);
+      float  childHeightConstraint = std::max(0.0f, contentHeight * s - marginH);
+
+      MeasureMode      modeW  = MeasureMode::AT_MOST;
+      MeasureMode      modeH  = MeasureMode::AT_MOST;
+      MeasureModeCheck check  = MeasureModeCheck::NONE;
+      bool             matchW = false;
+      bool             matchH = false;
+      if(modeAware)
+      {
+        matchW = (childImpl.GetRequestedWidth() == MATCH_PARENT);
+        matchH = (childImpl.GetRequestedHeight() == MATCH_PARENT);
+        modeW  = (matchW && widthDetermined) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+        modeH  = (matchH && heightDetermined) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+        // A MATCH_PARENT axis this container cannot resolve yet is a probe; its exact call
+        // follows in step 2 (or in ArrangeDefault), which is the one the derivation describes.
+        check = ((matchW && !widthDetermined) || (matchH && !heightDetermined)) ? MeasureModeCheck::NONE : MeasureModeCheck::MATCHES_DERIVATION;
+      }
+      else if(legacyDerivation)
+      {
+        const MeasureModes legacy = DeriveChildModesAsCustomParent(childImpl.GetRequestedWidth(), childImpl.GetRequestedHeight());
+        modeW                     = legacy.width;
+        modeH                     = legacy.height;
+        check                     = MeasureModeCheck::MATCHES_DERIVATION;
+      }
+      MeasuredSize childSize = ViewDataImpl::Get(childImpl).Measure(childWidthConstraint, childHeightConstraint, modeW, modeH, check);
 
       float childNatW  = (s > 0.0f) ? childSize.width / s : childSize.width;
       float childNatH  = (s > 0.0f) ? childSize.height / s : childSize.height;
@@ -1339,6 +1443,17 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
       float natMarginH = (s > 0.0f) ? marginH / s : marginH;
       maxRight         = std::max(maxRight, childX + natMarginW + childNatW);
       maxBottom        = std::max(maxBottom, childY + natMarginH + childNatH);
+      if(!matchW)
+      {
+        maxRightOwn = std::max(maxRightOwn, childX + natMarginW + childNatW);
+      }
+
+      if(twoStep)
+      {
+        const float visMarginW = static_cast<float>(margin.start) * childScale + static_cast<float>(margin.end) * childScale;
+        const float visMarginH = static_cast<float>(margin.top) * childScale + static_cast<float>(margin.bottom) * childScale;
+        records.push_back(StepOneRecord{&childImpl, childY, natMarginH, visMarginW, visMarginH, childWidthConstraint, childHeightConstraint, modeW, modeH, matchW, matchH, childY + natMarginH + childNatH});
+      }
     }
 
     MeasuredSize size;
@@ -1358,6 +1473,65 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
         size.width = std::min(size.width, natW);
       }
     }
+
+    // The width this container reports -- the clamp Measure() applies to the result -- and
+    // therefore the bounds its parent lays it out at; the slots below are ArrangeDefault's
+    // expression with those bounds. Only an undetermined axis needs it.
+    float reportedW = 0.0f;
+    if(twoStep && !widthDetermined)
+    {
+      reportedW = std::min(std::max(size.width * s, GetMinimumWidth() * s), GetMaximumWidth() * s);
+    }
+    const float visPadLeft   = static_cast<float>(mPadding.start) * s;
+    const float visPadRight  = static_cast<float>(mPadding.end) * s;
+    const float visPadTop    = static_cast<float>(mPadding.top) * s;
+    const float visPadBottom = static_cast<float>(mPadding.bottom) * s;
+
+    // Whether this view has a width of its own: what the children that are not MATCH_PARENT on the
+    // width (their positions and margins included), the padding and the own minimum/maximum give it.
+    // Without one, every MATCH_PARENT-width child keeps its step-1 probe, whatever its margins:
+    // the size its MATCH_PARENT siblings' margins or reports would give is not a slot.
+    bool hasOwnWidth = false;
+    if(twoStep && !widthDetermined)
+    {
+      hasOwnWidth = SnapEmptySlot(std::min(std::max((maxRightOwn + pw) * s, GetMinimumWidth() * s), GetMaximumWidth() * s) - visPadLeft - visPadRight) > 0.0f;
+    }
+
+    // Step 2a: the width is resolved; re-measure the MATCH_PARENT-width children EXACTLY at
+    // their slot (a MATCH_PARENT x MATCH_PARENT child on an undetermined height waits for 2b, so it
+    // is re-measured once). Their new heights replace their bottom contributions; the width
+    // aggregate above is final. An empty slot (SnapEmptySlot) means nothing gives this view a width
+    // of its own: the child is not measured exactly at it, its step-1 probe (its at-most report)
+    // stands.
+    if(twoStep && !widthDetermined)
+    {
+      bool bottomChanged = false;
+      for(auto& record : records)
+      {
+        if(!record.matchW || (record.matchH && !heightDetermined))
+        {
+          continue;
+        }
+        const float slotW = hasOwnWidth ? SnapEmptySlot(reportedW - visPadLeft - visPadRight - record.visMarginW) : 0.0f;
+        if(slotW <= 0.0f)
+        {
+          continue;
+        }
+        MeasuredSize exact     = ViewDataImpl::Get(*record.impl).Measure(slotW, record.heightConstraint, MeasureMode::EXACTLY, record.modeH, MeasureModeCheck::MATCHES_DERIVATION);
+        const float  exactNatH = (s > 0.0f) ? exact.height / s : exact.height;
+        record.bottom          = record.childY + record.natMarginH + exactNatH;
+        bottomChanged          = true;
+      }
+      if(bottomChanged)
+      {
+        maxBottom = 0.0f;
+        for(const auto& record : records)
+        {
+          maxBottom = std::max(maxBottom, record.bottom);
+        }
+      }
+    }
+
     if(mRequestedHeight >= 0)
     {
       size.height = mRequestedHeight;
@@ -1372,6 +1546,57 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
       if(natH >= 0.0f)
       {
         size.height = std::min(size.height, natH);
+      }
+    }
+
+    // Step 2b: the height is resolved; re-measure the MATCH_PARENT-height children EXACTLY at
+    // their slot. A MATCH_PARENT width is exact here too (the content extent when determined, the
+    // step-2a slot otherwise); any other width keeps its step-1 number and mode. Widths are
+    // not re-aggregated. An empty slot is never measured exactly: at an empty height slot the
+    // step-1 probe stands, and an empty width slot keeps the probe's width number and mode.
+    if(twoStep && !heightDetermined)
+    {
+      const float reportedH = std::min(std::max(size.height * s, GetMinimumHeight() * s), GetMaximumHeight() * s);
+      // The height of its own, as for the width: the bottoms of the children that are not
+      // MATCH_PARENT on the height (step 2a's included), the padding and the own minimum/maximum.
+      float maxBottomOwn = 0.0f;
+      for(const auto& record : records)
+      {
+        if(!record.matchH)
+        {
+          maxBottomOwn = std::max(maxBottomOwn, record.bottom);
+        }
+      }
+      const bool hasOwnHeight = SnapEmptySlot(std::min(std::max((maxBottomOwn + ph) * s, GetMinimumHeight() * s), GetMaximumHeight() * s) - visPadTop - visPadBottom) > 0.0f;
+      for(const auto& record : records)
+      {
+        if(!record.matchH)
+        {
+          continue;
+        }
+        const float slotH = hasOwnHeight ? SnapEmptySlot(reportedH - visPadTop - visPadBottom - record.visMarginH) : 0.0f;
+        if(slotH <= 0.0f)
+        {
+          continue;
+        }
+        float            width     = record.widthConstraint;
+        MeasureMode      widthMode = record.matchW ? MeasureMode::EXACTLY : record.modeW;
+        MeasureModeCheck check     = MeasureModeCheck::MATCHES_DERIVATION;
+        if(record.matchW && !widthDetermined)
+        {
+          const float slotW = hasOwnWidth ? SnapEmptySlot(reportedW - visPadLeft - visPadRight - record.visMarginW) : 0.0f;
+          if(slotW > 0.0f)
+          {
+            width = slotW;
+          }
+          else
+          {
+            // The probe's width (AT_MOST at the budget) while the derivation says EXACTLY.
+            widthMode = record.modeW;
+            check     = MeasureModeCheck::NONE;
+          }
+        }
+        ViewDataImpl::Get(*record.impl).Measure(width, slotH, widthMode, MeasureMode::EXACTLY, check);
       }
     }
     return {size.width * s, size.height * s};
@@ -1429,6 +1654,12 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
     float visPadTop    = static_cast<float>(mPadding.top) * s;
     float visPadBottom = static_cast<float>(mPadding.bottom) * s;
 
+    // Mode-aware only as exactly a plain ViewImpl (see MeasureDefault); ImageViewImpl and
+    // every other subclass reaching this through ViewImpl::OnArrange re-measure every
+    // MATCH_PARENT child with the custom-parent modes, never skipped.
+    const MeasureModeParent parentKind = GetMeasureModeParent();
+    const bool              modeAware  = (parentKind == MeasureModeParent::DEFAULT);
+
     std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
     for(auto& childView : childSnapshot)
     {
@@ -1463,8 +1694,28 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
 
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
-        LayoutDependency::ArrangeOwnedMeasureScope ownerScope(&mViewImpl);
-        childImpl.Measure(childW, childH);
+        ViewDataImpl& childData = ViewDataImpl::Get(childImpl);
+        if(modeAware)
+        {
+          // A MATCH_PARENT axis is assigned its slot (EXACTLY); any other axis carries the
+          // child's own measured size back to it. Skipped when the child already holds a
+          // measurement for exactly this slot (the measure pass's step 2 or one-step call).
+          const MeasureMode modeW = (childImpl.GetRequestedWidth() == MATCH_PARENT) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+          const MeasureMode modeH = (childImpl.GetRequestedHeight() == MATCH_PARENT) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+          if(!childData.CanSkipArrangeRemeasure(childW, childH, modeW, modeH))
+          {
+            LayoutDependency::ArrangeOwnedMeasureScope ownerScope(&mViewImpl);
+            childData.Measure(childW, childH, modeW, modeH, MeasureModeCheck::MATCHES_DERIVATION);
+          }
+        }
+        else
+        {
+          const MeasureModes                         legacy = (parentKind == MeasureModeParent::NONE)
+                                                                ? DeriveChildModesAsCustomParent(childImpl.GetRequestedWidth(), childImpl.GetRequestedHeight())
+                                                                : MeasureModes{};
+          LayoutDependency::ArrangeOwnedMeasureScope ownerScope(&mViewImpl);
+          childData.Measure(childW, childH, legacy.width, legacy.height, (parentKind == MeasureModeParent::NONE) ? MeasureModeCheck::MATCHES_DERIVATION : MeasureModeCheck::NONE);
+        }
       }
 
       childImpl.Arrange(LayoutRect(childX, childY, childW, childH));
@@ -4113,14 +4364,29 @@ void ViewDataImpl::SetArrangeCallback(ArrangeCallback callback)
 
 void ViewDataImpl::SetArrangeCallback(ArrangeCallback callback, ArrangePolicy policy)
 {
+  // Recorded before the swap: an ArrangeCallback turns a mode-aware first-party container
+  // into a custom parent (GetMeasureModeParent), and clearing the callbacks turns it back. That changes how it MEASURES its children, so the swap is then a
+  // measure input, not an arrange-only one.
+  const MeasureModeParent modeParentBefore = GetMeasureModeParent();
+
   EnsureLayoutCallbacksObject(*this)->SetArrangeCallback(std::move(callback));
 
   mArrangeCallbackAlways = (policy == ArrangePolicy::ALWAYS);
   RefreshArrangeProducerPolicy();
 
   // Pair the policy change with invalidation so a view that has already
-  // published a cache entry cannot be served from it under the new policy.
-  InvalidateArrange();
+  // published a cache entry cannot be served from it under the new policy. When the swap
+  // also moved this view in or out of the mode-aware producers, its measure goes too
+  // (InvalidateMeasure() supersedes InvalidateArrange(): it clears both cache bits and
+  // raises both dirty bits).
+  if(GetMeasureModeParent() != modeParentBefore)
+  {
+    InvalidateMeasure();
+  }
+  else
+  {
+    InvalidateArrange();
+  }
 }
 
 void ViewDataImpl::SetArrangePolicy(ArrangePolicy policy)
@@ -4702,6 +4968,17 @@ void ViewDataImpl::InvalidateParentArrangeCacheForOutOfBandArrange(bool framewor
 
 MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
 {
+  // The mode-less entry (ViewImpl::Measure, hence every application call, custom producer and
+  // component internal). The derivation reproduces the modes the parent's layout passes this
+  // view in its last call of a pass, so an application call after the pass keys on the same
+  // entry. No first-party layout path comes through here: they all call the mode-carrying
+  // overload with explicit modes.
+  const MeasureModes modes = DeriveMeasureModes();
+  return Measure(visualW, visualH, modes.width, modes.height, MeasureModeCheck::NONE);
+}
+
+MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode modeWidth, MeasureMode modeHeight, MeasureModeCheck check)
+{
   // Same-view re-entrancy is guarded in RELEASE, not just DEBUG: Measure() is
   // reachable from untrusted customization (MeasureCallback / OnMeasure /
   // LayoutManager) and from the public, nestable LayoutController::ProcessLayouts(),
@@ -4765,16 +5042,34 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
     mEffectiveScaleActorSynced = true;
   }
 
-  float natW = (visualW > 0.f) ? visualW / s : visualW;
-  float natH = (visualH > 0.f) ? visualH / s : visualH;
+  // The measure modes are KEY terms like the constraint. Canonicalised first, so an explicit
+  // call and a derived one agree: an explicitly sized axis resolves to its requested size in
+  // every first-party producer whatever the mode, and EXACTLY needs a size the view can be laid
+  // out at (an unbounded budget is demoted to AT_MOST).
+  const MeasureModes modes = NormaliseMeasureModes(visualW, visualH, modeWidth, modeHeight);
 
   // Ensure constraints respect this view's min/max bounds so that
   // OnMeasure (and therefore child measurements) see the effective
   // available space. Without this, children would be measured against
   // the original (smaller) constraint, then ApplyConstraints would
   // enlarge the result — leaving children incorrectly sized.
-  float effNatW = std::min(std::max(natW, GetMinimumWidth()), GetMaximumWidth());
-  float effNatH = std::min(std::max(natH, GetMinimumHeight()), GetMaximumHeight());
+  // Every mode, EXACTLY included: the view is laid out at its slot clamped by the same
+  // bounds (ArrangeImpl), so its content is measured for that clamped size.
+  // NormaliseMeasureConstraint is THE expression; CanSkipArrangeRemeasure keys on the very
+  // same function.
+  const float effNatW = NormaliseMeasureConstraint(visualW, s, true);
+  const float effNatH = NormaliseMeasureConstraint(visualH, s, false);
+
+#if defined(DEBUG_ENABLED)
+  if(check == MeasureModeCheck::MATCHES_DERIVATION)
+  {
+    // The derivation is normalised with the same numbers, so an EXACTLY that the numbers
+    // cannot carry (an unbounded budget) falls back identically on both sides.
+    const MeasureModes derived = DeriveMeasureModes();
+    DALI_ASSERT_DEBUG(NormaliseMeasureModes(visualW, visualH, derived.width, derived.height) == modes &&
+                      "A first-party parent passed measure modes its derivation does not produce");
+  }
+#endif
 
   // The effective scale is a KEY term here, where the ARRANGE cache instead relies on
   // invalidation plus a DEBUG assert (Corollary C). The asymmetry is deliberate:
@@ -4806,7 +5101,14 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   // keeps >= 0, and the NaN the constructor plants is unreachable behind
   // mMeasureCacheValid. The old `>= 0.0f` pre-test could therefore never reject anything
   // FloatEqual would have accepted.
+  //
+  // The two mode terms are exact compares of 2-bit copies (no arithmetic), right after the
+  // three bit tests. Every mode keys on the min/max-clamped constraint
+  // (NormaliseMeasureConstraint): two exact sizes that clamp to the same value share the entry,
+  // which is sound because the producer ran at that value and the report is the same clamp of
+  // either.
   if(mMeasureCacheValid && !mMeasureDirty && !mMeasurePassPoisoned &&
+     mMeasureModeWidth == modes.width && mMeasureModeHeight == modes.height &&
      mMeasureKeyOrPropagation.scaleKey == s &&
      FloatEqual(mLastMeasureConstraint.width, effNatW) &&
      FloatEqual(mLastMeasureConstraint.height, effNatH))
@@ -4819,6 +5121,13 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   // mMeasureCacheValid still false (no publish reached) makes the next Measure
   // miss and recompute.
   MeasurePassGuard pass(*this);
+
+  // The modes of THIS call, written before the ancestor walk and the producer: a first-party
+  // producer reads them through GetMeasureModes() (whether its own extent is determined), and they
+  // double as the KEY the publish below makes valid. A same-view re-entrant call returned above
+  // and never reaches this write, so it cannot disturb the modes the outer producer is reading.
+  mMeasureModeWidth  = modes.width;
+  mMeasureModeHeight = modes.height;
 
   // This pass will rewrite the measured slot that every ancestor arranges from,
   // so any ancestor cache entry that was produced against the previous slot has
@@ -4846,6 +5155,24 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
     visual = mViewImpl.OnMeasure(effVisW, effVisH);
   }
   visual = ApplyConstraints(visual);
+
+  // An EXACTLY axis reports the size its parent assigned, clamped by this view's own minimum/maximum
+  // with ApplyConstraints (minimum first, then maximum: max wins) -- the very clamp ArrangeImpl applies
+  // to the slot (ClampToOwnSizeBounds), so the measured size is the size the view is laid out at,
+  // whatever the producer returned. AT_MOST / UNSPECIFIED keep the producer's report (MATCH_PARENT:
+  // the minimum).
+  if(modes.width == MeasureMode::EXACTLY || modes.height == MeasureMode::EXACTLY)
+  {
+    const MeasuredSize assigned = ApplyConstraints(MeasuredSize(visualW, visualH));
+    if(modes.width == MeasureMode::EXACTLY)
+    {
+      visual.width = assigned.width;
+    }
+    if(modes.height == MeasureMode::EXACTLY)
+    {
+      visual.height = assigned.height;
+    }
+  }
 
   // The RESULT is published unconditionally: mMeasuredSize is "the last
   // completed measurement" and is read outside the cache path (GetMeasuredSize(),
@@ -5363,6 +5690,12 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // intentionally discarded -- called for its side effect of establishing the bit.
   (void)mViewImpl.GetEffectiveScale();
 
+  // This view is never laid out outside its own minimum/maximum: the size of the slot is clamped
+  // here (ClampToOwnSizeBounds, max wins) and its start edge -- the logical x/y -- is kept. The
+  // provisional apply, the arrange implementation and the invalid-return fallback all see the
+  // clamped bounds; the cache KEY and the hit test above keep the raw input.
+  const LayoutRect ownBounds = ClampToOwnSizeBounds(bounds);
+
   // ApplySelfBoundsIfChanged is an UNCONDITIONAL per-pass reconciliation of the
   // actor's geometry against the arranged bounds, not a one-time apply: it
   // silently repairs any external clobber of POSITION/SIZE -- including the
@@ -5375,29 +5708,32 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // UtcDaliViewArrangeRestoresExternallyMovedSelfGeometry{,Rtl}P pin this, and
   // UtcDaliViewArrangeCacheHitStillReconcilesSelfGeometryP pins it for the hit.
   //
-  // Phase 1: apply the input bounds as provisional self geometry, so a
-  // customization hook that reads back self event-side geometry observes the
-  // input (as before this refactor), not stale prior-pass geometry.
-  ApplySelfBoundsIfChanged(bounds);
+  // Phase 1: apply the input bounds, clamped by this view's own minimum/maximum
+  // (ClampToOwnSizeBounds), as provisional self geometry, so a customization hook
+  // that reads back self event-side geometry observes the input (as before this
+  // refactor), not stale prior-pass geometry.
+  ApplySelfBoundsIfChanged(ownBounds);
 
-  LayoutRect returnedBounds = bounds;
+  LayoutRect returnedBounds = ownBounds;
   if(auto* callback = GetArrangeCallback())
   {
-    returnedBounds = DispatchArrangeWithCallback(callback, bounds);
+    returnedBounds = DispatchArrangeWithCallback(callback, ownBounds);
   }
   else if(auto* manager = mViewImpl.GetLayoutManager())
   {
-    DispatchArrangeWithLayoutManager(manager, bounds);
-    returnedBounds = bounds; // Managers arrange children only; owner final == input.
+    DispatchArrangeWithLayoutManager(manager, ownBounds);
+    returnedBounds = ownBounds; // Managers arrange children only; owner final == input.
   }
   else
   {
-    returnedBounds = mViewImpl.OnArrange(bounds);
+    returnedBounds = mViewImpl.OnArrange(ownBounds);
   }
 
   // Phase 2: adopt the validated returned rect (all four axes) as the
-  // authoritative final self geometry. Invalid returns fall back to input.
-  const LayoutRect finalBounds = ResolveReturnedBounds(bounds, returnedBounds);
+  // authoritative final self geometry -- even outside the minimum/maximum, an
+  // explicit choice of the arrange implementation. Invalid returns fall back to
+  // the clamped input.
+  const LayoutRect finalBounds = ResolveReturnedBounds(ownBounds, returnedBounds);
   ApplySelfBoundsIfChanged(finalBounds);
 
   // The RESULT is published unconditionally: mArrangedBounds is "the last
@@ -5513,7 +5849,8 @@ void ViewDataImpl::MeasureStandaloneChildren(float parentExtentWidth, float pare
     const StandaloneSlotInputs inputs     = SnapshotStandaloneSlotInputs(childImpl);
     const StandaloneExtent     available  = ResolveStandaloneAvailableExtent(inputs, parentExtentWidth, parentExtentHeight);
     const StandaloneExtent     constraint = DeriveStandaloneMeasureConstraint(inputs, available);
-    childImpl.Measure(constraint.width, constraint.height);
+    const MeasureModes         modes      = DeriveStandaloneMeasureModes(inputs);
+    ViewDataImpl::Get(childImpl).Measure(constraint.width, constraint.height, modes.width, modes.height, MeasureModeCheck::MATCHES_DERIVATION);
 
     // This measurement IS the parent's consumption of the child's slot, so clear the
     // bit: HasUnconsumedStandaloneChild() must keep reporting only slots written by a
@@ -5911,6 +6248,19 @@ MeasuredSize ViewDataImpl::ApplyConstraints(const MeasuredSize& size) const
   return constrained;
 }
 
+LayoutRect ViewDataImpl::ClampToOwnSizeBounds(const LayoutRect& bounds) const
+{
+  // No minimum/maximum was ever set (the storage is lazy): one pointer test.
+  if(!mSizeConstraints)
+  {
+    return bounds;
+  }
+  // The same clamp, in the same order, Measure() reports an EXACTLY axis with; the bounds are
+  // read straight from mSizeConstraints through the getters, never through the property system.
+  const MeasuredSize size = ApplyConstraints(MeasuredSize(bounds.width, bounds.height));
+  return LayoutRect(bounds.x, bounds.y, size.width, size.height);
+}
+
 Ui::View ViewDataImpl::GetParentView() const
 {
   Actor parent = mViewImpl.Self().GetParent();
@@ -5919,6 +6269,508 @@ Ui::View ViewDataImpl::GetParentView() const
     return Ui::View::DownCast(parent);
   }
   return Ui::View();
+}
+
+bool ViewDataImpl::HasMeasureCallback() const
+{
+  auto* object = GetLayoutCallbacksObject(const_cast<ViewDataImpl&>(*this));
+  return object && object->GetMeasureCallback();
+}
+
+float ViewDataImpl::NormaliseMeasureConstraint(float visual, float scale, bool widthAxis) const
+{
+  const float natural = (visual > 0.f) ? visual / scale : visual;
+  return widthAxis ? std::min(std::max(natural, GetMinimumWidth()), GetMaximumWidth())
+                   : std::min(std::max(natural, GetMinimumHeight()), GetMaximumHeight());
+}
+
+MeasureModes ViewDataImpl::NormaliseMeasureModes(float visualW, float visualH, MeasureMode modeWidth, MeasureMode modeHeight) const
+{
+  // An explicitly sized axis resolves to its requested size in every first-party producer
+  // whatever the mode, so its mode is canonicalised: an explicit and a derived call then
+  // agree on the KEY. EXACTLY needs a size the view can be laid out at: an exact constraint at
+  // or above MAX_EXACT_MEASURE_SIZE is an unbounded budget, not a size, and is demoted to AT_MOST
+  // -- what every such call meant before modes existed -- so no view ever reports it. The
+  // comparison also rejects a negative constraint, NaN and infinity.
+  MeasureModes modes{modeWidth, modeHeight};
+  if(mRequestedWidth >= 0.0f || (modes.width == MeasureMode::EXACTLY && !(visualW >= 0.0f && visualW < MAX_EXACT_MEASURE_SIZE)))
+  {
+    modes.width = MeasureMode::AT_MOST;
+  }
+  if(mRequestedHeight >= 0.0f || (modes.height == MeasureMode::EXACTLY && !(visualH >= 0.0f && visualH < MAX_EXACT_MEASURE_SIZE)))
+  {
+    modes.height = MeasureMode::AT_MOST;
+  }
+  return modes;
+}
+
+MeasureModes ViewDataImpl::GetMeasureModes() const
+{
+  return MeasureModes{mMeasureModeWidth, mMeasureModeHeight};
+}
+
+bool ViewDataImpl::IsWidthDetermined() const
+{
+  // Explicit -> determined. MATCH_PARENT -> determined: EXACTLY gives the size, and under AT_MOST the
+  // follower contract measures the content at the incoming constraint, exactly as before.
+  // WRAP_CONTENT -> determined only when the parent decided the size (EXACTLY).
+  return !(mRequestedWidth < 0.0f && mRequestedWidth != MATCH_PARENT && mMeasureModeWidth != MeasureMode::EXACTLY);
+}
+
+bool ViewDataImpl::IsHeightDetermined() const
+{
+  return !(mRequestedHeight < 0.0f && mRequestedHeight != MATCH_PARENT && mMeasureModeHeight != MeasureMode::EXACTLY);
+}
+
+MeasureModeParent ViewDataImpl::GetMeasureModeParent() const
+{
+  // The dispatch order makes this sound: Measure runs MeasureCallback > LayoutManager >
+  // OnMeasure and Arrange runs ArrangeCallback > LayoutManager > OnArrange. Either callback
+  // therefore replaces a first-party producer on at least one axis, and the callback, not the
+  // first-party code, then decides how the children are measured or placed.
+  return HasLayoutCallback() ? MeasureModeParent::NONE : ClassifyProducerAsParent();
+}
+
+MeasureModeParent ViewDataImpl::ClassifyProducerAsParent() const
+{
+  if(LayoutManager* manager = GetLayoutManager())
+  {
+    // EXACT type: a subclass (MarkdownStackLayoutManager, an application's own) may override
+    // Measure/Arrange, so it is a custom parent.
+    const std::type_info& type = typeid(*manager);
+    if(type == typeid(StackLayoutManager))
+    {
+      return MeasureModeParent::STACK;
+    }
+    if(type == typeid(GridLayoutManager))
+    {
+      return MeasureModeParent::GRID;
+    }
+    if(type == typeid(FlexLayoutManager))
+    {
+      // A wrapping flex re-breaks its lines from the measured sizes in Arrange, so only the
+      // single-line flex is mode-aware; a wrapping one keeps every child AT_MOST (an exact
+      // MATCH_PARENT report would inflate every line it is in).
+      return (static_cast<FlexLayoutManager*>(manager)->GetWrap() == FlexWrap::NO_WRAP) ? MeasureModeParent::FLEX : MeasureModeParent::FLEX_WRAP;
+    }
+    if(type == typeid(AbsoluteLayoutManager))
+    {
+      return MeasureModeParent::ABSOLUTE;
+    }
+    if(type == typeid(ScrollViewLayoutManager))
+    {
+      return MeasureModeParent::SCROLL;
+    }
+    return MeasureModeParent::NONE;
+  }
+  return (typeid(mViewImpl) == typeid(ViewImpl)) ? MeasureModeParent::DEFAULT : MeasureModeParent::NONE;
+}
+
+namespace
+{
+enum class GridTrackKind
+{
+  ABSOLUTE, ///< Every spanned track is ABSOLUTE: the cell is determined before any child is measured
+  STAR,     ///< No spanned track is AUTO-like and at least one is STAR
+  AUTO      ///< At least one spanned track is AUTO-like (sized from the children)
+};
+
+// The classification GridLayoutManager uses (file-local copy, same rules): an axis with no
+// definitions is one implicit AUTO-like track.
+GridTrackKind ClassifyGridSpan(const Dali::Vector<GridLength>& definitions, uint32_t start, uint32_t span)
+{
+  bool allAbsolute = true;
+  bool anyAutoLike = false;
+  bool anyStar     = false;
+  for(uint32_t i = start; i < start + span; ++i)
+  {
+    const bool defined = i < definitions.Size();
+    if(definitions.Size() == 0u || (defined && definitions[i].GetType() == GridLengthType::AUTO))
+    {
+      anyAutoLike = true;
+    }
+    if(!defined || definitions[i].GetType() != GridLengthType::ABSOLUTE)
+    {
+      allAbsolute = false;
+    }
+    if(defined && definitions[i].GetType() == GridLengthType::STAR)
+    {
+      anyStar = true;
+    }
+  }
+  if(allAbsolute && span > 0u)
+  {
+    return GridTrackKind::ABSOLUTE;
+  }
+  if(!anyAutoLike && anyStar)
+  {
+    return GridTrackKind::STAR;
+  }
+  return GridTrackKind::AUTO;
+}
+} // namespace
+
+MeasureModes ViewDataImpl::DeriveMeasureModes() const
+{
+  // The modes a first-party parent passes this view in its LAST call of a full measure +
+  // arrange pass: what an application call made after the pass must match to share its cache
+  // entry. Intermediate calls that differ (probes before a parent's extent is resolved,
+  // re-measures of stretched containers) are documented exceptions of the DEBUG check.
+  MeasureModes modes;
+  const bool   fixedW = mRequestedWidth >= 0.0f;
+  const bool   fixedH = mRequestedHeight >= 0.0f;
+  if(fixedW && fixedH)
+  {
+    return modes; // canonical: no lookups at all
+  }
+
+  // A STANDALONE view, and a view without a View parent (a layout root, a detached view): only
+  // the caller assigns its size, so a MATCH_PARENT axis is exact at the constraint and every
+  // other axis is AT_MOST -- the rule the framework's own passes over such a view use
+  // (DeriveStandaloneMeasureModes()), so an application's call after a pass keys on the pass's
+  // entry.
+  const auto ownRule = [this]()
+  {
+    return MeasureModes{(mRequestedWidth == MATCH_PARENT) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST,
+                        (mRequestedHeight == MATCH_PARENT) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST};
+  };
+  if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    return ownRule();
+  }
+  Ui::View parent = GetParentView();
+  if(!parent)
+  {
+    return ownRule();
+  }
+
+  const ViewDataImpl& parentData = Get(GetImpl(parent));
+  const bool          matchW     = (mRequestedWidth == MATCH_PARENT);
+  const bool          matchH     = (mRequestedHeight == MATCH_PARENT);
+  const bool          wrapW      = (mRequestedWidth == WRAP_CONTENT);
+  const bool          wrapH      = (mRequestedHeight == WRAP_CONTENT);
+
+  switch(parentData.GetMeasureModeParent())
+  {
+    case MeasureModeParent::NONE:
+    {
+      return parentData.DeriveChildModesAsCustomParent(mRequestedWidth, mRequestedHeight);
+    }
+    case MeasureModeParent::FLEX_WRAP:
+    {
+      return modes; // AT_MOST on every axis: the lines are built from the measured sizes
+    }
+    case MeasureModeParent::DEFAULT:
+    {
+      modes.width  = matchW ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      modes.height = matchH ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      break;
+    }
+    case MeasureModeParent::SCROLL:
+    {
+      modes.width  = matchW ? MeasureMode::EXACTLY : MeasureMode::UNSPECIFIED;
+      modes.height = matchH ? MeasureMode::EXACTLY : MeasureMode::UNSPECIFIED;
+      break;
+    }
+    case MeasureModeParent::STACK:
+    {
+      const auto* manager   = static_cast<const StackLayoutManager*>(parentData.GetLayoutManager());
+      const bool  vertical  = (manager->GetOrientation() == StackOrientation::VERTICAL);
+      const auto* params    = StackLayoutParamsImpl::Get(mViewImpl);
+      const float weight    = params ? params->GetWeight() : 0.0f;
+      const auto  alignment = params ? params->GetAlignment() : LayoutAlignment::START;
+
+      // Cross axis: MATCH_PARENT is assigned; a FILL WRAP_CONTENT child is stretched to the
+      // cross extent once that extent is determined. Main axis: a weight share is assigned; a
+      // MATCH_PARENT main axis without weight stays AT_MOST, because the stack sums the main
+      // extents it measured.
+      const bool        crossDetermined = vertical ? parentData.IsWidthDetermined() : parentData.IsHeightDetermined();
+      const bool        matchCross      = vertical ? matchW : matchH;
+      const bool        wrapCross       = vertical ? wrapW : wrapH;
+      const MeasureMode crossMode       = (matchCross || (wrapCross && alignment == LayoutAlignment::FILL && crossDetermined)) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      const MeasureMode mainMode        = (weight > 0.0f) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      modes.width                       = vertical ? crossMode : mainMode;
+      modes.height                      = vertical ? mainMode : crossMode;
+      break;
+    }
+    case MeasureModeParent::FLEX:
+    {
+      const auto* manager    = static_cast<const FlexLayoutManager*>(parentData.GetLayoutManager());
+      const bool  horizontal = manager->IsMainAxisHorizontal();
+      const auto* params     = FlexLayoutParamsImpl::Get(mViewImpl);
+      const float grow       = params ? params->GetFlexGrow() : 0.0f;
+      FlexAlign   align      = params ? params->GetAlignSelf() : FlexAlign::AUTO;
+      if(align == FlexAlign::AUTO)
+      {
+        align = manager->GetAlignItems();
+      }
+
+      // Main axis: only a MATCH_PARENT child that takes part in grow is assigned its share; the
+      // line sums the other main extents. Cross axis: MATCH_PARENT is assigned; a STRETCH
+      // WRAP_CONTENT child is stretched once the cross extent is determined.
+      const bool        crossDetermined = horizontal ? parentData.IsHeightDetermined() : parentData.IsWidthDetermined();
+      const bool        matchMain       = horizontal ? matchW : matchH;
+      const bool        matchCross      = horizontal ? matchH : matchW;
+      const bool        wrapCross       = horizontal ? wrapH : wrapW;
+      const MeasureMode mainMode        = (matchMain && grow > 0.0f) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      const MeasureMode crossMode       = (matchCross || (wrapCross && align == FlexAlign::STRETCH && crossDetermined)) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      modes.width                       = horizontal ? mainMode : crossMode;
+      modes.height                      = horizontal ? crossMode : mainMode;
+      break;
+    }
+    case MeasureModeParent::GRID:
+    {
+      const auto*                     manager  = static_cast<const GridLayoutManager*>(parentData.GetLayoutManager());
+      const Dali::Vector<GridLength>& rowDefs  = manager->GetRowDefinitions();
+      const Dali::Vector<GridLength>& colDefs  = manager->GetColumnDefinitions();
+      const uint32_t                  rowCount = std::max(1u, static_cast<uint32_t>(rowDefs.Size()));
+      const uint32_t                  colCount = std::max(1u, static_cast<uint32_t>(colDefs.Size()));
+      const auto*                     params   = GridLayoutParamsImpl::Get(mViewImpl);
+      // Clamped exactly as GridLayoutManager clamps them.
+      const uint32_t row     = std::min(params ? params->GetRow() : 0u, rowCount - 1);
+      const uint32_t col     = std::min(params ? params->GetColumn() : 0u, colCount - 1);
+      const uint32_t rowSpan = std::min(params ? params->GetRowSpan() : 1u, rowCount - row);
+      const uint32_t colSpan = std::min(params ? params->GetColumnSpan() : 1u, colCount - col);
+      const auto     hAlign  = params ? params->GetHorizontalAlignment() : LayoutAlignment::FILL;
+      const auto     vAlign  = params ? params->GetVerticalAlignment() : LayoutAlignment::FILL;
+
+      // MATCH_PARENT is assigned its cell. A FILL WRAP_CONTENT child is stretched EXACTLY only
+      // when its cell is determined before the children are measured: ABSOLUTE tracks, or STAR
+      // columns of a grid whose width is determined (rows: ABSOLUTE tracks only).
+      const GridTrackKind colKind = ClassifyGridSpan(colDefs, col, colSpan);
+      const GridTrackKind rowKind = ClassifyGridSpan(rowDefs, row, rowSpan);
+      const bool          colCell = (colKind == GridTrackKind::ABSOLUTE) || (colKind == GridTrackKind::STAR && parentData.IsWidthDetermined());
+      const bool          rowCell = (rowKind == GridTrackKind::ABSOLUTE);
+      modes.width                 = (matchW || (wrapW && hAlign == LayoutAlignment::FILL && colCell)) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      modes.height                = (matchH || (wrapH && vAlign == LayoutAlignment::FILL && rowCell)) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      break;
+    }
+    case MeasureModeParent::ABSOLUTE:
+    {
+      const auto*      params = AbsoluteLayoutParamsImpl::Get(mViewImpl);
+      const LayoutRect bounds = params ? params->GetBounds() : LayoutRect(0.0f, 0.0f, -1.0f, -1.0f);
+
+      // MATCH_PARENT is assigned the content extent; an explicit or proportional bounds extent
+      // (bounds >= 0) is assigned as is.
+      modes.width  = (matchW || bounds.width >= 0.0f) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      modes.height = (matchH || bounds.height >= 0.0f) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      break;
+    }
+  }
+
+  if(fixedW)
+  {
+    modes.width = MeasureMode::AT_MOST;
+  }
+  if(fixedH)
+  {
+    modes.height = MeasureMode::AT_MOST;
+  }
+  return modes;
+}
+
+MeasureModes ViewDataImpl::DeriveChildModesAsCustomParent(float childRequestedWidth, float childRequestedHeight) const
+{
+  const auto axis = [](float child, float parentRequested, MeasureMode parentMode)
+  {
+    if(child >= 0.0f)
+    {
+      return MeasureMode::AT_MOST; // an explicit child size: canonical
+    }
+    const bool match = (child == MATCH_PARENT);
+    if(parentRequested >= 0.0f)
+    {
+      // An explicitly sized parent: its own modes are the canonical AT_MOST, so its requested
+      // size, not its modes, says that its size is determined.
+      return match ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+    }
+    if(parentMode == MeasureMode::EXACTLY)
+    {
+      return match ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+    }
+    if(parentMode == MeasureMode::UNSPECIFIED)
+    {
+      return MeasureMode::UNSPECIFIED; // a scroll axis is passed on; MATCH_PARENT reports its minimum
+    }
+    return MeasureMode::AT_MOST; // a budget: MATCH_PARENT reports its minimum, as before
+  };
+  return MeasureModes{axis(childRequestedWidth, mRequestedWidth, mMeasureModeWidth),
+                      axis(childRequestedHeight, mRequestedHeight, mMeasureModeHeight)};
+}
+
+MeasuredSize ViewDataImpl::GetMatchFollowerSize() const
+{
+  // The same product the producers return, through the same clamp Measure() applies, hence
+  // bit-identical to what a measurement would report.
+  const float s = mViewImpl.GetEffectiveScale();
+  return ApplyConstraints(MeasuredSize(GetMinimumWidth() * s, GetMinimumHeight() * s));
+}
+
+bool ViewDataImpl::HasSizeDependentContent(bool widthAxis) const
+{
+  // Only a WRAP_CONTENT other axis reports content: an explicit one reports its request, a
+  // MATCH_PARENT one its minimum or its slot, whatever this view's size on widthAxis is.
+  if((widthAxis ? mRequestedHeight : mRequestedWidth) != WRAP_CONTENT)
+  {
+    return false;
+  }
+  // The producer is classified first and the layout callbacks are tested only where the answer
+  // would be true (a callback makes this view a custom parent: false), so the common negative
+  // answer needs no callback lookup.
+  const MeasureModeParent kind = ClassifyProducerAsParent();
+  if(kind == MeasureModeParent::NONE)
+  {
+    return false; // not a first-party container: nothing here measures its children exactly
+  }
+  bool                            onMainAxis = false; // STACK / FLEX / FLEX_WRAP: is widthAxis this container's main axis?
+  FlexAlign                       alignItems = FlexAlign::STRETCH;
+  const Dali::Vector<GridLength>* colDefs    = nullptr;
+  if(kind == MeasureModeParent::STACK)
+  {
+    onMainAxis = ((static_cast<const StackLayoutManager*>(GetLayoutManager())->GetOrientation() == StackOrientation::HORIZONTAL) == widthAxis);
+  }
+  else if(kind == MeasureModeParent::FLEX || kind == MeasureModeParent::FLEX_WRAP)
+  {
+    const auto* manager = static_cast<const FlexLayoutManager*>(GetLayoutManager());
+    onMainAxis          = (manager->IsMainAxisHorizontal() == widthAxis);
+    alignItems          = manager->GetAlignItems();
+  }
+  else if(kind == MeasureModeParent::GRID)
+  {
+    colDefs = &static_cast<const GridLayoutManager*>(GetLayoutManager())->GetColumnDefinitions();
+  }
+  for(Dali::Vector<View>::ConstIterator it = mChildren.Begin(), end = mChildren.End(); it != end; ++it)
+  {
+    const ViewImpl& childImpl = GetImpl(*it);
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    {
+      continue;
+    }
+    if(kind == MeasureModeParent::FLEX_WRAP)
+    {
+      if(onMainAxis)
+      {
+        return !HasLayoutCallback(); // the number of lines follows the main size, whatever the children request
+      }
+      continue; // a wrapped line stretches to its own cross size, not to this view's
+    }
+    const ViewDataImpl& child          = Get(childImpl);
+    const float         requested      = widthAxis ? child.mRequestedWidth : child.mRequestedHeight;
+    const float         otherRequested = widthAxis ? child.mRequestedHeight : child.mRequestedWidth;
+    if(requested >= 0.0f || otherRequested != WRAP_CONTENT)
+    {
+      continue; // an explicit size ignores this view's size; a non-WRAP_CONTENT other axis cannot change with it
+    }
+    if(requested == MATCH_PARENT)
+    {
+      return !HasLayoutCallback();
+    }
+    switch(kind) // WRAP_CONTENT on the axis: sized from this view's size only by its own layout
+    {
+      case MeasureModeParent::STACK:
+      {
+        const auto* params = StackLayoutParamsImpl::Get(child.mViewImpl);
+        if(onMainAxis)
+        {
+          // A weight share can narrow the child, so its other axis can change.
+          if(params && params->GetWeight() > 0.0f)
+          {
+            return !HasLayoutCallback();
+          }
+        }
+        else if(params && params->GetAlignment() == LayoutAlignment::FILL && child.HasSizeDependentContent(widthAxis))
+        {
+          return !HasLayoutCallback();
+        }
+        break;
+      }
+      case MeasureModeParent::FLEX:
+      {
+        const auto* params = FlexLayoutParamsImpl::Get(child.mViewImpl);
+        bool        sized  = false;
+        if(onMainAxis)
+        {
+          sized = params && params->GetFlexGrow() > 0.0f;
+        }
+        else
+        {
+          const FlexAlign align = params ? params->GetAlignSelf() : FlexAlign::AUTO;
+          sized                 = ((align == FlexAlign::AUTO) ? alignItems : align) == FlexAlign::STRETCH;
+        }
+        if(sized && child.HasSizeDependentContent(widthAxis))
+        {
+          return !HasLayoutCallback();
+        }
+        break;
+      }
+      case MeasureModeParent::GRID:
+      {
+        if(widthAxis) // only STAR columns follow the grid's size before the children are measured (rows: no)
+        {
+          const uint32_t colCount = std::max(1u, static_cast<uint32_t>(colDefs->Size()));
+          const auto*    params   = GridLayoutParamsImpl::Get(child.mViewImpl);
+          const uint32_t col      = std::min(params ? params->GetColumn() : 0u, colCount - 1);
+          const uint32_t colSpan  = std::min(params ? params->GetColumnSpan() : 1u, colCount - col);
+          if(ClassifyGridSpan(*colDefs, col, colSpan) == GridTrackKind::STAR)
+          {
+            return !HasLayoutCallback();
+          }
+        }
+        break;
+      }
+      case MeasureModeParent::ABSOLUTE:
+      {
+        const auto*   params = AbsoluteLayoutParamsImpl::Get(child.mViewImpl);
+        const uint8_t flags  = params ? static_cast<uint8_t>(params->GetFlags()) : 0u;
+        const uint8_t flag   = static_cast<uint8_t>(widthAxis ? AbsoluteLayoutFlags::WIDTH_PROPORTIONAL : AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL);
+        if((flags & flag) != 0u)
+        {
+          return !HasLayoutCallback();
+        }
+        break;
+      }
+      default: // DEFAULT, SCROLL: a WRAP_CONTENT child never follows the container's size
+        break;
+    }
+  }
+  return false;
+}
+
+bool ViewDataImpl::CanSkipArrangeRemeasure(float visualW, float visualH, MeasureMode modeWidth, MeasureMode modeHeight) const
+{
+  // The hit predicate's bits, plus the actor-side scale sync a Measure() hit would still
+  // perform: skipping is only sound where a real call would be a pure cache hit.
+  if(!mMeasureCacheValid || mMeasureDirty || mMeasurePassPoisoned || !mEffectiveScaleActorSynced)
+  {
+    return false;
+  }
+  const MeasureModes modes = NormaliseMeasureModes(visualW, visualH, modeWidth, modeHeight);
+  if(mMeasureModeWidth != modes.width || mMeasureModeHeight != modes.height)
+  {
+    return false;
+  }
+  const float s = mViewImpl.GetEffectiveScale();
+  if(mMeasureKeyOrPropagation.scaleKey != s)
+  {
+    return false;
+  }
+
+  // Axes the parent ASSIGNS (MATCH_PARENT or EXACTLY) must match the KEY. The other axes carry
+  // the child's own measured size back to it (the arrange passes the measured size on those
+  // axes), which a WRAP_CONTENT producer resolves to the same value and an explicit size ignores,
+  // so they are not compared. That premise holds for every first-party producer; it is
+  // documented for custom ones.
+  if((mRequestedWidth == MATCH_PARENT || modes.width == MeasureMode::EXACTLY) &&
+     !FloatEqual(mLastMeasureConstraint.width, NormaliseMeasureConstraint(visualW, s, true)))
+  {
+    return false;
+  }
+  if((mRequestedHeight == MATCH_PARENT || modes.height == MeasureMode::EXACTLY) &&
+     !FloatEqual(mLastMeasureConstraint.height, NormaliseMeasureConstraint(visualH, s, false)))
+  {
+    return false;
+  }
+  return true;
 }
 
 void ViewDataImpl::SetBackgroundGradientInternal(const Gradient::Base& gradient)
@@ -5964,8 +6816,11 @@ MeasuredSize ViewDataImpl::DispatchMeasureWithLayoutManager(LayoutManager* manag
 
   float requestedVisW = (requestedWidth >= 0.f) ? requestedWidth * s : requestedWidth;
   float requestedVisH = (requestedHeight >= 0.f) ? requestedHeight * s : requestedHeight;
-  float effectiveVisW = (requestedVisW >= 0.f) ? requestedVisW : widthConstraint;
-  float effectiveVisH = (requestedVisH >= 0.f) ? requestedVisH : heightConstraint;
+  // An explicit size is laid out clamped by this view's own minimum/maximum (Measure() clamps the
+  // report, ArrangeImpl the slot), so the content is measured inside that clamped size -- the size
+  // the manager is arranged at when the parent places this view at its measured size.
+  float effectiveVisW = (requestedVisW >= 0.f) ? std::min(std::max(requestedVisW, GetMinimumWidth() * s), GetMaximumWidth() * s) : widthConstraint;
+  float effectiveVisH = (requestedVisH >= 0.f) ? std::min(std::max(requestedVisH, GetMinimumHeight() * s), GetMaximumHeight() * s) : heightConstraint;
   float contentVisW   = std::max(0.0f, effectiveVisW - visPadW);
   float contentVisH   = std::max(0.0f, effectiveVisH - visPadH);
 

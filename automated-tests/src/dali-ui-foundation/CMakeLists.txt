@@ -24,6 +24,7 @@ SET(TC_SOURCES
         utc-Dali-IndependentFocus.cpp
         utc-Dali-View.cpp
         utc-Dali-ViewLayoutBoundary.cpp
+        utc-Dali-ViewMeasureMode.cpp
         utc-Dali-Label.cpp
         utc-Dali-LabelTextGradient.cpp
         utc-Dali-InputField.cpp

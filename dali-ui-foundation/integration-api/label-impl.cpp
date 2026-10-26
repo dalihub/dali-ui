@@ -2509,10 +2509,13 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   else // WRAP_CONTENT
   {
     const float allowedMaxHeight = (heightConstraint >= 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
-    // When width is MATCH_PARENT, measuredWidth is minWidth (0 by default).
-    // Use widthConstraint for height calculation since that represents the
-    // actual available width the label will receive in Arrange.
-    const float widthForHeight = (requestedWidth == MATCH_PARENT) ? std::max(0.0f, widthConstraint) : measuredWidth;
+    // When width is MATCH_PARENT, measuredWidth is minWidth (0 by default), and when the
+    // parent assigned the width (EXACTLY) the Label is laid out at exactly the width
+    // constraint. Use widthConstraint for height calculation in both cases since that
+    // represents the actual width the label will receive in Arrange.
+    const bool widthAssigned = (requestedWidth == MATCH_PARENT) ||
+                               (Internal::ViewDataImpl::Get(*this).GetMeasureModes().width == Internal::MeasureMode::EXACTLY);
+    const float widthForHeight = widthAssigned ? std::max(0.0f, widthConstraint) : measuredWidth;
     const float height         = (widthForHeight > 0.0f) ? std::max(0.0f, GetHeightForWidth(widthForHeight)) : 0.0f;
     measuredHeight             = ClampWithMinPriority(height, minHeight, allowedMaxHeight);
   }

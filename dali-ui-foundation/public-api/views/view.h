@@ -137,19 +137,19 @@ public: // Property & enumeration declarations
       REQUESTED_HEIGHT,
 
       /**
-       * @brief The minimum width applied during measurement.
+       * @brief The minimum width of the View, applied when it is measured and when it is laid out (see SetMinimumWidth()).
        * @details Name "minimumWidth", type Property::FLOAT.
        */
       MINIMUM_WIDTH,
 
       /**
-       * @brief The minimum height applied during measurement.
+       * @brief The minimum height of the View, applied when it is measured and when it is laid out (see SetMinimumHeight()).
        * @details Name "minimumHeight", type Property::FLOAT.
        */
       MINIMUM_HEIGHT,
 
       /**
-       * @brief The maximum width applied during measurement.
+       * @brief The maximum width of the View, applied when it is measured and when it is laid out (see SetMaximumWidth()).
        * @details Name "maximumWidth", type Property::FLOAT.
        * @note max-wins: if the minimum exceeds the maximum, the MAXIMUM wins
        * (measurement floors to the minimum then ceils to the maximum).
@@ -158,7 +158,7 @@ public: // Property & enumeration declarations
       MAXIMUM_WIDTH,
 
       /**
-       * @brief The maximum height applied during measurement.
+       * @brief The maximum height of the View, applied when it is measured and when it is laid out (see SetMaximumHeight()).
        * @details Name "maximumHeight", type Property::FLOAT.
        */
       MAXIMUM_HEIGHT,
@@ -382,6 +382,21 @@ public: // Measure / Arrange API
    * The framework keys the measure cache on the effective scale as well as on the
    * constraint, so a scale change alone forces a re-measure.
    *
+   * Each constraint is an upper bound unless the parent's layout ASSIGNS the axis:
+   * a first-party parent (a plain View, StackLayout, GridLayout, a single-line
+   * FlexLayout, AbsoluteLayout or ScrollView) assigns a MATCH_PARENT axis, a stretched
+   * axis, or an axis its layout params size explicitly or proportionally (AbsoluteLayout
+   * bounds); on an assigned axis the view reports the constraint, clamped by its own
+   * minimum/maximum, as its measured size -- the size it is laid out at. An axis with its own
+   * explicit requested size always reports that size (clamped the same way), whatever the
+   * parent decides. On any other axis it reports the size it wants within the bound;
+   * a MATCH_PARENT axis then reports its minimum size.
+   * This call derives which axes are assigned from the view's parent, the same way the
+   * parent's layout does, and the measure cache keys on it as well. A view without a View
+   * parent (a layout root, a detached view) is assigned on its MATCH_PARENT axes -- the caller's
+   * constraint is its size -- and under any other parent a MATCH_PARENT axis is assigned when
+   * that parent's own size is determined (explicit, or itself assigned).
+   *
    * @param[in] widthConstraint The width constraint for measurement
    * @param[in] heightConstraint The height constraint for measurement
    * @return The measured size
@@ -424,6 +439,10 @@ public: // Measure / Arrange API
    * @note An ArrangePolicy::IF_CHANGED arrange implementation must arrange the same set
    * of children for the same tracked inputs. If that set depends on untracked state,
    * use ArrangePolicy::ALWAYS or invalidate arrange whenever the state changes.
+   *
+   * @note The size of @p bounds is first clamped to the View's own minimum/maximum, keeping
+   * the start edge of @p bounds; the arrange implementation receives the clamped bounds, and
+   * its returned rect is applied as is.
    *
    * @param[in] bounds The bounds to arrange the view in
    * @return The final arranged bounds (parent-local, pre-RTL logical)
@@ -518,6 +537,9 @@ public: // Measure / Arrange API
    * resolves to RIGHT_TO_LEFT, so callbacks must not apply RTL mirroring
    * themselves.
    *
+   * The callback receives the bounds after the View's own minimum/maximum clamp
+   * (see Arrange()).
+   *
    * @note The callback replaces OnArrange() as this view's arrange implementation. This
    * one-argument overload uses ArrangePolicy::IF_CHANGED, so the framework
    * may reuse an unchanged result without invoking the callback. Use the two-argument
@@ -550,6 +572,9 @@ public: // Measure / Arrange API
    * actor tree.
    *
    * Installing a callback replaces the policy of the previously installed callback.
+   *
+   * The callback receives the bounds after the View's own minimum/maximum clamp
+   * (see Arrange()).
    *
    * @param[in] callback The arrange callback (ownership transferred)
    * @param[in] policy   When the callback runs
@@ -815,6 +840,12 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the minimum width.
    *
+   * The View is never measured or laid out narrower than this. When its parent's layout gives
+   * it a narrower slot, the View is laid out at the minimum width from the start edge of that
+   * slot (its left edge, or its right edge when the parent's layout direction is
+   * RIGHT_TO_LEFT) and extends past the slot; the parent's placement of the View's siblings
+   * is unaffected.
+   *
    * @param[in] width The minimum width
    */
   void SetMinimumWidth(float width);
@@ -829,6 +860,11 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the minimum height.
    *
+   * The View is never measured or laid out shorter than this. When its parent's layout gives
+   * it a shorter slot, the View is laid out at the minimum height from the top edge of that
+   * slot and extends past the slot; the parent's placement of the View's siblings is
+   * unaffected.
+   *
    * @param[in] height The minimum height
    */
   void SetMinimumHeight(float height);
@@ -842,6 +878,12 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
 
   /**
    * @brief Sets the maximum width.
+   *
+   * The View is never measured or laid out wider than this. When its parent's layout gives it
+   * a wider slot -- a MATCH_PARENT or stretched axis, a flex-grow share, a grid cell -- the
+   * View is laid out at the maximum width from the start edge of that slot (its left edge, or
+   * its right edge when the parent's layout direction is RIGHT_TO_LEFT) and the rest of the
+   * slot stays empty; the parent's placement of the View's siblings is unaffected.
    *
    * @param[in] width The maximum width
    * @note max-wins: when the minimum width exceeds the maximum width, the
@@ -859,6 +901,11 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
 
   /**
    * @brief Sets the maximum height.
+   *
+   * The View is never measured or laid out taller than this. When its parent's layout gives it
+   * a taller slot -- a MATCH_PARENT or stretched axis, a flex-grow share, a grid cell -- the
+   * View is laid out at the maximum height from the top edge of that slot and the rest of the
+   * slot stays empty; the parent's placement of the View's siblings is unaffected.
    *
    * @param[in] height The maximum height
    * @note max-wins: when the minimum height exceeds the maximum height, the

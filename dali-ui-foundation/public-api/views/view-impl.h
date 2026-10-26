@@ -849,6 +849,11 @@ protected:
    * non-standalone child's x for right-to-left, so a direction-independent measure
    * plus the default arrange is usually the correct way to be direction-aware.
    *
+   * @note On an axis the parent's layout assigns (see View::Measure()), the framework
+   * reports the given constraint, clamped by the view's own minimum/maximum, as this view's
+   * measured size, whatever this method returns. This method runs at that clamped
+   * constraint, so the content is measured for the size the view will be laid out at.
+   *
    * @param[in] widthConstraint  Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT.
    * @param[in] heightConstraint Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT.
    * @return Measured visual (scale-applied) size.
@@ -861,6 +866,10 @@ protected:
    * Return the view's final self bounds (parent-local, pre-RTL logical). The
    * framework validates the returned rect and applies its x/y/width/height to
    * the self actor; do NOT call self geometry setters. Default echoes @p bounds.
+   * @p bounds is the slot the parent assigned with its size already clamped to
+   * this view's own minimum/maximum (its start edge kept), so the default lays
+   * the view out inside its own bounds; a returned rect outside the
+   * minimum/maximum is applied as is.
    *
    * @note This method is NOT guaranteed to run on every arrange pass.
    * ArrangePolicy::IF_CHANGED is the default, so the framework may serve a

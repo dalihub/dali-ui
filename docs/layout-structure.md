@@ -132,7 +132,7 @@ A **layout root** is a top-level View in the layout hierarchy (its parent is not
    - The result is cached as `MeasuredSize`; if constraints are unchanged, measurement is skipped.
 
 2. **Arrange**  
-   - The View is given a `LayoutRect` (typically from 0,0 with the measured size). It applies its own alignment and margin, and if it has a LayoutManager, the manager calls `Arrange(child, childBounds)` for each child to set position and size.
+   - The View is given a `LayoutRect` (typically from 0,0 with the measured size). It first clamps the rect's size to its own minimum/maximum, keeping the rect's start edge (see *Requested vs Minimum/Maximum*), then applies its own alignment and margin, and if it has a LayoutManager, the manager calls `Arrange(child, childBounds)` for each child to set position and size.
 
 ### Layout caching and the measure/arrange contract
 
@@ -141,13 +141,15 @@ Understanding what they key on is the whole of what a custom View, LayoutManager
 or callback has to know.
 
 The **measure cache** is unconditional. `View::Measure()` serves a stored
-`MeasuredSize` whenever the normalised constraint is unchanged and nothing has
-invalidated the view's layout, and the measure implementation — `OnMeasure()`, an
-attached `LayoutManager::Measure()`, or a `MeasureCallback` — is simply not
-called. There is no opt-out. A measure implementation is therefore **required** to be
-a pure function of:
+`MeasuredSize` whenever the normalised constraint and its measure mode (see
+*Measure modes* below) are unchanged and nothing has invalidated the view's layout,
+and the measure implementation — `OnMeasure()`, an attached `LayoutManager::Measure()`,
+or a `MeasureCallback` — is simply not called. There is no opt-out. A measure
+implementation is therefore **required** to be a pure function of:
 
 - its two constraints,
+- the measure mode of each axis (the parent's layout decides it; a mode-less call
+  such as an application's `View::Measure()` derives it from the parent),
 - the view's effective scale,
 - the view's effective layout direction,
 - the view's own layout-tracked state (requested size, padding, margin, min/max
@@ -352,26 +354,216 @@ implementations.
 
 ### Measure constraints (sign-encoded budget)
 
-During Measure the parent passes the width and height constraints each as a single **sign-encoded `float`** — there is no separate mode field and no measure-mode enum anywhere in the API:
+During Measure the parent passes the width and height constraints each as a single **sign-encoded `float`** — the public API carries one scalar per axis; internally the framework pairs it with a measure mode (see *Measure modes* below):
 
-- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `GetEffectiveScale()` to obtain the natural-unit budget before computing sizes. This budget acts as an **at-most ceiling**.
+- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `GetEffectiveScale()` to obtain the natural-unit budget before computing sizes. Under the default mode (at-most) this budget acts as an **at-most ceiling**.
 - **Negative value** — a sentinel carrying intent, not a size: `WRAP_CONTENT` (-1.0f) or `MATCH_PARENT` (-2.0f).
 
-Before `OnMeasure` runs, `ViewImpl::Measure` reconciles the incoming constraint against this view's min/max bounds: `effective = std::min(std::max(constraint, Minimum), Maximum)`. With the default `Minimum` of `0`, a negative sentinel constraint is therefore **floored to 0** — so the budget that actually reaches `OnMeasure` is always `>= 0`. (An axis is left "unbounded" not by a negative value but by passing a large positive budget such as `FLT_MAX`, as ScrollView does on its scrollable axes.)
+Before `OnMeasure` runs, `ViewImpl::Measure` reconciles the incoming constraint against this view's min/max bounds: `effective = std::min(std::max(constraint, Minimum), Maximum)` -- on every axis, an axis measured exactly included (see *Measure modes*). With the default `Minimum` of `0`, a negative sentinel constraint is therefore **floored to 0** — so the budget that actually reaches `OnMeasure` is always `>= 0`. (An axis is left "unbounded" not by a negative value but by passing a large positive budget such as `FLT_MAX`, as ScrollView does on its scrollable axes.)
 
-For a `WRAP_CONTENT` view, the measured result (children bounding box for a container, or `GetNaturalSize()` for a leaf) is **clamped down to the incoming budget** via `std::min(size, budget)` whenever that budget is non-negative. So a `WRAP_CONTENT` child measured against a finite budget is clamped to it and does **not** overflow the parent; measured against a very large budget it is effectively unclamped and sizes purely to its content. `MATCH_PARENT` and fixed-size requests do not go through this clamp — they resolve directly to the minimum size and the requested size respectively.
+For a `WRAP_CONTENT` view, the measured result (children bounding box for a container, or `GetNaturalSize()` for a leaf) is **clamped down to the incoming budget** via `std::min(size, budget)` whenever that budget is non-negative. So a `WRAP_CONTENT` child measured against a finite budget is clamped to it and does **not** overflow the parent; measured against a very large budget it is effectively unclamped and sizes purely to its content. `MATCH_PARENT` and fixed-size requests do not go through this clamp — they resolve directly to the minimum size (when measured at-most; measured exactly, to the constraint clamped by the view's own minimum/maximum, see *Measure modes*) and to the requested size respectively.
 
 This clamp bounds a `WRAP_CONTENT` result to the available budget. Setting `SetMaximumWidth()` / `SetMaximumHeight()` is therefore not needed to stop a `WRAP_CONTENT` child from overflowing its parent's budget — those are a separate min/max bounds mechanism applied earlier in Measure.
 
 A `LayoutMode::STANDALONE` child is the exception: a `WRAP_CONTENT` axis is budgeted by the size of the window it is shown in (minus its own margin) rather than by its parent's, so it may extend past its parent; an explicit size is measured as is, and a `MATCH_PARENT` axis against the parent -- see LayoutMode::STANDALONE below.
 
+### Measure modes
+
+Vocabulary used below:
+
+| term | meaning |
+|---|---|
+| constraint | the scalar a parent passes per axis -- an input (`Measure(w, h)`, `OnMeasure(...)`) |
+| mode | how the constraint binds: at-most / exactly / unspecified -- an input |
+| determined | the axis size is final before the measurement runs: an explicit size, `MATCH_PARENT`, or measured exactly |
+| size | the two-axis measure result (`MeasuredSize`, `GetMeasuredSize()`) |
+| slot / bounds | what a parent hands a child at Arrange -- the output of placement (`LayoutRect`) |
+
+Internally every measure constraint carries one of three modes per axis -- the
+well-known tri-state measure specification:
+
+- **At-most** (the default): the constraint is an upper bound; the view reports the
+  size it wants within it. This is what every constraint meant before modes existed.
+- **Exactly**: the parent has decided the slot the view will be laid out in. The view
+  is measured at that size clamped by its own minimum/maximum and reports the clamped
+  size as its measured size, whatever its producer returned -- the size it is then laid
+  out at (see *Requested vs Minimum/Maximum*). An exact constraint at or above 1e30 is an
+  unbounded budget (such as `FLT_MAX`), not a size: it is measured at-most instead, so no
+  view ever reports it.
+- **Unspecified**: a scrolled axis; the number stays ScrollView's huge finite budget
+  (`FLT_MAX`). In this release it is a cache-key and derivation term only: every
+  producer treats it like at-most.
+
+The mode is not part of the public API (`View::Measure(width, height)` is unchanged).
+It is decided by the first-party parents -- a plain `View`, `StackLayout`,
+`GridLayout`, a single-line `FlexLayout` (`FlexWrap::NO_WRAP`), `AbsoluteLayout` and
+`ScrollView` -- and derived for a mode-less call (an application's or a custom
+producer's `View::Measure()`) from the parent the view has, so that a call made after a
+layout pass is served from the same cache entry. Per parent, a child is measured
+exactly on an axis when:
+
+- **plain View**: the axis is `MATCH_PARENT`;
+- **StackLayout**: cross axis `MATCH_PARENT`, or `WRAP_CONTENT` with `FILL` alignment
+  once the stack's cross extent is determined; main axis when the child has a weight. A
+  `MATCH_PARENT` main axis without weight stays at-most (the stack sums the main
+  extents);
+- **FlexLayout** (single line): cross axis `MATCH_PARENT`, or `WRAP_CONTENT` with an
+  effective `STRETCH` alignment once the cross extent is determined; main axis when the
+  child is `MATCH_PARENT` and takes part in flex-grow, or when the line's
+  grow/shrink/basis distribution (computed in Measure once the main extent is determined)
+  decides its width -- narrowing any child, widening a container;
+- **GridLayout**: the axis is `MATCH_PARENT` (its cell); or `WRAP_CONTENT` with `FILL`
+  alignment when its cell is determined before the children are measured -- `ABSOLUTE`
+  tracks, and `STAR` columns of a grid whose width is determined;
+- **AbsoluteLayout**: the axis is `MATCH_PARENT`, or has an explicit or proportional
+  extent in its `AbsoluteLayoutParams`;
+- **ScrollView**: the axis is `MATCH_PARENT` (the viewport); a `WRAP_CONTENT` axis is
+  unspecified.
+
+A view whose parent is not one of these layouts takes its mode from the parent itself:
+an explicit size stays at its requested size; a parent with an explicit size, or one that was measured
+exactly, makes a `MATCH_PARENT` child exact; a parent measured with a budget makes it report
+its minimum; a parent on a scroll axis passes "unspecified". A wrapping `FlexLayout` keeps
+reporting minimums for `MATCH_PARENT` children (its lines are built from the measured sizes).
+
+A view without a View parent -- a layout root, a detached view -- and a
+`LayoutMode::STANDALONE` view are exact on their `MATCH_PARENT` axes: the caller's
+constraint is their size. The framework's own passes give such an axis the extent it is
+placed in, clamped by the view's own minimum/maximum, so the measured size equals the slot,
+and an application's `View::Measure()` with the same numbers after the pass returns that size
+from the same cache entry. An explicitly sized axis is always at-most (it resolves to its
+requested size whatever the mode).
+
+**Two-step measurement.** A container's extent on an axis is *determined* when it is
+explicit, `MATCH_PARENT`, or measured exactly. On a determined axis its `MATCH_PARENT` and
+stretched children are measured exactly at the content extent in one step. On an
+undetermined axis (`WRAP_CONTENT` measured at-most) the extent is the aggregate of the
+children, so the container first measures every child exactly as before -- a
+`MATCH_PARENT` child included, reporting what it always reported, so the aggregate is
+unchanged -- resolves its extent, and then re-measures exactly, at the slot Arrange
+will give them, the children whose extent it decides: its `MATCH_PARENT` children,
+and stretched children narrower than the slot whose own content follows their size on
+that axis (a container holding a `MATCH_PARENT` or weighted child, a stretched or grow child
+with such content, a `STAR`-column or proportional child, or a wrapping `FlexLayout` stretched
+along its main axis). A stretched child whose content ignores that size keeps its natural
+measured size: re-measuring it would change nothing but its own report. Those results feed
+only the other axis' aggregate. A wrapped Label (or a container holding one) therefore gets
+the height of the width it is laid out at. A `MATCH_PARENT` or proportional child whose
+container -- or, in a grid, the columns it spans -- has no size of its own on that axis (only
+children that size themselves, the container's own minimum and a grid's column definitions give
+it one, not its `MATCH_PARENT` siblings' margins or reports), or whose slot is empty, is not
+measured at a slot there: it keeps its at-most report (its minimum on that axis, the other axis
+measured at the budget; a weighted child keeps its share), so what surrounds it keeps the size
+it had before modes existed, and it is measured at its real slot when its container is stretched
+or arranged. A slot below 0.001 px counts as empty: at a UI scale that is not a power-of-two
+fraction, taking the padding and margins off a container's size leaves about 1e-6 px where 0 is
+meant.
+
+**Arrange.** The arrange-time re-measure of a `MATCH_PARENT` child passes the same
+modes and is skipped when the child already holds a valid measurement for exactly
+that slot -- usually the measure pass's own exact call. The axes the parent assigns
+are compared; the others carry the child's own measured size back to it, which assumes
+that a `WRAP_CONTENT` producer measured under its own result returns the same result.
+Every first-party producer does; a custom producer that does not keeps its subtree
+measured at the measure-pass constraint on that axis.
+
+**Grid cells.** A `GridLayout` child wider or taller than its cell at arrange time is
+re-measured at the cell (a child measured at the grid's budget because its cell was not
+determined yet, or a grid laid out smaller than it measured); an explicitly sized child keeps
+its size and is clipped to the cell, as before.
+
+**Labels.** A wrapping Label measured with an exact width computes its height at that width;
+measured with an at-most width it uses its own measured width, as before.
+
+**Lists.** A `RecyclerView` lays every item out at the list's cross size, so it measures each
+item exactly there on the cross axis and at most on the scroll axis: a `WRAP_CONTENT` item's
+`MATCH_PARENT` content gets the height of the list's width.
+
+**Limits.** A custom parent (a callback, a custom or subclassed `LayoutManager`, a `ViewImpl`
+subclass) measures its children in one step with the custom-parent modes above and never skips
+an arrange-time re-measure; a `WRAP_CONTENT` container that such a parent lays out wider than it
+measured is not measured again at that width, nor is a stretched custom container or a stretched
+container in an `AUTO` or undetermined `STAR` column of a `GridLayout` measured at-most: its
+`MATCH_PARENT` content has the height of the container's measured width, where before modes
+existed it had the height of the budget width; a subclassed `StackLayout`, `GridLayout` or
+`FlexLayout` manager whose size is determined therefore gives its `MATCH_PARENT` children exact
+reports, which can change its `AUTO` columns or its line sums. A wrapping `FlexLayout` keeps the
+at-most measurement. A `GridLayout` measured at-most does not re-measure stretched containers in
+`AUTO` or `STAR` columns, `STAR` rows are never a determined cell, and a `MATCH_PARENT` child in
+a `STAR` column of a grid whose width is not determined, or in an `AUTO` column that holds only
+`MATCH_PARENT` children, is measured at the grid's budget and again at its cell on every
+arrange. In an arrange-only pass that widens a `STAR` cell of such a grid, a `WRAP_CONTENT`
+child keeps the measurement of the narrower cell until the grid is measured again: a `START`
+child stays at that width and wrap, a `FILL` child is laid out at the wider cell with the
+narrower width's height (extra space below, no clipping). A `StackLayout` with weights on an
+undetermined cross axis resolves the slot from its non-weight children and its
+`MATCH_PARENT`-cross weight children; a wider `WRAP_CONTENT` weight child corrects it only in
+Arrange. A stretched `WRAP_CONTENT` child whose content does not follow the stretched size -- a
+leaf, or a container whose children keep their own size on that axis -- keeps its natural
+measured size while it is laid out stretched. The test for "content that follows the stretched
+size" is conservative: a `MATCH_PARENT` child counts even when its height ignores its width, and
+so does a `WRAP_CONTENT` child sized by a weight, a `STAR` column or a proportional bound, a
+leaf included; this costs a re-measure, never a wrong size. A single-line `FlexLayout` laid out
+at a main size other than the one it measured (a parent that stretches it or gives it a cell or
+bounds of another size) distributes its line again at that size, as before modes existed; the
+children whose main size its measure assigned are re-measured at their new share, other children
+keep their natural measured size. A view whose slot lies outside its own minimum/maximum is laid
+out at the clamped size from the slot's start edge; the parent does not give the difference to
+the siblings.
+
+**Cost.** Measuring a child exactly at its slot costs a second measurement wherever the
+slot is only known after the child's natural size. On every pass that re-measures such a
+container, each of these children is measured twice -- once at its natural size, once at its
+slot -- and its subtree with it:
+- a `MATCH_PARENT` child on an axis where the container's size is not determined (as before
+  modes existed: it used to be measured at the budget and again at Arrange);
+- a stretched child, on such an axis, whose content follows the stretched size (see above);
+- a child of a single-line `FlexLayout` with a determined main size that flex-shrink or a
+  flex-basis narrows below its natural size, and, while a `FlexLayout` is laid out at a main size
+  other than the one it measured, each child whose main size it assigned (a main size above about
+  16000 px at a non-unit scale can be taken for a different one: the flex then distributes again
+  with the same numbers);
+- a stretched child of a single-line `FlexLayout` while the line is taller than the flex's own
+  cross size (a sibling's minimum or explicit cross size): it is measured at the flex's cross size
+  and again at the line's;
+- a `MATCH_PARENT`-cross weight child of a `StackLayout` on an undetermined cross axis.
+A pass that re-measures nothing above such a child (an arrange-only pass, or a change inside
+an unrelated subtree) costs nothing extra. A stretched child whose content ignores the
+stretched size, and every child under a container whose size is determined, is measured once.
+The second measurement is what gives such children -- a wrapped Label above all -- the height
+of the width they are laid out at.
+
 ### Requested vs Minimum/Maximum (max-wins)
 
 Each view can carry independent minimum and maximum size bounds
 (`SetMinimumWidth()` / `SetMaximumWidth()` and the height equivalents).
-After the measured size is produced by `OnMeasure` / the LayoutManager /
-the measure callback, `ViewImpl::ApplyConstraints` reconciles it against
-those bounds, for width and height independently.
+A view is never measured or laid out outside them:
+
+- **Measure.** The incoming constraint is pre-clamped to `[Minimum, Maximum]` before
+  the measure implementation runs, on every axis (an exactly measured one included), so
+  children see the effective available space rather than the raw constraint. After the
+  measured size is produced by `OnMeasure` / the LayoutManager / the measure callback,
+  `ViewImpl::ApplyConstraints` reconciles it against the same bounds, for width and
+  height independently; an exactly measured axis reports the size its parent assigned,
+  clamped the same way. The default measure and every layout manager measure an explicitly
+  sized view's children inside its explicit size clamped by its own minimum/maximum -- the size
+  it is laid out at; a custom `OnMeasure()` decides for itself.
+- **Arrange.** The bounds a parent hands the view are clamped the same way before the
+  view's arrange implementation runs. The view keeps the start edge of that slot: its
+  left and top edges, or its right and top edges when the parent's layout direction is
+  `RIGHT_TO_LEFT` (the mirror keeps the slot's logical start); a `LayoutMode::STANDALONE`
+  view and a layout root, which are positioned from their requested position and never
+  mirrored, keep their left edge. `OnArrange()`, an `ArrangeCallback` and an attached
+  LayoutManager receive the clamped bounds, so a container lays its children out inside
+  them; a rect an arrange implementation returns is applied as is, even outside the
+  bounds. `GetMeasuredSize()`, the arranged bounds and the actor geometry therefore agree.
+- **Parents are unchanged.** Slots, cells, weight shares, flex-grow and flex-shrink
+  distribution, `STAR` tracks, justification and alignment offsets are computed as
+  before, so siblings do not move: a view narrower than its slot leaves the rest of the
+  slot empty, and a minimum larger than the slot makes the view overflow it from the
+  start edge. A parent that positions a slot from its own size keeps that position (for
+  example a proportional `AbsoluteLayout` position); a parent that aligns a child by its
+  measured size aligns the clamped size (`GridLayout` `START` / `CENTER` / `END`).
 
 **Clamp order:** the minimum (floor) is applied first, then the maximum
 (ceiling) — `result = std::min(std::max(value, Minimum), Maximum)`.
@@ -386,9 +578,6 @@ ceiling drops it to `30` — the final size is `30`.
 - **Units:** the bounds are stored in natural (pre-scale) units and
   multiplied by the effective scale at clamp time, so they compare
   against the visual-unit measured size.
-- The incoming constraint is itself pre-clamped to `[Minimum, Maximum]`
-  before children are measured, so children see the effective available
-  space rather than the raw constraint.
 
 DALi UI unconditionally lets the maximum win via the fixed clamp order —
 there is no min-wins branch or configurable policy for a
@@ -396,43 +585,70 @@ there is no min-wins branch or configurable policy for a
 
 ### MATCH_PARENT semantics
 
-A `MATCH_PARENT` view acts as a **follower**: it fills the space assigned by
-its parent during Arrange, rather than influencing the parent's own size
-during Measure.
+A `MATCH_PARENT` view fills the space assigned by its parent during Arrange,
+rather than influencing the parent's own size during Measure. What it reports
+from Measure depends on the measure mode (see *Measure modes*):
 
-**Measure phase:**
+**Measured at-most (a follower)** -- only when the parent's size on that axis is not
+determined (a custom `WRAP_CONTENT` parent measured with a budget, a wrapping `FlexLayout`,
+or a summed main axis; a first-party `WRAP_CONTENT` parent does this only as the first of
+its two steps, see below):
 - A `MATCH_PARENT` view reports its minimum size (`SetMinimumWidth` /
   `SetMinimumHeight`, default 0) as its desired size, but its children
   are still measured normally with the incoming constraint. Only the
   view's own return value is minSize.
-- Because the desired size is 0 (or minimum), a `WRAP_CONTENT` parent
-  determines its own size exclusively from non-MATCH_PARENT children.
+
+**Measured exactly** -- by a first-party parent, by a custom parent whose own size is
+determined, as a layout root or a detached view, as a STANDALONE view:
+- A `MATCH_PARENT` view reports its slot clamped by its own minimum/maximum --
+  the size it is laid out at; its content is measured at that size.
+
+**A `WRAP_CONTENT` parent** still determines its own size from its children as
+before -- a `MATCH_PARENT` child contributes its follower report (its minimum, for
+the first-party producers) -- and then measures the `MATCH_PARENT` child exactly at
+the resolved size.
 - Example: parent is `WRAP_CONTENT`, child A is fixed 100px, child B is
-  `MATCH_PARENT` → parent's desired width = 100 (child B contributes 0).
+  `MATCH_PARENT` → parent's width = 100 (child B contributes its minimum, 0);
+  child B is then measured exactly at 100, reports 100 and its height at 100,
+  and the parent's height includes that height.
 
 **Arrange phase:**
 - The parent assigns `MATCH_PARENT` children the full available content
-  area (parent size − parent padding − child margin).
+  area (parent size − parent padding − child margin); the child is laid out
+  at that area clamped by its own minimum/maximum, keeping the area's start
+  edge.
 - Before arranging, the parent re-measures the `MATCH_PARENT` child with
   the final bounds, so its internal state (text layout, nested children)
-  reflects the real available space. The Measure cache prevents redundant
-  work when the constraint has not changed.
+  reflects the real available space. The re-measure runs only when the slot
+  differs from what the measure pass already gave the child.
 - Continuing the example: parent arranged at 100px → child B is
-  re-measured and arranged at 100px.
+  arranged at 100px; it was already measured there.
 
 **Per-LayoutManager behavior:**
 - **StackLayout**: cross-axis `MATCH_PARENT` fills the available cross-axis
-  space. Main-axis `MATCH_PARENT` fills the full available main-axis space
-  unless the child also has weight > 0, in which case the weight share
-  determines the main-axis size and main-axis `MATCH_PARENT` is ignored.
-- **FlexLayout**: cross-axis `MATCH_PARENT` fills the flex line's cross
-  size. Main-axis `MATCH_PARENT` fills the available main axis; use
-  flex-grow for proportional distribution.
+  space and is measured exactly at it. Main-axis `MATCH_PARENT` fills the full
+  available main-axis space unless the child also has weight > 0, in which case
+  the weight share determines the main-axis size; without weight the main axis is
+  still measured at-most (the stack sums the main extents), with weight it is
+  measured exactly at the share.
+- **FlexLayout** (single line): cross-axis `MATCH_PARENT` fills the flex line's
+  cross size and is measured exactly at it. Main-axis `MATCH_PARENT` fills the
+  available main axis (measured at-most); with flex-grow it takes its share,
+  which Measure computes -- together with shrink and basis -- once the main extent
+  is determined, and measures exactly. A wrapping FlexLayout keeps the at-most
+  measurement throughout.
 - **GridLayout**: `MATCH_PARENT` children do not drive AUTO row/column
-  sizing. In Arrange, cells are filled by default (FILL alignment).
+  sizing; they are measured exactly at their cell. ABSOLUTE cells, and STAR
+  columns of a grid whose width is determined, are determined before the children are
+  measured: `FILL` children are measured exactly at them, other children at most
+  at them. AUTO columns are sized from the children's natural sizes. In Arrange,
+  cells are filled by default (FILL alignment).
 - **AbsoluteLayout**: `MATCH_PARENT` children fill the available content
-  area (when no explicit bounds are set via AbsoluteLayoutParams).
-- **ScrollView**: `MATCH_PARENT` children fill the viewport in Arrange.
+  area (when no explicit bounds are set via AbsoluteLayoutParams); explicit and
+  proportional extents are measured exactly. On a `WRAP_CONTENT` axis a
+  proportional child is measured after the others, once the axis is resolved.
+- **ScrollView**: `MATCH_PARENT` children fill the viewport in Arrange and are
+  measured exactly at it; other axes are unspecified.
 
 ### Grid placement (explicit cells)
 
@@ -502,6 +718,9 @@ identical passes alternate between mirrored and unmirrored coordinates.
   `RIGHT_TO_LEFT`. A child placed at `X = 0` therefore lands flush against
   the right edge, so the layout origin effectively moves to the **top-right**
   under RTL.
+- A child clamped by its own minimum/maximum keeps the logical x of its slot,
+  so the mirror keeps the slot's right edge:
+  `POSITION_X = parentWidth − slotX − clampedWidth`.
 - **STANDALONE children are skipped.** `ApplyLayoutDirection` `continue`s
   past any child whose `LayoutMode` is `STANDALONE`, so the only way to opt a
   child out of mirroring is `SetLayoutMode(LayoutMode::STANDALONE)`.
@@ -578,12 +797,14 @@ A Standalone child:
     provisional size is used -- its own requested size when it has one (clamped
     by its own minimum/maximum), otherwise the constraint it was measured at --
     and the parent's arrange pass re-measures the child at the final size.
-    `MATCH_PARENT` still reports the minimum size from Measure; the slot is the
-    parent extent.
+    A `MATCH_PARENT` axis is measured exactly at that extent clamped by the
+    child's own minimum/maximum
+    (`Internal::DeriveStandaloneMeasureModes`, the same derivation on every pass)
+    and reports it; the slot is that same clamped extent.
   - `WRAP_CONTENT`: the size of the window the View is shown in, minus its own
     margin. The window size is the whole `Window::GetPositionSize()` extent:
     platform insets, input-method panels and window decorations are not
-    accounted for. A `WRAP_CONTENT` Standalone child is therefore not clamped to
+    accounted for. A `WRAP_CONTENT` Standalone child is therefore not bounded by
     its parent: a label or a container sizes to its content with the window size
     as its budget. Use `SetMaximumWidth` / `SetMaximumHeight` (or an explicit
     size) to bound it more tightly. Outside any window (a direct `Measure()` on
@@ -643,12 +864,13 @@ A Standalone child:
   `MATCH_PARENT` fills the parent edge to edge regardless of parent padding,
   and any margin set on the Standalone child shifts it inward consistently in
   both axes.
-- **Applies its own min/max to its slot.** A boundary child has no parent
-  layout to clamp it, so the derivation of its slot enforces its
-  `Minimum`/`Maximum` width and height. The same derivation runs whether the
-  slot comes from the parent's arrange pass or from the child's own
-  layout-root pass, so both agree; for a `MATCH_PARENT` axis it is the only
-  place the clamp reaches, because the measured value is discarded there.
+- **Applies its own min/max to its slot.** The derivation of its slot
+  enforces its `Minimum`/`Maximum` width and height -- the clamp every view
+  applies to the bounds it is arranged at (see *Requested vs
+  Minimum/Maximum*), which is therefore a no-op on top of it. The same
+  derivation runs whether the slot comes from the parent's arrange pass or
+  from the child's own layout-root pass, so both agree; a `MATCH_PARENT` axis
+  is measured exactly at that clamped extent.
 
 **Behaviour change.** Compared with the earlier derivation, an explicitly sized
 Standalone view is measured at its requested size instead of the parent's

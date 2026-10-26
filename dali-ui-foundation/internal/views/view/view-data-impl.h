@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/internal/layouts/measure-mode.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
@@ -156,8 +157,121 @@ public:
    */
   bool CanUseVisuals() const;
 
+  /**
+   * @brief The mode-less measure entry: ViewImpl::Measure() and therefore the public
+   * View::Measure() land here.
+   *
+   * Derives the measure modes this view's parent would pass it (DeriveMeasureModes()) and
+   * forwards to the mode-carrying overload, so an application's call after a layout pass
+   * agrees with the call the parent's layout made and can be served from the same cache
+   * entry.
+   */
   MeasuredSize Measure(float visualWidth, float visualHeight);
-  LayoutRect   Arrange(const LayoutRect& bounds);
+
+  /**
+   * @brief The mode-carrying measure: the entry every first-party parent uses.
+   *
+   * The modes are normalised first (an explicitly sized axis becomes AT_MOST, because every
+   * first-party producer resolves it to the requested size whatever the mode; EXACTLY needs a
+   * constraint >= 0 and below MAX_EXACT_MEASURE_SIZE), stored before the producer runs
+   * (GetMeasureModes()) and kept as two exact KEY terms of the measure cache. Every axis runs the
+   * producer at the constraint clamped by this view's own minimum/maximum. An EXACTLY axis reports
+   * the given size clamped the same way (ApplyConstraints, max wins) as its measured size,
+   * whatever the producer returned -- the size ArrangeImpl lays the view out at; AT_MOST and
+   * UNSPECIFIED axes keep the producer's report.
+   *
+   * @param[in] visualWidth The width constraint, visual units
+   * @param[in] visualHeight The height constraint, visual units
+   * @param[in] modeWidth The measure mode of the width constraint
+   * @param[in] modeHeight The measure mode of the height constraint
+   * @param[in] check MATCHES_DERIVATION when the modes must equal DeriveMeasureModes()
+   *                  (checked in DEBUG builds only)
+   * @return The measured size, visual units
+   */
+  MeasuredSize Measure(float visualWidth, float visualHeight, MeasureMode modeWidth, MeasureMode modeHeight, MeasureModeCheck check = MeasureModeCheck::NONE);
+
+  /// The normalised modes of the latest non-re-entrant Measure() call on this view. A first-party
+  /// producer reads them during its own pass; after the pass they are the modes its latest
+  /// measurement was made at.
+  MeasureModes GetMeasureModes() const;
+
+  /// Whether this view's width is decided before its content is measured: an explicit width, a
+  /// MATCH_PARENT width, or a WRAP_CONTENT width measured EXACTLY. False for a WRAP_CONTENT width
+  /// measured AT_MOST or UNSPECIFIED, whose extent is the aggregate of its content.
+  bool IsWidthDetermined() const;
+
+  /// The height counterpart of IsWidthDetermined().
+  bool IsHeightDetermined() const;
+
+  /// Which first-party container this view is, as a parent (MeasureModeParent::NONE for every
+  /// other producer: a callback, a custom or subclassed LayoutManager, a ViewImpl subclass).
+  MeasureModeParent GetMeasureModeParent() const;
+
+  /// The modes this view's parent passes it in its last call of a full measure + arrange pass.
+  /// An explicitly sized axis is always AT_MOST. A STANDALONE view and a view without a View
+  /// parent (a layout root, a detached view) are EXACTLY on a MATCH_PARENT axis and AT_MOST
+  /// otherwise: nothing but the caller assigns their size. Under a parent that is not a
+  /// first-party container, DeriveChildModesAsCustomParent() of that parent applies.
+  MeasureModes DeriveMeasureModes() const;
+
+  /**
+   * @brief The modes this view passes a child when it is NOT a mode-aware first-party container
+   * (a custom producer, a subclassed manager, a ViewImpl subclass, a component).
+   *
+   * The usual child rule, driven by this view's own requested size and the modes it was itself
+   * measured with, per axis and in this order: an explicit child size is AT_MOST (canonical); a
+   * MATCH_PARENT child of a parent with an explicit size is EXACTLY (a WRAP_CONTENT child
+   * AT_MOST); otherwise the parent's received mode decides -- EXACTLY makes a MATCH_PARENT child
+   * EXACTLY, AT_MOST keeps the child AT_MOST (MATCH_PARENT reports its minimum), and UNSPECIFIED
+   * is passed on as UNSPECIFIED. The explicit-size test comes first because an explicitly sized
+   * parent's own modes are the canonical AT_MOST.
+   *
+   * @param[in] childRequestedWidth The child's requested width (natural units or a sentinel)
+   * @param[in] childRequestedHeight The child's requested height (natural units or a sentinel)
+   * @return The modes to measure that child with
+   */
+  MeasureModes DeriveChildModesAsCustomParent(float childRequestedWidth, float childRequestedHeight) const;
+
+  /// The size a MATCH_PARENT axis measured AT_MOST reports when its producer follows the
+  /// MATCH_PARENT contract exactly (the default measure, a Layout, a Label, every LayoutManager,
+  /// and no measure callback; GridLayoutManager decides that, because it is the only consumer and
+  /// the only one of the two that can see LabelImpl): the minimum size times the effective scale,
+  /// through the same clamp Measure() applies.
+  MeasuredSize GetMatchFollowerSize() const;
+
+  /// Const twin of GetMeasureCallback() != nullptr.
+  bool HasMeasureCallback() const;
+
+  /// Whether this view's measured size on the OTHER axis can change when its parent assigns it a
+  /// different size on @p widthAxis (true: width, false: height). False unless this view is a
+  /// first-party container whose other axis is WRAP_CONTENT and a contributing child follows this
+  /// view's size on that axis in a way that can change the child's own other-axis size:
+  /// MATCH_PARENT on it; sized from it by this view's layout (a weight or flex-grow share, a STAR
+  /// column, a proportional extent) or stretched on it, while itself holding such content; or
+  /// wrapping lines that break at this view's main size. Decides whether a stretched WRAP_CONTENT
+  /// container is worth an exact re-measure: widening one whose content ignores the size changes
+  /// nothing but its own report.
+  bool HasSizeDependentContent(bool widthAxis) const;
+
+  /**
+   * @brief Whether an arrange-time re-measure of this view may be skipped because the view
+   * already holds a measurement for exactly that slot.
+   *
+   * True when this view holds a valid, clean measure cache entry produced at the same
+   * (normalised) modes and the same effective scale, and every axis the parent assigns -- a
+   * MATCH_PARENT axis or an EXACTLY axis -- matches the cache KEY. The remaining axes carry the
+   * view's own measured size back to it, which a WRAP_CONTENT producer resolves to the same value,
+   * so they are not compared.
+   *
+   * @param[in] visualWidth The width the re-measure would pass, visual units
+   * @param[in] visualHeight The height the re-measure would pass, visual units
+   * @param[in] modeWidth The width mode the re-measure would pass
+   * @param[in] modeHeight The height mode the re-measure would pass
+   * @return True when the re-measure would not change this view's measurement
+   */
+  bool CanSkipArrangeRemeasure(float visualWidth, float visualHeight, MeasureMode modeWidth, MeasureMode modeHeight) const;
+
+  LayoutRect Arrange(const LayoutRect& bounds);
 
   /**
    * @brief Arranges this view as a root driven by LayoutController.
@@ -1204,6 +1318,23 @@ private:
   void SetBehaviourFlags(ViewImpl::ViewBehaviour behaviourFlags);
   void Destroy();
 
+  /// Canonical modes: an explicitly sized axis becomes AT_MOST, and EXACTLY falls back to
+  /// AT_MOST unless its constraint is >= 0 and below MAX_EXACT_MEASURE_SIZE (an unbounded budget
+  /// is not a size). Shared by Measure(), CanSkipArrangeRemeasure() and the DEBUG derivation check
+  /// so all of them see the same modes.
+  MeasureModes NormaliseMeasureModes(float visualWidth, float visualHeight, MeasureMode modeWidth, MeasureMode modeHeight) const;
+
+  /// The GetMeasureModeParent() classification of this view's producer alone (its exact layout
+  /// manager type, or a plain ViewImpl), without the layout-callback test GetMeasureModeParent()
+  /// applies first.
+  MeasureModeParent ClassifyProducerAsParent() const;
+
+  /// The measure cache KEY of one axis, which is also the producer's input: the visual
+  /// constraint in natural units, clamped by this view's own minimum/maximum on every mode. THE
+  /// expression Measure() keys on, shared with CanSkipArrangeRemeasure() so both use
+  /// bit-identical arithmetic.
+  float NormaliseMeasureConstraint(float visual, float scale, bool widthAxis) const;
+
   MeasuredSize MeasureDefault(float widthConstraint, float heightConstraint);
   LayoutRect   ArrangeDefault(const LayoutRect& bounds);
   bool         HandleKeyEventDefault(const Dali::KeyEvent& event);
@@ -1601,6 +1732,11 @@ private:
 
   MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
 
+  /// The bounds this view is laid out at for a slot its parent hands it: the slot's width/height
+  /// clamped to this view's own minimum/maximum by ApplyConstraints (max wins), x/y kept -- the
+  /// slot's start edge.
+  LayoutRect ClampToOwnSizeBounds(const LayoutRect& bounds) const;
+
   /**
    * @brief Measures every STANDALONE direct child at its derived constraint.
    *
@@ -1979,6 +2115,18 @@ private:
   /// signedness caveat noted on mLastArrangeDirection cannot apply: the three
   /// enumerators are 0..2 and an unsigned 2-bit field holds 0..3.
   LayoutTransitionMode mLayoutTransitionMode : 2;
+
+  /// The modes of the latest Measure() miss, written before the producer runs (a first-party
+  /// producer reads them through GetMeasureModes()) and, while mMeasureCacheValid, two exact KEY
+  /// terms of the measure cache. They are not part of the KEY / propagation-record union, so
+  /// DropMeasureCacheEntry() needs no change: the valid bit alone decides whether they key a hit.
+  ///
+  /// PACKING: two 2-bit fields beside the other enum bit-fields, sharing the allocation unit the
+  /// change of field type opened after the bool run; UNSIGNED by construction (MeasureMode's
+  /// underlying type is uint8_t) and the three enumerators are 0..2. sizeof(ViewDataImpl) is
+  /// unchanged by them.
+  MeasureMode mMeasureModeWidth : 2;
+  MeasureMode mMeasureModeHeight : 2;
 
   /// A whole bool, not a bit-field: ScopedTrueFlag binds a `bool&`, which a bit-field
   /// cannot provide. It sits between the bit-field run above and mFlags below; a

@@ -1466,6 +1466,14 @@ private:
     // measure producer mutates its scale, margin or requested size mid-pass.
     const Internal::StandaloneSlotInputs inputs = Internal::SnapshotStandaloneSlotInputs(*view);
 
+    // The measure modes come from the same snapshot on both branches: a MATCH_PARENT axis is
+    // measured EXACTLY at the slot DeriveStandaloneRootBounds places it in, every other axis
+    // AT_MOST -- the modes ArrangeStandaloneChild and MeasureStandaloneChildren pass a boundary
+    // view, and the modes ViewDataImpl::DeriveMeasureModes() gives a STANDALONE view or a view
+    // without a View parent, so the own pass, the placement and an application's call after the
+    // pass share one measure cache KEY.
+    const Internal::MeasureModes modes = Internal::DeriveStandaloneMeasureModes(inputs);
+
     float layoutWidth  = view->GetRequestedWidth();
     float layoutHeight = view->GetRequestedHeight();
 
@@ -1509,7 +1517,7 @@ private:
 
       const Internal::StandaloneExtent available    = Internal::ResolveStandaloneAvailableExtent(inputs, parentWidth, parentHeight);
       const Internal::StandaloneExtent constraint   = Internal::DeriveStandaloneMeasureConstraint(inputs, available);
-      const MeasuredSize               measuredSize = view->Measure(constraint.width, constraint.height);
+      const MeasuredSize               measuredSize = Internal::ViewDataImpl::Get(*view).Measure(constraint.width, constraint.height, modes.width, modes.height, Internal::MeasureModeCheck::MATCHES_DERIVATION);
       const LayoutRect                 bounds       = Internal::DeriveStandaloneRootBounds(inputs, available.width, available.height, measuredSize);
 
       // Use the internal root entry point rather than the public Arrange path: it
@@ -1555,12 +1563,26 @@ private:
     widthConstraint     = std::max(0.0f, widthConstraint - marginW);
     heightConstraint    = std::max(0.0f, heightConstraint - marginH);
 
-    // Measure pass
-    MeasuredSize measuredSize = view->Measure(widthConstraint, heightConstraint);
+    // A MATCH_PARENT axis is placed at this constraint clamped by the root's own min/max (the
+    // clamp DeriveStandaloneRootBounds applies), so it is clamped the same way here and measured
+    // EXACTLY at it: the measured size then equals the slot. WRAP_CONTENT keeps the at-most budget.
+    if(inputs.matchWidth)
+    {
+      widthConstraint = std::min(std::max(widthConstraint, inputs.minimumWidth * inputs.scale), inputs.maximumWidth * inputs.scale);
+    }
+    if(inputs.matchHeight)
+    {
+      heightConstraint = std::min(std::max(heightConstraint, inputs.minimumHeight * inputs.scale), inputs.maximumHeight * inputs.scale);
+    }
+
+    // Measure pass. A root without a View parent derives these very modes for a mode-less call;
+    // a View parent here would mean a stale registration, whose derivation is the parent's.
+    const Internal::MeasureModeCheck check        = Ui::View::DownCast(parent) ? Internal::MeasureModeCheck::NONE : Internal::MeasureModeCheck::MATCHES_DERIVATION;
+    MeasuredSize                     measuredSize = Internal::ViewDataImpl::Get(*view).Measure(widthConstraint, heightConstraint, modes.width, modes.height, check);
 
     // Arrange pass: use the user-set position (parent is not a layout).
-    // MATCH_PARENT roots fill the available constraint rather than using their
-    // measured (minimum) size, and the root's own min/max is enforced on the result.
+    // MATCH_PARENT roots fill the available constraint (which they were measured EXACTLY at),
+    // and the root's own min/max is enforced on the result.
     // It is the same shared derivation the STANDALONE branch above ends on; a
     // STANDALONE view with a parent has already returned there, which is where its
     // convergence with ArrangeStandaloneChild is established.

@@ -17,6 +17,8 @@
 
 #include <dali-ui-foundation/integration-api/recycler.h>
 #include <dali-ui-foundation/internal/linear-items-layouter-impl.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/integration-api/debug.h>
 #include <algorithm>
@@ -306,7 +308,10 @@ bool LinearItemsLayouterImpl::MeasureSlot(Recycler& recycler, uint32_t position,
   const float trailingCross = crossInset.trailingCrossOffset + (horizontal ? decoOffs.bottom : decoOffs.end);
   slot.cross                = std::max(0.0f, mCrossExtent - slot.crossStart - trailingCross);
 
-  const MeasuredSize measured = horizontal ? slot.view.Measure(kUnconstrained, slot.cross) : slot.view.Measure(slot.cross, kUnconstrained);
+  // Every item is laid out at slot.cross: its cross axis is measured exactly there, the scroll axis
+  // keeps the at-most budget. The scroller is a plain View whose derivation says at most: no
+  // derivation check.
+  const MeasuredSize measured = ViewDataImpl::Get(Ui::GetImpl(slot.view)).Measure(horizontal ? kUnconstrained : slot.cross, horizontal ? slot.cross : kUnconstrained, horizontal ? MeasureMode::AT_MOST : MeasureMode::EXACTLY, horizontal ? MeasureMode::EXACTLY : MeasureMode::AT_MOST, MeasureModeCheck::NONE);
   slot.extent                 = horizontal ? measured.width : measured.height;
   MeasureUpdate(position, slot.leading + slot.extent + slot.trailing);
   return true;

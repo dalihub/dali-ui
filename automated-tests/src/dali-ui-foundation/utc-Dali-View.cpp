@@ -2295,10 +2295,10 @@ int UtcDaliViewMeasureMatchParentP(void)
   view.SetRequestedWidth(MATCH_PARENT);
   view.SetRequestedHeight(MATCH_PARENT);
   MeasuredSize size = view.Measure(200.0f, 150.0f);
-  // MATCH_PARENT reports minimum desired size (0 by default); actual size
-  // is determined by the parent during the Arrange phase.
-  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
+  // A view without a View parent is exact on its MATCH_PARENT axes: nothing but the caller
+  // assigns its size, so the constraint is the size it reports (and is laid out at).
+  DALI_TEST_EQUALS(size.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2396,10 +2396,10 @@ int UtcDaliViewLayoutMatchParentWithManagerP(void)
   child.SetRequestedHeight(50.0f);
   layout.Add(child);
   MeasuredSize size = layout.Measure(200.0f, 150.0f);
-  // MATCH_PARENT layout reports minimum desired size (0 by default);
-  // actual size is determined by its parent during the Arrange phase.
-  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
+  // A MATCH_PARENT layout without a View parent is exact on both axes: the constraint the
+  // caller passes is the size it reports (and is laid out at).
+  DALI_TEST_EQUALS(size.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -7068,24 +7068,38 @@ int UtcDaliViewAncestorCacheOnlyInvalidationSchedulesNoLayoutP(void)
 // pushed an ArrangeOwnedMeasureScope around it, so the ancestor walk stops at
 // that view and everything above it keeps its measure cache.
 //
-// Tree: root(fixed 200x100) -> OBS(pass-through counting producer, fixed) ->
+// Tree: root(fixed 200x100) -> OBS(pass-through counting producer, fixed, and an
+// arrange producer that lays its child out 10 smaller than measured on both axes) ->
 // M(the arranging container under test, WRAP_CONTENT) -> C(MATCH_PARENT width,
 // clamp producer).
 //
-// M is deliberately WRAP_CONTENT: its arrange bounds are then its own measured
-// size (80x60), which differs from the 200x100 constraint its measure pass handed
-// C, so C's arrange-phase re-measure is a genuine full MISS and really does run
-// the walk. Sizing M to 200x100 instead makes the two constraints equal, the
-// re-measure a cache hit, and the whole test vacuous (verified for Grid and Flex).
-// The non-vacuity guard below pins that the re-measure ran.
+// The arrange re-measure has to be a genuine full MISS for the walk to run at all.
+// M's measure already measures C exactly at the slot M resolves for it (a
+// WRAP_CONTENT container measures a MATCH_PARENT child at its final width), and a
+// re-measure at that same slot is skipped. OBS therefore lays M out 10 smaller than
+// M measured: M's arrange then hands C a slot its measure pass never used, so C's
+// re-measure really runs the walk on every site. The non-vacuity guard below pins
+// that C was measured more than once.
 //
 // From C the walk would reach M (arrange-in-progress) and then OBS; the owner
 // scope stops it at M, so OBS's producer must never run again on an otherwise
 // identical pass.
 //
 // Without the scope the walk clears M's and OBS's caches, and because C's two
-// constraints alternate for ever, the clearing repeats on every pass: OBS's count
-// then grows once per pass. That divergence is what makes this test non-vacuous.
+// slots alternate for ever (M's measure and M's arrange), the clearing repeats on
+// every pass: OBS's count then grows once per pass. That divergence is what makes
+// this test non-vacuous.
+LayoutRect ShrinkingSingleChildArrange(View view, const LayoutRect& bounds)
+{
+  for(uint32_t i = 0; i < view.GetChildViewCount(); ++i)
+  {
+    View               child    = view.GetChildViewAt(i);
+    const MeasuredSize measured = child.GetMeasuredSize();
+    child.Arrange(LayoutRect(0.0f, 0.0f, std::max(0.0f, measured.width - 10.0f), std::max(0.0f, measured.height - 10.0f)));
+  }
+  return bounds;
+}
+
 void CheckArrangeOwnedChildMeasureDoesNotInvalidateAncestors(UiTestApplication& application, View container)
 {
   Window window = application.GetWindow();
@@ -7101,6 +7115,7 @@ void CheckArrangeOwnedChildMeasureDoesNotInvalidateAncestors(UiTestApplication& 
   observer.SetRequestedWidth(200.0f);
   observer.SetRequestedHeight(100.0f);
   observer.SetMeasureCallback(MeasureCallback::New(&CountingPassThroughMeasure));
+  observer.SetArrangeCallback(ArrangeCallback::New(&ShrinkingSingleChildArrange));
 
   View child = View::New();
   child.SetRequestedWidth(MATCH_PARENT);
@@ -7124,10 +7139,10 @@ void CheckArrangeOwnedChildMeasureDoesNotInvalidateAncestors(UiTestApplication& 
   application.SendNotification();
   application.SendNotification();
 
-  // Non-vacuity guard: C was measured at least twice -- once by M's measure
-  // pass, once by M's arrange re-measuring the MATCH_PARENT slot. Without that
-  // second measurement there is no arrange-owned measure to attribute and the
-  // assertions below would hold trivially.
+  // Non-vacuity guard: C was measured at least twice -- by M's measure pass, and
+  // by M's arrange re-measuring the MATCH_PARENT slot OBS's smaller placement
+  // gives it. Without that arrange-time measurement there is no arrange-owned
+  // measure to attribute and the assertions below would hold trivially.
   DALI_TEST_CHECK(gClampMeasureProducerCount >= 2);
   const int observerCountAfterLayout = gPassThroughMeasureProducerCount;
   DALI_TEST_CHECK(observerCountAfterLayout > 0);

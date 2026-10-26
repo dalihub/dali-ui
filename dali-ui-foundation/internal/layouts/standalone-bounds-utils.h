@@ -22,6 +22,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layouts/measure-mode.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -37,10 +38,10 @@ namespace Internal
  *
  * The parent-supplied extent for a MATCH_PARENT axis, the measured size otherwise.
  *
- * UNCLAMPED on purpose: DeriveStandaloneMeasureConstraint measures a MATCH_PARENT
- * axis at exactly this unclamped value (the available extent), so the measure cache
- * KEY converges too. The clamp belongs to the placement (see
- * DeriveStandaloneRootBounds), not to the constraint the producer is run at.
+ * Unclamped here; DeriveStandaloneRootBounds applies the view's own min/max to the result.
+ * DeriveStandaloneMeasureConstraint measures a MATCH_PARENT axis EXACTLY at that same clamped
+ * value, so the measured size equals the slot and the clamp in DeriveStandaloneRootBounds and the
+ * arrange-side clamp are idempotent on such an axis.
  *
  * @param[in] match True when this axis requested MATCH_PARENT
  * @param[in] available The extent the parent makes available on this axis
@@ -201,7 +202,9 @@ inline StandaloneExtent ResolveStandaloneAvailableExtent(const StandaloneSlotInp
  * (LayoutController::ProcessLayoutRoot) -- and all three call this with the extent THEY know for
  * the parent, already reduced to the available extent by ResolveStandaloneAvailableExtent. Per
  * axis:
- *  - MATCH_PARENT: the available extent, the very value DeriveStandaloneRootBounds places it at;
+ *  - MATCH_PARENT: the available extent clamped by the view's own min/max -- the very value
+ *    DeriveStandaloneRootBounds places it at; the axis is measured EXACTLY
+ *    (DeriveStandaloneMeasureModes), so the measured size equals the slot;
  *  - WRAP_CONTENT: the size of the window the view is shown in, less its own margin -- the
  *    whole Window::GetPositionSize() extent: platform insets, input-method panels and window
  *    decorations are not accounted for. It does not depend on the parent, so it is the same on
@@ -264,8 +267,19 @@ inline StandaloneExtent ResolveStandaloneAvailableExtent(const StandaloneSlotInp
  */
 inline StandaloneExtent DeriveStandaloneMeasureConstraint(const StandaloneSlotInputs& inputs, const StandaloneExtent& available)
 {
-  // MATCH_PARENT axes keep the available extent.
   StandaloneExtent constraint = available;
+
+  // MATCH_PARENT axes take the available extent clamped by the view's own min/max: the slot
+  // DeriveStandaloneRootBounds places them in (the same expression, so the same value). They
+  // are measured EXACTLY, which reports the constraint, so the measured size equals the slot.
+  if(inputs.matchWidth)
+  {
+    constraint.width = std::min(std::max(available.width, inputs.minimumWidth * inputs.scale), inputs.maximumWidth * inputs.scale);
+  }
+  if(inputs.matchHeight)
+  {
+    constraint.height = std::min(std::max(available.height, inputs.minimumHeight * inputs.scale), inputs.maximumHeight * inputs.scale);
+  }
 
   const float marginW = static_cast<float>(inputs.margin.start + inputs.margin.end) * inputs.scale;
   const float marginH = static_cast<float>(inputs.margin.top + inputs.margin.bottom) * inputs.scale;
@@ -292,6 +306,24 @@ inline StandaloneExtent DeriveStandaloneMeasureConstraint(const StandaloneSlotIn
   }
 
   return constraint;
+}
+
+/**
+ * @brief The measure modes matching DeriveStandaloneMeasureConstraint().
+ *
+ * A MATCH_PARENT axis is measured at exactly the extent DeriveStandaloneRootBounds() places it
+ * in, so it is EXACTLY; every other axis keeps the at-most budget (an explicit size is
+ * canonicalised to AT_MOST by Measure() anyway). Used by all three places that measure a boundary
+ * view and by the regular layout-root path, so the same snapshot yields the same modes -- and,
+ * with the same constraint, the same measure cache KEY -- on every path.
+ *
+ * @param[in] inputs The view's slot inputs, snapshotted before the pass
+ * @return The modes to measure the view at
+ */
+inline MeasureModes DeriveStandaloneMeasureModes(const StandaloneSlotInputs& inputs)
+{
+  return MeasureModes{inputs.matchWidth ? MeasureMode::EXACTLY : MeasureMode::AT_MOST,
+                      inputs.matchHeight ? MeasureMode::EXACTLY : MeasureMode::AT_MOST};
 }
 
 /**
@@ -341,10 +373,12 @@ inline LayoutRect DeriveStandaloneRootBounds(const StandaloneSlotInputs& inputs,
   bounds.width  = ResolveStandaloneExtent(inputs.matchWidth, availableWidth, measured.width);
   bounds.height = ResolveStandaloneExtent(inputs.matchHeight, availableHeight, measured.height);
 
-  // A boundary view has no parent layout to clamp it, so its own min/max is enforced
-  // here. For a MATCH_PARENT axis the measured value was discarded above, so this is
-  // the only place min/max reaches it; for the others ApplyConstraints already applied
-  // the same clamp during Measure and this is idempotent.
+  // Its own min/max is enforced here, so the slot itself carries the clamp every view
+  // applies at arrange (ViewDataImpl::ClampToOwnSizeBounds), which is then idempotent.
+  // For a MATCH_PARENT axis the measured value was discarded above in favour of the
+  // available extent, which this clamps to the value DeriveStandaloneMeasureConstraint
+  // measured it at; for the others ApplyConstraints already applied the same clamp during
+  // Measure. Idempotent either way.
   bounds.width  = std::min(std::max(bounds.width, inputs.minimumWidth * inputs.scale), inputs.maximumWidth * inputs.scale);
   bounds.height = std::min(std::max(bounds.height, inputs.minimumHeight * inputs.scale), inputs.maximumHeight * inputs.scale);
 
