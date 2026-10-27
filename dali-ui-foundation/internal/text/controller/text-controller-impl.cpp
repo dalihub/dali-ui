@@ -743,8 +743,7 @@ void Controller::Impl::GetText(CharacterIndex index, std::string& text) const
 
 Dali::LayoutDirection::Type Controller::Impl::GetLayoutDirection(Dali::Actor& actor) const
 {
-  if(mModel->mLayoutDirectionMode == LayoutDirectionMode::LOCALE ||
-     (mModel->mLayoutDirectionMode == LayoutDirectionMode::INHERIT && !mIsLayoutDirectionChanged))
+  if(mModel->mLayoutDirectionMode == LayoutDirectionMode::LOCALE)
   {
     Dali::Integration::SceneHolder sceneHolder = Dali::Integration::SceneHolder::Get(actor);
     return sceneHolder ? sceneHolder.GetRootLayer().GetEffectiveLayoutDirection()
@@ -752,6 +751,8 @@ Dali::LayoutDirection::Type Controller::Impl::GetLayoutDirection(Dali::Actor& ac
   }
   else
   {
+    // Actor resolves inheritance, including explicit ancestor boundaries, even
+    // when the effective direction has never changed and no signal was emitted.
     return actor.GetEffectiveLayoutDirection();
   }
 }

@@ -439,7 +439,6 @@ void Controller::ClearVariationsMap()
 
 void Controller::ChangedLayoutDirection()
 {
-  mImpl->mIsLayoutDirectionChanged = true;
   mImpl->InvalidateLayoutDirectionData();
 }
 

@@ -498,7 +498,6 @@ public:
     mFontStyleSetByString(false),
     mStrikethroughSetByString(false),
     mSystemFontSizeScaleEnabled(false),
-    mIsLayoutDirectionChanged(false),
     mIsUserInteractionEnabled(true),
     mProcessorRegistered(false),
     mEmbossEnabled(false),
@@ -1674,7 +1673,6 @@ public:
   bool               mFontStyleSetByString : 1;        ///< Set when font style is set by string (legacy) instead of map
   bool               mStrikethroughSetByString : 1;    ///< Set when strikethrough is set by string (legacy) instead of map
   bool               mSystemFontSizeScaleEnabled : 1;  ///< Whether the system font size scale is applied.
-  bool               mIsLayoutDirectionChanged : 1;    ///< Whether the layout has changed.
   bool               mIsUserInteractionEnabled : 1;    ///< Whether the user interaction is enabled.
   bool               mProcessorRegistered : 1;         ///< Whether the text controller registered into processor or not.
   bool               mEmbossEnabled : 1;               ///< Whether emboss is enabled.
