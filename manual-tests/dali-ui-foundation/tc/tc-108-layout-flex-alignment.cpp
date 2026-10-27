@@ -110,6 +110,27 @@ public:
           r.Rendered("b", b, LayoutRect(start + 30, 0, 30, 10));
         });
       }));
+    // STRETCH on the determined 100 cross extent measures both WRAP_CONTENT heights EXACTLY at 100;
+    // a's maximum 40 clamps its report and its stretched slot (0,0,60,100) from the top edge.
+    out.push_back(Single("F05.stretch-clamp", "A stretched child reports and is laid out at its maximum from the slot's top edge", 12, [](Run& r) {
+      auto f = FlexLayout::New();
+      Fixed(f, 300, 100);
+      View a = View::New(), b = View::New();
+      a.SetRequestedWidth(60);
+      a.SetRequestedHeight(WRAP_CONTENT);
+      a.SetMaximumHeight(40);
+      b.SetRequestedWidth(60);
+      b.SetRequestedHeight(WRAP_CONTENT);
+      f.Add(a);
+      f.Add(b);
+      View stage = Mount(r, f, 300, 100);
+      r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.Size("a", a.GetMeasuredSize(), MeasuredSize(60, 40));
+        r.Rendered("a.rendered", a, LayoutRect(0, 0, 60, 40));
+        r.Size("b", b.GetMeasuredSize(), MeasuredSize(60, 100));
+        r.Rendered("b.rendered", b, LayoutRect(60, 0, 60, 100));
+      });
+    }));
     return out;
   }
 };

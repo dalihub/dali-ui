@@ -30,6 +30,7 @@
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 - `C19.custom-manager`: 앱이 정의한 `LayoutManager` 서브클래스(각 자식을 직전 자식의 우하단에서 `step`배만큼 이동해 대각선 배치)를 plain View에 attach합니다. `mount`(a 20×10, b 30×15, c 40×20: measured 90×45, a (0,0), b (20,10), c (50,25)) → `step-1.5`(manager 소유 상태 setter가 `InvalidateOwnerMeasure()`로 pass를 스스로 예약해야 하며 Measure/Arrange 호출 각 +1, b (30,15), c (75,37.5)) → `same-value`(같은 값을 다시 쓰면 pass가 없어야 함: 300ms 뒤 +0/+0, c 불변) → `sibling-pass`(형제 leaf만 바꾼 pass에서 custom manager는 measure 캐시와 기본 IF_CHANGED 정책으로 재실행되지 않음: +0/+0) → `step-1.0`(복원)의 5 step입니다. 호출 수 delta는 정확히 일치해야 합니다.
+- `C19.custom-manager-modes`: 같은 대각선 manager를 attach한 WRAP×WRAP root에 a=Leaf(20,10)과 MATCH×MATCH d(min 6×4)를 넣고 200×100 stage에 붙입니다. manager는 자식에게 mode가 없는 `Measure()`를 호출하므로 d의 mode는 custom parent 규칙으로 유도됩니다. `budget`에서는 root가 AT_MOST로 측정되므로 d도 AT_MOST로 측정되어 minimum (6,4)를 보고하고 root는 (20+6,10+4)=(26,14), d 렌더 (20,10,6,4)(직전 자식 a의 우하단), a 렌더 (0,0,20,10)입니다. `exact`에서 root를 MATCH×MATCH로 바꾸면 root가 EXACTLY (200,100)이 되고, EXACTLY인 custom parent의 MATCH_PARENT 자식 d는 (200−20,100−10)에서 EXACTLY로 측정되어 (180,90)을 보고합니다. root measured (200,100), d 렌더 (20,10,180,90), a 렌더 (0,0,20,10)입니다(docs/layout-structure.md custom parent 규칙, view.h Measure). 각 step은 12행입니다.
 
 ## 근거와 검증 경계
 
@@ -47,7 +48,7 @@ callback→attached manager→default의 dispatch 순서와 네 manager의 attac
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 6 scenario, 12 action, 106 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 7 scenario, 14 action, 130 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -57,6 +58,7 @@ Profile `release`: 6 scenario, 12 action, 106 checks. 이 표에 없는 scenario
 | `C18.attached-manager.3` | `run` : 8 |
 | `C18.attached-manager.4` | `run` : 8 |
 | `C19.custom-manager` | `mount` : 14 → `step-1.5` : 16 → `same-value` : 6 → `sibling-pass` : 6 → `step-1.0` : 14 |
+| `C19.custom-manager-modes` | `budget` : 12 → `exact` : 12 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

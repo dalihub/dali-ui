@@ -1,5 +1,5 @@
 {
-  "revision": 14,
+  "revision": 15,
   "base_revision": "fb86f14d2fe42705fecfcd2b73855213a667736b",
   "scope": "new TC suite only; existing TC45–94 preserved",
   "coordinate_contract": {
@@ -935,6 +935,91 @@
                   "required_checks": 6
                 }
               ]
+            },
+            {
+              "id": "C07.match-clamp.0",
+              "steps": [
+                {
+                  "id": "below-minimum",
+                  "required_checks": 6
+                },
+                {
+                  "id": "inside",
+                  "required_checks": 6
+                },
+                {
+                  "id": "above-maximum",
+                  "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "C07.match-clamp.1",
+              "steps": [
+                {
+                  "id": "below-minimum",
+                  "required_checks": 6
+                },
+                {
+                  "id": "inside",
+                  "required_checks": 6
+                },
+                {
+                  "id": "above-maximum",
+                  "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "C07.match-clamp.2",
+              "steps": [
+                {
+                  "id": "below-minimum",
+                  "required_checks": 6
+                },
+                {
+                  "id": "inside",
+                  "required_checks": 6
+                },
+                {
+                  "id": "above-maximum",
+                  "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "C07.match-clamp.3",
+              "steps": [
+                {
+                  "id": "below-minimum",
+                  "required_checks": 6
+                },
+                {
+                  "id": "inside",
+                  "required_checks": 6
+                },
+                {
+                  "id": "above-maximum",
+                  "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "C07.match-clamp.4",
+              "steps": [
+                {
+                  "id": "below-minimum",
+                  "required_checks": 6
+                },
+                {
+                  "id": "inside",
+                  "required_checks": 6
+                },
+                {
+                  "id": "above-maximum",
+                  "required_checks": 6
+                }
+              ]
             }
           ]
         },
@@ -1069,6 +1154,24 @@
                   "required_checks": 4
                 }
               ]
+            },
+            {
+              "id": "R04.unbounded-exact",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "C09.max-wins.match",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 6
+                }
+              ]
             }
           ]
         },
@@ -1129,6 +1232,28 @@
                 {
                   "id": "run",
                   "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "C06.two-step",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 16
+                },
+                {
+                  "id": "widen-seed",
+                  "required_checks": 16
+                }
+              ]
+            },
+            {
+              "id": "C11.explicit-clamped-content",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 13
                 }
               ]
             }
@@ -1266,6 +1391,19 @@
                 {
                   "id": "step-1.0",
                   "required_checks": 14
+                }
+              ]
+            },
+            {
+              "id": "C19.custom-manager-modes",
+              "steps": [
+                {
+                  "id": "budget",
+                  "required_checks": 12
+                },
+                {
+                  "id": "exact",
+                  "required_checks": 12
                 }
               ]
             }
@@ -1490,6 +1628,23 @@
                   "required_checks": 8
                 }
               ]
+            },
+            {
+              "id": "K06.minmax-arrange",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 7
+                },
+                {
+                  "id": "maximum",
+                  "required_checks": 8
+                },
+                {
+                  "id": "same",
+                  "required_checks": 5
+                }
+              ]
             }
           ]
         },
@@ -1570,6 +1725,23 @@
                 {
                   "id": "unrelated-pass",
                   "required_checks": 2
+                }
+              ]
+            },
+            {
+              "id": "C20.empty-slot",
+              "steps": [
+                {
+                  "id": "empty",
+                  "required_checks": 12
+                },
+                {
+                  "id": "own-width",
+                  "required_checks": 12
+                },
+                {
+                  "id": "empty-again",
+                  "required_checks": 12
                 }
               ]
             }
@@ -1667,6 +1839,42 @@
                 {
                   "id": "corrupt-and-repair",
                   "required_checks": 3
+                }
+              ]
+            },
+            {
+              "id": "C13.scaled-clamp.1.000000",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "C13.scaled-clamp.1.250000",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "C13.scaled-clamp.1.500000",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "C13.scaled-clamp.2.000000",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 6
                 }
               ]
             }
@@ -1805,6 +2013,31 @@
                   "required_checks": 12
                 }
               ]
+            },
+            {
+              "id": "C15.clamped-mirror",
+              "steps": [
+                {
+                  "id": "ltr",
+                  "required_checks": 6
+                },
+                {
+                  "id": "rtl",
+                  "required_checks": 14
+                },
+                {
+                  "id": "parent-replay",
+                  "required_checks": 4
+                },
+                {
+                  "id": "child-replay",
+                  "required_checks": 4
+                },
+                {
+                  "id": "ltr-again",
+                  "required_checks": 4
+                }
+              ]
             }
           ]
         },
@@ -1882,6 +2115,37 @@
                   "required_checks": 8
                 }
               ]
+            },
+            {
+              "id": "S04.fill-maximum",
+              "steps": [
+                {
+                  "id": "ltr",
+                  "required_checks": 10
+                },
+                {
+                  "id": "rtl",
+                  "required_checks": 12
+                }
+              ]
+            },
+            {
+              "id": "S11.match-report",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 12
+                }
+              ]
+            },
+            {
+              "id": "S12.weight-exact-share",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 7
+                }
+              ]
             }
           ]
         },
@@ -1929,6 +2193,42 @@
                 {
                   "id": "weighted",
                   "required_checks": 4
+                }
+              ]
+            },
+            {
+              "id": "S15.clamped-container",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 16
+                }
+              ]
+            },
+            {
+              "id": "S16.weighted-wrap-exact",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 14
+                }
+              ]
+            },
+            {
+              "id": "S17.two-step-match",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 12
+                }
+              ]
+            },
+            {
+              "id": "S17.two-step-stretched",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 16
                 }
               ]
             }
@@ -2015,6 +2315,28 @@
                 {
                   "id": "run",
                   "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "F10.grow-maximum-kept",
+              "steps": [
+                {
+                  "id": "first",
+                  "required_checks": 10
+                },
+                {
+                  "id": "arrange-only",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "F18.shrink-assigned-exact",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 11
                 }
               ]
             }
@@ -2110,6 +2432,15 @@
                 {
                   "id": "run",
                   "required_checks": 20
+                }
+              ]
+            },
+            {
+              "id": "F19.wrap-match-follower",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 6
                 }
               ]
             }
@@ -2297,6 +2628,15 @@
                   "required_checks": 8
                 }
               ]
+            },
+            {
+              "id": "F05.stretch-clamp",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 12
+                }
+              ]
             }
           ]
         },
@@ -2369,6 +2709,15 @@
                   "required_checks": 10
                 }
               ]
+            },
+            {
+              "id": "G17.match-cell-measured",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 12
+                }
+              ]
             }
           ]
         },
@@ -2435,6 +2784,51 @@
                 {
                   "id": "run",
                   "required_checks": 4
+                }
+              ]
+            },
+            {
+              "id": "G09.clamped-align.0",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "G09.clamped-align.1",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "G09.clamped-align.2",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "G09.clamped-align.3",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "G18.oversize-remeasured",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 13
                 }
               ]
             }
@@ -2592,6 +2986,15 @@
                 {
                   "id": "run",
                   "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "A09.bounds-exact",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 14
                 }
               ]
             }
@@ -2830,6 +3233,24 @@
                   "required_checks": 6
                 }
               ]
+            },
+            {
+              "id": "A10.proportional-maximum",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 12
+                }
+              ]
+            },
+            {
+              "id": "A11.proportional-last",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 9
+                }
+              ]
             }
           ]
         },
@@ -2958,6 +3379,72 @@
                   "required_checks": 4
                 }
               ]
+            },
+            {
+              "id": "S10.match-measured",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 6
+                },
+                {
+                  "id": "arrange-only",
+                  "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "S10.wrap-window-bound",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 8
+                }
+              ]
+            },
+            {
+              "id": "S10.explicit-requested",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "S10.mixed-axes",
+              "steps": [
+                {
+                  "id": "parent-120",
+                  "required_checks": 7
+                },
+                {
+                  "id": "parent-200",
+                  "required_checks": 7
+                }
+              ]
+            },
+            {
+              "id": "S10.placement-remeasure",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "G14.mode-release",
+              "steps": [
+                {
+                  "id": "standalone",
+                  "required_checks": 6
+                },
+                {
+                  "id": "release",
+                  "required_checks": 6
+                }
+              ]
             }
           ]
         },
@@ -3027,6 +3514,110 @@
                   "required_checks": 8
                 }
               ]
+            },
+            {
+              "id": "K11.application-measure.0",
+              "steps": [
+                {
+                  "id": "pass",
+                  "required_checks": 7
+                },
+                {
+                  "id": "app-hit",
+                  "required_checks": 3
+                }
+              ]
+            },
+            {
+              "id": "K11.application-measure.1",
+              "steps": [
+                {
+                  "id": "pass",
+                  "required_checks": 7
+                },
+                {
+                  "id": "app-hit",
+                  "required_checks": 3
+                }
+              ]
+            },
+            {
+              "id": "K11.application-measure.2",
+              "steps": [
+                {
+                  "id": "pass",
+                  "required_checks": 7
+                },
+                {
+                  "id": "app-hit",
+                  "required_checks": 3
+                }
+              ]
+            },
+            {
+              "id": "K11.application-measure.3",
+              "steps": [
+                {
+                  "id": "pass",
+                  "required_checks": 7
+                },
+                {
+                  "id": "app-hit",
+                  "required_checks": 3
+                }
+              ]
+            },
+            {
+              "id": "K11.application-measure.4",
+              "steps": [
+                {
+                  "id": "pass",
+                  "required_checks": 7
+                },
+                {
+                  "id": "app-hit",
+                  "required_checks": 3
+                }
+              ]
+            },
+            {
+              "id": "K11.application-measure.5",
+              "steps": [
+                {
+                  "id": "pass",
+                  "required_checks": 7
+                },
+                {
+                  "id": "app-hit",
+                  "required_checks": 3
+                }
+              ]
+            },
+            {
+              "id": "K12.arrange-remeasure-skip",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 6
+                },
+                {
+                  "id": "invalidate",
+                  "required_checks": 3
+                }
+              ]
+            },
+            {
+              "id": "K11.application-measure.6",
+              "steps": [
+                {
+                  "id": "pass",
+                  "required_checks": 7
+                },
+                {
+                  "id": "app-hit",
+                  "required_checks": 3
+                }
+              ]
             }
           ]
         },
@@ -3068,6 +3659,23 @@
                 },
                 {
                   "id": "hit",
+                  "required_checks": 5
+                }
+              ]
+            },
+            {
+              "id": "K21.clamped-arrange-hit",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 10
+                },
+                {
+                  "id": "external-hit",
+                  "required_checks": 10
+                },
+                {
+                  "id": "pass",
                   "required_checks": 5
                 }
               ]
@@ -3194,7 +3802,7 @@
               "steps": [
                 {
                   "id": "run",
-                  "required_checks": 7
+                  "required_checks": 11
                 },
                 {
                   "id": "stable",
@@ -3207,7 +3815,7 @@
               "steps": [
                 {
                   "id": "run",
-                  "required_checks": 7
+                  "required_checks": 11
                 },
                 {
                   "id": "stable",
@@ -3220,7 +3828,7 @@
               "steps": [
                 {
                   "id": "run",
-                  "required_checks": 7
+                  "required_checks": 11
                 },
                 {
                   "id": "stable",
@@ -3233,7 +3841,7 @@
               "steps": [
                 {
                   "id": "run",
-                  "required_checks": 7
+                  "required_checks": 11
                 },
                 {
                   "id": "stable",
@@ -3246,11 +3854,29 @@
               "steps": [
                 {
                   "id": "run",
-                  "required_checks": 7
+                  "required_checks": 11
                 },
                 {
                   "id": "stable",
                   "required_checks": 1
+                }
+              ]
+            },
+            {
+              "id": "K13.measure-pass-slot.0",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "K13.measure-pass-slot.4",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 10
                 }
               ]
             }
@@ -3281,7 +3907,7 @@
               "steps": [
                 {
                   "id": "mount",
-                  "required_checks": 4
+                  "required_checks": 5
                 },
                 {
                   "id": "warmup",
@@ -3294,6 +3920,10 @@
                 {
                   "id": "repeat",
                   "required_checks": 1
+                },
+                {
+                  "id": "path-independence",
+                  "required_checks": 5
                 }
               ]
             },
@@ -3572,6 +4202,23 @@
                 {
                   "id": "reattach",
                   "required_checks": 10
+                }
+              ]
+            },
+            {
+              "id": "L05.standalone-offscene",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 6
+                },
+                {
+                  "id": "detach",
+                  "required_checks": 8
+                },
+                {
+                  "id": "reattach",
+                  "required_checks": 6
                 }
               ]
             }
@@ -3875,6 +4522,36 @@
                   "required_checks": 7
                 }
               ]
+            },
+            {
+              "id": "TR03.clamped-target-ltr",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 6
+                },
+                {
+                  "id": "change",
+                  "required_checks": 17
+                },
+                {
+                  "id": "slot-only",
+                  "required_checks": 7
+                }
+              ]
+            },
+            {
+              "id": "TR03.clamped-target-rtl",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 6
+                },
+                {
+                  "id": "change",
+                  "required_checks": 17
+                }
+              ]
             }
           ]
         },
@@ -4016,6 +4693,19 @@
                 {
                   "id": "inherited-exit-finish",
                   "required_checks": 7
+                }
+              ]
+            },
+            {
+              "id": "TR04.standalone-parent-target",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 8
+                },
+                {
+                  "id": "change-held",
+                  "required_checks": 15
                 }
               ]
             }
@@ -5854,6 +6544,40 @@
                   "required_checks": 4
                 }
               ]
+            },
+            {
+              "id": "CT01.root-maximum",
+              "steps": [
+                {
+                  "id": "pass",
+                  "required_checks": 10
+                },
+                {
+                  "id": "application-measure",
+                  "required_checks": 3
+                },
+                {
+                  "id": "below-maximum",
+                  "required_checks": 5
+                }
+              ]
+            },
+            {
+              "id": "CT01.standalone-window-root",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 8
+                },
+                {
+                  "id": "reconnect",
+                  "required_checks": 1
+                },
+                {
+                  "id": "window-resize",
+                  "required_checks": 7
+                }
+              ]
             }
           ]
         },
@@ -5879,6 +6603,23 @@
                 {
                   "id": "unregister",
                   "required_checks": 1
+                }
+              ]
+            },
+            {
+              "id": "CT02.mode-switch-cancels-self-turn",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 8
+                },
+                {
+                  "id": "switch-before-turn",
+                  "required_checks": 8
+                },
+                {
+                  "id": "steady",
+                  "required_checks": 4
                 }
               ]
             }
@@ -6195,6 +6936,40 @@
                 {
                   "id": "recovered",
                   "required_checks": 6
+                }
+              ]
+            },
+            {
+              "id": "text-two-step",
+              "steps": [
+                {
+                  "id": "seed-40",
+                  "required_checks": 14
+                },
+                {
+                  "id": "seed-75",
+                  "required_checks": 14
+                }
+              ]
+            },
+            {
+              "id": "text-stretched",
+              "steps": [
+                {
+                  "id": "fill",
+                  "required_checks": 6
+                },
+                {
+                  "id": "maximum",
+                  "required_checks": 6
+                },
+                {
+                  "id": "minimum",
+                  "required_checks": 6
+                },
+                {
+                  "id": "conflict",
+                  "required_checks": 8
                 }
               ]
             }
@@ -7136,6 +7911,23 @@
                   "required_checks": 23
                 }
               ]
+            },
+            {
+              "id": "SC.content-arranged-extent",
+              "steps": [
+                {
+                  "id": "minimum",
+                  "required_checks": 8
+                },
+                {
+                  "id": "scroll-end",
+                  "required_checks": 6
+                },
+                {
+                  "id": "custom-return",
+                  "required_checks": 7
+                }
+              ]
             }
           ]
         },
@@ -7303,6 +8095,24 @@
                 {
                   "id": "run",
                   "required_checks": 24
+                }
+              ]
+            },
+            {
+              "id": "window-wrap-cross-vertical",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 7
+                }
+              ]
+            },
+            {
+              "id": "window-wrap-cross-horizontal",
+              "steps": [
+                {
+                  "id": "run",
+                  "required_checks": 7
                 }
               ]
             }

@@ -21,6 +21,10 @@ struct DirectedKind
 {
   View stage, container, a, b, standalone;
 };
+struct ClampedMirror
+{
+  View stage, p, c, sibling;
+};
 inline LayoutRect Mirrored(const LayoutRect& v)
 {
   return LayoutRect(200 - v.x - v.width, v.y, v.width, v.height);
@@ -153,6 +157,56 @@ public:
                          }});
       out.push_back(Steps(Id("C15.standalone-replay", kind), "Standalone children are excluded from the mirror and the cache-hit replay keeps mirrored geometry", steps));
     }
+    // A MATCH_PARENT child with margin (10,0,20,0) and maximum 120x80 in a 300x200 parent: slot
+    // (10,20,290,180), laid out clamped at (10,20,120,80) from the slot's start edge. Under RTL the
+    // slot's right edge (300 - 10) is kept: x = 300 - 10 - 120 = 170, on both replay routes.
+    out.push_back(Steps("C15.clamped-mirror", "A clamped MATCH_PARENT child keeps the slot's start edge, which under RTL is its right edge, on every replay route", {
+      {"ltr", 6, [](Run& r) {
+         auto s     = std::make_shared<ClampedMirror>();
+         s->p       = Leaf(300, 200, "parent");
+         s->c       = Leaf(MATCH_PARENT, MATCH_PARENT, "clamped");
+         s->c.SetMargin(Insets(10, 0, 20, 0));
+         s->c.SetMaximumWidth(120);
+         s->c.SetMaximumHeight(80);
+         s->sibling = Leaf(10, 10, "sibling");
+         s->sibling.SetRequestedY(215);
+         s->p.Add(s->c);
+         s->stage = r.Stage(300, 230);
+         ColorizeTree(s->p);
+         s->stage.Add(s->p);
+         s->stage.Add(s->sibling);
+         r.SetState(s);
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) {
+           r.Size("ltr.measured", s->c.GetMeasuredSize(), MeasuredSize(120, 80));
+           r.Rendered("ltr.rendered", s->c, LayoutRect(10, 20, 120, 80));
+         });
+       }},
+      {"rtl", 14, [](Run& r) {
+         auto s = r.State<ClampedMirror>();
+         s->p.SetLayoutDirection(Dali::LayoutDirection::RIGHT_TO_LEFT);
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) {
+           r.Rendered("rtl.rendered", s->c, LayoutRect(170, 20, 120, 80));
+           r.Rect("rtl.logical", ArrangedBounds(s->c), LayoutRect(10, 20, 120, 80));
+           r.Rect("rtl.reported", r.Snapshot(s->c), LayoutRect(170, 20, 120, 80));
+           r.Size("rtl.measured", s->c.GetMeasuredSize(), MeasuredSize(120, 80));
+         });
+       }},
+      {"parent-replay", 4, [](Run& r) {
+         auto s = r.State<ClampedMirror>();
+         s->sibling.SetRequestedWidth(11);
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) { r.Rendered("parent-replay.rendered", s->c, LayoutRect(170, 20, 120, 80)); });
+       }},
+      {"child-replay", 4, [](Run& r) {
+         auto s = r.State<ClampedMirror>();
+         s->p.InvalidateArrange();
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) { r.Rendered("child-replay.rendered", s->c, LayoutRect(170, 20, 120, 80)); });
+       }},
+      {"ltr-again", 4, [](Run& r) {
+         auto s = r.State<ClampedMirror>();
+         s->p.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) { r.Rendered("ltr-again.rendered", s->c, LayoutRect(10, 20, 120, 80)); });
+       }},
+    }));
     return out;
   }
 };

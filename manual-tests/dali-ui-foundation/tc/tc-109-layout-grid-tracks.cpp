@@ -135,6 +135,28 @@ public:
         r.Rendered("minimum.b", b, LayoutRect(30, 0, 70, 20));
       });
     }));
+    // A MATCH_PARENT child of an ABSOLUTE cell is measured EXACTLY at the cell. In a STAR column of a
+    // grid of determined width the width is a cell in Measure (300 - 50 = 250); a STAR row is never a
+    // cell before the children are measured, so the height is measured exactly at its 60 cell in
+    // Arrange.
+    out.push_back(Single("G17.match-cell-measured", "MATCH_PARENT children report their cells: ABSOLUTE tracks and STAR columns in Measure, STAR rows in Arrange", 12, [](Run& r) {
+      auto g = GridLayout::New();
+      Fixed(g, 300, 100);
+      g.AddColumnDefinition(GridLength::Absolute(50));
+      g.AddColumnDefinition(GridLength::Star(1));
+      g.AddRowDefinition(GridLength::Absolute(40));
+      g.AddRowDefinition(GridLength::Star(1));
+      View m1 = Cell(g, 0, 0), m2 = Cell(g, 1, 1);
+      Fixed(m1, MATCH_PARENT, MATCH_PARENT);
+      Fixed(m2, MATCH_PARENT, MATCH_PARENT);
+      View stage = Mount(r, g, 300, 100);
+      r.AfterRender({stage, g, m1, m2}, [=](Run& r) {
+        r.Size("m1", m1.GetMeasuredSize(), MeasuredSize(50, 40));
+        r.Rendered("m1.rendered", m1, LayoutRect(0, 0, 50, 40));
+        r.Size("m2", m2.GetMeasuredSize(), MeasuredSize(250, 60));
+        r.Rendered("m2.rendered", m2, LayoutRect(50, 40, 250, 60));
+      });
+    }));
     return out;
   }
 };

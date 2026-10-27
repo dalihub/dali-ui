@@ -98,6 +98,46 @@ public:
          });
        }},
     }));
+    // A proportional width 0.5 x 300 = 150 is assigned EXACTLY and clamped by the maximum 100, from the
+    // slot's start edge. The proportional x of b is resolved from the unclamped extent:
+    // (300 - 150) x 1 = 150.
+    out.push_back(Single("A10.proportional-maximum", "A proportional slot is clamped by the child's maximum; a proportional position keeps the unclamped extent", 12, [](Run& r) {
+      auto layout = AbsoluteLayout::New();
+      Fixed(layout, 300, 200);
+      View a = View::New(), b = View::New();
+      a.SetRequestedHeight(20);
+      b.SetRequestedHeight(20);
+      a.SetMaximumWidth(100);
+      b.SetMaximumWidth(100);
+      a.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, 0.5f, -1)).SetFlags(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL));
+      b.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(1, 30, 0.5f, -1)).SetFlags(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL | AbsoluteLayoutFlags::X_PROPORTIONAL));
+      layout.Add(a);
+      layout.Add(b);
+      View stage = Mount(r, layout, 300, 200);
+      r.AfterRender({stage, layout, a, b}, [=](Run& r) {
+        r.Size("a", a.GetMeasuredSize(), MeasuredSize(100, 20));
+        r.Rendered("a.rendered", a, LayoutRect(0, 0, 100, 20));
+        r.Size("b", b.GetMeasuredSize(), MeasuredSize(100, 20));
+        r.Rendered("b.rendered", b, LayoutRect(150, 30, 100, 20));
+      });
+    }));
+    // A wrapping layout resolves its width from its other children (b: 100) first and only then
+    // measures the proportional child at 0.5 x 100 = 50, exactly.
+    out.push_back(Single("A11.proportional-last", "A wrapping layout measures a proportional child after its own width is resolved", 9, [](Run& r) {
+      auto layout = AbsoluteLayout::New();
+      auto a      = Probed(r, 37, 19, false);
+      a->view.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, 0.5f, -1)).SetFlags(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL));
+      View b = Leaf(100, 10, "b");
+      layout.Add(a->view);
+      layout.Add(b);
+      View stage = Mount(r, layout, 200, 100);
+      r.AfterRender({stage, layout, a->view, b}, [=](Run& r) {
+        r.Near("a.last-width", a->lastWidth, 50);
+        r.Size("a", a->view.GetMeasuredSize(), MeasuredSize(50, 19));
+        r.Rendered("a.rendered", a->view, LayoutRect(0, 0, 50, 19));
+        r.Size("layout", layout.GetMeasuredSize(), MeasuredSize(100, 19));
+      });
+    }));
     return out;
   }
 };

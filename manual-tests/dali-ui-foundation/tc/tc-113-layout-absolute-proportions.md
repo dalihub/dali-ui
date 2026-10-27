@@ -31,6 +31,8 @@
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 - `A06.wrap-circularity`: position만 proportional이면 determinate width40을 WRAP에 기여합니다. width 자체를 parent의.5로 바꾸면 순환하는 width 기여만 제외하여 0×20입니다.
+- `A10.proportional-maximum`: 300×200 layout에서 높이 20, 최대 폭 100인 a(bounds (0,0,.5,−1), WIDTH_PROPORTIONAL)와 b(bounds (1,30,.5,−1), WIDTH|X_PROPORTIONAL)입니다. 비례 폭 .5×300=150이 EXACTLY로 배정되고 최대 폭으로 clamp되어 둘 다 measured (100,20)입니다. a의 slot (0,0,150,20)은 start edge에서 clamp되어 렌더 (0,0,100,20)이고, b의 비례 위치는 clamp 전 extent로 계산되어 x=(300−150)×1=150, 렌더 (150,30,100,20)입니다. 12행입니다.
+- `A11.proportional-last`: 200×100 stage의 WRAP×WRAP layout에 비례 폭 .5인 37×19 probe a와 b=Leaf(100,10)을 둡니다. WRAP layout은 b로 자기 폭 100을 먼저 정한 뒤 a를 .5×100=50에서 EXACTLY로 측정하므로 a의 마지막 constraint 폭 50, measured (50,19), 렌더 (0,0,50,19)이고 layout measured (100,19)입니다. 9행입니다.
 
 ## 근거와 검증 경계
 
@@ -48,7 +50,7 @@ proportional 위치는 전체 parent 크기가 아니라 child extent를 뺀 남
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 23 scenario, 29 action, 140 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 25 scenario, 31 action, 161 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -75,6 +77,8 @@ Profile `release`: 23 scenario, 29 action, 140 checks. 이 표에 없는 scenari
 | `A08.position.1.250000` | `ltr` : 4 → `rtl` : 8 |
 | `A05.all-flags` | `run` : 4 |
 | `A06.wrap-circularity` | `position-only` : 6 → `size-circular` : 6 |
+| `A10.proportional-maximum` | `run` : 12 |
+| `A11.proportional-last` | `run` : 9 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

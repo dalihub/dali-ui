@@ -43,6 +43,23 @@ std::shared_ptr<Probed2> MountProbe(Run& r, float stageWidth, float stageHeight)
   r.SetState(s);
   return s;
 }
+// A wrapping plain View whose width comes only from a sub-pixel seed, holding a MATCH_PARENT-width
+// child around a wrapping probe (37x19, 38 high when narrower than 37).
+struct EmptySlot
+{
+  std::shared_ptr<Probe> inner;
+  View                   stage, p, seed, m;
+  void                   Expect(Run& r, float width, float height) const
+  {
+    auto self = *this;
+    r.AfterRender({stage, p, seed, m, inner->view}, [self, width, height](Run& r) {
+      r.Size("p", self.p.GetMeasuredSize(), MeasuredSize(width, height));
+      r.Rendered("p.rendered", self.p, LayoutRect(0, 0, width, height));
+      r.Size("m", self.m.GetMeasuredSize(), MeasuredSize(width, height));
+      r.Rendered("m.rendered", self.m, LayoutRect(0, 0, width, height));
+    });
+  }
+};
 } // namespace
 
 class Tc101 : public Case
@@ -168,6 +185,37 @@ public:
            r.Equal("repeat.measure-cache", s->probe->measures, 1);
            r.Equal("repeat.arrange-cache", s->probe->arranges, 1);
          });
+       }},
+    }));
+    // An own width below 0.001 px is an empty slot: the MATCH_PARENT child keeps its at-most probe
+    // in the measure pass (height 19) and is measured exactly at the 0.0005 px slot only by Arrange,
+    // whose height budget is that 19. An own width of 0.002 px is a slot: the child is measured
+    // exactly at it in the measure pass and the probe wraps (height 38).
+    out.push_back(Steps("C20.empty-slot", "A sub-tolerance own width hands out no slot; a slot of 0.002 px is measured exactly", {
+      {"empty", 12, [](Run& r) {
+         auto s   = std::make_shared<EmptySlot>();
+         s->p     = View::New();
+         s->seed  = Leaf(0.0005f, 0, "seed");
+         s->m     = View::New();
+         s->m.SetRequestedWidth(MATCH_PARENT);
+         s->inner           = Probed(r);
+         s->inner->wrapping = true;
+         s->m.Add(s->inner->view);
+         s->p.Add(s->seed);
+         s->p.Add(s->m);
+         s->stage = Mount(r, s->p, 200, 100);
+         r.SetState(s);
+         s->Expect(r, 0.0005f, 19);
+       }},
+      {"own-width", 12, [](Run& r) {
+         auto s = r.State<EmptySlot>();
+         s->seed.SetRequestedWidth(0.002f);
+         s->Expect(r, 0.002f, 38);
+       }},
+      {"empty-again", 12, [](Run& r) {
+         auto s = r.State<EmptySlot>();
+         s->seed.SetRequestedWidth(0.0005f);
+         s->Expect(r, 0.0005f, 19);
        }},
     }));
     return out;

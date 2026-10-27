@@ -18,7 +18,7 @@
 
 | TC | scenario / action / required checks | 검사 계약 |
 |---|---|---|
-| TC145 | 56 / 157 / 3347 | 기존2131 + same-count/partial/notify542 + animation 중 resize512(같은 수/작은 수 × 정수/분수·부분 마지막 page) + 정지 상태 no-op animated 요청 뒤 page 수 감소162; SC.match-constraints17행 |
+| TC145 | 57 / 160 / 3368 | 기존2131 + same-count/partial/notify542 + animation 중 resize512(같은 수/작은 수 × 정수/분수·부분 마지막 page) + 정지 상태 no-op animated 요청 뒤 page 수 감소162 + SC.content-arranged-extent21; SC.match-constraints17행 + SC.content-arranged-extent21행 |
 | TC152 | 12 / 84 / 82940 | manager 4×N{16,128,512}; 반복 sample step 4개(189+4N)와 work-budget step 3개(11+4N) |
 | TC153 | 3 / 18 / 17571 | N{16,128,512}; 반복 sample step 3개(189+4N)와 work-budget step 3개(14+4N) |
 | TC154 | 7 / 7 / 4146 | flat 4×771(256 cycle×3 + 최종 렌더 3) + depth 34/258/770 |
@@ -86,8 +86,9 @@ warm-up 없이 31개 sample마다 `sample.immediate.*`, `sample.geometry.*`를 �
 
 | source function / decision | scenario → action | 실제 assertion ID / 독립 식 |
 |---|---|---|
-| `ScrollViewLayoutManager::Measure :64`의 MATCH/non-MATCH 축 constraint | `SC.match-constraints.{0…3} → run` | `owner.measure`100×80, `measure.constraint.width/height`=(MATCH ?72/60:FLT_MAX), `content.measure`=(MATCH ?72/60:240/200), `measure.producer=1` |
-| `ScrollViewLayoutManager::Arrange :106`의 MATCH 대입/Arrange-owned 재측정 | 같은 scenario | `owner.arrange`=(0,0,100,80), `content.arranged`=(11,7,w,h); `arrange.constraint.width/height`; `arrange.measure.producers`=mixed 축만 2, 양축MATCH/양축WRAP1. natural 축 재측정 constraint도 240/200으로 exact 대조 |
+| `ScrollViewLayoutManager::Measure :87`(child constraint와 mode :123-131)의 MATCH/non-MATCH 축 constraint: MATCH 축은 viewport에 EXACTLY, WRAP 축은 FLT_MAX에 UNSPECIFIED | `SC.match-constraints.{0…3} → run` | `owner.measure`100×80, `measure.constraint.width/height`=(MATCH ?72/60:FLT_MAX), `content.measure`=(MATCH ?72/60:240/200) |
+| `ScrollViewLayoutManager::Arrange :140`의 MATCH 대입과 `CanSkipArrangeRemeasure :194`: 할당 축의 slot이 측정 key와 같으면 Arrange-owned 재측정 생략 | 같은 scenario | `owner.arrange`=(0,0,100,80), `content.arranged`=(11,7,w,h); `last.constraint.width/height`=(bits&1 ?72:FLT_MAX, bits&2 ?60:FLT_MAX)(마지막 producer 호출이 measure pass 호출); `measure.producers`=1(모든 bits) |
+| `ScrollViewLayoutManager::Arrange :207-215`: scrollable 크기는 content의 arrange 결과(자기 min/max로 clamp된 slot 또는 callback 반환 rect) | `SC.content-arranged-extent → minimum/scroll-end/custom-return` | `extent.content.measured`(100,200), `extent.content`(0,0,100,200), `extent.scrollable.height`200, `extent.viewport.height`80; `extent.scroll.y`=200−80=120, `extent.scroll.x`0, `extent.scrolled`(0,−120,100,200); `extent.custom.scrollable.height/width`300/37, `extent.custom.scroll.y`=300−80=220, `extent.custom.scrolled`(0,−220,37,300) |
 | Scroll manager `ArrangePolicy::ALWAYS`가 current Actor position을 다시 읽음 | `I05.scroll-preservation → scroll-to/settled-layout-replay` | `scroll-x/y`50/60, `scrolled-content` 및 `preserved`=(−50,−60,240,200), `preserved-scroll-x/y`50/60 |
 | `ScrollViewImpl::AdjustScrollPosition :1558`, `SetScrollPosition :230` | 같은 scenario `upper-clamp/negative-clamp` | `maximum-x/y`140/120 및 `clamped-content`; `minimum-x/y`0 및 `origin-content` |
 | `SetScrollableWidth/Height :245/:271`, `UpdateScrollingProperties :2258`의 viewport 재계산 | 같은 scenario `resize-viewport` | `larger-viewport`160×120, `new-maximum-x/y`80, `actual-content`=(−80,−80,240,200). content 크기가 같다는 이유로 viewport update를 건너뛰면 검출 |

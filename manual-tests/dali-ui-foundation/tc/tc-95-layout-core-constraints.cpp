@@ -118,6 +118,30 @@ public:
          ExpectMounted(r, "restored", "restored.rendered", MeasuredSize(37, 19), LayoutRect(0, 0, 37, 19));
        }},
     }));
+    // A MATCH_PARENT x MATCH_PARENT view with margin (7,0,11,0) gets the slot (7,11,W-7,H-11) of a
+    // WxH stage; it reports and is laid out at min(max(slot,40),100) on each axis, keeping the
+    // slot's start edge.
+    for(unsigned kind = 0; kind < 5; ++kind)
+      out.push_back(Steps(Id("C07.match-clamp", kind), "A MATCH_PARENT view reports its slot clamped by its own min/max and is laid out at that size from the slot's start edge", {
+        {"below-minimum", 6, [kind](Run& r) {
+           View v = Container(kind, MATCH_PARENT, MATCH_PARENT);
+           v.SetMargin(Insets(7, 0, 11, 0));
+           v.SetMinimumWidth(40);
+           v.SetMaximumWidth(100);
+           v.SetMinimumHeight(40);
+           v.SetMaximumHeight(100);
+           MountView(r, v, 46, 50);
+           ExpectMounted(r, "below-minimum", "below-minimum.rendered", MeasuredSize(40, 40), LayoutRect(7, 11, 40, 40));
+         }},
+        {"inside", 6, [](Run& r) {
+           ResizeStage(r, 77, 81);
+           ExpectMounted(r, "inside", "inside.rendered", MeasuredSize(70, 70), LayoutRect(7, 11, 70, 70));
+         }},
+        {"above-maximum", 6, [](Run& r) {
+           ResizeStage(r, 108, 112);
+           ExpectMounted(r, "above-maximum", "above-maximum.rendered", MeasuredSize(100, 100), LayoutRect(7, 11, 100, 100));
+         }},
+      }));
     return out;
   }
 };

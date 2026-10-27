@@ -193,6 +193,27 @@ public:
          });
        }},
     }));
+    // A scaled MATCH_PARENT view: margin and maximum are natural units multiplied by the scale s.
+    // Slot (10s, 20s, 300-10s, 200-20s) in the unscaled 300x200 stage; size (min(300-10s, 120s),
+    // min(200-20s, 80s)): (120,80), (150,100), (180,120), (240,160) for s = 1, 1.25, 1.5, 2.
+    for(float scale : {1.0f, 1.25f, 1.5f, 2.0f})
+      out.push_back(Single(("C13.scaled-clamp." + FloatId(scale)).c_str(), "A scaled MATCH_PARENT view is clamped by its maximum times the scale and laid out from its scaled margin", 6, [scale](Run& r) {
+        auto manager = Dali::Ui::Extension::LayoutScaleManager::Get();
+        manager.SetScalable(true);
+        manager.SetUiScale(scale);
+        View c = Leaf(MATCH_PARENT, MATCH_PARENT, "clamped");
+        Dali::Ui::Extension::View::SetUiScalePolicy(c, Dali::Ui::Extension::UiScalePolicy::ENABLED);
+        c.SetMargin(Insets(10, 0, 20, 0));
+        c.SetMaximumWidth(120);
+        c.SetMaximumHeight(80);
+        View stage = UnscaledStage(r, 300, 200);
+        stage.Add(c);
+        r.AfterRender({stage, c}, [=](Run& r) {
+          const float width = std::min(300 - 10 * scale, 120 * scale), height = std::min(200 - 20 * scale, 80 * scale);
+          r.Size("clamped", c.GetMeasuredSize(), MeasuredSize(width, height));
+          r.Rendered("clamped.rendered", c, LayoutRect(10 * scale, 20 * scale, width, height));
+        });
+      }));
     return out;
   }
 };

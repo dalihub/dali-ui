@@ -109,6 +109,48 @@ public:
          });
        }},
     }));
+    // A MATCH_PARENT-width probe is measured once, EXACTLY at the 200 stage width (the arrange-time
+    // re-measure finds that measurement and is skipped). A tracked maximum clamps the constraint
+    // before the producer and the slot at its start edge; the identical value is inert.
+    out.push_back(Steps("K06.minmax-arrange", "A tracked maximum re-measures a MATCH_PARENT child once and clamps its slot; the identical value is inert", {
+      {"mount", 7, [](Run& r) {
+         auto s     = std::make_shared<Tracked>();
+         s->probe   = Probed(r);
+         s->probe->view.SetRequestedWidth(MATCH_PARENT);
+         s->sibling = Leaf(10, 10, "sibling");
+         s->sibling.SetRequestedY(60);
+         s->stage = r.Stage(200, 100);
+         s->stage.Add(s->probe->view);
+         s->stage.Add(s->sibling);
+         r.SetState(s);
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
+           s->measures = s->probe->measures;
+           r.Equal("mounted-producer", s->probe->measures, 1);
+           r.Size("mounted", s->probe->view.GetMeasuredSize(), MeasuredSize(200, 19));
+           r.Rendered("mounted.rendered", s->probe->view, LayoutRect(0, 0, 200, 19));
+         });
+       }},
+      {"maximum", 8, [](Run& r) {
+         auto s = r.State<Tracked>();
+         s->probe->view.SetMaximumWidth(120);
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
+           r.Equal("changed-producer", s->probe->measures, s->measures + 1);
+           r.Near("last-width", s->probe->lastWidth, 120);
+           r.Size("changed", s->probe->view.GetMeasuredSize(), MeasuredSize(120, 19));
+           r.Rendered("changed.rendered", s->probe->view, LayoutRect(0, 0, 120, 19));
+           s->measures = s->probe->measures;
+         });
+       }},
+      {"same", 5, [](Run& r) {
+         auto s = r.State<Tracked>();
+         s->probe->view.SetMaximumWidth(120);
+         s->sibling.SetRequestedWidth(s->nudge += 1);
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
+           r.Equal("same-producer", s->probe->measures, s->measures);
+           r.Rendered("same.rendered", s->probe->view, LayoutRect(0, 0, 120, 19));
+         });
+       }},
+    }));
     return out;
   }
 };

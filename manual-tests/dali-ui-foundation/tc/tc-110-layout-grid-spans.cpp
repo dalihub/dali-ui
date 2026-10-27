@@ -71,6 +71,51 @@ public:
       View stage = Mount(r, g, 120, 80);
       r.AfterRender({stage, g, a}, [=](Run& r) { r.Rendered("cell", a, LayoutRect(5, 13, 106, 48)); });
     }));
+    // A 80x40 probe with maximum 60x30 in the 100x50 ABSOLUTE cell: its constraint is clamped to 60x30
+    // before the producer (FILL: measured EXACTLY at the cell, reported clamped), and the grid aligns
+    // the clamped size: START (0,0), CENTER ((100-60)/2, (50-30)/2) = (20,10), END (40,20); FILL lays
+    // the cell (0,0,100,50) out clamped from its start edge.
+    for(unsigned mode = 0; mode < 4; ++mode)
+      out.push_back(Single(Id("G09.clamped-align", mode).c_str(), "A grid aligns a child by its clamped size; FILL clamps the cell at its start edge", 10, [mode](Run& r) {
+        auto g = GridLayout::New();
+        GridTracks(g, {50}, {100, 200});
+        auto                  a    = Probed(r, 80, 40, false);
+        const LayoutAlignment al[] = {LayoutAlignment::START, LayoutAlignment::CENTER, LayoutAlignment::END, LayoutAlignment::FILL};
+        a->view.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(0).SetHorizontalAlignment(al[mode]).SetVerticalAlignment(al[mode]));
+        a->view.SetMaximumWidth(60);
+        a->view.SetMaximumHeight(30);
+        g.Add(a->view);
+        View b     = Cell(g, 0, 1);
+        View stage = Mount(r, g, 320, 80);
+        r.AfterRender({stage, g, a->view, b}, [=](Run& r) {
+          const LayoutRect aligned[] = {LayoutRect(0, 0, 60, 30), LayoutRect(20, 10, 60, 30), LayoutRect(40, 20, 60, 30), LayoutRect(0, 0, 60, 30)};
+          r.Size("a", a->view.GetMeasuredSize(), MeasuredSize(60, 30));
+          r.Rendered("a.rendered", a->view, aligned[mode]);
+          r.Rendered("b.rendered", b, LayoutRect(100, 0, 200, 50));
+        });
+      }));
+    // A wrapping grid with a 100 minimum: the STAR column shares max(30, 100) - 30 = 70. The 150-wide
+    // probe in it is measured at the 200 budget in Measure and, wider than its 70 cell, re-measured at
+    // the cell in Arrange.
+    out.push_back(Single("G18.oversize-remeasured", "A child wider than its STAR cell is re-measured at the cell in Arrange", 13, [](Run& r) {
+      auto g = GridLayout::New();
+      Fixed(g, WRAP_CONTENT, 30);
+      g.SetMinimumWidth(100);
+      g.AddColumnDefinition(GridLength::Absolute(30));
+      g.AddColumnDefinition(GridLength::Star(1));
+      View a = Cell(g, 0, 0);
+      auto b = Probed(r, 150, 19, false);
+      b->view.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
+      g.Add(b->view);
+      View stage = Mount(r, g, 200, 60);
+      r.AfterRender({stage, g, a, b->view}, [=](Run& r) {
+        r.Size("grid", g.GetMeasuredSize(), MeasuredSize(100, 30));
+        r.Rendered("a.rendered", a, LayoutRect(0, 0, 30, 30));
+        r.Size("b", b->view.GetMeasuredSize(), MeasuredSize(70, 19));
+        r.Near("b.last-width", b->lastWidth, 70);
+        r.Rendered("b.rendered", b->view, LayoutRect(30, 0, 70, 30));
+      });
+    }));
     return out;
   }
 };

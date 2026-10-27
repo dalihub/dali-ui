@@ -30,6 +30,7 @@
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 - `C15.standalone-replay.{kind}`(0 View, 1 Stack, 2 Flex, 3 Grid, 4 Absolute): 200×60 container에 a 20×10, b 30×15와 STANDALONE 10×10(요청 (150,40))을 두고 `ltr` → `rtl`(a/b는 x'=200−x−w로 mirror, standalone은 (150,40) 유지) → `replay`(RTL 상태에서 container `InvalidateArrange()`: 입력이 같으므로 자식은 cache-hit replay 경로를 지나며 mirror가 접힌 채 유지되어야 하고 이중 mirror나 복원은 FAIL) → `ltr-again`(복원)의 4 step, step마다 12행입니다. LTR 위치는 View/Absolute a (5,7)·b (40,20), Stack/Flex a (0,0)·b (20,0), Grid(암시 cell, START 정렬) a·b 모두 (0,0)입니다.
+- `C15.clamped-mirror`: 300×200 부모(Leaf)의 MATCH×MATCH child c(margin (10,0,20,0), max 120×80)와 y 215의 형제 leaf를 300×230 stage에 둡니다. c의 slot은 (10,20,290,180)이고 start edge에서 clamp된 logical bounds는 (10,20,120,80)입니다. `ltr`은 measured (120,80), 렌더 (10,20,120,80)입니다. `rtl`에서 부모를 RIGHT_TO_LEFT로 바꾸면 slot의 오른쪽 끝(300−10)이 유지되어 렌더 (300−10−120,20,120,80)=(170,20,120,80), controller 보고 `rtl.reported` (170,20,120,80), logical `rtl.logical`(`ViewImpl::GetArrangedBounds()`, pre-RTL) (10,20,120,80), measured (120,80)입니다. `parent-replay`(형제 폭 변경: 부모 arrange hit, 접힌 mirror로 replay)와 `child-replay`(부모 `InvalidateArrange()`: 부모 miss, c는 hit 후 clamp된 logical 폭으로 mirror)는 모두 렌더 (170,20,120,80)이고, `ltr-again`은 (10,20,120,80)입니다(docs/layout-structure.md RTL mirror 식, view.h SetMaximumWidth). 6/14/4/4/4행입니다.
 
 ## 근거와 검증 경계
 
@@ -47,7 +48,7 @@
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 7 scenario, 24 action, 280 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 8 scenario, 29 action, 312 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -58,6 +59,7 @@ Profile `release`: 7 scenario, 24 action, 280 checks. 이 표에 없는 scenario
 | `C15.standalone-replay.2` | `ltr` : 12 → `rtl` : 12 → `replay` : 12 → `ltr-again` : 12 |
 | `C15.standalone-replay.3` | `ltr` : 12 → `rtl` : 12 → `replay` : 12 → `ltr-again` : 12 |
 | `C15.standalone-replay.4` | `ltr` : 12 → `rtl` : 12 → `replay` : 12 → `ltr-again` : 12 |
+| `C15.clamped-mirror` | `ltr` : 6 → `rtl` : 14 → `parent-replay` : 4 → `child-replay` : 4 → `ltr-again` : 4 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

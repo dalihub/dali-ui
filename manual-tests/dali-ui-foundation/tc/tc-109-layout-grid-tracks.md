@@ -34,6 +34,7 @@
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 - `G15.wrap-minimum-star`: WRAP_CONTENT 폭 grid(min width 100, 열 {Absolute(30), Star(1)}, 높이 20)는 measured 100×20이고 star 열이 arrange 시점의 남은 70을 받아 a (0,0,30,20), b (30,0,70,20)입니다.
+- `G17.match-cell-measured`: 300×100 grid, 열 {Absolute(50), Star(1)}, 행 {Absolute(40), Star(1)}에 MATCH×MATCH m1(행 0, 열 0)과 m2(행 1, 열 1)를 둡니다. MATCH_PARENT child는 자기 cell을 배정받습니다. m1은 ABSOLUTE cell 50×40에서 EXACTLY로 측정되어 measured (50,40), 렌더 (0,0,50,40)입니다. m2의 폭은 폭이 결정된 grid의 STAR 열이므로 Measure에서 이미 300−50=250 cell이고, STAR 행은 children 측정 전에 결정되는 cell이 아니므로 높이는 Measure에서 AT_MOST였다가 Arrange에서 60(100−40) cell에 EXACTLY로 다시 측정됩니다. 그래서 m2 measured (250,60), 렌더 (50,40,250,60)입니다. 12행입니다.
 
 ## 근거와 검증 경계
 
@@ -51,7 +52,7 @@ track 종류별 budget, implicit track, zero factor, definition 변경에 따른
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 7 scenario, 8 action, 68 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 8 scenario, 9 action, 80 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -62,6 +63,7 @@ Profile `release`: 7 scenario, 8 action, 68 checks. 이 표에 없는 scenario�
 | `G04.implicit` | `implicit` : 4 → `explicit` : 4 |
 | `G14.mixed-span-deficit` | `run` : 8 |
 | `G15.wrap-minimum-star` | `run` : 10 |
+| `G17.match-cell-measured` | `run` : 12 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

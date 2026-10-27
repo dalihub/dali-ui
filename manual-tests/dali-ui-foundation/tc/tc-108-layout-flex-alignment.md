@@ -32,6 +32,7 @@
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 - `F12.overflow.3/4/5`: shrink0인 30+30을 width40에 배치합니다. SPACE_BETWEEN은 x0/30, SPACE_AROUND/EVENLY는 x−10/20입니다. 부족 공간을 음수 gap으로 분배하지 않습니다.
+- `F05.stretch-clamp`: 300×100 flex(기본 ROW, alignItems STRETCH)에서 a=폭 60·높이 WRAP·최대 높이 40, b=폭 60·높이 WRAP입니다. 결정된 cross 높이 100에서 STRETCH인 WRAP 높이는 EXACTLY 100으로 측정되므로 a는 최대 높이로 clamp된 measured (60,40), b는 (60,100)입니다. a의 stretch slot (0,0,60,100)은 위쪽 edge에서 clamp되어 렌더 (0,0,60,40), b는 (60,0,60,100)입니다. 12행입니다.
 
 ## 근거와 검증 경계
 
@@ -49,7 +50,7 @@ justify, alignSelf 우선순위, 네 방향의 좌표식을 검사합니다. BAS
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 20 scenario, 20 action, 176 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 21 scenario, 21 action, 188 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -73,6 +74,7 @@ Profile `release`: 20 scenario, 20 action, 176 checks. 이 표에 없는 scenari
 | `F12.overflow.3` | `run` : 8 |
 | `F12.overflow.4` | `run` : 8 |
 | `F12.overflow.5` | `run` : 8 |
+| `F05.stretch-clamp` | `run` : 12 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

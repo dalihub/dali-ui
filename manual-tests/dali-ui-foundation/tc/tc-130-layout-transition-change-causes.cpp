@@ -9,6 +9,71 @@
 #include "layout-validation-transition-fixtures.h"
 using namespace LayoutValidation;
 using namespace LayoutValidation::TransitionFixtures;
+namespace
+{
+// A MATCH_PARENT child at bounds position (40,30) of the 300x200 Absolute root with maximum 120x80:
+// its slot (40,30,300,200) is laid out clamped at (40,30,120,80), under RTL from the slot's right
+// edge (300 - 40 - 120 = 140). Raising the maximum width to 150 is a CHANGE (cause OTHER) to the newly
+// clamped rect (40,30,150,80), under RTL (300 - 40 - 150 = 110). A slot-only change that clamps to the
+// same rect makes no CHANGE.
+Scenario ClampedTarget(bool rtl)
+{
+  const float before = rtl ? 140.0f : 40.0f, after = rtl ? 110.0f : 40.0f;
+  Scenario    scenario{rtl ? "TR03.clamped-target-rtl" : "TR03.clamped-target-ltr", "A CHANGE transition targets the clamped rect; a slot change that clamps to the same rect starts none", {}};
+  scenario.steps.push_back({"mount", 6, [rtl, before](Run& r)
+  {
+    auto s = NewState(r);
+    if(rtl) s->root.SetProperty(Actor::Property::LAYOUT_DIRECTION, LayoutDirection::RIGHT_TO_LEFT);
+    s->child.SetRequestedWidth(MATCH_PARENT);
+    s->child.SetRequestedHeight(MATCH_PARENT);
+    SetFixtureBounds(s->child, {40, 30, -1, -1});
+    s->child.SetMaximumWidth(120);
+    s->child.SetMaximumHeight(80);
+    s->root.Add(s->child);
+    r.Attach(s->root);
+    r.AfterLayout({s->child}, [s, before](Run& v)
+    {
+      v.Rect("clamp.mount.target", v.Snapshot(s->child), {before, 30, 120, 80});
+      v.Size("clamp.mount.measured", s->child.GetMeasuredSize(), MeasuredSize(120, 80));
+    });
+  }});
+  scenario.steps.push_back({"change", 17, [before, after](Run& r)
+  {
+    auto s = r.State<State>();
+    CaptureLifecycle(s);
+    s->child.SetMaximumWidth(150);
+    // The manual pass ends with the animator tick, which dispatches every fresh animator once at
+    // raw progress 0, so the first context of the child is available right after the call.
+    LayoutController::Get(s->window).ProcessLayouts();
+    Observation found;
+    bool        seen = false;
+    for(std::size_t i = 0; i < s->observationCount; ++i)
+      if(s->observations[i].viewId == 2)
+      {
+        found = s->observations[i];
+        seen  = true;
+        break;
+      }
+    r.Truth("clamp.context.present", seen);
+    CheckObservation(r, found, LayoutTransitionSlot::CHANGE, LayoutChangeCause::OTHER, {before, 30, 120, 80}, {after, 30, 150, 80}, "clamp");
+    r.Rect("clamp.logical", ArrangedBounds(s->child), {40, 30, 150, 80});
+    r.Size("clamp.measured", s->child.GetMeasuredSize(), MeasuredSize(150, 80));
+  }});
+  if(!rtl)
+  {
+    scenario.steps.push_back({"slot-only", 7, [](Run& r)
+    {
+      auto s = r.State<State>();
+      s->root.SetRequestedWidth(280);
+      LayoutController::Get(s->window).ProcessLayouts();
+      r.Equal("slot-only.no-new-start", s->starts[2], 1);
+      r.Rect("slot-only.logical", ArrangedBounds(s->child), {40, 30, 150, 80});
+      r.Size("slot-only.measured", s->child.GetMeasuredSize(), MeasuredSize(150, 80));
+    }});
+  }
+  return scenario;
+}
+} // namespace
 class Tc130 : public Case
 {
 public:
@@ -136,6 +201,8 @@ public:
       LayoutController::Get(s->window).ProcessLayouts();
       r.Near("zero-duration.ignore-delay", LayoutValidation::Bounds(s->child).x, 200);
     }}}});
+    cases.push_back(ClampedTarget(false));
+    cases.push_back(ClampedTarget(true));
     return cases;
   }
 };

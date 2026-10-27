@@ -25,6 +25,7 @@
 - `K08.actor-repair`: margin (7,9)로 부착된 probe의 첫 렌더 target은 (7,9,37,19)이며 PARENT_ORIGIN.x=0, PIVOT.x=0.5, POSITION_USES_PIVOT=false입니다. Actor position/size를 직접 손상시킨 뒤 형제 leaf만 바꿔 pass를 유도하면 cache hit replay가 producer를 추가 실행하지 않고 렌더 target을 복원해야 합니다.
 - `K09.subtree-replay`: parent cache hit에서도 child b의 외부 position 손상을 복원해야 합니다. a/b의 producer 횟수는 그대로입니다.
 - `K10.returned-bounds`: callback이 반환한 (11,13,53,29)가 controller가 보고한 logical rect이자 렌더 rect이어야 하고, 형제 pass의 hit 뒤에도 같으며 producer는 1회입니다.
+- `K21.clamped-arrange-hit`: 300×200 stage에 MATCH×MATCH probe c(natural 60×40, max 120×80, arrange callback은 받은 bounds를 기록하고 그대로 반환)와 y 190의 형제 leaf를 둡니다. `mount`에서 c는 EXACTLY (300,200)으로 측정되어 clamp된 (120,80)을 보고하고, slot (0,0,300,200)은 callback 전에 start edge에서 clamp되므로 callback이 받은 bounds `received`는 (0,0,120,80), 렌더 (0,0,120,80)입니다(10행). `external-hit`(동기)에서 actor SIZE를 (290,200)으로 손상시킨 뒤 같은 raw slot으로 `Arrange(0,0,300,200)`을 호출하면 arrange cache key가 clamp 전 raw slot이므로 hit이고, 저장된 clamp rect (0,0,120,80)을 반환하고 다시 적용합니다(`hit`, `repaired`). arrange·measure producer 횟수는 그대로입니다(10행). `pass`에서 형제 폭을 바꿔 pass를 유도하면 stage의 재측정은 생략되고 c의 Arrange도 hit이라 렌더 (0,0,120,80), arrange producer 불변입니다(5행, view.h Arrange 주석).
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
@@ -44,13 +45,14 @@ replay는 사용자 producer 재실행 없이 저장된 geometry를 Actor에 재
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 3 scenario, 6 action, 43 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 4 scenario, 9 action, 68 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
 | `K08.actor-repair` | `mount` : 7 → `clobber-and-replay` : 5 |
 | `K09.subtree-replay` | `mount` : 8 → `clobber-and-replay` : 10 |
 | `K10.returned-bounds` | `mount` : 8 → `hit` : 5 |
+| `K21.clamped-arrange-hit` | `mount` : 10 → `external-hit` : 10 → `pass` : 5 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

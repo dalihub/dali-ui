@@ -22,7 +22,7 @@
 
 ## 시나리오와 독립 기대값
 
-- `S10.standalone.0.4`: default/Stack/Flex/Grid/Absolute에 ordinary20×10과 standalone100×80을 추가합니다. parent intrinsic은 20×10입니다. standalone의 SetRequestedX/Y를 7/9로 설정한 뒤 임시로(77,99,100,80)에 직접 Arrange합니다. parent Arrange는 이전 Actor 좌표를 보존하는 대신 요청에서 도출한(7,9,100,80)으로 복원해야 합니다. 논리 child 수는 2입니다.
+- `S10.standalone.0.4`: default/Stack/Flex/Grid/Absolute에 ordinary20×10과 standalone100×80을 추가합니다. parent intrinsic은 20×10입니다. standalone의 SetRequestedX/Y를 7/9로 설정하며, parent pass는 요청에서 도출한 (7,9,100,80)에 standalone을 배치해야 합니다. 논리 child 수는 2입니다.
 - `G14.mode-change`: Stack20+gap7+30=57×15에서 둘째를 STANDALONE으로 바꾸면 20×10입니다.
 
 
@@ -32,12 +32,18 @@
 - full-parent-minus-own-margin과 own-minmax-after-match의 x/y/width/height8행을 확인하십시오. 근거는 public-api/views/view.h의 STANDALONE 계약과 internal/layouts/standalone-bounds-utils.h의 DeriveStandaloneRootBounds입니다.
 
 - `S10.standalone.{kind}`는 ordinary child의 렌더 (0,0,20,10) 4행을 추가로 검사합니다(11행). `G14.mode-change`는 `ordinary`(57×15) → `standalone`(b를 STANDALONE으로 바꾼 뒤 20×10)이고, `S10.match-margin-clamp.{kind}`는 `match`((12,22,182,70)) → `clamp`(min/max 적용 (12,22,190,60))의 두 step입니다.
+- `S10.match-measured`: 200×150 plain View 부모의 MATCH×MATCH standalone s(margin (5,0,7,0), max 60×45)입니다. 가용 extent는 부모 extent − 자기 margin (195,143)이고 자기 max로 clamp된 (60,45)에서 EXACTLY로 측정되어 measured (60,45), 위치는 margin (5,7)이므로 렌더 (5,7,60,45)입니다. `mount`와 `arrange-only`(부모 `InvalidateArrange()`)가 같은 값이며 각 6행입니다.
+- `S10.wrap-window-bound`: 20×10 부모의 WRAP×WRAP standalone probe(150×90, 요청 위치 (3,4), margin (1,2,3,4))는 부모가 아니라 window 크기 W×H(check 시점에 읽는 입력)에서 자기 margin을 뺀 (W−3, H−7)로 측정됩니다. `s.last-width`=W−3, `s.last-height`=H−7, measured (min(150,W−3), min(90,H−7))(480×800 이상 window에서 (150,90)), 렌더 ((3+1),(4+3),같은 크기)=(4,7,150,90)이며 20×10 부모를 넘어갑니다. 8행입니다.
+- `S10.explicit-requested`: WRAP 부모(ordinary Leaf(20,10))의 standalone probe(natural 100×80, 요청 크기 40×30, 요청 위치 (5,6), margin (2,0,3,0))입니다. 명시 크기 축은 부모와 무관하게 요청 크기 × scale로 측정되고 margin은 그 바깥이므로 마지막 constraint (40,30), measured (40,30), 렌더 (5+2,6+3,40,30)=(7,9,40,30)이며 부모 measured는 standalone을 제외한 (20,10)입니다. 10행입니다.
+- `S10.mixed-axes`: 100×120 부모의 standalone probe(150×90, 폭 WRAP, 높이 MATCH_PARENT)를 300×250 stage에 둡니다. WRAP 폭은 window로 bound되어 min(150,W)=150이고 MATCH 높이는 부모 높이에서 EXACTLY입니다. `parent-120`은 measured (150,120), 마지막 constraint 높이 120, 렌더 (0,0,150,120)(폭은 100 부모를 넘음), `parent-200`(부모 높이 200)은 (150,200), 200, (0,0,150,200)입니다. 각 7행입니다.
+- `S10.placement-remeasure`: WRAP 부모(ordinary Leaf(120,60))의 MATCH×MATCH standalone probe(37×19)입니다. 부모 measure는 standalone에게 부모의 잠정 크기(WRAP 부모가 받은 200×100 budget)를 주어 그 크기에서 측정하고, 부모의 최종 크기 120×60이 다르므로 배치가 다시 측정합니다(view.h SetLayoutMode). 렌더 (0,0,120,60), measured (120,60), 마지막 constraint (120,60), 부모 measured (120,60)입니다. 10행입니다.
+- `G14.mode-release`: spacing 7 horizontal stack에 a=Leaf(20,10)과 standalone Leaf(30,15, 요청 위치 (50,40))를 둡니다. `standalone`은 렌더 (50,40,30,15), stack measured (20,10)을 확인합니다(6행). `release`는 한 action에서 standalone의 폭을 35로 바꿔 자기 turn을 queue한 직후 DEFAULT로 바꿉니다. DEFAULT 전환이 root 등록과 대기 중이던 자기 turn을 해제하므로 stack이 일반 child로 배치하여 렌더 (20+7,0,35,15)=(27,0,35,15), stack measured (20+7+35, max(10,15))=(62,15)입니다(6행). 등록이 남아 자기 turn이 실행되면 child는 요청 위치 (50,40)에 다시 배치되어 이 행이 실패합니다. controller의 등록 root 수 자체는 내부 상태이므로 관측하지 않습니다.
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 ## 근거와 검증 경계
 
-STANDALONE은 parent manager의 accumulation/spacing/index에서 제외되지만 View의 논리 child 목록에는 남습니다. 최종 위치는 요청 좌표+자신의 margin으로 결정되며 parent의 standalone 배치 경로가 이를 적용합니다. public-api/views/view.h의 SetLayoutMode 계약을 검증합니다.
+STANDALONE은 parent manager의 accumulation/spacing/index에서 제외되지만 View의 논리 child 목록에는 남습니다. 최종 위치는 요청 좌표+자신의 margin으로 결정되며 parent의 standalone 배치 경로가 이를 적용합니다. public-api/views/view.h의 SetLayoutMode 계약을 검증합니다. 측정 constraint는 모든 경로(부모 측정, 배치, 자기 root pass)에서 축마다 하나의 유도식을 따릅니다: MATCH_PARENT는 부모 extent − 자기 margin을 자기 min/max로 clamp해 EXACTLY, WRAP_CONTENT는 window 크기 − 자기 margin(window에 없으면 부모 extent), 명시 크기는 요청 크기 × scale입니다(docs/layout-structure.md STANDALONE 절, internal/layouts/standalone-bounds-utils.h DeriveStandaloneMeasureConstraint).
 
 `Snapshot`은 `LayoutController`가 `LayoutFinished`로 보고한 최종 parent-local target bounds(post-RTL, pre-transition)입니다. `GetArrangedBounds()`의 logical rect(pre-RTL)와 구분하십시오. 행 이름에 `logical`이나 `arranged`가 포함되어도 좌표 의미는 관측 API를 기준으로 판단하십시오. `Rendered` 행(id.x/.y/.width/.height, `*.rendered.*` 포함)은 current scene-graph 상태에서 계산한 화면 사각형을 부모 또는 명시한 base 기준으로 관측한 값이며 RTL 적용 후 좌표입니다. `GetMeasuredSize`는 해당 pass의 측정 결과입니다. controller 완료 snapshot, transition 중간 current geometry, Window의 최종 화면 합성은 서로 다른 관측입니다. callback 측정·배치 횟수는 controller pass가 호출한 synthetic producer의 횟수입니다.
 
@@ -51,7 +57,7 @@ STANDALONE은 parent manager의 accumulation/spacing/index에서 제외되지만
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 11 scenario, 17 action, 107 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 17 scenario, 26 action, 173 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -66,6 +72,12 @@ Profile `release`: 11 scenario, 17 action, 107 checks. 이 표에 없는 scenari
 | `S10.match-margin-clamp.2` | `match` : 4 → `clamp` : 4 |
 | `S10.match-margin-clamp.3` | `match` : 4 → `clamp` : 4 |
 | `S10.match-margin-clamp.4` | `match` : 4 → `clamp` : 4 |
+| `S10.match-measured` | `mount` : 6 → `arrange-only` : 6 |
+| `S10.wrap-window-bound` | `run` : 8 |
+| `S10.explicit-requested` | `run` : 10 |
+| `S10.mixed-axes` | `parent-120` : 7 → `parent-200` : 7 |
+| `S10.placement-remeasure` | `run` : 10 |
+| `G14.mode-release` | `standalone` : 6 → `release` : 6 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

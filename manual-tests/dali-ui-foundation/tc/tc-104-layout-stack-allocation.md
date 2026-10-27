@@ -27,6 +27,9 @@
 - `S05.margin-gap-overflow`: 첫 child의 margin 포함 주축은 35, spacing 7이므로 둘째 x=42입니다. container 40 밖으로 나오는 배치를 임의 clamp하지 않습니다.
 
 - `S04.fill-fixed-child`: FILL 정렬은 요청 크기가 WRAP_CONTENT인 child만 cross 축으로 확장합니다. 100×60 stack에서 고정 20×10 child는 (0,0,20,10)을 유지하고, 폭 30·높이 WRAP(min 5) child는 (20,0,30,60)으로 채웁니다.
+- `S04.fill-maximum`: 300×100 vertical stack에서 폭 WRAP·높이 20, FILL 정렬, 최대 폭 120인 a와 b=Leaf(50,10)입니다. 결정된 cross 폭 300에서 FILL인 a는 EXACTLY 300으로 측정되어 최대 폭으로 clamp된 (120,20)을 보고하고, FILL slot (0,0,300,20)은 start edge에서 clamp되어 렌더 (0,0,120,20)입니다. b는 a의 slot 높이 20 다음인 (0,20,50,10)입니다(`ltr`, 10행). `rtl`에서 stack을 RIGHT_TO_LEFT로 바꾸면 a는 slot의 오른쪽 끝을 유지하여 (300−120,0,120,20)=(180,0,120,20), logical(`ViewImpl::GetArrangedBounds()`, pre-RTL) (0,0,120,20), b는 (250,20,50,10)입니다(12행).
+- `S11.match-report`: 300×200 vertical stack에서 c=Leaf(MATCH_PARENT,20, margin (10,20,5,0))는 cross가 EXACTLY 300−10−20=270으로 측정되어 measured (270,20), 렌더 (10,5,270,20)입니다. d=MATCH×MATCH(weight 없음)는 cross EXACTLY 300, weight 없는 MATCH_PARENT main 축은 AT_MOST라 minimum 0을 보고하여 measured (300,0)이고, 배치에서는 가용 높이 전체 200을 채워(weight 없는 MATCH_PARENT main 축의 slot은 c가 쓴 높이를 뺀 나머지가 아니라 stack의 available 높이 전체입니다) c 아래 y=5+20에 (0,25,300,200)으로 stack 밖까지 이어집니다. 12행입니다.
+- `S12.weight-exact-share`: 300×80 horizontal stack(spacing 10)에서 a=Leaf(60,10)과 weight 1인 probe b(37×19)입니다. share=300−60−10=230이 Measure에서 main EXACTLY로 배정되므로 b measured (230,19), 마지막 constraint 폭 230, 렌더 (70,0,230,19)입니다. 7행입니다.
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
@@ -46,7 +49,7 @@
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 8 scenario, 8 action, 56 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 11 scenario, 12 action, 97 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -58,6 +61,9 @@ Profile `release`: 8 scenario, 8 action, 56 checks. 이 표에 없는 scenario�
 | `S04.cross.3` | `run` : 4 |
 | `S04.fill-fixed-child` | `run` : 8 |
 | `S05.margin-gap-overflow` | `run` : 8 |
+| `S04.fill-maximum` | `ltr` : 10 → `rtl` : 12 |
+| `S11.match-report` | `run` : 12 |
+| `S12.weight-exact-share` | `run` : 7 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

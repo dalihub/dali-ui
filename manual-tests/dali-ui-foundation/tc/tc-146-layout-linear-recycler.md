@@ -39,10 +39,13 @@ RecyclerView는 AbsoluteLayout의 명시적인 bounds slot으로 viewport 제약
 | `window-variable-decoration` | attach=0 → middle=26 → end=38 → wider=38 → start=0 | heights10/30/20, spacing5, decoration3/7/2/4, range88. slot start0/21/62, item y2/23/64. wider 전 width110, 후 width150 |
 | `window-empty` | run=0 | count0, range0, viewport50, holder 생성0 |
 | `window-zero-viewport` | run=0 | count10, estimated range218, viewport0, holder 생성0 |
+| `window-wrap-cross-vertical`, `window-wrap-cross-horizontal` | run=0 | item이 cross 축에 MATCH_PARENT 대신 WRAP_CONTENT를 요청(Leaf의 cross 자연 크기는 0). materialized 3개(viewport50, extent20, spacing2, cache0 → item0..2), 각 item measured vertical (120,20) / horizontal (20,120) |
 
 variable fixture는 attach 준비 중 public cache 범위를 넓혀 세 item을 모두 측정하고 즉시 cache0으로 되돌립니다. 실제 viewport는 항상 50입니다. 이 준비는 아직 측정되지 않은 item의 추정 크기와 독립 수치 oracle을 혼동하지 않기 위한 것이며 성능 측정이 아닙니다.
 
 23개 관측 행은 다음을 검증합니다. viewport rect 4행, scene 연결, catalog count, range, public/layouter offset, viewport extent, first/last active index, materialized count 및 정확한 index 집합, bound stable ID, 모든 materialized item의 update-thread parent-local rect mismatch 수, visible item의 viewport-relative screen rect mismatch 수, 실제 확인한 visible item 수, maximum error, scroller 존재와 current x/y, scroll idle입니다. item rect는 slot start와 decoration의 독립 합으로 계산하며 screen rect는 주축에서 offset을 뺍니다. cache item도 current local rect를 검사하되 화면 밖 item을 pixel 검증했다고 보고하지 마십시오. 빈경계의 두 `run`은 holder 생성0 검사를 추가하여 각각24행입니다.
+
+`window-wrap-cross-*`는 23행 공통 검사 대신 7행입니다: `cross.materialized`(=3)와 item0..2의 `cross.measured.i` 2행씩입니다. layouter는 모든 item을 slot의 cross extent(120)에 EXACTLY로, scroll 축은 at-most budget으로 측정하므로 WRAP_CONTENT cross 축도 slot을 보고하고 scroll 축은 명시 20을 유지합니다(docs/layout-structure.md RecyclerView 항목). MATCH_PARENT item은 mode 없는 유도로도 같은 값을 내므로 이 규칙을 구분하지 못해 WRAP item을 씁니다.
 
 모든 geometry mismatch와 maximum error는0, visible checked 수는 독립 visible item 수와 같아야 합니다. 누락 holder는 검사 생략이 아니라 materialized identity/local mismatch 실패입니다. 전체 view/scroller가 보이는 상태에서 current geometry를 읽습니다. 오류를 숨기기 위한 추가 layout pass나 expected 갱신은 허용하지 않습니다.
 
@@ -56,7 +59,7 @@ variable fixture는 attach 준비 중 public cache 범위를 넓혀 세 item을 
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 12 scenario, 26 action, 591 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 14 scenario, 28 action, 605 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -72,6 +75,8 @@ Profile `release`: 12 scenario, 26 action, 591 checks. 이 표에 없는 scenari
 | `window-variable-decoration` | `attach` : 23 → `middle` : 23 → `end` : 23 → `wider` : 23 → `start` : 23 |
 | `window-empty` | `run` : 24 |
 | `window-zero-viewport` | `run` : 24 |
+| `window-wrap-cross-vertical` | `run` : 7 |
+| `window-wrap-cross-horizontal` | `run` : 7 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

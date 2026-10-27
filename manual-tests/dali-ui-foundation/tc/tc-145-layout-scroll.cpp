@@ -43,8 +43,9 @@ void AddConstraintCases(std::vector<Scenario>& out)
       auto p = Probed(r, 240, 200);
       p->view.SetRequestedWidth(bits & 1 ? MATCH_PARENT : WRAP_CONTENT);
       p->view.SetRequestedHeight(bits & 2 ? MATCH_PARENT : WRAP_CONTENT);
-      // Record the constraint of the first (measure-pass) producer call; lastWidth/lastHeight
-      // keep the constraint of the final (arrange-time) call.
+      // Record the constraint of the first (measure-pass) producer call; lastWidth/lastHeight keep
+      // the constraint of the last producer call. An arrange-time re-measure runs only when an
+      // assigned axis's slot differs from the measured key.
       auto first   = std::make_shared<std::pair<float, float>>(-1.0f, -1.0f);
       p->onMeasure = [p, first]() {
         if(p->measures == 1) *first = {p->lastWidth, p->lastHeight};
@@ -59,9 +60,9 @@ void AddConstraintCases(std::vector<Scenario>& out)
         r.Size("content.measure", p->view.GetMeasuredSize(), {width, height});
         r.Rendered("owner.arrange", scroll, {0, 0, 100, 80});
         r.Rendered("content.arranged", p->view, {11, 7, width, height});
-        r.Near("arrange.constraint.width", p->lastWidth, bits ? width : std::numeric_limits<float>::max(), 0);
-        r.Near("arrange.constraint.height", p->lastHeight, bits ? height : std::numeric_limits<float>::max(), 0);
-        r.Equal("arrange.measure.producers", p->measures, bits == 1 || bits == 2 ? 2 : 1);
+        r.Near("last.constraint.width", p->lastWidth, bits & 1 ? 72 : std::numeric_limits<float>::max(), 0);
+        r.Near("last.constraint.height", p->lastHeight, bits & 2 ? 60 : std::numeric_limits<float>::max(), 0);
+        r.Equal("measure.producers", p->measures, 1);
       });
     }));
 }
@@ -848,6 +849,59 @@ void AddPreLayoutPageCases(std::vector<Scenario>& out)
       out.push_back(std::move(scenario));
     }
 }
+struct ExtentState
+{
+  ScrollView             scroll;
+  View                   stage, content;
+  std::shared_ptr<Probe> probe;
+};
+// The scrollable extent is the content's arranged rect -- its slot clamped by its own
+// minimum/maximum, or the rect its arrange callback returned -- not the slot.
+void AddContentExtentCases(std::vector<Scenario>& out)
+{
+  out.push_back(Steps("SC.content-arranged-extent", "The scroll range follows the content's arranged size, not its slot", {
+    {"minimum", 8, [](Run& r) {
+       auto s    = std::make_shared<ExtentState>();
+       s->scroll = ScrollView::New();
+       ConfigureScroll(s->scroll, ScrollDirection::Vertical);
+       Fixed(s->scroll, 100, 80);
+       s->content = Leaf(MATCH_PARENT, MATCH_PARENT, "content");
+       s->content.SetMinimumHeight(200);
+       s->scroll.SetContent(s->content);
+       s->stage = Mount(r, s->scroll, 100, 80);
+       r.SetState(s);
+       r.AfterRender({s->stage, s->scroll, s->content}, [=](Run& r) {
+         auto& impl = ScrollImpl(s->scroll);
+         r.Size("extent.content.measured", s->content.GetMeasuredSize(), MeasuredSize(100, 200));
+         r.Rendered("extent.content", s->content, LayoutRect(0, 0, 100, 200));
+         r.Near("extent.scrollable.height", impl.GetScrollableHeight(), 200);
+         r.Near("extent.viewport.height", impl.GetViewportHeight(), 80);
+       });
+     }},
+    {"scroll-end", 6, [](Run& r) {
+       auto s = r.State<ExtentState>();
+       s->scroll.ScrollTo(Vector2(0, 999), false);
+       const Vector2 position = s->scroll.GetScrollPosition();
+       r.Near("extent.scroll.y", position.y, 120);
+       r.Near("extent.scroll.x", position.x, 0);
+       r.Rect("extent.scrolled", s->content, LayoutRect(0, -120, 100, 200));
+     }},
+    {"custom-return", 7, [](Run& r) {
+       auto s             = r.State<ExtentState>();
+       s->probe           = Probed(r, 37, 19);
+       s->probe->returned = [](const LayoutRect& b) { return LayoutRect(b.x, b.y, b.width, 300); };
+       r.AfterLayout({s->scroll, s->probe->view}, [s](Run& r) {
+         auto& impl = ScrollImpl(s->scroll);
+         r.Near("extent.custom.scrollable.height", impl.GetScrollableHeight(), 300);
+         r.Near("extent.custom.scrollable.width", impl.GetScrollableWidth(), 37);
+         s->scroll.ScrollTo(Vector2(0, 999), false);
+         r.Near("extent.custom.scroll.y", s->scroll.GetScrollPosition().y, 220);
+         r.Rect("extent.custom.scrolled", s->probe->view, LayoutRect(0, -220, 37, 300));
+       });
+       s->scroll.SetContent(s->probe->view);
+     }},
+  }));
+}
 } // namespace
 
 class Tc145 : public Case
@@ -886,6 +940,7 @@ public:
     AddPageResizeRegressionCases(out);
     AddInFlightPageResizeCases(out);
     AddNoopSnapResizeCases(out);
+    AddContentExtentCases(out);
     return out;
   }
 };

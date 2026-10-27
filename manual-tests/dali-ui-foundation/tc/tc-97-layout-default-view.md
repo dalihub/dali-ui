@@ -24,7 +24,7 @@
 
 - local-coordinate: 부모 위치를 (70,90)에서 (100,120)으로 바꾸어도 child의 parent-local rect는 (16,26,37,19)입니다.
 - wrap-bounds: max(5+20,40+30)=70, max(7+10,20+15)=35입니다. B 폭을 40으로 바꾸면 80×35입니다.
-- match-budget: child slot은 (3+2,7+6,100−3−5−2−4,60−7−11−6−8)=(5,13,86,28)입니다. measured minimum은 0×0입니다.
+- match-budget: child slot은 (3+2,7+6,100−3−5−2−4,60−7−11−6−8)=(5,13,86,28)입니다. 부모가 explicit 크기라 두 축이 결정되어 있으므로 MATCH_PARENT child는 slot에서 EXACTLY로 측정되고, measured(`exact-slot`)도 slot과 같은 86×28입니다.
 - wrap-match: child minimum 30×20→10×20에 부모 WRAP 측정이 대응해야 합니다.
 
 - `C10.C12.local-coordinate`는 `mount`(parent를 margin (70,0,90,0)으로 300×270 stage에 부착: parent (70,90,200,150), child (16,26,37,19)) → `move-parent`(margin (100,0,120,0): parent (100,120,200,150), child 불변)의 두 step입니다.
@@ -32,7 +32,9 @@
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
-- `C11.exhausted-padding`: parent10×10에서 padding16×16과 child margin6×6을 빼도 extent는 음수가 되지 않습니다. child measured0×0, target(11,11,0,0)입니다.
+- `C11.exhausted-padding`: parent10×10에서 padding16×16과 child margin6×6을 빼도 extent는 음수가 되지 않습니다. child는 빈 slot max(0,10−16−6)=0에서 EXACTLY로 측정되므로(0은 EXACTLY로 유지되는 크기입니다) measured0×0, target(11,11,0,0)입니다.
+- `C06.two-step`: WRAP×WRAP 부모 p에 seed Leaf(30,0)과 폭 MATCH_PARENT·높이 WRAP_CONTENT인 m을 넣고, m 안에 37×19 wrapping probe(폭이 37보다 좁으면 높이 38)를 둡니다. 1단계에서 m은 200 budget에서 AT_MOST로 측정되어 (0,19)를 보고하고, p는 seed로부터 자기 폭 30을 얻은 뒤 2단계에서 m을 slot 30에 EXACTLY로 다시 측정합니다. probe는 30<37이므로 높이 38이 되어 `mount`는 p·m measured (30,38), p·m 렌더 (0,0,30,38), inner 렌더 (0,0,30,38)(m 기준)입니다. `widen-seed`에서 seed 폭을 50으로 바꾸면 slot 50≥37이므로 probe는 (37,19)이고 p·m은 measured (50,19), 렌더 (0,0,50,19), inner 렌더 (0,0,37,19)입니다. Arrange는 이미 같은 slot에서 측정된 m을 다시 측정하지 않습니다(docs/layout-structure.md의 두 단계 측정). 각 step은 measured 4행 + 렌더 12행으로 16행입니다.
+- `C11.explicit-clamped-content`: 요청 30×50, 최소 폭 60인 부모는 자기 min/max로 clamp된 크기 min(max(30,60),최대)=60 안에서 content를 측정합니다. wrapping probe(37×19)의 마지막 constraint 폭 `inner.last-width`는 60이고, 60≥37이므로 줄바꿈 없이 measured (37,19), 렌더 (0,0,37,19)입니다. 부모는 measured (60,50), 렌더 (0,0,60,50)입니다. 13행입니다.
 
 ## 근거와 검증 경계
 
@@ -50,7 +52,7 @@
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 5 scenario, 8 action, 56 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 7 scenario, 11 action, 101 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -59,6 +61,8 @@ Profile `release`: 5 scenario, 8 action, 56 checks. 이 표에 없는 scenario�
 | `C05.C11.match-budget` | `run` : 6 |
 | `C06.wrap-match` | `mount` : 6 → `reduce-minimum` : 6 |
 | `C11.exhausted-padding` | `run` : 6 |
+| `C06.two-step` | `mount` : 16 → `widen-seed` : 16 |
+| `C11.explicit-clamped-content` | `run` : 13 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

@@ -109,6 +109,22 @@ public:
         r.Rendered("e", e, LayoutRect(0, 30, 100, 10));
       });
     }));
+    // A wrapping flex builds its lines from the measured sizes, so it measures every child AT_MOST:
+    // a MATCH_PARENT main axis reports its minimum (0) and is laid out filling the 100 line.
+    out.push_back(Single("F19.wrap-match-follower", "A wrapping flex keeps at-most semantics for a MATCH_PARENT child, which still fills the line", 6, [](Run& r) {
+      auto f = FlexLayout::New();
+      Fixed(f, 100, 80);
+      f.SetWrap(FlexWrap::WRAP);
+      f.SetAlignItems(FlexAlign::FLEX_START);
+      f.SetAlignContent(FlexAlign::FLEX_START);
+      View a = Leaf(MATCH_PARENT, 10, "a");
+      f.Add(a);
+      View stage = Mount(r, f, 100, 80);
+      r.AfterRender({stage, f, a}, [=](Run& r) {
+        r.Size("a", a.GetMeasuredSize(), MeasuredSize(0, 10));
+        r.Rendered("a.rendered", a, LayoutRect(0, 0, 100, 10));
+      });
+    }));
     return out;
   }
 };

@@ -9,11 +9,11 @@
 3. `TC139.Reset run`을 한 번 눌러 새 run ID를 기록하십시오. 이후 실패를 지우기 위해 Reset하지 마십시오. 버튼 표시는 `Reset run`이며 Actor name과 accessibility name은 앞의 TC ID를 포함합니다.
 4. 각 scenario에서 `TC139.Run scenario`를 누르면 남은 step이 순서대로 자동 실행됩니다(step 하나씩 진행하려면 `TC139.Run step`). `LR_ACTION`의 scenario/step/required_checks가 아래 순서와 일치하는지 먼저 확인하십시오. 각 step이 끝나면 `LR_READY`와 그 step의 모든 행이 자동 출력됩니다.
 5. scene 단계는 해당 Window의 View target snapshot과 Window fence까지 기다립니다. 일반적으로 3초 안에 완료됩니다. 완료되지 않아도 조작하지 말고 framework의 자체 timeout을 기다리십시오: layout fence 10초 후 `observer.timeout`, fresh frame 4초 후 `render.frame-timeout`, render settle 4초 후 `render.settle-timeout` 행으로 실패가 기록됩니다. `LR_READY`가 도착하더라도 필수 행 누락이나 행 수 불일치는 PASS가 아닙니다. 그 전에 버튼을 누르면 `LR_NOOP`(step still running)만 남고 step은 계속 실행 중입니다. timeout 행이 나오면 실행 환경과 로그를 함께 보존하십시오.
-6. 각 step의 모든 검사 행은 완료 시 stdout에 자동 출력되며 HUD에는 요약과 실패 행만 표시되므로 행 수와 숫자는 stdout에서 빠짐없이 수집하십시오. 모든 step이 끝난 뒤에만 `TC139.Next scenario`를 누르거나, `TC139.Run all`로 남은 scenario를 이어서 자동 실행하십시오. 총 scenario 수는 2개입니다. `Run all` 뒤에는 마지막 `LR_RESULT`의 `completed_scenarios`가 `required_scenarios`와 같아질 때까지 기다리십시오. 그 전의 `FAILING`/`INCOMPLETE`는 종결 verdict가 아니므로 실행을 중단하지 마십시오. 완료 후 `< Back`으로 나가 `LR_CASE_END`의 `completed_scenarios`가 `required_scenarios`와 같은지 확인하십시오.
+6. 각 step의 모든 검사 행은 완료 시 stdout에 자동 출력되며 HUD에는 요약과 실패 행만 표시되므로 행 수와 숫자는 stdout에서 빠짐없이 수집하십시오. 모든 step이 끝난 뒤에만 `TC139.Next scenario`를 누르거나, `TC139.Run all`로 남은 scenario를 이어서 자동 실행하십시오. 총 scenario 수는 3개입니다. `Run all` 뒤에는 마지막 `LR_RESULT`의 `completed_scenarios`가 `required_scenarios`와 같아질 때까지 기다리십시오. 그 전의 `FAILING`/`INCOMPLETE`는 종결 verdict가 아니므로 실행을 중단하지 마십시오. 완료 후 `< Back`으로 나가 `LR_CASE_END`의 `completed_scenarios`가 `required_scenarios`와 같은지 확인하십시오.
 
 ## 단계와 필수 관측 수
 
-`CT02.depth-and-dedup`: `mount` 4개 → `queue-reverse-order` 4개입니다. `CT02.deleted-pending-root`: `unregister` 1개입니다.
+`CT02.depth-and-dedup`: `mount` 4개 → `queue-reverse-order` 4개입니다. `CT02.deleted-pending-root`: `unregister` 1개입니다. `CT02.mode-switch-cancels-self-turn`: `mount` 8개 → `switch-before-turn` 8개 → `steady` 4개입니다.
 
 `Rect`는 x/y/width/height 네 행, `Size`는 width/height 두 행입니다. 일반 scalar/count/bool 검사 하나는 한 행입니다. `LR_CHECK`의 run/scenario/step/action_seq를 `LR_ACTION`과 대조하고 다음 action 시작 전까지의 로그 구간을 함께 저장하여 같은 이름의 행이 서로 다른 step에서 섞이지 않게 하십시오. `LR_RESULT`의 completed_scenarios/required_scenarios, rows와 page 범위를 함께 보관하십시오.
 
@@ -24,11 +24,13 @@
 
 - off-scene root를 pending에 넣은 후 UnregisterView하면 그 뒤의 처리에서 제거된 root의 producer가 실행되지 않아야 합니다(`unregister.no-producer`). pending root 수와 controller 내부 유효성은 관측하지 않습니다.
 
+- `CT02.mode-switch-cancels-self-turn`: 300×200 vertical stack root에 sibling(60×20)과 STANDALONE child(80×40, 요청 위치 (40,30))를 둡니다. `mount`의 controller target은 child (40,30,80,40), sibling (0,0,60,20)입니다(8행). `switch-before-turn`은 child의 `InvalidateMeasure()`로 자기 turn을 queue한 뒤 같은 batch에서 `SetLayoutMode(DEFAULT)`로 바꾸고 `ProcessLayouts()`를 실행합니다. DEFAULT 전환이 root 등록과 queue된 자기 turn을 해제하므로 child는 stack이 20 높이 sibling 다음 slot에 배치되어 event-side target과 logical(`ViewImpl::GetArrangedBounds()`) 모두 (0,20,80,40)입니다(8행). 등록이 남아 자기 turn이 drain되면 child는 요청 위치 (40,30)에 다시 배치되어 이 행이 실패합니다. pending/등록 root 수와 drain event는 controller 내부 상태이므로 관측하지 않습니다. `steady`는 새 frame 뒤 current geometry가 (0,20,80,40)인지 확인합니다(4행, docs/layout-structure.md STANDALONE 절).
+
 ## Pass/Fail 판정
 
 - 작은 target 좌표는 절대오차 0.001 이하, 실제 rendered animation 좌표는 0.01 이하입니다. progress는 해당 행의 tolerance(0.0001 또는 0.00001)를 사용하십시오. NaN/Inf는 크기와 무관하게 FAIL입니다. count/ID/bool/exception condition은 정확히 일치해야 합니다.
 - `LR_CHECK`의 passed 표시만 믿지 말고 actual/expected/tolerance를 다시 대조하십시오. 같은 action에서 필요한 행 수보다 적거나 값이 잘렸거나 같은 행만 중복 수집되면 PASS로 처리하지 마십시오.
-- 모든 필수 action이 실행되고 expected checks와 실제 checks가 일치하며, 전체 2개 scenario가 완료되고 누적 failures=0이어야 합니다. 마지막 페이지 또는 마지막 scenario만 PASS인 것은 TC PASS가 아닙니다.
+- 모든 필수 action이 실행되고 expected checks와 실제 checks가 일치하며, 전체 3개 scenario가 완료되고 누적 failures=0이어야 합니다. 마지막 페이지 또는 마지막 scenario만 PASS인 것은 TC PASS가 아닙니다.
 - missing snapshot, observer overflow, 예상 밖 exception/crash/hang는 PASS가 아닙니다. 현재 제품 오류가 나타나도 expected를 actual로 바꾸거나 xfail로 제외하지 마십시오.
 - HUD 갱신이 화면 layout을 발생시켜도 이전 step의 고정된 결과는 바뀌면 안 됩니다. 같은 run/step의 행이 다시 출력될 때 값이 바뀌면 observer 오류로 FAIL입니다.
 
@@ -42,12 +44,13 @@ launcher로 돌아가면 TC가 signal과 transition callback을 끊고 추가 Wi
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 2 scenario, 3 action, 9 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 3 scenario, 6 action, 29 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
 | `CT02.depth-and-dedup` | `mount` : 4 → `queue-reverse-order` : 4 |
 | `CT02.deleted-pending-root` | `unregister` : 1 |
+| `CT02.mode-switch-cancels-self-turn` | `mount` : 8 → `switch-before-turn` : 8 → `steady` : 4 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

@@ -146,6 +146,47 @@ public:
       }, [s]
       { return s->finishes[1] >= 1; }, s->root);
     }}}});
+    // A MATCH_PARENT standalone child of a MATCH_PARENT view whose CHANGE animator holds its actor at
+    // the previous size: the child's own layout pass in the same batch follows the parent's layout
+    // target (300x150), not the parent's held actor SIZE (200x100). The recording animator writes no
+    // geometry and every check runs in the action of the manual pass, so the held SIZE is still the
+    // CHANGE's from value; the pass ends with the animator tick that records the parent's context.
+    cases.push_back({"TR04.standalone-parent-target", "A standalone child's own pass follows its parent's layout target, not its animated size", {{"mount", 8, [](Run& r)
+    {
+      auto s    = NewState(r);
+      s->root   = View::New();
+      s->nested = View::New();
+      s->child  = View::New();
+      s->root.SetRequestedWidth(200);
+      s->root.SetRequestedHeight(100);
+      s->nested.SetRequestedWidth(MATCH_PARENT);
+      s->nested.SetRequestedHeight(MATCH_PARENT);
+      s->child.SetRequestedWidth(MATCH_PARENT);
+      s->child.SetRequestedHeight(MATCH_PARENT);
+      s->child.SetLayoutMode(LayoutMode::STANDALONE);
+      s->nested.Add(s->child);
+      s->root.Add(s->nested);
+      r.Attach(s->root);
+      r.AfterLayout({s->nested, s->child}, [s](Run& v)
+      {
+        v.Rect("target.mount.parent", v.Snapshot(s->nested), {0, 0, 200, 100});
+        v.Rect("target.mount.standalone", v.Snapshot(s->child), {0, 0, 200, 100});
+      });
+    }},
+                                                                                                                                                                        {"change-held", 15, [](Run& r)
+    {
+      auto s = r.State<State>();
+      CaptureLifecycle(s);
+      s->root.SetRequestedWidth(300);
+      s->root.SetRequestedHeight(150);
+      s->child.InvalidateMeasure();
+      LayoutController::Get(s->window).ProcessLayouts();
+      r.Rect("target.parent.actor-held", LayoutValidation::Bounds(s->nested), {0, 0, 200, 100});
+      r.Rect("target.parent.layout-target", ArrangedBounds(s->nested), {0, 0, 300, 150});
+      r.Rect("target.standalone.bounds", LayoutValidation::Bounds(s->child), {0, 0, 300, 150});
+      r.Size("target.standalone.measured", s->child.GetMeasuredSize(), MeasuredSize(300, 150));
+      r.Truth("target.parent.animator-context", FirstObservation(*s, 4, LayoutTransitionSlot::CHANGE).viewId == 4u);
+    }}}});
     return cases;
   }
 };

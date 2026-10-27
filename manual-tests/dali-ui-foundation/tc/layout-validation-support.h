@@ -110,8 +110,9 @@ public:
   /// LayoutController with the stage content box as their constraint.
   View Stage(float width, float height, float x = 0.0f, float y = 0.0f);
   /// Like Stage() but attaches the stage to the Window as its own isolated layout root, so the
-  /// leaf producer counts of a mounted workload see a single-drain pass (not the weighted HUD's
-  /// double measure). Used by the work-count workloads (TC152/153); other mounts stay under the HUD.
+  /// leaf producer counts of a mounted workload see a single-drain pass that no HUD pass takes
+  /// part in. Used by the work-count workloads (TC152/153) and the producer-count scenario TC115 K12;
+  /// other mounts stay under the HUD.
   View StageOnWindow(float width, float height);
   /// Attaches `root` directly to the Window as its own layout root, placed at the fixture
   /// host's on-screen position so it renders in the fixture area rather than over the HUD.

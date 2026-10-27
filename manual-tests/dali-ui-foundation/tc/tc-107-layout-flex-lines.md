@@ -31,6 +31,7 @@
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 - `F02.wrap-grow-lines`: 100×60 WRAP flex에 basis 40(grow 1)/50(grow 1)/30(grow 2)/30(grow 0)/120(shrink 1)을 두면 줄은 [40,50] [30,30] [120]이고 줄마다 free space를 나눕니다: 45/55, 70/30, 그리고 120은 혼자인 줄에서 100으로 shrink합니다. 렌더 (0,0,45,10) (45,0,55,10) (0,10,70,20) (70,10,30,20) (0,30,100,10)입니다.
+- `F19.wrap-match-follower`: 100×80 wrapping flex(FLEX_START)의 a=Leaf(MATCH_PARENT,10)입니다. wrapping flex는 측정된 크기로 line을 다시 나누므로 모든 child를 AT_MOST로 측정하고, MATCH_PARENT main 축은 minimum 0을 보고하여 measured (0,10)입니다. grow 없는 MATCH_PARENT main 축은 배치에서 line 전체를 채우므로 렌더 (0,0,100,10)입니다. M 이전과 같은 값으로, 문서화된 한계(wrapping flex는 at-most 의미 유지)를 고정합니다. 6행입니다.
 
 ## 근거와 검증 경계
 
@@ -48,7 +49,7 @@ wrap의 strict 초과 조건, line별 크기, WRAP_REVERSE와 alignContent를 �
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 10 scenario, 10 action, 106 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 11 scenario, 11 action, 112 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -62,6 +63,7 @@ Profile `release`: 10 scenario, 10 action, 106 checks. 이 표에 없는 scenari
 | `F13.content.2` | `run` : 8 |
 | `F13.content.3` | `run` : 8 |
 | `F02.wrap-grow-lines` | `run` : 20 |
+| `F19.wrap-match-follower` | `run` : 6 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 
