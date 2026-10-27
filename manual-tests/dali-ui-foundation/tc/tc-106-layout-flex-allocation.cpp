@@ -11,6 +11,14 @@
 using namespace LayoutValidation;
 using namespace LayoutValidation::Fixtures;
 
+namespace
+{
+struct GrowKept
+{
+  View stage, flex, a, b;
+};
+} // namespace
+
 class Tc106 : public Case
 {
 public:
@@ -40,7 +48,7 @@ public:
         });
       }));
     for(bool shrink : {false, true})
-      out.push_back(Single(shrink ? "F11.minimum" : "F10.maximum", "Clamped measure and allocated basis remain distinct", 10, [shrink](Run& r) {
+      out.push_back(Single(shrink ? "F11.minimum" : "F10.maximum", "Own min/max clamps the grow/shrink slot at its start edge; the sibling keeps its share", 10, [shrink](Run& r) {
         auto f = FlexLayout::New();
         f.SetAlignItems(FlexAlign::FLEX_START);
         const float width = shrink ? 100 : 200;
@@ -58,7 +66,7 @@ public:
         r.AfterRender({stage, f, a, b}, [=](Run& r) {
           const float w = shrink ? 50 : 100;
           r.Size("measured-a", a.GetMeasuredSize(), MeasuredSize(shrink ? 80 : 60, 10));
-          r.Rendered("allocated-a", a, LayoutRect(0, 0, w, 10));
+          r.Rendered("allocated-a", a, LayoutRect(0, 0, shrink ? 80 : 60, 10));
           r.Rendered("allocated-b", b, LayoutRect(w, 0, w, 10));
         });
       }));
@@ -130,6 +138,57 @@ public:
         r.Size("minimum.measured", f.GetMeasuredSize(), MeasuredSize(100, 30));
         r.Rendered("minimum.a", a, LayoutRect(0, 0, 45, 10));
         r.Rendered("minimum.b", b, LayoutRect(45, 0, 55, 10));
+      });
+    }));
+    out.push_back(Steps("F10.grow-maximum-kept", "A MATCH_PARENT grow share assigned in Measure is clamped by its maximum and not given to the sibling", {
+      {"first", 10, [](Run& r) {
+         auto s  = std::make_shared<GrowKept>();
+         auto f  = FlexLayout::New();
+         s->flex = f;
+         f.SetAlignItems(FlexAlign::FLEX_START);
+         Fixed(f, 300, 50);
+         s->a = Leaf(60, 20, "a");
+         s->b = Leaf(MATCH_PARENT, 20, "b");
+         s->b.SetMaximumWidth(50);
+         s->a.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1));
+         s->b.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1));
+         f.Add(s->a);
+         f.Add(s->b);
+         s->stage = Mount(r, f, 300, 50);
+         r.SetState(s);
+         r.AfterRender({s->stage, s->flex, s->a, s->b}, [=](Run& r) {
+           r.Rendered("a", s->a, LayoutRect(0, 0, 180, 20));
+           r.Rendered("b", s->b, LayoutRect(180, 0, 50, 20));
+           r.Size("b.measured", s->b.GetMeasuredSize(), MeasuredSize(50, 20));
+         });
+       }},
+      {"arrange-only", 10, [](Run& r) {
+         auto s = r.State<GrowKept>();
+         s->flex.InvalidateArrange();
+         r.AfterRender({s->stage, s->flex, s->a, s->b}, [=](Run& r) {
+           r.Rendered("a", s->a, LayoutRect(0, 0, 180, 20));
+           r.Rendered("b", s->b, LayoutRect(180, 0, 50, 20));
+           r.Size("b.measured", s->b.GetMeasuredSize(), MeasuredSize(50, 20));
+         });
+       }},
+    }));
+    out.push_back(Single("F18.shrink-assigned-exact", "A child narrowed by shrink is re-measured exactly at its share in Measure", 11, [](Run& r) {
+      auto f = FlexLayout::New();
+      f.SetAlignItems(FlexAlign::FLEX_START);
+      Fixed(f, 100, 50);
+      auto a = Probed(r, 80, 19, false);
+      View b = Leaf(60, 10, "b");
+      a->view.SetLayoutParams(FlexLayoutParams::New().SetFlexShrink(1));
+      b.SetLayoutParams(FlexLayoutParams::New().SetFlexShrink(1));
+      f.Add(a->view);
+      f.Add(b);
+      View stage = Mount(r, f, 100, 50);
+      // Line 80 + 60 = 140 in 100: deficit 40 weighted 80:60 -> a 80 - 40 * 80 / 140 = 400/7, b 300/7.
+      r.AfterRender({stage, f, a->view, b}, [=](Run& r) {
+        r.Size("a", a->view.GetMeasuredSize(), MeasuredSize(400.0f / 7, 19));
+        r.Near("a.last-width", a->lastWidth, 400.0 / 7);
+        r.Rendered("a.rendered", a->view, LayoutRect(0, 0, 400.0f / 7, 19));
+        r.Rendered("b.rendered", b, LayoutRect(400.0f / 7, 0, 300.0f / 7, 10));
       });
     }));
     return out;

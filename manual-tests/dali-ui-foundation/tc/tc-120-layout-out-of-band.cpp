@@ -41,6 +41,14 @@ std::shared_ptr<OutOfBand> MountStack(Run& r, std::shared_ptr<Probe> probe)
   r.SetState(s);
   return s;
 }
+// The slot of the WRAP_CONTENT x WRAP_CONTENT standalone probe (natural 300x90, requested
+// position (7,9), no margin): every path measures it against the window it is shown in, not
+// against its 200x80 parent. The window size is an input read at check time.
+LayoutRect StandaloneSlot(Run& r)
+{
+  const auto window = r.GetWindow().GetPositionSize();
+  return LayoutRect(7, 9, std::min(300.0f, static_cast<float>(window.width)), std::min(90.0f, static_cast<float>(window.height)));
+}
 } // namespace
 
 class Tc120 : public Case
@@ -87,7 +95,7 @@ public:
        }},
     }));
     out.push_back(Steps("K14.external-standalone-measure", "A standalone slot corrected out of band is consumed by the parent's next Arrange", {
-      {"mount", 4, [](Run& r) {
+      {"mount", 5, [](Run& r) {
          auto probe = Probed(r, 300, 90, false);
          probe->view.SetLayoutMode(LayoutMode::STANDALONE);
          probe->view.SetRequestedX(7);
@@ -95,18 +103,19 @@ public:
          auto s = MountStack(r, probe);
          r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) {
            s->measures = s->probe->measures;
-           r.Rendered("before.slot", s->probe->view, LayoutRect(7, 9, 200, 80));
+           r.Rendered("before.slot", s->probe->view, StandaloneSlot(r));
+           r.Equal("mount.producer-once", s->probe->measures, 1);
          });
        }},
-      // The mount settle ends with the probe's own layout-root pass. One more parent pass settles
-      // the parent and the probe together; the external step starts from that state. Whether that
-      // parent pass re-runs the probe's producer depends on the measure key the root pass left
-      // behind, so the count is only re-based here, not checked.
+      // Every path measures the probe at the same window key: the parent's measure
+      // (MeasureStandaloneChildren) is the only producer run, and the placement and the probe's
+      // own layout-root pass are cache hits. This step re-bases the producer count on one more
+      // parent pass; the external step starts from that state.
       {"warmup", 4, [](Run& r) {
          auto s = r.State<OutOfBand>();
          s->Nudge();
          r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) {
-           r.Rendered("warmup.slot", s->probe->view, LayoutRect(7, 9, 200, 80));
+           r.Rendered("warmup.slot", s->probe->view, StandaloneSlot(r));
            s->measures = s->probe->measures;
          });
        }},
@@ -117,13 +126,23 @@ public:
          r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) {
            // The external Measure plus exactly one corrective measure at the parent's slot.
            r.Equal("corrective-child-producer", s->probe->measures, s->measures + 2);
-           r.Rendered("corrected.slot", s->probe->view, LayoutRect(7, 9, 200, 80));
+           r.Rendered("corrected.slot", s->probe->view, StandaloneSlot(r));
          });
        }},
       {"repeat", 1, [](Run& r) {
          auto s = r.State<OutOfBand>();
          s->Nudge();
          r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) { r.Equal("repeat.no-child-producer", s->probe->measures, s->measures + 2); });
+       }},
+      // The slot does not depend on which path measured last: the parent's own measure pass
+      // measures the probe at the same window key (a cache hit) and places it at the same slot.
+      {"path-independence", 5, [](Run& r) {
+         auto s = r.State<OutOfBand>();
+         s->parent.InvalidateMeasure();
+         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) {
+           r.Rendered("path-independence.slot", s->probe->view, StandaloneSlot(r));
+           r.Equal("path-independence.no-producer", s->probe->measures, s->measures + 2);
+         });
        }},
     }));
     out.push_back(Steps("K14.external-arrange", "A direct child Arrange on a rendered tree cannot leave a stale ancestor replay", {

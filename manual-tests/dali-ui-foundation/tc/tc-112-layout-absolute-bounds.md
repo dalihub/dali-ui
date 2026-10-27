@@ -28,6 +28,7 @@
 - `A07.wrap-negative-position`: far edge(−20+100,−5+20)=(80,15)입니다.
 
 - `A01.explicit-local`은 `mount`(layout을 margin (70,0,90,0)으로 300×220 stage에 부착: parent (70,90,200,100), child (11,13,37,19)) → `move-parent`(margin (100,0,120,0): parent 이동, child 불변)이고, `A03.intrinsic-match`는 `intrinsic`((5,7,37,19)) → `match`(MATCH_PARENT: (5,7,100,60))입니다. `A07.wrap-negative-position`은 measured (80,15)와 렌더 (0,0,80,15)를 검사합니다.
+- `A09.bounds-exact`: 200×100 Absolute layout에 bounds (10,20,70,30)인 37×19 probe c와 bounds (5,7,−1,−1)인 MATCH×MATCH View m을 둡니다. 명시 bounds extent는 그대로 배정되므로 c는 70×30에서 EXACTLY로 측정되어 measured (70,30), 마지막 constraint (70,30), 렌더 (10,20,70,30)입니다. bounds extent가 없는 MATCH_PARENT 축은 content extent(200×100, margin 0)를 배정받아 m은 measured (200,100), 렌더 (5,7,200,100)입니다. 14행입니다.
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
@@ -47,7 +48,7 @@ Absolute의 명시 bounds, 위임 sentinel, 음수 위치와 WRAP far edge를 �
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 7 scenario, 9 action, 46 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 8 scenario, 10 action, 60 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -58,6 +59,7 @@ Profile `release`: 7 scenario, 9 action, 46 checks. 이 표에 없는 scenario�
 | `A02.extent.250` | `run` : 4 |
 | `A03.intrinsic-match` | `intrinsic` : 4 → `match` : 4 |
 | `A07.wrap-negative-position` | `run` : 6 |
+| `A09.bounds-exact` | `run` : 14 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

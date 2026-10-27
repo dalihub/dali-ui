@@ -132,6 +132,34 @@ public:
            r.AfterRender({s->stage, s->probe->view}, [=](Run& r) { r.Rendered("recovered", s->probe->view, LayoutRect(11, 13, 61, 31)); });
          }},
       }));
+    out.push_back(Single("R04.unbounded-exact", "A detached MATCH_PARENT view is measured exactly at a bounded constraint; an unbounded, threshold or negative constraint stays a budget", 10, [](Run& r) {
+      // No View parent: the MATCH_PARENT axes are assigned (EXACTLY) and report the constraint
+      // clamped by the own minimum. An exact constraint at or above 1e30, or a negative one, is
+      // demoted to AT_MOST, where a MATCH_PARENT axis reports its minimum (13x17).
+      View d = View::New();
+      d.SetRequestedWidth(MATCH_PARENT);
+      d.SetRequestedHeight(MATCH_PARENT);
+      d.SetMinimumWidth(13);
+      d.SetMinimumHeight(17);
+      Dali::Ui::Extension::View::SetUiScalePolicy(d, Dali::Ui::Extension::UiScalePolicy::DISABLED);
+      r.Size("exact", d.Measure(200, 150), MeasuredSize(200, 150));
+      r.Size("float-max", d.Measure(std::numeric_limits<float>::max(), std::numeric_limits<float>::max()), MeasuredSize(13, 17));
+      r.Size("threshold", d.Measure(1e30f, 1e30f), MeasuredSize(13, 17));
+      r.Size("below-threshold", d.Measure(1e29f, 1e29f), MeasuredSize(1e29f, 1e29f));
+      r.Size("negative", d.Measure(-1, -1), MeasuredSize(13, 17));
+    }));
+    out.push_back(Single("C09.max-wins.match", "A MATCH_PARENT view with conflicting bounds reports and is laid out at its maximum from the slot's start edge", 6, [](Run& r) {
+      View a = Leaf(MATCH_PARENT, MATCH_PARENT, "max-wins");
+      a.SetMinimumWidth(100);
+      a.SetMaximumWidth(40);
+      a.SetMinimumHeight(90);
+      a.SetMaximumHeight(30);
+      View stage = Mount(r, a, 300, 300);
+      r.AfterRender({stage, a}, [=](Run& r) {
+        r.Size("maximum-wins", a.GetMeasuredSize(), MeasuredSize(40, 30));
+        r.Rendered("maximum-wins.rendered", a, LayoutRect(0, 0, 40, 30));
+      });
+    }));
     return out;
   }
 };

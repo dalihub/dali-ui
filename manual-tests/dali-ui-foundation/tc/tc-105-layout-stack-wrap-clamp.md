@@ -22,17 +22,21 @@
 
 ## 시나리오와 독립 기대값
 
-- `S08.minimum/maximum`: 각 weight 1의 최종 allocation은 항상 100입니다. Measure 결과만 minimum=120 또는 maximum=60을 반영합니다. measured 2행과 두 child rect 8행을 모두 검사하십시오.
+- `S08.minimum/maximum`: weight 1:1의 slot은 각각 100이지만 a는 자기 min 120 / max 60으로 clamp되어 slot의 start edge(x=0)에서 120 / 60 폭으로 배치됩니다(min이면 b와 겹칩니다). b의 slot은 재분배 없이 (100,0,100,10)이며 measured는 배치 크기와 같은 120 / 60입니다(view.h SetMinimumWidth/SetMaximumWidth). measured 2행과 두 child rect 8행을 모두 검사하십시오.
 - `S06.wrap-weight`: intrinsic 20+gap10+intrinsic30=60입니다. parent minimum 100을 주면 parent measured width=100입니다.
 - `S07.match-overflow`: unweighted MATCH_PARENT는 전체 100을 차지하여 x20에서 overflow합니다. weight 1을 지정한 후 남은 80만 배정받습니다.
 
 - `S06.wrap-weight`는 `wrap`(300×100 stage의 wrapping stack: 60×15, 렌더 동일) → `minimum`(min width 100: 100×15)이고, `S07.match-overflow`는 `unweighted`(b (20,0,100,10)) → `weighted`(weight 1: b (20,0,80,10))의 두 step입니다.
+- `S15.clamped-container`: 300×200 stage 안의 MATCH×MATCH vertical stack s(최대 폭 120)는 EXACTLY (300,200)으로 측정되어 (120,200)을 보고하고 slot (0,0,300,200)이 start edge에서 (0,0,120,200)으로 clamp됩니다. stack은 clamp된 bounds 안에 자식을 배치하므로 g(MATCH 폭, 높이 30)는 measured (120,30), 렌더 (0,0,120,30)이고, END 정렬 h(50×40)는 (120−50, 30) = (70,30,50,40)입니다. 16행입니다.
+- `S16.weighted-wrap-exact`: 200×100 vertical stack 안의 FILL horizontal stack inner(WRAP×WRAP)는 결정된 cross 폭 200에서 EXACTLY로 측정되므로 WRAP main 축도 결정되어 Measure에서 weight를 분배합니다. weight 1인 wrapping flex f는 200−120=80에서 EXACTLY로 측정되어 [40,40][40] 두 줄(높이 20)이 되고 inner는 (200, max(10,20)) = (200,20)입니다. inner 렌더 (0,0,200,20), f 렌더 (120,0,80,20)(inner 기준), f의 세 번째 Leaf 렌더 (0,10,40,10)(f 기준)입니다. 14행입니다.
+- `S17.two-step-match`: WRAP×WRAP vertical stack outer에 seed Leaf(100,0)과 폭 MATCH_PARENT인 wrapping flex wf(Leaf 40×10 3개)를 넣습니다. 1단계에서 wf는 200 budget에서 한 줄(높이 10)로 probe되고, outer가 seed에서 cross 폭 100을 얻은 뒤 wf를 100에서 EXACTLY로 다시 측정하면 두 줄(높이 20)이 됩니다. outer measured (100,20), 렌더 (0,0,100,20), wf measured (100,20), 렌더 (0,0,100,20)입니다. 12행입니다.
+- `S17.two-step-stretched`: 같은 outer와 seed에 FILL vertical stack c(WRAP×WRAP)를 넣고 그 안에 wf를 둡니다. c는 1단계에서 (0,10)을 보고하지만(자기 크기가 없어 MATCH 자식은 probe를 유지), slot 100보다 좁고 폭에 따라 content 크기가 달라지는 FILL 자식이므로 100에서 EXACTLY로 다시 측정되고 wf도 100에서 두 줄이 됩니다. outer·c measured (100,20), 렌더 (0,0,100,20), wf 렌더 (0,0,100,20)(c 기준)입니다. 16행입니다.
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 ## 근거와 검증 경계
 
-Measure clamp와 Arrange allocation의 서로 다른 계약을 검사합니다. allocation에 임의의 min/max 재분배 정책을 추가한 expected를 사용하지 않습니다.
+stack이 배정하는 slot(weight share, cross 정렬)과 child 자신의 min/max clamp(Measure 보고와 Arrange 모두, slot의 start edge 유지)를 검사하고, wrapping stack의 두 단계 측정(cross 폭이 정해진 뒤 MATCH_PARENT·FILL 자식을 그 폭에서 EXACTLY로 재측정)을 검사합니다. allocation에 임의의 min/max 재분배 정책을 추가한 expected를 사용하지 않습니다.
 
 `Snapshot`은 `LayoutController`가 `LayoutFinished`로 보고한 최종 parent-local target bounds(post-RTL, pre-transition)입니다. `GetArrangedBounds()`의 logical rect(pre-RTL)와 구분하십시오. 행 이름에 `logical`이나 `arranged`가 포함되어도 좌표 의미는 관측 API를 기준으로 판단하십시오. `Rendered` 행(id.x/.y/.width/.height, `*.rendered.*` 포함)은 current scene-graph 상태에서 계산한 화면 사각형을 부모 또는 명시한 base 기준으로 관측한 값이며 RTL 적용 후 좌표입니다. `GetMeasuredSize`는 해당 pass의 측정 결과입니다. controller 완료 snapshot, transition 중간 current geometry, Window의 최종 화면 합성은 서로 다른 관측입니다. callback 측정·배치 횟수는 controller pass가 호출한 synthetic producer의 횟수입니다.
 
@@ -46,7 +50,7 @@ Measure clamp와 Arrange allocation의 서로 다른 계약을 검사합니다. 
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 4 scenario, 6 action, 40 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 8 scenario, 10 action, 98 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -54,6 +58,10 @@ Profile `release`: 4 scenario, 6 action, 40 checks. 이 표에 없는 scenario�
 | `S08.maximum` | `run` : 10 |
 | `S06.wrap-weight` | `wrap` : 6 → `minimum` : 6 |
 | `S07.match-overflow` | `unweighted` : 4 → `weighted` : 4 |
+| `S15.clamped-container` | `run` : 16 |
+| `S16.weighted-wrap-exact` | `run` : 14 |
+| `S17.two-step-match` | `run` : 12 |
+| `S17.two-step-stretched` | `run` : 16 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

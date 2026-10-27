@@ -33,6 +33,8 @@
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 - `R03.returned-rect.0.2`: custom callback의 음수 extent/NaN position/Inf extent를 반환합니다. Debug는 DaliException(step 안의 동기 pass에서 포착), Release는 전체 input(7,9,53,29) fallback이어야 하며, 어느 쪽이든 앱이 abort되면 FAIL입니다. callback 전에 유효 input이 Actor에 provisional geometry로 적용되므로 safe-actor는 두 경우 모두(7,9,53,29)입니다. 잘못된 반환의 부분 field만 채택해서는 안 됩니다. 완료 record publication의 보존은 TC123에서 ViewImpl::GetArrangedBounds()로 별도 검사합니다. 다음 정상 호출(11,13,61,31)로 복구해야 합니다.
+- `R04.unbounded-exact`: 어떤 부모에도 붙이지 않은 MATCH×MATCH View(min 13×17, `Extension::UiScalePolicy::DISABLED`로 scale 1)를 동기 `Measure()`로만 측정합니다(렌더 없음, 10행). View 부모가 없으면 MATCH_PARENT 축은 EXACTLY로 배정되어 constraint를 자기 min/max로 clamp한 값을 보고하므로 `exact`=Measure(200,150)→(200,150), `below-threshold`=Measure(1e29,1e29)→(1e29,1e29)입니다. EXACTLY constraint가 1e30(MAX_EXACT_MEASURE_SIZE) 이상이거나 음수이면 크기가 아니라 budget이므로 AT_MOST로 강등되고 MATCH_PARENT 축은 minimum을 보고합니다. `float-max`=Measure(FLT_MAX,FLT_MAX), `threshold`=Measure(1e30,1e30), `negative`=Measure(−1,−1)은 모두 (13,17)입니다(docs/layout-structure.md Measure modes, view.h Measure).
+- `C09.max-wins.match`: MATCH×MATCH Leaf에 min (100,90), max (40,30)을 주고 300×300 stage에 붙입니다. EXACTLY 300은 min을 먼저 적용해 max(300,100)=300, 이어서 max가 이겨 min(300,40)=40이 되고 높이도 min(max(300,90),30)=30이므로 measured (40,30)입니다. slot (0,0,300,300)은 start edge를 유지한 채 같은 순서로 clamp되어 렌더 (0,0,40,30)입니다. 6행입니다.
 
 ## 근거와 검증 경계
 
@@ -50,7 +52,7 @@
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 13 scenario, 16 action, 107 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 15 scenario, 18 action, 123 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -67,6 +69,8 @@ Profile `release`: 13 scenario, 16 action, 107 checks. 이 표에 없는 scenari
 | `R03.returned-rect.0` | `invalid-result` : 5 → `recovered` : 4 |
 | `R03.returned-rect.1` | `invalid-result` : 5 → `recovered` : 4 |
 | `R03.returned-rect.2` | `invalid-result` : 5 → `recovered` : 4 |
+| `R04.unbounded-exact` | `run` : 10 |
+| `C09.max-wins.match` | `run` : 6 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

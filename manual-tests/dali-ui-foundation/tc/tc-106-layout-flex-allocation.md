@@ -24,7 +24,7 @@
 
 - `F06.grow`: basis 20/40, free=90, grow 1:2이므로 width=50/100입니다.
 - `F07.shrink`: basis 100/200, deficit 50, shrink 가중치는 100:400이므로 width=90/160입니다.
-- `F10.maximum`, `F11.minimum`: measured width는 각각 60/80, 실제 allocation은 100/50입니다. Measure와 Arrange를 각각 읽으십시오.
+- `F10.maximum`, `F11.minimum`: grow/shrink slot은 100/50이지만 a는 자기 max 60 / min 80으로 clamp되어 start edge(x=0)에서 60 / 80 폭으로 배치됩니다. measured는 배치 크기와 같은 60/80이고 b의 slot은 재분배 없이 (100,0,100,10) / (50,0,50,10)입니다.
 - `F09.match-grow`: fixed 50 뒤 MATCH_PARENT+grow child는 x50, width150입니다.
 - `F08.zero-basis`: 명시 basis0은 intrinsic 40/30을 대체하며 grow child만 전체 100을 받습니다.
 
@@ -35,10 +35,12 @@
 - `F15.shrink-clamp`: basis1/100, shrink100/1, container10이면 deficit91을 weighted basis100:100에 45.5씩 배분합니다. 첫 width는max(0,1−45.5)=0, 둘째 54.5입니다. 현재 allocation 정책의 개별 zero clamp 이후 재분배를 임의 가정하지 않습니다.
 
 - `F17.wrap-minimum-grow`: WRAP_CONTENT 폭 flex(min width 100, basis 20/30, grow 1/1, 높이 30)는 measured 100×30이고, arrange가 실제 폭 100으로 free 50을 나누어 a (0,0,45,10), b (45,0,55,10)입니다. measure 시점의 50을 arrange에서 재사용하면 FAIL입니다.
+- `F10.grow-maximum-kept`: 300×50 flex(FLEX_START)에서 a=Leaf(60,20) grow 1, b=MATCH_PARENT 폭·높이 20, grow 1, 최대 폭 50입니다. line은 60+0(b의 probe)이므로 free 240을 120씩 나누어 a 180, b의 slot 120이 됩니다. b의 slot은 Measure에서 EXACTLY로 배정되어 최대 폭으로 clamp된 measured (50,20)을 보고하고, x=180에서 50 폭으로 배치됩니다. 남는 70은 a에 재분배되지 않습니다. `first`는 a 렌더 (0,0,180,20), b 렌더 (180,0,50,20), b measured (50,20)이고 `arrange-only`(flex InvalidateArrange)는 저장된 slot을 다시 써서 같은 값입니다. 각 10행입니다.
+- `F18.shrink-assigned-exact`: 100×50 flex(FLEX_START)에서 probe a(80×19, shrink 1)와 b=Leaf(60,10)(shrink 1)는 line 140, deficit 40을 basis 가중 80:60으로 나눕니다. a=80−40×80/140=400/7≈57.142857, b=300/7≈42.857143입니다. 좁아진 a는 Measure에서 자기 share에 EXACTLY로 다시 측정되므로 measured (400/7,19), 마지막 constraint 폭 400/7이고, 렌더 a (0,0,400/7,19), b (400/7,0,300/7,10)입니다. 11행입니다.
 
 ## 근거와 검증 경계
 
-`flex-layout-manager.cpp`의 basis, grow, basis-weighted shrink, MATCH_PARENT 최종 재측정을 독립 식으로 검증합니다.
+`flex-layout-manager.cpp`의 basis, grow, basis-weighted shrink, MATCH_PARENT 최종 재측정을 독립 식으로 검증합니다. 한 줄 flex는 결정된 main 크기에서 grow/shrink 분배를 Measure에서 계산하고, 그 share가 배정된 child는 share에서 EXACTLY로 측정되어 자기 min/max로 clamp된 크기를 보고합니다. 배치는 slot의 start edge를 유지하며 clamp로 남거나 모자란 공간을 형제에게 재분배하지 않습니다.
 
 `Snapshot`은 `LayoutController`가 `LayoutFinished`로 보고한 최종 parent-local target bounds(post-RTL, pre-transition)입니다. `GetArrangedBounds()`의 logical rect(pre-RTL)와 구분하십시오. 행 이름에 `logical`이나 `arranged`가 포함되어도 좌표 의미는 관측 API를 기준으로 판단하십시오. `Rendered` 행(id.x/.y/.width/.height, `*.rendered.*` 포함)은 current scene-graph 상태에서 계산한 화면 사각형을 부모 또는 명시한 base 기준으로 관측한 값이며 RTL 적용 후 좌표입니다. `GetMeasuredSize`는 해당 pass의 측정 결과입니다. controller 완료 snapshot, transition 중간 current geometry, Window의 최종 화면 합성은 서로 다른 관측입니다. callback 측정·배치 횟수는 controller pass가 호출한 synthetic producer의 횟수입니다.
 
@@ -52,7 +54,7 @@
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 9 scenario, 9 action, 70 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 11 scenario, 12 action, 101 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -65,6 +67,8 @@ Profile `release`: 9 scenario, 9 action, 70 checks. 이 표에 없는 scenario�
 | `F15.shrink-clamp` | `run` : 8 |
 | `F16.margin-padding` | `run` : 4 |
 | `F17.wrap-minimum-grow` | `run` : 10 |
+| `F10.grow-maximum-kept` | `first` : 10 → `arrange-only` : 10 |
+| `F18.shrink-assigned-exact` | `run` : 11 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

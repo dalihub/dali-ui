@@ -17,6 +17,11 @@ struct Tree
 {
   View stage, p, a, b;
 };
+struct TwoStep
+{
+  View                   stage, p, seed, m;
+  std::shared_ptr<Probe> inner;
+};
 } // namespace
 
 class Tc97 : public Case
@@ -92,7 +97,7 @@ public:
       p.Add(c);
       View stage = Mount(r, p, 100, 60);
       r.AfterRender({stage, p, c}, [=](Run& r) {
-        r.Size("minimum-contribution", c.GetMeasuredSize(), MeasuredSize(0, 0));
+        r.Size("exact-slot", c.GetMeasuredSize(), MeasuredSize(86, 28));
         r.Rendered("match-slot", c, LayoutRect(5, 13, 86, 28));
       });
     }));
@@ -129,6 +134,55 @@ public:
       r.AfterRender({stage, parent, child}, [=](Run& r) {
         r.Size("zero-measure", child.GetMeasuredSize(), MeasuredSize(0, 0));
         r.Rendered("zero-content", child, LayoutRect(11, 11, 0, 0));
+      });
+    }));
+    out.push_back(Steps("C06.two-step", "A MATCH_PARENT child of a wrapping parent is re-measured exactly at the width the parent resolves", {
+      {"mount", 16, [](Run& r) {
+         auto s   = std::make_shared<TwoStep>();
+         s->p     = View::New();
+         s->seed  = Leaf(30, 0, "seed");
+         s->m     = View::New();
+         s->m.SetRequestedWidth(MATCH_PARENT);
+         s->inner           = Probed(r);
+         s->inner->wrapping = true;
+         s->m.Add(s->inner->view);
+         s->p.Add(s->seed);
+         s->p.Add(s->m);
+         s->stage = Mount(r, s->p, 200, 100);
+         r.SetState(s);
+         r.AfterRender({s->stage, s->p, s->seed, s->m, s->inner->view}, [=](Run& r) {
+           r.Size("p", s->p.GetMeasuredSize(), MeasuredSize(30, 38));
+           r.Rendered("p.rendered", s->p, LayoutRect(0, 0, 30, 38));
+           r.Size("m", s->m.GetMeasuredSize(), MeasuredSize(30, 38));
+           r.Rendered("m.rendered", s->m, LayoutRect(0, 0, 30, 38));
+           r.Rendered("inner.rendered", s->inner->view, LayoutRect(0, 0, 30, 38));
+         });
+       }},
+      {"widen-seed", 16, [](Run& r) {
+         auto s = r.State<TwoStep>();
+         s->seed.SetRequestedWidth(50);
+         r.AfterRender({s->stage, s->p, s->seed, s->m, s->inner->view}, [=](Run& r) {
+           r.Size("p", s->p.GetMeasuredSize(), MeasuredSize(50, 19));
+           r.Rendered("p.rendered", s->p, LayoutRect(0, 0, 50, 19));
+           r.Size("m", s->m.GetMeasuredSize(), MeasuredSize(50, 19));
+           r.Rendered("m.rendered", s->m, LayoutRect(0, 0, 50, 19));
+           r.Rendered("inner.rendered", s->inner->view, LayoutRect(0, 0, 37, 19));
+         });
+       }},
+    }));
+    out.push_back(Single("C11.explicit-clamped-content", "An explicit view measures its content inside its own minimum-clamped size", 13, [](Run& r) {
+      View p = Leaf(30, 50, "parent");
+      p.SetMinimumWidth(60);
+      auto inner      = Probed(r);
+      inner->wrapping = true;
+      p.Add(inner->view);
+      View stage = Mount(r, p, 200, 100);
+      r.AfterRender({stage, p, inner->view}, [=](Run& r) {
+        r.Size("p", p.GetMeasuredSize(), MeasuredSize(60, 50));
+        r.Rendered("p.rendered", p, LayoutRect(0, 0, 60, 50));
+        r.Near("inner.last-width", inner->lastWidth, 60);
+        r.Size("inner", inner->view.GetMeasuredSize(), MeasuredSize(37, 19));
+        r.Rendered("inner.rendered", inner->view, LayoutRect(0, 0, 37, 19));
       });
     }));
     return out;

@@ -95,6 +95,28 @@ public:
         r.Rendered("wrap.rendered", a, LayoutRect(0, 0, 80, 15));
       });
     }));
+    // An explicit bounds extent is assigned EXACTLY (the 37x19 probe is measured at 70x30 and
+    // reports it); a MATCH_PARENT extent without one is assigned the layout's content extent.
+    out.push_back(Single("A09.bounds-exact", "Explicit bounds extents and MATCH_PARENT axes are measured exactly at the extent they are laid out at", 14, [](Run& r) {
+      auto a = AbsoluteLayout::New();
+      Fixed(a, 200, 100);
+      auto c = Probed(r, 37, 19, false);
+      c->view.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(10, 20, 70, 30)));
+      View m = View::New();
+      Fixed(m, MATCH_PARENT, MATCH_PARENT);
+      m.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(5, 7, -1, -1)));
+      a.Add(c->view);
+      a.Add(m);
+      View stage = Mount(r, a, 200, 100);
+      r.AfterRender({stage, a, c->view, m}, [=](Run& r) {
+        r.Size("c", c->view.GetMeasuredSize(), MeasuredSize(70, 30));
+        r.Near("c.last-width", c->lastWidth, 70);
+        r.Near("c.last-height", c->lastHeight, 30);
+        r.Rendered("c.rendered", c->view, LayoutRect(10, 20, 70, 30));
+        r.Size("m", m.GetMeasuredSize(), MeasuredSize(200, 100));
+        r.Rendered("m.rendered", m, LayoutRect(5, 7, 200, 100));
+      });
+    }));
     return out;
   }
 };

@@ -26,6 +26,8 @@
 - `G06.auto-deficit`: AUTO floor20+30+gap10=60이며 spanning child100의 부족 40을 두 AUTO에 20씩 더합니다. width40/50입니다.
 - `G09.align.0.3`: cell100×60 안 20×10을 START/CENTER/END/FILL로 배치합니다. CENTER=(40,25), END=(80,50), FILL=100×60입니다.
 - `G10.padding-margin`: content112×62에서 margin6×14를 빼면 106×48, 시작점(3+2,7+6)입니다.
+- `G09.clamped-align.0.3`(START/CENTER/END/FILL): WRAP grid(행 {50}, 열 {100,200}, 320×80 stage)의 행 0 열 0에 80×40 probe a(최대 60×30)를 두고 가로·세로 정렬을 mode로 줍니다. constraint는 producer 전에 자기 max로 clamp되어 a는 (60,30)을 보고합니다(FILL은 100×50 cell에서 EXACTLY로 측정되어 clamp). grid는 clamp된 크기로 정렬하므로 렌더는 START (0,0,60,30), CENTER ((100−60)/2,(50−30)/2)=(20,10,60,30), END (40,20,60,30)이고, FILL은 cell (0,0,100,50)이 start edge에서 clamp되어 (0,0,60,30)입니다. 열 1의 b는 cell (100,0,200,50)입니다. 각 10행입니다.
+- `G18.oversize-remeasured`: WRAP 폭·높이 30·최소 폭 100인 grid, 열 {Absolute(30), Star(1)}에 a(열 0 cell)와 150×19 probe b(열 1)를 200×60 stage에 둡니다. 폭이 결정되지 않은 grid의 STAR 열은 max(30, 최소 폭 100)−30=70을 받아 grid measured (100,30)입니다. b는 Measure에서 200 budget으로 측정되어 150을 보고하지만 70 cell보다 넓으므로 Arrange에서 cell에 다시 측정되어 measured (70,19), 마지막 constraint 폭 70이고 FILL cell 렌더 (30,0,70,30)입니다. a 렌더 (0,0,30,30)입니다. 13행입니다.
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
@@ -45,7 +47,7 @@ span 범위의 내부 gap, AUTO 부족량 보정과 cell alignment를 별도 독
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 7 scenario, 7 action, 36 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 12 scenario, 12 action, 89 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -56,6 +58,11 @@ Profile `release`: 7 scenario, 7 action, 36 checks. 이 표에 없는 scenario�
 | `G09.align.2` | `run` : 4 |
 | `G09.align.3` | `run` : 4 |
 | `G10.padding-margin` | `run` : 4 |
+| `G09.clamped-align.0` | `run` : 10 |
+| `G09.clamped-align.1` | `run` : 10 |
+| `G09.clamped-align.2` | `run` : 10 |
+| `G09.clamped-align.3` | `run` : 10 |
+| `G18.oversize-remeasured` | `run` : 13 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

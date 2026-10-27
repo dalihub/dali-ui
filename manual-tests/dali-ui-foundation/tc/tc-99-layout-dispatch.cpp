@@ -86,6 +86,10 @@ struct CustomManaged
     arranges = manager->arranges;
   }
 };
+struct CustomModes
+{
+  View stage, root, a, d;
+};
 } // namespace
 
 class Tc99 : public Case
@@ -232,6 +236,45 @@ public:
            r.Rendered("restore.a", s->a, LayoutRect(0, 0, 20, 10));
            r.Rendered("restore.b", s->b, LayoutRect(20, 10, 30, 15));
            r.Rendered("restore.c", s->c, LayoutRect(50, 25, 40, 20));
+         });
+       }},
+    }));
+    // The application-defined manager calls the mode-less Measure on its children. A custom
+    // parent assigns a MATCH_PARENT child only when its own size is determined (explicit, or
+    // measured EXACTLY); under an at-most budget the child reports its minimum.
+    out.push_back(Steps("C19.custom-manager-modes", "A custom LayoutManager's MATCH_PARENT child is measured at the budget, then exactly once the manager's view is assigned", {
+      {"budget", 12, [](Run& r) {
+         auto s  = std::make_shared<CustomModes>();
+         s->root = View::New();
+         s->root.SetRequestedWidth(WRAP_CONTENT);
+         s->root.SetRequestedHeight(WRAP_CONTENT);
+         s->root.AttachLayoutManager(Dali::MakeUnique<DiagonalManager>());
+         s->a = Leaf(20, 10, "a");
+         s->d = Leaf(MATCH_PARENT, MATCH_PARENT, "d");
+         s->d.SetMinimumWidth(6);
+         s->d.SetMinimumHeight(4);
+         s->root.Add(s->a);
+         s->root.Add(s->d);
+         s->stage = r.Stage(200, 100);
+         ColorizeTree(s->root);
+         s->stage.Add(s->root);
+         r.SetState(s);
+         r.AfterRender({s->stage, s->root, s->a, s->d}, [=](Run& r) {
+           r.Size("budget.d", s->d.GetMeasuredSize(), MeasuredSize(6, 4));
+           r.Size("budget.root", s->root.GetMeasuredSize(), MeasuredSize(26, 14));
+           r.Rendered("budget.d.rendered", s->d, LayoutRect(20, 10, 6, 4));
+           r.Rendered("budget.a.rendered", s->a, LayoutRect(0, 0, 20, 10));
+         });
+       }},
+      {"exact", 12, [](Run& r) {
+         auto s = r.State<CustomModes>();
+         s->root.SetRequestedWidth(MATCH_PARENT);
+         s->root.SetRequestedHeight(MATCH_PARENT);
+         r.AfterRender({s->stage, s->root, s->a, s->d}, [=](Run& r) {
+           r.Size("exact.d", s->d.GetMeasuredSize(), MeasuredSize(180, 90));
+           r.Size("exact.root", s->root.GetMeasuredSize(), MeasuredSize(200, 100));
+           r.Rendered("exact.d.rendered", s->d, LayoutRect(20, 10, 180, 90));
+           r.Rendered("exact.a.rendered", s->a, LayoutRect(0, 0, 20, 10));
          });
        }},
     }));

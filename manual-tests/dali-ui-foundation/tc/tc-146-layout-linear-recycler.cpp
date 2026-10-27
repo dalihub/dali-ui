@@ -173,6 +173,25 @@ public:
         r.AfterFrame([s](Run& v)
         { CheckWindowRecycler(v, *s, 0); v.Equal("window.no-holder-created", s->creates, 0); }, {}, s->stage);
     }));
+    // Items requesting WRAP_CONTENT on the cross axis (a Leaf's natural size there is 0) are measured
+    // EXACTLY at the 120 slot cross extent, so they report it; the scroll axis keeps the explicit 20.
+    // Viewport 50, extent 20, spacing 2, no cache: items 0..2 are materialized.
+    for(bool horizontal : {false, true})
+      result.push_back(Single(horizontal ? "window-wrap-cross-horizontal" : "window-wrap-cross-vertical", "Items are measured exactly at the slot's cross extent", 7, [horizontal](Run& r)
+      {
+        auto s = MakeWindowRecycler(r, std::vector<float>(10, 20), horizontal, false, 50, true);
+        LayoutController::Get(r.GetWindow()).ProcessLayouts();
+        r.AfterFrame([s, horizontal](Run& v)
+        {
+          v.Equal("cross.materialized", s->bound.size(), 3);
+          for(uint32_t i = 0; i < 3; ++i)
+          {
+            const auto         found    = s->bound.find(i);
+            const MeasuredSize measured = found != s->bound.end() ? found->second.GetMeasuredSize() : MeasuredSize(-1, -1);
+            v.Size(Id("cross.measured", i).c_str(), measured, horizontal ? MeasuredSize(20, 120) : MeasuredSize(120, 20));
+          }
+        }, {}, s->stage);
+      }));
     return result;
   }
 };

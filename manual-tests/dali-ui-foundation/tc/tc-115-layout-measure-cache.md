@@ -26,6 +26,8 @@
 - `K02.normalized-key`: minimum width 120와 maximum height 30 때문에 40×100 stage의 raw 제약은 (120,30)으로 정규화됩니다. producer 입력 120/30, measured 120×19, 렌더 (0,0,120,19)를 확인하고, stage를 50×200으로 바꿔도(`resize`) producer는 1회여야 합니다.
 - `K03.explicit-invalidation`: 외부 width를 37→53으로 바꾸기만 하면 형제 pass 뒤에도 cached 37입니다. `InvalidateMeasure` 이후 53×19가 측정·렌더되고(producer 2), 다음 형제 pass는 hit입니다.
 - `K04.sibling-isolation`: 20+30 stack(50×10) 부착 후 a를 40으로 바꾸고 invalidate하면 root는 70×10이 되고 a producer만 +1, b producer는 그대로입니다.
+- `K11.application-measure.{k}`: 100×60 container(k=0 plain View, 1 vertical stack, 2 vertical stack, 3 Flex(ROW/NO_WRAP/STRETCH 기본값), 4 Grid(100×60 ABSOLUTE cell 하나), 5 Absolute, 6 vertical ScrollView(pan scroll과 scroll bar 끔, padding 0))의 유일한 child인 30×10 probe를 100×60 stage에 붙입니다. probe는 k=0 MATCH×MATCH, k=1 폭 MATCH_PARENT·weight 1, k=2 FILL, k=3·4 WRAP×WRAP, k=5 bounds (0,0,50,40), k=6 ScrollView content로 폭 MATCH_PARENT·높이 WRAP_CONTENT입니다. `pass`는 각 parent의 measure 경로가 배정하는 크기 k=0 (100,60)(EXACTLY 두 축), k=1 (100,60)(cross MATCH와 main weight share 60), k=2 (100,10)(결정된 cross의 FILL만 EXACTLY), k=3 (30,60)(STRETCH cross만 EXACTLY), k=4 (100,60)(ABSOLUTE cell 두 축), k=5 (50,40)(명시 bounds extent), k=6 (100,10)을 measured와 렌더 (0,0,w,h)로 확인하고 producer는 1회입니다(7행). k=6의 scroll layout(`ScrollViewLayoutManager`)은 MATCH_PARENT 축을 viewport 폭 100에서 EXACTLY로, WRAP_CONTENT 축을 FLT_MAX에서 UNSPECIFIED로 측정하므로 폭은 할당된 100, 높이는 probe 자신의 10이고, 배치는 이미 같은 slot 폭과 mode의 측정이 있으므로 재측정을 생략합니다(UNSPECIFIED 축은 비교하지 않음). `app-hit`는 application이 mode 없는 `Measure()`를 pass와 같은 숫자(k=0~4 (100,60), k=5 (50,40), k=6 (100,FLT_MAX))로 호출합니다. 이 호출은 parent 종류에 맞게 pass와 같은 mode를 유도하므로(k=6은 ScrollView 부모의 규칙으로 (EXACTLY, UNSPECIFIED)) cache hit이어야 합니다: 반환값은 pass의 measured이고(`returned`) probe의 producer 횟수가 변하지 않아야 합니다(`producer-unchanged`, 3행). probe는 callback leaf이므로 cache hit은 producer를 실행하지 않는 호출과 같습니다. 어느 parent 종류의 유도를 AT_MOST로 바꾸면 그 k가 miss하여 producer가 다시 실행됩니다(view.h Measure, docs/layout-structure.md mode 유도). hit/producer event 수와 capture overflow는 내부 관측이므로 검사하지 않습니다. k=6은 기존 scenario 순서를 유지하도록 `K12` 뒤에 선언합니다. View 부모가 없는 규칙과 custom parent(NONE) 규칙은 각각 TC96 `R04`와 TC99 `C19.custom-manager-modes`가, wrapping Flex(FLEX_WRAP)의 mode 없는 유도는 어떤 행도 검사하지 않습니다(coverage 문서의 알려진 한계).
+- `K12.arrange-remeasure-skip`: 자기 layout root인 100×60 stage(HUD pass 없음)에 MATCH×MATCH probe(30×10)를 둡니다. `mount`는 measured (100,60), 렌더 (0,0,100,60)입니다(6행). `invalidate`는 probe의 producer 횟수 기준을 다시 잡고 probe를 `InvalidateMeasure()`합니다. stage root의 한 번의 drain이 probe를 EXACTLY (100,60)으로 한 번 측정하고, ArrangeDefault는 같은 slot의 측정이 이미 있으므로 재측정을 생략합니다. producer는 정확히 1회 늘고(`measure-producer`) measured는 (100,60)입니다(3행, docs/layout-structure.md Arrange 재측정 생략 조건). 재측정 생략과 cache hit은 구분되지 않지만, Arrange 시점 재측정이 producer를 다시 실행하면 2회가 되어 실패합니다. measure/arrange 진입·hit event 수는 내부 관측이므로 검사하지 않습니다.
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
@@ -45,7 +47,7 @@ cache key와 normalization, external state invalidation, clean sibling 재사용
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 4 scenario, 11 action, 48 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 12 scenario, 27 action, 127 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -53,6 +55,14 @@ Profile `release`: 4 scenario, 11 action, 48 checks. 이 표에 없는 scenario�
 | `K02.normalized-key` | `mount` : 8 → `resize` : 1 |
 | `K03.explicit-invalidation` | `mount` : 5 → `stale` : 3 → `invalidated` : 7 → `fresh-cache` : 1 |
 | `K04.sibling-isolation` | `mount` : 4 → `dirty-a` : 8 |
+| `K11.application-measure.0` | `pass` : 7 → `app-hit` : 3 |
+| `K11.application-measure.1` | `pass` : 7 → `app-hit` : 3 |
+| `K11.application-measure.2` | `pass` : 7 → `app-hit` : 3 |
+| `K11.application-measure.3` | `pass` : 7 → `app-hit` : 3 |
+| `K11.application-measure.4` | `pass` : 7 → `app-hit` : 3 |
+| `K11.application-measure.5` | `pass` : 7 → `app-hit` : 3 |
+| `K12.arrange-remeasure-skip` | `mount` : 6 → `invalidate` : 3 |
+| `K11.application-measure.6` | `pass` : 7 → `app-hit` : 3 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

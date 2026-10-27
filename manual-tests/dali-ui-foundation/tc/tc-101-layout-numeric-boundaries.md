@@ -27,6 +27,7 @@
 - `C20.exact-params`: weight 0→0.0005는 모드 변경이며 정확히 저장되고 pass에서 producer가 +1이어야 합니다.
 - `C20.requested-position-epsilon`: 요청 x 100으로 렌더된 probe에 100 바로 다음 float 값(100+2^-17≈100.0000076)을 요청하면 requested position setter의 ranged epsilon(|x|<200에서 100·FLT_EPSILON≈1.19e-5) 안이라 무시되어(형제 pass 유도 후) arrange producer가 그대로이고 렌더 x는 100입니다. 이어서 100.002를 요청하면 이 step 시작 시점 대비 producer +1이고 렌더 x는 100.002(허용오차 0.001)입니다. 128 크기에서는 float 1 ULP(≈1.5e-5)가 이미 epsilon을 넘으므로 sub-epsilon 값이 존재하지 않습니다.
 - `C20.first-pass-cache`: 첫 controller pass에서 measure/arrange producer가 각각 정확히 1회 실행되고, 형제만 바꾼 두 번째 pass는 두 cache 모두 hit이라 횟수가 1로 유지됩니다.
+- `C20.empty-slot`: 200×100 stage의 WRAP×WRAP 부모 p에 seed Leaf(w,0)과 폭 MATCH_PARENT인 m을 넣고, m 안에 wrapping probe(37×19, 폭이 37보다 좁으면 높이 38)를 둡니다. p의 자기 폭은 seed 폭 w뿐이고 0.001(EMPTY_SLOT_TOLERANCE) 미만의 slot은 빈 slot입니다. `empty`(w=0.0005)에서는 빈 slot이라 m이 measure pass에서 1단계 at-most probe(높이 19)를 유지하므로 p는 (0.0005,19)이고, Arrange가 m을 slot 0.0005×19에 EXACTLY로 다시 측정하면 probe 높이가 높이 budget 19로 제한되어 m도 (0.0005,19)입니다. `own-width`(w=0.002, setter의 0.001 차이 조건을 넘음)에서는 slot 0.002가 있어 m이 measure pass에서 0.002에 EXACTLY로 측정되고 probe가 줄바꿈하여 p·m이 (0.002,38)입니다. `empty-again`(w=0.0005)은 `empty`와 같습니다. 각 step은 p와 m의 measured·렌더 (0,0,w,h)로 12행이며, tolerance가 0이면 `empty`의 높이 행이 38이 됩니다(docs/layout-structure.md 두 단계 측정의 빈 slot).
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
@@ -46,7 +47,7 @@
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 5 scenario, 13 action, 37 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 6 scenario, 16 action, 73 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -55,6 +56,7 @@ Profile `release`: 5 scenario, 13 action, 37 checks. 이 표에 없는 scenario�
 | `C20.exact-params` | `mount` : 4 → `mode-change` : 3 |
 | `C20.requested-position-epsilon` | `mount` : 4 → `sub-epsilon` : 2 → `above-epsilon` : 2 |
 | `C20.first-pass-cache` | `mount` : 6 → `unrelated-pass` : 2 |
+| `C20.empty-slot` | `empty` : 12 → `own-width` : 12 → `empty-again` : 12 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

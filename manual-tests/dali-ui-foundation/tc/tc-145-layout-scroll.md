@@ -1,6 +1,6 @@
 # 145. Layout: Scroll and page layout
 
-이 TC는 ScrollView의 constraint 전달·scroll 보존·축별 padding/margin과 PageScrollView의 layout 기반 page 수·viewport 변경·page 삽입/삭제를 검증합니다. 대응 소스는 `tc-145-layout-scroll.cpp`입니다. 기존 TC 실행 결과는 사용하지 않습니다. **56 scenario, 157 action, 3347 required checks**를 실행하십시오.
+이 TC는 ScrollView의 constraint 전달·scroll 보존·축별 padding/margin과 PageScrollView의 layout 기반 page 수·viewport 변경·page 삽입/삭제를 검증합니다. 대응 소스는 `tc-145-layout-scroll.cpp`입니다. 기존 TC 실행 결과는 사용하지 않습니다. **57 scenario, 160 action, 3368 required checks**를 실행하십시오.
 
 ## 실행 조건
 
@@ -15,7 +15,7 @@
 2. 동기 action은 그 호출에서 끝납니다. mount/resize/content 변경 action은 해당 View들의 `LayoutFinishedSignal`과 같은 action의 Window 완료 fence를 기다립니다. 신규 page 회귀 action은 그 뒤 `Run::AfterFrame`의 새 `REFRESH_ONCE` render task 완료를 기다리고 current geometry를 독립 expected와 비교합니다. animation 대기 조건은 `IsScrolling()==false`이며 expected geometry를 대기 조건으로 사용하지 않습니다. 기본 layout fence 10초, fresh frame 4초 안에 완료되지 않거나 필요한 snapshot이 빠지면 FAIL입니다. 이 frame 관측은 Window compositor 전체 screenshot이 아닙니다.
 3. 각 step이 끝나면 `LR_READY`와 그 step의 모든 행이 자동 출력됩니다.
 4. 아래 표의 `required_checks`와 실행 행 수가 정확히 같고 모든 필수 행이 PASS여야 action을 통과시킵니다. `Next scenario`는 현재 scenario의 모든 step이 끝난 후에 누르거나 `Run all`로 이어서 실행하십시오. `Run all` 뒤에는 마지막 `LR_RESULT`의 `completed_scenarios`가 `required_scenarios`와 같아질 때까지 기다리십시오. 그 전의 `FAILING`/`INCOMPLETE`는 종결 verdict가 아니므로 실행을 중단하지 마십시오. 완료 후 `< Back`으로 나가 `LR_CASE_END`의 `completed_scenarios`가 `required_scenarios`와 같은지 확인하십시오.
-5. 아래 56 scenario, 157 action을 모두 실행하고 3347개 검사 행을 보존하십시오. 실패·누락·timeout이 하나라도 있으면 TC를 PASS로 기록하지 마십시오. 알려진 문제도 xfail로 통과시키지 마십시오.
+5. 아래 57 scenario, 160 action을 모두 실행하고 3368개 검사 행을 보존하십시오. 실패·누락·timeout이 하나라도 있으면 TC를 PASS로 기록하지 마십시오. 알려진 문제도 xfail로 통과시키지 마십시오.
 6. run/scenario/action ID, 필수·실행 행 수, 실패 actual/expected/tolerance, 원문 로그를 저장하십시오. 동일 fixture의 후속 실패가 앞 단계 오류에 따른 것인지도 기록하되 검사를 생략하지 마십시오.
 
 `Rect`는 x/y/width/height 네 행, `Size`는 width/height 두 행입니다. geometry 허용오차는 0.001이며 정수·bool·producer 수는 정확히 일치해야 합니다. explicit constraint 비교는 오차 0입니다. NaN/Inf는 실패합니다. unconstrained callback 입력은 infinity가 아닌 `std::numeric_limits<float>::max()`라는 유한값입니다. candidate 출력으로 expected를 갱신하지 마십시오.
@@ -40,14 +40,14 @@
 
 각 scenario에서 `run`을 실행하십시오. viewport 요청 100×80, ScrollView padding(start,end,top,bottom)=(11,17,7,13), inner constraint=(72,60)입니다. custom content producer의 자연 크기는 240×200입니다. requested 크기가 MATCH_PARENT인 축만 inner constraint를 받습니다.
 
-| scenario | width / height 요청 | 최초 producer constraint | measured 및 arranged content 크기 | Arrange 재측정 constraint | 누적 Measure producer 수 |
+| scenario | width / height 요청 | 최초 producer constraint | measured 및 arranged content 크기 | Arrange 재측정 / 마지막 producer 호출 constraint | 누적 Measure producer 수 |
 |---|---|---|---|---|---:|
-| SC.match-constraints.0 | WRAP / WRAP | FLT_MAX / FLT_MAX | 240×200 | 재측정 없음 | 1 |
-| SC.match-constraints.1 | MATCH / WRAP | 72 / FLT_MAX | 72×200 | 72 / 200 | 2 |
-| SC.match-constraints.2 | WRAP / MATCH | FLT_MAX / 60 | 240×60 | 240 / 60 | 2 |
-| SC.match-constraints.3 | MATCH / MATCH | 72 / 60 | 72×60 | 72 / 60, cache hit | 1 |
+| SC.match-constraints.0 | WRAP / WRAP | FLT_MAX / FLT_MAX | 240×200 | 재측정 없음, FLT_MAX / FLT_MAX | 1 |
+| SC.match-constraints.1 | MATCH / WRAP | 72 / FLT_MAX | 72×200 | 생략(할당 축 72 = 측정 key), 72 / FLT_MAX | 1 |
+| SC.match-constraints.2 | WRAP / MATCH | FLT_MAX / 60 | 240×60 | 생략(할당 축 60 = 측정 key), FLT_MAX / 60 | 1 |
+| SC.match-constraints.3 | MATCH / MATCH | 72 / 60 | 72×60 | 생략, 72 / 60 | 1 |
 
-17행은 owner Measure2, 최초 callback constraint2, content measured2, owner 렌더 geometry4, content 렌더 geometry4, 최종 callback constraint2, 누적 producer1입니다. owner Arrange 반환은(0,0,100,80), content origin은 padding에 따른(11,7)입니다. callback 카운터는 이 synthetic producer만 계수합니다.
+MATCH_PARENT 축은 measure pass에서 이미 viewport에 EXACTLY로 측정되고(WRAP 축은 UNSPECIFIED), Arrange의 재측정은 할당 축의 slot이 측정 key와 다를 때만 실행되므로 네 경우 모두 생략됩니다. 할당되지 않은 축은 content의 measured 크기를 그대로 돌려받으며 이 probe는 자기 크기에서 같은 결과를 내므로 결과가 같습니다(docs/layout-structure.md Arrange 재측정 생략 조건). 17행은 owner Measure2, 최초 callback constraint2, content measured2, owner 렌더 geometry4, content 렌더 geometry4, 마지막 producer 호출 constraint2(`last.constraint.*`), 누적 producer1(`measure.producers`)입니다. owner Arrange 반환은(0,0,100,80), content origin은 padding에 따른(11,7)입니다. callback 카운터는 이 synthetic producer만 계수합니다.
 
 ## SC.axis-padding-margin.0…2 — 각 4 action / 76 checks
 
@@ -138,7 +138,7 @@ attach action은 지정 View snapshot과 Window fence 후 `pending.settled.*`10�
 
 ## 근거와 검증 경계
 
-- `public-api/layouts/scroll-view-layout-manager.cpp`의 MATCH 축 constraint, 자연 축 unconstrained Measure, Arrange-owned 재측정, ALWAYS Arrange와 실제 scroll 위치 보존을 검사합니다.
+- `public-api/layouts/scroll-view-layout-manager.cpp`의 MATCH 축 constraint, 자연 축 unconstrained Measure, 할당 축의 slot이 측정 key와 다를 때만 실행되는 Arrange-owned 재측정, content의 arrange 결과로 정하는 scrollable 크기, ALWAYS Arrange와 실제 scroll 위치 보존을 검사합니다.
 - `integration-api/scroll-view-impl.cpp`의 viewport·scrollable size·padding origin·AdjustScrollPosition·ApplyScrollPosition을 수치로 대조합니다.
 - `public-api/views/scroll/page-scroll-view.h`의 page 크기·count·index·Notify 계약과 `integration-api/page-scroll-view-impl.cpp`의 즉시 expected count/다음 layout 갱신 경로를 검사합니다.
 
@@ -204,13 +204,24 @@ scroll을 시작하지 않은 animated 요청은 snap target을 남기면 안 �
 
 instant scroll과 no-op 요청은 layout pass를 요청하지 않으므로 `instant-select`와 `animated-same-page`는 `AfterLayout`을 기다리지 않고 `Run::AfterFrame`의 새 render task 완료 뒤에 관측합니다. `animated-same-page`는 `IsScrolling()==false`를 기다리지 않고 요청 직후 한 번 검사합니다. 대기 조건은 frame 완료뿐이며 expected geometry를 기다림 조건으로 사용하지 않습니다.
 
+## SC.content-arranged-extent — 3 action / 21 checks
+
+100×80 ScrollView(Vertical, scrollbar Never, padding 없음)를 100×80 stage에 붙입니다. scroll 범위는 content의 slot이 아니라 content의 arrange 결과(자기 min/max로 clamp된 slot, 또는 arrange callback이 반환한 rect)입니다.
+
+| action | 조작 | 독립 기대값 | 필수 행 수 |
+| --- | --- | --- | ---: |
+| `minimum` | content=MATCH×MATCH Leaf, 최소 높이 200 | viewport (100,80)에서 EXACTLY로 측정되어 높이 80이 200으로 올라가 measured (100,200), slot (0,0,100,80)이 clamp되어 렌더 (0,0,100,200), scrollable 높이 200, viewport 높이 80 | 8 |
+| `scroll-end` | `ScrollTo((0,999), false)`, 동기 | scroll y=200−80=120, x=0, content event-side (0,−120,100,200) | 6 |
+| `custom-return` | content를 37×19 probe로 교체, arrange callback이 (x,y,width,300)을 반환; layout 뒤 `ScrollTo((0,999), false)` | scrollable 높이 300, 폭 37, scroll y=300−80=220, probe event-side (0,−220,37,300) | 7 |
+
 ## 종료와 재현
 
-`< Back`으로 나간 뒤 같은 TC에 다시 진입하고 `Reset run` 이후 첫 scenario를 반복하십시오. run ID와 counter가 새로 시작하고 초기 기대값이 같아야 합니다. 반복 실행은 위 3347행 집계와 별도로 기록하십시오.
+`< Back`으로 나간 뒤 같은 TC에 다시 진입하고 `Reset run` 이후 첫 scenario를 반복하십시오. run ID와 counter가 새로 시작하고 초기 기대값이 같아야 합니다. 반복 실행은 위 3368행 집계와 별도로 기록하십시오.
 
 ## 단계 구성
 
-- `SC.match-constraints.{bits}`(17행)는 100×80 ScrollView를 stage에 부착하고 controller pass 뒤 owner measured (100,80), 첫 producer 호출의 제약(`measure.constraint.*`), content measured, owner/content 렌더 rect, 마지막 producer 호출의 제약(`arrange.constraint.*`), producer 횟수(단일 MATCH 축은 2, 그 외 1)를 검사합니다.
+- `SC.match-constraints.{bits}`(17행)는 100×80 ScrollView를 stage에 부착하고 controller pass 뒤 owner measured (100,80), 첫 producer 호출의 제약(`measure.constraint.*`), content measured, owner/content 렌더 rect, 마지막 producer 호출의 제약(`last.constraint.*`), producer 횟수(`measure.producers`, 모두 1)를 검사합니다.
+- `SC.content-arranged-extent`는 `minimum`(content 최소 높이 200: scrollable 200) → `scroll-end`(끝까지 scroll: y 120) → `custom-return`(arrange callback이 높이 300을 반환: scrollable 300, y 220)입니다.
 
 ## 고정 실행 계약과 종료 증거
 
@@ -218,7 +229,7 @@ instant scroll과 no-op 요청은 layout pass를 요청하지 않으므로 `inst
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 56 scenario, 157 action, 3347 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 57 scenario, 160 action, 3368 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -278,6 +289,7 @@ Profile `release`: 56 scenario, 157 action, 3347 checks. 이 표에 없는 scena
 | `PAGE.inflight-resize-vertical.smaller-count-partial` | `mount` : 14 → `resize-during-snap` : 30 → `repeat-settled-layout` : 20 |
 | `PAGE.noop-snap-resize-horizontal` | `mount` : 14 → `instant-select` : 23 → `animated-same-page` : 21 → `resize-smaller-count` : 23 |
 | `PAGE.noop-snap-resize-vertical` | `mount` : 14 → `instant-select` : 23 → `animated-same-page` : 21 → `resize-smaller-count` : 23 |
+| `SC.content-arranged-extent` | `minimum` : 8 → `scroll-end` : 6 → `custom-return` : 7 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

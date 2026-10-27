@@ -11,6 +11,14 @@
 using namespace LayoutValidation;
 using namespace LayoutValidation::Fixtures;
 
+namespace
+{
+struct FillMaximum
+{
+  View stage, stack, a, b;
+};
+} // namespace
+
 class Tc104 : public Case
 {
 public:
@@ -87,6 +95,74 @@ public:
       r.AfterRender({stage, s, a, b}, [=](Run& r) {
         r.Rendered("margin", a, LayoutRect(2, 4, 30, 10));
         r.Rendered("overflow", b, LayoutRect(42, 0, 20, 15));
+      });
+    }));
+    // FILL on the determined 300 cross extent measures the WRAP_CONTENT child EXACTLY at 300, which
+    // its maximum clamps to 120; the 300-wide slot is clamped from its start edge (x = 0), and under
+    // RTL from its right edge (x = 300 - 120 = 180).
+    out.push_back(Steps("S04.fill-maximum", "A FILL child is laid out at its maximum from the slot's start edge, the right edge under RTL", {
+      {"ltr", 10, [](Run& r) {
+         auto s   = std::make_shared<FillMaximum>();
+         s->stack = StackLayout::New(StackOrientation::VERTICAL);
+         Fixed(s->stack, 300, 100);
+         s->a = View::New();
+         s->a.SetRequestedWidth(WRAP_CONTENT);
+         s->a.SetRequestedHeight(20);
+         s->a.SetMaximumWidth(120);
+         s->a.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+         s->b = Leaf(50, 10, "b");
+         s->stack.Add(s->a);
+         s->stack.Add(s->b);
+         s->stage = Mount(r, s->stack, 300, 100);
+         r.SetState(s);
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
+           r.Size("a", s->a.GetMeasuredSize(), MeasuredSize(120, 20));
+           r.Rendered("a.rendered", s->a, LayoutRect(0, 0, 120, 20));
+           r.Rendered("b.rendered", s->b, LayoutRect(0, 20, 50, 10));
+         });
+       }},
+      {"rtl", 12, [](Run& r) {
+         auto s = r.State<FillMaximum>();
+         s->stack.SetLayoutDirection(Dali::LayoutDirection::RIGHT_TO_LEFT);
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
+           r.Rendered("a.rtl", s->a, LayoutRect(180, 0, 120, 20));
+           r.Rect("a.logical", ArrangedBounds(s->a), LayoutRect(0, 0, 120, 20));
+           r.Rendered("b.rtl", s->b, LayoutRect(250, 20, 50, 10));
+         });
+       }},
+    }));
+    out.push_back(Single("S11.match-report", "A MATCH_PARENT cross axis reports the stack's cross extent; a MATCH_PARENT main axis without weight reports its minimum", 12, [](Run& r) {
+      auto s = StackLayout::New(StackOrientation::VERTICAL);
+      Fixed(s, 300, 200);
+      View c = Leaf(MATCH_PARENT, 20, "c"), d = Leaf(MATCH_PARENT, MATCH_PARENT, "d");
+      c.SetMargin(Insets(10, 20, 5, 0));
+      s.Add(c);
+      s.Add(d);
+      View stage = Mount(r, s, 300, 200);
+      // c: cross EXACTLY at 300 - 10 - 20 = 270; d: cross EXACTLY at 300, main AT_MOST (minimum 0),
+      // laid out at the available 200 below c (y = 5 + 20), overflowing the stack.
+      r.AfterRender({stage, s, c, d}, [=](Run& r) {
+        r.Size("c", c.GetMeasuredSize(), MeasuredSize(270, 20));
+        r.Rendered("c.rendered", c, LayoutRect(10, 5, 270, 20));
+        r.Size("d", d.GetMeasuredSize(), MeasuredSize(300, 0));
+        r.Rendered("d.rendered", d, LayoutRect(0, 25, 300, 200));
+      });
+    }));
+    out.push_back(Single("S12.weight-exact-share", "A weight child is measured exactly at its share in Measure", 7, [](Run& r) {
+      auto s = StackLayout::New(StackOrientation::HORIZONTAL);
+      Fixed(s, 300, 80);
+      s.SetSpacing(10);
+      View a = Leaf(60, 10, "a");
+      auto b = Probed(r, 37, 19, false);
+      b->view.SetLayoutParams(StackLayoutParams::New().SetWeight(1));
+      s.Add(a);
+      s.Add(b->view);
+      View stage = Mount(r, s, 300, 80);
+      // Share = 300 - 60 - 10 = 230 (main EXACTLY); the cross axis keeps the probe's 19.
+      r.AfterRender({stage, s, a, b->view}, [=](Run& r) {
+        r.Size("b", b->view.GetMeasuredSize(), MeasuredSize(230, 19));
+        r.Rendered("b.rendered", b->view, LayoutRect(70, 0, 230, 19));
+        r.Near("b.last-width", b->lastWidth, 230);
       });
     }));
     return out;

@@ -19,6 +19,18 @@ struct Roots
   StackLayout left, right;
   View        a, b, c;
 };
+struct Offscene
+{
+  std::shared_ptr<Probe> probe;
+  View                   stage, parent;
+};
+// The window extent a WRAP_CONTENT x WRAP_CONTENT standalone 300x90 probe (no margin) is measured
+// against while it is in a window; the window size is an input read at check time.
+MeasuredSize WindowBound(Run& r)
+{
+  const auto window = r.GetWindow().GetPositionSize();
+  return MeasuredSize(std::min(300.0f, static_cast<float>(window.width)), std::min(90.0f, static_cast<float>(window.height)));
+}
 } // namespace
 
 class Tc126 : public Case
@@ -102,6 +114,52 @@ public:
            r.Size("reattached", s->root.GetMeasuredSize(), MeasuredSize(44, 28));
            r.Rendered("reattached.rendered", s->root, LayoutRect(0, 0, 44, 28));
            r.Rendered("child", s->child, LayoutRect(7, 9, 37, 19));
+         });
+       }},
+    }));
+    // A window-bounded standalone probe under a plain View parent, on a stage that is its own
+    // window root: measured against the window while on scene. The stage is removed from the window
+    // itself (its parent is a Layer, so no View OnChildRemoved acts); the probe keeps its last
+    // measured size, an off-scene parent Arrange then measures the probe against the parent's
+    // 200x80 extent, and putting the stage back measures the probe against the window again. The
+    // caches dropped on scene disconnection and the tracked-root registry are internal state and
+    // are not observed. The stage's parent is not a View, so it is never a required view of
+    // AfterRender.
+    out.push_back(Steps("L05.standalone-offscene", "A window-bounded standalone child falls back to the parent extent off scene and is measured against the window again on reconnection", {
+      {"mount", 6, [](Run& r) {
+         auto s    = std::make_shared<Offscene>();
+         s->stage  = r.StageOnWindow(200, 110);
+         s->parent = Container(0, 200, 80);
+         s->probe  = Probed(r, 300, 90, false);
+         s->probe->view.SetLayoutMode(LayoutMode::STANDALONE);
+         s->probe->view.SetRequestedX(7);
+         s->probe->view.SetRequestedY(9);
+         s->parent.Add(s->probe->view);
+         ColorizeTree(s->parent);
+         s->stage.Add(s->parent);
+         r.SetState(s);
+         r.AfterRender({s->parent, s->probe->view}, [=](Run& r) {
+           const MeasuredSize bound = WindowBound(r);
+           r.Rendered("probe", s->probe->view, LayoutRect(7, 9, bound.width, bound.height));
+           r.Size("probe.measured", s->probe->view.GetMeasuredSize(), bound);
+         });
+       }},
+      {"detach", 8, [](Run& r) {
+         auto               s     = r.State<Offscene>();
+         const MeasuredSize bound = WindowBound(r);
+         s->stage.Unparent();
+         r.Size("kept.measured", s->probe->view.GetMeasuredSize(), bound);
+         s->parent.Arrange(LayoutRect(0, 0, 200, 80));
+         r.Rect("offscene.placement", s->probe->view, LayoutRect(7, 9, 200, 80));
+         r.Size("offscene.measured", s->probe->view.GetMeasuredSize(), MeasuredSize(200, 80));
+       }},
+      {"reattach", 6, [](Run& r) {
+         auto s = r.State<Offscene>();
+         r.GetWindow().Add(s->stage);
+         r.AfterRender({s->parent, s->probe->view}, [=](Run& r) {
+           const MeasuredSize bound = WindowBound(r);
+           r.Rendered("probe", s->probe->view, LayoutRect(7, 9, bound.width, bound.height));
+           r.Size("probe.measured", s->probe->view.GetMeasuredSize(), bound);
          });
        }},
     }));

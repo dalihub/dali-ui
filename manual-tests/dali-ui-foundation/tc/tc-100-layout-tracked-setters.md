@@ -32,6 +32,8 @@
 
 추가 setter index5.11은 requested height, minimum height, maximum width/height, Flex/Grid/Absolute params입니다. 모두 producer가 1회 재실행되고 동일값 반복은 cache hit이어야 합니다.
 
+- `K06.minmax-arrange`: K05와 같은 stage와 형제 leaf에 폭 MATCH_PARENT·높이 WRAP_CONTENT probe(37×19)를 둡니다. `mount`에서 probe는 200 폭에 EXACTLY로 한 번 측정되고(Arrange의 재측정은 같은 slot의 측정이 이미 있어 생략) slot을 보고하므로 `mounted-producer`=1, measured (200,19), 렌더 (0,0,200,19)입니다. `maximum`에서 최대 폭 120을 주면 producer가 한 번 다시 실행되고(+1), constraint가 producer 전에 자기 max로 clamp되어 `last-width`=120, measured (120,19)이며 slot 200은 start edge에서 clamp되어 렌더 (0,0,120,19)입니다. `same`에서 같은 최대 폭을 다시 설정하고 형제 폭을 바꿔 pass를 유도하면 producer는 그대로이고(+0) 부모의 replay가 clamp된 rect (0,0,120,19)를 다시 적용합니다. 7/8/5행입니다.
+
 ## 근거와 검증 경계
 
 추적 상태의 setter invalidation과 same-value no-op, visibility의 Layout 참여를 검사합니다.
@@ -48,7 +50,7 @@
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 13 scenario, 38 action, 112 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 14 scenario, 41 action, 132 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -65,6 +67,7 @@ Profile `release`: 13 scenario, 38 action, 112 checks. 이 표에 없는 scenari
 | `K05.tracked.10` | `mount` : 5 → `changed` : 2 → `same` : 1 |
 | `K05.tracked.11` | `mount` : 5 → `changed` : 2 → `same` : 1 |
 | `C19.hidden-participates` | `visible` : 8 → `hidden` : 8 |
+| `K06.minmax-arrange` | `mount` : 7 → `maximum` : 8 → `same` : 5 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 

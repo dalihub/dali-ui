@@ -142,6 +142,7 @@ struct WindowRecyclerFixture
   std::vector<float>          extents;
   std::map<uint32_t, View>    bound;
   bool                        horizontal{false};
+  bool                        wrapCross{false}; ///< Items request WRAP_CONTENT instead of MATCH_PARENT on the cross axis
   float                       viewport{50}, cross{120}, spacing{2}, before{0}, after{0};
   uint32_t                    creates{0}, recycles{0};
 
@@ -195,11 +196,12 @@ struct WindowRecyclerFixture
   }
 };
 
-inline std::shared_ptr<WindowRecyclerFixture> MakeWindowRecycler(Run& r, const std::vector<float>& extents, bool horizontal = false, bool decorated = false, float viewport = 50)
+inline std::shared_ptr<WindowRecyclerFixture> MakeWindowRecycler(Run& r, const std::vector<float>& extents, bool horizontal = false, bool decorated = false, float viewport = 50, bool wrapCross = false)
 {
   auto s        = std::make_shared<WindowRecyclerFixture>();
   s->extents    = extents;
   s->horizontal = horizontal;
+  s->wrapCross  = wrapCross;
   s->viewport   = viewport;
   s->spacing    = decorated ? 5 : 2;
   if(decorated)
@@ -226,8 +228,9 @@ inline std::shared_ptr<WindowRecyclerFixture> MakeWindowRecycler(Run& r, const s
   {
     if(auto state = weak.lock())
     {
-      holder.view.SetRequestedWidth(state->horizontal ? state->extents.at(holder.position) : MATCH_PARENT);
-      holder.view.SetRequestedHeight(state->horizontal ? MATCH_PARENT : state->extents.at(holder.position));
+      const float cross = state->wrapCross ? WRAP_CONTENT : MATCH_PARENT;
+      holder.view.SetRequestedWidth(state->horizontal ? state->extents.at(holder.position) : cross);
+      holder.view.SetRequestedHeight(state->horizontal ? cross : state->extents.at(holder.position));
       holder.view.SetProperty(Actor::Property::NAME, Dali::String(Id("window.item", holder.position).c_str()));
       holder.view.SetBackgroundColor(FixtureColor(holder.position));
       state->bound[holder.position] = holder.view;

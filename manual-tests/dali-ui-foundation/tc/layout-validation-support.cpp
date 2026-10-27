@@ -425,9 +425,12 @@ View Run::Stage(float width, float height, float x, float y)
 View Run::StageOnWindow(float width, float height)
 {
   // Same visible stage as Stage(), but attached to the Window as its OWN layout root instead of
-  // under the weighted fixture-host stack. A weight child is measured twice per pass by the stack
-  // manager, which would double every leaf producer run the work steps count on the mounted
-  // subtree. As an isolated root the workload is drained once per pass; the on-screen position (host
+  // under the weighted fixture-host stack. Before measure modes a weight child was measured twice per
+  // pass by the stack manager (at its natural extent in Measure, at its share in Arrange), which
+  // doubled every leaf producer run the work steps count on the mounted subtree. With measure
+  // modes the HUD's content area is measured EXACTLY and distributes its weights in Measure, so that
+  // double measure is gone; the isolated root is kept so that no HUD pass takes part in a counted
+  // pass. As an isolated root the workload is drained once per pass; the on-screen position (host
   // extents) and every parent-relative rendered rect are unchanged.
   View stage = View::New();
   stage.SetRequestedWidth(width);

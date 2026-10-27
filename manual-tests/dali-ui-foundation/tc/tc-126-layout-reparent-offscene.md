@@ -26,6 +26,9 @@
 - `L02.detached-measure`: child37×19의 requested position(7,9)이 parent44×28을 만듭니다. detach 후 parent0×0, child37×19이며 재부착 후 44×28입니다.
 
 - `L01.reparent`는 `mount`(left (0,0,57,15), right (0,50,40,20)) → `reparent`(b를 right로 이동: old 20×10, new 75×20, b 렌더 (45,0,30,15))이고, `L02.detached-measure`는 `mount`(44×28) → `remove`(0×0) → `detached`(off-scene child의 직접 Measure 37×19: detached 계약 자체가 검증 대상) → `reattach`(44×28, child (7,9,37,19))입니다.
+- `L05.standalone-offscene`: window에 직접 붙인 200×110 stage(`StageOnWindow`: 자기 layout root이며 부모는 View가 아닌 Layer) 안 200×80 plain View 부모의 WRAP×WRAP standalone probe(300×90, 요청 위치 (7,9))입니다. window 안에서는 window 크기 W×H(check 시점에 읽는 입력)로 bound되므로 `mount`는 렌더 (7,9,min(300,W),min(90,H)), measured (min(300,W),min(90,H))입니다(6행). stage는 부모가 View가 아니라 render settle 대상이 될 수 없으므로 `AfterRender`는 부모와 probe만 기다립니다.
+- `L05`의 `detach`(동기)는 stage를 window에서 뗍니다(`stage.Unparent()`). stage의 부모는 View가 아니므로 View 부모의 `OnChildRemoved` reset은 실행되지 않고 각 View의 scene 해제(`OnViewSceneDisconnection`)만 작동합니다. 떼어낸 직후 probe의 measured는 그대로입니다(`kept.measured`). 이어 off-scene 부모를 `Arrange(0,0,200,80)`하면 window가 없는 WRAP 축은 부모 extent (200,80)을 쓰므로 probe의 event-side 배치는 (7,9,200,80)(`offscene.placement`), measured는 (200,80)입니다(`offscene.measured`, 8행). scene 해제가 버리는 probe·부모의 measure/arrange cache 자체는 내부 상태이므로 관측하지 않습니다.
+- `L05`의 `reattach`는 stage를 window에 다시 붙입니다(`GetWindow().Add(stage)`). probe는 window key로 다시 측정되어 렌더·measured가 mount와 같습니다(6행, docs/layout-structure.md STANDALONE 절). scene 연결에서 다시 등록되는 layout root 수는 controller 내부 상태이므로 관측하지 않습니다.
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
@@ -45,12 +48,13 @@ scene 밖에서도 public synchronous 계산이 유효하고 reparent가 양쪽 
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 2 scenario, 6 action, 44 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 3 scenario, 9 action, 64 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
 | `L01.reparent` | `mount` : 8 → `reparent` : 12 |
 | `L02.detached-measure` | `mount` : 6 → `remove` : 6 → `detached` : 2 → `reattach` : 10 |
+| `L05.standalone-offscene` | `mount` : 6 → `detach` : 8 → `reattach` : 6 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 
