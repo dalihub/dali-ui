@@ -70,7 +70,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
 }
 
 WireframeVisual::WireframeVisual(VisualFactoryCache& factoryCache, Visual::BasePtr actualVisual)
-: Visual::Base(factoryCache, actualVisual ? actualVisual->GetType() : Ui::Integration::InternalVisualType::WIREFRAME),
+: Visual::Base(factoryCache, actualVisual ? actualVisual->GetType() : Ui::Integration::InternalVisualType::WIREFRAME, actualVisual ? actualVisual->GetDecorationCapabilities() : Visual::DecorationCapability::NONE),
   mActualVisual(actualVisual)
 {
   // This visual's shader emits straight (non pre-multiplied) alpha, so opt out of the default.

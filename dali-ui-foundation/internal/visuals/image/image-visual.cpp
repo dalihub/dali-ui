@@ -189,7 +189,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
 
 ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                          const VisualUrl& imageUrl, ImageDimensions size)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::IMAGE),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::IMAGE, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mPixelArea(FULL_TEXTURE_RECT),
   mPixelAreaIndex(Property::INVALID_INDEX),
   mPreMultipliedAlphaIndex(Property::INVALID_INDEX),

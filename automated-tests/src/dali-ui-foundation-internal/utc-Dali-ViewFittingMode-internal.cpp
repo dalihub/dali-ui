@@ -62,7 +62,7 @@ public:
 protected:
   FittingModeTestVisual(Dali::Ui::Internal::VisualFactoryCache&   factoryCache,
                         Dali::Ui::Integration::InternalVisualType type)
-  : Dali::Ui::Internal::Visual::Base(factoryCache, type)
+  : Dali::Ui::Internal::Visual::Base(factoryCache, type, Dali::Ui::Internal::Visual::DecorationCapability::NONE)
   {
     mImpl->mFittingModeRequired = true;
   }

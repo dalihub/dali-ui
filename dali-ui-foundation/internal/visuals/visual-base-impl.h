@@ -48,6 +48,36 @@ namespace Visual
 class EventObserver;
 
 /**
+ * @brief Renderer decorations a visual can apply.
+ *
+ * Each visual declares the decorations it supports when constructing its base,
+ * so decoration availability is a capability of the implementation and is not
+ * derived from the reported visual type.
+ */
+enum class DecorationCapability : uint8_t
+{
+  NONE          = 0,      ///< No renderer decoration is supported.
+  CORNER_RADIUS = 1 << 0, ///< The visual supports cornerRadius and cornerSquareness.
+  BORDERLINE    = 1 << 1, ///< The visual supports borderline width, color and offset.
+};
+
+/**
+ * @brief Bitwise OR operator for DecorationCapability.
+ */
+inline DecorationCapability operator|(DecorationCapability lhs, DecorationCapability rhs)
+{
+  return static_cast<DecorationCapability>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+}
+
+/**
+ * @brief Bitwise AND operator for DecorationCapability.
+ */
+inline DecorationCapability operator&(DecorationCapability lhs, DecorationCapability rhs)
+{
+  return static_cast<DecorationCapability>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+}
+
+/**
  * Base class for all Control rendering logic. A control may have multiple visuals.
  *
  * Note: The visual responds to the the Actor::COLOR by blending it with the 'Multiply' operator.
@@ -363,6 +393,13 @@ public:
   Ui::Integration::InternalVisualType GetType() const;
 
   /**
+   * @brief Get the renderer decorations this visual supports.
+   *
+   * @return The bitwise OR of the DecorationCapability values declared by this visual
+   */
+  DecorationCapability GetDecorationCapabilities() const;
+
+  /**
    * @brief Retrieve the property object associated with the property key.
    *
    * @param[in] key The Property key of the visual.
@@ -441,8 +478,9 @@ protected:
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] type The type of the this visual
+   * @param[in] decorationCapabilities The bitwise OR of the DecorationCapability values this visual supports
    */
-  Base(VisualFactoryCache& factoryCache, Ui::Integration::InternalVisualType type);
+  Base(VisualFactoryCache& factoryCache, Ui::Integration::InternalVisualType type, DecorationCapability decorationCapabilities);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().

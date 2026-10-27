@@ -157,7 +157,7 @@ GradientVisualPtr GradientVisual::New(VisualFactoryCache& factoryCache, const Pr
 }
 
 GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::GRADIENT),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::GRADIENT, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mGradientTransform(),
   mGradient(nullptr),
   mGradientType(LINEAR),

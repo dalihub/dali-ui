@@ -311,7 +311,7 @@ void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 }
 
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::TEXT),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::TEXT, Visual::DecorationCapability::NONE),
   mController(Text::Controller::New()),
   mTypesetter(Text::Typesetter::New(mController->GetRenderTextModel())),
   mAsyncTextInterface(nullptr),
