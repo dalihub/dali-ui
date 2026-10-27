@@ -108,7 +108,7 @@ SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderF
 
 SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                      const VisualUrl& imageUrl, ImageDimensions size)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::SVG),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::SVG, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mImageVisualShaderFactory(shaderFactory),
   mSvgLoader(factoryCache.GetSvgLoader()),
   mSvgLoadId(SvgLoader::INVALID_SVG_LOAD_ID),

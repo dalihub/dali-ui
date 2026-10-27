@@ -378,11 +378,6 @@ private:
    */
   bool IsLogicalFocusWindow(Dali::Integration::SceneHolder sceneHolder) const;
 
-  struct ParentNavigationResult
-  {
-    FocusNavigationResult result = FocusNavigationResult::NotHandled();
-  };
-
   /**
    * This will be called when the adaptor is initialized
    */
@@ -402,13 +397,13 @@ private:
   /**
    * Finds an explicitly configured directional target.
    */
-  FocusNavigationResult FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction);
+  void FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction, FocusNavigationResult& result);
 
   /**
    * Propagates navigation through the parent chain, including the Focus Group
    * View itself, and stops before policies outside that boundary.
    */
-  ParentNavigationResult FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context);
+  void FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context, FocusNavigationResult& result);
 
   /**
    * Finds the framework fallback using geometry or linear ordering.
@@ -534,6 +529,13 @@ private:
 
   bool ShouldIndicateFocus(const FocusChangeContext& context, bool previousFocusIndicated) const;
 
+  bool EvaluateFocusIndicationPolicy(const View&       previousFocusView,
+                                     const View&       focusedView,
+                                     FocusDevice       device,
+                                     const InputEvent& inputEvent,
+                                     bool              previousFocusIndicated,
+                                     bool              focusIndicationProposed) const;
+
   /**
    * Resolves the policy decision for focusedView while it remains the focused view,
    * then applies the result via SetFocusIndicated().
@@ -589,6 +591,14 @@ private:
 
   FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
 
+  enum class FocusIndicationPolicyMode
+  {
+    DEFAULT,
+    FOLLOW_FOCUS,
+    CUSTOM
+  };
+
+  FocusIndicationPolicyMode                  mFocusIndicationPolicyMode{FocusIndicationPolicyMode::DEFAULT};
   Extension::FocusIndicationPolicy::Function mFocusIndicationPolicy; ///< Extension policy for automatic focus indication changes.
 
   FocusNavigationCallback mFocusNavigationFallback; ///< Application-wide policy invoked before FocusFinder.

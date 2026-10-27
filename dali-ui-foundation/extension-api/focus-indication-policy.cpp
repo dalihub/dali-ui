@@ -17,18 +17,55 @@
 
 #include <dali-ui-foundation/extension-api/focus-indication-policy.h>
 
+#include <dali-ui-foundation/internal/focus-manager/focus-indication-context-impl.h>
+
 namespace DALI_NAMESPACE
 {
 namespace Ui
 {
 namespace Extension
 {
+FocusIndicationContext::FocusIndicationContext(const Internal::FocusIndicationContextImpl& impl)
+: mImpl(&impl)
+{
+}
+
+const Dali::Ui::View& FocusIndicationContext::GetPreviousFocusView() const
+{
+  return mImpl->previousFocusView;
+}
+
+const Dali::Ui::View& FocusIndicationContext::GetFocusedView() const
+{
+  return mImpl->focusedView;
+}
+
+FocusDevice FocusIndicationContext::GetDevice() const
+{
+  return mImpl->device;
+}
+
+const InputEvent& FocusIndicationContext::GetInputEvent() const
+{
+  return mImpl->inputEvent;
+}
+
+bool FocusIndicationContext::IsPreviousFocusIndicated() const
+{
+  return mImpl->previousFocusIndicated;
+}
+
+bool FocusIndicationContext::IsFocusIndicationProposed() const
+{
+  return mImpl->focusIndicationProposed;
+}
+
 namespace FocusIndicationPolicy
 {
 
 bool Default(const FocusIndicationContext& context)
 {
-  return context.proposedIndicated;
+  return context.IsFocusIndicationProposed();
 }
 
 bool FollowFocus(const FocusIndicationContext&)

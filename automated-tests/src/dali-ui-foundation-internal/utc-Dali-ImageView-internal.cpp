@@ -84,7 +84,7 @@ public:
 
 private:
   explicit PendingImageViewTestVisual(Ui::Internal::VisualFactoryCache& cache)
-  : Ui::Internal::Visual::Base(cache, Ui::Integration::InternalVisualType::IMAGE)
+  : Ui::Internal::Visual::Base(cache, Ui::Integration::InternalVisualType::IMAGE, Ui::Internal::Visual::DecorationCapability::NONE)
   {
   }
   void OnInitialize() override

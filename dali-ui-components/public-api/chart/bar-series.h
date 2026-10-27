@@ -18,8 +18,13 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/math/vector2.h>
+#include <dali/public-api/math/vector3.h>
 #include <dali/public-api/math/vector4.h>
+#include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/chart/chart-series.h>
@@ -203,6 +208,99 @@ public:
    * @return The point size of the data label text
    */
   float GetDataLabelSize() const;
+
+  /**
+   * @brief Sets a finite non-negative corner radius in pixels, clamped to half the bar dimensions.
+   * @param[in] radius The radius; zero preserves rectangular bars
+   */
+  void SetCornerRadius(float radius);
+
+  /**
+   * @brief Returns the authored corner radius.
+   * @return The radius in pixels
+   */
+  float GetCornerRadius() const;
+
+  /**
+   * @brief Sets a linear fill gradient in bar-local coordinates.
+   * @param[in] gradient The gradient
+   */
+  void SetFillGradient(const Gradient::Linear& gradient);
+
+  /**
+   * @brief Restores solid fill colors.
+   */
+  void ClearFillGradient();
+
+  /**
+   * @brief Replaces data with X/minimum/maximum triples. Range bars cannot be stacked.
+   * @param[in] values Triples (X, minimum Y, maximum Y); minimum must not exceed maximum and NaN marks a gap
+   */
+  void SetRangeValues(const Dali::Vector<Vector3>& values);
+
+  /**
+   * @brief Sets the finite non-negative bar border width and color.
+   * @param[in] width The border width
+   * @param[in] color The border color; theme identifiers are retained
+   */
+  void SetBorder(float width, const UiColor& color);
+
+  /**
+   * @brief Sets finite non-negative border dash and gap lengths in pixels.
+   *
+   * Both lengths must be positive to draw a dashed border. Otherwise it is solid.
+   * @param[in] dash The dash length
+   * @param[in] gap The gap length
+   */
+  void SetBorderDash(float dash, float gap);
+
+  /**
+   * @brief Returns the border dash and gap lengths, initially zero.
+   * @return The dash and gap in pixels
+   */
+  Vector2 GetBorderDash() const;
+
+  /**
+   * @brief Colors bars below and above a finite data value.
+   *
+   * The boundary uses the chart's Y scale and stays aligned with sections at the
+   * same value. Replaces any fill gradient; point color overrides take priority.
+   * @param[in] value The threshold in data coordinates
+   * @param[in] lowerColor The color below the threshold
+   * @param[in] upperColor The color above the threshold
+   */
+  void SetFillThreshold(float value, const UiColor& lowerColor, const UiColor& upperColor);
+
+  /**
+   * @brief Restores solid fill after a threshold fill.
+   */
+  void ClearFillThreshold();
+
+  /**
+   * @brief Overrides the border of one bar, independently of its fill color.
+   *
+   * The override replaces the series border width, color and dash pattern.
+   * Width zero hides the border; both dash and gap must be positive to dash it.
+   * Overrides stay at their indices after data replacement until cleared.
+   * Indices beyond the current data can be configured for future points.
+   * @param[in] pointIndex The zero-based data index
+   * @param[in] width The finite non-negative border width in pixels
+   * @param[in] color The border color; theme identifiers are retained
+   * @param[in] dash The finite non-negative dash length in pixels
+   * @param[in] gap The finite non-negative gap length in pixels
+   */
+  void SetPointBorder(uint32_t pointIndex, float width, const UiColor& color, float dash = 0.0f, float gap = 0.0f);
+
+  /**
+   * @brief Restores the current series border for one data index.
+   * @param[in] pointIndex The zero-based data index; an unset index is ignored
+   */
+  void ClearPointBorder(uint32_t pointIndex);
+
+  /**
+   * @brief Restores the current series border for all data indices.
+   */
+  void ClearPointBorders();
 
 public:
   explicit BarSeries(Integration::BarSeries* impl);

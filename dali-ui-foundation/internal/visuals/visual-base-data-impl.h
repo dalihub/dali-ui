@@ -49,13 +49,30 @@ struct Base::Impl
   /**
    * Constructor
    * @param [in] type The type of the this visual
+   * @param [in] decorationCapabilities The bitwise OR of the DecorationCapability values the visual supports
    */
-  Impl(Ui::Integration::InternalVisualType type);
+  Impl(Ui::Integration::InternalVisualType type, DecorationCapability decorationCapabilities);
 
   /**
    * Destructor
    */
   ~Impl();
+
+  /**
+   * Whether the visual declared the corner radius / squareness decoration.
+   */
+  bool IsCornerRadiusSupported() const
+  {
+    return (mDecorationCapabilities & DecorationCapability::CORNER_RADIUS) != DecorationCapability::NONE;
+  }
+
+  /**
+   * Whether the visual declared the borderline decoration.
+   */
+  bool IsBorderlineSupported() const
+  {
+    return (mDecorationCapabilities & DecorationCapability::BORDERLINE) != DecorationCapability::NONE;
+  }
 
   enum Flags
   {
@@ -512,6 +529,7 @@ public:
   float                                      mViewEffectiveScale;
   Ui::Visual::ResourceStatus                 mResourceStatus;
   const Ui::Integration::InternalVisualType  mType;
+  const DecorationCapability                 mDecorationCapabilities;
 
   bool mAlwaysUsingBorderline : 1;         ///< Whether we need the borderline in shader always.
   bool mAlwaysUsingCornerRadius : 1;       ///< Whether we need the corner radius in shader always.

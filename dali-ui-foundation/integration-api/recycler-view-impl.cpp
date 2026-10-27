@@ -1688,14 +1688,23 @@ View RecyclerViewImpl::OnFocusRequested()
   return ViewImpl::OnFocusRequested();
 }
 
-FocusNavigationResult RecyclerViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context)
+void RecyclerViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result)
 {
   const FocusDirection direction = context.GetDirection();
-  if(!mKeyScrollEnabled || !mAdapter || !mLayouter) return FocusNavigationResult::NotHandled();
+  if(!mKeyScrollEnabled || !mAdapter || !mLayouter)
+  {
+    return;
+  }
 
   const uint32_t curPos = FindActiveItemPosition(currentFocusedView);
-  if(curPos == INVALID_ITEM_POSITION) return FocusNavigationResult::NotHandled();
-  if(!IsLayoutAxisDirection(direction)) return FocusNavigationResult::NotHandled();
+  if(curPos == INVALID_ITEM_POSITION)
+  {
+    return;
+  }
+  if(!IsLayoutAxisDirection(direction))
+  {
+    return;
+  }
 
   uint32_t nextPos = NextItemPosition(curPos, direction);
   if(nextPos == INVALID_ITEM_POSITION)
@@ -1703,10 +1712,11 @@ FocusNavigationResult RecyclerViewImpl::OnFocusNavigationRequested(View currentF
     if(!IsAtScrollBoundary(direction))
     {
       ScrollBy(IsForwardDirection(direction) ? mKeyScrollStep : -mKeyScrollStep, true);
-      return FocusNavigationResult::Stay();
+      result.Stay();
+      return;
     }
     TriggerKeyEdgeFeedback(direction);
-    return FocusNavigationResult::NotHandled(); // Let FocusFinder exit to a neighboring view.
+    return; // Let FocusFinder exit to a neighboring view.
   }
 
   // Scan past any active (visible) items that are not keyboard-focusable.
@@ -1729,10 +1739,11 @@ FocusNavigationResult RecyclerViewImpl::OnFocusNavigationRequested(View currentF
       if(!IsAtScrollBoundary(direction))
       {
         ScrollBy(IsForwardDirection(direction) ? mKeyScrollStep : -mKeyScrollStep, true);
-        return FocusNavigationResult::Stay();
+        result.Stay();
+        return;
       }
       TriggerKeyEdgeFeedback(direction);
-      return FocusNavigationResult::NotHandled();
+      return;
     }
     nextPos = scanPos;
   }
@@ -1755,7 +1766,8 @@ FocusNavigationResult RecyclerViewImpl::OnFocusNavigationRequested(View currentF
       // Item is within step distance — focus it directly.
       // ScrollOnFocus (OnFocusManagerChanged) handles making it fully visible.
       mKeyRepeatTargetPos = INVALID_ITEM_POSITION;
-      return FocusNavigationResult::MoveTo(nextView);
+      result.MoveTo(nextView);
+      return;
     }
   }
 
@@ -1775,7 +1787,7 @@ FocusNavigationResult RecyclerViewImpl::OnFocusNavigationRequested(View currentF
   ScrollToItemMakeVisible(mKeyRepeatTargetPos, true);
   StartKeyRepeatTimer();
 
-  return FocusNavigationResult::Stay(); // The timer updates focus once the target is active.
+  result.Stay(); // The timer updates focus once the target is active.
 }
 
 bool RecyclerViewImpl::OnKeyEvent(const Dali::KeyEvent& event)

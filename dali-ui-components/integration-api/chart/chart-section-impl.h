@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-object.h>
+#include <dali/public-api/signals/dali-signal.h>
 #include <limits>
 
 // INTERNAL INCLUDES
@@ -41,14 +42,17 @@ public:
   {
     xMin = v;
   }
+
   float GetXMin() const
   {
     return xMin;
   }
+
   void SetXMax(float v)
   {
     xMax = v;
   }
+
   float GetXMax() const
   {
     return xMax;
@@ -58,14 +62,17 @@ public:
   {
     yMin = v;
   }
+
   float GetYMin() const
   {
     return yMin;
   }
+
   void SetYMax(float v)
   {
     yMax = v;
   }
+
   float GetYMax() const
   {
     return yMax;
@@ -75,35 +82,43 @@ public:
   {
     fillColor = c;
   }
+
   Vector4 GetFillColor() const
   {
     return fillColor;
   }
+
   void SetStrokeColor(const Vector4& c)
   {
     strokeColor = c;
   }
+
   Vector4 GetStrokeColor() const
   {
     return strokeColor;
   }
+
   void SetStrokeWidth(float w)
   {
     strokeWidth = w;
   }
+
   float GetStrokeWidth() const
   {
     return strokeWidth;
   }
 
 public:
-  Vector4 fillColor{0.3f, 0.6f, 1.0f, 0.15f};
-  Vector4 strokeColor{0.3f, 0.6f, 1.0f, 0.8f};
-  float   xMin{std::numeric_limits<float>::quiet_NaN()};
-  float   xMax{std::numeric_limits<float>::quiet_NaN()};
-  float   yMin{std::numeric_limits<float>::quiet_NaN()};
-  float   yMax{std::numeric_limits<float>::quiet_NaN()};
-  float   strokeWidth{0.0f};
+  Vector4        fillColor{0.3f, 0.6f, 1.0f, 0.15f};
+  Vector4        strokeColor{0.3f, 0.6f, 1.0f, 0.8f};
+  float          xMin{std::numeric_limits<float>::quiet_NaN()};
+  float          xMax{std::numeric_limits<float>::quiet_NaN()};
+  float          yMin{std::numeric_limits<float>::quiet_NaN()};
+  float          yMax{std::numeric_limits<float>::quiet_NaN()};
+  float          strokeWidth{0.0f};
+  float          cornerRadius{0.0f};
+  bool           patternEnabled{false};
+  Signal<void()> mChanged;
 };
 
 } // namespace Integration

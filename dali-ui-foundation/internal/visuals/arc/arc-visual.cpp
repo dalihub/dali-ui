@@ -56,7 +56,7 @@ ArcVisualPtr ArcVisual::New(VisualFactoryCache& factoryCache, const Property::Ma
 }
 
 ArcVisual::ArcVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::ARC),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::ARC, Visual::DecorationCapability::NONE),
   mThickness(0.0f),
   mRadius(0.0f),
   mStartAngle(0.0f),

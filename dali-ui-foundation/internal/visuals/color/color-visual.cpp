@@ -168,7 +168,7 @@ ColorVisualPtr ColorVisual::New(VisualFactoryCache& factoryCache, ColorVisualSha
 }
 
 ColorVisual::ColorVisual(VisualFactoryCache& factoryCache, ColorVisualShaderFactory& shaderFactory)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::COLOR),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::COLOR, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mBlurRadius(0.0f),
   mCutoutCornerContext(nullptr),
   mCutoutPolicy(Dali::Ui::CutoutPolicy::NONE),

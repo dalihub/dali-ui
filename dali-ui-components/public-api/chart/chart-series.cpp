@@ -84,6 +84,7 @@ Dali::String ChartSeries::GetName() const
 void ChartSeries::SetColor(const Vector4& color)
 {
   GetImplementation(*this).SetColor(color);
+  GetImplementation(*this).NotifyChanged();
 }
 
 Vector4 ChartSeries::GetColor() const
@@ -145,6 +146,7 @@ int ChartSeries::GetMaximumDataPoints() const
 void ChartSeries::SetZIndex(int zIndex)
 {
   GetImplementation(*this).SetZIndex(zIndex);
+  GetImplementation(*this).NotifyChanged();
 }
 
 int ChartSeries::GetZIndex() const
@@ -155,6 +157,25 @@ int ChartSeries::GetZIndex() const
 ChartSeries::ChartSeries(Integration::ChartSeries* impl)
 : BaseHandle(impl)
 {
+}
+
+void ChartSeries::SetPointColor(uint32_t pointIndex, const UiColor& color)
+{
+  auto& impl                    = GetImplementation(*this);
+  impl.mPointColors[pointIndex] = color;
+  impl.NotifyChanged();
+}
+
+UiColor ChartSeries::GetPointColor(uint32_t pointIndex) const
+{
+  return GetImplementation(*this).PointColor(pointIndex);
+}
+
+void ChartSeries::ClearPointColors()
+{
+  auto& impl = GetImplementation(*this);
+  impl.mPointColors.clear();
+  impl.NotifyChanged();
 }
 
 } // namespace Ui

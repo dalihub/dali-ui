@@ -18,11 +18,14 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/vector4.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/chart/chart-series.h>
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
+#include <cstdint>
 
 namespace DALI_NAMESPACE
 {
@@ -394,6 +397,52 @@ public:
    * @return The formatter, or nullptr if the data label format is used
    */
   DataLabelFormatterType GetDataLabelFormatter() const;
+
+  /**
+   * @brief Sets a linear gradient for the filled area.
+   * @param[in] gradient The gradient in plot coordinates
+   */
+  void SetFillGradient(const Gradient::Linear& gradient);
+
+  /**
+   * @brief Restores the solid area fill.
+   */
+  void ClearFillGradient();
+
+  /**
+   * @brief Sets a linear gradient for the line stroke.
+   * @param[in] gradient The gradient in plot coordinates
+   */
+  void SetStrokeGradient(const Gradient::Linear& gradient);
+
+  /**
+   * @brief Restores the solid line stroke.
+   */
+  void ClearStrokeGradient();
+
+  /**
+   * @brief Sets the dash pattern; a zero gap produces a solid stroke.
+   * @param[in] dashLength Finite positive dash length in pixels
+   * @param[in] gapLength Finite non-negative gap length in pixels
+   */
+  void SetLineDash(float dashLength, float gapLength);
+
+  /**
+   * @brief Overrides edges [firstPoint, lastPoint) using original point indices.
+   *
+   * Later overlapping overrides win. NaN gaps remain disconnected.
+   * @param[in] firstPoint The first point index
+   * @param[in] lastPoint The final point index
+   * @param[in] color The stroke color; theme identifiers are retained
+   * @param[in] dashLength The dash length in pixels
+   * @param[in] gapLength The gap length, or zero for solid
+   */
+  void SetSegmentStyle(uint32_t firstPoint, uint32_t lastPoint, const UiColor& color, float dashLength = 5.0f, float gapLength = 0.0f);
+
+  /**
+   * @brief Removes all per-segment overrides.
+   */
+  void ClearSegmentStyles();
 
 public:
   explicit LineSeries(Integration::LineSeries* impl);

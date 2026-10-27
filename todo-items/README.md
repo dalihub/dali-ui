@@ -25,3 +25,4 @@
 | [Trait BaseObject storage](trait-base-object-storage.md) | 설계 필요 | Trait 저장 구조 검토 |
 | [Chromium WebView backend bugs](chromium-webview-backend-bugs.md) | 확인된 버그 | History item과 JavaScript handler routing 수정 |
 | [FocusManager 정책 후속 검토](focus-manager-policy-followups.md) | 별도 검토·승인 필요 | ClearFocus 계약·재진입, 히스토리, 저장 view 검증, 윈도우 상태, touch/hover 정책 |
+| [Recycler API ABI 리팩토링](recycler-api-abi-refactoring.md) | 설계 정리·구현 미착수 | Decoration handle 전환, holder·변경 이벤트 값 PImpl, commit 순서와 성능 검증 |

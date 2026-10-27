@@ -31,7 +31,7 @@ namespace Ui
 /**
  * @brief Property index definitions for CanvasView.
  *
- * This struct is the single source of truth for all property indices.
+ * This struct is the single source of truth for public property indices.
  * It is shared between:
  *   - CanvasView::Property  (public-api, for application code)
  *   - CanvasViewImpl        (internal/canvas-view, for DALI_PROPERTY_REGISTRATION_EXTERNAL)
@@ -77,13 +77,6 @@ struct CanvasViewPropertyIndex
      *                 CanvasView::RequestRasterization().
      */
     RASTERIZATION_REQUEST_MANUALLY,
-
-    /**
-     * @brief Internal visual slot for the rasterized canvas texture.
-     * @details Name "canvasContentVisual", type Property::MAP.
-     * @note Not intended for application use. Managed internally by CanvasViewImpl.
-     */
-    CANVAS_CONTENT_VISUAL,
   };
 };
 

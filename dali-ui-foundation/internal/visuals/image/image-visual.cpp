@@ -189,7 +189,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
 
 ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                          const VisualUrl& imageUrl, ImageDimensions size)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::IMAGE),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::IMAGE, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mPixelArea(FULL_TEXTURE_RECT),
   mPixelAreaIndex(Property::INVALID_INDEX),
   mPreMultipliedAlphaIndex(Property::INVALID_INDEX),
@@ -292,8 +292,10 @@ void ImageVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  // Load image immediately if LOAD_POLICY requires it
-  if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE)
+  // Load image immediately if LOAD_POLICY requires it.
+  // DoAction(UPDATE_PROPERTY) re-enters here; requesting again would register this
+  // observer twice for a loading texture while its destruction signal connects once.
+  if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE && mTextureId == TextureManager::INVALID_TEXTURE_ID)
   {
     LoadTexture(mTextures, loadSize, TextureManager::ReloadPolicy::CACHED);
   }

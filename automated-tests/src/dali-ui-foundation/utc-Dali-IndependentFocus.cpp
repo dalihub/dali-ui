@@ -34,11 +34,11 @@ namespace
 {
 struct InitialNavigation
 {
-  FocusNavigationResult Navigate(View current, FocusNavigationContext)
+  void Navigate(View current, FocusNavigationContext, FocusNavigationResult& result)
   {
     ++calls;
     currentWasEmpty = !current;
-    return FocusNavigationResult::MoveTo(target);
+    result.MoveTo(target);
   }
   View target;
   int  calls{0};
@@ -49,11 +49,11 @@ WeakHandle<View> gHiddenByPolicyTarget;
 
 bool HideFocusCandidate(const Extension::FocusIndicationContext& context)
 {
-  if(context.focusedView == gHiddenByPolicyTarget.GetHandle())
+  if(context.GetFocusedView() == gHiddenByPolicyTarget.GetHandle())
   {
-    context.focusedView.GetParent().SetProperty(Actor::Property::VISIBLE, false);
+    context.GetFocusedView().GetParent().SetProperty(Actor::Property::VISIBLE, false);
   }
-  return context.proposedIndicated;
+  return context.IsFocusIndicationProposed();
 }
 
 struct FocusRecorder : ConnectionTracker

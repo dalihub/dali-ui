@@ -95,7 +95,7 @@ PrimitiveVisualPtr PrimitiveVisual::New(VisualFactoryCache& factoryCache, const 
 }
 
 PrimitiveVisual::PrimitiveVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::PRIMITIVE),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::PRIMITIVE, Visual::DecorationCapability::NONE),
   mScaleDimensions(Vector3::ONE),
   mScaleTopRadius(DEFAULT_SCALE_TOP_RADIUS),
   mScaleBottomRadius(DEFAULT_SCALE_BOTTOM_RADIUS),

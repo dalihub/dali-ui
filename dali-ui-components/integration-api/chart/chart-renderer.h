@@ -25,6 +25,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-components/integration-api/chart/chart-bar-geometry.h>
 #include <dali-ui-components/integration-api/chart/chart-layout-manager.h>
 #include <dali-ui-components/integration-api/chart/chart-model.h>
 #include <dali-ui-components/integration-api/chart/chart-scale-engine.h>
@@ -54,7 +55,7 @@ public:
    * @param[in,out] canvas  The background CanvasView layer.
    * @param[in]     model   Chart model (style, data).
    * @param[in]     scale   Scale engine with current plotArea.
-   * @param[in]     layout  Computed layout (yTicks, xTickCount, plotArea).
+   * @param[in]     layout  Computed layout (independent X/Y ticks, labels, and plot area).
    */
   void Render(Ui::CanvasView&                         canvas,
               const ChartModel&                       model,
@@ -113,10 +114,10 @@ public:
   struct DataLabelInfo
   {
     Dali::String text;
-    Vector2      position;
     Vector4      color;
-    float        size;
     Vector3      pivot{Pivot::BOTTOM_CENTER};
+    Vector2      position;
+    float        size;
   };
 
   /**
@@ -128,13 +129,20 @@ public:
    * @param[in]     layout       Computed layout.
    * @param[in]     pOldYValues  Per-series Y-value snapshot for animation (nullptr = no animation).
    * @param[in]     animProgress Animation progress in [0,1].
+   * @param[in]     oldBars      Previously displayed bar geometry, or nullptr for immediate rendering.
    */
   std::vector<DataLabelInfo> Render(Ui::CanvasView&                         canvas,
                                     const ChartModel&                       model,
                                     const ScaleEngine&                      scale,
                                     const ChartLayoutManager::LayoutResult& layout,
                                     const std::vector<std::vector<float>>*  pOldYValues  = nullptr,
-                                    float                                   animProgress = 1.0f);
+                                    float                                   animProgress = 1.0f,
+                                    const std::vector<ChartBarGeometry>*    oldBars      = nullptr);
+
+  const std::vector<ChartBarGeometry>& GetRenderedBars() const
+  {
+    return mRenderedBars;
+  }
 
 private:
   static std::vector<size_t> SortedSeriesOrder(const ChartModel& model);
@@ -149,7 +157,8 @@ private:
   void RenderScatters(Dali::CanvasRenderer::DrawableGroup& group, const ChartModel& model, const ScaleEngine& scale, const std::vector<size_t>& order);
 
   void RenderBars(Dali::CanvasRenderer::DrawableGroup& group, const ChartModel& model, const ScaleEngine& scale, const ChartLayoutManager::LayoutResult& layout, const std::vector<size_t>& order);
-  void RenderStackedBars(Dali::CanvasRenderer::DrawableGroup& group, const ChartModel& model, const ScaleEngine& scale, const ChartLayoutManager::LayoutResult& layout, const std::vector<size_t>& stackedIdx);
+
+  std::vector<ChartBarGeometry> mRenderedBars;
 
   void RenderBarDataLabels(const ChartModel& model, const ScaleEngine& scale, const ChartLayoutManager::LayoutResult& layout, std::vector<DataLabelInfo>& outLabels, const std::vector<size_t>& order);
 

@@ -22,8 +22,7 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 
 #include <cmath>
-#include <cstdlib>
-#include <iostream>
+#include <iomanip>
 #include <locale>
 #include <sstream>
 #include <string>
@@ -160,11 +159,10 @@ bool ParseValue(const std::string& text, std::size_t& pos, float& value)
     return false;
   }
 
-  const char* begin = text.c_str() + pos;
-  char*       end   = nullptr;
-  value             = std::strtof(begin, &end);
-
-  if(end == begin)
+  std::istringstream valueStream(text.substr(pos));
+  valueStream.imbue(std::locale::classic());
+  valueStream >> value;
+  if(valueStream.fail())
   {
     return false;
   }
@@ -174,7 +172,10 @@ bool ParseValue(const std::string& text, std::size_t& pos, float& value)
     return false;
   }
 
-  pos = static_cast<std::size_t>(end - text.c_str());
+  const std::streampos parsedLength = valueStream.tellg();
+  pos                               = parsedLength == std::streampos(-1)
+                                        ? text.size()
+                                        : pos + static_cast<std::size_t>(parsedLength);
   return true;
 }
 
@@ -234,8 +235,13 @@ std::string FloatToString(float value)
     return "0";
   }
 
-  std::string text = std::to_string(value);
+  std::ostringstream oss;
+  oss.imbue(std::locale::classic());
+  oss << std::fixed << std::setprecision(6) << value;
 
+  std::string text = oss.str();
+
+  // Remove trailing zeros and decimal point if necessary.
   if(text.find('.') != std::string::npos)
   {
     while(!text.empty() && text.back() == '0')
@@ -251,8 +257,10 @@ std::string FloatToString(float value)
 
   if(text.empty() || text == "-")
   {
+    // This should not happen, but just in case, return "0" to avoid returning an empty string or just a minus sign.
     text += '0';
   }
+
   return text;
 }
 

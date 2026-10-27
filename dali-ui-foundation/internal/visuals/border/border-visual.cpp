@@ -55,7 +55,7 @@ BorderVisualPtr BorderVisual::New(VisualFactoryCache& factoryCache, const Proper
 }
 
 BorderVisual::BorderVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::BORDER),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::BORDER, Visual::DecorationCapability::NONE),
   mBorderSize(0.f),
   mBorderSizeIndex(Property::INVALID_INDEX),
   mAntiAliasingEnabled(false)

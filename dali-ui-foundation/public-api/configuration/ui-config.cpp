@@ -566,5 +566,25 @@ void UiConfig::DefaultViewInitializer(View view)
 {
 }
 
+void UiConfig::SetUnitDpi(int dpi)
+{
+  GetImpl(*this).SetUnitDpi(dpi);
+}
+
+int UiConfig::GetUnitDpi() const
+{
+  return GetImpl(*this).GetUnitDpi();
+}
+
+void UiConfig::SetUnitBaselineDpi(int baselineDpi)
+{
+  GetImpl(*this).SetUnitBaselineDpi(baselineDpi);
+}
+
+int UiConfig::GetUnitBaselineDpi() const
+{
+  return GetImpl(*this).GetUnitBaselineDpi();
+}
+
 } // namespace Ui
 } //namespace DALI_NAMESPACE

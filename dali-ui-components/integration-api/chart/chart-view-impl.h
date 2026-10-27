@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
@@ -62,9 +63,13 @@ public:
   // Public API implementation
   // =========================================================================
 
-  void AddSeries(Ui::ChartSeries series);
-  bool RemoveSeries(const Dali::String& name);
-  void RemoveAllSeries();
+  void    AddSeries(Ui::ChartSeries series);
+  void    ApplyStyle(const Ui::ChartViewStyle& style);
+  void    SetViewport(const Vector4& range);
+  Vector4 GetViewport() const;
+  bool    SelectPoint(uint32_t seriesIndex, uint32_t pointIndex);
+  bool    RemoveSeries(const Dali::String& name);
+  void    RemoveAllSeries();
 
   void SetXAxis(Ui::ChartAxis axis);
   void SetYAxis(Ui::ChartAxis axis);
@@ -80,14 +85,17 @@ public:
   {
     return mDataPointSelectedSignal;
   }
+
   Ui::ChartView::LegendItemTappedSignalType& LegendItemTappedSignal()
   {
     return mLegendItemTappedSignal;
   }
+
   Ui::ChartView::MultiPointSelectedSignalType& MultiPointSelectedSignal()
   {
     return mMultiPointSelectedSignal;
   }
+
   Ui::ChartView::ZoomedSignalType& ZoomedSignal()
   {
     return mZoomedSignal;
@@ -97,6 +105,7 @@ public:
   {
     mModel.mStyle.visibility.legendToggleEnabled = enabled;
   }
+
   bool IsLegendToggleEnabled() const
   {
     return mModel.mStyle.visibility.legendToggleEnabled;
@@ -106,6 +115,7 @@ public:
   {
     mModel.mStyle.interaction.hitThreshold = pixels;
   }
+
   float GetHitThreshold() const
   {
     return mModel.mStyle.interaction.hitThreshold;
@@ -115,6 +125,7 @@ public:
   {
     mModel.mStyle.interaction.findingStrategy = static_cast<int>(s);
   }
+
   Ui::ChartView::FindingStrategy GetFindingStrategy() const
   {
     return static_cast<Ui::ChartView::FindingStrategy>(mModel.mStyle.interaction.findingStrategy);
@@ -129,6 +140,7 @@ public:
   {
     mModel.mStyle.animation.duration = std::max(0.0f, ms);
   }
+
   float GetAnimationDuration() const
   {
     return mModel.mStyle.animation.duration;
@@ -138,85 +150,111 @@ public:
   {
     mModel.mStyle.animation.easing = static_cast<int>(easing);
   }
+
   Ui::ChartView::EasingType GetAnimationEasing() const
   {
     return static_cast<Ui::ChartView::EasingType>(mModel.mStyle.animation.easing);
   }
 
-  void  SetUpdateThrottle(float ms);
+  void SetUpdateThrottle(float ms);
+
   float GetUpdateThrottle() const
   {
     return mThrottleMs;
   }
 
   // Gauge
-  void  SetGaugeValue(float v);
+  void SetGaugeValue(float v);
+
   float GetGaugeValue() const
   {
     return mModel.mStyle.gauge.value;
   }
-  void  SetGaugeMinValue(float v);
+
+  void SetGaugeMinValue(float v);
+
   float GetGaugeMinValue() const
   {
     return mModel.mStyle.gauge.minValue;
   }
-  void  SetGaugeMaxValue(float v);
+
+  void SetGaugeMaxValue(float v);
+
   float GetGaugeMaxValue() const
   {
     return mModel.mStyle.gauge.maxValue;
   }
-  void  SetGaugeArcSpan(float degrees);
+
+  void SetGaugeArcSpan(float degrees);
+
   float GetGaugeArcSpan() const
   {
     return mModel.mStyle.gauge.arcSpanDegrees;
   }
-  void  SetGaugeStartAngle(float degrees);
+
+  void SetGaugeStartAngle(float degrees);
+
   float GetGaugeStartAngle() const
   {
     return mModel.mStyle.gauge.startAngleDegrees;
   }
-  void  SetGaugeArcWidth(float ratio);
+
+  void SetGaugeArcWidth(float ratio);
+
   float GetGaugeArcWidth() const
   {
     return mModel.mStyle.gauge.arcWidthRatio;
   }
-  void    SetGaugeTrackColor(const Vector4& color);
+
+  void SetGaugeTrackColor(const Vector4& color);
+
   Vector4 GetGaugeTrackColor() const
   {
     return mModel.mStyle.gauge.trackColor;
   }
-  void    SetGaugeProgressColor(const Vector4& color);
+
+  void SetGaugeProgressColor(const Vector4& color);
+
   Vector4 GetGaugeProgressColor() const
   {
     return mModel.mStyle.gauge.progressColor;
   }
-  void         SetGaugeCenterLabel(const Dali::String& text);
+
+  void SetGaugeCenterLabel(const Dali::String& text);
+
   Dali::String GetGaugeCenterLabel() const
   {
     return mModel.mStyle.gauge.centerLabel;
   }
+
   void AddGaugeRange(float fromValue, float toValue, const Vector4& color);
   void ClearGaugeRanges();
 
   // Zoom / Pan
   void SetZoomMode(int flags);
-  int  GetZoomMode() const
+
+  int GetZoomMode() const
   {
     return mModel.mStyle.interaction.zoomModeFlags;
   }
+
   void ResetZoom();
+
   void SetZoomClampEnabled(bool enabled)
   {
     mModel.mStyle.interaction.zoomClampEnabled = enabled;
   }
+
   bool IsZoomClampEnabled() const
   {
     return mModel.mStyle.interaction.zoomClampEnabled;
   }
+
   void SetAutoFitYOnPan(bool enabled)
   {
     mModel.mStyle.interaction.autoFitY = enabled;
   }
+
   bool IsAutoFitYOnPan() const
   {
     return mModel.mStyle.interaction.autoFitY;
@@ -226,6 +264,27 @@ public:
   void AddSection(Ui::ChartSection section);
   void RemoveSection(Ui::ChartSection section);
   void ClearSections();
+  void AddAnnotation(Ui::ChartAnnotation annotation);
+  void RemoveAnnotation(Ui::ChartAnnotation annotation);
+  void ClearAnnotations();
+  void RebuildAnnotations();
+  void SetTooltipContent(Ui::View content);
+  /**
+   * @brief Updates the shared tooltip content while preserving single-point text formatting.
+   * @param[in] hits Selected points whose tooltip content is refreshed
+   * @param[in] singlePoint True for the single-point overlay, which includes the X label
+   */
+  void UpdateTooltip(const std::vector<HitResult>& hits, bool singlePoint = false);
+
+  Ui::ChartView::TooltipUpdatedSignalType& TooltipUpdatedSignal()
+  {
+    return mTooltipUpdatedSignal;
+  }
+
+  Ui::ChartView::ContentUpdatedSignalType& ContentUpdatedSignal()
+  {
+    return mContentUpdatedSignal;
+  }
 
   // =========================================================================
   // Property
@@ -247,6 +306,14 @@ private:
   void SyncLayerSizes();
   void UpdateScale();
   void RebuildBackground();
+  void QueueRedraw();
+  void FlushRedraw();
+  void EmitContentUpdated();
+
+  /**
+   * @brief Refreshes resolved colors after a theme color-table update.
+   */
+  void OnColorsChanged();
   void RebuildData();
 
   void OnSeriesDataChanged();
@@ -298,6 +365,7 @@ private:
   void InitViewportFromData();
   void ApplyViewportToScale();
   void ClampViewport();
+  void ClampViewport(bool clampX, bool clampY);
   void FitYToViewport();
   void EmitZoomedSignal();
 
@@ -311,99 +379,79 @@ private:
   ChartViewImpl& operator=(const ChartViewImpl&) = delete;
 
 private:
-  Ui::ChartView::Type mType;
-  ChartModel          mModel;
-  ScaleEngine         mScale;
-
-  // Canvas layers
-  Ui::CanvasView mBackgroundCanvas;
-  Ui::CanvasView mDataCanvas;
-  Ui::CanvasView mOverlayCanvas;
-
-  // Layout / Rendering
-  ChartLayoutManager               mLayoutManager;
-  BackgroundRenderer               mBackgroundRenderer;
-  DataRenderer                     mDataRenderer;
-  ChartLayoutManager::LayoutResult mLastLayout;
-
-  // Interaction
-  ChartHitTester  mHitTester;
-  OverlayRenderer mOverlayRenderer;
-
-  // Tooltip
-  Ui::Label mTooltipLabel;
-
-  // Throttle timer
-  Timer mUpdateThrottleTimer;
-  float mThrottleMs{16.0f};
-  bool  mPendingUpdate{false};
-
-  // Animation timer
-  Timer                                 mAnimTimer;
-  std::vector<std::vector<float>>       mLastRenderedCanvasY;
-  std::vector<std::vector<float>>       mAnimOldCanvasY;
-  std::chrono::steady_clock::time_point mAnimStartTime;
-
-  // Text label pools
-  Ui::Label              mTitleLabel;
-  Ui::Label              mXAxisTitleLabel;
-  Ui::Label              mYAxisTitleLabel;
-  std::vector<Ui::Label> mXTickLabels;
-  std::vector<Ui::Label> mYTickLabels;
-  std::vector<Ui::Label> mLegendLabels;
-  std::vector<Ui::Label> mDataLabels;
-
-  // Formatter
-  Ui::ChartView::TooltipFormatterType mTooltipFormatter{nullptr};
-
-  // Signals
+  // Ordered storage
+  ChartModel                                  mModel;
+  ChartLayoutManager::LayoutResult            mLastLayout;
+  HitResult                                   mLastHit;
+  ChartLayoutManager                          mLayoutManager;
+  ScaleEngine                                 mScale;
+  DataRenderer                                mDataRenderer;
+  std::vector<Ui::ChartAnnotation>            mAnnotations;
+  std::vector<Ui::View>                       mAnnotationViews;
+  std::vector<std::vector<float>>             mLastRenderedCanvasY;
+  std::vector<std::vector<float>>             mAnimOldCanvasY;
+  std::vector<ChartBarGeometry>               mLastRenderedBars;
+  std::vector<ChartBarGeometry>               mAnimOldBars;
+  std::vector<Ui::Label>                      mXTickLabels;
+  std::vector<Ui::Label>                      mYTickLabels;
+  std::vector<Ui::Label>                      mLegendLabels;
+  std::vector<Ui::Label>                      mDataLabels;
+  Ui::UiColorManager                          mColorManager;
+  Ui::CanvasView                              mBackgroundCanvas;
+  Ui::CanvasView                              mDataCanvas;
+  Ui::CanvasView                              mOverlayCanvas;
+  CallbackBase*                               mRedrawCallback{nullptr};
+  Ui::Label                                   mTooltipLabel;
+  Ui::View                                    mTooltipContent;
+  Ui::ChartView::TooltipUpdatedSignalType     mTooltipUpdatedSignal;
+  Ui::ChartView::ContentUpdatedSignalType     mContentUpdatedSignal;
+  Timer                                       mUpdateThrottleTimer;
+  Timer                                       mAnimTimer;
+  std::chrono::steady_clock::time_point       mAnimStartTime;
+  Ui::Label                                   mTitleLabel;
+  Ui::Label                                   mXAxisTitleLabel;
+  Ui::Label                                   mYAxisTitleLabel;
+  Ui::ChartView::TooltipFormatterType         mTooltipFormatter{nullptr};
   Ui::ChartView::DataPointSelectedSignalType  mDataPointSelectedSignal;
   Ui::ChartView::LegendItemTappedSignalType   mLegendItemTappedSignal;
   Ui::ChartView::MultiPointSelectedSignalType mMultiPointSelectedSignal;
   Ui::ChartView::ZoomedSignalType             mZoomedSignal;
+  std::chrono::steady_clock::time_point       mLastTapTimePoint;
+  Dali::PanGestureDetector                    mPanDetector;
+  Dali::PinchGestureDetector                  mPinchDetector;
+  Vector2                                     mPinchStartDataCenter;
+  Vector2                                     mPanStartLocalPos;
+  Vector2                                     mSize;
+  Ui::ChartView::Type                         mType;
+  float                                       mThrottleMs{16.0f};
+  float                                       mAnimProgress{0.0f};
+  float                                       mViewportXMin{0.0f};
+  float                                       mViewportXMax{0.0f};
+  float                                       mViewportYMin{0.0f};
+  float                                       mViewportYMax{0.0f};
+  float                                       mDataXMin{0.0f};
+  float                                       mDataXMax{1.0f};
+  float                                       mDataYMin{0.0f};
+  float                                       mDataYMax{1.0f};
+  float                                       mPinchStartXMin{0.0f};
+  float                                       mPinchStartXMax{0.0f};
+  float                                       mPinchStartYMin{0.0f};
+  float                                       mPinchStartYMax{0.0f};
+  float                                       mPanStartXMin{0.0f};
+  float                                       mPanStartYMin{0.0f};
+  int                                         mHoveredLegendIndex{-1};
+  BackgroundRenderer                          mBackgroundRenderer;
+  ChartHitTester                              mHitTester;
+  OverlayRenderer                             mOverlayRenderer;
+  bool                                        mAnimationActive{false};
+  bool                                        mPendingUpdate{false};
+  bool                                        mViewportActive{false};
+  bool                                        mTouchActive{false};
+  bool                                        mPanActive{false};
+  bool                                        mNeedsBackgroundUpdate{true};
+  bool                                        mNeedsDataUpdate{true};
 
-  // Viewport state (data-space)
-  float mViewportXMin{0.0f};
-  float mViewportXMax{0.0f};
-  float mViewportYMin{0.0f};
-  float mViewportYMax{0.0f};
-  bool  mViewportActive{false};
-
-  // Full data range for clamping
-  float mDataXMin{0.0f};
-  float mDataXMax{1.0f};
-  float mDataYMin{0.0f};
-  float mDataYMax{1.0f};
-
-  // Pinch state
-  Vector2 mPinchStartDataCenter;
-  float   mPinchStartXMin{0.0f};
-  float   mPinchStartXMax{0.0f};
-  float   mPinchStartYMin{0.0f};
-  float   mPinchStartYMax{0.0f};
-
-  // Pan state
-  Vector2 mPanStartLocalPos;
-  float   mPanStartXMin{0.0f};
-  float   mPanStartYMin{0.0f};
-
-  // Touch / hover state
-  HitResult mLastHit;
-  int       mHoveredLegendIndex{-1};
-  bool      mTouchActive{false};
-  bool      mPanActive{false};
-
-  // Double-tap
-  std::chrono::steady_clock::time_point mLastTapTimePoint;
-  static constexpr uint32_t             DOUBLE_TAP_MS = 300;
-
-  // Explicit gesture detectors (ViewImpl has no EnableGestureDetection)
-  Dali::PanGestureDetector   mPanDetector;
-  Dali::PinchGestureDetector mPinchDetector;
-
-  Vector2 mSize;
-  bool    mNeedsBackgroundUpdate{true};
-  bool    mNeedsDataUpdate{true};
+  static constexpr uint32_t DOUBLE_TAP_MS = 300;
 };
 
 } // namespace Integration

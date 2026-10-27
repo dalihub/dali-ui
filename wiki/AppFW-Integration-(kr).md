@@ -1,22 +1,22 @@
 # AppFW Integration
 
-`tizen_appfw::UiApplication`을 이용해 dali-ui 애플리케이션을 Tizen Application Framework(AppFW)와 통합하는 방법을 설명합니다.
+`tizen_appfw::DaliApplication`을 이용해 dali-ui 애플리케이션을 Tizen Application Framework(AppFW)와 통합하는 방법을 설명합니다.
 
 <br/>
 
 ## 1. Application 생성
 
-`tizen_appfw::UiApplication`을 상속받은 후 `OnCreate()`를 구현합니다.
+`tizen_appfw::DaliApplication`을 상속받은 후 `OnCreate()`를 구현합니다.
 
 ```cpp
-#include <tizen_appfw/ui-application.h>
+#include <tizen_appfw/dali_application.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/dali.h>
 
-class MyApp : public tizen_appfw::UiApplication, public Dali::ConnectionTracker
+class MyApp : public tizen_appfw::DaliApplication, public Dali::ConnectionTracker
 {
 public:
-  MyApp(int argc, char** argv) : UiApplication(argc, argv) {}
+  MyApp(int argc, char** argv) : DaliApplication(argc, argv) {}
 
 protected:
   bool OnCreate() override {
@@ -45,13 +45,13 @@ int main(int argc, char** argv) {
   * DALi 내부에서 만든 default window를 반환합니다.
   * 추가 윈도우 생성을 위해서는 `Dali::Window::New()`를 이용합니다.
 * `OnCreate()`부터는 `Dali::UiContext::Get()`도 사용 가능합니다.
-  * `Dali::UiContext::Get().GetDefaultWindow()`는 `tizen_appfw::UiApplication::GetDefaultWindow()`와 같은 window를 반환합니다.
+  * `Dali::UiContext::Get().GetDefaultWindow()`는 `tizen_appfw::DaliApplication::GetDefaultWindow()`와 같은 window를 반환합니다.
 
 <br/>
 
 ## 2. Application Lifecycle Callback
 
-`tizen_appfw::UiApplication`은 `OnCreate()`, `OnPause()`, `OnResume()`, `OnTerminate()`, `OnControl()` 콜백을 지원합니다.
+`tizen_appfw::DaliApplication`은 `OnCreate()`, `OnPause()`, `OnResume()`, `OnTerminate()`, `OnControl()` 콜백을 지원합니다.
 
 * `OnCreate()`를 제외하고는 필요한 것만 오버라이드해서 구현하면 됩니다.
   * `OnCreate()`는 구현이 필수입니다.

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "layout-transition-probe.h"
 #include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -147,7 +148,9 @@ public:
     mScrollView.SetScrollDirection(ScrollDirection::Vertical);
     mScrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
     mScrollView.SetRequestedWidth(MATCH_PARENT);
-    mScrollView.SetRequestedHeight(MATCH_PARENT);
+    // Reserve the button row first; MATCH_PARENT would extend the viewport
+    // below the TC content area and put its bottom edge zone off screen.
+    mScrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     mScrollView.SetContent(mStack);
 
     mRoot = StackLayout::New();
@@ -310,6 +313,7 @@ public:
   void OnExit() override
   {
     StopAutoScrollTimer();
+    mProbe.Stop();
     DisconnectAll();
     mAutoScrollTimer.Reset();
     mDraggedChild.Reset();
@@ -325,6 +329,8 @@ public:
   }
 
 private:
+  LayoutTransitionProbe mProbe{"TC80"};
+
   static bool IsDownState(PointState::Type state)
   {
     return state == PointState::DOWN || state == PointState::STARTED;
@@ -577,7 +583,27 @@ private:
         }
       }
       mDraggedIndex = targetIndex;
+      StartLayoutProbe("REORDER");
     }
+  }
+
+  void StartLayoutProbe(const char* phase, Actor primary = {})
+  {
+    std::vector<Actor> siblings;
+    for(uint32_t i = 0u; i < mStack.GetChildViewCount(); ++i)
+    {
+      View child = mStack.GetChildViewAt(i);
+      if(child != mDragProxy && child != primary)
+      {
+        siblings.push_back(child);
+      }
+    }
+    if(!primary && !siblings.empty())
+    {
+      primary = siblings.front();
+      siblings.erase(siblings.begin());
+    }
+    if(primary) mProbe.Start(primary, phase, std::move(siblings));
   }
 
   void FinishDrag()
@@ -687,6 +713,7 @@ private:
     }
 
     mStack.SetLayoutTransition(savedTransition);
+    StartLayoutProbe("DROP", droppedChild);
   }
 
   void CancelDrag()

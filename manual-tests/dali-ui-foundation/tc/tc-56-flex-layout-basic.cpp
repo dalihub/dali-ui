@@ -14,6 +14,7 @@
  */
 
 #include "manual-test-case.h"
+#include "layout-test-controls.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
@@ -72,7 +73,9 @@ public:
     blueBox.SetRequestedWidth(100.0f);
     root.Add(blueBox);
 
-    contentArea.Add(root);
+    ManualTest::MountResizableLayout(contentArea, root, this, {
+      {"Parent: Width 800", 800.0f, MATCH_PARENT},
+      {"Parent: Full", MATCH_PARENT, MATCH_PARENT}});
   }
 
   void OnExit() override

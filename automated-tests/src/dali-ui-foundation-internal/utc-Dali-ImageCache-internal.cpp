@@ -1567,3 +1567,76 @@ int UtcDaliTextureManagerAsyncPixelBufferAndWaitingCpuMaskP(void)
   application.SendNotification();
   END_TEST;
 }
+
+namespace
+{
+Dali::Ui::Internal::TextureManager::TextureInfo* FindTextureInfo(Dali::Ui::Internal::TextureManager& textureManager,
+                                                                 const char*                         url)
+{
+  auto& cache = textureManager.mTextureCacheManager;
+  for(uint32_t i = 0u; i < cache.size(); ++i)
+  {
+    auto& textureInfo = cache[Dali::Ui::Internal::TextureManager::TextureCacheIndex(
+      Dali::Ui::Internal::TextureManagerType::TEXTURE_CACHE_INDEX_TYPE_LOCAL, i)];
+    if(textureInfo.url.GetUrl() == url)
+    {
+      return &textureInfo;
+    }
+  }
+  return nullptr;
+}
+} // namespace
+
+// The view corner radius re-applies properties to an IMMEDIATE image visual. Its pending
+// texture must keep one observer, or clearing the url leaves a dangling observer to notify.
+int UtcDaliTextureManagerImmediateCornerRadiusSingleObserverP(void)
+{
+  UiTestApplication application;
+  auto&       textureManager = GetFactoryCache().GetTextureManager();
+  const char* url            = DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png";
+
+  Dali::Ui::ImageView view = Dali::Ui::ImageView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetCornerRadius(10.0f);
+  view.SetLoadPolicy(Dali::Ui::Image::LoadPolicy::IMMEDIATE);
+  view.SetResourceUrl(url);
+
+  auto* textureInfo = FindTextureInfo(textureManager, url);
+  DALI_TEST_CHECK(textureInfo);
+  DALI_TEST_CHECK(textureInfo->loadState == Dali::Ui::Internal::TextureManager::LoadState::LOADING);
+  DALI_TEST_EQUALS(static_cast<int>(textureInfo->observerList.Count()), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(textureInfo->referenceCount), 1, TEST_LOCATION);
+
+  // Releasing the visual while loading must not leave any of its observer entries behind.
+  view.SetResourceUrl("");
+  textureInfo = FindTextureInfo(textureManager, url);
+  if(textureInfo)
+  {
+    DALI_TEST_EQUALS(static_cast<int>(textureInfo->observerList.Count()), 0, TEST_LOCATION);
+  }
+  application.SendNotification();
+  application.Render();
+  Test::WaitForEventThreadTrigger(1, 1, true);
+  application.SendNotification();
+  application.Render();
+
+  // The corner-radius image still loads once the duplicate request is gone.
+  int readyCount = 0;
+  view.ResourceReadySignal().Connect(&application, [&](Dali::Ui::View)
+  { ++readyCount; });
+  application.GetScene().Add(view);
+  view.SetResourceUrl(url);
+  for(int i = 0; i < 8 && view.GetLoadingStatus() != Dali::Ui::Visual::ResourceStatus::READY; ++i)
+  {
+    Test::WaitForEventThreadTrigger(1, 1, true);
+    application.SendNotification();
+    application.Render();
+  }
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetLoadingStatus() == Dali::Ui::Visual::ResourceStatus::READY);
+  DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+  END_TEST;
+}

@@ -2,23 +2,23 @@
 
 # AppFW Integration
 
-This guide explains how to build a dali-ui application on top of the Tizen Application Framework (AppFW) using `tizen_appfw::UiApplication`.
+This guide explains how to build a dali-ui application on top of the Tizen Application Framework (AppFW) using `tizen_appfw::DaliApplication`.
 
 <br/>
 
 ## 1. Creating an Application
 
-Inherit from `tizen_appfw::UiApplication` and implement `OnCreate()`.
+Inherit from `tizen_appfw::DaliApplication` and implement `OnCreate()`.
 
 ```cpp
-#include <tizen_appfw/ui-application.h>
+#include <tizen_appfw/dali_application.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/dali.h>
 
-class MyApp : public tizen_appfw::UiApplication, public Dali::ConnectionTracker
+class MyApp : public tizen_appfw::DaliApplication, public Dali::ConnectionTracker
 {
 public:
-  MyApp(int argc, char** argv) : UiApplication(argc, argv) {}
+  MyApp(int argc, char** argv) : DaliApplication(argc, argv) {}
 
 protected:
   bool OnCreate() override {
@@ -47,13 +47,13 @@ int main(int argc, char** argv) {
   * It returns the default window created internally by DALi.
   * To create additional windows, use `Dali::Window::New()`.
 * `Dali::UiContext::Get()` is also available starting from `OnCreate()`.
-  * `Dali::UiContext::Get().GetDefaultWindow()` returns the same window as `tizen_appfw::UiApplication::GetDefaultWindow()`.
+  * `Dali::UiContext::Get().GetDefaultWindow()` returns the same window as `tizen_appfw::DaliApplication::GetDefaultWindow()`.
 
 <br/>
 
 ## 2. Application Lifecycle Callbacks
 
-`tizen_appfw::UiApplication` supports the following lifecycle callbacks: `OnCreate()`, `OnPause()`, `OnResume()`, `OnTerminate()`, `OnControl()`.
+`tizen_appfw::DaliApplication` supports the following lifecycle callbacks: `OnCreate()`, `OnPause()`, `OnResume()`, `OnTerminate()`, `OnControl()`.
 
 * Other than `OnCreate()`, override only the callbacks you actually need.
   * `OnCreate()` must be implemented.

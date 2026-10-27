@@ -572,11 +572,13 @@ float LinearItemsLayouterImpl::LayoutWindow(Recycler& recycler, uint32_t itemCou
     endOff   = (correction != 0.0f) ? above.currentOffset : endOff;
   }
 
+  // Publish the window. An empty one has no last item: its index stays at the anchor rather than
+  // wrapping below zero.
+  mHasActiveItems      = (first < end);
   mFirstActive         = first;
   mFirstActiveOffset   = firstOff;
-  mLastActive          = end - 1u;
+  mLastActive          = mHasActiveItems ? end - 1u : first;
   mLastActiveEndOffset = endOff;
-  mHasActiveItems      = (first < end);
   // The visible items keep their screen position: the offset moves with them.
   mScrollOffset += correction;
   return correction;

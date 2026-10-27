@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "manual-test-case.h"
 #include "layout-transition-probe.h"
+#include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/public-api/adaptor-framework/ui-context.h>
@@ -185,6 +185,7 @@ public:
     {
       inner.push_back(mCard.GetChildViewAt(i));
     }
+    inner.push_back(mCard); // Include the direct child as well as its nested items.
     mProbe.Start(mSpacer, "TOGGLE", std::move(inner));
     return true;
   }

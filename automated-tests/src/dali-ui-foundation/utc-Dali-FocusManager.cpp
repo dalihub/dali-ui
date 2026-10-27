@@ -15,6 +15,7 @@
  */
 
 #include <stdlib.h>
+#include <type_traits>
 #include <vector>
 #include <dali.h>
 #include <dali/integration-api/events/hover-event-integ.h>
@@ -39,6 +40,20 @@ namespace UiExtension = Dali::Ui::Extension;
 
 namespace
 {
+static_assert(sizeof(FocusNavigationResult) == sizeof(void*));
+static_assert(!std::is_default_constructible<FocusNavigationResult>::value);
+static_assert(!std::is_copy_constructible<FocusNavigationResult>::value);
+static_assert(!std::is_move_constructible<FocusNavigationResult>::value);
+static_assert(!std::is_copy_assignable<FocusNavigationResult>::value);
+static_assert(!std::is_move_assignable<FocusNavigationResult>::value);
+
+static_assert(sizeof(UiExtension::FocusIndicationContext) == sizeof(void*));
+static_assert(!std::is_default_constructible<UiExtension::FocusIndicationContext>::value);
+static_assert(!std::is_copy_constructible<UiExtension::FocusIndicationContext>::value);
+static_assert(!std::is_move_constructible<UiExtension::FocusIndicationContext>::value);
+static_assert(!std::is_copy_assignable<UiExtension::FocusIndicationContext>::value);
+static_assert(!std::is_move_assignable<UiExtension::FocusIndicationContext>::value);
+
 struct WindowFocusRecorder : ConnectionTracker
 {
   void OnChanged(View previous, View current)
@@ -82,13 +97,13 @@ int gFocusIndicationPolicyCallCount = 0;
 bool RecordFocusIndicationPolicy(const UiExtension::FocusIndicationContext& context)
 {
   ++gFocusIndicationPolicyCallCount;
-  gFocusIndicationPolicyCall.previousFocusView = context.previousFocusView;
-  gFocusIndicationPolicyCall.focusedView = context.focusedView;
-  gFocusIndicationPolicyCall.device = context.device;
-  gFocusIndicationPolicyCall.inputEventType = context.inputEvent.GetInputEventType();
-  gFocusIndicationPolicyCall.previousFocusIndicated = context.previousFocusIndicated;
-  gFocusIndicationPolicyCall.proposedIndicated = context.proposedIndicated;
-  return context.proposedIndicated;
+  gFocusIndicationPolicyCall.previousFocusView = context.GetPreviousFocusView();
+  gFocusIndicationPolicyCall.focusedView = context.GetFocusedView();
+  gFocusIndicationPolicyCall.device = context.GetDevice();
+  gFocusIndicationPolicyCall.inputEventType = context.GetInputEvent().GetInputEventType();
+  gFocusIndicationPolicyCall.previousFocusIndicated = context.IsPreviousFocusIndicated();
+  gFocusIndicationPolicyCall.proposedIndicated = context.IsFocusIndicationProposed();
+  return context.IsFocusIndicationProposed();
 }
 
 bool NeverIndicateFocus(const UiExtension::FocusIndicationContext& context)
@@ -105,14 +120,49 @@ bool ReenterFocusFromIndicationPolicy(const UiExtension::FocusIndicationContext&
   gReentrantIndicationTarget.Reset();
   if(target)
   {
+    const View& previousReference = context.GetPreviousFocusView();
+    const View& focusedReference = context.GetFocusedView();
+    const InputEvent& eventReference = context.GetInputEvent();
+    const View previous = previousReference;
+    const View focused = focusedReference;
+    const InputEvent event = eventReference;
+    const FocusDevice device = context.GetDevice();
+    const bool previousIndicated = context.IsPreviousFocusIndicated();
+    const bool proposed = context.IsFocusIndicationProposed();
+
     DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(target));
+
+    // Nested policy evaluation must not overwrite the outer decision or the
+    // objects referenced by its getters.
+    DALI_TEST_CHECK(previousReference == previous);
+    DALI_TEST_CHECK(focusedReference == focused);
+    DALI_TEST_CHECK(eventReference == event);
+    DALI_TEST_CHECK(context.GetPreviousFocusView() == previous);
+    DALI_TEST_CHECK(context.GetFocusedView() == focused);
+    DALI_TEST_CHECK(context.GetInputEvent() == event);
+    DALI_TEST_CHECK(context.GetDevice() == device);
+    DALI_TEST_CHECK(context.IsPreviousFocusIndicated() == previousIndicated);
+    DALI_TEST_CHECK(context.IsFocusIndicationProposed() == proposed);
   }
-  return context.proposedIndicated;
+  return context.IsFocusIndicationProposed();
+}
+
+bool RemoveTargetFromIndicationPolicy(const UiExtension::FocusIndicationContext& context)
+{
+  const View& focused = context.GetFocusedView();
+  const InputEvent& event = context.GetInputEvent();
+  focused.GetParent().Remove(focused);
+  DALI_TEST_CHECK(focused);
+  DALI_TEST_CHECK(!focused.IsConnectedToScene());
+  DALI_TEST_CHECK(context.GetFocusedView() == focused);
+  DALI_TEST_CHECK(event.IsProgrammatic());
+  RecordFocusIndicationPolicy(context);
+  return UiExtension::FocusIndicationPolicy::Default(context);
 }
 
 struct FocusInDuringNavigation
 {
-  FocusNavigationResult Navigate(View current, FocusNavigationContext context)
+  void Navigate(View current, FocusNavigationContext context, FocusNavigationResult& result)
   {
     Window window = context.GetWindow();
     if(loseFocusFirst)
@@ -125,7 +175,7 @@ struct FocusInDuringNavigation
     DALI_TEST_CHECK(!FocusManager::Get().SetCurrentFocusView(target));
     DALI_TEST_CHECK(!FocusManager::Get().RequestFocus(target));
     DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::LEFT));
-    return FocusNavigationResult::MoveTo(target);
+    result.MoveTo(target);
   }
 
   View target;
@@ -633,6 +683,27 @@ int UtcDaliFocusManagerRemovedAndReattachedViewDoesNotRestoreFocusP(void)
     DALI_TEST_CHECK(recorder.changes.size() == 1u);
     DALI_TEST_CHECK(!view.GetState().Contains(ViewState::FOCUSED));
   }
+  END_TEST;
+}
+
+int UtcDaliFocusManagerIndicationContextSurvivesTargetRemovalP(void)
+{
+  UiConfig config = UiConfig::New();
+  GetImpl(config).SetFocusIndicationPolicy(&RemoveTargetFromIndicationPolicy);
+  UiTestApplication application(config);
+  View target = AddWindowFocusTarget(application.GetWindow());
+  FocusManager manager = FocusManager::Get();
+
+  gFocusIndicationPolicyCallCount = 0;
+  DALI_TEST_CHECK(!manager.SetCurrentFocusView(target));
+  DALI_TEST_CHECK(!manager.GetCurrentFocusView());
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 1);
+  // A handle explicitly copied out of the borrowed context remains valid.
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.focusedView == target);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.inputEventType == InputEventType::NONE);
+  gFocusIndicationPolicyCall.previousFocusView.Reset();
+  gFocusIndicationPolicyCall.focusedView.Reset();
+
   END_TEST;
 }
 
@@ -1669,16 +1740,16 @@ int  gOuterNavigationCallbackCount = 0;
 View gGroupNavigationTarget;
 int  gGroupNavigationCallbackCount = 0;
 
-FocusNavigationResult OuterNavigationCallbackFunc(View, FocusNavigationContext)
+void OuterNavigationCallbackFunc(View, FocusNavigationContext, FocusNavigationResult& result)
 {
   ++gOuterNavigationCallbackCount;
-  return FocusNavigationResult::MoveTo(gOuterNavigationTarget);
+  result.MoveTo(gOuterNavigationTarget);
 }
 
-FocusNavigationResult GroupNavigationCallbackFunc(View, FocusNavigationContext)
+void GroupNavigationCallbackFunc(View, FocusNavigationContext, FocusNavigationResult& result)
 {
   ++gGroupNavigationCallbackCount;
-  return FocusNavigationResult::MoveTo(gGroupNavigationTarget);
+  result.MoveTo(gGroupNavigationTarget);
 }
 } // namespace
 
@@ -1784,11 +1855,11 @@ View gCallbackTarget;
 int gCallbackCallCount = 0;
 FocusDirection gCallbackDirection = FocusDirection::LEFT;
 
-FocusNavigationResult FocusNavigationCallbackFunc(View, FocusNavigationContext context)
+void FocusNavigationCallbackFunc(View, FocusNavigationContext context, FocusNavigationResult& result)
 {
   ++gCallbackCallCount;
   gCallbackDirection = context.GetDirection();
-  return FocusNavigationResult::MoveTo(gCallbackTarget);
+  result.MoveTo(gCallbackTarget);
 }
 } // namespace
 
@@ -1849,42 +1920,42 @@ void RecordFallbackContext(View current, FocusNavigationContext context)
   gFallbackFocusGroup = context.GetFocusGroup();
 }
 
-FocusNavigationResult MoveFallback(View current, FocusNavigationContext context)
+void MoveFallback(View current, FocusNavigationContext context, FocusNavigationResult& result)
 {
   RecordFallbackContext(current, context);
-  return FocusNavigationResult::MoveTo(gFallbackTarget);
+  result.MoveTo(gFallbackTarget);
 }
 
-FocusNavigationResult NotHandledFallback(View current, FocusNavigationContext context)
+void NotHandledFallback(View current, FocusNavigationContext context, FocusNavigationResult& result)
 {
   RecordFallbackContext(current, context);
-  return FocusNavigationResult::NotHandled();
+  result.NotHandled();
 }
 
-FocusNavigationResult StayFallback(View current, FocusNavigationContext context)
+void StayFallback(View current, FocusNavigationContext context, FocusNavigationResult& result)
 {
   RecordFallbackContext(current, context);
-  return FocusNavigationResult::Stay();
+  result.Stay();
 }
 
-FocusNavigationResult ReentrantFallback(View current, FocusNavigationContext context)
+void ReentrantFallback(View current, FocusNavigationContext context, FocusNavigationResult& result)
 {
   RecordFallbackContext(current, context);
   DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::LEFT));
   DALI_TEST_CHECK(!FocusManager::Get().RequestFocus(gFallbackTarget));
   FocusManager::Get().SetFocusNavigationFallback({});
-  return FocusNavigationResult::MoveTo(gFallbackTarget);
+  result.MoveTo(gFallbackTarget);
 }
 
 View gLocalCallbackTarget;
 int gLocalCallbackCallCount = 0;
 
-FocusNavigationResult ReentrantLocalCallback(View, FocusNavigationContext)
+void ReentrantLocalCallback(View, FocusNavigationContext, FocusNavigationResult& result)
 {
   ++gLocalCallbackCallCount;
   DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::LEFT));
   DALI_TEST_CHECK(!FocusManager::Get().RequestFocus(gLocalCallbackTarget));
-  return FocusNavigationResult::MoveTo(gLocalCallbackTarget);
+  result.MoveTo(gLocalCallbackTarget);
 }
 
 class ResolvingFocusViewImpl : public ViewImpl
@@ -2371,9 +2442,9 @@ namespace
 {
 View gPriorityCallbackTarget;
 
-FocusNavigationResult PriorityCallbackFunc(View, FocusNavigationContext)
+void PriorityCallbackFunc(View, FocusNavigationContext, FocusNavigationResult& result)
 {
-  return FocusNavigationResult::MoveTo(gPriorityCallbackTarget);
+  result.MoveTo(gPriorityCallbackTarget);
 }
 } // namespace
 
@@ -3216,5 +3287,106 @@ int UtcDaliFocusManagerForwardSingleViewN(void)
   FocusManager::Get().RequestFocus(v1);
   DALI_TEST_CHECK(!FocusManager::Get().MoveFocus(FocusDirection::FORWARD));
   DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == v1);
+  END_TEST;
+}
+
+namespace
+{
+struct BorrowedNavigationResultRecorder
+{
+  View target;
+  int calls{0};
+  int mode{0};
+
+  void Navigate(View current, FocusNavigationContext, FocusNavigationResult& result)
+  {
+    ++calls;
+    DALI_TEST_CHECK(result.GetType() == FocusNavigationResultType::NOT_HANDLED);
+    DALI_TEST_CHECK(!result.GetCandidate());
+    if(mode == 0)
+    {
+      // A policy may leave the supplied result untouched.
+      return;
+    }
+
+    result.MoveTo(target);
+    DALI_TEST_CHECK(result.GetType() == FocusNavigationResultType::MOVE);
+    DALI_TEST_CHECK(result.GetCandidate() == target);
+    DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == current);
+
+    result.Stay();
+    DALI_TEST_CHECK(result.GetType() == FocusNavigationResultType::STAY);
+    DALI_TEST_CHECK(!result.GetCandidate());
+    if(mode == 1)
+    {
+      return;
+    }
+
+    result.MoveTo(target);
+    result.NotHandled();
+    DALI_TEST_CHECK(result.GetType() == FocusNavigationResultType::NOT_HANDLED);
+    DALI_TEST_CHECK(!result.GetCandidate());
+    if(mode == 2)
+    {
+      return;
+    }
+
+    result.MoveTo(target);
+  }
+};
+} // namespace
+
+int UtcDaliFocusManagerBorrowedNavigationResultP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  View current = View::New();
+  View target = View::New();
+  current.SetFocusable(true);
+  target.SetFocusable(true);
+  parent.Add(current);
+  parent.Add(target);
+  application.GetScene().Add(parent);
+  application.SendNotification();
+  application.Render();
+
+  FocusManager manager = FocusManager::Get();
+  DALI_TEST_CHECK(manager.RequestFocus(current));
+  BorrowedNavigationResultRecorder recorder;
+  recorder.target = target;
+  parent.SetFocusNavigationCallback(FocusNavigationCallback::New(&recorder, &BorrowedNavigationResultRecorder::Navigate));
+  ResetFallbackState();
+  gFallbackTarget = target;
+  manager.SetFocusNavigationFallback(FocusNavigationCallback::New(&MoveFallback));
+
+  // An untouched local result delegates to the global fallback.
+  DALI_TEST_CHECK(manager.MoveFocus(FocusDirection::RIGHT));
+  DALI_TEST_CHECK(manager.GetCurrentFocusView() == target);
+  DALI_TEST_EQUALS(gFallbackCallCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(manager.RequestFocus(current));
+
+  // A final Stay cancels the earlier candidate and stops the fallback.
+  recorder.mode = 1;
+  DALI_TEST_CHECK(!manager.MoveFocus(FocusDirection::RIGHT));
+  DALI_TEST_CHECK(manager.GetCurrentFocusView() == current);
+  DALI_TEST_EQUALS(gFallbackCallCount, 1, TEST_LOCATION);
+
+  // A final NotHandled clears the candidate and resumes fallback processing.
+  recorder.mode = 2;
+  DALI_TEST_CHECK(manager.MoveFocus(FocusDirection::RIGHT));
+  DALI_TEST_CHECK(manager.GetCurrentFocusView() == target);
+  DALI_TEST_EQUALS(gFallbackCallCount, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(manager.RequestFocus(current));
+
+  // Only the last decision is applied, after the callback returns.
+  recorder.mode = 3;
+  DALI_TEST_CHECK(manager.MoveFocus(FocusDirection::RIGHT));
+  DALI_TEST_CHECK(manager.GetCurrentFocusView() == target);
+  DALI_TEST_EQUALS(gFallbackCallCount, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(recorder.calls, 4, TEST_LOCATION);
+
+  parent.SetFocusNavigationCallback({});
+  manager.SetFocusNavigationFallback({});
+  ResetFallbackState();
   END_TEST;
 }

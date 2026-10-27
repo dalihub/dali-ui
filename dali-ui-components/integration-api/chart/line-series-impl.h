@@ -43,6 +43,7 @@ public: /// ChartSeries overrides
   {
     return mColor;
   }
+
   void SetColor(const Vector4& color) override;
 
 public:
@@ -50,16 +51,19 @@ public:
   {
     return mLineWidth;
   }
+
   bool IsMarkersVisible() const
   {
     return mShowMarkers;
   }
+
   float GetMarkerRadius() const
   {
     return mMarkerRadius;
   }
 
-  void  SetSmoothness(float value);
+  void SetSmoothness(float value);
+
   float GetSmoothness() const
   {
     return mSmoothness;
@@ -69,7 +73,8 @@ public:
   void SetMarkersVisible(bool visible);
   void SetMarkerRadius(float radius);
 
-  void                        SetMarkerShape(Ui::LineSeries::MarkerShape shape);
+  void SetMarkerShape(Ui::LineSeries::MarkerShape shape);
+
   Ui::LineSeries::MarkerShape GetMarkerShape() const
   {
     return mMarkerShape;
@@ -78,43 +83,50 @@ public:
   void    SetMarkerColor(const Vector4& color);
   Vector4 GetMarkerColor() const;
 
-  void    SetMarkerBorderColor(const Vector4& color);
+  void SetMarkerBorderColor(const Vector4& color);
+
   Vector4 GetMarkerBorderColor() const
   {
     return mMarkerBorderColor;
   }
 
-  void  SetMarkerBorderWidth(float width);
+  void SetMarkerBorderWidth(float width);
+
   float GetMarkerBorderWidth() const
   {
     return mMarkerBorderWidth;
   }
 
   void SetDataLabelsVisible(bool visible);
+
   bool IsDataLabelsVisible() const
   {
     return mShowDataLabels;
   }
 
-  void                SetDataLabelFormat(const Dali::String& format);
+  void SetDataLabelFormat(const Dali::String& format);
+
   const Dali::String& GetDataLabelFormat() const
   {
     return mDataLabelFormat;
   }
 
-  void    SetDataLabelColor(const Vector4& color);
+  void SetDataLabelColor(const Vector4& color);
+
   Vector4 GetDataLabelColor() const
   {
     return mDataLabelColor;
   }
 
-  void  SetDataLabelSize(float pointSize);
+  void SetDataLabelSize(float pointSize);
+
   float GetDataLabelSize() const
   {
     return mDataLabelSize;
   }
 
   void SetFillEnabled(bool enabled);
+
   bool IsFillEnabled() const
   {
     return mFillEnabled;
@@ -124,24 +136,41 @@ public:
   Vector4 GetFillColor() const;
 
   using DataLabelFormatterType = Ui::LineSeries::DataLabelFormatterType;
-  void                          SetDataLabelFormatter(DataLabelFormatterType formatter);
+  void SetDataLabelFormatter(DataLabelFormatterType formatter);
+
   const DataLabelFormatterType& GetDataLabelFormatter() const
   {
     return mDataLabelFormatter;
   }
 
+  struct Segment
+  {
+    UiColor  color;
+    uint32_t first;
+    uint32_t last;
+    float    dashLength;
+    float    gapLength;
+  };
+
+  // Ordered appearance storage
+  std::vector<Segment> mSegments;
+  Ui::Gradient::Linear mStrokeGradient;
+  float                mDashLength{5.0f};
+  float                mGapLength{0.0f};
+  bool                 mHasStrokeGradient{false};
+
 protected:
   ~LineSeries() override;
 
 private:
-  DataLabelFormatterType      mDataLabelFormatter{nullptr};
-  Ui::LineSeries::MarkerShape mMarkerShape{Ui::LineSeries::MarkerShape::CIRCLE};
   Dali::String                mDataLabelFormat{"%.1f"};
   Vector4                     mColor;
   Vector4                     mMarkerColor;
   Vector4                     mMarkerBorderColor{0.0f, 0.0f, 0.0f, 0.0f};
   Vector4                     mDataLabelColor{0.2f, 0.2f, 0.2f, 1.0f};
   Vector4                     mFillColor;
+  DataLabelFormatterType      mDataLabelFormatter{nullptr};
+  Ui::LineSeries::MarkerShape mMarkerShape{Ui::LineSeries::MarkerShape::CIRCLE};
   float                       mLineWidth;
   float                       mMarkerRadius;
   float                       mMarkerBorderWidth{0.0f};

@@ -64,11 +64,11 @@ struct ExitFocusProbe : ConnectionTracker
     }
   }
 
-  FocusNavigationResult Navigate(View current, FocusNavigationContext)
+  void Navigate(View current, FocusNavigationContext, FocusNavigationResult& result)
   {
     ++navigationCalls;
     navigationSource = current;
-    return FocusNavigationResult::Stay();
+    result.Stay();
   }
 
   View destination;

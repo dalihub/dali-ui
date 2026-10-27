@@ -21,6 +21,7 @@
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/vector4.h>
 #include <algorithm>
+#include <map>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/chart-series-impl.h>
@@ -43,6 +44,7 @@ public: /// ChartSeries overrides
   {
     return mColor;
   }
+
   void SetColor(const Vector4& c) override
   {
     mColor    = c;
@@ -59,6 +61,7 @@ public:
   {
     return mBarGroupWidth;
   }
+
   void SetBarGroupWidth(float r)
   {
     mBarGroupWidth = std::clamp(r, 0.01f, 1.0f);
@@ -68,30 +71,37 @@ public:
   {
     return mShowDataLabels;
   }
+
   void SetDataLabelsVisible(bool v)
   {
     mShowDataLabels = v;
   }
+
   const Dali::String& GetDataLabelFormat() const
   {
     return mDataLabelFormat;
   }
+
   void SetDataLabelFormat(const Dali::String& f)
   {
     mDataLabelFormat = f;
   }
+
   Vector4 GetDataLabelColor() const
   {
     return mDataLabelColor;
   }
+
   void SetDataLabelColor(const Vector4& c)
   {
     mDataLabelColor = c;
   }
+
   float GetDataLabelSize() const
   {
     return mDataLabelSize;
   }
+
   void SetDataLabelSize(float s)
   {
     mDataLabelSize = s;
@@ -101,10 +111,35 @@ public:
   {
     return mStacked;
   }
+
   void SetStacked(bool s)
   {
     mStacked = s;
   }
+
+  struct BorderAppearance
+  {
+    UiColor color;
+    Vector2 dash;
+    float   width;
+  };
+
+  BorderAppearance GetPointBorder(uint32_t index) const
+  {
+    const auto found = mPointBorders.find(index);
+    return found == mPointBorders.end() ? BorderAppearance{mBorderColor, mBorderDash, mBorderWidth} : found->second;
+  }
+
+  // Ordered appearance storage
+  std::map<uint32_t, BorderAppearance> mPointBorders;
+  UiColor                              mBorderColor{0.0f, 0.0f, 0.0f, 0.0f};
+  UiColor                              mLowerFillColor;
+  UiColor                              mUpperFillColor;
+  Vector2                              mBorderDash{Vector2::ZERO};
+  float                                mCornerRadius{0.0f};
+  float                                mBorderWidth{0.0f};
+  float                                mFillThreshold{0.0f};
+  bool                                 mHasFillThreshold{false};
 
 protected:
   ~BarSeries() override = default;

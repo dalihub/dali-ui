@@ -24,6 +24,7 @@
 #include <dali/public-api/math/int-pair.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/dali-signal.h>
 
 namespace DALI_NAMESPACE
@@ -114,7 +115,7 @@ public:
   Dali::String GetAuxiliaryHintValue(unsigned int id) const;
   unsigned int GetAuxiliaryHintId(const Dali::String& hint) const;
   void SetMaximumSize(WindowSize size);
-  void AddFramePresentedCallback(CallbackBase* callback, int32_t frameId);
+  void AddFramePresentedCallback(Callback<void(int32_t)> callback, int32_t frameId);
 
 
   Dali::RenderTaskList GetRenderTaskList();

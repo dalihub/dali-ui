@@ -79,6 +79,11 @@ public:
     return "18. Lottie: RenderScale / RedrawOnScale";
   }
 
+  bool ScrollsOnShortWindow() const override
+  {
+    return true;
+  }
+
   Dali::String GetDescription() const override
   {
     return "Visual quality comparison of RenderScale; verify Get* return values for RedrawOnScale flags";

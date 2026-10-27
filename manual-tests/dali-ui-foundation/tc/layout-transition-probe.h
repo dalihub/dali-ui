@@ -19,35 +19,17 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 #include <chrono>
-#include <cstdio>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
-/**
- * Prints what a transition does to one actor, one line per tick, on stdout
- * (dlog tag STDOUT on Tizen):
- *
- *   [TC78][EXIT] t=0.016 h=79.2 opacity=0.991 scene=1
- *   ...
- *   [TC78][EXIT][END] samples=50
- *
- * t is seconds since the touch; h and opacity are the rendered (current)
- * values, scene is CONNECTED_TO_SCENE. The probe only reads — it changes
- * nothing about the transition.
- *
- * The phase is the slot that was triggered: ENTER (the added child), EXIT (the
- * leaving child), CHANGE (a child whose requested size changed) or TOGGLE (a
- * reflow). With inner actors the line also carries their rendered heights in
- * the same tick, so a reflow of nested items can be compared with its parent:
- *
- *   [TC81][TOGGLE] t=0.112 h=77.0 opacity=1.000 scene=1 inner=72.0,72.0,72.0
- *
- * Why: an automated check reading the accessibility tree cannot see a 0.4 s
- * transition on a slow target — the first tree read after the change takes
- * ~0.5-2 s there — and opacity is not in the tree at all. The child is held by
- * this probe for the sampling window only.
- */
+// Read current values without changing the transition. Sampling is requested
+// every 16ms for 0.8s; neither the timer interval nor frame delivery is guaranteed.
+// The first sample may precede layout. END means the observation window ended;
+// STOP means it was superseded or the TC exited, not normal animation completion.
 class LayoutTransitionProbe : public Dali::ConnectionTracker
 {
 public:
@@ -56,88 +38,110 @@ public:
   {
   }
 
-  /// EXIT: call right BEFORE the remove, so the first line is the pre-EXIT state.
-  /// ENTER: call right AFTER the add. CHANGE / TOGGLE: call right AFTER the size
-  /// change (the first line is the pre-layout state).
-  void Start(Dali::Actor actor, std::string phase, std::vector<Dali::Actor> inner = {})
+  // EXIT: call before Remove to retain the pre-EXIT state. Other actions: call
+  // after Add/request changes. The first sample is labelled pre-layout.
+  void Start(Dali::Actor actor, std::string phase, std::vector<Dali::Actor> peers = {})
   {
     Stop();
     mActor   = actor;
-    mInner   = std::move(inner);
+    mPeers   = std::move(peers);
     mPhase   = std::move(phase);
     mStart   = Clock::now();
-    mSamples = 0u;
-    Sample();
-    mTimer = Dali::Timer::New(TICK_MS);
+    mSamples = 0;
+    ++mRun;
+    Sample("pre-layout");
+    mTimer = Dali::Timer::New(16);
     mTimer.TickSignal().Connect(this, &LayoutTransitionProbe::OnTick);
     mTimer.Start();
   }
 
   void Stop()
   {
-    if(mTimer)
+    if(mTimer) mTimer.Stop();
+    mTimer.Reset();
+    if(mActor)
     {
-      mTimer.Stop();
-      mTimer.Reset();
+      Sample("stop");
+      std::cout << "[" << mTag << "][" << mPhase << "][STOP] run=" << mRun << " samples=" << mSamples << std::endl;
     }
     mActor.Reset();
-    mInner.clear();
+    mPeers.clear();
+  }
+
+  // Log each actual callback independently of current-property timer samples.
+  // The event-thread context is not the progress of the last rendered frame.
+  static void LogAnimator(const char* tag, const Dali::Ui::LayoutAnimatorContext& context)
+  {
+    auto view = context.GetView();
+    if(!view) return;
+    const auto         from = context.GetFromBounds(), to = context.GetToBounds();
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(6) << '[' << tag << "][CONTEXT] clock=" << Timestamp()
+        << " id=" << view.GetProperty<int>(Dali::Actor::Property::ID)
+        << " slot=" << unsigned(context.GetSlot()) << " raw=" << context.GetRawProgress()
+        << " eased=" << context.GetProgress()
+        << " from=" << from.x << ',' << from.y << ',' << from.width << ',' << from.height
+        << " to=" << to.x << ',' << to.y << ',' << to.width << ',' << to.height;
+    std::cout << out.str() << std::endl;
   }
 
 private:
   using Clock = std::chrono::steady_clock;
 
-  static constexpr unsigned int TICK_MS  = 16u;
-  static constexpr double       WINDOW_S = 0.8; // 2x the 0.4 s transition
-
+  static double Timestamp()
+  {
+    return std::chrono::duration<double>(Clock::now().time_since_epoch()).count();
+  }
   double Elapsed() const
   {
     return std::chrono::duration<double>(Clock::now() - mStart).count();
   }
-
-  void Sample()
+  static void Bounds(std::ostream& out, Dali::Actor actor)
   {
-    const Dali::Vector3 size    = mActor.GetCurrentProperty<Dali::Vector3>(Dali::Actor::Property::SIZE);
-    const float         opacity = mActor.GetCurrentProperty<float>(Dali::Actor::Property::OPACITY);
-    const bool          scene   = mActor.GetProperty<bool>(Dali::Actor::Property::CONNECTED_TO_SCENE);
-    char                line[128];
-    std::snprintf(line, sizeof(line), "[%s][%s] t=%.3f h=%.1f opacity=%.3f scene=%d",
-                  mTag.c_str(), mPhase.c_str(), Elapsed(), size.height, opacity, scene ? 1 : 0);
-    std::string out(line);
-    for(std::size_t i = 0; i < mInner.size(); ++i)
-    {
-      std::snprintf(line, sizeof(line), "%s%.1f", i == 0u ? " inner=" : ",",
-                    mInner[i].GetCurrentProperty<Dali::Vector3>(Dali::Actor::Property::SIZE).height);
-      out += line;
-    }
-    std::cout << out << std::endl;
-    ++mSamples;
+    const auto p      = actor.GetCurrentProperty<Dali::Vector3>(Dali::Actor::Property::POSITION);
+    const auto s      = actor.GetCurrentProperty<Dali::Vector3>(Dali::Actor::Property::SIZE);
+    const auto parent = actor.GetParent();
+    out << " id=" << actor.GetProperty<int>(Dali::Actor::Property::ID)
+        << " name=" << std::quoted(actor.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr())
+        << " parent=" << (parent ? parent.GetProperty<int>(Dali::Actor::Property::ID) : 0)
+        << " x=" << p.x << " y=" << p.y << " w=" << s.width << " h=" << s.height
+        << " opacity=" << actor.GetCurrentProperty<float>(Dali::Actor::Property::OPACITY)
+        << " scene=" << actor.GetProperty<bool>(Dali::Actor::Property::CONNECTED_TO_SCENE);
   }
-
+  void Sample(const char* kind)
+  {
+    ++mSamples;
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(6)
+        << '[' << mTag << "][" << mPhase << "] t=" << Elapsed() << " clock=" << Timestamp()
+        << " run=" << mRun << " sample=" << mSamples << " kind=" << kind << " peers=" << mPeers.size();
+    Bounds(out, mActor);
+    out << '\n';
+    for(auto peer : mPeers)
+    {
+      out << '[' << mTag << "][" << mPhase << "][PEER] run=" << mRun << " sample=" << mSamples;
+      Bounds(out, peer);
+      out << '\n';
+    }
+    std::cout << out.str() << std::flush;
+  }
   bool OnTick()
   {
-    if(!mActor)
-    {
-      return false;
-    }
-    Sample();
-    if(Elapsed() < WINDOW_S)
-    {
-      return true;
-    }
-    std::cout << "[" << mTag << "][" << mPhase << "][END] samples=" << mSamples << std::endl;
+    if(!mActor) return false;
+    Sample("timer");
+    if(Elapsed() < .8) return true;
+    std::cout << "[" << mTag << "][" << mPhase << "][END] run=" << mRun << " samples=" << mSamples << std::endl;
     mActor.Reset();
-    mInner.clear();
+    mPeers.clear();
     return false;
   }
 
-  std::string       mTag;
-  std::string       mPhase;
-  Dali::Actor       mActor;
-  std::vector<Dali::Actor> mInner;
-  Dali::Timer       mTimer;
-  Clock::time_point mStart{};
-  unsigned int      mSamples{0u};
+  std::string              mTag, mPhase;
+  Dali::Actor              mActor;
+  std::vector<Dali::Actor> mPeers;
+  Dali::Timer              mTimer;
+  Clock::time_point        mStart{};
+  unsigned                 mRun{0}, mSamples{0};
 };
 
 #endif // MANUAL_TEST_LAYOUT_TRANSITION_PROBE_H

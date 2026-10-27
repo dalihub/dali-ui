@@ -43,9 +43,11 @@
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-indication-context-impl.h>
 
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-navigation-context-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-navigation-result-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -272,6 +274,18 @@ void FocusManager::GetConfiguration()
     mDefaultFocusIndicatorEnabled = config.IsDefaultFocusIndicatorEnabled();
     mFocusIndicationPolicy        = GetImpl(config).GetFocusIndicationPolicy();
   }
+  if(mFocusIndicationPolicy == &Extension::FocusIndicationPolicy::Default)
+  {
+    mFocusIndicationPolicyMode = FocusIndicationPolicyMode::DEFAULT;
+  }
+  else if(mFocusIndicationPolicy == &Extension::FocusIndicationPolicy::FollowFocus)
+  {
+    mFocusIndicationPolicyMode = FocusIndicationPolicyMode::FOLLOW_FOCUS;
+  }
+  else
+  {
+    mFocusIndicationPolicyMode = FocusIndicationPolicyMode::CUSTOM;
+  }
   mConfigurationLoaded = true;
 }
 
@@ -333,8 +347,8 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
   if(IsLogicalFocusWindow(sceneHolder) && view != previous)
   {
     const bool previousIndicated    = previous && GetImpl(previous).GetState().Contains(ViewState::FOCUS_INDICATED);
-    effectiveContext.focusIndicated = mFocusIndicationPolicy({previous, view, context.device, context.inputEvent,
-                                                              previousIndicated, ShouldIndicateFocus(context, previousIndicated)});
+    effectiveContext.focusIndicated = EvaluateFocusIndicationPolicy(previous, view, context.device, context.inputEvent,
+                                                                    previousIndicated, ShouldIndicateFocus(context, previousIndicated));
   }
   // Policy callbacks can disconnect the target or change its independent policy.
   if(!view.IsConnectedToScene() || Dali::Integration::SceneHolder::Get(view) != sceneHolder ||
@@ -1009,16 +1023,18 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
     return false;
   }
 
-  FocusNavigationResult result = FindNextFocusByParentNavigation(currentFocusView, navigationContext).result;
+  FocusNavigationResultImpl resultImpl;
+  FocusNavigationResult     result(resultImpl);
+  FindNextFocusByParentNavigation(currentFocusView, navigationContext, result);
 
   if(result.GetType() == FocusNavigationResultType::NOT_HANDLED)
   {
-    result = FindNextFocusByProperty(currentFocusView, direction);
+    FindNextFocusByProperty(currentFocusView, direction, result);
   }
 
   if(result.GetType() == FocusNavigationResultType::NOT_HANDLED && mFocusNavigationFallback)
   {
-    result = mFocusNavigationFallback.Invoke(currentFocusView, navigationContext);
+    mFocusNavigationFallback.Invoke(currentFocusView, navigationContext, result);
   }
 
   if(result.GetType() == FocusNavigationResultType::NOT_HANDLED && mEnableDefaultAlgorithm)
@@ -1026,7 +1042,7 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
     View candidate = FindNextFocusByFinder(currentFocusView, navigationContext);
     if(candidate)
     {
-      result = FocusNavigationResult::MoveTo(candidate);
+      result.MoveTo(candidate);
     }
   }
 
@@ -1043,11 +1059,11 @@ void FocusManager::SetFocusNavigationFallback(FocusNavigationCallback callback)
   mFocusNavigationFallback = std::move(callback);
 }
 
-FocusNavigationResult FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction)
+void FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction, FocusNavigationResult& result)
 {
   if(!currentFocusView)
   {
-    return FocusNavigationResult::NotHandled();
+    return;
   }
 
   Property::Index index = Property::INVALID_INDEX;
@@ -1099,19 +1115,17 @@ FocusNavigationResult FocusManager::FindNextFocusByProperty(View currentFocusVie
           found = View::DownCast(window.GetRootLayer().FindChildById(viewId));
         }
       }
-      return FocusNavigationResult::MoveTo(found);
+      result.MoveTo(found);
+      return;
     }
   }
-  return FocusNavigationResult::NotHandled();
 }
 
-FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context)
+void FocusManager::FindNextFocusByParentNavigation(View currentFocusView, FocusNavigationContext context, FocusNavigationResult& result)
 {
-  ParentNavigationResult result;
-
   if(!currentFocusView)
   {
-    return result;
+    return;
   }
 
   Actor parent = currentFocusView.GetParent();
@@ -1120,10 +1134,10 @@ FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigati
     View parentView = View::DownCast(parent);
     if(parentView)
     {
-      result.result = ViewDataImpl::Get(GetImpl(parentView)).RequestFocusNavigation(currentFocusView, context);
-      if(result.result.GetType() != FocusNavigationResultType::NOT_HANDLED)
+      ViewDataImpl::Get(GetImpl(parentView)).RequestFocusNavigation(currentFocusView, context, result);
+      if(result.GetType() != FocusNavigationResultType::NOT_HANDLED)
       {
-        return result;
+        return;
       }
 
       if(parentView == context.GetFocusGroup())
@@ -1133,7 +1147,6 @@ FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigati
     }
     parent = parent.GetParent();
   }
-  return result;
 }
 
 FocusNavigationContext FocusManager::CreateFocusNavigationContext(View currentFocusView, Ui::FocusDirection direction, const FocusChangeContext& context)
@@ -1381,9 +1394,35 @@ void FocusManager::SetFocusIndicationWithPolicy(View focusedView, bool proposedI
   if(focusedView)
   {
     const bool previousFocusIndicated = GetImpl(focusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
-    const bool indicated              = mFocusIndicationPolicy({focusedView, focusedView, device, inputEvent, previousFocusIndicated, proposedIndicated});
+    const bool indicated              = EvaluateFocusIndicationPolicy(focusedView, focusedView, device, inputEvent, previousFocusIndicated, proposedIndicated);
     SetFocusIndicated(focusedView, indicated, inputEvent);
   }
+}
+
+bool FocusManager::EvaluateFocusIndicationPolicy(const View&       previousFocusView,
+                                                 const View&       focusedView,
+                                                 FocusDevice       device,
+                                                 const InputEvent& inputEvent,
+                                                 bool              previousFocusIndicated,
+                                                 bool              focusIndicationProposed) const
+{
+  // Built-in policies need neither a context nor additional handle references.
+  switch(mFocusIndicationPolicyMode)
+  {
+    case FocusIndicationPolicyMode::DEFAULT:
+      return focusIndicationProposed;
+    case FocusIndicationPolicyMode::FOLLOW_FOCUS:
+      return true;
+    case FocusIndicationPolicyMode::CUSTOM:
+      break;
+  }
+
+  // Stack ownership hides the extensible layout without allocating a body.
+  // Nested callbacks get independent snapshots with their own handle lifetimes.
+  const FocusIndicationContextImpl        impl{previousFocusView, focusedView, device, inputEvent,
+                                        previousFocusIndicated, focusIndicationProposed};
+  const Extension::FocusIndicationContext context(impl);
+  return mFocusIndicationPolicy(context);
 }
 
 void FocusManager::ClearTouchFocusCandidate()

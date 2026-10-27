@@ -61,7 +61,9 @@ DALI_TYPE_REGISTRATION_BEGIN_FULL(Ui::CanvasView, Ui::Internal::CanvasViewImpl, 
 CANVAS_VIEW_PROPERTY_REGISTRATION("viewBox",                      VECTOR2, VIEW_BOX)
 CANVAS_VIEW_PROPERTY_REGISTRATION("synchronousLoading",           BOOLEAN, SYNCHRONOUS_LOADING)
 CANVAS_VIEW_PROPERTY_REGISTRATION("rasterizationRequestManually", BOOLEAN, RASTERIZATION_REQUEST_MANUALLY)
-CANVAS_VIEW_PROPERTY_REGISTRATION("canvasContentVisual",          MAP,     CANVAS_CONTENT_VISUAL)
+
+Dali::PropertyRegistration canvasContentVisual(typeRegistration, "canvasContentVisual", CanvasViewImpl::Property::CANVAS_CONTENT_VISUAL, Dali::Property::MAP, &CanvasViewImpl::SetProperty, &CanvasViewImpl::GetProperty);
+static_assert((static_cast<int>(CanvasViewImpl::Property::CANVAS_CONTENT_VISUAL) - static_cast<int>(Ui::CanvasViewPropertyIndex::PROPERTY_START_INDEX)) == __COUNTER__, "CanvasView internal visual index must match registration order.");
 
 DALI_TYPE_REGISTRATION_END()
 #undef CANVAS_VIEW_PROPERTY_REGISTRATION

@@ -248,12 +248,74 @@ int UtcDaliFontVariationToStringFloatFormatting(void)
     {"slnt", -0.5f},
     {"zer1", -0.0f},
     {"zer2", 0.0f},
-    {"long", 700.123474f},
+    {"1ong", 700.123474f},
+    {"2ong", 1.23456789f},
+    {"3ong", 0.0000001234f},
   });
 
   const Dali::String actual = FontVariation::ToString(axes);
 
-  DALI_TEST_EQUALS(actual, Dali::String("wght=1,wdth=1.25,slnt=-0.5,zer1=0,zer2=0,long=700.123474"), TEST_LOCATION);
+  DALI_TEST_EQUALS(actual, Dali::String("wght=1,wdth=1.25,slnt=-0.5,zer1=0,zer2=0,1ong=700.123474,2ong=1.234568,3ong=0"), TEST_LOCATION);
+
+  const Dali::Vector<FontVariation::Axis> reparsed = FontVariation::FromString(actual);
+
+  DALI_TEST_EQUALS(reparsed.Count(), axes.Count(), TEST_LOCATION);
+  for(uint32_t i = 0u; i < axes.Count(); ++i)
+  {
+    DALI_TEST_EQUALS(reparsed[i].GetTag(), axes[i].GetTag(), TEST_LOCATION);
+    DALI_TEST_EQUALS(reparsed[i].GetValue(), axes[i].GetValue(), TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliFontVariationToStringFloatFormattingWithLocale(void)
+{
+  const char* targetLocale  = "en_DK.UTF-8"; // Use a locale that uses '.' as decimal separator
+
+  const char* currentLocale = setlocale(LC_NUMERIC, nullptr);
+  DALI_TEST_CHECK(currentLocale != nullptr);
+
+#if defined(_MSC_VER)
+  char* prev = _strdup(currentLocale);
+#else
+  char* prev = strdup(currentLocale);
+#endif
+  DALI_TEST_CHECK(prev != nullptr);
+
+  if(setlocale(LC_NUMERIC, targetLocale) == nullptr)
+  {
+    tet_infoline("Skipping locale formatting test: en_DK.UTF-8 is not available.");
+    free(prev);
+    END_TEST;
+  }
+
+  const Dali::Vector<FontVariation::Axis> axes = MakeAxes({
+    {"asdf", 700.0f},
+    {"1234", 1.234f},
+    {"0000", 0.0f},
+    {"5678", 0.5678f},
+    {"1ong", 700.123474f},
+    {"2ong", 1.23456789f},
+    {"3ong", 0.0000001234f},
+  });
+
+  const Dali::String actual = FontVariation::ToString(axes);
+
+  DALI_TEST_EQUALS(actual, Dali::String("asdf=700,1234=1.234,0000=0,5678=0.5678,1ong=700.123474,2ong=1.234568,3ong=0"), TEST_LOCATION);
+
+  const Dali::Vector<FontVariation::Axis> reparsed = FontVariation::FromString(actual);
+
+  DALI_TEST_EQUALS(reparsed.Count(), axes.Count(), TEST_LOCATION);
+  for(uint32_t i = 0u; i < axes.Count(); ++i)
+  {
+    DALI_TEST_EQUALS(reparsed[i].GetTag(), axes[i].GetTag(), TEST_LOCATION);
+    DALI_TEST_EQUALS(reparsed[i].GetValue(), axes[i].GetValue(), TEST_LOCATION);
+  }
+
+  // Revert it
+  setlocale(LC_NUMERIC, prev);
+  free(prev);
+
   END_TEST;
 }
 

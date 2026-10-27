@@ -57,56 +57,6 @@ const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
 
 namespace
 {
-/**
- * @brief Check whether this visual type can use corner radius feature or not.
- * @param type VisualType that want to checkup
- * @return true if type can use corner radius feature.
- */
-static bool IsTypeAvailableForCornerRadius(Ui::Integration::InternalVisualType type)
-{
-  switch(type)
-  {
-    case Ui::Integration::InternalVisualType::COLOR:
-    case Ui::Integration::InternalVisualType::GRADIENT:
-    case Ui::Integration::InternalVisualType::IMAGE:
-    case Ui::Integration::InternalVisualType::SVG:
-    case Ui::Integration::InternalVisualType::ANIMATED_IMAGE:
-    case Ui::Integration::InternalVisualType::LOTTIE_ANIMATION:
-    {
-      return true;
-    }
-    default:
-    {
-      return false;
-    }
-  }
-}
-
-/**
- * @brief Check whether this visual type can use borderline feature or not.
- * @param type VisualType that want to checkup
- * @return true if type can use borderline feature.
- */
-static bool IsTypeAvailableForBorderline(Ui::Integration::InternalVisualType type)
-{
-  switch(type)
-  {
-    case Ui::Integration::InternalVisualType::COLOR:
-    case Ui::Integration::InternalVisualType::GRADIENT:
-    case Ui::Integration::InternalVisualType::IMAGE:
-    case Ui::Integration::InternalVisualType::SVG:
-    case Ui::Integration::InternalVisualType::ANIMATED_IMAGE:
-    case Ui::Integration::InternalVisualType::LOTTIE_ANIMATION:
-    {
-      return true;
-    }
-    default:
-    {
-      return false;
-    }
-  }
-}
-
 struct StringProperty
 {
   const char* const name;
@@ -145,8 +95,8 @@ Property::Index GetVisualPropertyIndex(Property::Key key)
 
 } // namespace
 
-Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::Integration::InternalVisualType type)
-: mImpl(new Impl(type)),
+Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::Integration::InternalVisualType type, DecorationCapability decorationCapabilities)
+: mImpl(new Impl(type, decorationCapabilities)),
   mFactoryCache(factoryCache)
 {
   if(DALI_UNLIKELY(!Dali::Adaptor::IsEventThread()))
@@ -335,7 +285,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
           mImpl->SetBorderlineWidth(width);
         }
 
-        if(DALI_UNLIKELY(mImpl->mRenderer && IsTypeAvailableForBorderline(mImpl->mType)))
+        if(DALI_UNLIKELY(mImpl->mRenderer && mImpl->IsBorderlineSupported()))
         {
           // Unusual case. SetProperty called after OnInitialize().
           // Assume that DoAction call UPDATE_PROPERTY.
@@ -375,7 +325,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
           mImpl->SetBorderlineColor(color);
         }
 
-        if(DALI_UNLIKELY(mImpl->mRenderer && IsTypeAvailableForBorderline(mImpl->mType)))
+        if(DALI_UNLIKELY(mImpl->mRenderer && mImpl->IsBorderlineSupported()))
         {
           // Unusual case. SetProperty called after OnInitialize().
           // Assume that DoAction call UPDATE_PROPERTY.
@@ -392,7 +342,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
           mImpl->SetBorderlineOffset(offset);
         }
 
-        if(DALI_UNLIKELY(mImpl->mRenderer && IsTypeAvailableForBorderline(mImpl->mType)))
+        if(DALI_UNLIKELY(mImpl->mRenderer && mImpl->IsBorderlineSupported()))
         {
           // Unusual case. SetProperty called after OnInitialize().
           // Assume that DoAction call UPDATE_PROPERTY.
@@ -425,7 +375,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
           }
         }
 
-        if(DALI_UNLIKELY(mImpl->mRenderer && IsTypeAvailableForCornerRadius(mImpl->mType)))
+        if(DALI_UNLIKELY(mImpl->mRenderer && mImpl->IsCornerRadiusSupported()))
         {
           // Unusual case. SetProperty called after OnInitialize().
           // Assume that DoAction call UPDATE_PROPERTY.
@@ -512,7 +462,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
           }
         }
 
-        if(DALI_UNLIKELY(mImpl->mRenderer && IsTypeAvailableForCornerRadius(mImpl->mType)))
+        if(DALI_UNLIKELY(mImpl->mRenderer && mImpl->IsCornerRadiusSupported()))
         {
           // Unusual case. SetProperty called after OnInitialize().
           // Assume that DoAction call UPDATE_PROPERTY.
@@ -793,14 +743,14 @@ void Visual::Base::CreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, mImpl->mMixColor); // vec4
   map.Insert(Ui::Integration::Visual::Property::OPACITY, mImpl->mMixColor.a);
 
-  if(IsTypeAvailableForBorderline(mImpl->mType))
+  if(mImpl->IsBorderlineSupported())
   {
     map.Insert(Ui::Integration::Visual::Property::BORDERLINE_WIDTH, mImpl->GetBorderlineWidth());
     map.Insert(Ui::Integration::Visual::Property::BORDERLINE_COLOR, mImpl->GetBorderlineColor());
     map.Insert(Ui::Integration::Visual::Property::BORDERLINE_OFFSET, mImpl->GetBorderlineOffset());
   }
 
-  if(IsTypeAvailableForCornerRadius(mImpl->mType))
+  if(mImpl->IsCornerRadiusSupported())
   {
     map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS, mImpl->GetCornerRadius());
     map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY, mImpl->GetCornerRadiusPolicy());
@@ -836,7 +786,7 @@ bool Visual::Base::IsOnScene() const
 bool Visual::Base::IsRoundedCornerRequired() const
 {
   // If VisualType doesn't support rounded corner, always return false.
-  if(IsTypeAvailableForCornerRadius(mImpl->mType))
+  if(mImpl->IsCornerRadiusSupported())
   {
     if(mImpl->mRenderer)
     {
@@ -860,7 +810,7 @@ bool Visual::Base::IsRoundedCornerRequired() const
 bool Visual::Base::IsSquircleCornerRequired() const
 {
   // If VisualType doesn't support rounded corner, always return false.
-  if(IsTypeAvailableForCornerRadius(mImpl->mType))
+  if(mImpl->IsCornerRadiusSupported())
   {
     if(mImpl->mRenderer)
     {
@@ -885,7 +835,7 @@ bool Visual::Base::IsSquircleCornerRequired() const
 bool Visual::Base::IsBorderlineRequired() const
 {
   // If VisualType doesn't support borderline, always return false.
-  if(IsTypeAvailableForBorderline(mImpl->mType))
+  if(mImpl->IsBorderlineSupported())
   {
     if(mImpl->mRenderer)
     {
@@ -931,7 +881,7 @@ void Visual::Base::RegisterDecoration()
 {
   if(mImpl->mRenderer)
   {
-    if(IsTypeAvailableForCornerRadius(mImpl->mType))
+    if(mImpl->IsCornerRadiusSupported())
     {
       if(mImpl->mAlwaysUsingCornerRadius || !(mImpl->GetCornerRadius() == Vector4::ZERO))
       {
@@ -945,7 +895,7 @@ void Visual::Base::RegisterDecoration()
                                      mImpl->GetCornerSquareness());
       }
     }
-    if(IsTypeAvailableForBorderline(mImpl->mType))
+    if(mImpl->IsBorderlineSupported())
     {
       if(mImpl->mAlwaysUsingBorderline || !EqualsZero(mImpl->GetBorderlineWidth()))
       {
@@ -1020,6 +970,11 @@ bool Visual::Base::IsSynchronousLoadingRequired() const
 Ui::Integration::InternalVisualType Visual::Base::GetType() const
 {
   return mImpl->mType;
+}
+
+Visual::DecorationCapability Visual::Base::GetDecorationCapabilities() const
+{
+  return mImpl->mDecorationCapabilities;
 }
 
 Ui::Visual::ResourceStatus Visual::Base::GetResourceStatus() const
@@ -1293,7 +1248,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     }
     case Dali::Ui::Integration::Visual::Property::CORNER_RADIUS:
     {
-      if(IsTypeAvailableForCornerRadius(mImpl->mType))
+      if(mImpl->IsCornerRadiusSupported())
       {
         return DecoratedVisualRenderer::Property::CORNER_RADIUS;
       }
@@ -1301,7 +1256,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     }
     case Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS:
     {
-      if(IsTypeAvailableForCornerRadius(mImpl->mType))
+      if(mImpl->IsCornerRadiusSupported())
       {
         return DecoratedVisualRenderer::Property::CORNER_SQUARENESS;
       }
@@ -1309,7 +1264,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     }
     case Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH:
     {
-      if(IsTypeAvailableForBorderline(mImpl->mType))
+      if(mImpl->IsBorderlineSupported())
       {
         return DecoratedVisualRenderer::Property::BORDERLINE_WIDTH;
       }
@@ -1317,7 +1272,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     }
     case Dali::Ui::Integration::Visual::Property::BORDERLINE_COLOR:
     {
-      if(IsTypeAvailableForBorderline(mImpl->mType))
+      if(mImpl->IsBorderlineSupported())
       {
         return DecoratedVisualRenderer::Property::BORDERLINE_COLOR;
       }
@@ -1325,7 +1280,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     }
     case Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET:
     {
-      if(IsTypeAvailableForBorderline(mImpl->mType))
+      if(mImpl->IsBorderlineSupported())
       {
         return DecoratedVisualRenderer::Property::BORDERLINE_OFFSET;
       }
@@ -1415,7 +1370,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     // Default animatable properties from DecoratedVisualRenderer
     case Ui::Integration::Visual::Property::CORNER_RADIUS:
     {
-      if(IsTypeAvailableForCornerRadius(mImpl->mType))
+      if(mImpl->IsCornerRadiusSupported())
       {
         if(changeProperties)
         {
@@ -1456,7 +1411,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     }
     case Ui::Integration::Visual::Property::CORNER_SQUARENESS:
     {
-      if(IsTypeAvailableForCornerRadius(mImpl->mType))
+      if(mImpl->IsCornerRadiusSupported())
       {
         if(changeProperties)
         {
@@ -1492,7 +1447,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     case Ui::Integration::Visual::Property::BORDERLINE_COLOR:
     case Ui::Integration::Visual::Property::BORDERLINE_OFFSET:
     {
-      if(IsTypeAvailableForBorderline(mImpl->mType))
+      if(mImpl->IsBorderlineSupported())
       {
         if(changeProperties)
         {
@@ -1570,7 +1525,7 @@ bool Visual::Base::IsOffscreenRenderingCaptureEnabled() const
 
 bool Visual::Base::IsCornerRadiusIgnoredAtOffscreenRendering() const
 {
-  return !IsTypeAvailableForCornerRadius(mImpl->mType) ||
+  return !mImpl->IsCornerRadiusSupported() ||
          (IsOffscreenRenderingCaptureEnabled() && mImpl->mOffscreenRenderingIgnoreCornerRadius);
 }
 

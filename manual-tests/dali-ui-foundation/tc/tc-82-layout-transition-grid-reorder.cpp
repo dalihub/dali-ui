@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "layout-transition-probe.h"
 #include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -167,15 +168,19 @@ public:
     // A definite main-axis size is required for the weighted ScrollView child to
     // fill the remaining space; without it the stack wraps to its content and
     // the ScrollView grows to the grid's full (scrollable) height instead.
+    // 400x600 on a 1080p window. A shorter window (e.g. a 1024x600 panel) keeps the
+    // whole panel on screen: the height shrinks to what is left below the launcher
+    // header (60) and the panel's top offset (20), minus a 20px bottom margin.
+    const float panelHeight = std::min(600.0f, static_cast<float>(mWindow.GetPositionSize().height) - 60.0f - 20.0f - 20.0f);
     mOuterStack.SetRequestedWidth(400.0f);
-    mOuterStack.SetRequestedHeight(600.0f);
+    mOuterStack.SetRequestedHeight(panelHeight);
     mOuterStack.SetSpacing(20.0f);
     mOuterStack.SetPadding(Insets(20.0f, 20.0f, 20.0f, 20.0f));
     mOuterStack.SetBackgroundColor(Vector4(0.5f, 0.5f, 0.5f, 0.5f));
     mOuterStack.SetCornerRadius(40.0f);
     // Compensate for the launcher's 60px header so the panel keeps the
     // original sample's window-relative Y position.
-    mOuterStack.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(80.0f, 20.0f, 400.0f, 600.0f)));
+    mOuterStack.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(80.0f, 20.0f, 400.0f, panelHeight)));
     mOuterStack.Add(topRow);
     mOuterStack.Add(midRow);
     mOuterStack.Add(mScrollView);
@@ -366,6 +371,7 @@ public:
   {
     CancelLongPress();
     StopAutoScrollTimer();
+    mProbe.Stop();
     DisconnectAll();
     mLongPressTimer.Reset();
     mAutoScrollTimer.Reset();
@@ -382,6 +388,8 @@ public:
   }
 
 private:
+  LayoutTransitionProbe mProbe{"TC82"};
+
   static bool IsDownState(PointState::Type state)
   {
     return state == PointState::DOWN || state == PointState::STARTED;
@@ -425,12 +433,12 @@ private:
   // how individual hierarchy positions encode arranged bounds.
   float GetGridWorldX() const
   {
-    return mGrid.CalculateScreenExtents().x - mRoot.CalculateScreenExtents().x;
+    return mGrid.CalculateScreenBounds().x - mRoot.CalculateScreenBounds().x;
   }
 
   float GetGridWorldY() const
   {
-    return mGrid.CalculateScreenExtents().y - mRoot.CalculateScreenExtents().y;
+    return mGrid.CalculateScreenBounds().y - mRoot.CalculateScreenBounds().y;
   }
 
   // Row-major target index for the dragged cell. The preview's world
@@ -510,8 +518,8 @@ private:
 
     // Clamp the preview to the visible ScrollView viewport (Y) and to the
     // grid's column band (X) so it stays on screen.
-    const Bounds rootExtents     = mRoot.CalculateScreenExtents();
-    const Bounds viewportExtents = mScrollView.CalculateScreenExtents();
+    const Bounds rootExtents     = mRoot.CalculateScreenBounds();
+    const Bounds viewportExtents = mScrollView.CalculateScreenBounds();
     const float viewportTop      = viewportExtents.y - rootExtents.y;
     const float viewportHeight   = viewportExtents.height;
     const float minY           = viewportTop;
@@ -539,8 +547,27 @@ private:
       // layout pass right here to guarantee the cells move to their new cells;
       // the transition stays attached so the CHANGE slot animates the reflow.
       ApplyGridOrder();
+      StartLayoutProbe("REORDER");
       LayoutController::Get(mWindow).ProcessLayouts();
     }
+  }
+
+  void StartLayoutProbe(const char* phase, Actor primary = {})
+  {
+    std::vector<Actor> siblings;
+    for(View cell : mGridItems)
+    {
+      if(cell != mDraggedChild && cell != primary)
+      {
+        siblings.push_back(cell);
+      }
+    }
+    if(!primary && !siblings.empty())
+    {
+      primary = siblings.front();
+      siblings.erase(siblings.begin());
+    }
+    if(primary) mProbe.Start(primary, phase, std::move(siblings));
   }
 
   void FinishDrag()
@@ -571,6 +598,7 @@ private:
       SetCellContentOpacity(draggedChild, 1.0f);
     }
     mScrollView.SetPanScrollEnabled(true);
+    StartLayoutProbe("DROP", draggedChild);
   }
 
   void MoveDraggedItem(uint32_t from, uint32_t to)

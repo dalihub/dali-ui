@@ -2363,7 +2363,7 @@ void InputFieldImpl::TextDeleted(unsigned int position, unsigned int length, con
 // =============================================================================
 // SelectableControlInterface
 // =============================================================================
-void InputFieldImpl::SelectText(const uint32_t start, const uint32_t end)
+void InputFieldImpl::SelectText(uint32_t start, uint32_t end)
 {
   if(mController && mController->IsShowingRealText())
   {

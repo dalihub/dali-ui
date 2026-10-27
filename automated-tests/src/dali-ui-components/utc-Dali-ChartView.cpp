@@ -15,23 +15,27 @@
  *
  */
 
-#include <dali-ui-components/public-api/chart/chart-axis.h>
-#include <dali-ui-components/public-api/chart/bar-series.h>
-#include <dali-ui-components/public-api/chart/chart-section.h>
+#include <dali-ui-components/integration-api/chart/bar-series-impl.h>
 #include <dali-ui-components/integration-api/chart/chart-hit-tester.h>
+#include <dali-ui-components/public-api/chart/bar-series.h>
+#include <dali-ui-components/public-api/chart/chart-axis.h>
+#include <dali-ui-components/public-api/chart/chart-section.h>
 #include <dali-ui-components/public-api/chart/chart-view.h>
 #include <dali-ui-components/public-api/chart/line-series.h>
 #include <dali-ui-components/public-api/chart/pie-series.h>
 #include <dali-ui-components/public-api/chart/scatter-series.h>
 #include <dali-ui-components/public-api/components-ui-config.h>
-#include <dali/devel-api/events/pan-gesture-devel.h>
-#include <dali/devel-api/events/pinch-gesture-devel.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/events/pan-gesture-devel.h>
+#include <dali/devel-api/events/pinch-gesture-devel.h>
+#include <samples/chart-view/chart-case-presenter.h>
 #include <stdlib.h>
+#include <algorithm>
 #include <iostream>
 #include <limits>
+#include <locale>
 #include <utility>
 
 #define private public
@@ -57,6 +61,55 @@ namespace
 {
 static bool gSignalReceived = false;
 
+class ChartCommaPunctuation : public std::numpunct<char>
+{
+public:
+  ChartCommaPunctuation()                                        = default;
+  ~ChartCommaPunctuation() override                              = default;
+  ChartCommaPunctuation(const ChartCommaPunctuation&)            = delete;
+  ChartCommaPunctuation& operator=(const ChartCommaPunctuation&) = delete;
+  ChartCommaPunctuation(ChartCommaPunctuation&&)                 = delete;
+  ChartCommaPunctuation& operator=(ChartCommaPunctuation&&)      = delete;
+
+private:
+  char do_decimal_point() const override
+  {
+    return ',';
+  }
+
+  char do_thousands_sep() const override
+  {
+    return '.';
+  }
+
+  std::string do_grouping() const override
+  {
+    return "\3";
+  }
+};
+
+class ScopedChartCppLocale
+{
+public:
+  ScopedChartCppLocale()
+  : mPrevious(std::locale::global(std::locale(std::locale::classic(), new ChartCommaPunctuation)))
+  {
+  }
+
+  ~ScopedChartCppLocale()
+  {
+    std::locale::global(mPrevious);
+  }
+
+  ScopedChartCppLocale(const ScopedChartCppLocale&)            = delete;
+  ScopedChartCppLocale& operator=(const ScopedChartCppLocale&) = delete;
+  ScopedChartCppLocale(ScopedChartCppLocale&&)                 = delete;
+  ScopedChartCppLocale& operator=(ScopedChartCppLocale&&)      = delete;
+
+private:
+  std::locale mPrevious;
+};
+
 void OnDataPointSelected(ChartView, const ChartPointEventArgs&)
 {
   gSignalReceived = true;
@@ -67,15 +120,157 @@ void RenderChart(UiTestApplication& application, ChartView chartView)
   application.GetScene().Add(chartView);
   application.SendNotification();
   application.Render();
+  application.RunIdles();
   application.SendNotification();
   application.Render();
 }
 
-Dali::Ui::Integration::ChartViewImpl& GetChartImpl(ChartView view)
+Dali::Ui::Integration::ChartViewImpl& GetChartImpl(ChartView& view)
 {
   return static_cast<Dali::Ui::Integration::ChartViewImpl&>(view.GetImplementation());
 }
 } // namespace
+
+int UtcDaliChartPieSelectPointAndThemeLabel(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto              style = ChartViewStyle::Builder().SetBackgroundColor(Color::BLACK).SetLabelColor(Color::WHITE).Build();
+  auto              chart = ChartView::New(ChartView::Type::PIE, Vector2(320, 320), style);
+  auto              pie   = PieSeries::New();
+  pie.SetInnerRadiusRatio(.6f);
+  pie.SetCenterLabel("100");
+  pie.AddSlice("A", 60, Color::BLUE);
+  pie.AddSlice("B", 40, Color::GREEN);
+  chart.AddSeries(pie);
+  RenderChart(application, chart);
+  int               selected = -1;
+  ConnectionTracker tracker;
+  chart.DataPointSelectedSignal().Connect(&tracker, [&selected](ChartView, const ChartPointEventArgs& point)
+  {
+    selected = point.GetPointIndex();
+    DALI_TEST_EQUALS(point.GetXLabel(), Dali::String("B"), TEST_LOCATION);
+    DALI_TEST_EQUALS(point.GetDataY(), 40.0f, TEST_LOCATION);
+  });
+  DALI_TEST_CHECK(chart.SelectPoint(0u, 1u));
+  DALI_TEST_EQUALS(selected, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!chart.SelectPoint(0u, 2u));
+  DALI_TEST_EQUALS(GetChartImpl(chart).mLastHit.seriesColor, Color::GREEN, TEST_LOCATION);
+  bool centerFound = false;
+  for(uint32_t index = 0u; index < chart.GetChildCount(); ++index)
+  {
+    const auto label = Label::DownCast(chart.GetChildAt(index));
+    if(label && label.GetText() == "100")
+    {
+      centerFound = true;
+      DALI_TEST_EQUALS(label.GetProperty<Vector4>(Label::Property::TEXT_COLOR), Color::WHITE, TEST_LOCATION);
+    }
+  }
+  DALI_TEST_CHECK(centerFound);
+  pie.SetVisible(false);
+  DALI_TEST_CHECK(!chart.SelectPoint(0u, 1u));
+  END_TEST;
+}
+
+int UtcDaliChartAdditionalGalleryPresentationAndRestore(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  for(const auto& spec : ChartStandard::BuildReferenceCases())
+  {
+    if(spec.webReference)
+    {
+      continue;
+    }
+    ChartStandard::CaseState state;
+    for(bool dark : {false, true})
+    {
+      ChartStandard::CasePresenter presenter(spec, state, 448, ChartStandard::CardHeight(spec), dark, true);
+      auto                         chart = presenter.GetChart();
+      chart.SetUpdateThrottle(0);
+      RenderChart(application, chart);
+      auto& model = GetChartImpl(chart).mModel;
+      if(spec.kind == ChartStandard::ChartKind::PIE)
+      {
+        const auto pie = PieSeries::DownCast(model.mSeriesList.front());
+        DALI_TEST_EQUALS(pie.GetSliceCount(), 5, TEST_LOCATION);
+        DALI_TEST_EQUALS(pie.GetInnerRadiusRatio(), spec.innerRadius, TEST_LOCATION);
+        DALI_TEST_CHECK(chart.SelectPoint(0u, 1u));
+        DALI_TEST_CHECK(state.hasSelection);
+        DALI_TEST_EQUALS(state.selected, 1u, TEST_LOCATION);
+      }
+      else if(spec.kind == ChartStandard::ChartKind::GAUGE)
+      {
+        DALI_TEST_EQUALS(chart.GetGaugeValue(), ChartStandard::BuildValues(spec, state).front(), TEST_LOCATION);
+      }
+      else
+      {
+        DALI_TEST_EQUALS(model.mSeriesList.size(), 2u, TEST_LOCATION);
+        const auto& points = GetImplementation(model.mSeriesList.front()).GetValues();
+        DALI_TEST_EQUALS(points.front().first, 1.2f, TEST_LOCATION);
+        DALI_TEST_EQUALS(points.size(), 10u, TEST_LOCATION);
+        DALI_TEST_CHECK(chart.SelectPoint(1u, 0u));
+        DALI_TEST_EQUALS(state.series, 1u, TEST_LOCATION);
+      }
+      presenter.Update();
+      application.SendNotification();
+      application.Render();
+      application.RunIdles();
+      DALI_TEST_CHECK(presenter.IsReady());
+      DALI_TEST_CHECK(state.revision > 0);
+      chart.Unparent();
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliChartReferencePointForecastBordersSurviveUpdates(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  for(const auto& spec : ChartStandard::BuildReferenceCases())
+  {
+    if(spec.id != "vertical-bar-25" && spec.id != "vertical-bar-26" && spec.id != "vertical-bar-27")
+    {
+      continue;
+    }
+    const std::vector<uint32_t> expected = spec.id == "vertical-bar-27" ? std::vector<uint32_t>{2u, 3u, 6u, 7u} : std::vector<uint32_t>{1u, 3u};
+    DALI_TEST_EQUALS(spec.pointBorders.size(), expected.size(), TEST_LOCATION);
+    ChartStandard::CaseState state;
+    for(bool dark : {false, true})
+    {
+      ChartStandard::CasePresenter presenter(spec, state, 674.0f, ChartStandard::CardHeight(spec), dark, true);
+      auto                         chart = presenter.GetChart();
+      chart.SetUpdateThrottle(0);
+      RenderChart(application, chart);
+      const auto bar = BarSeries::DownCast(GetChartImpl(chart).mModel.mSeriesList.front());
+      DALI_TEST_CHECK(bar);
+      const auto& impl = GetImplementation(bar);
+      for(int update = 0; update < 2; ++update)
+      {
+        for(uint32_t index = 0u; index < spec.values.size(); ++index)
+        {
+          const auto border   = impl.GetPointBorder(index);
+          const bool forecast = std::find(expected.begin(), expected.end(), index) != expected.end();
+          DALI_TEST_EQUALS(border.width, forecast ? 1.0f : 0.0f, TEST_LOCATION);
+          DALI_TEST_EQUALS(border.dash, forecast ? Vector2(2.0f, 2.0f) : Vector2::ZERO, TEST_LOCATION);
+          if(forecast)
+          {
+            const bool    main  = index < spec.values.size() / 2u;
+            const Vector4 color = main ? Vector4(56.0f / 255.0f, 122.0f / 255.0f, 1.0f, 1.0f) : Vector4(183.0f / 255.0f, 183.0f / 255.0f, 187.0f / 255.0f, 1.0f);
+            DALI_TEST_EQUALS(border.color.GetRgba(), color, 0.001f, TEST_LOCATION);
+          }
+        }
+        DALI_TEST_CHECK(chart.SelectPoint(0u, expected.front()));
+        DALI_TEST_CHECK(state.hasSelection);
+        presenter.Update();
+        application.SendNotification();
+        application.Render();
+        application.RunIdles();
+      }
+      DALI_TEST_CHECK(presenter.IsReady());
+      chart.Unparent();
+    }
+  }
+  END_TEST;
+}
 
 int UtcDaliChartPointEventArgsValueSemanticsP(void)
 {
@@ -112,7 +307,7 @@ int UtcDaliChartPointEventArgsValueSemanticsP(void)
 int UtcDaliChartViewGaugeStyleAndSignalsP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
   chartView.SetGaugeStartAngle(-90.0f);
   chartView.SetGaugeArcWidth(0.25f);
   chartView.SetGaugeTrackColor(Color::BLUE);
@@ -131,15 +326,15 @@ int UtcDaliChartViewGaugeStyleAndSignalsP(void)
 int UtcDaliChartViewPublicTooltipFormatterP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
   chartView.SetTooltipFormatter([](const Dali::String& series, const Dali::String& label, float)
   {
     return series + label;
   });
   Dali::Ui::Integration::HitResult hit;
   hit.seriesName = "revenue";
-  hit.xLabel = "April";
-  hit.isValid = true;
+  hit.xLabel     = "April";
+  hit.isValid    = true;
   DALI_TEST_EQUALS(GetChartImpl(chartView).BuildMultiTooltipText({hit}), std::string("revenueApril"), TEST_LOCATION);
 
   END_TEST;
@@ -581,10 +776,79 @@ int UtcDaliChartViewRenderGaugeP(void)
   END_TEST;
 }
 
+int UtcDaliChartViewRenderGaugeDefaultCenterLabelP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView         chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
+
+  const float maxValue = std::numeric_limits<float>::max();
+  chartView.SetGaugeMaximumValue(maxValue);
+  chartView.SetGaugeValue(maxValue);
+  RenderChart(application, chartView);
+
+  auto& impl = GetChartImpl(chartView);
+  DALI_TEST_EQUALS(impl.mDataLabels.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(impl.mDataLabels[0].GetProperty<Dali::String>(Label::Property::TEXT).Size(), 31u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliChartViewLocaleIndependentLabelsAndTooltipsP(void)
+{
+  UiTestApplication    application(Components::UiConfig::New());
+  ScopedChartCppLocale locale;
+  DALI_TEST_EQUALS(std::use_facet<std::numpunct<char>>(std::locale()).decimal_point(), ',', TEST_LOCATION);
+
+  auto bars   = ChartView::New(ChartView::Type::BAR, Vector2(480.0f, 360.0f));
+  auto series = BarSeries::New();
+  series.SetValues({12.5f, -3.25f});
+  series.SetDataLabelsVisible(true);
+  series.SetDataLabelFormat("%.2f");
+  bars.AddSeries(series);
+  RenderChart(application, bars);
+  auto& barImpl = GetChartImpl(bars);
+  DALI_TEST_EQUALS(barImpl.mDataLabels.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(barImpl.mDataLabels[0].GetText(), Dali::String("12.50"), TEST_LOCATION);
+  DALI_TEST_EQUALS(barImpl.mDataLabels[1].GetText(), Dali::String("-3.25"), TEST_LOCATION);
+
+  Dali::Ui::Integration::HitResult hit;
+  hit.seriesName = "series";
+  hit.xLabel     = "value";
+  hit.dataY      = 12.5f;
+  hit.canvasPos  = Vector2(100.0f, 100.0f);
+  hit.isValid    = true;
+  barImpl.UpdateOverlay(hit);
+  DALI_TEST_EQUALS(barImpl.mTooltipLabel.GetText(), Dali::String("series\nvalue : 12.5"), TEST_LOCATION);
+  barImpl.UpdateOverlayMulti({hit});
+  DALI_TEST_EQUALS(barImpl.mTooltipLabel.GetText(), Dali::String("series: 12.5"), TEST_LOCATION);
+
+  auto              pieChart = ChartView::New(ChartView::Type::PIE, Vector2(360.0f, 360.0f));
+  auto              pie      = PieSeries::New();
+  const std::string longName(80u, 'A');
+  pie.SetInnerRadiusRatio(0.6f);
+  pie.SetDataLabelsVisible(true);
+  pie.AddSlice(Dali::String(longName.c_str()), 12.5f, Color::BLUE);
+  pie.AddSlice("B", 87.5f, Color::GREEN);
+  pieChart.AddSeries(pie);
+  RenderChart(application, pieChart);
+  auto& pieImpl = GetChartImpl(pieChart);
+  DALI_TEST_EQUALS(pieImpl.mDataLabels.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(pieImpl.mDataLabels[0].GetText(), Dali::String(std::string(63u, 'A').c_str()), TEST_LOCATION);
+  DALI_TEST_EQUALS(pieImpl.mDataLabels[1].GetText(), Dali::String("B\n88%"), TEST_LOCATION);
+
+  auto gauge = ChartView::New(ChartView::Type::GAUGE, Vector2(360.0f, 360.0f));
+  gauge.SetGaugeMaximumValue(2000.0f);
+  gauge.SetGaugeValue(1234.0f);
+  RenderChart(application, gauge);
+  const auto& gaugeImpl = GetChartImpl(gauge);
+  DALI_TEST_EQUALS(gaugeImpl.mDataLabels.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gaugeImpl.mDataLabels[0].GetText(), Dali::String("1234"), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliChartViewInternalPropertiesP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   chartView.SetProperty(ChartView::Property::SHOW_TOOLTIP, false);
   chartView.SetProperty(ChartView::Property::BACKGROUND_COLOR, Color::CYAN);
@@ -620,8 +884,8 @@ int UtcDaliChartViewInternalPropertiesP(void)
 int UtcDaliChartViewInternalViewportAndAnimationP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  LineSeries line = LineSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries        line      = LineSeries::New();
   line.SetName("line");
   line.SetValues({0.0f, 10.0f, 20.0f, 30.0f});
   chartView.AddSeries(line);
@@ -665,7 +929,7 @@ int UtcDaliChartViewInternalViewportAndAnimationP(void)
   impl.RebuildDataAnimated(canvasY, 1.0f);
   impl.mAnimOldCanvasY.clear();
   impl.mModel.mStyle.animation.duration = 1.0f;
-  impl.mAnimStartTime = std::chrono::steady_clock::now() - std::chrono::milliseconds(10);
+  impl.mAnimStartTime                   = std::chrono::steady_clock::now() - std::chrono::milliseconds(10);
   DALI_TEST_CHECK(!impl.OnAnimTimer());
   impl.mModel.mStyle.animation.duration = 0.0f;
   DALI_TEST_CHECK(!impl.OnAnimTimer());
@@ -681,9 +945,9 @@ int UtcDaliChartViewInternalViewportAndAnimationP(void)
 int UtcDaliChartViewInternalOverlayAndLegendP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  LineSeries first = LineSeries::New();
-  LineSeries second = LineSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries        first     = LineSeries::New();
+  LineSeries        second    = LineSeries::New();
   first.SetName("first");
   first.SetValues({2.0f, 4.0f, 8.0f});
   second.SetName("second");
@@ -695,22 +959,31 @@ int UtcDaliChartViewInternalOverlayAndLegendP(void)
   Dali::Ui::Integration::ChartViewImpl& impl = GetChartImpl(chartView);
 
   Dali::Ui::Integration::HitResult firstHit;
-  firstHit.seriesName = "first";
-  firstHit.xLabel = "B";
-  firstHit.seriesColor = Color::RED;
-  firstHit.canvasPos = Vector2(100.0f, 120.0f);
-  firstHit.dataX = 1.0f;
-  firstHit.dataY = 4.0f;
-  firstHit.seriesIndex = 0;
-  firstHit.pointIndex = 1;
-  firstHit.isValid = true;
+  firstHit.seriesName                        = "first";
+  firstHit.xLabel                            = "B";
+  firstHit.seriesColor                       = Color::RED;
+  firstHit.canvasPos                         = Vector2(100.0f, 120.0f);
+  firstHit.dataX                             = 1.0f;
+  firstHit.dataY                             = 4.0f;
+  firstHit.seriesIndex                       = 0;
+  firstHit.pointIndex                        = 1;
+  firstHit.isValid                           = true;
   Dali::Ui::Integration::HitResult secondHit = firstHit;
-  secondHit.seriesName = "second";
-  secondHit.dataY = 6.0f;
-  secondHit.seriesIndex = 1;
+  secondHit.seriesName                       = "second";
+  secondHit.dataY                            = 6.0f;
+  secondHit.seriesIndex                      = 1;
 
   DALI_TEST_EQUALS(impl.BuildMultiTooltipText({firstHit, secondHit}), std::string("first: 4\nsecond: 6"), TEST_LOCATION);
-  impl.SetTooltipFormatter([](const Dali::String& series, const Dali::String&, float) { return series; });
+  impl.UpdateOverlay(firstHit);
+  DALI_TEST_EQUALS(impl.mTooltipLabel.GetProperty<Dali::String>(Label::Property::TEXT),
+                   Dali::String("first\nB : 4"),
+                   TEST_LOCATION);
+  impl.UpdateOverlayMulti({firstHit});
+  DALI_TEST_EQUALS(impl.mTooltipLabel.GetText(), Dali::String("first: 4"), TEST_LOCATION);
+  impl.UpdateOverlayMulti({firstHit, secondHit});
+  DALI_TEST_EQUALS(impl.mTooltipLabel.GetText(), Dali::String("first: 4\nsecond: 6"), TEST_LOCATION);
+  impl.SetTooltipFormatter([](const Dali::String& series, const Dali::String&, float)
+  { return series; });
   DALI_TEST_EQUALS(impl.BuildMultiTooltipText({firstHit, secondHit}), std::string("first\nsecond"), TEST_LOCATION);
   impl.UpdateOverlay(firstHit);
   impl.UpdateOverlayMulti({firstHit, secondHit});
@@ -741,22 +1014,22 @@ int UtcDaliChartViewInternalOverlayAndLegendP(void)
 int UtcDaliChartViewInternalPieHitTestP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::PIE, Vector2(360.0f, 360.0f));
-  PieSeries pie = PieSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::PIE, Vector2(360.0f, 360.0f));
+  PieSeries         pie       = PieSeries::New();
   pie.AddSlice("first", 25.0f, Color::RED);
   pie.AddSlice("second", 75.0f, Color::BLUE);
   pie.SetInnerRadiusRatio(0.4f);
   chartView.AddSeries(pie);
   RenderChart(application, chartView);
   Dali::Ui::Integration::ChartViewImpl& impl = GetChartImpl(chartView);
-  impl.mLastLayout.plotArea = Rect<float>(0.0f, 0.0f, 300.0f, 300.0f);
-  const Rect<float>& plot = impl.mLastLayout.plotArea;
-  const Vector2 center(plot.x + plot.width * 0.5f, plot.y + plot.height * 0.5f);
-  int seriesIndex = -1;
+  impl.mLastLayout.plotArea                  = Rect<float>(0.0f, 0.0f, 300.0f, 300.0f);
+  const Rect<float>& plot                    = impl.mLastLayout.plotArea;
+  const Vector2      center(plot.x + plot.width * 0.5f, plot.y + plot.height * 0.5f);
+  int                seriesIndex = -1;
 
   DALI_TEST_EQUALS(impl.HitTestPie(center, seriesIndex), -1, TEST_LOCATION);
   DALI_TEST_EQUALS(seriesIndex, 0, TEST_LOCATION);
-  const float radialOffset = std::min(plot.width, plot.height) * 0.25f;
+  const float   radialOffset = std::min(plot.width, plot.height) * 0.25f;
   const Vector2 outerPoint(center.x + radialOffset, center.y + radialOffset);
   DALI_TEST_CHECK(impl.HitTestPie(outerPoint, seriesIndex) >= 0);
   DALI_TEST_EQUALS(impl.HitTestPie(Vector2(-100.0f, -100.0f), seriesIndex), -1, TEST_LOCATION);
@@ -769,8 +1042,8 @@ int UtcDaliChartViewInternalPieHitTestP(void)
 int UtcDaliChartViewWheelZoomAtPlotCenterP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  LineSeries line = LineSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries        line      = LineSeries::New();
   line.SetValues({0.0f, 10.0f, 20.0f, 30.0f});
   chartView.AddSeries(line);
   chartView.SetZoomMode(static_cast<int>(ChartView::ZoomMode::ZOOM_X) |
@@ -779,9 +1052,9 @@ int UtcDaliChartViewWheelZoomAtPlotCenterP(void)
 
   auto& impl = GetChartImpl(chartView);
   impl.InitViewportFromData();
-  const float originalXRange = impl.mViewportXMax - impl.mViewportXMin;
-  const float originalYRange = impl.mViewportYMax - impl.mViewportYMin;
-  const auto& plot = impl.mLastLayout.plotArea;
+  const float   originalXRange = impl.mViewportXMax - impl.mViewportXMin;
+  const float   originalYRange = impl.mViewportYMax - impl.mViewportYMin;
+  const auto&   plot           = impl.mLastLayout.plotArea;
   const Vector2 center(plot.x + plot.width * 0.5f, plot.y + plot.height * 0.5f);
 
   WheelEvent zoomIn = WheelEvent::New(WheelEvent::MOUSE_WHEEL, 0, 0u, center, 1, 100u);
@@ -797,11 +1070,12 @@ int UtcDaliChartViewWheelZoomAtPlotCenterP(void)
 
   END_TEST;
 }
+
 int UtcDaliChartViewPanGestureMovesViewportP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  LineSeries line = LineSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries        line      = LineSeries::New();
   line.SetValues({5.0f, 10.0f, 20.0f, 35.0f});
   chartView.AddSeries(line);
   chartView.SetZoomMode(static_cast<int>(ChartView::ZoomMode::PAN_X) |
@@ -809,7 +1083,7 @@ int UtcDaliChartViewPanGestureMovesViewportP(void)
   chartView.SetZoomClampEnabled(false);
   RenderChart(application, chartView);
 
-  auto& impl = GetChartImpl(chartView);
+  auto&      impl    = GetChartImpl(chartView);
   PanGesture started = DevelPanGesture::New(GestureState::STARTED);
   DevelPanGesture::SetPosition(started, Vector2(100.0f, 100.0f));
   impl.OnPanGesture(chartView, started);
@@ -829,17 +1103,49 @@ int UtcDaliChartViewPanGestureMovesViewportP(void)
   END_TEST;
 }
 
+int UtcDaliChartViewExplicitViewportPanPreservesRange(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  ChartView         chart = ChartView::New(ChartView::Type::BAR, Vector2(640.0f, 300.0f));
+  BarSeries         bars  = BarSeries::New();
+  Vector<float>     values;
+  for(uint32_t index = 0; index < 72u; ++index)
+  {
+    values.PushBack(30.0f);
+  }
+  bars.SetValues(values);
+  chart.AddSeries(bars);
+  chart.SetViewport(Vector4(-0.5f, 0.0f, 24.5f, 120.0f));
+  chart.SetZoomMode(static_cast<int>(ChartView::ZoomMode::PAN_X));
+  RenderChart(application, chart);
+
+  auto& impl    = GetChartImpl(chart);
+  auto  started = DevelPanGesture::New(GestureState::STARTED);
+  DevelPanGesture::SetPosition(started, Vector2(300.0f, 100.0f));
+  impl.OnPanGesture(chart, started);
+  auto continuing = DevelPanGesture::New(GestureState::CONTINUING);
+  DevelPanGesture::SetPosition(continuing, Vector2(200.0f, 100.0f));
+  impl.OnPanGesture(chart, continuing);
+  const auto viewport = chart.GetViewport();
+  DALI_TEST_CHECK(viewport.x > -0.5f);
+  DALI_TEST_EQUALS(viewport.z - viewport.x, 25.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewport.y, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewport.w, 120.0f, 0.001f, TEST_LOCATION);
+  impl.OnPanGesture(chart, DevelPanGesture::New(GestureState::FINISHED));
+  END_TEST;
+}
+
 int UtcDaliChartViewTouchHoverAndLegendInteractionP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  LineSeries series = LineSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries        series    = LineSeries::New();
   series.SetName("traffic");
   series.SetValues({2.0f, 5.0f, 9.0f, 4.0f});
   chartView.AddSeries(series);
   RenderChart(application, chartView);
 
-  auto& impl = GetChartImpl(chartView);
+  auto&      impl    = GetChartImpl(chartView);
   TouchEvent started = TouchEvent::New(1u);
   started.AddPoint(1, PointState::STARTED, Vector2(100.0f, 100.0f));
   DALI_TEST_CHECK(impl.OnTouch(chartView, started));
@@ -858,9 +1164,9 @@ int UtcDaliChartViewTouchHoverAndLegendInteractionP(void)
   exited.AddPoint(1, PointState::FINISHED, Vector2(110.0f, 100.0f));
   DALI_TEST_CHECK(impl.OnHover(chartView, exited));
 
-  impl.mLastLayout.hasLegend = true;
+  impl.mLastLayout.hasLegend               = true;
   impl.mModel.mStyle.visibility.showLegend = true;
-  impl.mLastLayout.legendItems.push_back({Vector2(100.0f, 200.0f), Vector2(120.0f, 195.0f), "traffic"});
+  impl.mLastLayout.legendItems.push_back({"traffic", Vector2(100.0f, 200.0f), Vector2(120.0f, 195.0f)});
   impl.mLegendLabels.push_back(Label::New());
   const Vector2 legendPosition(100.0f, 195.0f);
   DALI_TEST_EQUALS(impl.FindLegendItemAt(legendPosition), 0, TEST_LOCATION);
@@ -882,8 +1188,8 @@ int UtcDaliChartViewTouchHoverAndLegendInteractionP(void)
 int UtcDaliChartViewDenseLineAndNumericBarsP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView dense = ChartView::New(ChartView::Type::LINE, Vector2(280.0f, 220.0f));
-  LineSeries line = LineSeries::New();
+  ChartView         dense = ChartView::New(ChartView::Type::LINE, Vector2(280.0f, 220.0f));
+  LineSeries        line  = LineSeries::New();
   line.SetName("Dense samples");
   line.SetMarkersVisible(true);
   line.SetMarkerShape(LineSeries::MarkerShape::CIRCLE);
@@ -901,7 +1207,7 @@ int UtcDaliChartViewDenseLineAndNumericBarsP(void)
   DALI_TEST_CHECK(dense.GetChildCount() > 0u);
 
   ChartView bars = ChartView::New(ChartView::Type::BAR, Vector2(280.0f, 220.0f));
-  BarSeries bar = BarSeries::New();
+  BarSeries bar  = BarSeries::New();
   bar.SetName("Irregular intervals");
   bar.SetValues({Vector2(0.0f, -4.0f), Vector2(0.5f, 8.0f),
                  Vector2(2.5f, 3.0f), Vector2(8.0f, 12.0f)});
@@ -914,8 +1220,8 @@ int UtcDaliChartViewDenseLineAndNumericBarsP(void)
 int UtcDaliChartViewPinchZoomUpdatesBothViewportAxesP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  LineSeries line = LineSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries        line      = LineSeries::New();
   line.SetValues({0.0f, 10.0f, 20.0f, 30.0f});
   chartView.AddSeries(line);
   chartView.SetZoomMode(static_cast<int>(ChartView::ZoomMode::ZOOM_X) |
@@ -950,7 +1256,7 @@ int UtcDaliChartViewPinchZoomUpdatesBothViewportAxesP(void)
 int UtcDaliChartViewTitlePlacementAndLabelPoolLifecycleP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
   chartView.SetTitle("Revenue");
   ChartAxis xAxis = ChartAxis::New();
   ChartAxis yAxis = ChartAxis::New();
@@ -976,8 +1282,9 @@ int UtcDaliChartViewTitlePlacementAndLabelPoolLifecycleP(void)
   struct TitleCase
   {
     ChartView::TitlePosition position;
-    Vector3 pivot;
+    Vector3                  pivot;
   };
+
   const TitleCase titleCases[] = {
     {ChartView::TitlePosition::TOP_LEFT, Pivot::TOP_LEFT},
     {ChartView::TitlePosition::TOP_RIGHT, Pivot::TOP_RIGHT},
@@ -989,16 +1296,17 @@ int UtcDaliChartViewTitlePlacementAndLabelPoolLifecycleP(void)
     chartView.SetTitlePosition(titleCase.position);
     application.SendNotification();
     application.Render();
+    application.RunIdles();
     DALI_TEST_EQUALS(impl.mTitleLabel.GetProperty<Vector3>(Actor::Property::PIVOT), titleCase.pivot, TEST_LOCATION);
   }
-  auto layout = impl.mLastLayout;
+  auto layout      = impl.mLastLayout;
   layout.hasLegend = true;
-  layout.legendItems.push_back({Vector2(20.0f, 20.0f), Vector2(40.0f, 20.0f), "Revenue"});
+  layout.legendItems.push_back({"Revenue", Vector2(20.0f, 20.0f), Vector2(40.0f, 20.0f)});
   impl.PlaceTextLabels(layout);
   DALI_TEST_CHECK(!impl.mLegendLabels.empty());
 
-  layout.hasLegend = false;
-  layout.hasTitle = false;
+  layout.hasLegend     = false;
+  layout.hasTitle      = false;
   layout.hasXAxisTitle = false;
   layout.hasYAxisTitle = false;
   impl.PlaceTextLabels(layout);
@@ -1016,7 +1324,7 @@ int UtcDaliChartViewTitlePlacementAndLabelPoolLifecycleP(void)
 
 int UtcDaliChartHitTesterSameXAndNearestYP(void)
 {
-  UiTestApplication application(Components::UiConfig::New());
+  UiTestApplication                 application(Components::UiConfig::New());
   Dali::Ui::Integration::ChartModel model;
   model.mXAxis = ChartAxis::New();
   model.mYAxis = ChartAxis::New();
@@ -1057,5 +1365,145 @@ int UtcDaliChartHitTesterSameXAndNearestYP(void)
   DALI_TEST_EQUALS(nearest.size(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(nearest[0].seriesName, String("low"), TEST_LOCATION);
   DALI_TEST_CHECK(tester.FindBySameX(Vector2(90.0f, 20.0f), model, scale, 1.0f, true).empty());
+  END_TEST;
+}
+
+int UtcDaliChartViewBarValueAnimationFrames(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto              chart = ChartView::New(ChartView::Type::BAR, Vector2(480, 360));
+  auto              bar   = BarSeries::New();
+  bar.SetValues({20.0f, 80.0f});
+  chart.AddSeries(bar);
+  chart.SetViewport(Vector4(-.5f, 0, 1.5f, 100));
+  RenderChart(application, chart);
+  auto&      impl   = GetChartImpl(chart);
+  const auto before = impl.mLastRenderedBars;
+  chart.SetAnimationDuration(500);
+  chart.SetUpdateThrottle(0);
+  bar.SetValues({80.0f, 20.0f});
+  DALI_TEST_CHECK(impl.mAnimationActive);
+  DALI_TEST_EQUALS(impl.mLastRenderedBars[0].bounds.height, before[0].bounds.height, .001f, TEST_LOCATION);
+  const auto target = Dali::Ui::Integration::BuildChartBars(impl.mModel, impl.mScale);
+  impl.RebuildDataAnimated(impl.mAnimOldCanvasY, .5f);
+  DALI_TEST_EQUALS(impl.mLastRenderedBars[0].bounds.height, (before[0].bounds.height + target[0].bounds.height) * .5f, .001f, TEST_LOCATION);
+  DALI_TEST_CHECK(impl.mLastRenderedBars[1].bounds.height < before[1].bounds.height);
+  const auto displayed = impl.mLastRenderedBars;
+  bar.SetValues({40.0f, 60.0f});
+  DALI_TEST_EQUALS(impl.mAnimOldBars[0].bounds.height, displayed[0].bounds.height, .001f, TEST_LOCATION);
+  chart.SetAnimationDuration(0);
+  bar.SetValues({90.0f, 10.0f});
+  DALI_TEST_CHECK(!impl.mAnimationActive);
+  const auto immediate = Dali::Ui::Integration::BuildChartBars(impl.mModel, impl.mScale);
+  DALI_TEST_EQUALS(impl.mLastRenderedBars[0].bounds.height, immediate[0].bounds.height, .001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliChartViewBarViewportAnimationFrames(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto              chart = ChartView::New(ChartView::Type::BAR, Vector2(480, 360));
+  auto              bar   = BarSeries::New();
+  bar.SetValues({20.0f, 60.0f, 80.0f});
+  chart.AddSeries(bar);
+  chart.SetViewport(Vector4(-.5f, 0, 2.5f, 100));
+  RenderChart(application, chart);
+  auto&      impl   = GetChartImpl(chart);
+  const auto before = impl.mLastRenderedBars;
+  chart.SetAnimationDuration(500);
+  chart.SetUpdateThrottle(0);
+  chart.SetViewport(Vector4(-.5f, 0, 4.5f, 200));
+  DALI_TEST_CHECK(impl.mAnimationActive);
+  const auto target = Dali::Ui::Integration::BuildChartBars(impl.mModel, impl.mScale);
+  impl.RebuildDataAnimated(impl.mAnimOldCanvasY, .5f);
+  const auto middle = impl.mLastRenderedBars;
+  DALI_TEST_EQUALS(middle[1].bounds.x, (before[1].bounds.x + target[1].bounds.x) * .5f, .001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(middle[1].bounds.width, (before[1].bounds.width + target[1].bounds.width) * .5f, .001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(middle[1].bounds.height, (before[1].bounds.height + target[1].bounds.height) * .5f, .001f, TEST_LOCATION);
+  impl.RebuildDataAnimated(impl.mAnimOldCanvasY, 1.0f);
+  DALI_TEST_EQUALS(impl.mLastRenderedBars[1].bounds.x, target[1].bounds.x, .001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliChartViewRangeAndStackedBarAnimationFrames(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  for(bool stacked : {false, true})
+  {
+    auto chart  = ChartView::New(ChartView::Type::BAR, Vector2(480, 360));
+    auto first  = BarSeries::New();
+    auto second = BarSeries::New();
+    if(stacked)
+    {
+      first.SetStacked(true);
+      second.SetStacked(true);
+      first.SetValues({20.0f, -30.0f});
+      second.SetValues({10.0f, -15.0f});
+      chart.AddSeries(second);
+    }
+    else
+    {
+      Vector<Vector3> ranges;
+      ranges.PushBack(Vector3(0, 20, 80));
+      ranges.PushBack(Vector3(1, -60, -20));
+      first.SetRangeValues(ranges);
+    }
+    chart.AddSeries(first);
+    chart.SetViewport(Vector4(-.5f, -100, 1.5f, 100));
+    RenderChart(application, chart);
+    auto& impl = GetChartImpl(chart);
+    impl.OnUpdateThrottleTimer();
+    const auto before = impl.mLastRenderedBars;
+    chart.SetAnimationDuration(500);
+    chart.SetUpdateThrottle(100);
+    if(stacked)
+    {
+      first.SetValues({40.0f, -10.0f});
+      second.SetValues({20.0f, -25.0f});
+    }
+    else
+    {
+      Vector<Vector3> ranges;
+      ranges.PushBack(Vector3(0, 40, 90));
+      ranges.PushBack(Vector3(1, -80, -40));
+      first.SetRangeValues(ranges);
+    }
+    impl.OnUpdateThrottleTimer();
+    const auto target = Dali::Ui::Integration::BuildChartBars(impl.mModel, impl.mScale);
+    impl.RebuildDataAnimated(impl.mAnimOldCanvasY, .5f);
+    DALI_TEST_EQUALS(impl.mLastRenderedBars.size(), before.size(), TEST_LOCATION);
+    for(size_t index = 0; index < before.size(); ++index)
+    {
+      const auto& middle = impl.mLastRenderedBars[index].bounds;
+      DALI_TEST_EQUALS(middle.y, (before[index].bounds.y + target[index].bounds.y) * .5f, .001f, TEST_LOCATION);
+      DALI_TEST_EQUALS(middle.height, (before[index].bounds.height + target[index].bounds.height) * .5f, .001f, TEST_LOCATION);
+    }
+    chart.Unparent();
+  }
+  END_TEST;
+}
+
+int UtcDaliChartViewRemoveBarDuringAnimation(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  auto              chart = ChartView::New(ChartView::Type::BAR, Vector2(480, 360));
+  auto              bar   = BarSeries::New();
+  bar.SetName("bars");
+  bar.SetValues({20.0f, 80.0f});
+  auto line = LineSeries::New();
+  line.SetValues({30.0f, 60.0f});
+  chart.AddSeries(bar);
+  chart.AddSeries(line);
+  RenderChart(application, chart);
+  chart.SetUpdateThrottle(0);
+  chart.SetAnimationDuration(500);
+  bar.SetValues({80.0f, 20.0f});
+  auto& impl = GetChartImpl(chart);
+  DALI_TEST_CHECK(impl.mAnimationActive);
+  DALI_TEST_CHECK(chart.RemoveSeries("bars"));
+  application.SendNotification();
+  application.Render();
+  application.RunIdles();
+  DALI_TEST_EQUALS(impl.mModel.mSeriesList.size(), 1u, TEST_LOCATION);
   END_TEST;
 }

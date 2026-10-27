@@ -14,6 +14,7 @@
  */
 
 #include "manual-test-case.h"
+#include "layout-test-controls.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
@@ -68,7 +69,9 @@ public:
     bottomBar.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(bottomBar);
 
-    contentArea.Add(root);
+    ManualTest::MountResizableLayout(contentArea, root, this, {
+      {"Parent: Height 600", MATCH_PARENT, 600.0f},
+      {"Parent: Full", MATCH_PARENT, MATCH_PARENT}});
   }
 
   void OnExit() override

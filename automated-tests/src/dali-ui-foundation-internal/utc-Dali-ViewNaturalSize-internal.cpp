@@ -68,7 +68,7 @@ public:
 
 protected:
   NaturalSizeTestVisual(Dali::Ui::Internal::VisualFactoryCache& factoryCache)
-  : Dali::Ui::Internal::Visual::Base(factoryCache, Dali::Ui::Integration::InternalVisualType::IMAGE)
+  : Dali::Ui::Internal::Visual::Base(factoryCache, Dali::Ui::Integration::InternalVisualType::IMAGE, Dali::Ui::Internal::Visual::DecorationCapability::CORNER_RADIUS | Dali::Ui::Internal::Visual::DecorationCapability::BORDERLINE)
   {
   }
 

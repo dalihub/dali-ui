@@ -16,6 +16,8 @@ SET(TC_SOURCES
     utc-Dali-ProgressBar.cpp
     utc-Dali-Toast.cpp
     utc-Dali-ChartView.cpp
+    utc-Dali-ChartAppearance.cpp
+    utc-Dali-ChartReferenceCases.cpp
     utc-Dali-ChartSeries.cpp
     utc-Dali-PieSeries.cpp
     utc-Dali-ChartAxis.cpp
@@ -47,10 +49,16 @@ SET(TC_GENERATED_HEADER
 # Chart and WindowFrame cases exercise internal units directly, so those units
 # are compiled into the test executable. They are hidden in the shared library.
 SET(COMPONENT_INTERNAL_TEST_SOURCES
+    ../../../samples/chart-view/chart-reference-cases.cpp
+    ../../../samples/chart-view/chart-additional-cases.cpp
+    ../../../samples/chart-view/chart-number-transition.cpp
+    ../../../samples/chart-view/chart-case-presenter.cpp
+    ../../../samples/chart-view/chart-additional-presenter.cpp
     ../../../dali-ui-components/integration-api/chart/chart-axis-impl.cpp
     ../../../dali-ui-components/integration-api/chart/chart-series-impl.cpp
     ../../../dali-ui-components/integration-api/chart/chart-color-palette.cpp
     ../../../dali-ui-components/integration-api/chart/chart-hit-tester.cpp
+    ../../../dali-ui-components/integration-api/chart/chart-layout-manager.cpp
     ../../../dali-ui-components/internal/window/window-frame-layout-engine.cpp
     ../../../dali-ui-components/internal/window/window-frame-decoration-validator.cpp
     ../../../dali-ui-components/internal/window/window-frame-style-resolver.cpp
@@ -117,6 +125,9 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-vector-image-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-window.cpp
 )
+
+SET_SOURCE_FILES_PROPERTIES(../../../samples/chart-view/chart-case-presenter.cpp PROPERTIES
+  COMPILE_DEFINITIONS "RESOURCES_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/../../../samples/chart-view/res/\"")
 
 IF(DALI_TEST_SOURCE_LIST_ONLY)
     RETURN()

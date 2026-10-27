@@ -3068,10 +3068,10 @@ int UtcDaliDragAndDropDetectorExplicitSession(void)
   application.SendNotification();
   application.Render();
 
-  const Bounds  sourceBounds = source.CalculateScreenExtents();
+  const Bounds  sourceBounds = source.CalculateScreenBounds();
   const Vector2 sourceCenter(sourceBounds.x + sourceBounds.width * 0.5f,
                              sourceBounds.y + sourceBounds.height * 0.5f);
-  const Bounds  targetBounds = target.CalculateScreenExtents();
+  const Bounds  targetBounds = target.CalculateScreenBounds();
   const Vector2 targetCenter(targetBounds.x + targetBounds.width * 0.5f,
                              targetBounds.y + targetBounds.height * 0.5f);
 

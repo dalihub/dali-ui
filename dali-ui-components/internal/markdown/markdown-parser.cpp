@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <limits>
+#include <locale>
 #include <sstream>
 #include <utility>
 
@@ -691,6 +692,7 @@ private:
 
     const uint32_t     ordinal = childCounts[parentIndex]++;
     std::ostringstream stream;
+    stream.imbue(std::locale::classic());
     stream << snapshot.nodes[parentIndex].path << "/" << ordinal;
     return stream.str();
   }

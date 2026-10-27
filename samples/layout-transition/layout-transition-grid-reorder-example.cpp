@@ -406,12 +406,12 @@ private:
   // how individual hierarchy positions encode arranged bounds.
   float GetGridWorldX() const
   {
-    return mGrid.CalculateScreenExtents().x - mRoot.CalculateScreenExtents().x;
+    return mGrid.CalculateScreenBounds().x - mRoot.CalculateScreenBounds().x;
   }
 
   float GetGridWorldY() const
   {
-    return mGrid.CalculateScreenExtents().y - mRoot.CalculateScreenExtents().y;
+    return mGrid.CalculateScreenBounds().y - mRoot.CalculateScreenBounds().y;
   }
 
   // Row-major target index for the dragged cell. The preview's world
@@ -491,8 +491,8 @@ private:
 
     // Clamp the preview to the visible ScrollView viewport (Y) and to the
     // grid's column band (X) so it stays on screen.
-    const Bounds rootExtents     = mRoot.CalculateScreenExtents();
-    const Bounds viewportExtents = mScrollView.CalculateScreenExtents();
+    const Bounds rootExtents     = mRoot.CalculateScreenBounds();
+    const Bounds viewportExtents = mScrollView.CalculateScreenBounds();
     const float  viewportTop     = viewportExtents.y - rootExtents.y;
     const float  viewportHeight  = viewportExtents.height;
     const float  minY            = viewportTop;

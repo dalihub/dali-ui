@@ -25,7 +25,6 @@
 #include "focus-finder.h"
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/public-api/actors/layer.h>
 #include <algorithm>
@@ -331,7 +330,7 @@ bool IsFocusable(Actor& actor)
   return (actor.GetProperty<bool>(Actor::Property::FOCUSABLE) &&
           actor.GetProperty<bool>(Actor::Property::ENABLED) &&
           actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
-          !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED) &&
+          !actor.GetCurrentProperty<bool>(Actor::Property::WORLD_IGNORED) &&
           actor.GetProperty<Vector4>(Actor::Property::WORLD_COLOR_MULTIPLIER).a > FULLY_TRANSPARENT);
 }
 
@@ -339,7 +338,7 @@ bool CanTraverseFocus(Actor& actor)
 {
   return (actor &&
           actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
-          !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED));
+          !actor.GetCurrentProperty<bool>(Actor::Property::WORLD_IGNORED));
 }
 
 Actor FindNextFocus(Actor& actor, Actor& focusedActor, Bounds& focusedRect, Bounds& bestCandidateRect, Ui::FocusDirection direction)
@@ -355,7 +354,7 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Bounds& focusedRect, Boun
       Dali::Actor child = actor.GetChildAt(i - 1);
       if(child && child != focusedActor && IsFocusable(child))
       {
-        Bounds candidateRect = DevelActor::CalculateCurrentScreenExtents(child);
+        Bounds candidateRect = child.CalculateCurrentScreenBounds();
 
         if(IsBetterCandidate(direction, focusedRect, candidateRect, bestCandidateRect))
         {
@@ -470,7 +469,7 @@ void AddFocusables(Actor rootActor, Actor& focusedActor, FocusFinderWorkspace& w
         continue;
       }
 
-      workspace.sortedChildren.push_back({child, DevelActor::CalculateCurrentScreenExtents(child), focusable});
+      workspace.sortedChildren.push_back({child, child.CalculateCurrentScreenBounds(), focusable});
     }
 
     View       parentView = View::DownCast(actor);
@@ -556,12 +555,12 @@ View GetNearestFocusableView(Actor rootActor, View focusedView, Ui::FocusDirecti
   if(!focusedActor)
   {
     // If there is no currently focused view, it is searched based on the upper left corner of the current window.
-    Bounds rootRect = DevelActor::CalculateCurrentScreenExtents(rootActor);
+    Bounds rootRect = rootActor.CalculateCurrentScreenBounds();
     focusedRect     = Bounds(rootRect.x, rootRect.y, 0.f, 0.f);
   }
   else
   {
-    focusedRect = DevelActor::CalculateCurrentScreenExtents(focusedActor);
+    focusedRect = focusedActor.CalculateCurrentScreenBounds();
   }
 
   // initialize the best candidate to something impossible

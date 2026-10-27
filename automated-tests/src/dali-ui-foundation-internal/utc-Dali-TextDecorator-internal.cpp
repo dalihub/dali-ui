@@ -179,14 +179,14 @@ int UtcDaliTextDecoratorHandlesReceivePanWithHitTestModesP(void)
     DALI_TEST_EQUALS(handleViews.size(), handles.size(), TEST_LOCATION);
     std::sort(handleViews.begin(), handleViews.end(), [](const ImageView& lhs, const ImageView& rhs)
     {
-      return lhs.CalculateScreenExtents().x < rhs.CalculateScreenExtents().x;
+      return lhs.CalculateScreenBounds().x < rhs.CalculateScreenBounds().x;
     });
     for(size_t index = 0u; index < handles.size(); ++index)
     {
       const HandleCase& handleCase = handles[index];
       const ImageView&  handle     = handleViews[index];
 
-      const Bounds screenExtents = handle.CalculateScreenExtents();
+      const Bounds screenExtents = handle.CalculateScreenBounds();
       Vector2      panStart(screenExtents.x + 0.5f * screenExtents.width,
                             screenExtents.y + 0.5f * screenExtents.height);
       const Insets touchHitAreaMargin =
@@ -373,7 +373,7 @@ int UtcDaliTextDecoratorHandleEdgeAutoScrollP(void)
     std::vector<ImageView> views;
     CollectImageViews(root, views);
     DALI_TEST_EQUALS(views.size(), 1u, TEST_LOCATION);
-    const Bounds extents = views.front().CalculateScreenExtents();
+    const Bounds extents = views.front().CalculateScreenBounds();
     const Vector2 start(extents.x + 0.5f * extents.width, extents.y + 0.5f * extents.height);
     const Vector2 end = start + edge.delta;
     uint32_t time = 100u;

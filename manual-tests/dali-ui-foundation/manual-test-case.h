@@ -110,6 +110,20 @@ public:
   virtual void OnEnter(Dali::Ui::View contentArea) = 0;
 
   /**
+   * @brief Whether this TC's content needs the 1080p content height.
+   *
+   * Return true when the screen is laid out for a 1920x1080 window and does not
+   * fit a shorter one (rows or controls would fall below the window). On a window
+   * shorter than 1080 the launcher then keeps the 1080p content height and makes
+   * it scroll vertically; on 1080p and taller nothing changes. A TC that scrolls
+   * its own content keeps the default (nested scrolling would take its drags).
+   */
+  virtual bool ScrollsOnShortWindow() const
+  {
+    return false;
+  }
+
+  /**
    * @brief Called when the user navigates back from this TC.
    *
    * Override to release resources (timers, signal connections, etc.).

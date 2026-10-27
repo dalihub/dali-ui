@@ -359,7 +359,7 @@ void AnimatedImageVisual::CreateImageCache(TextureManager::ReloadPolicy reloadPo
 
 AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                          ImageDimensions desiredSize)
-: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::ANIMATED_IMAGE),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::ANIMATED_IMAGE, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mFrameDelayTimer(),
   mPlacementActor(),
   mImageVisualShaderFactory(shaderFactory),

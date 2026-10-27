@@ -72,6 +72,11 @@ public:
     return "33. Focus Tab Order";
   }
 
+  bool ScrollsOnShortWindow() const override
+  {
+    return true;
+  }
+
   Dali::String GetDescription() const override
   {
     return "Tab/Shift+Tab ordering with geometry corner cases";

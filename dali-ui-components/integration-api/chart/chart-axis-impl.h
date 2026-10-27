@@ -23,6 +23,7 @@
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <algorithm>
+#include <map>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -45,19 +46,22 @@ public:
   void                      SetLabels(const std::vector<Dali::String>& labels);
   std::vector<Dali::String> GetLabels() const;
 
-  void  SetMinLimit(float min);
+  void SetMinLimit(float min);
+
   float GetMinLimit() const
   {
     return mMinLimit;
   }
 
-  void  SetMaxLimit(float max);
+  void SetMaxLimit(float max);
+
   float GetMaxLimit() const
   {
     return mMaxLimit;
   }
 
   void SetAutoRange(bool autoRange);
+
   bool GetAutoRange() const
   {
     return mAutoRange;
@@ -67,10 +71,12 @@ public:
   {
     return mShowGridLines;
   }
+
   float GetLabelSize() const
   {
     return mLabelSize;
   }
+
   const Dali::String& GetTitle() const
   {
     return mTitle;
@@ -80,26 +86,30 @@ public:
   void SetLabelSize(float size);
   void SetTitle(const Dali::String& title);
 
-  void    SetAxisLineColor(const Vector4& color);
+  void SetAxisLineColor(const Vector4& color);
+
   Vector4 GetAxisLineColor() const
   {
     return mAxisLineColor;
   }
 
-  void  SetAxisLineWidth(float width);
+  void SetAxisLineWidth(float width);
+
   float GetAxisLineWidth() const
   {
     return mAxisLineWidth;
   }
 
   void SetGridDash(float dashLength, float gapLength);
+
   void GetGridDash(float& dashLength, float& gapLength) const
   {
     dashLength = mGridDashLength;
     gapLength  = mGridGapLength;
   }
 
-  void    SetGridColor(const Vector4& color);
+  void SetGridColor(const Vector4& color);
+
   Vector4 GetGridColor() const
   {
     return mGridColor;
@@ -110,6 +120,7 @@ public:
     mMinStep = std::max(0.0f, step);
     EmitConfigChangedSignal();
   }
+
   float GetMinStep() const
   {
     return mMinStep;
@@ -120,6 +131,7 @@ public:
     mDataPadding = std::max(0.0f, fraction);
     EmitConfigChangedSignal();
   }
+
   float GetDataPadding() const
   {
     return mDataPadding;
@@ -130,6 +142,7 @@ public:
     mLabelsRotation = degrees;
     EmitConfigChangedSignal();
   }
+
   float GetLabelsRotation() const
   {
     return mLabelsRotation;
@@ -137,31 +150,51 @@ public:
 
   ConfigChangedSignalType& ConfigChangedSignal();
 
+  void NotifyChanged()
+  {
+    EmitConfigChangedSignal();
+  }
+
+  // Computed limits must not emit configuration changes while handling an axis signal.
+  void SetComputedMinimum(float value)
+  {
+    mMinLimit = value;
+  }
+
+  void SetComputedMaximum(float value)
+  {
+    mMaxLimit = value;
+  }
+
+  // Ordered appearance storage
+  std::map<float, std::pair<Dali::String, UiColor>> mTickLabels;
+  UiColor                                           mLabelColor{Vector4(0.0f, 0.0f, 0.0f, 1.0f)};
+  Ui::ChartAxis::Position                           mPosition{Ui::ChartAxis::Position::NEAR};
+  Ui::ChartAxis::ScaleType                          mScaleType{Ui::ChartAxis::ScaleType::LINEAR};
+  bool                                              mLabelsVisible{true};
+  bool                                              mTickMarksVisible{true};
+
 protected:
   ~ChartAxis() override;
 
 private:
-  void EmitConfigChangedSignal();
-
-  std::vector<Dali::String> mLabels;
+  void                      EmitConfigChangedSignal();
   Dali::String              mTitle;
+  std::vector<Dali::String> mLabels;
+  Vector4                   mAxisLineColor;
+  Vector4                   mGridColor;
+  ConfigChangedSignalType   mConfigChangedSignal;
   float                     mMinLimit;
   float                     mMaxLimit;
   float                     mLabelSize;
+  float                     mAxisLineWidth;
+  float                     mGridDashLength;
+  float                     mGridGapLength;
+  float                     mMinStep{0.0f};
+  float                     mDataPadding{0.0f};
+  float                     mLabelsRotation{0.0f};
   bool                      mAutoRange;
   bool                      mShowGridLines;
-
-  Vector4 mAxisLineColor;
-  float   mAxisLineWidth;
-  float   mGridDashLength;
-  float   mGridGapLength;
-  Vector4 mGridColor;
-
-  float mMinStep{0.0f};
-  float mDataPadding{0.0f};
-  float mLabelsRotation{0.0f};
-
-  ConfigChangedSignalType mConfigChangedSignal;
 };
 
 } // namespace Integration

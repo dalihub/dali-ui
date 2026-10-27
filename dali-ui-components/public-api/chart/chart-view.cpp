@@ -152,7 +152,29 @@ ChartView::~ChartView()
 
 ChartView ChartView::New(Type type, const Vector2& size)
 {
-  return Integration::ChartViewImpl::New(type, size);
+  return New(type, size, ChartViewStyle::Default());
+}
+
+ChartView ChartView::New(Type type, const Vector2& size, const ChartViewStyle& style)
+{
+  auto chart = Integration::ChartViewImpl::New(type, size);
+  GetImpl(chart).ApplyStyle(style);
+  return chart;
+}
+
+void ChartView::SetViewport(const Vector4& range)
+{
+  GetImpl(*this).SetViewport(range);
+}
+
+Vector4 ChartView::GetViewport() const
+{
+  return GetImpl(*this).GetViewport();
+}
+
+bool ChartView::SelectPoint(uint32_t seriesIndex, uint32_t pointIndex)
+{
+  return GetImpl(*this).SelectPoint(seriesIndex, pointIndex);
 }
 
 ChartView ChartView::DownCast(BaseHandle handle)
@@ -330,6 +352,36 @@ void ChartView::ClearSections()
   GetImpl(*this).ClearSections();
 }
 
+void ChartView::AddAnnotation(ChartAnnotation annotation)
+{
+  GetImpl(*this).AddAnnotation(annotation);
+}
+
+void ChartView::RemoveAnnotation(ChartAnnotation annotation)
+{
+  GetImpl(*this).RemoveAnnotation(annotation);
+}
+
+void ChartView::ClearAnnotations()
+{
+  GetImpl(*this).ClearAnnotations();
+}
+
+void ChartView::SetTooltipContent(View content)
+{
+  GetImpl(*this).SetTooltipContent(content);
+}
+
+ChartView::TooltipUpdatedSignalType& ChartView::TooltipUpdatedSignal()
+{
+  return GetImpl(*this).TooltipUpdatedSignal();
+}
+
+ChartView::ContentUpdatedSignalType& ChartView::ContentUpdatedSignal()
+{
+  return GetImpl(*this).ContentUpdatedSignal();
+}
+
 ChartView::DataPointSelectedSignalType& ChartView::DataPointSelectedSignal()
 {
   return GetImpl(*this).DataPointSelectedSignal();
@@ -354,6 +406,7 @@ void ChartView::SetGaugeValue(float v)
 {
   GetImpl(*this).SetGaugeValue(v);
 }
+
 float ChartView::GetGaugeValue() const
 {
   return GetImpl(*this).GetGaugeValue();
@@ -363,6 +416,7 @@ void ChartView::SetGaugeMinimumValue(float v)
 {
   GetImpl(*this).SetGaugeMinValue(v);
 }
+
 float ChartView::GetGaugeMinimumValue() const
 {
   return GetImpl(*this).GetGaugeMinValue();
@@ -372,6 +426,7 @@ void ChartView::SetGaugeMaximumValue(float v)
 {
   GetImpl(*this).SetGaugeMaxValue(v);
 }
+
 float ChartView::GetGaugeMaximumValue() const
 {
   return GetImpl(*this).GetGaugeMaxValue();
@@ -381,6 +436,7 @@ void ChartView::SetGaugeArcSpan(float d)
 {
   GetImpl(*this).SetGaugeArcSpan(d);
 }
+
 float ChartView::GetGaugeArcSpan() const
 {
   return GetImpl(*this).GetGaugeArcSpan();
@@ -390,6 +446,7 @@ void ChartView::SetGaugeStartAngle(float d)
 {
   GetImpl(*this).SetGaugeStartAngle(d);
 }
+
 float ChartView::GetGaugeStartAngle() const
 {
   return GetImpl(*this).GetGaugeStartAngle();
@@ -399,6 +456,7 @@ void ChartView::SetGaugeArcWidth(float r)
 {
   GetImpl(*this).SetGaugeArcWidth(r);
 }
+
 float ChartView::GetGaugeArcWidth() const
 {
   return GetImpl(*this).GetGaugeArcWidth();
@@ -408,6 +466,7 @@ void ChartView::SetGaugeTrackColor(const Vector4& c)
 {
   GetImpl(*this).SetGaugeTrackColor(c);
 }
+
 Vector4 ChartView::GetGaugeTrackColor() const
 {
   return GetImpl(*this).GetGaugeTrackColor();
@@ -417,6 +476,7 @@ void ChartView::SetGaugeProgressColor(const Vector4& c)
 {
   GetImpl(*this).SetGaugeProgressColor(c);
 }
+
 Vector4 ChartView::GetGaugeProgressColor() const
 {
   return GetImpl(*this).GetGaugeProgressColor();
@@ -426,6 +486,7 @@ void ChartView::SetGaugeCenterLabel(const Dali::String& t)
 {
   GetImpl(*this).SetGaugeCenterLabel(t);
 }
+
 Dali::String ChartView::GetGaugeCenterLabel() const
 {
   return GetImpl(*this).GetGaugeCenterLabel();

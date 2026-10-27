@@ -16,16 +16,19 @@
  * limitations under the License.
  *
  */
+#include <dali-ui-components/public-api/chart/chart-annotation.h>
 #include <dali-ui-components/public-api/chart/chart-axis.h>
 #include <dali-ui-components/public-api/chart/chart-section.h>
 #include <dali-ui-components/public-api/chart/chart-series.h>
 #include <dali-ui-components/public-api/chart/chart-view-properties.h>
+#include <dali-ui-components/public-api/styles/chart-view-style.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/signals/dali-signal.h>
+#include <cstdint>
 
 namespace DALI_NAMESPACE
 {
@@ -284,6 +287,35 @@ public:
    * @return A handle to the new ChartView
    */
   static ChartView New(Type type, const Vector2& size);
+
+  /**
+   * @brief Creates a chart with immutable construction defaults.
+   * @param[in] type The chart type
+   * @param[in] size The initial pixel size
+   * @param[in] style The initialized style
+   * @return The chart
+   */
+  static ChartView New(Type type, const Vector2& size, const ChartViewStyle& style);
+
+  /**
+   * @brief Sets the viewport as (xMinimum, yMinimum, xMaximum, yMaximum).
+   * @param[in] range Finite increasing ranges, positive on logarithmic axes
+   */
+  void SetViewport(const Vector4& range);
+
+  /**
+   * @brief Returns the current viewport as (xMinimum, yMinimum, xMaximum, yMaximum).
+   * @return The current data-space viewport
+   */
+  Vector4 GetViewport() const;
+
+  /**
+   * @brief Selects an existing visible data point, emitting the selection signal.
+   * @param[in] seriesIndex The series index
+   * @param[in] pointIndex The point index
+   * @return True if the point is visible and can be selected
+   */
+  bool SelectPoint(uint32_t seriesIndex, uint32_t pointIndex);
 
   /**
    * @brief Downcasts a handle to a ChartView handle.
@@ -615,6 +647,58 @@ public:
    * @brief Removes all sections from the chart.
    */
   void ClearSections();
+
+  /**
+   * @brief Attaches an annotation and observes its changes. Duplicate attachments are ignored.
+   * @param[in] annotation The initialized annotation
+   */
+  void AddAnnotation(ChartAnnotation annotation);
+
+  /**
+   * @brief Detaches an annotation.
+   * @param[in] annotation The annotation
+   */
+  void RemoveAnnotation(ChartAnnotation annotation);
+
+  /**
+   * @brief Detaches all annotations.
+   */
+  void ClearAnnotations();
+
+  /**
+   * @brief Sets custom tooltip content, reparenting it into this chart.
+   *
+   * Pass an uninitialized View to restore the built-in tooltip. The content is
+   * measured after TooltipUpdatedSignal so handlers can update its labels.
+   * @param[in] content The tooltip view
+   */
+  void SetTooltipContent(View content);
+
+  /**
+   * @brief Emitted before measuring tooltip content for the currently selected points.
+   */
+  using TooltipUpdatedSignalType = Signal<void(ChartView, const Dali::Vector<ChartPointEventArgs>&)>;
+
+  /**
+   * @brief Returns the tooltip update signal.
+   * @return The signal
+   */
+  TooltipUpdatedSignalType& TooltipUpdatedSignal();
+
+  /**
+   * @brief Emitted after a completed batch updates chart coordinates and labels.
+   *
+   * This event is delivered outside layout traversal, after the final animated
+   * update when applicable. It does not indicate GPU presentation completion.
+   * Changes made by a handler schedule a subsequent update.
+   */
+  using ContentUpdatedSignalType = Signal<void(ChartView)>;
+
+  /**
+   * @brief Returns the content update signal.
+   * @return The signal
+   */
+  ContentUpdatedSignalType& ContentUpdatedSignal();
 
   using DataPointSelectedSignalType  = Signal<void(ChartView, const ChartPointEventArgs&)>;
   using LegendItemTappedSignalType   = Signal<void(ChartView, int, bool)>;

@@ -28,6 +28,7 @@
 16. [CMake Integration](#16-cmake-integration)
 17. [Default Values](#17-default-values)
 18. [Important Notes](#18-important-notes)
+19. [Standard design gallery](#19-standard-design-gallery)
 
 ---
 
@@ -39,6 +40,7 @@
 
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -56,6 +58,7 @@ int main(int argc, char** argv)
 
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -492,6 +495,15 @@ Rotate axis labels to prevent overlap with dense data:
 
 ```cpp
 xAxis.SetLabelsRotation(45.0f);   // 45-degree rotation
+```
+
+### Label and Tick Visibility
+
+Axis labels and tick marks are controlled independently. Hiding labels or skipping overlapping X-axis labels keeps tick marks enabled when `SetTickMarksVisible(true)` is set. This applies to both near and far axis positions; marks outside the viewport are not drawn.
+
+```cpp
+xAxis.SetLabelsVisible(false);
+xAxis.SetTickMarksVisible(true); // Keep ticks while hiding their text.
 ```
 
 ### Grid and Axis Line Style
@@ -1206,4 +1218,342 @@ target_compile_options(my-chart-app PRIVATE
 
 ---
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#development-guides)
+## 19. Standard design gallery
+
+The standard gallery contains 141 cards in 20 categories: 137 web reference cards plus native donut, pie, gauge and scatter examples.
+
+These PNGs were captured from the running gallery on Ubuntu on 2026-10-22. The recipes show core chart configuration; use each run command for the complete card, controls and datasets. They distinguish existing Vector4 APIs from new UiColor APIs. Apply Components::UiConfig first as described in Basic Setup.
+
+### Shared colors and style
+
+UiColor supports fixed RGBA values and theme color IDs. New chart APIs retain tokens and redraw after color-table changes. For example, pass `UiColor::ON_SURFACE` to SetLabelColor. Runtime properties take precedence over construction defaults.
+
+```cpp
+#include <dali-ui-components/dali-ui-components.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+using namespace Dali;
+using namespace Dali::Ui;
+
+ChartView MakeGalleryChart(ChartView::Type type)
+{
+  auto style = ChartViewStyle::Builder()
+    .SetBackgroundColor(UiColor(0xFFFFFFu))
+    .SetLabelColor(UiColor(0x777777u))
+    .SetLegendTextColor(UiColor(0x777777u))
+    .SetTooltipBackgroundColor(UiColor(0xE8F2FFu))
+    .SetTooltipTextColor(UiColor(0x222222u))
+    .SetPadding(8.0f).Build();
+  auto chart = ChartView::New(type, Vector2(618.0f, 300.0f), style);
+  chart.SetAnimationDuration(500.0f);
+  chart.SetProperty(ChartView::Property::SHOW_LEGEND, false);
+  return chart;
+}
+```
+
+### Per-point Forecast bars
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::BAR);
+auto bars = BarSeries::New();
+bars.SetValues({50.0f, 50.0f, 70.0f, 70.0f, 40.0f, 40.0f, 30.0f, 30.0f});
+bars.SetCornerRadius(100.0f);
+bars.SetBarGroupWidth(0.5f);
+for(uint32_t index = 0u; index < 8u; ++index)
+{
+  const bool main = index < 4u;
+  const bool forecast = index == 2u || index == 3u || index >= 6u;
+  const UiColor color(main ? 0x387AFFu : 0xB7B7BBu);
+  bars.SetPointColor(index, forecast ? color.WithAlpha(0.3f) : color);
+  if(forecast)
+  {
+    bars.SetPointBorder(index, 1.0f, color, 2.0f, 2.0f);
+  }
+}
+chart.AddSeries(bars);
+```
+
+![Per-point Forecast bars](assets/chartview/standard/vertical-bar-27-light.png)
+
+Point fills and borders are independent. Update changes status colors and bar heights while retaining Forecast outlines.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=vertical-bar-27
+```
+
+![Per-point Forecast bars — After Update](assets/chartview/standard/vertical-bar-27-updated.png)
+
+Press Update to transition to new values over the configured 500ms.
+
+### Aligned Highlight threshold
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::BAR);
+auto bars = BarSeries::New();
+bars.SetValues({80.0f, 100.0f});
+bars.SetCornerRadius(8.0f);
+bars.SetFillThreshold(50.0f, UiColor(0xC5D8FFu), UiColor(0x387AFFu));
+chart.AddSeries(bars);
+auto guide = ChartSection::New();
+guide.SetMinimumY(50.0f);
+guide.SetMaximumY(50.0f);
+guide.SetStrokeColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+guide.SetStrokeWidth(2.0f);
+chart.AddSection(guide);
+```
+
+![Aligned Highlight threshold](assets/chartview/standard/vertical-bar-15-light.png)
+
+Use the same Y data value for the fill threshold and guide. Both follow the same scale when the size or values change.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=vertical-bar-15
+```
+
+### Gradient line and area
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::LINE);
+auto line = LineSeries::New();
+line.SetValues({5.0f, 6.0f, 7.0f, 4.0f, 2.0f, 3.0f, 6.0f, 5.0f, 7.0f});
+line.SetColor(Vector4(0.22f, 0.48f, 1.0f, 1.0f));
+line.SetMarkersVisible(true);
+line.SetFillEnabled(true);
+Dali::Ui::Gradient::Linear fill(Vector2(0.0f, -0.5f), Vector2(0.0f, 0.5f));
+fill.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, UiColor(0x0000FFu)),
+                   Dali::Ui::Gradient::StopNode(1.0f, UiColor(0xFFFFFFu))});
+line.SetFillGradient(fill);
+chart.AddSeries(line);
+```
+
+![Gradient line and area](assets/chartview/standard/line-12-light.png)
+
+A gradient fills the area below the line. Update moves the line and markers; selecting a point displays a tooltip.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=line-12
+```
+
+### Colored bars and line
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::BAR);
+auto bars = BarSeries::New();
+bars.SetValues({30.0f, 60.0f, 90.0f, 120.0f, 150.0f});
+bars.SetCornerRadius(8.0f);
+bars.SetPointColor(0u, UiColor(0x0000FFu));
+bars.SetPointColor(1u, UiColor(0x00AA00u));
+bars.SetPointColor(2u, UiColor(0xFFAA00u));
+auto line = LineSeries::New();
+line.SetValues({20.0f, 80.0f, 50.0f, 130.0f, 100.0f});
+line.SetColor(Vector4(0.65f, 0.8f, 0.9f, 1.0f));
+chart.AddSeries(bars);
+chart.AddSeries(line);
+chart.SetFindingStrategy(ChartView::FindingStrategy::SAME_X);
+```
+
+![Colored bars and line](assets/chartview/standard/combo-01-light.png)
+
+Add bars and a line to the same ChartView. This recipe uses short data; the captured full sample contains 20 bars and 25 line points.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=combo-01
+```
+
+![Colored bars and line — After Update](assets/chartview/standard/combo-01-updated.png)
+
+Press Update to transition to new values over the configured 500ms.
+
+### Three-panel energy report
+
+```cpp
+auto report = AbsoluteLayout::New();
+for(uint32_t row = 0u; row < 3u; ++row)
+{
+  auto chart = MakeGalleryChart(ChartView::Type::BAR);
+  chart.SetLayoutParams(AbsoluteLayoutParams::New()
+    .SetX(190.5f).SetY(134.0f + static_cast<float>(row) * 160.0f)
+    .SetWidth(304.0f).SetHeight(row == 2u ? 108.0f : 73.0f));
+  auto bars = BarSeries::New();
+  bars.SetValues({10.0f, 20.0f, 15.0f, 30.0f, 12.0f, 24.0f});
+  bars.SetCornerRadius(4.0f);
+  chart.AddSeries(bars);
+  report.Add(chart);
+}
+```
+
+![Three-panel energy report](assets/chartview/standard/pattern-14-light.png)
+
+Place three independent ChartViews in one card. This recipe shows chart placement; the full sample supplies 24 values per plot and separate labels for metrics, dates and hints.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=pattern-14
+```
+
+### Donut distribution
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::PIE);
+auto pie = PieSeries::New();
+pie.SetInnerRadiusRatio(0.62f);
+pie.SetSliceGap(2.0f);
+pie.AddSlice("Apple", 248.0f, Vector4(UiColor(0x387AFFu)));
+pie.AddSlice("Samsung", 220.0f, Vector4(UiColor(0x12AB88u)));
+pie.AddSlice("Huawei", 95.0f, Vector4(UiColor(0xFF9A3Du)));
+pie.AddSlice("Xiaomi", 90.0f, Vector4(UiColor(0x9B81F6u)));
+pie.AddSlice("Others", 190.0f, Vector4(UiColor(0xA3A9B6u)));
+chart.AddSeries(pie);
+```
+
+![Donut distribution](assets/chartview/standard/donut-01-light.png)
+
+The sample places the 843M total in a separate center label. Slices and legends select segments; Update changes shares and total, and Reset restores the example data.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=donut-01
+```
+
+Dark theme:
+
+![Donut dark theme](assets/chartview/standard/donut-01-dark.png)
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=donut-01 --theme=dark
+```
+
+### Pie distribution
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::PIE);
+auto pie = PieSeries::New();
+pie.SetInnerRadiusRatio(0.0f);
+pie.SetSliceGap(2.0f);
+pie.AddSlice("Chrome", 63.0f, Vector4(UiColor(0x387AFFu)));
+pie.AddSlice("Safari", 19.0f, Vector4(UiColor(0x12AB88u)));
+pie.AddSlice("Edge", 11.0f, Vector4(UiColor(0xFF9A3Du)));
+pie.AddSlice("Firefox", 4.0f, Vector4(UiColor(0x9B81F6u)));
+pie.AddSlice("Other", 3.0f, Vector4(UiColor(0xA3A9B6u)));
+chart.AddSeries(pie);
+```
+
+![Pie distribution](assets/chartview/standard/pie-01-light.png)
+
+An inner-radius ratio of zero produces a filled pie. Legends show values and shares; gaps between slices are excluded from selection.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=pie-01
+```
+
+### Activity-goal gauge
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::GAUGE);
+chart.SetGaugeMinimumValue(0.0f);
+chart.SetGaugeMaximumValue(100.0f);
+chart.SetGaugeArcSpan(270.0f);
+chart.SetGaugeStartAngle(135.0f);
+chart.SetGaugeArcWidth(0.18f);
+chart.AddGaugeRange(0.0f, 60.0f, Vector4(UiColor(0x78ACFFu)));
+chart.AddGaugeRange(60.0f, 80.0f, Vector4(UiColor(0x70CDB5u)));
+chart.AddGaugeRange(80.0f, 100.0f, Vector4(UiColor(0xFFB877u)));
+chart.SetGaugeValue(72.0f);
+chart.SetGaugeCenterLabel("72%");
+```
+
+![Activity-goal gauge](assets/chartview/standard/gauge-01-light.png)
+
+Configure a gauge through ChartView's gauge APIs without adding a series. Update changes progress and Reset restores 72%.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=gauge-01
+```
+
+### Two-group scatter
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::SCATTER);
+chart.SetViewport(Vector4(0.0f, 0.0f, 10.0f, 10.0f));
+auto first = ScatterSeries::New();
+first.SetValues({Vector2(1.2f, 5.3f), Vector2(2.5f, 2.8f), Vector2(3.1f, 7.1f)});
+first.SetMarkerShape(ScatterSeries::MarkerShape::CIRCLE);
+first.SetColor(Vector4(UiColor(0x387AFFu)));
+auto second = ScatterSeries::New();
+second.SetValues({Vector2(7.1f, 1.4f), Vector2(8.4f, 3.7f), Vector2(6.3f, 2.1f)});
+second.SetMarkerShape(ScatterSeries::MarkerShape::DIAMOND);
+second.SetColor(Vector4(UiColor(0xFF7F20u)));
+chart.AddSeries(first);
+chart.AddSeries(second);
+```
+
+![Two-group scatter](assets/chartview/standard/scatter-01-light.png)
+
+Use independent XY values with circle and diamond markers. This recipe uses three points per group; the full sample uses ten. Legend buttons toggle each group independently.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=scatter-01
+```
+
+### Complete source and interaction
+
+See [CasePresenter](../samples/chart-view/chart-case-presenter.cpp) for Cartesian charts, annotations and paging; [additional presenters](../samples/chart-view/chart-additional-presenter.cpp) for circular charts and scatter; and the [reference](../samples/chart-view/chart-reference-cases.cpp) and [additional fixtures](../samples/chart-view/chart-additional-cases.cpp) for complete datasets and placement.
+
+Update changes data and Select moves selection. Use Dark/Light to switch themes. Select pie or donut slices through the plot or legend; scatter legends toggle groups. Pie, donut and scatter data updates are immediate; bar and line transitions are animated.
+
+### Content readiness and annotation text
+
+`ContentUpdatedSignal()` is emitted outside layout traversal after a batch has updated
+coordinates and labels. Animated changes emit it after their final update. A handler
+may restore a visible data-point selection; mutations in the handler schedule another
+update. This signal does not guarantee GPU presentation completion.
+
+```cpp
+ConnectionTracker tracker; // Keep this alive while receiving callbacks.
+chart.ContentUpdatedSignal().Connect(&tracker, [](ChartView ready)
+{
+  ready.SelectPoint(0u, 1u);
+});
+
+auto note = ChartAnnotation::New(ChartAnnotation::Type::TEXT);
+note.SetText("A label that can exceed the available width");
+note.SetPosition(Vector2(1.0f, 20.0f));
+note.SetTextMaximumWidth(90.0f);
+note.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+chart.AddAnnotation(note);
+```
+
+Text width must be finite and non-negative; zero keeps automatic chart-relative
+sizing. Overflow supports `CLIP` (default) and `ELLIPSIS`. Chart-relative bounds
+still apply when an authored limit is larger than the available chart width.
+
+The gallery stores state separately from card views, restores selection after content
+updates, and implements revolving, counting and cross-fading numbers in the sample.
+`--list-cases`, `--case=<id>`, `--theme=dark`, `--freeze-animations`, and
+`--dump-state=<path>` support inspection. `samples/chart-view/verify-gallery.py`
+captures both themes on X11; a capture is evidence for review, not a visual PASS.
+
+
+### Bar transitions and value-based fills
+
+Bar values and explicit X/Y viewport updates use the configured animation duration.
+Each frame interpolates the last displayed bar bounds, including range and stacked
+bars. An update during a transition starts from the displayed frame; duration zero
+keeps immediate updates. Initial display remains immediate.
+
+`BarSeries::SetBorderDash(dash, gap)` sets a dashed outline when both finite lengths
+are positive; `GetBorderDash()` returns the pair. `SetFillThreshold(value, lower,
+upper)` places a hard color boundary at a Y data value. Use the same value for a
+ChartSection guide to keep them aligned through updates and resizing. Threshold
+and gradient fills replace each other; `ClearFillThreshold()` restores solid fill.
+
+`SetPointBorder(index, width, color, dash, gap)` overrides a single bar's complete
+border while leaving its fill unchanged. For example, use
+`series.SetPointBorder(1u, 1.0f, Color::BLUE, 2.0f, 2.0f)` for a forecast among solid
+bars. Width zero hides that border; a zero dash or gap makes it solid. Finite,
+non-negative lengths are required. Overrides remain at their data indices through
+replacement; future indices can be configured. `ClearPointBorder(index)` and
+`ClearPointBorders()` restore the current series border for one or all points.
+Point fill colors and point borders are cleared independently. The Per-Point
+Themes gallery cases 25–27 use explicit point borders for their Forecast bars.
+
+---
+
+[← Back to Components](Components.md)

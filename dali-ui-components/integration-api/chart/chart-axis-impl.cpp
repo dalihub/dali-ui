@@ -27,16 +27,16 @@ namespace Integration
 
 ChartAxis::ChartAxis()
 : mTitle(),
+  mAxisLineColor(0.2f, 0.2f, 0.2f, 1.0f),
+  mGridColor(0.8f, 0.8f, 0.8f, 1.0f),
   mMinLimit(0.0f),
   mMaxLimit(1.0f),
   mLabelSize(11.0f),
-  mAutoRange(true),
-  mShowGridLines(true),
-  mAxisLineColor(0.2f, 0.2f, 0.2f, 1.0f),
   mAxisLineWidth(2.0f),
   mGridDashLength(5.0f),
   mGridGapLength(4.0f),
-  mGridColor(0.8f, 0.8f, 0.8f, 1.0f)
+  mAutoRange(true),
+  mShowGridLines(true)
 {
 }
 

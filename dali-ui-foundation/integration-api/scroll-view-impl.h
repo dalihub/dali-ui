@@ -609,18 +609,18 @@ private:
    * four cases apply:
    *
    *  !next AND at scroll boundary:
-   *    Return View() so FocusFinder can exit to a neighboring view (e.g. Ext Bottom).
+   *    Leave result unhandled so FocusFinder can exit to a neighboring view (e.g. Ext Bottom).
    *  Case 3 — no next focusable AND not at scroll boundary:
    *    Transfer focus to Self() (if FOCUSABLE) so OnKeyEvent drives
    *    further step-scrolling. Sets mKeyScrollLastChild/Dir to suppress re-selection
    *    of content items while in this blind-scroll mode.
    *  Case 4 — next focusable beyond mKeyScrollStep:
-   *    Scroll one step, return currentFocusedView to keep focus in place and
+   *    Scroll one step, record Stay() to keep focus in place and
    *    block FocusFinder from jumping further.
    *  Case 5 — next focusable within mKeyScrollStep (or at scroll boundary):
-   *    Return next directly; ScrollOnFocus animates it into full view.
+   *    Record MoveTo(next); ScrollOnFocus animates it into full view.
    */
-  FocusNavigationResult OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context) override;
+  void OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result) override;
 
   /**
    * @brief Returns true if `child` (a content descendant) overlaps the current viewport.

@@ -94,7 +94,7 @@ Dali::Vector2 PointToVector2(Ui::VisualPivot point)
 
 } // unnamed namespace
 
-Internal::Visual::Base::Impl::Impl(Ui::Integration::InternalVisualType type)
+Internal::Visual::Base::Impl::Impl(Ui::Integration::InternalVisualType type, DecorationCapability decorationCapabilities)
 : mEventObserver(nullptr),
   mConstraintFeatureList{},
   mTransform(nullptr),
@@ -106,6 +106,7 @@ Internal::Visual::Base::Impl::Impl(Ui::Integration::InternalVisualType type)
   mViewEffectiveScale(1.0f),
   mResourceStatus(Ui::Visual::ResourceStatus::PREPARING),
   mType(type),
+  mDecorationCapabilities(decorationCapabilities),
   mAlwaysUsingBorderline(false),
   mAlwaysUsingCornerRadius(false),
   mAlwaysUsingCornerSquareness(false),

@@ -810,7 +810,7 @@ bool DragAndDropDetector::IsTargetEligible(const Dali::Ui::View& target) const
 
 Vector2 DragAndDropDetector::GetViewScreenCenter(const Dali::Ui::View& view) const
 {
-  const Bounds screenExtents = view.CalculateScreenExtents();
+  const Bounds screenExtents = view.CalculateScreenBounds();
   return Vector2(screenExtents.x + screenExtents.width * 0.5f,
                  screenExtents.y + screenExtents.height * 0.5f);
 }

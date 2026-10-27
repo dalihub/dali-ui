@@ -28,7 +28,7 @@
 16. [CMake 통합](#16-cmake-통합)
 17. [기본값](#17-기본값)
 18. [주요 참고사항](#18-주요-참고사항)
-19. [주요 참고사항](#19-주요-참고사항)
+19. [표준 디자인 갤러리](#19-표준-디자인-갤러리)
 
 ---
 
@@ -40,6 +40,7 @@
 
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -57,6 +58,7 @@ int main(int argc, char** argv)
 
 ```cpp
 #include <dali-ui-components/dali-ui-components.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -493,6 +495,15 @@ yAxis.SetMinimumStep(50.0f);   // Y 틱: 0, 50, 100, 150, ...
 
 ```cpp
 xAxis.SetLabelsRotation(45.0f);   // 45도 회전
+```
+
+### 라벨과 눈금 표시
+
+축 라벨과 눈금은 독립적으로 제어합니다. `SetTickMarksVisible(true)`이면 라벨을 숨기거나 겹치는 X축 라벨이 생략되어도 눈금은 유지됩니다. NEAR와 FAR 위치에 모두 적용되며 뷰포트 밖의 눈금은 그리지 않습니다.
+
+```cpp
+xAxis.SetLabelsVisible(false);
+xAxis.SetTickMarksVisible(true); // 글자를 숨기면서 눈금은 유지합니다.
 ```
 
 ### 그리드 및 축 라인 스타일
@@ -1204,6 +1215,344 @@ target_compile_options(my-chart-app PRIVATE
 - **`SetLegendToggleEnabled(false)`는 시그널 전용 모드입니다.** `false`일 때도 `LegendItemTappedSignal`은 발생하지만, `ChartView`는 해당 시리즈를 자동으로 숨기거나 표시하지 않습니다. 이를 통해 콜백에서 커스텀 토글 로직을 구현할 수 있습니다.
 
 <br/>
+
+---
+
+## 19. 표준 디자인 갤러리
+
+표준 갤러리는 20개 분류의 141개 카드로 구성됩니다. 웹 참조 137개와 도넛·파이·게이지·산점도 네 개를 포함합니다.
+
+아래 PNG는 2026-10-22 Ubuntu에서 새 갤러리를 실제 실행해 촬영한 화면입니다. 코드는 차트 구성의 핵심이며 카드·버튼·전체 데이터까지 포함한 재현은 각 실행 명령을 사용합니다. 기존 API가 받는 Vector4와 신규 API의 UiColor를 구분합니다. 애플리케이션은 앞의 기본 설정처럼 Components::UiConfig를 먼저 적용해야 합니다.
+
+### 공통 색상·스타일
+
+UiColor는 고정 RGBA와 테마 색상 ID를 지원합니다. 신규 차트 API는 토큰을 보관하고 색상표 변경 시 다시 그립니다. 예를 들어 `UiColor::ON_SURFACE`를 SetLabelColor에 전달할 수 있습니다. 생성 스타일 이후에 런타임 프로퍼티로 지정한 값은 우선합니다.
+
+```cpp
+#include <dali-ui-components/dali-ui-components.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+using namespace Dali;
+using namespace Dali::Ui;
+
+ChartView MakeGalleryChart(ChartView::Type type)
+{
+  auto style = ChartViewStyle::Builder()
+    .SetBackgroundColor(UiColor(0xFFFFFFu))
+    .SetLabelColor(UiColor(0x777777u))
+    .SetLegendTextColor(UiColor(0x777777u))
+    .SetTooltipBackgroundColor(UiColor(0xE8F2FFu))
+    .SetTooltipTextColor(UiColor(0x222222u))
+    .SetPadding(8.0f).Build();
+  auto chart = ChartView::New(type, Vector2(618.0f, 300.0f), style);
+  chart.SetAnimationDuration(500.0f);
+  chart.SetProperty(ChartView::Property::SHOW_LEGEND, false);
+  return chart;
+}
+```
+
+### 점별 Forecast 막대
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::BAR);
+auto bars = BarSeries::New();
+bars.SetValues({50.0f, 50.0f, 70.0f, 70.0f, 40.0f, 40.0f, 30.0f, 30.0f});
+bars.SetCornerRadius(100.0f);
+bars.SetBarGroupWidth(0.5f);
+for(uint32_t index = 0u; index < 8u; ++index)
+{
+  const bool main = index < 4u;
+  const bool forecast = index == 2u || index == 3u || index >= 6u;
+  const UiColor color(main ? 0x387AFFu : 0xB7B7BBu);
+  bars.SetPointColor(index, forecast ? color.WithAlpha(0.3f) : color);
+  if(forecast)
+  {
+    bars.SetPointBorder(index, 1.0f, color, 2.0f, 2.0f);
+  }
+}
+chart.AddSeries(bars);
+```
+
+![점별 Forecast 막대](assets/chartview/standard/vertical-bar-27-light.png)
+
+점별 채움과 테두리는 독립적입니다. Update 시 상태색과 막대 높이가 바뀌며 점선 Forecast를 함께 표현합니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=vertical-bar-27
+```
+
+![점별 Forecast 막대 — Update 후](assets/chartview/standard/vertical-bar-27-updated.png)
+
+실행 중 Update를 누르면 설정된 500ms 동안 값이 전환됩니다.
+
+### Highlight 경계
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::BAR);
+auto bars = BarSeries::New();
+bars.SetValues({80.0f, 100.0f});
+bars.SetCornerRadius(8.0f);
+bars.SetFillThreshold(50.0f, UiColor(0xC5D8FFu), UiColor(0x387AFFu));
+chart.AddSeries(bars);
+auto guide = ChartSection::New();
+guide.SetMinimumY(50.0f);
+guide.SetMaximumY(50.0f);
+guide.SetStrokeColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+guide.SetStrokeWidth(2.0f);
+chart.AddSection(guide);
+```
+
+![Highlight 경계](assets/chartview/standard/vertical-bar-15-light.png)
+
+채움 경계와 기준선에 같은 Y 데이터 값을 사용합니다. 화면 크기나 값이 바뀌어도 두 경계가 같은 좌표계를 사용합니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=vertical-bar-15
+```
+
+### 그라데이션 선·영역
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::LINE);
+auto line = LineSeries::New();
+line.SetValues({5.0f, 6.0f, 7.0f, 4.0f, 2.0f, 3.0f, 6.0f, 5.0f, 7.0f});
+line.SetColor(Vector4(0.22f, 0.48f, 1.0f, 1.0f));
+line.SetMarkersVisible(true);
+line.SetFillEnabled(true);
+Dali::Ui::Gradient::Linear fill(Vector2(0.0f, -0.5f), Vector2(0.0f, 0.5f));
+fill.SetStopNodes({Dali::Ui::Gradient::StopNode(0.0f, UiColor(0x0000FFu)),
+                   Dali::Ui::Gradient::StopNode(1.0f, UiColor(0xFFFFFFu))});
+line.SetFillGradient(fill);
+chart.AddSeries(line);
+```
+
+![그라데이션 선·영역](assets/chartview/standard/line-12-light.png)
+
+선 아래 영역을 그라데이션으로 채웁니다. Update로 선·마커가 함께 이동하고 선택 시 툴팁이 표시됩니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=line-12
+```
+
+### 다색 막대 + 선
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::BAR);
+auto bars = BarSeries::New();
+bars.SetValues({30.0f, 60.0f, 90.0f, 120.0f, 150.0f});
+bars.SetCornerRadius(8.0f);
+bars.SetPointColor(0u, UiColor(0x0000FFu));
+bars.SetPointColor(1u, UiColor(0x00AA00u));
+bars.SetPointColor(2u, UiColor(0xFFAA00u));
+auto line = LineSeries::New();
+line.SetValues({20.0f, 80.0f, 50.0f, 130.0f, 100.0f});
+line.SetColor(Vector4(0.65f, 0.8f, 0.9f, 1.0f));
+chart.AddSeries(bars);
+chart.AddSeries(line);
+chart.SetFindingStrategy(ChartView::FindingStrategy::SAME_X);
+```
+
+![다색 막대 + 선](assets/chartview/standard/combo-01-light.png)
+
+같은 ChartView에 막대와 선을 추가합니다. 코드는 짧은 데이터로 구성 원리를 보이며, 캡처는 20개 막대와 25개 선 포인트를 사용하는 전체 샘플입니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=combo-01
+```
+
+![다색 막대 + 선 — Update 후](assets/chartview/standard/combo-01-updated.png)
+
+실행 중 Update를 누르면 설정된 500ms 동안 값이 전환됩니다.
+
+### 3단 에너지 리포트
+
+```cpp
+auto report = AbsoluteLayout::New();
+for(uint32_t row = 0u; row < 3u; ++row)
+{
+  auto chart = MakeGalleryChart(ChartView::Type::BAR);
+  chart.SetLayoutParams(AbsoluteLayoutParams::New()
+    .SetX(190.5f).SetY(134.0f + static_cast<float>(row) * 160.0f)
+    .SetWidth(304.0f).SetHeight(row == 2u ? 108.0f : 73.0f));
+  auto bars = BarSeries::New();
+  bars.SetValues({10.0f, 20.0f, 15.0f, 30.0f, 12.0f, 24.0f});
+  bars.SetCornerRadius(4.0f);
+  chart.AddSeries(bars);
+  report.Add(chart);
+}
+```
+
+![3단 에너지 리포트](assets/chartview/standard/pattern-14-light.png)
+
+독립적인 ChartView 세 개를 카드에 배치합니다. 위 코드는 차트 배치의 핵심이며, 전체 샘플은 차트별 24개 데이터와 별도 Label로 지표·날짜·힌트를 구성합니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=pattern-14
+```
+
+### 도넛 구성비
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::PIE);
+auto pie = PieSeries::New();
+pie.SetInnerRadiusRatio(0.62f);
+pie.SetSliceGap(2.0f);
+pie.AddSlice("Apple", 248.0f, Vector4(UiColor(0x387AFFu)));
+pie.AddSlice("Samsung", 220.0f, Vector4(UiColor(0x12AB88u)));
+pie.AddSlice("Huawei", 95.0f, Vector4(UiColor(0xFF9A3Du)));
+pie.AddSlice("Xiaomi", 90.0f, Vector4(UiColor(0x9B81F6u)));
+pie.AddSlice("Others", 190.0f, Vector4(UiColor(0xA3A9B6u)));
+chart.AddSeries(pie);
+```
+
+![도넛 구성비](assets/chartview/standard/donut-01-light.png)
+
+중앙의 843M은 샘플이 별도 Label로 표시한 합계입니다. 조각·범례를 선택할 수 있고 Update는 구성비와 합계를, Reset은 초기 데이터를 복원합니다. 수치는 예제 데이터입니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=donut-01
+```
+
+어두운 테마:
+
+![Donut dark theme](assets/chartview/standard/donut-01-dark.png)
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=donut-01 --theme=dark
+```
+
+### 파이 구성비
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::PIE);
+auto pie = PieSeries::New();
+pie.SetInnerRadiusRatio(0.0f);
+pie.SetSliceGap(2.0f);
+pie.AddSlice("Chrome", 63.0f, Vector4(UiColor(0x387AFFu)));
+pie.AddSlice("Safari", 19.0f, Vector4(UiColor(0x12AB88u)));
+pie.AddSlice("Edge", 11.0f, Vector4(UiColor(0xFF9A3Du)));
+pie.AddSlice("Firefox", 4.0f, Vector4(UiColor(0x9B81F6u)));
+pie.AddSlice("Other", 3.0f, Vector4(UiColor(0xA3A9B6u)));
+chart.AddSeries(pie);
+```
+
+![파이 구성비](assets/chartview/standard/pie-01-light.png)
+
+InnerRadiusRatio를 0으로 설정하면 도넛 대신 채워진 파이를 표시합니다. 범례는 값과 비율을 보여주며 조각 사이 간격은 선택 대상에서 제외됩니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=pie-01
+```
+
+### 활동 목표 게이지
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::GAUGE);
+chart.SetGaugeMinimumValue(0.0f);
+chart.SetGaugeMaximumValue(100.0f);
+chart.SetGaugeArcSpan(270.0f);
+chart.SetGaugeStartAngle(135.0f);
+chart.SetGaugeArcWidth(0.18f);
+chart.AddGaugeRange(0.0f, 60.0f, Vector4(UiColor(0x78ACFFu)));
+chart.AddGaugeRange(60.0f, 80.0f, Vector4(UiColor(0x70CDB5u)));
+chart.AddGaugeRange(80.0f, 100.0f, Vector4(UiColor(0xFFB877u)));
+chart.SetGaugeValue(72.0f);
+chart.SetGaugeCenterLabel("72%");
+```
+
+![활동 목표 게이지](assets/chartview/standard/gauge-01-light.png)
+
+게이지는 별도 Series 없이 ChartView의 게이지 API로 구성합니다. Update로 진행률을 바꾸고 Reset으로 72%를 복원합니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=gauge-01
+```
+
+### 두 그룹 산점도
+
+```cpp
+auto chart = MakeGalleryChart(ChartView::Type::SCATTER);
+chart.SetViewport(Vector4(0.0f, 0.0f, 10.0f, 10.0f));
+auto first = ScatterSeries::New();
+first.SetValues({Vector2(1.2f, 5.3f), Vector2(2.5f, 2.8f), Vector2(3.1f, 7.1f)});
+first.SetMarkerShape(ScatterSeries::MarkerShape::CIRCLE);
+first.SetColor(Vector4(UiColor(0x387AFFu)));
+auto second = ScatterSeries::New();
+second.SetValues({Vector2(7.1f, 1.4f), Vector2(8.4f, 3.7f), Vector2(6.3f, 2.1f)});
+second.SetMarkerShape(ScatterSeries::MarkerShape::DIAMOND);
+second.SetColor(Vector4(UiColor(0xFF7F20u)));
+chart.AddSeries(first);
+chart.AddSeries(second);
+```
+
+![두 그룹 산점도](assets/chartview/standard/scatter-01-light.png)
+
+독립적인 X/Y 값과 원·마름모 마커를 사용합니다. 코드는 그룹당 세 점으로 줄였으며 전체 샘플은 그룹당 열 점을 표시합니다. 범례 버튼은 각 그룹을 독립적으로 표시·숨김 처리합니다.
+
+```bash
+./samples/chart-view/bin/chart-standard-gallery.example --case=scatter-01
+```
+
+### 전체 소스와 조작
+
+일반 차트·주석·페이지 이동은 [CasePresenter](../samples/chart-view/chart-case-presenter.cpp), 원형 차트·산점도·범례는 [추가 차트 구현](../samples/chart-view/chart-additional-presenter.cpp), 전체 수치와 배치는 [참조 데이터](../samples/chart-view/chart-reference-cases.cpp)와 [추가 데이터](../samples/chart-view/chart-additional-cases.cpp)를 참고합니다.
+
+카드의 Update는 값을 갱신하고 Select는 선택을 이동합니다. 상단 Dark/Light로 테마를 전환합니다. 도넛·파이는 조각이나 범례를, 산점도는 점과 그룹 범례를 조작할 수 있습니다. 도넛·파이·산점도의 값 갱신은 현재 즉시 반영되며 막대·선의 값 전환은 애니메이션으로 표현합니다.
+
+### 콘텐츠 갱신 시점과 주석 텍스트
+
+`ContentUpdatedSignal()`은 좌표와 라벨의 일괄 갱신 후, 레이아웃 순회 밖에서
+발생합니다. 애니메이션은 마지막 갱신 후에 알립니다. 핸들러에서 화면 안의
+데이터 점 선택을 복원할 수 있으며, 핸들러의 변경은 후속 갱신을 예약합니다.
+GPU의 화면 표시 완료를 뜻하는 신호는 아닙니다.
+
+```cpp
+ConnectionTracker tracker; // 콜백을 받는 동안 수명을 유지합니다.
+chart.ContentUpdatedSignal().Connect(&tracker, [](ChartView ready)
+{
+  ready.SelectPoint(0u, 1u);
+});
+
+auto note = ChartAnnotation::New(ChartAnnotation::Type::TEXT);
+note.SetText("가용 폭보다 길어질 수 있는 주석 텍스트");
+note.SetPosition(Vector2(1.0f, 20.0f));
+note.SetTextMaximumWidth(90.0f);
+note.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+chart.AddAnnotation(note);
+```
+
+최대 폭은 유한한 0 이상의 값이며, 0은 차트에 맞춘 자동 폭입니다. overflow는
+기본값 `CLIP`과 `ELLIPSIS`를 지원합니다. 지정 폭이 차트보다 커도 가용 영역
+제한은 적용됩니다.
+
+갤러리는 카드 View와 상태를 분리하고, 콘텐츠 갱신 후 선택을 복원합니다.
+회전·카운팅·교차 페이드 숫자는 샘플에서 구현합니다. `--list-cases`,
+`--case=<id>`, `--theme=dark`, `--freeze-animations`, `--dump-state=<path>`로
+사례를 확인할 수 있습니다. `samples/chart-view/verify-gallery.py`는 X11에서
+양쪽 테마를 캡처하며, 캡처 결과의 시각적 수용 판정은 별도로 수행합니다.
+
+
+### 막대 전환과 값 기준 채움
+
+막대 값과 명시적 X/Y 뷰포트 변경에 설정된 애니메이션 시간을 적용합니다. 범위·
+누적 막대도 마지막 표시 사각형에서 위치·폭·높이를 보간합니다. 진행 중 다시
+갱신하면 표시 중인 프레임에서 시작합니다. 시간 0은 즉시 변경하며 첫 화면은
+기존처럼 즉시 표시합니다.
+
+`BarSeries::SetBorderDash(dash, gap)`은 두 길이가 양수일 때 점선 외곽을 표시하고
+`GetBorderDash()`는 그 값을 반환합니다. `SetFillThreshold(value, lower, upper)`는
+Y 데이터 값에서 색을 구분합니다. ChartSection 기준선에 같은 값을 사용하면
+갱신·크기 변경 후에도 경계가 일치합니다. threshold와 gradient는 마지막 설정을
+사용하며 `ClearFillThreshold()`는 단색으로 복원합니다.
+
+`SetPointBorder(index, width, color, dash, gap)`으로 채움 색을 유지하면서 한 막대의
+테두리 전체를 지정합니다. 예를 들어
+`series.SetPointBorder(1u, 1.0f, Color::BLUE, 2.0f, 2.0f)`는 일반 막대 사이의
+Forecast에 점선을 적용합니다. 폭 0은 테두리를 숨기고 dash/gap 중 하나가 0이면
+실선입니다. 길이는 유한한 음이 아닌 값이어야 합니다. 데이터 교체 후에도 같은
+인덱스에 설정이 남고 미래 인덱스도 미리 지정할 수 있습니다.
+`ClearPointBorder(index)`와 `ClearPointBorders()`는 한 점 또는 모든 점에 현재
+시리즈 테두리를 복원합니다. 점별 채움 색과 테두리는 각각 독립적으로 해제합니다.
+갤러리의 Per-Point Themes 25–27은 명시적인 Forecast 점별 테두리를 사용합니다.
 
 ---
 

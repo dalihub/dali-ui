@@ -45,6 +45,11 @@ public:
     return "60. FlexLayout: Reverse Directions";
   }
 
+  bool ScrollsOnShortWindow() const override
+  {
+    return true;
+  }
+
   Dali::String GetDescription() const override
   {
     return "Verify row-reverse and column-reverse ordering";

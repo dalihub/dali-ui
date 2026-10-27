@@ -85,6 +85,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 세 가지 API 레벨
 * [In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop-(kr))
 * [State Management](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management-(kr))
 * [State Effect](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Effect-(kr))
+* [Render Effect](https://github.sec.samsung.net/NUI/dali-ui/wiki/Render-Effect-(kr))
 * [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI-(kr))
 * [Create New Component](https://github.sec.samsung.net/NUI/dali-ui/wiki/Create-New-Component-(kr))
 * [컴포넌트 목록](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components-%28kr%29)

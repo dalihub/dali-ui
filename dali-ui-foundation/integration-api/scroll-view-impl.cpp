@@ -975,25 +975,38 @@ bool ScrollViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   return true;
 }
 
-FocusNavigationResult ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context)
+void ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result)
 {
   const FocusDirection direction = context.GetDirection();
-  if(!mKeyScrollEnabled || !mContent) return FocusNavigationResult::NotHandled();
+  if(!mKeyScrollEnabled || !mContent)
+  {
+    return;
+  }
 
   // OnFocusNavigationRequested is only called on PARENT layouts (FindNextFocusByParentNavigation
   // traverses GetParent() chain).  When ScrollView itself is the focused view, it is never
   // called here — PAGE_* and HOME/END are handled in OnKeyEvent instead.
-  if(!IsDescendantOfContent(currentFocusedView)) return FocusNavigationResult::NotHandled();
+  if(!IsDescendantOfContent(currentFocusedView))
+  {
+    return;
+  }
 
   View selfView = View::DownCast(Self());
-  if(!IsDirectionCompatible(direction)) return FocusNavigationResult::NotHandled();
+  if(!IsDirectionCompatible(direction))
+  {
+    return;
+  }
 
   // PAGE_*: scroll one full page and focus the topmost / bottommost item in the
   // destination viewport (mirrors Android ScrollView.pageScroll behavior).
   if(direction == FocusDirection::PAGE_UP || direction == FocusDirection::PAGE_DOWN)
   {
     View candidate = PageScrollAndFocus(direction);
-    return candidate ? FocusNavigationResult::MoveTo(candidate) : FocusNavigationResult::NotHandled();
+    if(candidate)
+    {
+      result.MoveTo(candidate);
+    }
+    return;
   }
 
   // Arrow key navigation below.
@@ -1006,7 +1019,7 @@ FocusNavigationResult ScrollViewImpl::OnFocusNavigationRequested(View currentFoc
     {
       // At boundary with no next item: let FocusFinder exit to a neighboring view.
       TriggerKeyEdgeFeedback(direction);
-      return FocusNavigationResult::NotHandled();
+      return;
     }
     // Case 3: past the last focusable item, content can still scroll.
     // Transfer focus to Self() so subsequent arrow presses are handled by OnKeyEvent.
@@ -1016,9 +1029,11 @@ FocusNavigationResult ScrollViewImpl::OnFocusNavigationRequested(View currentFoc
     {
       mKeyScrollLastChild = currentFocusedView;
       mKeyScrollLastDir   = direction;
-      return FocusNavigationResult::MoveTo(selfView);
+      result.MoveTo(selfView);
+      return;
     }
-    return FocusNavigationResult::Stay();
+    result.Stay();
+    return;
   }
 
   // Case 5: next item is within one step of the viewport edge — focus it directly.
@@ -1048,20 +1063,22 @@ FocusNavigationResult ScrollViewImpl::OnFocusNavigationRequested(View currentFoc
   if(distance < mKeyScrollStep)
   {
     mKeyScrollLastChild.Reset();
-    return FocusNavigationResult::MoveTo(next);
+    result.MoveTo(next);
+    return;
   }
 
   // Case 4b: boundary override — scrolling is a no-op, focus next directly.
   if(IsAtScrollBoundary(direction))
   {
     mKeyScrollLastChild.Reset();
-    return FocusNavigationResult::MoveTo(next);
+    result.MoveTo(next);
+    return;
   }
 
   // Case 4: step-scroll toward next item, keep current focus to block FocusFinder.
   ScrollByKeyDirection(direction);
   mKeyScrollLastChild.Reset();
-  return FocusNavigationResult::Stay();
+  result.Stay();
 }
 
 bool ScrollViewImpl::IsDirectionCompatible(FocusDirection direction) const

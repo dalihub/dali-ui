@@ -43,6 +43,9 @@ constexpr uint32_t COLOR_MATCH_TEXT  = 0x2563EB; // Blue
 
 // Sizes (pixels)
 constexpr float HEADER_HEIGHT = 60.0f;
+// TC screens are laid out for a 1920x1080 window. A TC whose content needs that
+// height (ScrollsOnShortWindow) keeps it on a shorter window and scrolls.
+constexpr float MIN_CONTENT_HEIGHT = 1080.0f - HEADER_HEIGHT;
 constexpr float SEARCH_HEIGHT = 48.0f;
 constexpr float SEPARATOR_H   = 1.0f;
 constexpr float PADDING_H     = 20.0f;
@@ -431,8 +434,26 @@ private:
     // ── Content area: TC adds its views here ────────────────────────────────
     StackLayout contentArea = StackLayout::New(StackOrientation::VERTICAL);
     contentArea.SetRequestedWidth(MATCH_PARENT);
-    contentArea.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    mRootContainer.Add(contentArea);
+    const float windowHeight = static_cast<float>(mApplication.GetWindow().GetPositionSize().height);
+    if(mActiveCase->ScrollsOnShortWindow() && windowHeight - HEADER_HEIGHT < MIN_CONTENT_HEIGHT)
+    {
+      // Keep the 1080p content height and scroll it (e.g. on a 1024x600 panel)
+      // instead of squeezing or clipping the TC.
+      contentArea.SetRequestedHeight(MIN_CONTENT_HEIGHT);
+      ScrollView contentScroll = ScrollView::New();
+      contentScroll.SetScrollDirection(ScrollDirection::Vertical);
+      contentScroll.SetRequestedWidth(MATCH_PARENT);
+      contentScroll.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+      contentScroll.SetContent(contentArea);
+      // Lets automation tell this wrapper from the TC's own views.
+      contentScroll.SetAccessibilityName("TC content scroll");
+      mRootContainer.Add(contentScroll);
+    }
+    else
+    {
+      contentArea.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+      mRootContainer.Add(contentArea);
+    }
 
     mActiveCase->OnEnter(contentArea);
   }

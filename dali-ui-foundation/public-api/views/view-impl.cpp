@@ -1011,9 +1011,8 @@ bool ViewImpl::OnAccessibilityRequestValue(Dali::String& value)
   return false;
 }
 
-FocusNavigationResult ViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context)
+void ViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result)
 {
-  return FocusNavigationResult::NotHandled();
 }
 
 Ui::View::KeyEventSignalType& ViewImpl::KeyEventSignal()
