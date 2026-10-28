@@ -37,7 +37,7 @@ namespace Internal
 Property::Map CreateColorVisualPropertyMap(const Vector4& color);
 Property::Map CreateColorVisualPropertyMap(const UiColor& color);
 Property::Map CreateImageVisualPropertyMap(const Dali::String& url);
-Property::Map CreateGradientVisualPropertyMap(const Gradient::Base& gradient);
+Property::Map CreateGradientVisualPropertyMap(const Ui::Gradient::Base& gradient);
 
 } // namespace Internal
 } // namespace Ui

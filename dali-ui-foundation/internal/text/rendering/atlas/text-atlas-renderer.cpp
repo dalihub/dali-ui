@@ -91,6 +91,19 @@ struct AtlasRenderer::Impl
   ~Impl()
   {
     ClearGradientAnimBinding();
+    ClearGradientSpanResources();
+  }
+
+  /**
+   * @brief Releases the owned gradient span lookup IDs and clears their resources.
+   */
+  void ClearGradientSpanResources()
+  {
+    for(auto& resource : mGradientSpanResources)
+    {
+      Internal::Gradient::RequestReleaseLookupTexture(resource.lookupTextureId);
+    }
+    mGradientSpanResources.clear();
   }
 
   struct MeshRecord
@@ -109,12 +122,13 @@ struct AtlasRenderer::Impl
 
   struct GradientSpanAtlasResource
   {
-    Internal::Gradient::Style style;
-    Texture                   lookupTexture;
-    Sampler                   lookupSampler;
-    Vector4                   bounds{0.0f, 0.0f, 1.0f, 1.0f};
-    GradientSpan::BoundsMode  boundsMode{GradientSpan::BoundsMode::SPAN_BOUND};
-    bool                      initialized{false};
+    Internal::Gradient::Style              style;
+    Texture                                lookupTexture;
+    Ui::Internal::GradientTextureCache::Id lookupTextureId{Ui::Internal::GradientTextureCache::INVALID_ID};
+    Sampler                                lookupSampler;
+    Vector4                                bounds{0.0f, 0.0f, 1.0f, 1.0f};
+    GradientSpan::BoundsMode               boundsMode{GradientSpan::BoundsMode::SPAN_BOUND};
+    bool                                   initialized{false};
 
     void SetStyle(const Internal::Gradient::Style& newStyle)
     {
@@ -125,7 +139,7 @@ struct AtlasRenderer::Impl
 
       initialized   = true;
       style         = newStyle;
-      lookupTexture = Internal::Gradient::CreateLookupTexture(style);
+      lookupTexture = Internal::Gradient::AcquireLookupTexture(style, &lookupTextureId);
       lookupSampler = Sampler();
       if(lookupTexture)
       {
@@ -400,10 +414,14 @@ struct AtlasRenderer::Impl
     if(data == nullptr || data->paints.Empty() || data->glyphPaintIndices.Empty() ||
        layoutSize.width < Math::MACHINE_EPSILON_1000 || layoutSize.height < Math::MACHINE_EPSILON_1000)
     {
-      mGradientSpanResources.clear();
+      ClearGradientSpanResources();
       return;
     }
 
+    for(size_t index = data->paints.Count(); index < mGradientSpanResources.size(); ++index)
+    {
+      Internal::Gradient::RequestReleaseLookupTexture(mGradientSpanResources[index].lookupTextureId);
+    }
     mGradientSpanResources.resize(data->paints.Count());
     std::vector<PixelBounds> spanBounds(data->paints.Count());
 
@@ -1931,7 +1949,7 @@ Actor AtlasRenderer::Render(Text::ViewInterface& view, Actor textControl, Proper
   }
   else
   {
-    mImpl->mGradientSpanResources.clear();
+    mImpl->ClearGradientSpanResources();
   }
 
   mImpl->RebindGradientAnimConstraints();

@@ -199,6 +199,11 @@ AtlasResource::AtlasResource()
   mRendererState.resourceId = AllocateResourceId();
 }
 
+AtlasResource::~AtlasResource()
+{
+  RequestReleaseLookupTexture(mLookupTextureId);
+}
+
 bool AtlasResource::Set(const Dali::Ui::Gradient::Base& gradient)
 {
   const Style                    newStyle       = CreateStyle(gradient);
@@ -228,11 +233,16 @@ bool AtlasResource::Set(const Dali::Ui::Gradient::Base& gradient)
 
   bool lookupChange = false;
 
-  if(stopsChange)
+  if(stopsChange || spreadChange)
   {
-    mRendererState.lookupTexture = newStyle.stops.Count() >= 2u ? CreateLookupTexture(newStyle) : Texture();
-    lookupChange                 = true;
-    if(mRendererState.lookupTexture)
+    const Texture previousTexture = mRendererState.lookupTexture;
+    mRendererState.lookupTexture  = newStyle.stops.Count() >= 2u ? AcquireLookupTexture(newStyle, &mLookupTextureId) : Texture();
+    if(newStyle.stops.Count() < 2u)
+    {
+      RequestReleaseLookupTexture(mLookupTextureId);
+    }
+    lookupChange = true;
+    if(mRendererState.lookupTexture && mRendererState.lookupTexture != previousTexture)
     {
       ++mLookupGenerationCount;
     }

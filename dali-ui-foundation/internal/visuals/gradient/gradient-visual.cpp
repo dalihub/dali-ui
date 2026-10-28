@@ -16,12 +16,13 @@
  */
 
 // CLASS HEADER
-#include "gradient-visual.h"
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-visual.h>
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/devel-api/scripting/scripting.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/rendering/decorated-visual-renderer.h>
 #include <dali/integration-api/string-utils.h>
@@ -160,6 +161,7 @@ GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
 : Visual::Base(factoryCache, Ui::Integration::InternalVisualType::GRADIENT, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mGradientTransform(),
   mGradient(nullptr),
+  mGradientTextureCache(factoryCache.GetGradientTextureCache()),
   mGradientType(LINEAR),
   mStartOffsetIndex(Property::INVALID_INDEX)
 {
@@ -167,6 +169,10 @@ GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
 
 GradientVisual::~GradientVisual()
 {
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  {
+    mGradientTextureCache.RequestRelease(mLookupTextureId);
+  }
 }
 
 void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
@@ -469,7 +475,7 @@ bool GradientVisual::ApplyStopNodes(const Property::Map& propertyMap)
 
   if(stopOffsetValue != nullptr && stopColorValue != nullptr)
   {
-    mGradient->ClearStop();
+    mGradient->ClearStops();
   }
 
   Vector<float>   offsetArray;
@@ -487,8 +493,11 @@ void GradientVisual::ApplyLookupTexture()
   // Set up the texture set. If lookup texture generate failed, set empty texture handle so don't be rendered anything.
   if(DALI_LIKELY(mGradient) && mImpl->mRenderer)
   {
-    TextureSet    textureSet    = TextureSet::New();
-    Dali::Texture lookupTexture = mGradient->GenerateLookupTexture();
+    TextureSet textureSet = TextureSet::New();
+    mGradientTextureCache.RequestRelease(mLookupTextureId);
+    mLookupTextureId            = GradientTextureCache::INVALID_ID;
+    mLookupTextureId            = mGradientTextureCache.Acquire(*mGradient);
+    Dali::Texture lookupTexture = mGradientTextureCache.GetTexture(mLookupTextureId);
     textureSet.SetTexture(0u, lookupTexture);
     Dali::WrapMode::Type wrap = GetWrapMode(mGradient->GetSpreadMethod());
     if(wrap != Dali::WrapMode::DEFAULT)

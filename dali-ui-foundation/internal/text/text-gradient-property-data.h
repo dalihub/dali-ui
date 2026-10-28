@@ -36,8 +36,8 @@ namespace Text
 
 struct TextGradientPropertyData
 {
-  Gradient::Base textGradient;
-  Gradient::Base textGradientOverlay;
+  Ui::Gradient::Base textGradient;
+  Ui::Gradient::Base textGradientOverlay;
 
   Ui::Text::GradientBoundsMode  textGradientBoundsMode{Ui::Text::GradientBoundsMode::CONTENT_BOUND};
   Ui::Text::GradientBoundsMode  textGradientOverlayBoundsMode{Ui::Text::GradientBoundsMode::CONTENT_BOUND};

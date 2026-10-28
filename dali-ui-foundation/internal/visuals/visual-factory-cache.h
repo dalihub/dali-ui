@@ -25,9 +25,11 @@
 #include <dali/public-api/rendering/geometry.h>
 #include <dali/public-api/rendering/shader.h>
 #include <dali/public-api/rendering/uniform-block.h>
+#include <memory>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-loader.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
 #include <dali/devel-api/rendering/renderer-devel.h>
@@ -392,6 +394,12 @@ public:
   SvgLoader& GetSvgLoader();
 
   /**
+   * @brief Retrieves the shared gradient lookup texture cache.
+   * @return The cache owned by this visual factory cache
+   */
+  GradientTextureCache& GetGradientTextureCache();
+
+  /**
    * @brief Request removal of all unused textures retained by ReleasePolicy::NEVER.
    */
   void RequestClearUnusedTextures();
@@ -517,9 +525,10 @@ private:
 
   bool mLoadYuvPlanes; ///< A global flag to specify if the image should be loaded as yuv planes
 
-  TextureManager mTextureManager;
-  NPatchLoader   mNPatchLoader;
-  SvgLoader      mSvgLoader;
+  GradientTextureCache mGradientTextureCache;
+  TextureManager       mTextureManager;
+  NPatchLoader         mNPatchLoader;
+  SvgLoader            mSvgLoader;
 
   Dali::UniformBlock mDefaultUniformBlock;
 

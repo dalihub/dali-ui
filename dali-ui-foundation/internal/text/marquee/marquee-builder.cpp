@@ -24,6 +24,8 @@
 #include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/rendering/texture.h>
+#include <memory>
+#include <utility>
 
 #include <cmath>
 #include <string>
@@ -41,6 +43,33 @@ namespace Text
 
 namespace
 {
+
+/**
+ * @brief Holds newly acquired lookup references until prepared content accepts them.
+ */
+struct LookupTextureIds
+{
+  Ui::Internal::GradientTextureCache::Id lookupTextureId{Ui::Internal::GradientTextureCache::INVALID_ID};
+  Ui::Internal::GradientTextureCache::Id overlayLookupTextureId{Ui::Internal::GradientTextureCache::INVALID_ID};
+};
+
+/**
+ * @brief Releases temporary references on return without deleting their stack storage.
+ */
+struct LookupTextureIdsDeleter
+{
+  /**
+   * @brief Queues releases for both temporary lookup references.
+   * @param[in,out] textureIds The stack-allocated IDs guarded by a unique_ptr
+   */
+  void operator()(LookupTextureIds* textureIds) const
+  {
+    Internal::Gradient::RequestReleaseLookupTexture(textureIds->lookupTextureId);
+    Internal::Gradient::RequestReleaseLookupTexture(textureIds->overlayLookupTextureId);
+  }
+};
+
+using LookupTextureCleanup = std::unique_ptr<LookupTextureIds, LookupTextureIdsDeleter>;
 
 uint32_t GetNextSimpleOverlayStyleTextureIndex(const TextScrollerGradient& textGradient)
 {
@@ -231,6 +260,30 @@ Sampler MarqueeBuilder::CreateTextScrollSampler(bool isHorizontal)
   return sampler;
 }
 
+MarqueeBuilder::PreparedContent::~PreparedContent()
+{
+  Internal::Gradient::RequestReleaseLookupTexture(textGradient.lookupTextureId);
+  Internal::Gradient::RequestReleaseLookupTexture(textGradient.overlayLookupTextureId);
+}
+
+MarqueeBuilder::PreparedContent::PreparedContent(PreparedContent&& other) noexcept
+: textureSet(std::move(other.textureSet)),
+  textGradient(std::exchange(other.textGradient, TextScrollerGradient{}))
+{
+}
+
+MarqueeBuilder::PreparedContent& MarqueeBuilder::PreparedContent::operator=(PreparedContent&& other) noexcept
+{
+  if(this != &other)
+  {
+    Internal::Gradient::RequestReleaseLookupTexture(textGradient.lookupTextureId);
+    Internal::Gradient::RequestReleaseLookupTexture(textGradient.overlayLookupTextureId);
+    textureSet   = std::move(other.textureSet);
+    textGradient = std::exchange(other.textGradient, TextScrollerGradient{});
+  }
+  return *this;
+}
+
 MarqueeBuilder::PreparedContent MarqueeBuilder::CreateTextContent(PixelData textPixelData,
                                                                   Sampler   sampler)
 {
@@ -329,12 +382,21 @@ bool MarqueeBuilder::TryApplyMixedGradientContent(PreparedContent&              
     return false;
   }
 
+  Internal::Gradient::RequestReleaseLookupTexture(content.textGradient.lookupTextureId);
+  Internal::Gradient::RequestReleaseLookupTexture(content.textGradient.overlayLookupTextureId);
+  LookupTextureIds     textureIds;
+  LookupTextureCleanup cleanup(&textureIds);
+
   TextureSet mixedTextureSet = TextureSet::New();
   AddTextScrollTexture(mixedTextureSet, request.preservedPixelData, request.sampler, 0u);
   AddTextScrollTexture(mixedTextureSet, request.maskPixelData, request.sampler, 1u);
 
   uint32_t textureSetIndex = 2u;
-  Internal::Gradient::AddLookupTexture(mixedTextureSet, textureSetIndex, request.gradientState.baseStyle);
+  Internal::Gradient::AddLookupTexture(mixedTextureSet, textureSetIndex, request.gradientState.baseStyle, &textureIds.lookupTextureId);
+  if(!mixedTextureSet.GetTexture(textureSetIndex - 1u))
+  {
+    return false;
+  }
 
   TextScrollerGradient mixedGradient =
     Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.baseStyle,
@@ -346,7 +408,11 @@ bool MarqueeBuilder::TryApplyMixedGradientContent(PreparedContent&              
 
   if(overlayEnabled)
   {
-    Internal::Gradient::AddLookupTexture(mixedTextureSet, textureSetIndex, request.gradientState.overlayStyle);
+    Internal::Gradient::AddLookupTexture(mixedTextureSet, textureSetIndex, request.gradientState.overlayStyle, &textureIds.overlayLookupTextureId);
+    if(!mixedTextureSet.GetTexture(textureSetIndex - 1u))
+    {
+      return false;
+    }
 
     const TextScrollerGradient textGradientOverlay =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.overlayStyle,
@@ -369,6 +435,9 @@ bool MarqueeBuilder::TryApplyMixedGradientContent(PreparedContent&              
   content.textureSet   = mixedTextureSet;
   content.textGradient = mixedGradient;
 
+  content.textGradient.lookupTextureId        = std::exchange(textureIds.lookupTextureId, Ui::Internal::GradientTextureCache::INVALID_ID);
+  content.textGradient.overlayLookupTextureId = std::exchange(textureIds.overlayLookupTextureId, Ui::Internal::GradientTextureCache::INVALID_ID);
+  cleanup.release();
   return true;
 }
 
@@ -407,6 +476,11 @@ bool MarqueeBuilder::TryApplySimpleStyleContent(PreparedContent&                
     return false;
   }
 
+  Internal::Gradient::RequestReleaseLookupTexture(content.textGradient.lookupTextureId);
+  Internal::Gradient::RequestReleaseLookupTexture(content.textGradient.overlayLookupTextureId);
+  LookupTextureIds     textureIds;
+  LookupTextureCleanup cleanup(&textureIds);
+
   TextureSet styleTextureSet = TextureSet::New();
   AddTextScrollTexture(styleTextureSet, request.fillPixelData, request.sampler, 0u);
 
@@ -414,7 +488,11 @@ bool MarqueeBuilder::TryApplySimpleStyleContent(PreparedContent&                
   TextScrollerGradient textGradient;
   if(baseEnabled)
   {
-    Internal::Gradient::AddLookupTexture(styleTextureSet, textureSetIndex, request.gradientState.baseStyle);
+    Internal::Gradient::AddLookupTexture(styleTextureSet, textureSetIndex, request.gradientState.baseStyle, &textureIds.lookupTextureId);
+    if(!styleTextureSet.GetTexture(textureSetIndex - 1u))
+    {
+      return false;
+    }
     textGradient =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.baseStyle,
                                                         request.baseBounds.bounds,
@@ -425,7 +503,11 @@ bool MarqueeBuilder::TryApplySimpleStyleContent(PreparedContent&                
 
   if(overlayEnabled)
   {
-    Internal::Gradient::AddLookupTexture(styleTextureSet, textureSetIndex, request.gradientState.overlayStyle);
+    Internal::Gradient::AddLookupTexture(styleTextureSet, textureSetIndex, request.gradientState.overlayStyle, &textureIds.overlayLookupTextureId);
+    if(!styleTextureSet.GetTexture(textureSetIndex - 1u))
+    {
+      return false;
+    }
     const TextScrollerGradient textGradientOverlay =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.overlayStyle,
                                                         request.overlayBounds.bounds,
@@ -440,19 +522,27 @@ bool MarqueeBuilder::TryApplySimpleStyleContent(PreparedContent&                
   AddTextScrollTexture(styleTextureSet, request.stylePixelData, request.sampler, textureSetIndex);
   textGradient.styleTextureEnabled = true;
 
-  content.textureSet   = styleTextureSet;
-  content.textGradient = textGradient;
+  content.textureSet                          = styleTextureSet;
+  content.textGradient                        = textGradient;
+  content.textGradient.lookupTextureId        = std::exchange(textureIds.lookupTextureId, Ui::Internal::GradientTextureCache::INVALID_ID);
+  content.textGradient.overlayLookupTextureId = std::exchange(textureIds.overlayLookupTextureId, Ui::Internal::GradientTextureCache::INVALID_ID);
+  cleanup.release();
   return true;
 }
 
 void MarqueeBuilder::ApplySimpleGradientContent(PreparedContent&                    content,
                                                 const SimpleGradientContentRequest& request)
 {
+  Internal::Gradient::RequestReleaseLookupTexture(content.textGradient.lookupTextureId);
+  Internal::Gradient::RequestReleaseLookupTexture(content.textGradient.overlayLookupTextureId);
+  LookupTextureIds     textureIds;
+  LookupTextureCleanup cleanup(&textureIds);
+
   uint32_t textureSetIndex = 1u;
 
   if(request.gradientState.baseStyleRenderable && request.baseBoundsResolved)
   {
-    Internal::Gradient::AddLookupTexture(content.textureSet, textureSetIndex, request.gradientState.baseStyle);
+    Internal::Gradient::AddLookupTexture(content.textureSet, textureSetIndex, request.gradientState.baseStyle, &textureIds.lookupTextureId);
 
     content.textGradient =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.baseStyle,
@@ -464,7 +554,7 @@ void MarqueeBuilder::ApplySimpleGradientContent(PreparedContent&                
 
   if(request.gradientState.overlayStyleRenderable && request.overlayBoundsResolved)
   {
-    Internal::Gradient::AddLookupTexture(content.textureSet, textureSetIndex, request.gradientState.overlayStyle);
+    Internal::Gradient::AddLookupTexture(content.textureSet, textureSetIndex, request.gradientState.overlayStyle, &textureIds.overlayLookupTextureId);
 
     const TextScrollerGradient textGradientOverlay =
       Internal::GradientMarquee::CreateScrollerGradient(request.gradientState.overlayStyle,
@@ -477,6 +567,9 @@ void MarqueeBuilder::ApplySimpleGradientContent(PreparedContent&                
                                                   request.overlayMode);
     ApplyOverlayAnimationState(content.textGradient, request.animationState);
   }
+  content.textGradient.lookupTextureId        = std::exchange(textureIds.lookupTextureId, Ui::Internal::GradientTextureCache::INVALID_ID);
+  content.textGradient.overlayLookupTextureId = std::exchange(textureIds.overlayLookupTextureId, Ui::Internal::GradientTextureCache::INVALID_ID);
+  cleanup.release();
 }
 
 MarqueeBuilder::CompositionPlan MarqueeBuilder::GetCompositionPlan(const CompositionRequest& request)

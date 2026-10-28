@@ -313,7 +313,7 @@ public:
   UiColor            GetBackgroundColor() const;
   void               SetBackgroundColor(const UiColor& color);
   void               SetBackgroundImage(const Dali::String& url);
-  void               SetBackgroundGradient(const Gradient::Base& gradient);
+  void               SetBackgroundGradient(const Ui::Gradient::Base& gradient);
   UiColor            GetColorMultiplier() const;
   void               SetColorMultiplier(const UiColor& multiplier);
   UiColor            GetCurrentColorMultiplier() const;
@@ -711,12 +711,12 @@ public:
 
   bool UpdateColorBindingInternal(StringView bindingId, const UiColor& color);
   void SetColorBindingInternal(StringView bindingId, const UiColor& color, ColorCallback callback);
-  bool UpdateColorBindingInternal(StringView bindingId, const Gradient::Base& gradient);
-  void SetColorBindingInternal(StringView bindingId, const Gradient::Base& gradient, Callback<void(const Gradient::Base&)> callback);
+  bool UpdateColorBindingInternal(StringView bindingId, const Ui::Gradient::Base& gradient);
+  void SetColorBindingInternal(StringView bindingId, const Ui::Gradient::Base& gradient, Callback<void(const Ui::Gradient::Base&)> callback);
   void ClearGradientColorBinding(StringView bindingId);
   void ClearBackgroundBinding();
   void SetBackgroundColorInternal(const Vector4& color);
-  void SetBackgroundGradientInternal(const Gradient::Base& gradient);
+  void SetBackgroundGradientInternal(const Ui::Gradient::Base& gradient);
   void SetBorderlineColorInternal(const Vector4& color);
   void SetColorMultiplierInternal(const Vector4& multiplier);
 

@@ -19,12 +19,16 @@
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/public-api/math/math-utils.h>
 #include <cmath>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-foundation/internal/visuals/gradient/linear-gradient.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 
 namespace DALI_NAMESPACE
 {
@@ -182,8 +186,12 @@ RenderData ResolveRenderData(const Style&   style,
   return data;
 }
 
-Dali::Texture CreateLookupTexture(const Style& style)
+Dali::Texture AcquireLookupTexture(const Style& style, Ui::Internal::GradientTextureCache::Id* textureId)
 {
+  if(textureId)
+  {
+    RequestReleaseLookupTexture(*textureId);
+  }
   if(style.stops.Count() < 2u)
   {
     return Dali::Texture();
@@ -206,12 +214,53 @@ Dali::Texture CreateLookupTexture(const Style& style)
   }
 
   gradient->ApplyStops(offsets, colors);
-  return gradient->GenerateLookupTexture();
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  {
+    auto       factory = Ui::Integration::VisualFactory::Get();
+    auto&      cache   = Ui::GetImplementation(factory).GetFactoryCache().GetGradientTextureCache();
+    const auto id      = cache.Acquire(*gradient);
+    Texture    texture = cache.GetTexture(id);
+    if(textureId)
+    {
+      *textureId = id;
+    }
+    else
+    {
+      cache.RequestRelease(id);
+    }
+    return texture;
+  }
+  return Texture();
 }
 
-void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const Style& style)
+void RequestReleaseLookupTexture(Ui::Internal::GradientTextureCache::Id& textureId)
 {
-  Texture lookupTexture   = CreateLookupTexture(style);
+  if(textureId != Ui::Internal::GradientTextureCache::INVALID_ID)
+  {
+    if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+    {
+      auto factory = Ui::Integration::VisualFactory::Get();
+      Ui::GetImplementation(factory).GetFactoryCache().GetGradientTextureCache().RequestRelease(textureId);
+    }
+    textureId = Ui::Internal::GradientTextureCache::INVALID_ID;
+  }
+}
+
+void ReferenceLookupTexture(Ui::Internal::GradientTextureCache::Id textureId)
+{
+  if(textureId != Ui::Internal::GradientTextureCache::INVALID_ID)
+  {
+    if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+    {
+      auto factory = Ui::Integration::VisualFactory::Get();
+      Ui::GetImplementation(factory).GetFactoryCache().GetGradientTextureCache().Reference(textureId);
+    }
+  }
+}
+
+void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const Style& style, Ui::Internal::GradientTextureCache::Id* textureId)
+{
+  Texture lookupTexture   = AcquireLookupTexture(style, textureId);
   Sampler gradientSampler = Sampler::New();
   gradientSampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
   gradientSampler.SetWrapMode(GetWrapMode(style.spreadMethod), Dali::WrapMode::CLAMP_TO_EDGE);
@@ -220,9 +269,9 @@ void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const St
   textureSet.SetSampler(textureSetIndex, gradientSampler);
 }
 
-void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const Style& style)
+void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const Style& style, Ui::Internal::GradientTextureCache::Id* textureId)
 {
-  SetLookupTexture(textureSet, textureSetIndex, style);
+  SetLookupTexture(textureSet, textureSetIndex, style, textureId);
   ++textureSetIndex;
 }
 

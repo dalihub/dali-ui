@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/integration-api/text/text-atlas-gradient-apply-state.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace DALI_NAMESPACE::Ui::Text::Internal::Gradient
@@ -72,13 +73,17 @@ struct AtlasFrameState
 /**
  * @brief Stores the prepared atlas resource for one authored gradient.
  *
- * The LUT cache key is intentionally the stop list only. Geometry, units,
- * spread, bounds, and scrolling do not recreate the lookup texture.
+ * Geometry, units, bounds and scrolling do not recreate the lookup texture.
+ * Spread affects LUT pixels only for REPEAT with incomplete stop coverage.
  */
 class AtlasResource
 {
 public:
   AtlasResource();
+  /**
+   * @brief Requests release of the owned gradient lookup texture ID.
+   */
+  ~AtlasResource();
 
   AtlasResource(const AtlasResource&)            = delete;
   AtlasResource(AtlasResource&&)                 = delete;
@@ -95,9 +100,10 @@ public:
   const AtlasRendererState&       GetRendererState() const;
 
 private:
-  Dali::Ui::Gradient::Base mAuthored;
-  AtlasRendererState       mRendererState;
-  uint64_t                 mLookupGenerationCount{0u};
+  Dali::Ui::Gradient::Base               mAuthored;
+  AtlasRendererState                     mRendererState;
+  uint64_t                               mLookupGenerationCount{0u};
+  Ui::Internal::GradientTextureCache::Id mLookupTextureId{Ui::Internal::GradientTextureCache::INVALID_ID};
 };
 
 /**

@@ -27,6 +27,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace DALI_NAMESPACE
@@ -45,6 +46,9 @@ struct TextVisualGradientData
   Ui::Text::Internal::Gradient::Style mTextGradientOverlayStyle;
   Ui::Text::GradientBoundsMode        mTextGradientOverlayBoundsMode;
   Ui::Text::GradientOverlayMode       mTextGradientOverlayMode;
+
+  GradientTextureCache::Id mLookupTextureId{GradientTextureCache::INVALID_ID};
+  GradientTextureCache::Id mOverlayLookupTextureId{GradientTextureCache::INVALID_ID};
 
   PixelData      mTextGradientMaskPixelData;
   VisualRenderer mGradientRenderer;

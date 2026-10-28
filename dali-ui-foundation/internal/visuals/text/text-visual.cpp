@@ -331,6 +331,11 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
 
 TextVisual::~TextVisual()
 {
+  if(auto* gradientData = GetTextVisualGradientData(mGradientData))
+  {
+    Text::Internal::Gradient::RequestReleaseLookupTexture(gradientData->mLookupTextureId);
+    Text::Internal::Gradient::RequestReleaseLookupTexture(gradientData->mOverlayLookupTextureId);
+  }
 }
 
 void TextVisual::OnInitialize()
@@ -818,7 +823,7 @@ void TextVisual::UpdateRenderer()
 {
   // Handles may outlive Application::MainLoop. Property setters must not
   // rebuild render resources after the adaptor has retired their scene.
-  if(!Dali::Adaptor::IsAvailable())
+  if(DALI_UNLIKELY(!Dali::Adaptor::IsAvailable()))
   {
     Actor control = mControl.GetHandle();
     if(control)
@@ -1110,7 +1115,7 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
 // From async text manager
 void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textInformation)
 {
-  if(!Dali::Adaptor::IsAvailable())
+  if(DALI_UNLIKELY(!Dali::Adaptor::IsAvailable()))
   {
     return;
   }
@@ -1393,10 +1398,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         gradientData.mTextGradientMaskPixelData = renderInfo.textGradientMaskPixelData;
         AddTexture(textureSet, renderInfo.textGradientMaskPixelData, sampler, textureSetIndex);
         ++textureSetIndex;
-        Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
+        Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle, &gradientData.mLookupTextureId);
         if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
         {
-          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle);
+          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle, &gradientData.mOverlayLookupTextureId);
         }
       }
       else
@@ -1407,12 +1412,12 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         if(mTextShaderFeatureCache.IsEnabledTextGradient())
         {
           auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
-          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
+          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle, &gradientData.mLookupTextureId);
         }
         if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
         {
           auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
-          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle);
+          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle, &gradientData.mOverlayLookupTextureId);
         }
       }
 
@@ -1656,7 +1661,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     // Allocation/attachment above can invoke application code. Do not deliver
     // the old result's image timings or completion after a newer publication.
     const auto* publishedReveal = GetTextVisualRevealData(mRevealData);
-    if(!Dali::Adaptor::IsAvailable() || mController->GetRenderRevision() != publicationRevision ||
+    if(DALI_UNLIKELY(!Dali::Adaptor::IsAvailable()) || mController->GetRenderRevision() != publicationRevision ||
        parameters.textRevealRevision != (publishedReveal ? publishedReveal->revision : 0u) ||
        !mController->IsAsyncRendering() || mControl.GetHandle() != control)
     {
@@ -1733,7 +1738,11 @@ void TextVisual::SetTextGradientStyle(const Text::Internal::Gradient::Style& sty
     return;
   }
 
-  gradientData                             = &GetOrCreateTextVisualGradientData(mGradientData);
+  gradientData = &GetOrCreateTextVisualGradientData(mGradientData);
+  if(!Text::Internal::Gradient::IsRenderable(style))
+  {
+    Text::Internal::Gradient::RequestReleaseLookupTexture(gradientData->mLookupTextureId);
+  }
   gradientData->mTextGradientStyle         = style;
   gradientData->mTextGradientMaskPixelData = PixelData();
   gradientData->mGradientRenderer          = VisualRenderer();
@@ -1776,6 +1785,10 @@ void TextVisual::SetTextGradientOverlayStyle(const Text::Internal::Gradient::Sty
 
   gradientData = &GetOrCreateTextVisualGradientData(mGradientData);
   RemoveGradientOverlayAnimConstraints();
+  if(!Text::Internal::Gradient::IsRenderable(style))
+  {
+    Text::Internal::Gradient::RequestReleaseLookupTexture(gradientData->mOverlayLookupTextureId);
+  }
   gradientData->mTextGradientOverlayStyle  = style;
   gradientData->mGradientOverlayRenderer   = VisualRenderer();
   gradientData->mHasGradientOverlayContext = false;
@@ -2479,7 +2492,7 @@ void TextVisual::CancelAsyncRender(Ui::Integration::Visual::Base visual)
 
 bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextParameters& parameters)
 {
-  if(!Dali::Adaptor::IsAvailable())
+  if(DALI_UNLIKELY(!Dali::Adaptor::IsAvailable()))
   {
     RemoveRenderer(control, true);
     return false;
@@ -3124,7 +3137,7 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
                                            const Vector<Text::ReplacementRevealTiming>& ordinaryTimings)
 {
   auto* data = GetTextVisualRevealData(mRevealData);
-  if(!Dali::Adaptor::IsAvailable() || !data || data->runtimeBlur || !actor || mRendererList.size() != 1u || !Dali::Integration::SceneHolder::Get(actor))
+  if(DALI_UNLIKELY(!Dali::Adaptor::IsAvailable()) || !data || data->runtimeBlur || !actor || mRendererList.size() != 1u || !Dali::Integration::SceneHolder::Get(actor))
   {
     return false;
   }
@@ -3162,7 +3175,7 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
   // Compare both that invalidation and the resolved resources/owner geometry.
   auto unchanged = [&]()
   {
-    return Dali::Adaptor::IsAvailable() && GetTextVisualRevealData(mRevealData) == data && data->revision == revision &&
+    return DALI_LIKELY(Dali::Adaptor::IsAvailable()) && GetTextVisualRevealData(mRevealData) == data && data->revision == revision &&
            mController->GetRenderRevision() == renderRevision && mController->IsAsyncRendering() == asynchronous &&
            mController->GetReplacementSourceSnapshot().sourceRevision == sourceIdentity &&
            mController->GetReplacementRenderState().layoutGeneration == layoutGeneration &&
@@ -3578,10 +3591,10 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     AddTexture(textureSet, gradientData.mTextGradientMaskPixelData, sampler, textureSetIndex);
     ++textureSetIndex;
 
-    Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
+    Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle, &gradientData.mLookupTextureId);
     if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
     {
-      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle);
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle, &gradientData.mOverlayLookupTextureId);
     }
   }
   else
@@ -3610,12 +3623,12 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     if(mTextShaderFeatureCache.IsEnabledTextGradient())
     {
       auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
-      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle, &gradientData.mLookupTextureId);
     }
     if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
     {
       auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
-      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle);
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle, &gradientData.mOverlayLookupTextureId);
     }
   }
 

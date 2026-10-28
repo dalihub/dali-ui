@@ -36,15 +36,15 @@ namespace Internal
 namespace ViewGradientColorBinding
 {
 
-bool HasTokenColor(const Gradient::Base& gradient);
+bool HasTokenColor(const Ui::Gradient::Base& gradient);
 
 /**
  * @brief Adds gradient binding data.
  * @return True when the first binding data was added and the caller should connect the color table change signal.
  */
-bool Add(ViewImpl& viewImpl, StringView bindingId, const Gradient::Base& gradient, Callback<void(const Gradient::Base&)> callback);
+bool Add(ViewImpl& viewImpl, StringView bindingId, const Ui::Gradient::Base& gradient, Callback<void(const Ui::Gradient::Base&)> callback);
 
-bool Update(ViewImpl& viewImpl, StringView bindingId, const Gradient::Base& gradient);
+bool Update(ViewImpl& viewImpl, StringView bindingId, const Ui::Gradient::Base& gradient);
 void ApplyAll(ViewImpl& viewImpl);
 
 /**

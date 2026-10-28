@@ -81,8 +81,35 @@ struct MarqueeBuilder
     bool            overlayApplyAlways{false};
   };
 
+  /**
+   * @brief Owns prepared marquee textures and their gradient cache references.
+   *
+   * Moving transfers ownership and invalidates the source IDs. Copying is disabled
+   * so cache references are released exactly once.
+   */
   struct PreparedContent
   {
+    /**
+     * @brief Creates empty prepared content.
+     */
+    PreparedContent() = default;
+    /**
+     * @brief Requests release of the owned gradient lookup IDs.
+     */
+    ~PreparedContent();
+    PreparedContent(const PreparedContent&)            = delete;
+    PreparedContent& operator=(const PreparedContent&) = delete;
+    /**
+     * @brief Transfers prepared content from another owner.
+     * @param[in,out] other The source whose lookup IDs are invalidated
+     */
+    PreparedContent(PreparedContent&& other) noexcept;
+    /**
+     * @brief Releases existing IDs and transfers prepared content from another owner.
+     * @param[in,out] other The source whose lookup IDs are invalidated
+     * @return A reference to this content
+     */
+    PreparedContent&     operator=(PreparedContent&& other) noexcept;
     TextureSet           textureSet;
     TextScrollerGradient textGradient;
   };

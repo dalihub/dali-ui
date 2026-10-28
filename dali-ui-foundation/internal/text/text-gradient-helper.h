@@ -27,6 +27,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 
 namespace DALI_NAMESPACE
 {
@@ -73,11 +74,44 @@ RenderData ResolveRenderData(const Style&   style,
                              const Vector4& bounds,
                              const Vector2& coordinateSize);
 
-Dali::Texture CreateLookupTexture(const Style& style);
+/**
+ * @brief Acquires a synchronous shared lookup texture for a text gradient.
+ * @param[in] style The text gradient rendering style
+ * @param[in,out] textureId Optional owned ID to replace with the acquired reference
+ * @return The lookup texture, or an empty handle if there are fewer than two stops
+ * @note If textureId is omitted, the acquired reference is queued for release immediately.
+ */
+Dali::Texture AcquireLookupTexture(const Style& style, Dali::Ui::Internal::GradientTextureCache::Id* textureId = nullptr);
 
-void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const Style& style);
+/**
+ * @brief Requests release of an owned lookup texture and resets its ID.
+ * @param[in,out] textureId The owned ID to release and replace with INVALID_ID
+ */
+void RequestReleaseLookupTexture(Dali::Ui::Internal::GradientTextureCache::Id& textureId);
 
-void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const Style& style);
+/**
+ * @brief Retains a lookup texture when prepared content is handed to a live scroller.
+ * @param[in] textureId The lookup texture ID to retain
+ */
+void ReferenceLookupTexture(Dali::Ui::Internal::GradientTextureCache::Id textureId);
+
+/**
+ * @brief Assigns a shared lookup texture and gradient sampler to a texture slot.
+ * @param[in,out] textureSet The texture set receiving the lookup texture
+ * @param[in] textureSetIndex The texture slot to update
+ * @param[in] style The text gradient rendering style
+ * @param[in,out] textureId Optional owned lookup ID to replace
+ */
+void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const Style& style, Dali::Ui::Internal::GradientTextureCache::Id* textureId = nullptr);
+
+/**
+ * @brief Assigns a lookup texture and advances the next texture slot index.
+ * @param[in,out] textureSet The texture set receiving the lookup texture
+ * @param[in,out] textureSetIndex The slot to update, incremented after assignment
+ * @param[in] style The text gradient rendering style
+ * @param[in,out] textureId Optional owned lookup ID to replace
+ */
+void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const Style& style, Dali::Ui::Internal::GradientTextureCache::Id* textureId = nullptr);
 
 template<typename RendererType>
 Property::Index SetRendererProperty(RendererType renderer, const char* name, const Property::Value& value)

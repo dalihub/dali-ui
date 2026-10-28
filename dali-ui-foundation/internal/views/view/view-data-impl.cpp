@@ -2836,9 +2836,9 @@ void ViewDataImpl::SetBackgroundImage(const Dali::String& url)
   SetBackground(Internal::CreateImageVisualPropertyMap(url));
 }
 
-void ViewDataImpl::SetBackgroundGradient(const Gradient::Base& gradient)
+void ViewDataImpl::SetBackgroundGradient(const Ui::Gradient::Base& gradient)
 {
-  if(gradient.GetType() == Gradient::Type::NONE || gradient.GetStopNodes().Count() < 2u)
+  if(gradient.GetType() == Ui::Gradient::Type::NONE || gradient.GetStopNodes().Count() < 2u)
   {
     ClearBackground();
     return;
@@ -2848,7 +2848,7 @@ void ViewDataImpl::SetBackgroundGradient(const Gradient::Base& gradient)
   if(!UpdateColorBindingInternal(BACKGROUND_GRADIENT_BINDING_ID, gradient))
   {
     SetColorBindingInternal(BACKGROUND_GRADIENT_BINDING_ID, gradient,
-                            Callback<void(const Gradient::Base&)>::New(this, &ViewDataImpl::SetBackgroundGradientInternal));
+                            Callback<void(const Ui::Gradient::Base&)>::New(this, &ViewDataImpl::SetBackgroundGradientInternal));
   }
   SetBackgroundGradientInternal(gradient);
 }
@@ -6151,7 +6151,7 @@ void ViewDataImpl::SetColorBindingInternal(StringView bindingId, const UiColor& 
   manager.SetBindingColor(mViewImpl.Self(), bindingId, color);
 }
 
-bool ViewDataImpl::UpdateColorBindingInternal(StringView bindingId, const Gradient::Base& gradient)
+bool ViewDataImpl::UpdateColorBindingInternal(StringView bindingId, const Ui::Gradient::Base& gradient)
 {
   if(!Internal::ViewGradientColorBinding::HasTokenColor(gradient))
   {
@@ -6161,7 +6161,7 @@ bool ViewDataImpl::UpdateColorBindingInternal(StringView bindingId, const Gradie
   return Internal::ViewGradientColorBinding::Update(mViewImpl, bindingId, gradient);
 }
 
-void ViewDataImpl::SetColorBindingInternal(StringView bindingId, const Gradient::Base& gradient, Callback<void(const Gradient::Base&)> callback)
+void ViewDataImpl::SetColorBindingInternal(StringView bindingId, const Ui::Gradient::Base& gradient, Callback<void(const Ui::Gradient::Base&)> callback)
 {
   if(Internal::ViewGradientColorBinding::Add(mViewImpl, bindingId, gradient, std::move(callback)))
   {
@@ -6773,7 +6773,7 @@ bool ViewDataImpl::CanSkipArrangeRemeasure(float visualW, float visualH, Measure
   return true;
 }
 
-void ViewDataImpl::SetBackgroundGradientInternal(const Gradient::Base& gradient)
+void ViewDataImpl::SetBackgroundGradientInternal(const Ui::Gradient::Base& gradient)
 {
   SetBackground(Internal::CreateGradientVisualPropertyMap(gradient));
 }

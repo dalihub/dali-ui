@@ -75,9 +75,9 @@ public:
   const Vector<GradientStop>& GetStops() const;
 
   /**
-   * Clear all added gradient stop.
+   * @brief Clears all gradient stops and invalidates their normalized state.
    */
-  void ClearStop();
+  void ClearStops();
 
   /**
    * Build GradientStop array by input parameters.
@@ -124,6 +124,14 @@ public:
   Dali::Texture GenerateLookupTexture();
 
   /**
+   * @brief Resolves automatic offsets and sorts stops before cache lookup.
+   *
+   * Repeated calls do no work until ApplyStops() or clearing the stops invalidates
+   * the normalized state. A gradient created from another gradient inherits it.
+   */
+  void NormalizeStops();
+
+  /**
    * Sets the gradient's start position offset.
    * @param[in] startOffset The start offset.
    * @note 0.0 is start position of gradient, 1.0 is end position of gradient.
@@ -137,13 +145,6 @@ public:
    * @return The start offset
    */
   float GetStartOffset() const;
-
-private:
-  /**
-   * Estimate the resolution of the lookup texture.
-   * Note: Only call this function after the gradient stops are sorted in order.
-   */
-  unsigned int EstimateTextureResolution();
 
 protected:
   /**
@@ -169,6 +170,7 @@ protected:
   Ui::Gradient::Units        mUnits;
   Ui::Gradient::SpreadMethod mSpreadMethod;
   float                      mStartOffset;
+  bool                       mStopsNormalized : 1; ///< Whether the current stop list has already been normalized.
 };
 
 } // namespace Internal

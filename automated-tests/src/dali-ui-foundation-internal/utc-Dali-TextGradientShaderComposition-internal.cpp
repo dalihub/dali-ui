@@ -24,11 +24,14 @@
 #include <dali-ui-foundation/internal/text/text-gradient-marquee-helper.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-shader-factory.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/animation/animation-devel.h>
 #include <dali/devel-api/common/singleton-service.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <mesh-builder.h>
 
 #include <limits>
@@ -2446,7 +2449,7 @@ int UtcDaliTextGradientMarqueeSyncAsyncContentBoundsEquivalentP(void)
 
 int UtcDaliTextGradientMarqueeLookupTexturesUseSequentialSlotsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   TextInternal::Gradient::Style baseStyle;
   baseStyle.enabled     = true;
@@ -2477,7 +2480,7 @@ int UtcDaliTextGradientMarqueeLookupTexturesUseSequentialSlotsP(void)
 
 int UtcDaliTextGradientMarqueeMixedLookupTextureUsesSlotTwoP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   TextInternal::Gradient::Style baseStyle = CreateLinearGradientStyle();
 
@@ -2492,7 +2495,7 @@ int UtcDaliTextGradientMarqueeMixedLookupTextureUsesSlotTwoP(void)
 
 int UtcDaliTextGradientMarqueeMixedOverlayLookupTextureUsesSlotThreeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiText::MarqueeBuilder::PreparedContent content;
   content.textureSet = TextureSet::New();
@@ -2621,7 +2624,7 @@ int UtcDaliTextScrollerOverlayStyleTextureSlotP(void)
 
 int UtcDaliTextScrollerGradientOverlayStyleTextureSlotP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   const Size verifiedSize(2.0f, 2.0f);
   Sampler    sampler = Sampler::New();
@@ -2648,7 +2651,7 @@ int UtcDaliTextScrollerGradientOverlayStyleTextureSlotP(void)
 
 int UtcDaliTextScrollerGradientOverlayOverlayStyleTextureSlotP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   const Size verifiedSize(2.0f, 2.0f);
   Sampler    sampler = Sampler::New();
@@ -2677,7 +2680,7 @@ int UtcDaliTextScrollerGradientOverlayOverlayStyleTextureSlotP(void)
 
 int UtcDaliTextScrollerStyleOverlayStyleTextureSlotP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   const Size verifiedSize(2.0f, 2.0f);
   Sampler    sampler = Sampler::New();
@@ -2705,7 +2708,7 @@ int UtcDaliTextScrollerStyleOverlayStyleTextureSlotP(void)
 
 int UtcDaliTextScrollerSimpleOverlayStyleDoesNotAppendToMixedContentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   const Size verifiedSize(2.0f, 2.0f);
   Sampler    sampler = Sampler::New();
@@ -2726,7 +2729,7 @@ int UtcDaliTextScrollerSimpleOverlayStyleDoesNotAppendToMixedContentP(void)
 
 int UtcDaliTextScrollerMixedOverlayStyleTextureSlotP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   const Size verifiedSize(2.0f, 2.0f);
   Sampler    sampler = Sampler::New();
@@ -2753,7 +2756,7 @@ int UtcDaliTextScrollerMixedOverlayStyleTextureSlotP(void)
 
 int UtcDaliTextScrollerMixedGradientOverlayOverlayStyleTextureSlotP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   const Size verifiedSize(2.0f, 2.0f);
   Sampler    sampler = Sampler::New();
@@ -2781,7 +2784,7 @@ int UtcDaliTextScrollerMixedGradientOverlayOverlayStyleTextureSlotP(void)
 
 int UtcDaliTextScrollerMixedStyleOverlayStyleTextureSlotP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   const Size verifiedSize(2.0f, 2.0f);
   Sampler    sampler = Sampler::New();
@@ -2809,7 +2812,7 @@ int UtcDaliTextScrollerMixedStyleOverlayStyleTextureSlotP(void)
 
 int UtcDaliTextScrollerMixedStyleGradientOverlayOverlayStyleTextureSlotP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   const Size verifiedSize(2.0f, 2.0f);
   Sampler    sampler = Sampler::New();
@@ -2838,7 +2841,7 @@ int UtcDaliTextScrollerMixedStyleGradientOverlayOverlayStyleTextureSlotP(void)
 
 int UtcDaliTextGradientMarqueeMixedStyleBaseLookupAndStyleTextureSlotsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiText::MarqueeBuilder::PreparedContent content;
   const auto request = CreateMixedGradientContentRequest(false, true);
@@ -2857,7 +2860,7 @@ int UtcDaliTextGradientMarqueeMixedStyleBaseLookupAndStyleTextureSlotsP(void)
 
 int UtcDaliTextGradientMarqueeMixedStyleBaseOverlayLookupAndStyleTextureSlotsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiText::MarqueeBuilder::PreparedContent content;
   const auto request = CreateMixedGradientContentRequest(true, true);
@@ -2878,7 +2881,7 @@ int UtcDaliTextGradientMarqueeMixedStyleBaseOverlayLookupAndStyleTextureSlotsP(v
 
 int UtcDaliTextGradientMarqueeStyleBaseLookupAndStyleTextureSlotsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiText::MarqueeBuilder::PreparedContent content;
   const auto request = CreateSimpleStyleContentRequest(true, false);
@@ -2895,7 +2898,7 @@ int UtcDaliTextGradientMarqueeStyleBaseLookupAndStyleTextureSlotsP(void)
 
 int UtcDaliTextGradientMarqueeStyleOverlayLookupAndStyleTextureSlotsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiText::MarqueeBuilder::PreparedContent content;
   const auto request = CreateSimpleStyleContentRequest(false, true);
@@ -2913,7 +2916,7 @@ int UtcDaliTextGradientMarqueeStyleOverlayLookupAndStyleTextureSlotsP(void)
 
 int UtcDaliTextGradientMarqueeStyleBaseOverlayLookupAndStyleTextureSlotsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiText::MarqueeBuilder::PreparedContent content;
   const auto request = CreateSimpleStyleContentRequest(true, true);
@@ -4033,7 +4036,7 @@ int UtcDaliTextGradientShaderCompositionAsyncTextVisualDisabledFallbackP(void)
 
 int UtcDaliTextScrollerPreparedCompositionMatrixP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   for(int scenario = 0; scenario < 4; ++scenario)
   {
     Sampler sampler = Sampler::New();
@@ -4065,5 +4068,92 @@ int UtcDaliTextScrollerPreparedCompositionMatrixP(void)
     DALI_TEST_CHECK(content.textGradient.enabled);
     DALI_TEST_CHECK(content.textGradient.overlayStyleTextureEnabled);
   }
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeSimpleEarlyReturnReleasesLookupP(void)
+{
+  UiTestApplication              application;
+  auto                           request = CreateSimpleStyleContentRequest(true, true);
+  Ui::Integration::VisualFactory factory;
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  {
+    factory = Ui::Integration::VisualFactory::Get();
+  }
+  DALI_TEST_CHECK(factory);
+  auto& cache = Ui::GetImplementation(factory).GetFactoryCache().GetGradientTextureCache();
+  using Cache = UiInternal::GradientTextureCache;
+  Cache::Id id{Cache::INVALID_ID};
+  Texture   texture = TextInternal::Gradient::AcquireLookupTexture(request.gradientState.baseStyle, &id);
+  DALI_TEST_CHECK(texture);
+  const auto releasedId = id;
+  TextInternal::Gradient::RequestReleaseLookupTexture(id);
+  // The base lookup succeeds, then invalid overlay data forces an early return.
+  request.gradientState.overlayStyle.stops.Clear();
+  UiText::MarqueeBuilder::PreparedContent content;
+  DALI_TEST_CHECK(!UiText::MarqueeBuilder::TryApplySimpleStyleContent(content, request));
+  DALI_TEST_EQUALS(content.textGradient.lookupTextureId, Cache::INVALID_ID, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayLookupTextureId, Cache::INVALID_ID, TEST_LOCATION);
+  application.SendNotification();
+  DALI_TEST_CHECK(!cache.GetTexture(releasedId));
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeMixedEarlyReturnReleasesLookupP(void)
+{
+  UiTestApplication              application;
+  auto                           request = CreateMixedGradientContentRequest(true, false);
+  Ui::Integration::VisualFactory factory;
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  {
+    factory = Ui::Integration::VisualFactory::Get();
+  }
+  DALI_TEST_CHECK(factory);
+  auto& cache = Ui::GetImplementation(factory).GetFactoryCache().GetGradientTextureCache();
+  using Cache = UiInternal::GradientTextureCache;
+  Cache::Id id{Cache::INVALID_ID};
+  Texture   texture = TextInternal::Gradient::AcquireLookupTexture(request.gradientState.baseStyle, &id);
+  DALI_TEST_CHECK(texture);
+  const auto releasedId = id;
+  TextInternal::Gradient::RequestReleaseLookupTexture(id);
+  // The base lookup succeeds, then invalid overlay data forces an early return.
+  request.gradientState.overlayStyle.stops.Clear();
+  UiText::MarqueeBuilder::PreparedContent content;
+  DALI_TEST_CHECK(!UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request));
+  DALI_TEST_EQUALS(content.textGradient.lookupTextureId, Cache::INVALID_ID, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayLookupTextureId, Cache::INVALID_ID, TEST_LOCATION);
+  application.SendNotification();
+  DALI_TEST_CHECK(!cache.GetTexture(releasedId));
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeReplacementRetainsSharedLookupP(void)
+{
+  UiTestApplication                       application;
+  auto                                    request = CreateSimpleStyleContentRequest(true, true);
+  UiText::MarqueeBuilder::PreparedContent content;
+  DALI_TEST_CHECK(UiText::MarqueeBuilder::TryApplySimpleStyleContent(content, request));
+  const auto id        = content.textGradient.lookupTextureId;
+  const auto overlayId = content.textGradient.overlayLookupTextureId;
+  Texture    texture   = content.textureSet.GetTexture(1u);
+  DALI_TEST_CHECK(UiText::MarqueeBuilder::TryApplySimpleStyleContent(content, request));
+  DALI_TEST_EQUALS(content.textGradient.lookupTextureId, id, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayLookupTextureId, overlayId, TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u) == texture);
+  application.SendNotification();
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u) == texture);
+  Ui::Integration::VisualFactory factory;
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  {
+    factory = Ui::Integration::VisualFactory::Get();
+  }
+  DALI_TEST_CHECK(factory);
+  auto& cache = Ui::GetImplementation(factory).GetFactoryCache().GetGradientTextureCache();
+  DALI_TEST_CHECK(cache.GetTexture(id));
+  DALI_TEST_CHECK(cache.GetTexture(overlayId));
+  content = UiText::MarqueeBuilder::PreparedContent{};
+  application.SendNotification();
+  DALI_TEST_CHECK(!cache.GetTexture(id));
+  DALI_TEST_CHECK(!cache.GetTexture(overlayId));
   END_TEST;
 }

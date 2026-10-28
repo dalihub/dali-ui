@@ -261,6 +261,8 @@ bool TextScroller::IsStopRequested() const
 
 void TextScroller::StopScrollingForUpdate()
 {
+  Internal::Gradient::RequestReleaseLookupTexture(mLookupTextureId);
+  Internal::Gradient::RequestReleaseLookupTexture(mOverlayLookupTextureId);
   mIsStoppedImmediately.store(true);
   mIsStopRequested = false;
   if(mScrollAnimation)
@@ -447,6 +449,8 @@ TextScroller::TextScroller(Ui::Integration::Text::ScrollerInterface& scrollerInt
 
 TextScroller::~TextScroller()
 {
+  Internal::Gradient::RequestReleaseLookupTexture(mLookupTextureId);
+  Internal::Gradient::RequestReleaseLookupTexture(mOverlayLookupTextureId);
   // Core removes its thread-local service before tearing down the playlist.
   // While it is alive, retire even infinite animations without a finish callback.
   if(mScrollAnimation && Dali::SingletonService::Get())
@@ -465,8 +469,14 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                 "TextScroller::SetParameters controlSize[%f,%f] textureSize[%f,%f] direction[%d]\n", controlSize.x,
                 controlSize.y, textureSize.x, textureSize.y, direction);
-  mRenderer           = renderer;
-  mScrollingTextActor = scrollingTextActor;
+  Internal::Gradient::RequestReleaseLookupTexture(mLookupTextureId);
+  Internal::Gradient::RequestReleaseLookupTexture(mOverlayLookupTextureId);
+  Internal::Gradient::ReferenceLookupTexture(textGradient.lookupTextureId);
+  Internal::Gradient::ReferenceLookupTexture(textGradient.overlayLookupTextureId);
+  mLookupTextureId        = textGradient.lookupTextureId;
+  mOverlayLookupTextureId = textGradient.overlayLookupTextureId;
+  mRenderer               = renderer;
+  mScrollingTextActor     = scrollingTextActor;
   RemoveGradientConstraints();
   RemoveGradientOverlayConstraints();
   mGradientEnabled        = false;

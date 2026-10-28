@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
@@ -50,23 +51,26 @@ typedef IntrusivePtr<TextScroller> TextScrollerPtr;
 
 struct TextScrollerGradient
 {
-  bool            enabled{false};
-  Gradient::Type  type{Gradient::Type::NONE};
-  Vector2         startPosition{Vector2::ZERO};
-  Vector2         endPosition{Vector2::ONE};
-  Vector2         radialCenter{Vector2::ZERO};
-  Vector2         radialScale{Vector2::ZERO};
-  Vector2         conicCenter{Vector2::ZERO};
-  Vector2         conicScale{Vector2::ONE};
-  float           conicStartAngle{0.0f};
-  float           startOffset{0.0f};
-  Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized bounds in the selected TextGradient coordinate space.
-  bool            useTextureCoordinates{false};   ///< True for content-attached marquee coordinates; false for viewport coordinates.
-  Property::Index startOffsetPropertyIndex{Property::INVALID_INDEX};
-  bool            applyConstraintsAlways{false};
-  bool            mixedTextGradient{false};          ///< True when scroller uses preserved color + gradient mask textures.
-  bool            styleTextureEnabled{false};        ///< True when slot set includes a below-fill style texture.
-  bool            overlayStyleTextureEnabled{false}; ///< True when slot set includes underline/strikethrough texture.
+  // Borrowed IDs; PreparedContent and the live TextScroller own the references.
+  Ui::Internal::GradientTextureCache::Id lookupTextureId{Ui::Internal::GradientTextureCache::INVALID_ID};
+  Ui::Internal::GradientTextureCache::Id overlayLookupTextureId{Ui::Internal::GradientTextureCache::INVALID_ID};
+  bool                                   enabled{false};
+  Gradient::Type                         type{Gradient::Type::NONE};
+  Vector2                                startPosition{Vector2::ZERO};
+  Vector2                                endPosition{Vector2::ONE};
+  Vector2                                radialCenter{Vector2::ZERO};
+  Vector2                                radialScale{Vector2::ZERO};
+  Vector2                                conicCenter{Vector2::ZERO};
+  Vector2                                conicScale{Vector2::ONE};
+  float                                  conicStartAngle{0.0f};
+  float                                  startOffset{0.0f};
+  Vector4                                bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized bounds in the selected TextGradient coordinate space.
+  bool                                   useTextureCoordinates{false};   ///< True for content-attached marquee coordinates; false for viewport coordinates.
+  Property::Index                        startOffsetPropertyIndex{Property::INVALID_INDEX};
+  bool                                   applyConstraintsAlways{false};
+  bool                                   mixedTextGradient{false};          ///< True when scroller uses preserved color + gradient mask textures.
+  bool                                   styleTextureEnabled{false};        ///< True when slot set includes a below-fill style texture.
+  bool                                   overlayStyleTextureEnabled{false}; ///< True when slot set includes underline/strikethrough texture.
 
   bool                      overlayEnabled{false};
   Gradient::Type            overlayType{Gradient::Type::NONE};
@@ -323,6 +327,9 @@ private:
   std::vector<Constraint>                   mGradientOverlayConstraints;     // Constraints for animated TextGradientOverlay uniforms.
   Property::Index                           mGradientAnimOffsetIndex;        // Source property for uTextGradientStartOffset.
   Property::Index                           mGradientOverlayAnimOffsetIndex; // Source property for uTextGradientOverlayStartOffset.
+
+  Ui::Internal::GradientTextureCache::Id mLookupTextureId{Ui::Internal::GradientTextureCache::INVALID_ID};
+  Ui::Internal::GradientTextureCache::Id mOverlayLookupTextureId{Ui::Internal::GradientTextureCache::INVALID_ID};
 
   int                      mScrollSpeed;                    ///< Speed which text should automatically scroll at
   int                      mLoopCount;                      ///< Number of time the text should scroll
