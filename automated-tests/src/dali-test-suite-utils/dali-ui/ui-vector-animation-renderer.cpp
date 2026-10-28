@@ -40,6 +40,8 @@ namespace
 std::atomic<uint32_t>                             gVectorAnimationLoadCount{0u};
 std::atomic<uint32_t>                             gLastVectorAnimationWidth{0u};
 std::atomic<uint32_t>                             gLastVectorAnimationHeight{0u};
+std::atomic<uint32_t>                             gRenderStoppedCount{0u};
+std::atomic<bool>                                 gFailNextRender{false};
 std::mutex                                        gDynamicPropertyProbeMutex;
 Dali::Internal::Adaptor::VectorAnimationRenderer* gLatestVectorAnimationRenderer{nullptr};
 } // unnamed namespace
@@ -122,7 +124,7 @@ public:
   bool Render(uint32_t frameNumber)
   {
     Dali::Mutex::ScopedLock lock(mMutex);
-    if(mWidth == 0 || mHeight == 0)
+    if(gFailNextRender.exchange(false) || mWidth == 0 || mHeight == 0)
     {
       return false;
     }
@@ -397,6 +399,7 @@ bool VectorAnimationRenderer::Render(uint32_t frameNumber)
 
 void VectorAnimationRenderer::RenderStopped()
 {
+  ++gRenderStoppedCount;
 }
 
 uint32_t VectorAnimationRenderer::GetTotalFrameNumber() const
@@ -468,6 +471,21 @@ namespace Test
 {
 namespace UiVectorAnimationRenderer
 {
+void ResetRenderStoppedCount()
+{
+  gRenderStoppedCount.store(0u);
+}
+
+uint32_t GetRenderStoppedCount()
+{
+  return gRenderStoppedCount.load();
+}
+
+void FailNextRender()
+{
+  gFailNextRender.store(true);
+}
+
 void ResetLoadCount()
 {
   gVectorAnimationLoadCount.store(0u);

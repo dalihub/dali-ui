@@ -44,6 +44,9 @@ namespace Test
 namespace UiVectorAnimationRenderer
 {
 void     ResetLoadCount();
+void     ResetRenderStoppedCount();
+uint32_t GetRenderStoppedCount();
+void     FailNextRender();
 uint32_t GetLoadCount();
 uint32_t GetDynamicPropertyCount();
 uint32_t GetLastRenderedFrame();
@@ -850,7 +853,26 @@ int UtcDaliVectorAnimationTaskPlaybackAndRangeP(void)
   task->SetAspectFitEnabled(false);
   DALI_TEST_CHECK(!task->IsAspectFitEnabled());
   task->SetSize(48u, 36u);
+  Test::UiVectorAnimationRenderer::ResetRenderStoppedCount();
   DALI_TEST_CHECK(task->Rasterize());
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetRenderStoppedCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!task->mKeepAnimation);
+
+  // A stopped seek must retry while the released queue is being prepared.
+  task->SetCurrentFrameNumber(2u);
+  Test::UiVectorAnimationRenderer::FailNextRender();
+  DALI_TEST_CHECK(task->Rasterize());
+  DALI_TEST_CHECK(task->mKeepAnimation);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetRenderStoppedCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(task->Rasterize());
+  DALI_TEST_CHECK(!task->mKeepAnimation);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetLastRenderedFrame(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetRenderStoppedCount(), 2u, TEST_LOCATION);
+
+  // Pause does not request conversion to an ordinary texture.
+  task->mPlayState = Task::PlayState::PAUSED;
+  DALI_TEST_CHECK(task->Rasterize());
+  DALI_TEST_EQUALS(Test::UiVectorAnimationRenderer::GetRenderStoppedCount(), 2u, TEST_LOCATION);
 
   Task::AnimationData data;
   data.resendFlag = Task::RESEND_LOOP_COUNT | Task::RESEND_PLAY_RANGE |

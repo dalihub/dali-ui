@@ -749,6 +749,13 @@ bool VectorAnimationTask::Rasterize()
     }
   }
 
+  // Also convert initial still frames and frames updated while stopped.
+  // Pause retains the native queue for playback to resume without reallocating.
+  if(renderSuccess && (stopped || mPlayState == PlayState::STOPPED))
+  {
+    mVectorRenderer.RenderStopped();
+  }
+
   if(stopped && renderSuccess)
   {
     mPlayState   = PlayState::STOPPED;
@@ -756,12 +763,6 @@ bool VectorAnimationTask::Rasterize()
     mCurrentLoop = 0;
 
     mNeedForceRenderOnceTrigger = true;
-
-    if(mVectorRenderer)
-    {
-      // Notify the Renderer that rendering is stopped.
-      mVectorRenderer.RenderStopped();
-    }
 
     // Animation is finished
     {
@@ -783,7 +784,9 @@ bool VectorAnimationTask::Rasterize()
     mNeedForceRenderOnceTrigger = false;
   }
 
-  if(mPlayState != PlayState::PAUSED && mPlayState != PlayState::STOPPED)
+  // A released queue is prepared asynchronously on the event thread.
+  // Still-frame requests must retry too, for example seeking after Stop.
+  if(!renderSuccess || (mPlayState != PlayState::PAUSED && mPlayState != PlayState::STOPPED))
   {
     mKeepAnimation = true;
   }
