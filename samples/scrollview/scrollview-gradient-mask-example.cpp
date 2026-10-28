@@ -104,7 +104,7 @@ private:
       for(int line = 0; line < 2; ++line)
       {
         View bar = View::New();
-        place(bar, 28, 104 + line * 38, 310 - line * 90, 20);
+        place(bar, 28.0f, static_cast<float>(104 + line * 38), static_cast<float>(310 - line * 90), 20.0f);
         bar.SetBackgroundColor(Vector4(0.08f, 0.22f, 0.30f, 0.35f));
         bar.SetCornerRadius(10.0f);
         card.Add(bar);

@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/devel-api/adaptor-framework/application.h>
+#include <dali/devel-api/adaptor-framework/environment-variable.h>
 
 #if defined(__GLIBC__)
 #include <malloc.h>
@@ -145,7 +146,7 @@ UiColor GetModeColor(PerfRenderMode mode)
 
 PerfRenderMode GetInitialRenderMode()
 {
-  const char* mode = std::getenv("DALI_TEXT_GRADIENT_PERF_MODE");
+  const char* mode = Dali::EnvironmentVariable::GetEnvironmentVariable("DALI_TEXT_GRADIENT_PERF_MODE");
   if(mode == nullptr)
   {
     return PerfRenderMode::TEXT_GRADIENT;
@@ -167,7 +168,7 @@ PerfRenderMode GetInitialRenderMode()
 
 uint32_t GetConfiguredLabelCount()
 {
-  const char* value = std::getenv("DALI_TEXT_GRADIENT_PERF_LABEL_COUNT");
+  const char* value = Dali::EnvironmentVariable::GetEnvironmentVariable("DALI_TEXT_GRADIENT_PERF_LABEL_COUNT");
   if(value == nullptr)
   {
     return DEFAULT_LABEL_COUNT;
@@ -182,13 +183,13 @@ uint32_t GetConfiguredLabelCount()
 
 bool GetInitialAsyncRendering()
 {
-  const char* value = std::getenv("DALI_TEXT_GRADIENT_PERF_ASYNC");
+  const char* value = Dali::EnvironmentVariable::GetEnvironmentVariable("DALI_TEXT_GRADIENT_PERF_ASYNC");
   return value == nullptr || (std::strcmp(value, "0") != 0 && std::strcmp(value, "off") != 0);
 }
 
 GradientSpanScenario GetGradientSpanScenario()
 {
-  const char* value = std::getenv("DALI_TEXT_GRADIENT_PERF_SPAN_SCENARIO");
+  const char* value = Dali::EnvironmentVariable::GetEnvironmentVariable("DALI_TEXT_GRADIENT_PERF_SPAN_SCENARIO");
   if(value == nullptr)
   {
     return GradientSpanScenario::PARTIAL_ONE;
