@@ -21,6 +21,7 @@ SET(TC_SOURCES
     utc-Dali-InteractiveView-internal.cpp
     utc-Dali-SelectableTrait-internal.cpp
     utc-Dali-LayoutDependencyScope-internal.cpp
+    utc-Dali-GradientTextureCache-internal.cpp
     utc-Dali-GradientFactory-internal.cpp
     utc-Dali-ShaderFactory-internal.cpp
     utc-Dali-VisualFactory-internal.cpp

@@ -103,21 +103,12 @@ const Matrix3& Gradient::GetAlignmentTransform() const
   return mAlignmentTransform;
 }
 
-/**
- * Following the SVG gradient.
- *
- * Not only the spread method decides the texture wrap mode:
- *    PAD-->GL_CLAMP_TO_EDGE; REPEAT-->GL_REPEAT; REFLECT-->GL_MIRROR_REPEAT
- *
- *  If the stops have not covered the whole zero to one range,
- *  the REPEAT spread behaves different from the two others in the lookup texture generation.
- */
-Dali::Texture Gradient::GenerateLookupTexture()
+void Gradient::NormalizeStops()
 {
-  uint32_t numStops = static_cast<uint32_t>(mGradientStops.Count());
-  if(DALI_UNLIKELY(numStops <= 0))
+  const uint32_t numStops = static_cast<uint32_t>(mGradientStops.Count());
+  if(numStops == 0u)
   {
-    return Dali::Texture();
+    return;
   }
 
   // Fill -1 offsets automatically.
@@ -154,6 +145,31 @@ Dali::Texture Gradient::GenerateLookupTexture()
   }
 
   std::sort(mGradientStops.Begin(), mGradientStops.End());
+}
+
+/**
+ * Following the SVG gradient.
+ *
+ * Not only the spread method decides the texture wrap mode:
+ *    PAD-->GL_CLAMP_TO_EDGE; REPEAT-->GL_REPEAT; REFLECT-->GL_MIRROR_REPEAT
+ *
+ *  If the stops have not covered the whole zero to one range,
+ *  the REPEAT spread behaves different from the two others in the lookup texture generation.
+ */
+Dali::Texture Gradient::GenerateLookupTexture()
+{
+  if(DALI_UNLIKELY(mGradientStops.Empty()))
+  {
+    return Dali::Texture();
+  }
+
+  NormalizeStops();
+  return GenerateLookupTextureFromNormalizedStops();
+}
+
+Texture Gradient::GenerateLookupTextureFromNormalizedStops()
+{
+  uint32_t numStops = static_cast<uint32_t>(mGradientStops.Count());
 
   // Copy the stops to use pre-multiplied colors during texture generation. Also allow we can use additional stops if we need.
   Vector<float>   offsets;

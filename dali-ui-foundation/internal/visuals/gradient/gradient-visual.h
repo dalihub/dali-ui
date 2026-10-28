@@ -23,6 +23,7 @@
 #include <dali/public-api/math/vector2.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-foundation/internal/visuals/gradient/gradient.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
@@ -210,10 +211,12 @@ private:
   GradientVisual& operator=(const GradientVisual& gradientVisual);
 
 private:
-  Matrix3                mGradientTransform;
-  IntrusivePtr<Gradient> mGradient;
-  Type                   mGradientType;
-  Dali::Property::Index  mStartOffsetIndex;
+  Matrix3                             mGradientTransform;
+  IntrusivePtr<Gradient>              mGradient;
+  std::weak_ptr<GradientTextureCache> mGradientTextureCache;
+  GradientTextureCache::Id            mLookupTextureId{GradientTextureCache::INVALID_ID};
+  Type                                mGradientType;
+  Dali::Property::Index               mStartOffsetIndex;
 };
 
 } // namespace Internal

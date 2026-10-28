@@ -163,6 +163,7 @@ GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
 : Visual::Base(factoryCache, Ui::Integration::InternalVisualType::GRADIENT, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mGradientTransform(),
   mGradient(nullptr),
+  mGradientTextureCache(factoryCache.GetGradientTextureCache()),
   mGradientType(LINEAR),
   mStartOffsetIndex(Property::INVALID_INDEX)
 {
@@ -170,6 +171,10 @@ GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
 
 GradientVisual::~GradientVisual()
 {
+  if(auto cache = mGradientTextureCache.lock())
+  {
+    cache->RequestRelease(mLookupTextureId);
+  }
 }
 
 void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
@@ -551,8 +556,14 @@ void GradientVisual::ApplyLookupTexture()
   // Set up the texture set. If lookup texture generate failed, set empty texture handle so don't be rendered anything.
   if(DALI_LIKELY(mGradient) && mImpl->mRenderer)
   {
-    TextureSet    textureSet    = TextureSet::New();
-    Dali::Texture lookupTexture = mGradient->GenerateLookupTexture();
+    TextureSet    textureSet = TextureSet::New();
+    Dali::Texture lookupTexture;
+    if(auto cache = mGradientTextureCache.lock())
+    {
+      cache->RequestRelease(mLookupTextureId);
+      mLookupTextureId = cache->Acquire(*mGradient);
+      lookupTexture    = cache->GetTexture(mLookupTextureId);
+    }
     textureSet.SetTexture(0u, lookupTexture);
     Dali::WrapMode::Type wrap = GetWrapMode(mGradient->GetSpreadMethod());
     if(wrap != Dali::WrapMode::DEFAULT)

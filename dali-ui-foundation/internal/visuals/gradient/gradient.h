@@ -80,6 +80,11 @@ public:
   void ClearStop();
 
   /**
+   * @brief Resolves automatic offsets and sorts stops before lookup generation.
+   */
+  void NormalizeStops();
+
+  /**
    * Build GradientStop array by input parameters.
    */
   void ApplyStops(const Vector<float>& offsets, const Vector<Vector4>& colors);
@@ -139,6 +144,13 @@ public:
   float GetStartOffset() const;
 
 private:
+  friend class GradientTextureCache;
+
+  /**
+   * @brief Generates the LUT after NormalizeStops(), without sorting a second time.
+   */
+  Texture GenerateLookupTextureFromNormalizedStops();
+
   /**
    * Estimate the resolution of the lookup texture.
    * Note: Only call this function after the gradient stops are sorted in order.
