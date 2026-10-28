@@ -1333,10 +1333,7 @@ private:
       const Attribute& attribute = openTag.annotationAttributes[attributeIndex];
 
       Dali::Ui::Text::Span span = Dali::Ui::Text::AnnotationSpan::New(Dali::String(attribute.name.c_str()), Dali::String(attribute.value.c_str()));
-      if(span)
-      {
-        mCompletedSpans.push_back({span, openTag.startIndex, endIndex, openTag.openOrder, attributeIndex});
-      }
+      mCompletedSpans.push_back({span, openTag.startIndex, endIndex, openTag.openOrder, attributeIndex});
     }
   }
 
