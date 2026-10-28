@@ -142,9 +142,9 @@ ADD_CUSTOM_COMMAND(
 )
 
 PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
-     dali2-core
-     dali2-adaptor
-     dali2-ui-foundation
+     dali3-core
+     dali3-adaptor
+     dali3-ui-foundation
 )
 
 ADD_COMPILE_OPTIONS( -rdynamic )

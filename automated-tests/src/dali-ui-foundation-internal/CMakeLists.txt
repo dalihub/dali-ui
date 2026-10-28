@@ -133,7 +133,7 @@ IF(DALI_TEST_SOURCE_LIST_ONLY)
 ENDIF()
 
 # This internal UTC target builds dali-ui-foundation sources directly.
-# It does not link against libdali2-ui-foundation, because many internal
+# It does not link against libdali3-ui-foundation, because many internal
 # symbols are hidden in the production shared library.
 SET(FOUNDATION_ROOT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../dali-ui-foundation)
 
@@ -189,8 +189,8 @@ LIST(APPEND LIBRARY_SOURCES ${BUILT_IN_SHADER_GEN_CPP})
 # ---------------------------------------------------------
 # 5. Package Dependencies
 # ---------------------------------------------------------
-PKG_CHECK_MODULES(DALICORE REQUIRED dali2-core)
-PKG_CHECK_MODULES(DALIADAPTOR REQUIRED dali2-adaptor)
+PKG_CHECK_MODULES(DALICORE REQUIRED dali3-core)
+PKG_CHECK_MODULES(DALIADAPTOR REQUIRED dali3-adaptor)
 
 # ---------------------------------------------------------
 # 6. Compiler Options
@@ -435,7 +435,7 @@ ADD_EXECUTABLE(${ORDINARY_ELLIPSIS_PERF_NAME} EXCLUDE_FROM_ALL
 )
 
 TARGET_LINK_LIBRARIES(${ORDINARY_ELLIPSIS_PERF_NAME}
-    dali2-ui-foundation
+    dali3-ui-foundation
     ${DALICORE_LIBRARIES}
     ${DALIADAPTOR_LIBRARIES}
     -lpthread

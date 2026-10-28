@@ -5,7 +5,7 @@ SET(CMAKE_C_STANDARD 99)
 
 FIND_PACKAGE(PkgConfig REQUIRED)
 PKG_CHECK_MODULES(TEXT_DALI REQUIRED IMPORTED_TARGET
-  dali2-core dali2-adaptor dali2-ui-foundation)
+  dali3-core dali3-adaptor dali3-ui-foundation)
 OPTION(TEXT_PIXEL_CHECKS "Enable PNG-based automatic pixel validation (requires libpng)" ON)
 IF(TEXT_PIXEL_CHECKS)
   FIND_PACKAGE(PNG 1.6 REQUIRED)

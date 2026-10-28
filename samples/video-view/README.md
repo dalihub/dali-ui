@@ -111,7 +111,7 @@ hello-world와 동일하게 독립 GBS 패키지로 구성돼 있다.
 - `packaging/com.samsung.dali.video-view.spec`
   - `capi-media-player`, `esplusplayer` BuildRequires (CAPI `player_h`, ESPlayer 헤더)
   - `VideoSourceDescriptor`(`video-source-descriptor.h`)는 dali-adaptor public-api에 있어
-    `pkgconfig(dali2-adaptor)`만으로 찾아진다(별도 integration 패키지 불필요).
+    `pkgconfig(dali3-adaptor)`만으로 찾아진다(별도 integration 패키지 불필요).
 - `res/` (아이콘)
 
 > GBS에서 위 헤더를 여전히 못 찾으면, rootstrap의 dali-adaptor 패키지가 VideoSourceDescriptor 추가

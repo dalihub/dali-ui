@@ -11,7 +11,7 @@ ENDIF()
 
 IF(WIN32)
   # Windows exercises the LWE web-engine backend
-  # (dali2-web-engine-lwe-plugin-win.dll) through a dedicated sample.
+  # (dali3-web-engine-lwe-plugin-win.dll) through a dedicated sample.
   DALI_ADD_SAMPLE(web-view-win.example web-view-win-example.cpp)
   # Button-driven test harness: google.com vs the local GC-stress page.
   DALI_ADD_SAMPLE(web-view-win-test.example web-view-win-test-example.cpp)

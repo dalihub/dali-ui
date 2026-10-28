@@ -166,10 +166,10 @@ TARGET_COMPILE_OPTIONS(dali-ui-components-test-md4c
 )
 
 PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
-     dali2-core
-     dali2-adaptor
-     dali2-ui-foundation
-     dali2-ui-components
+     dali3-core
+     dali3-adaptor
+     dali3-ui-foundation
+     dali3-ui-components
 )
 
 SET(${CAPI_LIB}_CFLAGS_OTHER_FOR_TESTS ${${CAPI_LIB}_CFLAGS_OTHER})

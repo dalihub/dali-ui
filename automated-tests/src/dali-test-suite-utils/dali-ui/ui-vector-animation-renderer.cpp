@@ -19,7 +19,7 @@
 //
 // The real implementation renders Lottie/vector animations via thorvg, which may not be
 // installed on the test machine. Symbol interposition (this file is compiled directly into the
-// test binary, ahead of libdali2-adaptor.so on the link line) lets LottieAnimationVisual and
+// test binary, ahead of libdali3-adaptor.so on the link line) lets LottieAnimationVisual and
 // SelectableLottieAnimationView tests run without invoking ThorVG, matching the approach used by
 // dali-toolkit's
 // dali-toolkit-test-utils/toolkit-vector-animation-renderer.cpp.

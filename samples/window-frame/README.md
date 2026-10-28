@@ -363,9 +363,9 @@ application as `com.samsung.dali.window-frame` and runs
 
 The component package must be built first because the sample no longer
 compiles a private copy of WindowFrame. The sample keeps an unversioned
-`pkgconfig(dali2-ui-components)` BuildRequires, so the rootstrap must provide a
+`pkgconfig(dali3-ui-components)` BuildRequires, so the rootstrap must provide a
 component package that contains the WindowFrame public API. It must also contain compatible
-`dali2-core` and `dali2-adaptor` packages; an older core can prevent the
+`dali3-core` and `dali3-adaptor` packages; an older core can prevent the
 component package from building before WindowFrame sources are compiled.
 
 ## Platform validation

@@ -4,7 +4,15 @@ IF(POLICY CMP0177)
   CMAKE_POLICY(SET CMP0177 NEW) # install() DESTINATION paths are normalized.
 ENDIF()
 
-SET(name "dali2-ui")
+# API major version (Not DALi release version). It also names the libraries,
+# the pkg-config files and the CMake packages (dali<major>-ui-foundation,
+# dali<major>-ui-components), and selects dali<major>-core and dali<major>-adaptor.
+IF(NOT DALI_API_MAJOR)
+  SET(DALI_API_MAJOR 3)
+ENDIF()
+SET(name "dali${DALI_API_MAJOR}-ui")
+SET(core_name "dali${DALI_API_MAJOR}-core")
+SET(adaptor_name "dali${DALI_API_MAJOR}-adaptor")
 PROJECT(${name})
 
 SET(CMAKE_C_STANDARD 99)
@@ -12,7 +20,7 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(GCC_COMPILER_VERSION_REQUIRED "6")
 
 # API VERSION (Not DALi release version)
-SET(DALI_UI_VERSION_MAJOR 2)
+SET(DALI_UI_VERSION_MAJOR ${DALI_API_MAJOR})
 SET(DALI_UI_VERSION_MINOR 0)
 SET(DALI_UI_VERSION_PATCH 0)
 SET(DALI_UI_VERSION ${DALI_UI_VERSION_MAJOR}.${DALI_UI_VERSION_MINOR}.${DALI_UI_VERSION_PATCH})
@@ -71,27 +79,27 @@ IF(WIN32)
     MESSAGE(FATAL_ERROR "ENABLE_VECTOR_BASED_TEXT_RENDERING is not supported by the Windows backend")
   ENDIF()
 
-  FIND_PACKAGE(dali2-core CONFIG REQUIRED)
-  FIND_PACKAGE(dali2-adaptor CONFIG REQUIRED)
+  FIND_PACKAGE(${core_name} CONFIG REQUIRED)
+  FIND_PACKAGE(${adaptor_name} CONFIG REQUIRED)
 
   SET(DALI_UI_PLATFORM_LIBRARIES
-    dali2-core::dali2-core
-    dali2-adaptor::dali2-adaptor
+    ${core_name}::${core_name}
+    ${adaptor_name}::${adaptor_name}
   )
 ELSEIF(ENABLE_PKG_CONFIGURE)
   FIND_PACKAGE( PkgConfig REQUIRED )
-  PKG_CHECK_MODULES(DALICORE REQUIRED dali2-core)
-  PKG_CHECK_MODULES(DALIADAPTOR REQUIRED dali2-adaptor)
+  PKG_CHECK_MODULES(DALICORE REQUIRED ${core_name})
+  PKG_CHECK_MODULES(DALIADAPTOR REQUIRED ${adaptor_name})
   SET(DALI_UI_PLATFORM_LIBRARIES
     ${DALICORE_LDFLAGS}
     ${DALIADAPTOR_LDFLAGS}
   )
 ELSE()
-  FIND_PACKAGE(dali2-core CONFIG REQUIRED)
-  FIND_PACKAGE(dali2-adaptor CONFIG REQUIRED)
+  FIND_PACKAGE(${core_name} CONFIG REQUIRED)
+  FIND_PACKAGE(${adaptor_name} CONFIG REQUIRED)
   SET(DALI_UI_PLATFORM_LIBRARIES
-    dali2-core::dali2-core
-    dali2-adaptor::dali2-adaptor
+    ${core_name}::${core_name}
+    ${adaptor_name}::${adaptor_name}
   )
 ENDIF()
 

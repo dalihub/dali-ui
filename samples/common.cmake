@@ -8,16 +8,16 @@ INCLUDE(GNUInstallDirs)
 
 # Build Options
 IF(WIN32)
-  FIND_PACKAGE(dali2-core CONFIG REQUIRED)
-  FIND_PACKAGE(dali2-adaptor CONFIG REQUIRED)
-  FIND_PACKAGE(dali2-ui-foundation CONFIG REQUIRED)
-  FIND_PACKAGE(dali2-ui-components CONFIG REQUIRED)
+  FIND_PACKAGE(dali3-core CONFIG REQUIRED)
+  FIND_PACKAGE(dali3-adaptor CONFIG REQUIRED)
+  FIND_PACKAGE(dali3-ui-foundation CONFIG REQUIRED)
+  FIND_PACKAGE(dali3-ui-components CONFIG REQUIRED)
 
   SET(DALI_UI_SAMPLE_LIBRARIES
-    dali2-ui-components::dali2-ui-components
-    dali2-ui-foundation::dali2-ui-foundation
-    dali2-adaptor::dali2-adaptor
-    dali2-core::dali2-core
+    dali3-ui-components::dali3-ui-components
+    dali3-ui-foundation::dali3-ui-foundation
+    dali3-adaptor::dali3-adaptor
+    dali3-core::dali3-core
   )
 
   # The top-level sample build applies these directory-wide. Keep standalone
@@ -28,10 +28,10 @@ IF(WIN32)
   ENDIF()
 ELSE()
   FIND_PACKAGE(PkgConfig REQUIRED)
-  PKG_CHECK_MODULES(DALICORE REQUIRED IMPORTED_TARGET dali2-core)
-  PKG_CHECK_MODULES(DALIADAPTOR REQUIRED IMPORTED_TARGET dali2-adaptor)
-  PKG_CHECK_MODULES(DALI_UI_FOUNDATION REQUIRED IMPORTED_TARGET dali2-ui-foundation)
-  PKG_CHECK_MODULES(DALI_UI_COMPONENTS REQUIRED IMPORTED_TARGET dali2-ui-components)
+  PKG_CHECK_MODULES(DALICORE REQUIRED IMPORTED_TARGET dali3-core)
+  PKG_CHECK_MODULES(DALIADAPTOR REQUIRED IMPORTED_TARGET dali3-adaptor)
+  PKG_CHECK_MODULES(DALI_UI_FOUNDATION REQUIRED IMPORTED_TARGET dali3-ui-foundation)
+  PKG_CHECK_MODULES(DALI_UI_COMPONENTS REQUIRED IMPORTED_TARGET dali3-ui-components)
 
   SET(DALI_UI_SAMPLE_LIBRARIES
     PkgConfig::DALI_UI_COMPONENTS

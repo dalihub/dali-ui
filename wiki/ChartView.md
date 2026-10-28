@@ -1098,10 +1098,10 @@ project(my-chart-app)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(DALICORE           REQUIRED dali2-core)
-pkg_check_modules(DALIADAPTOR        REQUIRED dali2-adaptor)
-pkg_check_modules(DALI_UI_FOUNDATION REQUIRED dali2-ui-foundation)
-pkg_check_modules(DALI_UI_COMP       REQUIRED dali2-ui-components)
+pkg_check_modules(DALICORE           REQUIRED dali3-core)
+pkg_check_modules(DALIADAPTOR        REQUIRED dali3-adaptor)
+pkg_check_modules(DALI_UI_FOUNDATION REQUIRED dali3-ui-foundation)
+pkg_check_modules(DALI_UI_COMP       REQUIRED dali3-ui-components)
 
 add_executable(my-chart-app main.cpp)
 

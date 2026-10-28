@@ -6,6 +6,6 @@ includedir=@INCLUDE_DIR@
 Name: dali-ui-foundation
 Description: DALi UI Foundation Library
 Version: @DALI_UI_VERSION@
-Requires: dali2-core
-Libs: -L${libdir} -ldali2-ui-foundation
+Requires: @core_name@
+Libs: -L${libdir} -l@PROJECT_LIB_NAME@
 Cflags: -I${includedir}

@@ -23,7 +23,7 @@ Build configuration:
 
 - Built as the private static CMake target `dali-ui-components-md4c`.
 - Compiled as C99 with position independent code.
-- Linked into `dali2-ui-components`.
+- Linked into `dali3-ui-components`.
 - Include path is private to the target/source tree and is not installed as a public DALi UI header.
 - MD4C types and callbacks are wrapped by `dali-ui-components/internal/markdown` and are not exposed by the MarkdownView public API.
 - The C source is compiled with hidden symbol visibility where supported by the DALi UI build.
@@ -72,4 +72,4 @@ Update procedure:
 1. Verify the target upstream tag and record its exact commit hash.
 2. Replace only `entity.c`, `entity.h`, `md4c.c`, `md4c.h`, and `LICENSE.md` from the upstream tag unless the parser starts requiring additional files.
 3. Keep local modifications out of upstream files. If a patch becomes unavoidable, add a section here describing the reason and the exact diff.
-4. Rebuild `dali2-ui-components`, run Markdown parser/MarkdownView UTCs, and check that MD4C symbols are not exported from the shared library.
+4. Rebuild `dali3-ui-components`, run Markdown parser/MarkdownView UTCs, and check that MD4C symbols are not exported from the shared library.

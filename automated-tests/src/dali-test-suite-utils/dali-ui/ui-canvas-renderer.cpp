@@ -23,7 +23,7 @@
 // methods is compiled down to `return false;` / `return 0u;` by the THORVG_SUPPORT guards, so a
 // test that checks a return value fails on a machine without thorvg and passes on one with it.
 // Symbol interposition (this file is compiled directly into the test binary, ahead of
-// libdali2-adaptor.so on the link line) lets the test suite exercise the CanvasRenderer API surface
+// libdali3-adaptor.so on the link line) lets the test suite exercise the CanvasRenderer API surface
 // without depending on thorvg being present at all, matching the approach already used by
 // dali-toolkit's dali-toolkit-test-utils/toolkit-canvas-renderer.cpp.
 //
