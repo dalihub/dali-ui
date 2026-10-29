@@ -42,6 +42,8 @@
 #include "view-visual-data.h"
 #include "visual-constraint-functions.h"
 
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-visual.h>
+
 using Dali::Integration::ToStdString;
 
 namespace DALI_NAMESPACE
@@ -1614,6 +1616,12 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, FittingMode
     }
 
     Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
+
+    if(update == FittingModeUpdate::SIZE_OR_SCALE && visualImpl.GetType() == Ui::Integration::InternalVisualType::GRADIENT)
+    {
+      // Gradients need only their alignment uniform, not fitting or a new layout callback.
+      static_cast<Internal::GradientVisual&>(visualImpl).UpdateUiScale(mOuter.mViewImpl.GetEffectiveScale());
+    }
 
     if(!visualImpl.IsFittingModeRequired() ||
        (update == FittingModeUpdate::LAYOUT_FINISHED && visualImpl.GetType() == Ui::Integration::InternalVisualType::TEXT))

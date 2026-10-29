@@ -98,6 +98,13 @@ public:
    */
   static GradientVisualPtr New(VisualFactoryCache& factoryCache, const Property::Map& properties);
 
+  /**
+   * @brief Updates the gradient alignment transform for the given UI scale.
+   *
+   * @param[in] effectiveScale The owning View's effective UI scale
+   */
+  void UpdateUiScale(float effectiveScale);
+
 public: // from Visual
   /**
    * @copydoc Visual::Base::CreatePropertyMap
@@ -153,6 +160,13 @@ protected:
   Shader GenerateShader() const override;
 
 private:
+  /**
+   * @brief Resolves the alignment uniform from the authored gradient and current UI scale.
+   *
+   * Keeps the previous alignment if the resolved matrix is not finite.
+   */
+  void UpdateAlignmentTransform();
+
   /**
    * New a gradient object with the given property map.
    *
