@@ -601,6 +601,13 @@ public:
 
   /**
    * @brief Returns the pointer position in preview-parent coordinates.
+   *
+   * The position is relative to the top-left corner of the configured drag preview
+   * container, or of the source View's parent when no container is configured, in
+   * that parent's local actor coordinates -- the units Actor::ScreenToLocal() reports.
+   * Laid-out geometry in those units already includes the effective scale, so use
+   * GetPreviewRequestedX() and GetPreviewRequestedY() to position the preview
+   * with View::SetRequestedX() and View::SetRequestedY().
    */
   const Vector2& GetPreviewLocalPosition() const;
 
@@ -608,6 +615,83 @@ public:
    * @brief Returns the normalized drag-start point within the source.
    */
   const Vector2& GetSourceAnchor() const;
+
+  /**
+   * @brief Returns the pointer X position in the drag preview's requested units.
+   *
+   * This is the x of GetPreviewLocalPosition() divided by the effective scale of
+   * the session's drag preview -- its window scale times the UI-scale term its
+   * UiScalePolicy selects, both 1.0 while LayoutScaleManager::SetScalable(false) is in
+   * force -- read when this snapshot was taken. The layout multiplies the requested
+   * position of a STANDALONE View by that View's own effective scale, so a
+   * STANDALONE preview whose PARENT_ORIGIN is TOP_LEFT, whose POSITION_USES_PIVOT is
+   * enabled and whose PIVOT is GetSourceAnchor() puts its grab point under the
+   * pointer when it passes this value and GetPreviewRequestedY() to
+   * View::SetRequestedX() and View::SetRequestedY(), whatever UiScalePolicy the
+   * preview or its container uses. A start margin on the preview offsets the grab
+   * point by the margin times that scale.
+   *
+   * The detector adds the preview to its container before it creates the first
+   * snapshot that has a preview, so the updater and DragPreviewPositionSignal
+   * receive the value converted with the scale the next layout pass uses. If the
+   * effective scale changes during the drag, the next drag update carries the newly converted
+   * value. While the session has no preview -- in the DragPreviewFactory event,
+   * which is created before the preview exists, and in every event of a session
+   * without one -- there is nothing to convert for, and the value equals the x of
+   * GetPreviewLocalPosition().
+   *
+   * @return The pointer X position to pass to View::SetRequestedX() of the drag
+   *         preview
+   */
+  float GetPreviewRequestedX() const;
+
+  /**
+   * @brief Returns the pointer Y position in the drag preview's requested units.
+   *
+   * This is the y of GetPreviewLocalPosition() converted exactly as
+   * GetPreviewRequestedX() describes, with the same timing and the same
+   * passthrough while the session has no preview. A top margin on the preview
+   * offsets the grab point by the margin times the preview's effective scale.
+   *
+   * @return The pointer Y position to pass to View::SetRequestedY() of the drag
+   *         preview
+   */
+  float GetPreviewRequestedY() const;
+
+  /**
+   * @brief Returns the source's laid-out width in requested units.
+   *
+   * This is the source's width when the drag started, as last rendered, divided by
+   * the effective scale it was rendered at: the width to pass to
+   * View::SetRequestedWidth() of a preview that copies the source. Like any View,
+   * such a preview is laid out at its own effective scale, children included, so it
+   * appears as large as the source when both resolve the same scale -- for example
+   * a preview that inherits its scale from an ordinary container in the source's
+   * window. If the source sits in a subtree that opts out of the system scale, give
+   * the preview the same UiScalePolicy to match it.
+   *
+   * The value is captured once when the drag starts and is the same in every event
+   * of the session, the DragPreviewFactory event included. Unlike the source's own
+   * requested width it is never WRAP_CONTENT or MATCH_PARENT.
+   *
+   * @return The source's drag-start width in requested units, or zero for an empty
+   *         snapshot or a source that has not been rendered yet
+   */
+  float GetPreviewRequestedWidth() const;
+
+  /**
+   * @brief Returns the source's laid-out height in requested units.
+   *
+   * This is the source's height when the drag started, as last rendered, divided
+   * by the effective scale it was rendered at, exactly as
+   * GetPreviewRequestedWidth() describes: the height to pass to
+   * View::SetRequestedHeight() of a preview that copies the source. It is captured
+   * once when the drag starts and is never WRAP_CONTENT or MATCH_PARENT.
+   *
+   * @return The source's drag-start height in requested units, or zero for an empty
+   *         snapshot or a source that has not been rendered yet
+   */
+  float GetPreviewRequestedHeight() const;
 
   /**
    * @brief Returns the payload captured when the drag started.
@@ -663,7 +747,9 @@ private:
                                  DropProposal            dropProposal,
                                  DragAndDropTargetStatus targetStatus,
                                  DragAndDropResult       result,
-                                 DragCancelReason        cancelReason);
+                                 DragCancelReason        cancelReason,
+                                 Vector2                 previewRequestedPosition,
+                                 Vector2                 previewRequestedSize);
 
   friend class Internal::DragAndDropDetector;
 

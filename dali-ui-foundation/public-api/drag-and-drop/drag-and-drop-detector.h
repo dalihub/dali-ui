@@ -608,21 +608,24 @@ public:
    *
    * The application remains responsible for positioning a custom preview
    * through DragPreviewUpdater or DragPreviewPositionSignal. Their event exposes
-   * the pointer in the selected container as previewLocalPosition and the
-   * normalized source grab point as sourceAnchor. The default updater applies
-   * those values automatically.
+   * the pointer in the selected container as previewLocalPosition, the same
+   * point in the preview's requested units as previewRequestedX and
+   * previewRequestedY, and the normalized source grab point as sourceAnchor. The
+   * default updater applies those values automatically.
    *
    * A custom updater can preserve the original grab point across unrelated
-   * source and overlay transforms:
+   * source and overlay transforms and under any effective scale:
    *
    * @code
    * void PositionPreview( View preview, const DragAndDropEvent& event )
    * {
+   *   // The factory made the preview STANDALONE, with PARENT_ORIGIN TOP_LEFT and
+   *   // POSITION_USES_PIVOT enabled.
    *   preview.SetProperty(
    *     Actor::Property::PIVOT,
    *     Vector3( event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f ) );
-   *   preview.SetRequestedX( event.GetPreviewLocalPosition().x );
-   *   preview.SetRequestedY( event.GetPreviewLocalPosition().y );
+   *   preview.SetRequestedX( event.GetPreviewRequestedX() );
+   *   preview.SetRequestedY( event.GetPreviewRequestedY() );
    * }
    *
    * detector.SetDragPreviewContainer( sceneOverlay );
@@ -641,11 +644,16 @@ public:
    * detached View to the configured drag preview container, or to the source
    * parent when no container is configured, and removes it before invoking
    * the finalizer. An empty or already-parented factory result is ignored and
-   * does not invoke the updater or finalizer.
+   * does not invoke the updater or finalizer. The preview does not exist yet
+   * while the factory runs: size it there, for example with
+   * DragAndDropEvent::GetPreviewRequestedWidth() and
+   * DragAndDropEvent::GetPreviewRequestedHeight(), and position it in the updater.
    *
-   * The optional updater is invoked after target resolution on every pan
-   * update. If it is empty, DragPreviewPositionSignal or the default
-   * pointer-offset positioning is used.
+   * The optional updater is invoked once the detector has added the preview to
+   * its container -- immediately at drag start, before the preview is first
+   * rendered -- and again after every pointer, explicit, or auto-scroll update.
+   * If it is empty, DragPreviewPositionSignal or the default anchor-aware
+   * positioning is used.
    *
    * The optional finalizer receives the detached preview and a snapshot whose
    * result is DROPPED, CANCELLED, or NO_TARGET. It may reparent the preview to
@@ -679,11 +687,14 @@ public:
    * Connect this signal to take complete ownership of preview positioning.
    * event.GetPreviewLocalPosition() is the pointer in the coordinate space of the
    * configured drag preview container, or the source View's parent when no
-   * container is configured. event.GetSourceAnchor() is the normalized source grab
-   * point. A layout-safe implementation can use STANDALONE layout with
-   * UiScalePolicy::DISABLED, set PARENT_ORIGIN to TOP_LEFT and PIVOT to
-   * sourceAnchor, enable POSITION_USES_PIVOT, then set the requested X/Y
-   * position to previewLocalPosition.
+   * container is configured, and event.GetPreviewRequestedX() and
+   * event.GetPreviewRequestedY() are the same point in the preview's requested
+   * units. event.GetSourceAnchor() is the normalized source grab point. A
+   * layout-safe implementation uses STANDALONE layout, sets PARENT_ORIGIN to
+   * TOP_LEFT and PIVOT to sourceAnchor, enables POSITION_USES_PIVOT, then sets the
+   * requested X/Y position to previewRequestedX and previewRequestedY. It needs no
+   * UiScalePolicy of its own: those values are converted with the preview's own
+   * effective scale, whatever policy the preview has.
    *
    * If no callback is connected, the detector applies that policy itself. It
    * temporarily changes the preview's layout mode, UiScale policy, requested

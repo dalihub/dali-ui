@@ -279,13 +279,12 @@ struct SessionVisualCallbacks
   {
     updateEvents.push_back(event);
     visual.SetLayoutMode(LayoutMode::STANDALONE);
-    visual.SetUiScalePolicy(UiScalePolicy::DISABLED);
     visual.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     visual.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
     visual.SetProperty(Actor::Property::PIVOT,
                        Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
-    visual.SetRequestedX(event.GetPreviewLocalPosition().x);
-    visual.SetRequestedY(event.GetPreviewLocalPosition().y);
+    visual.SetRequestedX(event.GetPreviewRequestedX());
+    visual.SetRequestedY(event.GetPreviewRequestedY());
   }
 
   void Finalize(View visual, const DragAndDropEvent& event)
@@ -302,6 +301,113 @@ struct SessionVisualCallbacks
   std::vector<View>             finalizerVisuals;
   View                          factoryParent;
   bool                          visualsWereDetached{true};
+};
+
+// The documented recipe built on the requested-unit accessors, recording what each callback saw.
+struct RequestedUnitPreviewCallbacks
+{
+  struct UpdateRecord
+  {
+    bool             parentIsContainer;
+    float            previewScale;
+    DragAndDropEvent event;
+  };
+
+  View Create(const DragAndDropEvent& event)
+  {
+    factoryEvents.push_back(event);
+    preview = View::New();
+    preview.SetRequestedWidth(event.GetPreviewRequestedWidth());
+    preview.SetRequestedHeight(event.GetPreviewRequestedHeight());
+    preview.SetLayoutMode(LayoutMode::STANDALONE);
+    preview.SetUiScalePolicy(previewPolicy);
+    preview.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+    preview.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
+    preview.SetProperty(Actor::Property::SENSITIVE, false);
+    content = View::New();
+    content.SetRequestedWidth(20.0f);
+    content.SetRequestedHeight(10.0f);
+    content.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+    content.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+    preview.Add(content);
+    return preview;
+  }
+
+  void Update(View view, const DragAndDropEvent& event)
+  {
+    updates.push_back({view.GetParent() == container, GetImpl(view).GetEffectiveLayoutScale(), event});
+    view.SetProperty(Actor::Property::PIVOT,
+                     Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
+    view.SetRequestedX(event.GetPreviewRequestedX());
+    view.SetRequestedY(event.GetPreviewRequestedY());
+  }
+
+  void Finalize(View view, const DragAndDropEvent& event)
+  {
+    finalizerEvents.push_back(event);
+    finalizerPreviewScales.push_back(GetImpl(view).GetEffectiveLayoutScale());
+  }
+
+  View                          container;
+  UiScalePolicy                 previewPolicy{UiScalePolicy::INHERIT};
+  View                          preview;
+  View                          content;
+  std::vector<DragAndDropEvent> factoryEvents;
+  std::vector<UpdateRecord>     updates;
+  std::vector<DragAndDropEvent> finalizerEvents;
+  std::vector<float>            finalizerPreviewScales;
+};
+
+// A DragPreviewPositionSignal handler applying the same recipe.
+struct RequestedPositionSignalHandler : public ConnectionTracker
+{
+  void OnPosition(View preview, const DragAndDropEvent& event)
+  {
+    parentIsContainer.push_back(preview.GetParent() == container);
+    previewScales.push_back(GetImpl(preview).GetEffectiveLayoutScale());
+    events.push_back(event);
+    preview.SetLayoutMode(LayoutMode::STANDALONE);
+    preview.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+    preview.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
+    preview.SetProperty(Actor::Property::PIVOT,
+                        Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
+    preview.SetRequestedX(event.GetPreviewRequestedX());
+    preview.SetRequestedY(event.GetPreviewRequestedY());
+  }
+
+  View                          container;
+  std::vector<bool>             parentIsContainer;
+  std::vector<float>            previewScales;
+  std::vector<DragAndDropEvent> events;
+};
+
+// The legacy recipe released with DragAndDropDetector: the source's rendered SIZE, UiScalePolicy::DISABLED
+// and the unconverted previewLocalPosition. Kept to pin that it still works without a window scale.
+struct LegacyPixelPreviewCallbacks
+{
+  View Create(const DragAndDropEvent& event)
+  {
+    const Vector3 size = event.GetSource().GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+    preview            = View::New();
+    preview.SetRequestedWidth(size.x);
+    preview.SetRequestedHeight(size.y);
+    preview.SetLayoutMode(LayoutMode::STANDALONE);
+    preview.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    preview.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+    preview.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
+    preview.SetProperty(Actor::Property::SENSITIVE, false);
+    return preview;
+  }
+
+  void Update(View view, const DragAndDropEvent& event)
+  {
+    view.SetProperty(Actor::Property::PIVOT,
+                     Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
+    view.SetRequestedX(event.GetPreviewLocalPosition().x);
+    view.SetRequestedY(event.GetPreviewLocalPosition().y);
+  }
+
+  View preview;
 };
 
 struct PayloadAcceptanceCallbacks : public ConnectionTracker
@@ -691,6 +797,70 @@ View CreateView(const Vector2& position)
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   return view;
+}
+
+// Sets the system scale and one window's scale for the scope of a test, and restores them and the
+// master switch when the scope ends -- also when a DALI_TEST_* check throws. Declare it after the
+// UiTestApplication so that it is destroyed first.
+class ScopedUiScaleState
+{
+public:
+  ScopedUiScaleState(Dali::Window window, float systemScale, float windowScale)
+  : mWindow(window),
+    mOriginalScale(LayoutScaleManager::Get().GetUiScale()),
+    mOriginalWindowScale(LayoutScaleManager::Get().GetWindowScale(window)),
+    mOriginalScalable(LayoutScaleManager::Get().IsScalable())
+  {
+    LayoutScaleManager manager = LayoutScaleManager::Get();
+    manager.SetScalable(true);
+    manager.SetUiScale(systemScale);
+    manager.SetWindowScale(mWindow, windowScale);
+  }
+
+  ~ScopedUiScaleState()
+  {
+    LayoutScaleManager manager = LayoutScaleManager::Get();
+    manager.SetWindowScale(mWindow, mOriginalWindowScale);
+    manager.SetUiScale(mOriginalScale);
+    manager.SetScalable(mOriginalScalable);
+  }
+
+private:
+  Dali::Window mWindow;
+  float        mOriginalScale;
+  float        mOriginalWindowScale;
+  bool         mOriginalScalable;
+};
+
+// The normalized point of @p source under @p screenPoint: the anchor the detector captures when a
+// drag activates there.
+Vector2 GetExpectedAnchor(View source, const Vector2& screenPoint)
+{
+  float localX = 0.0f;
+  float localY = 0.0f;
+  DALI_TEST_CHECK(source.ScreenToLocal(localX, localY, screenPoint.x, screenPoint.y));
+  const Vector3 size = source.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  return Vector2(std::clamp(localX / size.x, 0.0f, 1.0f), std::clamp(localY / size.y, 0.0f, 1.0f));
+}
+
+// Checks that the point of @p preview at the normalized @p anchor is under @p screenPoint.
+void CheckAnchorUnderPointer(View preview, const Vector2& anchor, const Vector2& screenPoint, const char* location)
+{
+  float localX = 0.0f;
+  float localY = 0.0f;
+  DALI_TEST_CHECK(preview.ScreenToLocal(localX, localY, screenPoint.x, screenPoint.y));
+  const Vector3 size = preview.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  DALI_TEST_EQUALS(localX, anchor.x * size.x, 0.1f, location);
+  DALI_TEST_EQUALS(localY, anchor.y * size.y, 0.1f, location);
+}
+
+void Settle(UiTestApplication& application)
+{
+  for(int i = 0; i < 2; ++i)
+  {
+    application.SendNotification();
+    application.Render();
+  }
 }
 
 Dali::Integration::TouchEvent MakeDeviceTouch(PointState::Type    state,
@@ -2726,6 +2896,435 @@ int UtcDaliDragAndDropDetectorParentedFactoryPreviewIsIgnored(void)
   DALI_TEST_EQUALS(signals.started, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(signals.ended, 1, TEST_LOCATION);
   DALI_TEST_CHECK(callbacks.finalizerEvents.empty());
+  END_TEST;
+}
+
+// DragAndDropEvent's requested-unit accessors in a gesture session without a preview, at a system
+// scale of 2. An empty snapshot reports zero for all four. Without a session preview there is
+// nothing to convert for, so the requested X/Y are the local position unchanged. The requested
+// width/height are the source's rendered SIZE over the scale it was rendered at, the same in every
+// event of the session, and copies keep all four values.
+//
+// The claims this test pins (stated, not demonstrated by a mutation run -- UTCs are build-only):
+// converting the position although the session has no preview (for example with the source's or its
+// parent's scale) halves it and fails the passthrough check; leaving the size unconverted reports
+// 200 x 200; a field dropped from the DragAndDropEvent::Impl aggregate reports zero.
+int UtcDaliDragAndDropEventPreviewRequestedValues(void)
+{
+  UiTestApplication  application;
+  ScopedUiScaleState scale(application.GetWindow(), 2.0f, 1.0f);
+
+  const DragAndDropEvent empty;
+  DALI_TEST_EQUALS(empty.GetPreviewRequestedX(), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetPreviewRequestedY(), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetPreviewRequestedWidth(), 0.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.GetPreviewRequestedHeight(), 0.0f, 0.0001f, TEST_LOCATION);
+
+  DragAndDropDetector detector = DragAndDropDetector::New();
+  SignalLog           signals;
+  View                source = CreateView(Vector2(20.0f, 20.0f)); // natural 100 x 100 -> 200 x 200
+  application.GetScene().Add(source);
+  detector.AttachSource(source);
+  ConnectSignals(detector, signals);
+  Settle(application);
+
+  const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
+  const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
+  uint32_t      time         = 100u;
+  TestStartPan(application, start, firstPointer, time);
+  Settle(application);
+
+  DALI_TEST_EQUALS(signals.started, 1, TEST_LOCATION);
+  const DragAndDropEvent started = signals.events.front();
+  // No session preview: nothing to convert for.
+  DALI_TEST_EQUALS(started.GetPreviewRequestedX(), started.GetPreviewLocalPosition().x, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(started.GetPreviewRequestedY(), started.GetPreviewLocalPosition().y, 0.0001f, TEST_LOCATION);
+  // Rendered SIZE 200 x 200 over the rendered scale 2.0.
+  DALI_TEST_EQUALS(started.GetPreviewRequestedWidth(), 100.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(started.GetPreviewRequestedHeight(), 100.0f, 0.01f, TEST_LOCATION);
+
+  DragAndDropEvent copied(started);
+  DragAndDropEvent assigned;
+  assigned = started;
+  DALI_TEST_EQUALS(copied.GetPreviewRequestedX(), started.GetPreviewRequestedX(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copied.GetPreviewRequestedY(), started.GetPreviewRequestedY(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copied.GetPreviewRequestedWidth(), 100.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copied.GetPreviewRequestedHeight(), 100.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(assigned.GetPreviewRequestedX(), started.GetPreviewRequestedX(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(assigned.GetPreviewRequestedY(), started.GetPreviewRequestedY(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(assigned.GetPreviewRequestedWidth(), 100.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(assigned.GetPreviewRequestedHeight(), 100.0f, 0.01f, TEST_LOCATION);
+
+  TestEndPan(application, firstPointer, time + TestGetFrameInterval());
+  DALI_TEST_EQUALS(signals.terminalEvents.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(signals.terminalEvents[0].GetPreviewRequestedWidth(), 100.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(signals.terminalEvents[0].GetPreviewRequestedHeight(), 100.0f, 0.01f, TEST_LOCATION);
+  END_TEST;
+}
+
+// The documented recipe on the updater path, at a system scale of 1.5 and a window scale of 2 -- an
+// effective scale of exactly 3. The factory sizes the preview with GetPreviewRequestedWidth() and
+// GetPreviewRequestedHeight() before the preview exists. Every updater call, the first one included,
+// finds the preview in its container at the scale its event was converted with, so the preview is as
+// large as the source on screen, its content is scaled with it, and its grab point stays under the
+// pointer. The finalizer receives the terminal snapshot taken while the preview was still in its
+// container.
+//
+// The claims this test pins (stated, not demonstrated by a mutation run -- UTCs are build-only): an
+// unconverted accessor fails the per-record conversion and the anchor checks; adding the preview
+// after the first updater call fails record 0 (not in the container, scale 1.5); building the
+// terminal snapshot after the preview is removed, or converting the position when the getter is
+// called, gives the finalizer the local position over 1.5; an unconverted size makes the factory see
+// 120 and the preview 360 wide.
+int UtcDaliDragAndDropDetectorPreviewCallbacksUseRequestedValues(void)
+{
+  UiTestApplication             application;
+  ScopedUiScaleState            scale(application.GetWindow(), 1.5f, 2.0f);
+  RequestedUnitPreviewCallbacks callbacks;
+  DragAndDropDetector           detector = DragAndDropDetector::New();
+  View                          source   = CreateView(Vector2(20.0f, 20.0f));
+  View                          overlay  = CreateView(Vector2::ZERO);
+
+  source.SetRequestedWidth(40.0f); // rendered 120 x 120 at (60, 60)
+  source.SetRequestedHeight(40.0f);
+  overlay.SetRequestedWidth(150.0f); // rendered 450 x 750
+  overlay.SetRequestedHeight(250.0f);
+  overlay.SetProperty(Actor::Property::SENSITIVE, false);
+
+  application.GetScene().Add(source);
+  application.GetScene().Add(overlay);
+  detector.AttachSource(source);
+  callbacks.container = overlay;
+  detector.SetDragPreviewContainer(overlay);
+  detector.SetDragPreviewCallbacks(
+    DragAndDropDetector::DragPreviewFactory::New(&callbacks, &RequestedUnitPreviewCallbacks::Create),
+    DragAndDropDetector::DragPreviewUpdater::New(&callbacks, &RequestedUnitPreviewCallbacks::Update),
+    DragAndDropDetector::DragPreviewFinalizer::New(&callbacks, &RequestedUnitPreviewCallbacks::Finalize));
+  Settle(application);
+
+  // The premise: 1.5 x 2 is exactly 3.
+  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 3.0f, 0.001f, TEST_LOCATION);
+
+  const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
+  const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
+  const Vector2 movedPointer = firstPointer + Vector2(40.0f, 30.0f);
+  uint32_t      time         = 100u;
+  TestStartPan(application, start, firstPointer, time);
+  Settle(application);
+  const Vector2 anchor = GetExpectedAnchor(source, firstPointer);
+
+  // The factory runs before the preview exists: the size is converted, the position passes through.
+  DALI_TEST_EQUALS(callbacks.factoryEvents.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(callbacks.factoryEvents[0].GetPreviewRequestedWidth(), 40.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(callbacks.factoryEvents[0].GetPreviewRequestedHeight(), 40.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(callbacks.factoryEvents[0].GetPreviewRequestedX(), callbacks.factoryEvents[0].GetPreviewLocalPosition().x, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(callbacks.factoryEvents[0].GetPreviewRequestedY(), callbacks.factoryEvents[0].GetPreviewLocalPosition().y, 0.0001f, TEST_LOCATION);
+
+  // Every updater call, the first one included, sees the preview in its container at 3.0 and an
+  // event converted with exactly that scale.
+  DALI_TEST_CHECK(callbacks.updates.size() >= 2u);
+  for(const RequestedUnitPreviewCallbacks::UpdateRecord& record : callbacks.updates)
+  {
+    DALI_TEST_CHECK(record.parentIsContainer);
+    DALI_TEST_EQUALS(record.previewScale, 3.0f, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(record.event.GetPreviewRequestedX() * 3.0f, record.event.GetPreviewLocalPosition().x, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(record.event.GetPreviewRequestedY() * 3.0f, record.event.GetPreviewLocalPosition().y, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(record.event.GetPreviewRequestedWidth(), 40.0f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(record.event.GetPreviewRequestedHeight(), 40.0f, 0.01f, TEST_LOCATION);
+  }
+
+  // The preview is as large as the source on screen, and its content is scaled with it.
+  const Vector3 sourceSize  = source.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  const Vector3 previewSize = callbacks.preview.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  const Vector3 contentSize = callbacks.content.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  DALI_TEST_EQUALS(sourceSize.x, 120.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(sourceSize.y, 120.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(previewSize.x, sourceSize.x, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(previewSize.y, sourceSize.y, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(contentSize.x, 60.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(contentSize.y, 30.0f, 0.1f, TEST_LOCATION);
+
+  CheckAnchorUnderPointer(callbacks.preview, anchor, firstPointer, TEST_LOCATION);
+  TestMovePan(application, movedPointer, time);
+  Settle(application);
+  CheckAnchorUnderPointer(callbacks.preview, anchor, movedPointer, TEST_LOCATION);
+
+  TestEndPan(application, movedPointer, time + TestGetFrameInterval());
+  DALI_TEST_EQUALS(callbacks.finalizerEvents.size(), 1u, TEST_LOCATION);
+  // Converted while the preview was still in its container, like the last update...
+  DALI_TEST_EQUALS(callbacks.finalizerEvents[0].GetPreviewRequestedX(), callbacks.updates.back().event.GetPreviewRequestedX(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(callbacks.finalizerEvents[0].GetPreviewRequestedY(), callbacks.updates.back().event.GetPreviewRequestedY(), 0.0001f, TEST_LOCATION);
+  // ...although the detached preview no longer has a window term: 1.5 alone.
+  DALI_TEST_EQUALS(callbacks.finalizerPreviewScales[0], 1.5f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// First coverage of DragPreviewPositionSignal, with the same recipe at a system scale of 2. Every
+// emission finds the reusable preview in its container at the scale its event was converted with,
+// and the grab point stays under the pointer. The detector neither positions nor restores a preview
+// that a handler positions, and an updater takes precedence over the signal.
+//
+// The claims this test pins (stated, not demonstrated by a mutation run -- UTCs are build-only):
+// running the default positioning as well, before or after the emission, makes its restore at the
+// end of the drag put back DEFAULT and 0 or the handler's first values -- the pointer moved, so they
+// differ from the last ones -- and fails the after-end checks; an unconverted accessor puts the
+// anchor at twice the pointer's local position; emitting the signal although an updater is set adds
+// handler calls.
+int UtcDaliDragAndDropDetectorDragPreviewPositionSignalUsesRequestedPosition(void)
+{
+  UiTestApplication              application;
+  ScopedUiScaleState             scale(application.GetWindow(), 2.0f, 1.0f);
+  RequestedPositionSignalHandler handler;
+  SessionVisualCallbacks         callbacks;
+  DragAndDropDetector            detector = DragAndDropDetector::New();
+  View                           source   = CreateView(Vector2(20.0f, 20.0f));
+  View                           overlay  = CreateView(Vector2::ZERO);
+  View                           visual   = View::New();
+
+  source.SetRequestedWidth(60.0f); // rendered 120 x 120 at (40, 40)
+  source.SetRequestedHeight(60.0f);
+  overlay.SetRequestedWidth(200.0f); // rendered 400 x 700
+  overlay.SetRequestedHeight(350.0f);
+  overlay.SetProperty(Actor::Property::SENSITIVE, false);
+  visual.SetRequestedWidth(75.0f); // rendered 150 x 60
+  visual.SetRequestedHeight(30.0f);
+  visual.SetProperty(Actor::Property::SENSITIVE, false);
+
+  application.GetScene().Add(source);
+  application.GetScene().Add(overlay);
+  detector.AttachSource(source);
+  handler.container = overlay;
+  detector.SetDragPreview(visual);
+  detector.SetDragPreviewContainer(overlay);
+  detector.DragPreviewPositionSignal().Connect(&handler, &RequestedPositionSignalHandler::OnPosition);
+  Settle(application);
+
+  const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
+  const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
+  const Vector2 movedPointer = firstPointer + Vector2(40.0f, 30.0f);
+  uint32_t      time         = 100u;
+  TestStartPan(application, start, firstPointer, time);
+  Settle(application);
+  const Vector2 anchor = GetExpectedAnchor(source, firstPointer);
+
+  DALI_TEST_CHECK(handler.events.size() >= 2u);
+  for(size_t i = 0u; i < handler.events.size(); ++i)
+  {
+    DALI_TEST_CHECK(handler.parentIsContainer[i]);
+    DALI_TEST_EQUALS(handler.previewScales[i], 2.0f, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(handler.events[i].GetPreviewRequestedX() * 2.0f, handler.events[i].GetPreviewLocalPosition().x, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(handler.events[i].GetPreviewRequestedY() * 2.0f, handler.events[i].GetPreviewLocalPosition().y, 0.001f, TEST_LOCATION);
+  }
+  const Vector3 visualSize = visual.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  DALI_TEST_EQUALS(visualSize.x, 150.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualSize.y, 60.0f, 0.1f, TEST_LOCATION);
+  CheckAnchorUnderPointer(visual, anchor, firstPointer, TEST_LOCATION);
+
+  TestMovePan(application, movedPointer, time);
+  Settle(application);
+  CheckAnchorUnderPointer(visual, anchor, movedPointer, TEST_LOCATION);
+
+  TestEndPan(application, movedPointer, time + TestGetFrameInterval());
+  DALI_TEST_CHECK(!visual.GetParent());
+  // What the handler left -- the FINISHED update is the last emission -- because the detector
+  // neither positioned nor restored the preview.
+  DALI_TEST_CHECK(visual.GetLayoutMode() == LayoutMode::STANDALONE);
+  DALI_TEST_EQUALS(visual.GetRequestedX(), handler.events.back().GetPreviewRequestedX(), 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetRequestedY(), handler.events.back().GetPreviewRequestedY(), 0.0001f, TEST_LOCATION);
+
+  // An updater takes precedence over the signal.
+  const size_t signalCalls = handler.events.size();
+  detector.SetDragPreviewCallbacks(
+    DragAndDropDetector::DragPreviewFactory::New(&callbacks, &SessionVisualCallbacks::Create),
+    DragAndDropDetector::DragPreviewUpdater::New(&callbacks, &SessionVisualCallbacks::Update),
+    DragAndDropDetector::DragPreviewFinalizer::New(&callbacks, &SessionVisualCallbacks::Finalize));
+  time = 1000u;
+  TestStartPan(application, start, firstPointer, time);
+  Settle(application);
+  TestEndPan(application, firstPointer, time + TestGetFrameInterval());
+  DALI_TEST_EQUALS(handler.events.size(), signalCalls, TEST_LOCATION);
+  DALI_TEST_CHECK(!callbacks.updateEvents.empty());
+
+  detector.ClearDragPreviewCallbacks();
+  END_TEST;
+}
+
+// GetPreviewRequestedWidth() and GetPreviewRequestedHeight() pair the source's rendered SIZE with
+// the scale it was rendered at. A system scale change that has not been laid out yet already moves
+// the memoized effective scale, while SIZE still holds the size laid out at the old scale.
+//
+// The claim this test pins (stated, not demonstrated by a mutation run -- UTCs are build-only):
+// dividing the rendered SIZE by the memoized GetEffectiveLayoutScale() reports 80 / 3 = 26.67 instead of 40.
+int UtcDaliDragAndDropDetectorPreviewRequestedWidthHeightUseRenderedScale(void)
+{
+  UiTestApplication      application;
+  ScopedUiScaleState     scale(application.GetWindow(), 2.0f, 1.0f);
+  SessionVisualCallbacks visual;
+  DragAndDropDetector    detector = DragAndDropDetector::New();
+  View                   source   = CreateView(Vector2(20.0f, 20.0f));
+  source.SetRequestedWidth(40.0f);
+  source.SetRequestedHeight(40.0f);
+  application.GetScene().Add(source);
+  detector.AttachSource(source);
+  detector.SetSourcePayload(source, {"application/x-test", Property::Value(1), DragAndDropOperation::MOVE});
+  detector.SetDragPreviewCallbacks(
+    DragAndDropDetector::DragPreviewFactory::New(&visual, &SessionVisualCallbacks::Create),
+    DragAndDropDetector::DragPreviewUpdater::New(&visual, &SessionVisualCallbacks::Update),
+    DragAndDropDetector::DragPreviewFinalizer::New(&visual, &SessionVisualCallbacks::Finalize));
+  Settle(application);
+
+  LayoutScaleManager::Get().SetUiScale(3.0f);                                                                      // neither laid out nor rendered yet
+  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 3.0f, 0.001f, TEST_LOCATION);                        // the memo is already new
+  DALI_TEST_EQUALS(source.GetCurrentProperty<Vector3>(Actor::Property::SIZE).x, 80.0f, 0.1f, TEST_LOCATION); // still rendered at 2.0
+
+  DALI_TEST_CHECK(detector.StartDrag(source, Device::Class::KEYBOARD));
+  DALI_TEST_EQUALS(visual.factoryEvents.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.factoryEvents[0].GetPreviewRequestedWidth(), 40.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.factoryEvents[0].GetPreviewRequestedHeight(), 40.0f, 0.01f, TEST_LOCATION);
+  detector.CancelDrag();
+  END_TEST;
+}
+
+// The documented remedy for a source inside a subtree that opts out of the system scale. At a
+// system scale of 2 the source sits in a UiScalePolicy::DISABLED panel, and its preview, shown in an
+// ordinary overlay that follows the scale, is given the same UiScalePolicy::DISABLED in the factory.
+// GetPreviewRequestedWidth()/Height() are then the source's own requested size and
+// GetPreviewRequestedX()/Y() are converted with the PREVIEW's scale, not the container's, so the
+// preview is as large as the source on screen and its grab point stays under the pointer.
+//
+// The claims this test pins (stated, not demonstrated by a mutation run -- UTCs are build-only):
+// converting with the container's scale (2.0) instead of the preview's own halves the requested
+// position and fails the per-record and anchor checks; dividing the size by the container's scale
+// reports 50 x 50.
+int UtcDaliDragAndDropDetectorPreviewMatchesSourceInScaleOptedOutSubtree(void)
+{
+  UiTestApplication             application;
+  ScopedUiScaleState            scale(application.GetWindow(), 2.0f, 1.0f);
+  RequestedUnitPreviewCallbacks callbacks;
+  DragAndDropDetector           detector = DragAndDropDetector::New();
+  View                          panel    = CreateView(Vector2::ZERO);
+  View                          source   = CreateView(Vector2(20.0f, 20.0f));
+  View                          overlay  = CreateView(Vector2::ZERO);
+
+  panel.SetRequestedWidth(200.0f);
+  panel.SetRequestedHeight(200.0f);
+  panel.SetUiScalePolicy(UiScalePolicy::DISABLED); // the source's subtree opts out: 100 x 100 at (20, 20)
+  overlay.SetRequestedWidth(200.0f);               // an ordinary overlay: rendered 400 x 700
+  overlay.SetRequestedHeight(350.0f);
+  overlay.SetProperty(Actor::Property::SENSITIVE, false);
+
+  panel.Add(source);
+  application.GetScene().Add(panel);
+  application.GetScene().Add(overlay);
+  detector.AttachSource(source);
+  callbacks.container     = overlay;
+  callbacks.previewPolicy = UiScalePolicy::DISABLED; // the remedy: the preview takes the source's policy
+  detector.SetDragPreviewContainer(overlay);
+  detector.SetDragPreviewCallbacks(
+    DragAndDropDetector::DragPreviewFactory::New(&callbacks, &RequestedUnitPreviewCallbacks::Create),
+    DragAndDropDetector::DragPreviewUpdater::New(&callbacks, &RequestedUnitPreviewCallbacks::Update),
+    DragAndDropDetector::DragPreviewFinalizer::New(&callbacks, &RequestedUnitPreviewCallbacks::Finalize));
+  Settle(application);
+
+  // The premises: the source does not follow the system scale, the container does.
+  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(overlay).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+
+  const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
+  const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
+  const Vector2 movedPointer = firstPointer + Vector2(40.0f, 30.0f);
+  uint32_t      time         = 100u;
+  TestStartPan(application, start, firstPointer, time);
+  Settle(application);
+  const Vector2 anchor = GetExpectedAnchor(source, firstPointer);
+
+  DALI_TEST_EQUALS(callbacks.factoryEvents.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(callbacks.factoryEvents[0].GetPreviewRequestedWidth(), 100.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(callbacks.factoryEvents[0].GetPreviewRequestedHeight(), 100.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_CHECK(callbacks.updates.size() >= 2u);
+  for(const RequestedUnitPreviewCallbacks::UpdateRecord& record : callbacks.updates)
+  {
+    DALI_TEST_CHECK(record.parentIsContainer);
+    DALI_TEST_EQUALS(record.previewScale, 1.0f, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(record.event.GetPreviewRequestedX(), record.event.GetPreviewLocalPosition().x, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(record.event.GetPreviewRequestedY(), record.event.GetPreviewLocalPosition().y, 0.001f, TEST_LOCATION);
+  }
+
+  const Vector3 sourceSize  = source.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  const Vector3 previewSize = callbacks.preview.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  const Vector3 contentSize = callbacks.content.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  DALI_TEST_EQUALS(sourceSize.x, 100.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(sourceSize.y, 100.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(previewSize.x, sourceSize.x, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(previewSize.y, sourceSize.y, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(contentSize.x, 20.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(contentSize.y, 10.0f, 0.1f, TEST_LOCATION);
+
+  CheckAnchorUnderPointer(callbacks.preview, anchor, firstPointer, TEST_LOCATION);
+  TestMovePan(application, movedPointer, time);
+  Settle(application);
+  CheckAnchorUnderPointer(callbacks.preview, anchor, movedPointer, TEST_LOCATION);
+
+  TestEndPan(application, movedPointer, time + TestGetFrameInterval());
+  END_TEST;
+}
+
+// The legacy recipe released with DragAndDropDetector -- the source's rendered SIZE, a preview with
+// UiScalePolicy::DISABLED and the unconverted previewLocalPosition -- keeps working for an
+// application that has not migrated: without a window scale the preview resolves to 1.0, is as large
+// as the source on screen at a system scale of 2, and keeps its grab point under the pointer.
+//
+// The claims this test pins (stated, not demonstrated by a mutation run -- UTCs are build-only): a
+// change of the units of GetPreviewLocalPosition() (for example dividing it by the container's
+// scale) puts the anchor at half the pointer's local position; a detector that rewrote the
+// UiScalePolicy of an application-positioned preview would lay it out at 2.0, 240 wide.
+int UtcDaliDragAndDropDetectorLegacyPreviewRecipeWithoutWindowScale(void)
+{
+  UiTestApplication           application;
+  ScopedUiScaleState          scale(application.GetWindow(), 2.0f, 1.0f);
+  LegacyPixelPreviewCallbacks callbacks;
+  DragAndDropDetector         detector = DragAndDropDetector::New();
+  View                        source   = CreateView(Vector2(20.0f, 20.0f));
+  View                        overlay  = CreateView(Vector2::ZERO);
+
+  source.SetRequestedWidth(60.0f); // rendered 120 x 120 at (40, 40)
+  source.SetRequestedHeight(60.0f);
+  overlay.SetRequestedWidth(200.0f); // an ordinary overlay: rendered 400 x 700
+  overlay.SetRequestedHeight(350.0f);
+  overlay.SetProperty(Actor::Property::SENSITIVE, false);
+
+  application.GetScene().Add(source);
+  application.GetScene().Add(overlay);
+  detector.AttachSource(source);
+  detector.SetDragPreviewContainer(overlay);
+  detector.SetDragPreviewCallbacks(
+    DragAndDropDetector::DragPreviewFactory::New(&callbacks, &LegacyPixelPreviewCallbacks::Create),
+    DragAndDropDetector::DragPreviewUpdater::New(&callbacks, &LegacyPixelPreviewCallbacks::Update));
+  Settle(application);
+
+  const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
+  const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
+  const Vector2 movedPointer = firstPointer + Vector2(40.0f, 30.0f);
+  uint32_t      time         = 100u;
+  TestStartPan(application, start, firstPointer, time);
+  Settle(application);
+  const Vector2 anchor = GetExpectedAnchor(source, firstPointer);
+
+  DALI_TEST_CHECK(callbacks.preview.GetParent() == overlay);
+  DALI_TEST_EQUALS(GetImpl(callbacks.preview).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+  const Vector3 sourceSize  = source.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  const Vector3 previewSize = callbacks.preview.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  DALI_TEST_EQUALS(sourceSize.x, 120.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(sourceSize.y, 120.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(previewSize.x, sourceSize.x, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(previewSize.y, sourceSize.y, 0.1f, TEST_LOCATION);
+
+  CheckAnchorUnderPointer(callbacks.preview, anchor, firstPointer, TEST_LOCATION);
+  TestMovePan(application, movedPointer, time);
+  Settle(application);
+  CheckAnchorUnderPointer(callbacks.preview, anchor, movedPointer, TEST_LOCATION);
+
+  TestEndPan(application, movedPointer, time + TestGetFrameInterval());
   END_TEST;
 }
 
