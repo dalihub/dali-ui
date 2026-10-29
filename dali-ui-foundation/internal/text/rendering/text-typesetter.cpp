@@ -18,7 +18,6 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/debug.h>
-#include <dali/integration-api/trace.h>
 #include <dali/public-api/common/constants.h>
 #include <dali/public-api/math/math-utils.h>
 #include <memory.h>
@@ -37,6 +36,7 @@
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/text-trace.h>
 
 namespace DALI_NAMESPACE
 {
@@ -302,7 +302,7 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
     return {};
   }
 
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER_TEXT_GRADIENT_MASK");
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RASTERIZE");
 
   auto& viewModel = *(mImpl->GetViewModel());
 
@@ -387,7 +387,7 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
     return {};
   }
 
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER_TEXT_GRADIENT_PRESERVED");
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RASTERIZE");
 
   auto& viewModel = *(mImpl->GetViewModel());
 
@@ -494,8 +494,9 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
     return {};
   }
 
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER");
   // @todo. This initial implementation for a TextLabel has only one visible page.
+
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RASTERIZE");
 
   // Use l-value to make ensure it is not nullptr, so compiler happy.
   auto& viewModel = *(mImpl->GetViewModel());

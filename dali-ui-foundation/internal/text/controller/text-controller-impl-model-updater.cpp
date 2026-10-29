@@ -17,9 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
-#include <dali/integration-api/trace.h>
 #include <dali/public-api/math/math-utils.h>
-#include <chrono>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
@@ -33,27 +31,16 @@
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
+#include <dali-ui-foundation/internal/text/text-trace.h>
 
 namespace DALI_NAMESPACE::Ui::Text
 {
 namespace
 {
-#if defined(DEBUG_ENABLED)
-Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
-#endif
-
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
 
-#if defined(TRACE_ENABLED)
-uint32_t GetMilliSeconds()
-{
-  // Get the time of a monotonic clock since its epoch.
-  auto epoch = std::chrono::steady_clock::now().time_since_epoch();
-
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
-
-  return static_cast<uint32_t>(duration.count());
-}
+#if defined(DEBUG_ENABLED)
+Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
 #endif
 
 // The relative luminance of a color is defined as (L = 0.2126 * R + 0.7152 * G + 0.0722 * B)
@@ -96,7 +83,8 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
     // Nothing to do if no operations are pending and required.
     return false;
   }
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_MODEL_UPDATE");
+
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_UPDATE");
 
   if(isProjectedTarget)
   {
@@ -407,19 +395,6 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
 
   const Length currentNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(glyphs.Count());
 
-#if defined(TRACE_ENABLED)
-  uint32_t logThreshold = TextAbstraction::FontClient::GetPerformanceLogThresholdTime();
-  bool     logEnabled   = TextAbstraction::FontClient::IsPerformanceLogEnabled();
-
-  uint32_t timeStamps[6];
-  uint32_t timeStampIndex = 0;
-
-  if(logEnabled)
-  {
-    timeStamps[timeStampIndex++] = GetMilliSeconds();
-  }
-#endif
-
   if(Controller::NO_OPERATION != (Controller::SHAPE_TEXT & operations))
   {
     const Vector<Character>& textToShape = textMirrored ? mirroredUtf32Characters : utf32Characters;
@@ -449,13 +424,6 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
     updated = true;
   }
 
-#if defined(TRACE_ENABLED)
-  if(logEnabled)
-  {
-    timeStamps[timeStampIndex++] = GetMilliSeconds();
-  }
-#endif
-
   const Length numberOfGlyphs = static_cast<Length>(glyphs.Count()) - currentNumberOfGlyphs;
 
   if(Controller::NO_OPERATION != (Controller::GET_GLYPH_METRICS & operations))
@@ -468,13 +436,6 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
                                        newParagraphGlyphs);
     updated = true;
   }
-
-#if defined(TRACE_ENABLED)
-  if(logEnabled)
-  {
-    timeStamps[timeStampIndex++] = GetMilliSeconds();
-  }
-#endif
 
   if(!isProjectedTarget && (nullptr != impl.mEventData) && impl.mEventData->mPreEditFlag &&
      (0u != impl.mModel->mVisualModel->mCharactersToGlyph.Count()))
@@ -657,13 +618,6 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
     updated = true;
   }
 
-#if defined(TRACE_ENABLED)
-  if(logEnabled)
-  {
-    timeStamps[timeStampIndex++] = GetMilliSeconds();
-  }
-#endif
-
   if(Controller::NO_OPERATION != (Controller::COLOR & operations))
   {
     // Set the color runs in glyphs.
@@ -691,13 +645,6 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
 
     updated = true;
   }
-
-#if defined(TRACE_ENABLED)
-  if(logEnabled)
-  {
-    timeStamps[timeStampIndex++] = GetMilliSeconds();
-  }
-#endif
 
   if((Controller::NO_OPERATION != (Controller::SHAPE_TEXT & operations)) &&
      !((!isProjectedTarget && nullptr != impl.mEventData) && impl.mEventData->mPreEditFlag &&
@@ -729,27 +676,6 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
 
     updated = true;
   }
-
-#if defined(TRACE_ENABLED)
-  if(logEnabled)
-  {
-    timeStamps[timeStampIndex++] = GetMilliSeconds();
-    uint32_t timeShape           = timeStamps[1] - timeStamps[0];
-    uint32_t timeGlyph           = timeStamps[2] - timeStamps[1];
-    uint32_t timePreedit         = timeStamps[3] - timeStamps[2];
-    uint32_t timeColor           = timeStamps[4] - timeStamps[3];
-    uint32_t timeCopy            = timeStamps[5] - timeStamps[4];
-
-    if(timeStamps[5] - timeStamps[0] > logThreshold)
-    {
-      std::string currentText;
-      Utf32ToUtf8(targetModel.mLogicalModel->mText.Begin(), numberOfCharacters, currentText);
-      DALI_LOG_DEBUG_INFO("DALI_TEXT_MODEL_UPDATE shape:%u ms, glyph:%u ms, preedit:%u ms, color:%u ms, copy:%u ms\n",
-                          timeShape, timeGlyph, timePreedit, timeColor, timeCopy);
-      DALI_LOG_DEBUG_INFO("DALI_TEXT_MODEL_UPDATE chars:%d, text:%s\n", numberOfCharacters, currentText.c_str());
-    }
-  }
-#endif
 
   // The estimated number of lines. Used to avoid reallocations when layouting.
   updateInfo.mEstimatedNumberOfLines =

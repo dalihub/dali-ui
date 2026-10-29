@@ -27,7 +27,6 @@
 #include <dali/integration-api/pixel-data-integ.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/texture-integ.h>
-#include <dali/integration-api/trace.h>
 #include <string.h>
 #include <cmath>
 #include <limits>
@@ -51,6 +50,7 @@
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
+#include <dali-ui-foundation/internal/text/text-trace.h>
 #include <dali-ui-foundation/internal/visuals/text/text-reveal-runtime-blur.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
@@ -71,8 +71,7 @@ namespace Internal
 {
 namespace
 {
-DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
-DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_TEXT_ASYNC, false);
+DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_PERFORMANCE_MARKER, false);
 
 const int CUSTOM_PROPERTY_COUNT(24); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, gradient uniforms
 
@@ -184,20 +183,6 @@ bool HasCompleteTextRevealMetadata(const Text::AsyncTextRenderInfo& renderInfo, 
 
   return rendererOffsetY == rendererHeight;
 }
-
-#ifdef TRACE_ENABLED
-constexpr const char* ASYNC_REQUEST_TYPE_NAME[] = {"RENDER_FIXED_SIZE", "RENDER_FIXED_WIDTH", "RENDER_FIXED_HEIGHT",
-                                                   "RENDER_CONSTRAINT", "COMPUTE_NATURAL_SIZE", "COMPUTE_HEIGHT_FOR_WIDTH"};
-
-const char* GetRequestTypeName(Ui::Integration::Text::Async::RequestType type)
-{
-  if(type < Ui::Integration::Text::Async::RENDER_FIXED_SIZE || type > Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH)
-  {
-    return "INVALID_REQUEST_TYPE";
-  }
-  return ASYNC_REQUEST_TYPE_NAME[type];
-}
-#endif
 
 struct NameIndexMatch
 {
@@ -1131,14 +1116,6 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
   }
   Text::AsyncTextParameters parameters          = textInformation.parameters;
   const auto                publicationRevision = mController->GetRenderRevision();
-
-#ifdef TRACE_ENABLED
-  if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("LoadComplete, success:%d, type:%s\n", loadingSuccess,
-                          GetRequestTypeName(parameters.requestType));
-  }
-#endif
 
   const bool isRenderRequest = IsAsyncRenderRequest(parameters.requestType);
   if(parameters.maximumNumberOfLinesRevision != mController->GetMaximumNumberOfLinesRevision() ||
@@ -2414,13 +2391,6 @@ void TextVisual::PublishReplacementRevealTimings(
 
 bool TextVisual::PrepareAsyncSizeComputationRequest(Text::AsyncTextParameters& parameters)
 {
-#ifdef TRACE_ENABLED
-  if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("Request size computation, type:%s\n", GetRequestTypeName(parameters.requestType));
-  }
-#endif
-
   switch(parameters.requestType)
   {
     case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
@@ -2573,13 +2543,6 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
   {
     Text::AsyncTextManager::Get().RequestCancel(mTextLoadingTaskId);
   }
-
-#ifdef TRACE_ENABLED
-  if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("Request render, type:%s\n", GetRequestTypeName(parameters.requestType));
-  }
-#endif
 
   mIsTextLoadingTaskRunning        = true;
   mTextLoadingMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
@@ -2862,6 +2825,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
   {
     DALI_LOG_DEBUG_INFO("Text::Reveal foreground rendering is disabled while marquee or cutout is active\n");
   }
+  // CPU render-resource preparation only. Layout may already have run in
+  // Label; actual GPU upload and ResourceReady callbacks are outside this scope.
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDER");
+
   RemoveTextRevealConstraints();
   if(!textRevealEnabled)
   {
@@ -2881,8 +2848,6 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
   Shader shader = GetTextShader(mFactoryCache, featureBuilder);
   mImpl->mRenderer.SetShader(shader);
-
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_VISUAL_UPDATE_RENDERER");
 
   if(auto* gradientData = GetTextVisualGradientData(mGradientData))
   {
@@ -3106,6 +3071,9 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       }
     }
   }
+  // Optional blur-effect publication can create additional scene resources.
+  DALI_TEXT_TRACE_END();
+
   // Unsupported configurations keep the complete ordinary Reveal publication.
   // Keep at least two Gaussian samples, as ordinary BlurEffect does. Resolve
   // this before sizing the halo so every target and shader uses the same radius.
