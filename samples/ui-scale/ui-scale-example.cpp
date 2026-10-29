@@ -20,9 +20,14 @@
  * Verifies all UiScalePolicy requirements in one scrollable screen:
  *
  *  [Control Panel]
- *    - Current scale display
- *    - Preset buttons: x0.8 / x1.0 / x1.2 / x1.5 / x2.0
+ *    - Current scale display: System x.. * Window x.. = Final x..
+ *    - System scale presets: x0.8 / x1.0 / x1.2 / x1.5 / x2.0
  *    - Custom scale InputField + Apply button
+ *    - Window scale presets: win x1.00 / x1.25 / x1.50 / x2.00
+ *      A per-window multiplier, independent of UiScalePolicy: it also scales the
+ *      DISABLED zones below. Like the system scale it is turned off by the master
+ *      switch. win x1.00 is the reset.
+ *      Every "effectiveScale = 1.0" below therefore assumes win x1.00.
  *
  *  [Zone A] INHERIT (default)
  *    - Three colored 60×60 boxes, all INHERIT
@@ -30,7 +35,8 @@
  *    - Nested 2×2 GridLayout also scales
  *
  *  [Zone B] DISABLED container + ENABLED children  ← KEY TEST
- *    - The outer StackLayout is DISABLED (effectiveScale = 1.0 always)
+ *    - The outer StackLayout is DISABLED (effectiveScale = the window scale,
+ *      i.e. 1.0 while the window scale is 1.0)
  *    - Red box:   INHERIT  → inherits DISABLED parent → does NOT scale
  *    - Green box: ENABLED  → bypasses DISABLED parent → DOES scale
  *    - Blue box:  ENABLED  → same as green
@@ -41,6 +47,12 @@
  *    - Purple sub-container: DISABLED → isolates its children
  *      - Purple child: INHERIT under DISABLED → does NOT scale
  *      - Orange-red child: ENABLED → scales despite DISABLED parent
+ *
+ *  [Zone D] Corner radius (ABSOLUTE & RELATIVE) and borderline width vs. UiScale
+ *
+ *  [Zone E] VisualBase transform and decoration properties vs. UiScale
+ *
+ *  [Zone F] RenderEffect with corner radius vs. UiScale
  *
  *  [Zone G] Reparent: DISABLED → INHERIT
  *    - A box (INHERIT) starts under a DISABLED parent → effectiveScale = 1.0
@@ -53,11 +65,25 @@
  *    - Change system scale while the box is unparented (no overhead)
  *    - "Re-add" puts it back → new scale is applied correctly
  *
- * Press Escape / Back to quit.
+ *  [Zone I] A second Window at a DIFFERENT window scale, side by side
+ *    - "비교 Window 열기" opens a second Window next to this one at win x2.00
+ *    - Both Windows get the SAME comparison card from ONE builder, so the only
+ *      difference in how the two cards are BUILT is the window scale of the
+ *      Window each one is in (the main card additionally sits inside a zone
+ *      container, so its surroundings differ; the card itself does not)
+ *    - Each card states its OWN window's System x.. * Window x.. = Final x..,
+ *      and both are refreshed whenever the panel above changes the system scale
+ *      or flips the master switch
+ *    - The second Window carries its own win x1.00 / x1.25 / x1.50 / x2.00 row;
+ *      using it leaves the main window untouched
+ *
+ * Press Escape / Back to quit; in the second Window it closes that Window only.
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/devel-api/adaptor-framework/application.h>
+#include <dali/public-api/adaptor-framework/window-system.h>
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -80,10 +106,12 @@ constexpr uint32_t C_GRAY_TEXT  = 0x757575;
 constexpr uint32_t C_INPUT_BG   = 0x2D2D4E;
 
 // Zone backgrounds
-constexpr uint32_t C_ZONE_A_BG  = 0xE3F2FD; // light blue
-constexpr uint32_t C_ZONE_B_BG  = 0xFFF9C4; // light yellow
-constexpr uint32_t C_ZONE_C_BG  = 0xE8F5E9; // light green
-constexpr uint32_t C_ZONE_TITLE = 0x37474F;
+constexpr uint32_t C_ZONE_A_BG   = 0xE3F2FD; // light blue
+constexpr uint32_t C_ZONE_B_BG   = 0xFFF9C4; // light yellow
+constexpr uint32_t C_ZONE_C_BG   = 0xE8F5E9; // light green
+constexpr uint32_t C_ZONE_I_BG   = 0xE0F7FA; // light cyan
+constexpr uint32_t C_ZONE_I_CARD = 0xB2EBF2; // comparison card, the same in both windows
+constexpr uint32_t C_ZONE_TITLE  = 0x37474F;
 
 // Box colors
 constexpr uint32_t C_RED      = 0xE53935;
@@ -102,6 +130,15 @@ constexpr float ZONE_RADIUS = 10.0f;
 constexpr float BOX_RADIUS  = 6.0f;
 constexpr float BTN_RADIUS  = 8.0f;
 constexpr float BTN_HEIGHT  = 44.0f;
+
+// Window scale presets. Shared by the control panel, which drives the main
+// window, and by the comparison window's own row in Zone I, so the two rows
+// cannot drift apart and the side-by-side comparison stays fair.
+constexpr float WINDOW_SCALE_PRESETS[] = {1.0f, 1.25f, 1.5f, 2.0f};
+
+// The window scale Zone I gives the comparison window when it opens. Deliberately
+// not 1.0: the zone exists to put a DIFFERENT window scale next to the main window's.
+constexpr float SUB_WINDOW_SCALE = 2.0f;
 } // namespace
 
 // ──────────────────── float → "1.23" helper ──────────────────────────────────
@@ -127,8 +164,10 @@ private:
 
   void OnInit(Application application)
   {
-    Window window = application.GetWindow();
-    window.SetBackgroundColor(Color::WHITE);
+    // Kept as a member because the per-window scale is set against this window
+    // from the control-panel handlers, long after OnInit has returned.
+    mWindow = application.GetWindow();
+    mWindow.SetBackgroundColor(Color::WHITE);
 
     // Root vertical stack — INHERIT (default), fills window
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
@@ -139,18 +178,30 @@ private:
     root.Add(BuildControlPanel());
     root.Add(BuildScrollZones());
 
-    window.Add(root);
-    window.KeyEventSignal().Connect(this, &UiScaleController::OnKeyEvent);
+    mWindow.Add(root);
+    mWindow.KeyEventSignal().Connect(this, &UiScaleController::OnKeyEvent);
 
-    UpdateScaleLabel();
+    UpdateScaleLabels();
   }
 
-  void OnKeyEvent(Window /*window*/, KeyEvent event)
+  // Connected to BOTH windows: key events only reach the focused window, so the
+  // comparison window would not answer Escape at all without this same handler.
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {
       if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
+        if(mSubWindow && window == mSubWindow)
+        {
+          // Escape in the comparison window closes just that window; quitting
+          // stays the main window's job.
+          CloseSubWindow();
+          return;
+        }
+
+        // Never leave a second visible window behind on the way out.
+        CloseSubWindow();
         mApplication.Quit();
       }
     }
@@ -161,7 +212,7 @@ private:
   void ApplyScale(float s)
   {
     LayoutScaleManager::Get().SetUiScale(s);
-    UpdateScaleLabel();
+    UpdateScaleLabels();
   }
 
   void OnApplyCustomScale()
@@ -184,11 +235,178 @@ private:
     }
   }
 
-  void UpdateScaleLabel()
+  // Per-window scale. Unlike ApplyScale() this is not a system setting: it is an
+  // additional multiplier on top of whatever the view's UiScalePolicy resolves to,
+  // so it also scales the DISABLED zones below. Passing 1.0 is the reset -- it
+  // drops this window's record entirely.
+  void ApplyWindowScale(float scale)
   {
-    std::string text = "System Scale: " + Fmt(LayoutScaleManager::Get().GetUiScale());
-    text += LayoutScaleManager::Get().IsScalable() ? "  (scaling ON)" : "  (scaling OFF)";
-    mScaleLabel.SetText(text.c_str());
+    LayoutScaleManager::Get().SetWindowScale(mWindow, scale);
+    UpdateScaleLabels();
+  }
+
+  // The three numbers one window is drawn at, as text. Shared by the control panel
+  // and by every comparison card, so two windows can never be described by two
+  // differently worded sums.
+  std::string DescribeScale(Window window) const
+  {
+    // Show both terms and their product, because that product -- not either term
+    // alone -- is what the tree is laid out and rendered at. Both getters report
+    // the STORED values, which the master switch does not touch, so the product is
+    // formed here: while the switch is off BOTH terms resolve to 1.0 and so does
+    // the product, which is exactly what the label then shows next to the stored
+    // values.
+    const float systemScale = LayoutScaleManager::Get().GetUiScale();
+    const bool  scalable    = LayoutScaleManager::Get().IsScalable();
+    const float windowScale = LayoutScaleManager::Get().GetWindowScale(window);
+    const float finalScale  = scalable ? systemScale * windowScale : 1.0f;
+
+    std::string text = "System x" + Fmt(systemScale) + " * Window x" + Fmt(windowScale) + " = Final x" + Fmt(finalScale);
+    text += scalable ? "  (scaling ON)" : "  (scaling OFF)";
+    return text;
+  }
+
+  // Every live label restates its OWN window's numbers, so a system-scale or
+  // master-switch change made from the control panel stays truthful in the
+  // comparison window too. Every path that moves either term calls this.
+  void UpdateScaleLabels()
+  {
+    const std::string mainText = DescribeScale(mWindow);
+    mScaleLabel.SetText(mainText.c_str());
+
+    if(mMainCardLabel)
+    {
+      mMainCardLabel.SetText(mainText.c_str());
+    }
+    if(mSubWindow && mSubCardLabel)
+    {
+      mSubCardLabel.SetText(DescribeScale(mSubWindow).c_str());
+    }
+  }
+
+  // ─────────── Comparison window (Zone I) ──────────────────────────────────
+
+  // Side by side with the main window and the same size as it, because the claim
+  // Zone I demonstrates -- the window scale changes how much content fits, not the
+  // window's pixel size -- is only readable when the two windows are the same
+  // size. The main window's geometry is read rather than assumed: on desktop it
+  // comes from the environment, so no size may be hard-coded here.
+  PositionSize ComputeSubWindowBounds() const
+  {
+    constexpr int WINDOW_GAP = 16;
+
+    const PositionSize mainBounds = mWindow.GetPositionSize();
+    const int          width      = std::max(1, mainBounds.width);
+    const int          height     = std::max(1, mainBounds.height);
+
+    int x = mainBounds.x + width + WINDOW_GAP;
+    int y = mainBounds.y;
+
+    // GetMainScreenSize() reports a zero size when the screen cannot be queried;
+    // in that case place the window beside the main one and leave the rest to the
+    // window manager.
+    const Int32Pair screenSize   = WindowSystem::GetMainScreenSize();
+    const int       screenWidth  = screenSize.GetWidth();
+    const int       screenHeight = screenSize.GetHeight();
+    if(screenWidth > 0 && screenHeight > 0)
+    {
+      x = std::min(std::max(0, x), std::max(0, screenWidth - width));
+      y = std::min(std::max(0, y), std::max(0, screenHeight - height));
+    }
+
+    return PositionSize(x, y, width, height);
+  }
+
+  // Opens the comparison window, or raises it when it is already open. The window
+  // scale is set BEFORE the tree is added so this window's very first measure
+  // already runs at its final scale, instead of being laid out at 1.0 and
+  // immediately again at SUB_WINDOW_SCALE.
+  void OpenSubWindow()
+  {
+    if(mSubWindow)
+    {
+      // Already open: raise it instead of creating a second one.
+      mSubWindow.Raise();
+      return;
+    }
+
+    mSubWindow = Window::New(ComputeSubWindowBounds(), "UiScale compare");
+    if(!mSubWindow)
+    {
+      if(mSubWindowStatus)
+      {
+        mSubWindowStatus.SetText("비교 Window: 이 백엔드는 다중 Window를 지원하지 않습니다");
+      }
+      return;
+    }
+
+    mSubWindow.SetClass("UiScale compare", "ui-scale-compare");
+    mSubWindow.SetBackgroundColor(Color::WHITE);
+
+    LayoutScaleManager::Get().SetWindowScale(mSubWindow, SUB_WINDOW_SCALE);
+
+    mSubWindow.Add(BuildSubWindowRoot());
+
+    // Key events only reach the focused window and the handler is otherwise
+    // connected to the main window alone, so this window answers Escape itself.
+    mSubWindow.KeyEventSignal().Connect(this, &UiScaleController::OnKeyEvent);
+
+    // Window::New leaves the native window unmapped and the adaptor auto-shows the
+    // default window only, so this Show() is what actually puts it on screen.
+    mSubWindow.Show();
+    mSubWindow.Raise();
+
+    UpdateScaleLabels();
+    UpdateSubWindowStatus();
+  }
+
+  // Closes the comparison window by dropping our handle. When the close is driven
+  // from the sub window's OWN key or touch dispatch, ours is not the last reference:
+  // the adaptor keeps the Window alive for the rest of that dispatch
+  // (SceneHolder::FeedKeyEvent / FeedTouchPoint), so the actual destruction happens
+  // when the dispatch unwinds. What the user sees is the Hide() below.
+  void CloseSubWindow()
+  {
+    if(!mSubWindow)
+    {
+      return;
+    }
+
+    // Stop pointing at views that are about to go away, so the label fan-out in
+    // UpdateScaleLabels() skips them.
+    mSubCardLabel.Reset();
+
+    mSubWindow.Hide();
+
+    // Each Window gets its own LayoutController, keyed on the Window's object
+    // pointer, and the public API documents this call as what to do when a window
+    // is being closed. It detaches the controller at once and defers the free to
+    // the idle reap, so calling it from a click handler is safe.
+    LayoutController::Remove(mSubWindow);
+
+    // Drop our reference; see the note on this function for who else may still
+    // hold one during the sub window's own event dispatch.
+    mSubWindow.Reset();
+
+    UpdateScaleLabels();
+    UpdateSubWindowStatus();
+  }
+
+  void UpdateSubWindowStatus()
+  {
+    if(!mSubWindowStatus)
+    {
+      return;
+    }
+    if(mSubWindow)
+    {
+      std::string s = "비교 Window: 열림 — win x" + Fmt(LayoutScaleManager::Get().GetWindowScale(mSubWindow));
+      mSubWindowStatus.SetText(s.c_str());
+    }
+    else
+    {
+      mSubWindowStatus.SetText("비교 Window: 닫힘");
+    }
   }
 
   // Global master switch handlers
@@ -197,7 +415,7 @@ private:
   {
     LayoutScaleManager::Get().SetScalable(!LayoutScaleManager::Get().IsScalable());
     UpdateScalableButton();
-    UpdateScaleLabel();
+    UpdateScaleLabels();
   }
 
   void UpdateScalableButton()
@@ -229,7 +447,7 @@ private:
     panel.Add(title);
 
     // Current scale display (updated dynamically)
-    mScaleLabel = Label::New("System Scale: 1.00");
+    mScaleLabel = Label::New("System x1.00 * Window x1.00 = Final x1.00");
     mScaleLabel.SetRequestedWidth(MATCH_PARENT);
     mScaleLabel.SetRequestedHeight(WRAP_CONTENT);
     mScaleLabel.SetFontSize(16.0f);
@@ -289,9 +507,40 @@ private:
     inputRow.Add(applyBtn);
     panel.Add(inputRow);
 
-    // Global master switch: enable/disable scaling process-wide. When OFF,
-    // every view renders at 1.0 regardless of its UiScalePolicy; the stored scale
-    // is preserved and re-applied when scaling is turned back ON.
+    // Per-window scale row. Deliberately a separate row from the system presets
+    // above: this scale multiplies the policy-selected term instead of replacing
+    // it, so it moves the DISABLED zones too, and win x1.00 resets it.
+    Label windowScaleTitle = Label::New("Window scale — independent of UiScalePolicy, turned off by the master switch");
+    windowScaleTitle.SetRequestedWidth(MATCH_PARENT);
+    windowScaleTitle.SetRequestedHeight(WRAP_CONTENT);
+    windowScaleTitle.SetFontSize(13.0f);
+    windowScaleTitle.SetTextColor(UiColor(C_GRAY_TEXT));
+    panel.Add(windowScaleTitle);
+
+    StackLayout windowScaleRow = StackLayout::New(StackOrientation::HORIZONTAL);
+    windowScaleRow.SetRequestedWidth(MATCH_PARENT);
+    windowScaleRow.SetRequestedHeight(WRAP_CONTENT);
+    windowScaleRow.SetSpacing(6.0f);
+
+    for(float preset : WINDOW_SCALE_PRESETS)
+    {
+      std::string     label = "win x" + Fmt(preset);
+      InteractiveView btn   = MakeButton(label, UiColor(C_BTN));
+      btn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+
+      const float capturedWindowScale = preset;
+      btn.ConnectClickedSignal(this, [this, capturedWindowScale](View, const InputEvent&)
+      {
+        ApplyWindowScale(capturedWindowScale);
+      });
+      windowScaleRow.Add(btn);
+    }
+    panel.Add(windowScaleRow);
+
+    // Global master switch: enable/disable scaling process-wide. When OFF, every
+    // view's effective scale resolves to 1.0 regardless of its UiScalePolicy -- the
+    // system term and the per-window scale above alike; both stored values are
+    // preserved and re-applied when scaling is turned back ON.
     mScalableBtn = InteractiveView::New();
     mScalableBtn.SetRequestedWidth(MATCH_PARENT);
     mScalableBtn.SetRequestedHeight(BTN_HEIGHT);
@@ -338,6 +587,7 @@ private:
     content.Add(BuildZoneF());
     content.Add(BuildZoneG());
     content.Add(BuildZoneH());
+    content.Add(BuildZoneI());
 
     // ScrollView fills remaining height in the root StackLayout
     ScrollView scrollView = ScrollView::New();
@@ -408,15 +658,20 @@ private:
   // This demonstrates the requirement: "자신은 scale을 적용받지 않되
   // child는 scale을 적용받는 뷰"
   //
-  // The zone container (StackLayout) is DISABLED → effectiveScale = 1.0.
-  // Children with INHERIT also don't scale (they inherit the 1.0 from parent).
+  // The zone container (StackLayout) is DISABLED → effectiveScale = the window
+  // scale, i.e. 1.0 while that window scale is 1.0.
+  // Children with INHERIT also don't scale (they inherit that value from parent).
   // Children with ENABLED bypass the DISABLED parent and use the system scale
   // directly.
   //
-  // Visual proof: increase scale to 1.5 or 2.0 and observe:
+  // Visual proof: leave the window scale at x1.00, increase the system scale to
+  // 1.5 or 2.0 and observe:
   //   - Red (INHERIT)  stays 60×60
   //   - Green (ENABLED) grows to 90×90 / 120×120
   //   - Blue  (ENABLED) grows to 90×90 / 120×120
+  //
+  // Then press "win x1.50": Red grows too, because the window scale is NOT a
+  // system scale the DISABLED policy opts out of.
   // ═══════════════════════════════════════════════════════════════════════════
 
   View BuildZoneB()
@@ -428,9 +683,10 @@ private:
 
     zone.Add(MakeZoneTitle("[Zone B] DISABLED container + ENABLED children"));
     zone.Add(MakeDesc(
-      "This container is DISABLED (effectiveScale = 1.0 always). "
-      "Its INHERIT children also don't scale. "
-      "But children with ENABLED policy bypass DISABLED and use the system scale directly."));
+      "This container is DISABLED (effectiveScale = the window scale, so 1.0 at win x1.00). "
+      "Its INHERIT children also don't follow the system scale. "
+      "But children with ENABLED policy bypass DISABLED and use the system scale directly. "
+      "The window scale applies to all of them."));
 
     // The three comparison boxes
     StackLayout row = MakeHStack();
@@ -1418,8 +1674,13 @@ private:
       if(!mIsParented)
       {
         mHContainer.Add(mScaleChangeBox);
-        mIsParented   = true;
-        std::string s = "상태: 부모에 연결됨 — Scale " + Fmt(LayoutScaleManager::Get().GetUiScale()) + " 적용됨";
+        mIsParented = true;
+
+        // The box is laid out at its effective scale -- this window's scale times the
+        // system scale -- so report the box's own value, with both terms beside it.
+        std::string s = "상태: 부모에 연결됨 — Scale x" + Fmt(GetImpl(mScaleChangeBox).GetEffectiveLayoutScale()) +
+                        " 적용됨 (System x" + Fmt(LayoutScaleManager::Get().GetUiScale()) +
+                        " * Window x" + Fmt(LayoutScaleManager::Get().GetWindowScale(mWindow)) + ")";
         mHStatusLabel.SetText(s.c_str());
       }
     });
@@ -1433,6 +1694,176 @@ private:
       "③ Re-add 후에 변경된 Scale이 올바르게 반영되는지 확인하세요."));
 
     return zone;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Zone I: a second Window at a different window scale, side by side
+  //
+  // One comparison card is built per Window from the SAME builder, so the two
+  // trees differ in exactly one thing: the window scale of the Window they end
+  // up in. Watch the DISABLED box in particular -- it opts out of the system
+  // scale but not out of the window scale, so it is the box that proves the
+  // window scale is not a second system scale.
+  //
+  // Observe: open the comparison window, then change Scale or flip the master
+  // switch in the control panel and compare the two cards.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  View BuildZoneI()
+  {
+    StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_I_BG));
+
+    zone.Add(MakeZoneTitle("[Zone I] 두 번째 Window로 Window scale 나란히 비교"));
+    zone.Add(MakeDesc(
+      "같은 내용의 카드를 Window 두 개에 하나씩 올리고, 두 Window에 서로 다른 Window scale을 "
+      "적용합니다. 두 카드는 같은 코드로 만들어지므로 만들어지는 방식의 유일한 차이는 각자가 놓인 Window의 "
+      "scale 차이입니다. Window scale은 Window의 픽셀 크기를 바꾸지 않고, 같은 크기의 "
+      "Window에 담기는 내용의 양을 바꿉니다."));
+
+    zone.Add(BuildComparisonCard("메인 Window", mMainCardLabel));
+
+    mSubWindowStatus = MakeDesc("비교 Window: 닫힘");
+    mSubWindowStatus.SetTextColor(UiColor(0x1A237E));
+    zone.Add(mSubWindowStatus);
+
+    StackLayout btnRow = MakeHStack();
+
+    InteractiveView openBtn = MakeButton("비교 Window 열기 (win x" + Fmt(SUB_WINDOW_SCALE) + ")", UiColor(0x00695C));
+    openBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    openBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
+      OpenSubWindow();
+    });
+
+    InteractiveView closeBtn = MakeButton("비교 Window 닫기", UiColor(0xC62828));
+    closeBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    closeBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
+      CloseSubWindow();
+    });
+
+    btnRow.Add(openBtn);
+    btnRow.Add(closeBtn);
+    zone.Add(btnRow);
+
+    zone.Add(MakeDesc(
+      "확인 방법: 비교 Window를 연 뒤 두 카드의 DISABLED 박스를 비교하세요. 위 컨트롤 패널에서 "
+      "Scale을 바꾸거나 마스터 스위치를 끄면 두 카드의 숫자가 함께 갱신됩니다. 마스터 스위치를 "
+      "끄면 Window scale도 함께 꺼져 두 카드 모두 Final x1.00이 되고, 다시 켜면 저장된 값이 다시 적용됩니다."));
+
+    return zone;
+  }
+
+  // Identical in both windows. Takes no Window: the Window it ends up in is the
+  // only variable in the comparison, so the builder must not be able to see it.
+  View BuildComparisonCard(const char* title, Label& outScaleLabel)
+  {
+    constexpr float CARD_RADIUS = 16.0f; // natural corner radius (ABSOLUTE)
+    constexpr float CARD_BORDER = 4.0f;  // natural borderline width (px)
+
+    StackLayout card = BuildZoneContainer(UiColor(C_ZONE_I_CARD));
+
+    card.Add(MakeZoneTitle(title));
+
+    // Each card states its OWN window's three numbers, so the comparison needs no
+    // arithmetic from the reader. Filled by UpdateScaleLabels(), never here.
+    outScaleLabel = MakeDesc("");
+    outScaleLabel.SetFontSize(14.0f);
+    outScaleLabel.SetTextColor(UiColor(C_ZONE_TITLE));
+    card.Add(outScaleLabel);
+
+    // One 60x60 box per policy. INHERIT and ENABLED follow the system scale as
+    // everywhere else in this sample; DISABLED is the interesting one, because the
+    // window scale still applies to it.
+    StackLayout policyRow = MakeHStack();
+    policyRow.Add(MakePolicyBox("INHERIT", UiColor(C_BLUE), UiScalePolicy::INHERIT, BOX_SIZE));
+    policyRow.Add(MakePolicyBox("ENABLED", UiColor(C_GREEN), UiScalePolicy::ENABLED, BOX_SIZE));
+    policyRow.Add(MakePolicyBox("DISABLED", UiColor(C_RED), UiScalePolicy::DISABLED, BOX_SIZE));
+    card.Add(policyRow);
+
+    // Decoration is stored in natural pixels and multiplied by the final scale, so
+    // the rounding and the border thickness stay in proportion between the two
+    // windows rather than staying equal in pixels.
+    StackLayout decoRow = MakeHStack();
+    {
+      View box = MakeDecoBox(UiColor(C_ORANGE), BOX_SIZE);
+      box.SetCornerRadius(CARD_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      box.SetBorderlineWidth(CARD_BORDER);
+      box.SetBorderlineColor(UiColor(C_DARK_TEXT));
+      decoRow.Add(MakeLabeled(box, "radius 16\nborder 4"));
+    }
+    decoRow.Add(MakeLabeled(MakeDecoBox(UiColor(C_PURPLE), BOX_SIZE), "plain\n60x60"));
+    card.Add(decoRow);
+
+    card.Add(MakeDesc(
+      "INHERIT/ENABLED 박스와 모서리 반경·테두리·글자 크기는 이 Window의 최종 배율(System × Window)로 그려집니다. "
+      "DISABLED 박스는 시스템 스케일만 거부하므로 Window scale만으로 그려집니다."));
+
+    return card;
+  }
+
+  // The comparison window's tree. Same shape as the main window (root stack ->
+  // ScrollView -> content), because at a high window scale this window's own
+  // controls grow too and no application view can opt out of the window scale;
+  // scrolling is what keeps them reachable.
+  View BuildSubWindowRoot()
+  {
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
+    content.SetRequestedWidth(MATCH_PARENT);
+    content.SetRequestedHeight(WRAP_CONTENT);
+    content.SetSpacing(16.0f);
+    content.SetPadding(Insets(14.0f, 14.0f, 16.0f, 24.0f));
+
+    content.Add(BuildComparisonCard("비교 Window", mSubCardLabel));
+
+    content.Add(MakeDesc("이 Window의 Window scale (메인 Window는 영향받지 않습니다):"));
+
+    // The same presets the control panel offers for the main window, from the same
+    // array, so the two rows cannot drift apart and the comparison stays fair.
+    StackLayout windowScaleRow = MakeHStack();
+    for(float preset : WINDOW_SCALE_PRESETS)
+    {
+      std::string     label = "win x" + Fmt(preset);
+      InteractiveView btn   = MakeButton(label, UiColor(C_BTN));
+      btn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+
+      const float capturedWindowScale = preset;
+      btn.ConnectClickedSignal(this, [this, capturedWindowScale](View, const InputEvent&)
+      {
+        if(mSubWindow)
+        {
+          LayoutScaleManager::Get().SetWindowScale(mSubWindow, capturedWindowScale);
+          UpdateScaleLabels();
+          UpdateSubWindowStatus();
+        }
+      });
+      windowScaleRow.Add(btn);
+    }
+    content.Add(windowScaleRow);
+
+    InteractiveView closeBtn = MakeButton("이 Window 닫기 (Esc)", UiColor(0xC62828));
+    closeBtn.SetRequestedWidth(MATCH_PARENT);
+    closeBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
+      CloseSubWindow();
+    });
+    content.Add(closeBtn);
+
+    ScrollView scrollView = ScrollView::New();
+    scrollView.SetScrollDirection(ScrollDirection::Vertical);
+    scrollView.SetRequestedWidth(MATCH_PARENT);
+    scrollView.SetRequestedHeight(WRAP_CONTENT);
+    scrollView.SetContent(content);
+    scrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetSpacing(0.0f);
+    root.Add(scrollView);
+
+    return root;
   }
 
   // ─── Decoration demo helpers ──────────────────────────────────────────────
@@ -1565,7 +1996,8 @@ private:
 
 private:
   Application&    mApplication;
-  Label           mScaleLabel; // updated on every ApplyScale()
+  Window          mWindow;     // the window the per-window scale is set on
+  Label           mScaleLabel; // updated on every ApplyScale() / ApplyWindowScale()
   InputField      mScaleInput;
   InteractiveView mScalableBtn;      // global master switch toggle
   Label           mScalableBtnLabel; // toggle button caption (ON/OFF)
@@ -1581,6 +2013,12 @@ private:
   View        mScaleChangeBox;
   Label       mHStatusLabel;
   bool        mIsParented{true};
+
+  // Zone I: a second Window at a different window scale
+  Window mSubWindow;       // the comparison window; empty while it is closed
+  Label  mMainCardLabel;   // main window card's System x.. * Window x.. = Final x..
+  Label  mSubCardLabel;    // comparison window card's own copy of that line
+  Label  mSubWindowStatus; // the open/closed status line in Zone I
 };
 
 // ─────────────────────────── Entry point ─────────────────────────────────────
