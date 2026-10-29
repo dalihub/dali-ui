@@ -237,15 +237,15 @@ struct DALI_UI_API LayoutBoundsLength
   float            value{0.0f};
   LayoutBoundsUnit unit{LayoutBoundsUnit::PIXEL};
 
-  static LayoutBoundsLength Pixel(float v)
+  static constexpr LayoutBoundsLength Pixel(float v)
   {
     return {v, LayoutBoundsUnit::PIXEL};
   }
-  static LayoutBoundsLength SelfFraction(float v)
+  static constexpr LayoutBoundsLength SelfFraction(float v)
   {
     return {v, LayoutBoundsUnit::SELF_FRACTION};
   }
-  static LayoutBoundsLength ParentFraction(float v)
+  static constexpr LayoutBoundsLength ParentFraction(float v)
   {
     return {v, LayoutBoundsUnit::PARENT_FRACTION};
   }
