@@ -330,6 +330,7 @@ touch sequence를 더 이상 intercept하지 않는다.
 | `SetScale(float)` | `SetUiScale(float)` |
 | `IsScalable()`, `SetScalable(bool)` | 변경 없음 (`IsScalable()`, `SetScalable(bool)`) |
 | `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | 공개 API 없음 (라이브러리가 내부에서 처리) |
+| 없음 | `GetWindowScale(Window)`, `SetWindowScale(Window, float)` (신규, 윈도우별 스케일) |
 
 두 클래스는 하나의 상태를 공유하므로 섞어 써도 되며, 마지막에 설정한 값이 적용된다. 두
 핸들은 서로 다른 객체라서 변환되지 않는다. 한쪽 핸들을 다른 쪽 `DownCast()`에 넘기면 빈

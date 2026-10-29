@@ -225,11 +225,26 @@ int UtcDaliUiScaleManagerSetScaleSubnormalRejectedN(void)
 
 // === Layout-root registry ===
 
+namespace
+{
+int gRegistryMeasureCount = 0;
+
+MeasuredSize CountRegistryMeasure(View, float, float)
+{
+  ++gRegistryMeasureCount;
+  return MeasuredSize(50.0f, 50.0f);
+}
+} // namespace
+
 // A root registered through the deprecated RegisterLayoutRoot() enters the registry that a
 // LayoutScaleManager scale change walks. The root is detached first, so the library has
-// already unregistered it and only the deprecated call can register it again. Detaching
-// does not drop the root's cached effective scale, so the control step shows the cache stays
-// stale while the root is unregistered; the last step shows the deprecated registration
+// already unregistered it and only the deprecated call can register it again. A detached
+// view caches no effective scale -- it follows a scale change by itself -- so the walk is
+// observed through what it does besides: it drops the root's layout caches. The root opts
+// out of the UI scale (UiScalePolicy::DISABLED), so its effective scale stays 1.0 and its
+// measure entry's scale never moves: only that walk can make the next same-constraint
+// Measure() run the producer again. The control step shows the entry surviving a scale
+// change while the root is unregistered; the last step shows the deprecated registration
 // made it reachable, while the root is still detached.
 int UtcDaliUiScaleManagerRegisterLayoutRootReachesDetachedRootP(void)
 {
@@ -241,17 +256,27 @@ int UtcDaliUiScaleManagerRegisterLayoutRootReachesDetachedRootP(void)
   manager.SetUiScale(1.0f);
 
   View root = AddSettledRoot(application);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-
-  // Control: detached and unregistered, the root misses a scale change.
   application.GetWindow().Remove(root);
+  root.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  root.SetMeasureCallback(MeasureCallback::New(&CountRegistryMeasure));
+  gRegistryMeasureCount = 0;
+
+  // An entry measured off scene, and the hit that shows it is live.
+  root.Measure(200.0f, 200.0f);
+  root.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(gRegistryMeasureCount, 1, TEST_LOCATION);
+
+  // Control: detached and unregistered, no walk reaches the root, and its entry survives.
   manager.SetUiScale(1.5f);
   DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  root.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(gRegistryMeasureCount, 1, TEST_LOCATION);
 
-  // Registered through the deprecated API, the detached root follows the next change.
+  // Registered through the deprecated API, the detached root is reached by the next change.
   UiScaleManager::Get().RegisterLayoutRoot(root);
   manager.SetUiScale(2.0f);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  root.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(gRegistryMeasureCount, 2, TEST_LOCATION);
 
   UiScaleManager::Get().UnregisterLayoutRoot(root);
   manager.SetUiScale(originalScale);

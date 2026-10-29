@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
@@ -34,20 +35,24 @@ class LayoutScaleManagerImpl;
 }
 
 /**
- * @brief Holds the UI scale that the layout pass applies to every view.
+ * @brief Holds the UI scale and the window scales that the layout pass applies to every view.
  *
  * LayoutScaleManager is a handle to a process-wide singleton. It is not a LayoutManager
  * and lays nothing out itself. It holds the UI scale -- the system scale, usually set
- * through SetUiScale() by a system or accessibility handler -- and a process-wide switch
- * that enables or disables scaling. A view's effective scale is the UI scale or 1.0, as
- * the view's UiScalePolicy selects; ViewImpl::GetEffectiveLayoutScale() returns it. The
- * effective scale is applied in the layout pass, so rendering -- text size, borders, blur
- * and render effects -- and the conversion between requested units and on-screen pixels
- * follow it as well.
+ * through SetUiScale() by a system or accessibility handler --, one window scale per
+ * Window, set through SetWindowScale(), and a process-wide switch that enables or
+ * disables both. Their product is each view's effective scale:
+ * @code
+ *   effectiveScale = GetWindowScale(theViewsWindow) * theViewsUiScaleTerm
+ * @endcode
+ * where the UI-scale term is the UI scale or 1.0, as the view's UiScalePolicy selects;
+ * ViewImpl::GetEffectiveLayoutScale() returns the product. The effective scale is applied in the
+ * layout pass, so rendering -- text size, borders, blur and render effects -- and the
+ * conversion between requested units and on-screen pixels follow it as well.
  *
  * @code
  *   LayoutScaleManager::Get().SetUiScale(1.5f);
- *   float uiScale = LayoutScaleManager::Get().GetUiScale();
+ *   LayoutScaleManager::Get().SetWindowScale(window, 2.0f); // views in window: 2.0 * 1.5
  * @endcode
  */
 class DALI_UI_API LayoutScaleManager : public BaseHandle
@@ -130,6 +135,11 @@ public:
    * value again does nothing. While scaling is disabled through SetScalable(false) the
    * value is stored, and the re-layout is deferred until scaling is enabled again.
    *
+   * A view that is not on a scene belongs to no registered layout root and is not laid out
+   * again, but it caches no effective scale either: ViewImpl::GetEffectiveLayoutScale() and
+   * View::Measure() on it use the new value at once, and it is laid out at that value when
+   * it is added to a scene.
+   *
    * @param[in] scale The new UI scale. It must be positive, finite and normal (>= FLT_MIN),
    *            because the layout also divides by it; other values are ignored and logged,
    *            leaving the current UI scale in place.
@@ -146,15 +156,83 @@ public:
   /**
    * @brief Enables or disables scaling process-wide.
    *
-   * A process-wide master switch. While scaling is disabled every view's effective scale is
-   * 1.0, whatever its UiScalePolicy and the value set through SetUiScale(); the stored value
-   * is kept -- GetUiScale() keeps reporting it -- and applied again when scaling is enabled.
-   * Changing the switch invalidates all registered layout roots and triggers a re-layout;
-   * setting the current state again does nothing.
+   * A process-wide master switch for both scales. While scaling is disabled every view's
+   * effective scale is 1.0, whatever its UiScalePolicy, the value set through SetUiScale()
+   * and any window scale set through SetWindowScale(); both stored values are kept --
+   * GetUiScale() and GetWindowScale() keep reporting them -- and applied again when scaling
+   * is enabled. Changing the switch invalidates all registered layout roots and triggers a
+   * re-layout; setting the current state again does nothing. A view that is not on a scene
+   * follows the switch at once, as it follows SetUiScale().
    *
    * @param[in] enable true to enable scaling, false to disable it
    */
   void SetScalable(bool enable);
+
+  /**
+   * @brief Returns the window scale applied to every view in @p window.
+   *
+   * This is the per-window term of a view's effective scale; see SetWindowScale(). It is
+   * the STORED value: like GetUiScale(), it keeps reporting it while scaling is disabled
+   * through SetScalable(false), although no view is scaled by it then.
+   *
+   * @param[in] window The window to query
+   * @return The window's scale, or 1.0 when none was set, when it was reset, or when
+   *         @p window is empty. A scale recorded for a window that has since been
+   *         destroyed is never reported for another window, and its record is dropped
+   *         automatically
+   */
+  float GetWindowScale(Window window) const;
+
+  /**
+   * @brief Sets the window scale applied to every view in @p window.
+   *
+   * A view's effective scale is the product of two independent terms:
+   * @code
+   *   effectiveScale = GetWindowScale(theViewsWindow) * theViewsUiScaleTerm
+   * @endcode
+   * where the UI-scale term is the one UiScalePolicy selects (GetUiScale(), or 1.0 for
+   * UiScalePolicy::DISABLED). The effective scale multiplies the pixel sizes handed to the
+   * view, so both layout and rendering happen at that scale.
+   *
+   * The window scale is INDEPENDENT of UiScalePolicy: it is applied to every view in
+   * the window, including views whose policy is UiScalePolicy::DISABLED (the one
+   * exception is a drag preview while DragAndDropDetector positions it itself; see
+   * DragAndDropDetector::DragPreviewPositionSignal()). It is NOT independent of
+   * SetScalable(): while scaling is disabled every view's effective scale is 1.0,
+   * this term included. A window scale set while scaling is disabled is stored --
+   * GetWindowScale() reports it -- and takes effect when scaling is enabled again, exactly
+   * like a value set through SetUiScale(). It does not change the window's own pixel
+   * size -- it changes how much logical content fits in it.
+   *
+   * Passing 1.0 restores the default and drops the window's record. Setting a scale
+   * invalidates only the layout roots registered in @p window and triggers a re-layout
+   * of that window; other windows are untouched. While scaling is disabled that
+   * re-layout is deferred to SetScalable(true).
+   *
+   * Destroying a window needs no reset: its record is dropped automatically, and a
+   * scale recorded for a destroyed window never applies to any later window.
+   *
+   * The window scale applies to a view only while the view is in @p window. A view that
+   * leaves it -- removed from it, or still in it when it is destroyed -- loses the window
+   * term together with its whole subtree: until it is added to a window again, its
+   * effective scale (ViewImpl::GetEffectiveLayoutScale()) and View::Measure() on it use
+   * the UI-scale term alone, the current one: they follow SetUiScale() and SetScalable()
+   * while the view is detached.
+   *
+   * @param[in] window The window whose views are affected. An empty window is ignored
+   *            and logged.
+   * @param[in] scale The window scale. It must be positive, finite and normal
+   *            (>= FLT_MIN), because the layout also divides by the effective scale;
+   *            other values are ignored and logged, leaving the current window scale in
+   *            place. The same requirement applies to the PRODUCT of this scale and the
+   *            UI scale, which is the value the layout actually divides by: each term
+   *            passing the check on its own does not keep the product finite and normal
+   *            (1e20 x 1e20 overflows, 1e-25 x 1e-25 underflows to zero), and the product
+   *            is deliberately not validated here because that would make either term's
+   *            validity depend on the order the two were set in. Keep both terms within
+   *            a sane display range.
+   */
+  void SetWindowScale(Window window, float scale);
 
 public: // Not intended for Application developers
   /// @cond internal

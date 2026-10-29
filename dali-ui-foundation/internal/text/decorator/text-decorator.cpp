@@ -38,6 +38,7 @@
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -704,6 +705,11 @@ struct Decorator::Impl : public ConnectionTracker
   {
     cursor = View::New();
     cursor.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    // Every decoration is handed geometry that is ALREADY scaled -- the cursor's width and height, the
+    // handles' positions and the markers' line height all come from the scaled text metrics -- so each one
+    // opts out of BOTH scale terms: UiScalePolicy::DISABLED takes it out of the system scale, and this takes
+    // it out of the per-window scale, which would otherwise multiply those values a second time.
+    Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(cursor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED);
     cursor.SetBackgroundColor(color);
     cursor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     cursor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -857,6 +863,7 @@ struct Decorator::Impl : public ConnectionTracker
       {
         grabHandle.actor = ImageView::New(ToDaliString(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED]));
         grabHandle.actor.SetUiScalePolicy(UiScalePolicy::DISABLED);
+        Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(grabHandle.actor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED); // See CreateCursor().
         grabHandle.actor.SetSynchronousLoading(true);
         grabHandle.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
         // grabHandle.actor.SetDepthIndex(Dali::Ui::Integration::DepthIndex::DECORATION); ///< TODO : Add this as an ImageVisual in the View's own half of the decoration layer, once built-in visuals use containers.
@@ -897,6 +904,7 @@ struct Decorator::Impl : public ConnectionTracker
     {
       handle.markerActor = ImageView::New(ToDaliString(image));
       handle.markerActor.SetUiScalePolicy(UiScalePolicy::DISABLED);
+      Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(handle.markerActor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED); // See CreateCursor().
       handle.markerActor.SetSynchronousLoading(true);
       handle.markerActor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
       handle.markerActor.SetProperty(Actor::Property::COLOR_MULTIPLIER, mHandleColor);
@@ -926,6 +934,7 @@ struct Decorator::Impl : public ConnectionTracker
       {
         primary.actor = ImageView::New(ToDaliString(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
         primary.actor.SetUiScalePolicy(UiScalePolicy::DISABLED);
+        Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(primary.actor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED); // See CreateCursor().
         primary.actor.SetSynchronousLoading(true);
         primary.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
 #ifdef DECORATOR_DEBUG
@@ -969,6 +978,7 @@ struct Decorator::Impl : public ConnectionTracker
       {
         secondary.actor = ImageView::New(ToDaliString(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
         secondary.actor.SetUiScalePolicy(UiScalePolicy::DISABLED);
+        Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(secondary.actor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED); // See CreateCursor().
         secondary.actor.SetSynchronousLoading(true);
         secondary.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
 #ifdef DECORATOR_DEBUG

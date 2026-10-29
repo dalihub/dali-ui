@@ -22,7 +22,10 @@
 
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <cmath>
 #include <dali-ui/ui-timer.h>
@@ -104,6 +107,20 @@ void CollectImageViews(Actor actor, std::vector<ImageView>& imageViews)
   for(uint32_t index = 0u; index < actor.GetChildCount(); ++index)
   {
     CollectImageViews(actor.GetChildAt(index), imageViews);
+  }
+}
+
+void CollectViews(Actor actor, std::vector<Ui::View>& views)
+{
+  Ui::View view = Ui::View::DownCast(actor);
+  if(view)
+  {
+    views.push_back(view);
+  }
+
+  for(uint32_t index = 0u; index < actor.GetChildCount(); ++index)
+  {
+    CollectViews(actor.GetChildAt(index), views);
   }
 }
 } // namespace
@@ -399,5 +416,116 @@ int UtcDaliTextDecoratorHandleEdgeAutoScrollP(void)
                                 }));
     application.GetScene().Remove(root);
   }
+  END_TEST;
+}
+
+// Every decoration is handed geometry the text controller has ALREADY scaled, so every
+// View the decorator creates -- the cursor, the grab handle, the two selection handles
+// and their two markers -- opts out of the per-window scale as well as the system
+// scale. The cursor and the handles are layout roots here (their parents are the
+// decorator's plain-Actor layers), so a window scale they kept would multiply their
+// requested size and position a second time.
+//
+// The claim this test pins (stated, not demonstrated by a mutation run here -- no build
+// was performed for this change): dropping the WindowScalePolicy line at the cursor,
+// grab-handle, primary-handle or secondary-handle creation site makes that view read
+// 2.0 below. The marker line is mutation-equivalent -- a marker is parented to its
+// handle and inherits the handle's opt-out -- so the code, not this check, carries it.
+int UtcDaliTextDecoratorDecorationsIgnoreWindowScaleP(void)
+{
+  UiTestApplication application;
+  tet_infoline("Every View the decorator creates resolves to scale 1.0 under a window scale");
+
+  const float originalScale    = LayoutScaleManager::Get().GetUiScale();
+  const bool  originalScalable = LayoutScaleManager::Get().IsScalable();
+  Window      window           = application.GetWindow();
+
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+  LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
+
+  // Anti-vacuity: an application view in the same window does take the window scale,
+  // so every 1.0 below is an opt-out and not a missing window scale.
+  Ui::View plain = Ui::View::New();
+  plain.SetRequestedWidth(10.0f);
+  plain.SetRequestedHeight(10.0f);
+  application.GetScene().Add(plain);
+  DALI_TEST_EQUALS(GetImpl(plain).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+
+  Actor root = Actor::New();
+  root.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  root.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  root.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 160.0f));
+  application.GetScene().Add(root);
+
+  TestDecoratorController controller(root);
+  Text::DecoratorPtr      decorator = Text::Decorator::New(controller, controller);
+  decorator->SetBoundingBox(BoundsInteger(0, 0, 240, 160));
+
+  // The three handles as UtcDaliTextDecoratorHandlesReceivePanWithHitTestModesP builds
+  // them, plus the two selection-handle markers and the primary cursor.
+  struct HandleCase
+  {
+    Text::HandleType type;
+    std::string      image;
+    std::string      pressedImage;
+    float            x;
+  };
+  const std::array<HandleCase, 3u> handles{{
+    {Text::GRAB_HANDLE,
+     GetRepositoryResourcePath("samples/text/res/cursor_handle.png"),
+     GetRepositoryResourcePath("samples/text/res/cursor_handle_pressed.png"),
+     60.0f},
+    {Text::LEFT_SELECTION_HANDLE,
+     GetRepositoryResourcePath("samples/text/res/selection_handle_left.png"),
+     GetRepositoryResourcePath("samples/text/res/selection_handle_left_pressed.png"),
+     120.0f},
+    {Text::RIGHT_SELECTION_HANDLE,
+     GetRepositoryResourcePath("samples/text/res/selection_handle_right.png"),
+     GetRepositoryResourcePath("samples/text/res/selection_handle_right_pressed.png"),
+     180.0f},
+  }};
+  for(const HandleCase& handle : handles)
+  {
+    decorator->SetHandleImage(handle.type, Text::HANDLE_IMAGE_RELEASED, handle.image);
+    decorator->SetHandleImage(handle.type, Text::HANDLE_IMAGE_PRESSED, handle.pressedImage);
+    decorator->SetPosition(handle.type, handle.x, 40.0f, 20.0f);
+    decorator->SetHandleActive(handle.type, true);
+  }
+  decorator->SetHandleImage(Text::LEFT_SELECTION_HANDLE_MARKER,
+                            Text::HANDLE_IMAGE_RELEASED,
+                            GetRepositoryResourcePath("samples/text/res/selection_handle_left.png"));
+  decorator->SetHandleImage(Text::RIGHT_SELECTION_HANDLE_MARKER,
+                            Text::HANDLE_IMAGE_RELEASED,
+                            GetRepositoryResourcePath("samples/text/res/selection_handle_right.png"));
+
+  decorator->SetPosition(Text::PRIMARY_CURSOR, 30.0f, 40.0f, 18.0f, 20.0f);
+  decorator->SetVisualCursorGeometry(Text::PRIMARY_CURSOR, 32.0f, 40.0f, 18.0f);
+  decorator->SetActiveCursor(Text::ACTIVE_CURSOR_PRIMARY);
+
+  NoopRelayoutContainer relayoutContainer;
+  decorator->Relayout(Vector2(240.0f, 160.0f), relayoutContainer);
+  application.SendNotification();
+  application.Render();
+
+  // The decorator creates Views at five sites -- the cursor, the grab handle, the two
+  // selection handles, and the marker, once per selection handle -- so the tree holds
+  // exactly six.
+  std::vector<Ui::View> views;
+  CollectViews(root, views);
+  DALI_TEST_EQUALS(views.size(), 6u, TEST_LOCATION);
+  for(Ui::View& view : views)
+  {
+    DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+    // Pins each creation site's own policy line, the markers included: a marker inherits
+    // its handle's opt-out, so the 1.0 above alone cannot tell a dropped marker line.
+    DALI_TEST_CHECK(Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(view)).GetWindowScalePolicy() == Dali::Ui::Internal::WindowScalePolicy::DISABLED);
+  }
+
+  application.GetScene().Remove(root);
+  application.GetScene().Remove(plain);
+  LayoutScaleManager::Get().SetWindowScale(window, 1.0f);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
