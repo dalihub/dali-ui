@@ -171,8 +171,8 @@ layout direction as the keyed inputs.
 
 The effective scale is part of the measure cache key, so a scale change alone
 forces a re-measure. The effective scale is resolved in one place,
-`ViewDataImpl::ComputeEffectiveScale()`; when the process-wide UI-scale master
-switch (`UiScaleManager::SetScalable(false)`) is off it returns `1.0` for every
+`ViewDataImpl::ComputeEffectiveScale()`; when the process-wide scaling master
+switch (`LayoutScaleManager::SetScalable(false)`) is off it returns `1.0` for every
 view regardless of the view's `UiScalePolicy`, so the whole tree behaves as
 unscaled.
 
@@ -357,7 +357,7 @@ implementations.
 
 During Measure the parent passes the width and height constraints each as a single **sign-encoded `float`** — the public API carries one scalar per axis; internally the framework pairs it with a measure mode (see *Measure modes* below):
 
-- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `GetEffectiveScale()` to obtain the natural-unit budget before computing sizes. Under the default mode (at-most) this budget acts as an **at-most ceiling**.
+- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `GetEffectiveLayoutScale()` to obtain the natural-unit budget before computing sizes. Under the default mode (at-most) this budget acts as an **at-most ceiling**.
 - **Negative value** — a sentinel carrying intent, not a size: `WRAP_CONTENT` (-1.0f) or `MATCH_PARENT` (-2.0f).
 
 Before `OnMeasure` runs, `ViewImpl::Measure` reconciles the incoming constraint against this view's min/max bounds: `effective = std::min(std::max(constraint, Minimum), Maximum)` -- on every axis, an axis measured exactly included (see *Measure modes*). With the default `Minimum` of `0`, a negative sentinel constraint is therefore **floored to 0** — so the budget that actually reaches `OnMeasure` is always `>= 0`. (An axis is left "unbounded" not by a negative value but by passing a large positive budget such as `FLT_MAX`, as ScrollView does on its scrollable axes.)

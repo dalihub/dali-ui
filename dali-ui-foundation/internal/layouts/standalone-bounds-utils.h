@@ -128,7 +128,7 @@ inline StandaloneSlotInputs SnapshotStandaloneSlotInputs(const ViewImpl& view)
 {
   StandaloneSlotInputs inputs;
 
-  inputs.scale           = view.GetEffectiveScale();
+  inputs.scale           = view.GetEffectiveLayoutScale();
   inputs.margin          = view.GetMargin();
   inputs.requestedX      = view.GetRequestedX();
   inputs.requestedY      = view.GetRequestedY();

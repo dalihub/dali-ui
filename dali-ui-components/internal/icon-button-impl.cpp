@@ -23,7 +23,7 @@ MeasuredSize MeasureIcon(Ui::View view, float widthConstraint, float heightConst
   const bool    ready              = image.GetLoadingStatus() == Ui::Visual::ResourceStatus::READY;
   const bool    naturalWidthValid  = ready && std::isfinite(natural.x) && natural.x > 0.0f;
   const bool    naturalHeightValid = ready && std::isfinite(natural.y) && natural.y > 0.0f;
-  const float   scale              = Ui::GetImpl(view).GetEffectiveScale();
+  const float   scale              = Ui::GetImpl(view).GetEffectiveLayoutScale();
   const float   requestedWidth     = view.GetRequestedWidth();
   const float   requestedHeight    = view.GetRequestedHeight();
   const bool    widthFixed         = requestedWidth >= 0.0f || requestedWidth == MATCH_PARENT;

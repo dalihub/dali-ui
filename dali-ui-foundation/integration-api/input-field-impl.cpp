@@ -1078,7 +1078,7 @@ void InputFieldImpl::UpdateInlineReplacementData(const Vector2& ownerSize, const
                        Vector2::ZERO,
                        contentSize,
                        contentSize,
-                       GetEffectiveScale(),
+                       GetEffectiveLayoutScale(),
                        source.sourceRevision);
 }
 
@@ -2092,7 +2092,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
 {
   mMeasureInvalidated = false;
 
-  const float effectiveScale = GetEffectiveScale();
+  const float effectiveScale = GetEffectiveLayoutScale();
   if(SetTextUiScale(effectiveScale))
   {
     mController->InvalidateFontData();

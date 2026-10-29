@@ -355,7 +355,7 @@ void CheckBoxImpl::OnSceneConnection(int depth)
 
 MeasuredSize CheckBoxImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  float s = GetEffectiveScale();
+  float s = GetEffectiveLayoutScale();
 
   Insets padding = GetPadding();
   float  visPadW = static_cast<float>(padding.start + padding.end) * s;
@@ -442,7 +442,7 @@ LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
 {
   // Self geometry (x/y/width/height) is applied centrally in ViewImpl::Arrange
   // from this method's returned LayoutRect; no actor-level setters needed here.
-  float  s       = GetEffectiveScale();
+  float  s       = GetEffectiveLayoutScale();
   Insets padding = GetPadding();
 
   // Children are arranged in the LOGICAL (left-to-right) frame and NOTHING is mirrored

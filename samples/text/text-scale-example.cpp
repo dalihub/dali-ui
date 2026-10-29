@@ -546,7 +546,7 @@ private:
 
   void SetUiScale(float scale)
   {
-    UiScaleManager::Get().SetScale(scale);
+    LayoutScaleManager::Get().SetUiScale(scale);
     UpdateStatus();
   }
 
@@ -587,7 +587,7 @@ private:
     for(const auto& option : FONT_OPTIONS)
       if(option.value == mSystemFont) fontName = option.name;
     const float        font = mTargetLabel.GetAdjustedFontSizeScale();
-    const float        ui   = UiScaleManager::Get().GetScale();
+    const float        ui   = LayoutScaleManager::Get().GetUiScale();
     const auto         size = IMAGE_SIZE * (font * ui);
     std::ostringstream status;
     status << std::fixed << std::setprecision(2)

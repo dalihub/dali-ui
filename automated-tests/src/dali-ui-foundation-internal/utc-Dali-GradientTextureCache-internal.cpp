@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -642,9 +642,9 @@ int UtcDaliGradientTextureCacheNonKeyProperties(void)
 int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
 {
   UiTestApplication application;
-  auto              scale = Ui::UiScaleManager::Get();
+  auto              scale = Ui::LayoutScaleManager::Get();
   scale.SetScalable(true);
-  scale.SetScale(1.f);
+  scale.SetUiScale(1.f);
   auto enabled  = Ui::View::New();
   auto disabled = Ui::View::New();
   enabled.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
@@ -665,7 +665,7 @@ int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
   Texture original = view.GetRendererAt(0).GetTextures().GetTexture(0);
   for(float value : {0.5f, 1.f, 1.25f, 2.f})
   {
-    scale.SetScale(value);
+    scale.SetUiScale(value);
     view.SetRequestedWidth(100.f / value);
     view.SetRequestedHeight(50.f / value);
     frame();
@@ -685,7 +685,7 @@ int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
     frame();
     DALI_TEST_CHECK(view.GetRendererAt(0).GetTextures().GetTexture(0) == original);
   }
-  scale.SetScale(1.f);
+  scale.SetUiScale(1.f);
   END_TEST;
 }
 

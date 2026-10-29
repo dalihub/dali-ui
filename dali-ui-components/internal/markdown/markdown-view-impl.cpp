@@ -67,7 +67,7 @@ bool HasBoundedWidthConstraint(ViewImpl& view, float widthConstraint)
   // float::max() at scale >= 1 and becomes float::max() * scale below 1.
   // Allow a few relative ULPs because the divide/multiply round trip can make
   // the normalized sentinel slightly smaller (for example at UI scale 1.3).
-  const float unboundedWidth     = DEFAULT_MAXIMUM_WIDTH * std::min(view.GetEffectiveScale(), 1.0f);
+  const float unboundedWidth     = DEFAULT_MAXIMUM_WIDTH * std::min(view.GetEffectiveLayoutScale(), 1.0f);
   const float unboundedTolerance = unboundedWidth * (4.0f * std::numeric_limits<float>::epsilon());
   return widthConstraint < unboundedWidth - unboundedTolerance;
 }

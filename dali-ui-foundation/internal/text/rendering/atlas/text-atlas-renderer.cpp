@@ -702,7 +702,7 @@ struct AtlasRenderer::Impl
     if(mGradientState.IsEnabled() || gradientSpanData)
     {
       Ui::View owner   = Ui::View::DownCast(textControl);
-      mGradientUiScale = owner ? Ui::GetImpl(owner).GetEffectiveScale() : 1.0f;
+      mGradientUiScale = owner ? Ui::GetImpl(owner).GetEffectiveLayoutScale() : 1.0f;
     }
     PrepareGradientSpanResources(gradientSpanData,
                                  positions,

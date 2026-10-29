@@ -2619,8 +2619,8 @@ int UtcDaliViewMeasureModeMatchContentItemAtFractionalScaleP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.1f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.1f);
   const float s = 1.1f;
 
   View p    = CreateCustomParent(300.0f, 600.0f);
@@ -2640,7 +2640,7 @@ int UtcDaliViewMeasureModeMatchContentItemAtFractionalScaleP(void)
   DALI_TEST_EQUALS(HeightOf(item), h, MODE_EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(HeightOf(label), h, MODE_EPSILON, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -2652,8 +2652,8 @@ int UtcDaliViewMeasureModeMatchContentCellAtFractionalScaleP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.1f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.1f);
   const float s = 1.1f;
 
   GridLayout grid = GridLayout::New();
@@ -2686,7 +2686,7 @@ int UtcDaliViewMeasureModeMatchContentCellAtFractionalScaleP(void)
   DALI_TEST_EQUALS(HeightOf(c), h + 24.0f * s, MODE_EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(HeightOf(label), h, MODE_EPSILON, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 

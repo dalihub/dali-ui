@@ -160,7 +160,7 @@ private:
 
   void ApplyScale(float s)
   {
-    UiScaleManager::Get().SetScale(s);
+    LayoutScaleManager::Get().SetUiScale(s);
     UpdateScaleLabel();
   }
 
@@ -186,8 +186,8 @@ private:
 
   void UpdateScaleLabel()
   {
-    std::string text = "System Scale: " + Fmt(UiScaleManager::Get().GetScale());
-    text += UiScaleManager::Get().IsScalable() ? "  (scaling ON)" : "  (scaling OFF)";
+    std::string text = "System Scale: " + Fmt(LayoutScaleManager::Get().GetUiScale());
+    text += LayoutScaleManager::Get().IsScalable() ? "  (scaling ON)" : "  (scaling OFF)";
     mScaleLabel.SetText(text.c_str());
   }
 
@@ -195,14 +195,14 @@ private:
 
   void OnToggleScalable()
   {
-    UiScaleManager::Get().SetScalable(!UiScaleManager::Get().IsScalable());
+    LayoutScaleManager::Get().SetScalable(!LayoutScaleManager::Get().IsScalable());
     UpdateScalableButton();
     UpdateScaleLabel();
   }
 
   void UpdateScalableButton()
   {
-    const bool enabled = UiScaleManager::Get().IsScalable();
+    const bool enabled = LayoutScaleManager::Get().IsScalable();
     mScalableBtnLabel.SetText(enabled ? "Scaling: ON (tap to disable)" : "Scaling: OFF (tap to enable)");
     mScalableBtn.SetBackgroundColor(UiColor(enabled ? 0x2E7D32 : 0xC62828));
   }
@@ -289,7 +289,7 @@ private:
     inputRow.Add(applyBtn);
     panel.Add(inputRow);
 
-    // Global master switch: enable/disable UI scaling process-wide. When OFF,
+    // Global master switch: enable/disable scaling process-wide. When OFF,
     // every view renders at 1.0 regardless of its UiScalePolicy; the stored scale
     // is preserved and re-applied when scaling is turned back ON.
     mScalableBtn = InteractiveView::New();
@@ -438,7 +438,7 @@ private:
     // Box 1: INHERIT → inherits DISABLED parent → effectiveScale = 1.0 → no scale
     row.Add(MakePolicyBox("INHERIT\n(no scale)", UiColor(C_RED), UiScalePolicy::INHERIT, BOX_SIZE));
 
-    // Box 2: ENABLED → directly reads UiScaleManager → effectiveScale = system scale
+    // Box 2: ENABLED → directly reads LayoutScaleManager → effectiveScale = system scale
     row.Add(MakePolicyBox("ENABLED\n(scales!)", UiColor(C_GREEN), UiScalePolicy::ENABLED, BOX_SIZE));
 
     // Box 3: ENABLED → same as Box 2
@@ -1353,7 +1353,7 @@ private:
   // Zone H: Unparent → scale change while detached → Re-add applies new scale
   //
   // Shows that:
-  //   (a) An unparented view is excluded from UiScaleManager tracking — no
+  //   (a) An unparented view is excluded from LayoutScaleManager tracking — no
   //       overhead when scale changes while the view is off-scene.
   //   (b) When the view is re-added, it picks up the current system scale
   //       correctly via OnSceneConnection → InvalidateMeasure → re-layout.
@@ -1367,7 +1367,7 @@ private:
 
     zone.Add(MakeZoneTitle("[Zone H] Unparent 후 Scale 변경 → Re-add 시 정확한 Scale 적용"));
     zone.Add(MakeDesc(
-      "박스를 Unparent 하면 OnSceneDisconnection이 발생하고 UiScaleManager 추적에서 제외됩니다. "
+      "박스를 Unparent 하면 OnSceneDisconnection이 발생하고 LayoutScaleManager 추적에서 제외됩니다. "
       "unparent 상태에서 시스템 스케일이 바뀌어도 박스에는 연산이 발생하지 않습니다. "
       "Re-add 시 OnSceneConnection → InvalidateMeasure → 재레이아웃으로 새 scale이 정확히 적용됩니다."));
 
@@ -1419,7 +1419,7 @@ private:
       {
         mHContainer.Add(mScaleChangeBox);
         mIsParented   = true;
-        std::string s = "상태: 부모에 연결됨 — Scale " + Fmt(UiScaleManager::Get().GetScale()) + " 적용됨";
+        std::string s = "상태: 부모에 연결됨 — Scale " + Fmt(LayoutScaleManager::Get().GetUiScale()) + " 적용됨";
         mHStatusLabel.SetText(s.c_str());
       }
     });

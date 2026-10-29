@@ -15,60 +15,79 @@ dali-ui는 두 가지 독립적인 스케일 메커니즘을 제공하며, 이 �
 
 트리 내 모든 뷰는 **유효 스케일(effective scale)** 을 보유합니다. 이 단일 `float` 배율은 Measure 및 Arrange 패스에서 모든 레이아웃 크기(사이즈, 마진, 패딩, 위치)에 곱해집니다.
 
+**시스템 스케일**(UI 스케일)은 `LayoutScaleManager`가 보유하는 프로세스 전역 스케일이며, 보통 OS나 접근성 설정 핸들러가 `LayoutScaleManager::SetUiScale()`로 설정합니다. `LayoutScaleManager::GetUiScale()`은 이 저장값을 반환하고, 각 뷰의 유효 스케일은 `ViewImpl::GetEffectiveLayoutScale()`로 조회합니다.
+
 뷰의 유효 스케일은 다음 규칙으로 결정됩니다.
 1. 부모 체인을 올라가며 구체적인 스케일을 정의한 가장 가까운 조상(또는 루트)을 찾습니다.
-2. 루트는 `UiScaleManager`에서 스케일을 상속합니다.
+2. 루트는 `LayoutScaleManager`에서 스케일을 상속합니다.
 
 ```
-UiScaleManager (시스템 스케일)
-  └── RootLayout             effectiveScale = 1.5  (UiScaleManager에서 상속)
+LayoutScaleManager (시스템 스케일)
+  └── RootLayout             effectiveScale = 1.5  (LayoutScaleManager에서 상속)
         ├── StackLayout       effectiveScale = 1.5  (상속)
         │     ├── Label       effectiveScale = 1.5  (상속)
         │     └── Button      effectiveScale = 1.0  (DISABLED — 서브트리 스케일 해제)
         └── Badge             effectiveScale = 1.5  (ENABLED — 시스템 스케일 직접 추적)
 ```
 
-`UiScaleManager::SetScale()`이 호출되면, 등록된 모든 레이아웃 루트가 유효 스케일을 재계산하고 자동으로 전체 재레이아웃을 트리거합니다.
+`LayoutScaleManager::SetUiScale()`이 호출되면, 등록된 모든 레이아웃 루트가 유효 스케일을 재계산하고 자동으로 전체 재레이아웃을 트리거합니다.
 
 <br/>
 
-## UiScaleManager
+## LayoutScaleManager
 
-`UiScaleManager`는 현재 시스템 스케일 값을 보유하는 프로세스 전역 싱글턴입니다.
+`LayoutScaleManager`는 현재 시스템 스케일 값을 보유하는 프로세스 전역 싱글턴입니다. `LayoutManager`가 아니며 직접 배치하지 않습니다. 보유한 값은 레이아웃 패스가 적용합니다.
 
 ```cpp
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 
 // 현재 시스템 스케일 읽기
-float scale = UiScaleManager::Get().GetScale();  // 기본값: 1.0
+float scale = LayoutScaleManager::Get().GetUiScale();  // 기본값: 1.0
 
 // 시스템 스케일 갱신 (보통 OS/vconf 핸들러에서 호출)
-UiScaleManager::Get().SetScale(1.5f);
+LayoutScaleManager::Get().SetUiScale(1.5f);
 ```
 
-`SetScale()` 호출 시 다음 세 가지가 원자적으로 처리됩니다.
+`SetUiScale()` 호출 시 다음 세 가지가 원자적으로 처리됩니다.
 1. 저장된 스케일 값 업데이트.
 2. 등록된 모든 레이아웃 루트와 그 전체 서브트리의 유효 스케일 캐시 리셋.
 3. 각 루트에 `InvalidateMeasure()` 호출 → 다음 프레임에 전체 재레이아웃 예약.
 
-> **참고:** `SetScale()`은 `NaN`, 0, 음수 값을 무시합니다. 이러한 값을 전달하면 no-op 처리되고 오류가 로그에 기록됩니다.
+> **참고:** `SetUiScale()`은 양수이고 유한하며 정상수(`>= FLT_MIN`)인 값만 받습니다. `NaN`, 무한대, 0, 음수, 비정상수(subnormal)는 무시되고 현재 값이 유지되며 오류가 로그에 기록됩니다.
 
 <br/>
 
 ### 전역 마스터 스위치
 
-`UiScaleManager`는 애플리케이션 전체의 동적 스케일을 켜고 끄는 프로세스 전역 **마스터 스위치**도 제공합니다.
+`LayoutScaleManager`는 애플리케이션 전체의 동적 스케일을 켜고 끄는 프로세스 전역 **마스터 스위치**도 제공합니다.
 
 ```cpp
-bool enabled = UiScaleManager::Get().IsScalable();  // 기본값: true
+bool enabled = LayoutScaleManager::Get().IsScalable();  // 기본값: true
 
-UiScaleManager::Get().SetScalable(false);  // 모든 뷰가 비스케일로 렌더링
-UiScaleManager::Get().SetScalable(true);   // 저장된 스케일 재적용
+LayoutScaleManager::Get().SetScalable(false);  // 모든 뷰가 비스케일로 렌더링
+LayoutScaleManager::Get().SetScalable(true);   // 저장된 스케일 재적용
 ```
 
-스케일이 꺼져 있는 동안에는 모든 뷰의 유효 스케일이 `UiScalePolicy`(`ENABLED`, `INHERIT`, `DISABLED`)나 트리 내 위치와 무관하게 `1.0`으로 결정됩니다. `SetScale()`로 설정한 값은 꺼진 동안에도 보존되며, 스케일을 다시 켜는 즉시 재적용됩니다. 스위치를 전환하면 `SetScale()`과 동일하게 등록된 모든 레이아웃 루트가 무효화되고 전체 재레이아웃이 트리거됩니다.
+스케일이 꺼져 있는 동안에는 모든 뷰의 유효 스케일이 `UiScalePolicy`(`ENABLED`, `INHERIT`, `DISABLED`)나 트리 내 위치와 무관하게 `1.0`으로 결정됩니다. `SetUiScale()`로 설정한 값은 꺼진 동안에도 보존되며, 스케일을 다시 켜는 즉시 재적용됩니다. 스위치를 전환하면 `SetUiScale()`과 동일하게 등록된 모든 레이아웃 루트가 무효화되고 전체 재레이아웃이 트리거됩니다.
 
-> **참고:** 스케일이 꺼진 상태에서 `SetScale()`을 호출하면 새 값은 저장되지만 재레이아웃은 하지 않습니다. 지연된 값은 다음 `SetScalable(true)` 호출 시 반영됩니다.
+> **참고:** 스케일이 꺼진 상태에서 `SetUiScale()`을 호출하면 새 값은 저장되지만 재레이아웃은 하지 않습니다. 지연된 값은 다음 `SetScalable(true)` 호출 시 반영됩니다.
+
+<br/>
+
+### UiScaleManager (deprecated)
+
+`UiScaleManager`(`ui-scale-manager.h`)는 이 클래스의 이전 이름입니다. 이전 릴리스로 빌드한 애플리케이션을 위해 남겨 둔 deprecated 클래스이며, 새 코드는 `LayoutScaleManager`를 사용합니다. 두 클래스는 하나의 상태를 공유하므로 어느 쪽으로 설정한 값이든 양쪽에서 읽히고, 마지막 호출이 적용됩니다. 두 핸들은 서로 다른 객체라서 `UiScaleManager` 핸들을 `LayoutScaleManager::DownCast()`하거나 그 반대로 하면 빈 핸들이 반환됩니다.
+
+| UiScaleManager (deprecated) | LayoutScaleManager |
+|---|---|
+| `UiScaleManager::Get()` | `LayoutScaleManager::Get()` |
+| `GetScale()` | `GetUiScale()` |
+| `SetScale(float)` | `SetUiScale(float)` |
+| `IsScalable()` | `IsScalable()` |
+| `SetScalable(bool)` | `SetScalable(bool)` |
+| `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | 없음. 라이브러리가 레이아웃 루트를 직접 등록합니다 |
+
+`ViewImpl::GetEffectiveScale()`도 함께 deprecated되었습니다. 같은 값을 반환하는 `ViewImpl::GetEffectiveLayoutScale()`을 사용합니다.
 
 <br/>
 
@@ -86,15 +105,15 @@ view.SetUiScalePolicy(UiScalePolicy::DISABLED);
 
 | 정책 | 유효 스케일 | 설명 |
 |---|---|---|
-| `INHERIT` | 부모에서 상속 (루트는 `UiScaleManager`) | 기본값. 트리를 따라 스케일을 상속합니다. 대부분의 뷰는 이 정책을 사용합니다. |
-| `ENABLED` | 항상 `UiScaleManager::GetScale()` 값 | 부모 정책에 관계없이 항상 시스템 스케일을 직접 추적합니다. |
+| `INHERIT` | 부모에서 상속 (루트는 `LayoutScaleManager`) | 기본값. 트리를 따라 스케일을 상속합니다. 대부분의 뷰는 이 정책을 사용합니다. |
+| `ENABLED` | 항상 `LayoutScaleManager::GetUiScale()` 값 | 부모 정책에 관계없이 항상 시스템 스케일을 직접 추적합니다. |
 | `DISABLED` | 항상 `1.0` | 스케일에서 완전히 제외됩니다. 하위 `INHERIT` 뷰도 `1.0`을 받습니다. |
 
 <br/>
 
 ### INHERIT (기본값)
 
-부모로부터 유효 스케일을 상속합니다. 모든 뷰의 기본 정책이 `INHERIT`이므로, `UiScaleManager`에 설정된 시스템 스케일은 별도 설정 없이 트리 전체로 자연스럽게 전파됩니다.
+부모로부터 유효 스케일을 상속합니다. 모든 뷰의 기본 정책이 `INHERIT`이므로, `LayoutScaleManager`에 설정된 시스템 스케일은 별도 설정 없이 트리 전체로 자연스럽게 전파됩니다.
 
 ```cpp
 // 별도 정책 설정 불필요 — INHERIT이 기본값입니다.
@@ -117,7 +136,7 @@ panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
 `DISABLED` 뷰의 자식들은 `1.0`을 상속하므로, `panel` 하위 서브트리만 비스케일 상태가 됩니다. 형제 뷰들은 정상적으로 스케일링됩니다.
 
 ```
-UiScaleManager scale = 2.0
+LayoutScaleManager 시스템 스케일 = 2.0
   └── RootLayout         effectiveScale = 2.0
         ├── Content       effectiveScale = 2.0  (INHERIT)
         └── Panel         effectiveScale = 1.0  (DISABLED)
@@ -129,7 +148,7 @@ UiScaleManager scale = 2.0
 
 ### ENABLED — DISABLED 서브트리에서 스케일 복구
 
-`DISABLED` 서브트리 안에서도 특정 뷰만 시스템 스케일을 추적해야 할 때 사용합니다. `ENABLED`는 부모 상속을 무시하고 항상 `UiScaleManager`에서 직접 값을 읽습니다.
+`DISABLED` 서브트리 안에서도 특정 뷰만 시스템 스케일을 추적해야 할 때 사용합니다. `ENABLED`는 부모 상속을 무시하고 항상 `LayoutScaleManager`에서 직접 값을 읽습니다.
 
 ```cpp
 panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
@@ -137,7 +156,7 @@ badge.SetUiScalePolicy(UiScalePolicy::ENABLED);  // DISABLED 패널 안에서도
 ```
 
 ```
-UiScaleManager scale = 2.0
+LayoutScaleManager 시스템 스케일 = 2.0
   └── Panel         effectiveScale = 1.0  (DISABLED)
         ├── Icon    effectiveScale = 1.0  (INHERIT)
         └── Badge   effectiveScale = 2.0  (ENABLED — DISABLED 부모 무시)
@@ -153,7 +172,7 @@ UiScaleManager scale = 2.0
 
 조건:
 - `ScalingFactor` = `1.5` (시작 시 `UiConfig::SetScalingFactor()`로 설정)
-- `UiScaleManager` 스케일 = `2.0` (런타임에 설정)
+- 시스템 스케일 = `2.0` (`LayoutScaleManager::SetUiScale()`로 런타임에 설정)
 - 요청 너비 `100_spx`인 뷰
 
 최종 시각적 너비:
@@ -170,9 +189,9 @@ UiScaleManager scale = 2.0
 
 ## 커스텀 뷰에서 스케일 변경에 대응하기
 
-`ViewImpl`을 상속해 커스텀 뷰를 구현한 경우, 픽셀 단위 값을 내부에 캐시하고 있다면 스케일 변경 시 해당 캐시를 무효화해야 합니다. `SetScale()`이 호출되면 루트에서 `InvalidateMeasure()`가 자동으로 실행되므로, `OnMeasure` / `OnArrange`를 오버라이드한 뷰는 매 레이아웃 패스마다 새로운 constraint와 `effectiveScale`을 받습니다 — 별도 처리는 필요 없습니다.
+`ViewImpl`을 상속해 커스텀 뷰를 구현한 경우, 픽셀 단위 값을 내부에 캐시하고 있다면 스케일 변경 시 해당 캐시를 무효화해야 합니다. `SetUiScale()`이 호출되면 루트에서 `InvalidateMeasure()`가 자동으로 실행되므로, `OnMeasure` / `OnArrange`를 오버라이드한 뷰는 매 레이아웃 패스마다 새로운 constraint와 `effectiveScale`을 받습니다 — 별도 처리는 필요 없습니다.
 
-레이아웃 패스 외부에서 값을 캐시하는 뷰는 프로퍼티 변경 알림을 구독하거나, `OnMeasure` 내에서 `GetEffectiveScale()`을 지연 호출 방식으로 사용하세요.
+레이아웃 패스 외부에서 값을 캐시하는 뷰는 프로퍼티 변경 알림을 구독하거나, `OnMeasure` 내에서 `GetEffectiveLayoutScale()`을 지연 호출 방식으로 사용하세요.
 
 <br/>
 
@@ -180,14 +199,14 @@ UiScaleManager scale = 2.0
 
 | 목적 | 방법 |
 |---|---|
-| 전체 시스템 스케일 변경 적용 | `UiScaleManager::Get().SetScale(newScale)` |
-| 현재 시스템 스케일 읽기 | `UiScaleManager::Get().GetScale()` |
-| 전역 동적 스케일 on/off | `UiScaleManager::Get().SetScalable(enable)` |
-| 스케일 활성화 여부 조회 | `UiScaleManager::Get().IsScalable()` |
+| 전체 시스템 스케일 변경 적용 | `LayoutScaleManager::Get().SetUiScale(newScale)` |
+| 현재 시스템 스케일 읽기 | `LayoutScaleManager::Get().GetUiScale()` |
+| 전역 동적 스케일 on/off | `LayoutScaleManager::Get().SetScalable(enable)` |
+| 스케일 활성화 여부 조회 | `LayoutScaleManager::Get().IsScalable()` |
 | 서브트리 스케일 해제 | `view.SetUiScalePolicy(UiScalePolicy::DISABLED)` |
 | 특정 뷰를 항상 시스템 스케일에 추적 | `view.SetUiScalePolicy(UiScalePolicy::ENABLED)` |
 | 기본 상속 동작으로 초기화 | `view.SetUiScalePolicy(UiScalePolicy::INHERIT)` |
-| 뷰의 유효 스케일 조회 (프레임워크용) | `viewImpl.GetEffectiveScale()` |
+| 뷰의 유효 스케일 조회 (프레임워크용) | `viewImpl.GetEffectiveLayoutScale()` |
 
 <br/>
 

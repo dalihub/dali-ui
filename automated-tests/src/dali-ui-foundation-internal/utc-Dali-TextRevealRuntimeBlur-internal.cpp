@@ -4731,7 +4731,7 @@ int CheckRuntimeGaussianScale(bool async)
     for(float scale : {0.8f, 1.0f, 1.2f, 1.25f, 1.4f, 2.0f, 1.0f})
     {
       const auto previous = completed;
-      UiScaleManager::Get().SetScale(scale);
+      LayoutScaleManager::Get().SetUiScale(scale);
       // Include async supersampling with fractional UI scale and return to
       // ordinary sampling. Layout/placement updates retain one blur task group.
       if(async)
@@ -4777,7 +4777,7 @@ int CheckRuntimeGaussianScale(bool async)
     Settle(application);
     DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline, TEST_LOCATION);
   }
-  UiScaleManager::Get().SetScale(1.0f);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
   END_TEST;
 }
 } // namespace
@@ -4805,12 +4805,12 @@ int UtcDaliTextRevealRuntimeGaussianPublicFallbackP(void)
   label.SetTextRevealProgress(0.4f);
   Settle(application);
   DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
-  UiScaleManager::Get().SetScale(1.25f);
+  LayoutScaleManager::Get().SetUiScale(1.25f);
   Settle(application);
   DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
   DALI_TEST_CHECK(Find(label, "RevealGaussianForeground"));
   DALI_TEST_CHECK(label.GetTextReveal() == reveal);
-  UiScaleManager::Get().SetScale(1.0f);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
   Settle(application);
   DALI_TEST_EQUALS(tasks.GetTaskCount(), baseline + 3u, TEST_LOCATION);
 

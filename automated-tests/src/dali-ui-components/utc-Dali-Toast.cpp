@@ -17,7 +17,7 @@
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-components/internal/toast-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
@@ -63,25 +63,25 @@ class ScopedUiScale
 {
 public:
   explicit ScopedUiScale(float scale)
-  : mManager(UiScaleManager::Get()),
-    mOriginalScale(mManager.GetScale())
+  : mManager(LayoutScaleManager::Get()),
+    mOriginalScale(mManager.GetUiScale())
   {
-    mManager.SetScale(scale);
+    mManager.SetUiScale(scale);
   }
 
   ~ScopedUiScale()
   {
-    mManager.SetScale(mOriginalScale);
+    mManager.SetUiScale(mOriginalScale);
   }
 
-  UiScaleManager GetManager() const
+  LayoutScaleManager GetManager() const
   {
     return mManager;
   }
 
 private:
-  UiScaleManager mManager;
-  float          mOriginalScale;
+  LayoutScaleManager mManager;
+  float              mOriginalScale;
 };
 
 void ObserveLifecycle(Toast toast, LifecycleData& data, ConnectionTrackerInterface* tracker)
@@ -486,9 +486,9 @@ int UtcDaliToastStackLayoutUsesEffectiveUiScaleP(void)
 
 int UtcDaliToastStackLayoutRespondsToRuntimeUiScaleChangeP(void)
 {
-  UiTestApplication application(Components::UiConfig::New());
-  ScopedUiScale     scale(1.0f);
-  UiScaleManager    scaleManager = scale.GetManager();
+  UiTestApplication  application(Components::UiConfig::New());
+  ScopedUiScale      scale(1.0f);
+  LayoutScaleManager scaleManager = scale.GetManager();
 
   Window window = application.GetWindow();
   window.SetPositionSize(PositionSize(0, 0, 800, 1000));
@@ -497,7 +497,7 @@ int UtcDaliToastStackLayoutRespondsToRuntimeUiScaleChangeP(void)
   toast.Post(window);
   Advance(application, POST_FINISH_MS);
 
-  scaleManager.SetScale(2.0f);
+  scaleManager.SetUiScale(2.0f);
   Advance(application, 1u);
   DALI_TEST_CHECK(toast.GetPropertyIndex("viewEffectiveScale") != Property::INVALID_INDEX);
   application.RunIdles();
@@ -523,9 +523,9 @@ int UtcDaliToastStackLayoutRespondsToRuntimeUiScaleChangeP(void)
 
 int UtcDaliToastRepostUsesScaleChangedWhileDetachedP(void)
 {
-  UiTestApplication application(Components::UiConfig::New());
-  ScopedUiScale     scale(1.0f);
-  UiScaleManager    scaleManager = scale.GetManager();
+  UiTestApplication  application(Components::UiConfig::New());
+  ScopedUiScale      scale(1.0f);
+  LayoutScaleManager scaleManager = scale.GetManager();
 
   Window window = application.GetWindow();
   window.SetPositionSize(PositionSize(0, 0, 800, 1000));
@@ -537,7 +537,7 @@ int UtcDaliToastRepostUsesScaleChangedWhileDetachedP(void)
   Advance(application, DISMISS_FINISH_MS);
   DALI_TEST_CHECK(!toast.GetParent());
 
-  scaleManager.SetScale(2.0f);
+  scaleManager.SetUiScale(2.0f);
   toast.Post(window);
 
   ImageView   icon       = ImageView::DownCast(toast.GetChildAt(0u));

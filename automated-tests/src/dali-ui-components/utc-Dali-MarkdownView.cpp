@@ -20,7 +20,7 @@
 #include <dali-ui-components/internal/markdown/markdown-view-impl.h>
 #include <dali-ui-components/internal/markdown/markdown-render-model.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
@@ -1324,15 +1324,15 @@ int UtcDaliMarkdownViewUnboundedWidthAtFractionalUiScaleP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
 
-  UiScaleManager scaleManager  = UiScaleManager::Get();
-  const float    originalScale = scaleManager.GetScale();
-  scaleManager.SetScale(1.3f);
+  LayoutScaleManager scaleManager  = LayoutScaleManager::Get();
+  const float        originalScale = scaleManager.GetUiScale();
+  scaleManager.SetUiScale(1.3f);
 
   MarkdownView view = MarkdownView::New();
   view.SetMarkdown("> Quote");
   const MeasuredSize measured = view.Measure(std::numeric_limits<float>::max(), 1000.0f);
 
-  scaleManager.SetScale(originalScale);
+  scaleManager.SetUiScale(originalScale);
 
   DALI_TEST_CHECK(std::isfinite(measured.GetWidth()));
   DALI_TEST_CHECK(measured.GetWidth() < 1000.0f);

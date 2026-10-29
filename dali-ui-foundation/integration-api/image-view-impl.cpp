@@ -71,7 +71,7 @@ Vector2 GetInitialImageSize(Actor& actor)
   const float  width   = std::min(std::max(requestedWidth, viewImpl.GetMinimumWidth()), viewImpl.GetMaximumWidth());
   const float  height  = std::min(std::max(requestedHeight, viewImpl.GetMinimumHeight()), viewImpl.GetMaximumHeight());
   const Insets padding = viewImpl.GetPadding();
-  return Vector2(width - padding.start - padding.end, height - padding.top - padding.bottom) * viewImpl.GetEffectiveScale();
+  return Vector2(width - padding.start - padding.end, height - padding.top - padding.bottom) * viewImpl.GetEffectiveLayoutScale();
 }
 
 BaseHandle CreateImageView()
@@ -570,7 +570,7 @@ void ImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
       float h    = self.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       if(w > 0.0f && h > 0.0f)
       {
-        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding(), GetEffectiveScale());
+        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding(), GetEffectiveLayoutScale());
       }
       else
       {
@@ -897,7 +897,7 @@ void ImageViewImpl::SetImageColorInternal(const Vector4& color)
 MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
-  float s    = GetEffectiveScale();
+  float s    = GetEffectiveLayoutScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 

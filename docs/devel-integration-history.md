@@ -315,3 +315,33 @@ payload, terminal result가 유지된다. 공통 cleanup은 Ended callback에서
 pan scrolling을 비활성화해도 `ScrollTo()`를 포함한 programmatic scrolling은
 동작한다. 진행 중인 pan을 비활성화하면 fling 없이 interaction을 종료하며 child
 touch sequence를 더 이상 intercept하지 않는다.
+
+## UiScaleManager → LayoutScaleManager 이전
+
+`UiScaleManager`가 맡던 시스템 스케일(UI 스케일), 스케일링 스위치, 레이아웃 루트 등록을 새
+클래스 `LayoutScaleManager`(`dali-ui-foundation/public-api/configuration/layout-scale-manager.h`)가
+맡는다. `UiScaleManager`는 deprecated되었으며 문서 태그만 바뀌었다. 릴리스된 심볼과
+시그니처는 그대로 유지된다.
+
+| Before (`UiScaleManager`, deprecated) | After (`LayoutScaleManager`) |
+|---|---|
+| `UiScaleManager::Get()` | `LayoutScaleManager::Get()` |
+| `GetScale()` | `GetUiScale()` |
+| `SetScale(float)` | `SetUiScale(float)` |
+| `IsScalable()`, `SetScalable(bool)` | 변경 없음 (`IsScalable()`, `SetScalable(bool)`) |
+| `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | 공개 API 없음 (라이브러리가 내부에서 처리) |
+
+두 클래스는 하나의 상태를 공유하므로 섞어 써도 되며, 마지막에 설정한 값이 적용된다. 두
+핸들은 서로 다른 객체라서 변환되지 않는다. 한쪽 핸들을 다른 쪽 `DownCast()`에 넘기면 빈
+핸들이 반환된다.
+
+## ViewImpl::GetEffectiveScale() → GetEffectiveLayoutScale()
+
+`ViewImpl::GetEffectiveScale()`은 deprecated되었으며 문서 태그만 바뀌었다. 릴리스된 심볼과
+시그니처는 그대로 유지되고, 같은 값을 반환하는 새 non-virtual 멤버
+`ViewImpl::GetEffectiveLayoutScale()`로 위임한다. 라이브러리, 테스트, 샘플, 문서는 새 이름을
+사용한다.
+
+| Before (deprecated) | After |
+|---|---|
+| `ViewImpl::GetEffectiveScale()` | `ViewImpl::GetEffectiveLayoutScale()` |

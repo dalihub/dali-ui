@@ -177,23 +177,23 @@ private:
     }
     else if(event.GetKeyName() == "q")
     {
-      UiScaleManager::Get().SetScale(1.0f);
+      LayoutScaleManager::Get().SetUiScale(1.0f);
     }
     else if(event.GetKeyName() == "w")
     {
-      UiScaleManager::Get().SetScale(2.0f);
+      LayoutScaleManager::Get().SetUiScale(2.0f);
     }
     else if(event.GetKeyName() == "e")
     {
-      UiScaleManager::Get().SetScale(4.0f);
+      LayoutScaleManager::Get().SetUiScale(4.0f);
     }
     else if(event.GetKeyName() == "r")
     {
-      UiScaleManager::Get().SetScale(8.0f);
+      LayoutScaleManager::Get().SetUiScale(8.0f);
     }
     else if(event.GetKeyName() == "t")
     {
-      UiScaleManager::Get().SetScale(12.0f);
+      LayoutScaleManager::Get().SetUiScale(12.0f);
     }
   }
 

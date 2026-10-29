@@ -1076,7 +1076,7 @@ void InputEditorImpl::UpdateInlineReplacementData(const Vector2& ownerSize, cons
                        Vector2::ZERO,
                        contentSize,
                        contentSize,
-                       GetEffectiveScale(),
+                       GetEffectiveLayoutScale(),
                        source.sourceRevision);
 }
 
@@ -2114,7 +2114,7 @@ MeasuredSize InputEditorImpl::OnMeasure(float widthConstraint, float heightConst
 {
   mMeasureInvalidated = false;
 
-  const float effectiveScale = GetEffectiveScale();
+  const float effectiveScale = GetEffectiveLayoutScale();
   if(SetTextUiScale(effectiveScale))
   {
     mController->InvalidateFontData();

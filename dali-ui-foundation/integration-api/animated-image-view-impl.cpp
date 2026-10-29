@@ -484,7 +484,7 @@ void AnimatedImageViewImpl::OnInitialize()
 MeasuredSize AnimatedImageViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
-  float s    = GetEffectiveScale();
+  float s    = GetEffectiveLayoutScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
@@ -953,7 +953,7 @@ void AnimatedImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
       float h    = self.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       if(w > 0.0f && h > 0.0f)
       {
-        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding(), GetEffectiveScale());
+        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding(), GetEffectiveLayoutScale());
       }
       else
       {

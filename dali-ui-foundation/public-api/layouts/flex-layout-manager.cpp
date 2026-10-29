@@ -196,7 +196,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(std::vector<View>&               
     {
       continue;
     }
-    float  childScale = childImpl.GetEffectiveScale();
+    float  childScale = childImpl.GetEffectiveLayoutScale();
     Insets margin     = childImpl.GetMargin();
 
     const bool isKept = IsKept(entries, i);
@@ -398,7 +398,7 @@ void ArrangeOneFlexLine(ViewImpl* owner, FlexLine& line, std::vector<View>& chil
   for(uint32_t idx : line.childIndices)
   {
     ViewImpl& childImpl  = GetImpl(children[idx]);
-    float     childScale = childImpl.GetEffectiveScale();
+    float     childScale = childImpl.GetEffectiveLayoutScale();
     Insets    margin     = childImpl.GetMargin();
 
     float childMainSize  = isMainAxisHorizontal ? workingSizes[idx].width : workingSizes[idx].height;
@@ -646,7 +646,7 @@ void ResolveFlexLineModes(FlexLine& line, std::vector<View>& children, std::vect
     // size: the line cross extent, or the flex's own min/max-clamped extent if that is larger
     // (Arrange takes max(line cross, available cross) for a single line).
     const Insets padding  = view.GetPadding();
-    const float  s        = view.GetEffectiveScale();
+    const float  s        = view.GetEffectiveLayoutScale();
     const float  padCross = horizontal ? static_cast<float>(padding.top + padding.bottom) * s : static_cast<float>(padding.start + padding.end) * s;
     const float  minCross = (horizontal ? view.GetMinimumHeight() : view.GetMinimumWidth()) * s;
     const float  maxCross = (horizontal ? view.GetMaximumHeight() : view.GetMaximumWidth()) * s;
@@ -906,7 +906,7 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
       continue;
     }
 
-    float  childScale            = childImpl.GetEffectiveScale();
+    float  childScale            = childImpl.GetEffectiveLayoutScale();
     Insets margin                = childImpl.GetMargin();
     float  marginW               = (margin.start + margin.end) * childScale;
     float  marginH               = (margin.top + margin.bottom) * childScale;

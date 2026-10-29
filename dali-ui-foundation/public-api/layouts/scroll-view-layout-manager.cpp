@@ -146,7 +146,7 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
   Integration::ScrollViewImpl*  scrollImpl = dynamic_cast<Integration::ScrollViewImpl*>(view);
   const uint32_t                count      = GetChildViewCount(view);
-  float                         s          = view->GetEffectiveScale();
+  float                         s          = view->GetEffectiveLayoutScale();
   const Internal::ViewDataImpl& viewData   = Internal::ViewDataImpl::Get(*view);
   const bool                    modeAware  = (viewData.GetMeasureModeParent() == Internal::MeasureModeParent::SCROLL);
 

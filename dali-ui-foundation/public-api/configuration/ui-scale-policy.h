@@ -34,8 +34,8 @@ namespace Ui
  */
 enum class UiScalePolicy : uint8_t
 {
-  INHERIT  = 0, ///< Inherit effective scale from parent; root inherits from UiScaleManager (default).
-  ENABLED  = 1, ///< Always apply the current UiScaleManager scale, ignoring parent policy.
+  INHERIT  = 0, ///< Inherit effective scale from parent; root takes the UI scale of LayoutScaleManager (default).
+  ENABLED  = 1, ///< Always apply the current LayoutScaleManager UI scale, ignoring parent policy.
   DISABLED = 2, ///< Opt out of scaling (effectiveScale = 1.0); descendant INHERIT views also get 1.0.
 };
 

@@ -348,7 +348,7 @@ public:
   float         GetRequestedY() const;
   void          SetUiScalePolicy(UiScalePolicy policy);
   UiScalePolicy GetUiScalePolicy() const;
-  float         GetEffectiveScale() const;
+  float         GetEffectiveLayoutScale() const;
   /**
    * @brief Records and propagates a measure invalidation under the uniform layout
    * processing policy.
@@ -1605,7 +1605,7 @@ private:
    *
    * Single concern: the CACHED SCALE only. Clears BOTH of its sync bits -- the
    * one that says the cached value is usable (mEffectiveScaleValid), so the next
-   * GetEffectiveScale() recomputes from the (possibly re-rooted) parent chain,
+   * GetEffectiveLayoutScale() recomputes from the (possibly re-rooted) parent chain,
    * and the one that says the ACTOR already holds that value
    * (mEffectiveScaleActorSynced), whose claim names the very value being
    * retracted -- and records the drop when it lands inside a running arrange pass
@@ -1952,7 +1952,7 @@ private:
   ViewState                            mState;
   UiScalePolicy                        mScalePolicy{UiScalePolicy::INHERIT};
   LayoutMode                           mLayoutMode;           ///< Layout mode of the view. PACKING: parked here, next to the other one-byte policy enum, because it fills the pad mScalePolicy would otherwise leave; its logical home is the layout group further down, which cross-references it.
-  mutable float                        mEffectiveScale{1.0f}; ///< Cached effective scale. Carries NO validity sentinel of its own; whether this value is usable is recorded by mEffectiveScaleValid. Mutable because the lazy (re)compute happens inside the const GetEffectiveScale().
+  mutable float                        mEffectiveScale{1.0f}; ///< Cached effective scale. Carries NO validity sentinel of its own; whether this value is usable is recorded by mEffectiveScaleValid. Mutable because the lazy (re)compute happens inside the const GetEffectiveLayoutScale().
   float                                mRequestedWidth;       ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f). PACKING: parked here to fill the 4-byte pad in front of mTraits; it belongs logically with mRequestedHeight, which sits in the layout group further down.
   TraitEntries                         mTraits;
   Internal::CoreInteractionObject*     mCoreInteractionObject;
@@ -2005,7 +2005,7 @@ private:
     : propagationGeneration(0u)
     {
     }
-    float    scaleKey; ///< Pure cache KEY: the effective scale the cached mMeasuredSize was produced at. Compared EXACTLY, not with FloatEqual, because it is a straight copy of the same GetEffectiveScale() value with no arithmetic between publish and compare -- unlike mLastMeasureConstraint, which reaches the predicate through a /s normalisation and a min/max clamp and therefore needs the tolerance.
+    float    scaleKey; ///< Pure cache KEY: the effective scale the cached mMeasuredSize was produced at. Compared EXACTLY, not with FloatEqual, because it is a straight copy of the same GetEffectiveLayoutScale() value with no arithmetic between publish and compare -- unlike mLastMeasureConstraint, which reaches the predicate through a /s normalisation and a min/max clamp and therefore needs the tolerance.
     uint32_t propagationGeneration;
   };
   union ArrangeKeyOrPropagation
@@ -2059,7 +2059,7 @@ private:
   bool         mArrangeOverrideAlways : 1;                        ///< True when this view's OnArrange() uses ArrangePolicy::ALWAYS. Default FALSE (ArrangePolicy::IF_CHANGED).
   bool         mArrangeCallbackAlways : 1;                        ///< True when the installed ArrangeCallback uses ArrangePolicy::ALWAYS. The one-argument overload resets it to FALSE.
   bool         mArrangeProducerAlways : 1;                        ///< Derived from the active producer and read by the arrange cache predicate. Default FALSE (ArrangePolicy::IF_CHANGED).
-  mutable bool mEffectiveScaleValid : 1;                          ///< THE sync bit for mEffectiveScale: true exactly when mEffectiveScale equals what ComputeEffectiveScale() would return now. Set by the lazy compute in the const GetEffectiveScale() (hence mutable), cleared by every scale-context invalidation.
+  mutable bool mEffectiveScaleValid : 1;                          ///< THE sync bit for mEffectiveScale: true exactly when mEffectiveScale equals what ComputeEffectiveScale() would return now. Set by the lazy compute in the const GetEffectiveLayoutScale() (hence mutable), cleared by every scale-context invalidation.
   bool         mEffectiveScaleActorSynced : 1;                    ///< THE sync bit for the ACTOR-side copy of the scale (the animatable VIEW_EFFECTIVE_SCALE property): true exactly when that property is known to hold mEffectiveScale. The second half of the pair whose first half is mEffectiveScaleValid -- that one says the CACHED scale is usable, this one says the ACTOR already has it. Set by Measure()'s push (after the write, which re-enters the clear below), cleared by DropCachedEffectiveScale() (the value it names has been retracted) and by ViewDataImpl::SetProperty for that index, which is the single funnel every event-side write of the property passes through. Default false, so the first Measure() always pushes.
   bool         mEffectiveScaleInvalidatedDuringPass : 1;          ///< True when the cached effective scale was invalidated while an arrange pass was running.
   bool         mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount

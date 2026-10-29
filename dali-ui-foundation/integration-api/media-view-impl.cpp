@@ -174,7 +174,7 @@ void MediaViewImpl::OnPresentationChanged()
 MeasuredSize MediaViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
-  float s    = GetEffectiveScale();
+  float s    = GetEffectiveLayoutScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
@@ -238,7 +238,7 @@ LayoutRect MediaViewImpl::OnArrange(const LayoutRect& bounds)
     {
       std::swap(padding.start, padding.end);
     }
-    Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(arranged.width, arranged.height), padding, GetEffectiveScale());
+    Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(arranged.width, arranged.height), padding, GetEffectiveLayoutScale());
   }
   return arranged;
 }

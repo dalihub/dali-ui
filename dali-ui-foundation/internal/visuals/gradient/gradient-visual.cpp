@@ -302,7 +302,7 @@ void GradientVisual::OnSetTransform()
 void GradientVisual::DoSetOnScene(Actor& actor)
 {
   Ui::View owner = Ui::View::DownCast(actor);
-  UpdateUiScale(owner ? GetImpl(owner).GetEffectiveScale() : 1.0f);
+  UpdateUiScale(owner ? GetImpl(owner).GetEffectiveLayoutScale() : 1.0f);
   actor.AddRenderer(mImpl->mRenderer);
 
   // Gradient Visual generated and ready to display
