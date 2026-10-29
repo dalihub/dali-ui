@@ -21,8 +21,8 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
-#include <dali/public-api/adaptor-framework/pixel-buffer.h>
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/images/pixel-buffer.h>
 #include <dali/public-api/images/pixel-data.h>
 #include <dali/public-api/images/pixel.h>
 #include <dali/public-api/math/rect.h>

@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/reveal/text-reveal-blur-preparation.h>
 #include <dali/integration-api/pixel-data-integ.h>
-#include <dali/public-api/adaptor-framework/pixel-buffer.h>
+#include <dali/public-api/images/pixel-buffer.h>
 #include <algorithm>
 #include <cmath>
 #include <cstring>

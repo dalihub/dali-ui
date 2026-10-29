@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/adaptor-framework/pixel-buffer-operations.h>
 #include <dali/public-api/common/constants.h>
 #include <dali/public-api/math/math-utils.h>
 #include <memory.h>
@@ -629,7 +630,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
 
       if(blurRadius > Math::MACHINE_EPSILON_1)
       {
-        outlineImageBuffer.ApplyGaussianBlur(blurRadius);
+        PixelBufferOperations::ApplyGaussianBlur(outlineImageBuffer, blurRadius);
       }
 
       // Combine the two buffers
@@ -653,7 +654,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
 
       if(blurRadius > Math::MACHINE_EPSILON_1)
       {
-        shadowImageBuffer.ApplyGaussianBlur(blurRadius);
+        PixelBufferOperations::ApplyGaussianBlur(shadowImageBuffer, blurRadius);
       }
 
       // Combine the two buffers
