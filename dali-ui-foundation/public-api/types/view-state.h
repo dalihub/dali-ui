@@ -100,7 +100,7 @@ public:
    * @param[in] other The state to check for
    * @return True if all bits of @p other are set in this state
    */
-  bool Contains(const ViewState& other) const
+  constexpr bool Contains(const ViewState& other) const
   {
     return (mBits & other.mBits) == other.mBits;
   }
@@ -111,7 +111,7 @@ public:
    * @param[in] other The state to check against
    * @return True if any common bit is set
    */
-  bool HasIntersectionWith(const ViewState& other) const
+  constexpr bool HasIntersectionWith(const ViewState& other) const
   {
     return (mBits & other.mBits) != 0u;
   }
@@ -121,7 +121,7 @@ public:
    *
    * @return True if no state bits are set
    */
-  bool IsNormal() const
+  constexpr bool IsNormal() const
   {
     return mBits == 0u;
   }
@@ -149,7 +149,7 @@ public:
   /**
    * @brief Checks if this state was newly added (not in prev, present in cur).
    */
-  bool WasAdded(const ViewState& prev, const ViewState& cur) const
+  constexpr bool WasAdded(const ViewState& prev, const ViewState& cur) const
   {
     return !prev.Contains(*this) && cur.Contains(*this);
   }
@@ -157,7 +157,7 @@ public:
   /**
    * @brief Checks if this state was removed (present in prev, not in cur).
    */
-  bool WasRemoved(const ViewState& prev, const ViewState& cur) const
+  constexpr bool WasRemoved(const ViewState& prev, const ViewState& cur) const
   {
     return prev.Contains(*this) && !cur.Contains(*this);
   }
@@ -165,7 +165,7 @@ public:
   /**
    * @brief Checks if this state was either added or removed.
    */
-  bool WasChanged(const ViewState& prev, const ViewState& cur) const
+  constexpr bool WasChanged(const ViewState& prev, const ViewState& cur) const
   {
     return WasAdded(prev, cur) || WasRemoved(prev, cur);
   }
@@ -176,54 +176,54 @@ public:
    * Unlike WasChanged(), this works with composite states — it returns true
    * if any constituent bit was toggled.
    */
-  bool AnyChanged(const ViewState& prev, const ViewState& cur) const
+  constexpr bool AnyChanged(const ViewState& prev, const ViewState& cur) const
   {
     return ((prev ^ cur) & *this).mBits != 0u;
   }
 
   // --- Operators ---
 
-  ViewState operator+(const ViewState& rhs) const
+  constexpr ViewState operator+(const ViewState& rhs) const
   {
     return ViewState(mBits | rhs.mBits);
   }
 
-  ViewState operator-(const ViewState& rhs) const
+  constexpr ViewState operator-(const ViewState& rhs) const
   {
     return ViewState(mBits & ~rhs.mBits);
   }
 
-  ViewState operator|(const ViewState& rhs) const
+  constexpr ViewState operator|(const ViewState& rhs) const
   {
     return ViewState(mBits | rhs.mBits);
   }
 
-  ViewState operator&(const ViewState& rhs) const
+  constexpr ViewState operator&(const ViewState& rhs) const
   {
     return ViewState(mBits & rhs.mBits);
   }
 
-  ViewState operator^(const ViewState& rhs) const
+  constexpr ViewState operator^(const ViewState& rhs) const
   {
     return ViewState(mBits ^ rhs.mBits);
   }
 
-  ViewState operator~() const
+  constexpr ViewState operator~() const
   {
     return ViewState(~mBits);
   }
 
-  bool operator==(const ViewState& rhs) const
+  constexpr bool operator==(const ViewState& rhs) const
   {
     return mBits == rhs.mBits;
   }
 
-  bool operator!=(const ViewState& rhs) const
+  constexpr bool operator!=(const ViewState& rhs) const
   {
     return mBits != rhs.mBits;
   }
 
-  explicit operator bool() const
+  constexpr explicit operator bool() const
   {
     return mBits != 0u;
   }
