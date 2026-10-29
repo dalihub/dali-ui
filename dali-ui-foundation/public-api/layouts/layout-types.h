@@ -122,7 +122,7 @@ public:
   /**
    * @brief Default constructor.
    */
-  MeasuredSize()
+  constexpr MeasuredSize()
   : width(0.0f),
     height(0.0f)
   {
@@ -134,7 +134,7 @@ public:
    * @param[in] w The width value
    * @param[in] h The height value
    */
-  MeasuredSize(float w, float h)
+  constexpr MeasuredSize(float w, float h)
   : width(w),
     height(h)
   {
@@ -144,7 +144,7 @@ public:
    * @brief Gets the width.
    * @return The width value
    */
-  float GetWidth() const
+  constexpr float GetWidth() const
   {
     return width;
   }
@@ -162,7 +162,7 @@ public:
    * @brief Gets the height.
    * @return The height value
    */
-  float GetHeight() const
+  constexpr float GetHeight() const
   {
     return height;
   }
@@ -180,7 +180,7 @@ public:
    * @brief Converts to Vector2.
    * @return Vector2 representation
    */
-  Vector2 ToVector2() const
+  constexpr Vector2 ToVector2() const
   {
     return Vector2(width, height);
   }
@@ -198,7 +198,7 @@ public:
   /**
    * @brief Default constructor.
    */
-  LayoutRect()
+  constexpr LayoutRect()
   : x(0.0f),
     y(0.0f),
     width(0.0f),
@@ -214,7 +214,7 @@ public:
    * @param[in] w Width
    * @param[in] h Height
    */
-  LayoutRect(float posX, float posY, float w, float h)
+  constexpr LayoutRect(float posX, float posY, float w, float h)
   : x(posX),
     y(posY),
     width(w),
@@ -225,7 +225,7 @@ public:
   /**
    * @brief Gets the X position.
    */
-  float GetX() const
+  constexpr float GetX() const
   {
     return x;
   }
@@ -241,7 +241,7 @@ public:
   /**
    * @brief Gets the Y position.
    */
-  float GetY() const
+  constexpr float GetY() const
   {
     return y;
   }
@@ -257,7 +257,7 @@ public:
   /**
    * @brief Gets the width.
    */
-  float GetWidth() const
+  constexpr float GetWidth() const
   {
     return width;
   }
@@ -273,7 +273,7 @@ public:
   /**
    * @brief Gets the height.
    */
-  float GetHeight() const
+  constexpr float GetHeight() const
   {
     return height;
   }
@@ -289,7 +289,7 @@ public:
   /**
    * @brief Gets the position as Vector2.
    */
-  Vector2 GetPosition() const
+  constexpr Vector2 GetPosition() const
   {
     return Vector2(x, y);
   }
@@ -297,7 +297,7 @@ public:
   /**
    * @brief Gets the size as Vector2.
    */
-  Vector2 GetSize() const
+  constexpr Vector2 GetSize() const
   {
     return Vector2(width, height);
   }
@@ -524,7 +524,7 @@ public:
   /**
    * @brief Default constructor (creates absolute 0).
    */
-  GridLength()
+  constexpr GridLength()
   : mType(GridLengthType::ABSOLUTE),
     mValue(0.0f)
   {
@@ -536,7 +536,7 @@ public:
    * @param[in] pixels The pixel value
    * @return GridLength instance
    */
-  static GridLength Absolute(float pixels)
+  static constexpr GridLength Absolute(float pixels)
   {
     GridLength length;
     length.mType  = GridLengthType::ABSOLUTE;
@@ -550,7 +550,7 @@ public:
    * @param[in] factor The star factor (default 1.0)
    * @return GridLength instance
    */
-  static GridLength Star(float factor = 1.0f)
+  static constexpr GridLength Star(float factor = 1.0f)
   {
     GridLength length;
     length.mType  = GridLengthType::STAR;
@@ -563,7 +563,7 @@ public:
    *
    * @return GridLength instance
    */
-  static GridLength Auto()
+  static constexpr GridLength Auto()
   {
     GridLength length;
     length.mType  = GridLengthType::AUTO;
@@ -574,7 +574,7 @@ public:
   /**
    * @brief Gets the type.
    */
-  GridLengthType GetType() const
+  constexpr GridLengthType GetType() const
   {
     return mType;
   }
@@ -582,7 +582,7 @@ public:
   /**
    * @brief Gets the value.
    */
-  float GetValue() const
+  constexpr float GetValue() const
   {
     return mValue;
   }
@@ -644,7 +644,7 @@ enum class AbsoluteLayoutFlags : uint8_t
 /**
  * @brief Bitwise OR operator for AbsoluteLayoutFlags.
  */
-inline AbsoluteLayoutFlags operator|(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlags rhs)
+inline constexpr AbsoluteLayoutFlags operator|(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlags rhs)
 {
   return static_cast<AbsoluteLayoutFlags>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
 }
@@ -652,7 +652,7 @@ inline AbsoluteLayoutFlags operator|(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlag
 /**
  * @brief Bitwise AND operator for AbsoluteLayoutFlags.
  */
-inline AbsoluteLayoutFlags operator&(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlags rhs)
+inline constexpr AbsoluteLayoutFlags operator&(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlags rhs)
 {
   return static_cast<AbsoluteLayoutFlags>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
 }
