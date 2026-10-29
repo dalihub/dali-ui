@@ -626,6 +626,13 @@ in the preview's requested units. `sourceAnchor` is the normalized point grabbed
 inside the source. Using them keeps the preview attached to the pointer even when
 the source and overlay have different scale or rotation.
 
+Keep the overlay an ordinary View. A preview inherits its effective scale from the
+overlay like any other child, so with `UiScalePolicy::DISABLED` on the overlay
+an inheriting preview stops following the system scale while its source still
+follows it. If you size the overlay, use `MATCH_PARENT`: a requested size is
+multiplied by the effective scale, so an overlay given the window's pixel size would be
+larger than the window whenever that scale is above 1.0.
+
 ### 5.3 Simpler alternatives
 
 Use one reusable detached view:
@@ -635,8 +642,17 @@ detector.SetDragPreview(reusablePreview);
 ```
 
 If no updater or `DragPreviewPositionSignal` is connected, the detector applies
-default anchor-aware positioning and restores the reusable view's original
-layout properties when the session ends.
+default anchor-aware positioning with `previewRequestedX`/`previewRequestedY`
+and restores the reusable view's original layout properties when the session
+ends. It does not change the preview's `UiScalePolicy`: build the reusable
+preview in the same units as the rest of the UI, and it and its children are
+laid out at the scale of the container it is added to. Earlier releases set
+`UiScalePolicy::DISABLED` on the preview while positioning it. A preview
+positioned this way that relied on it -- sized in pixels, or copying a source
+that sits in a `UiScalePolicy::DISABLED` subtree, whether reusable or created
+by a factory without an updater -- keeps its earlier geometry when it sets
+`UiScalePolicy::DISABLED` itself; without a window scale the result is the same
+as before.
 
 Leave all preview APIs unset for a headless drag session.
 

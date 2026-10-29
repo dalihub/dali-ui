@@ -1092,7 +1092,7 @@ void DragAndDropDetector::UpdateDragPreview()
     }
     else
     {
-      ApplyDefaultDragPreviewPosition();
+      ApplyDefaultDragPreviewPosition(Vector2(event.GetPreviewRequestedX(), event.GetPreviewRequestedY()));
     }
   }
 }
@@ -1146,7 +1146,7 @@ Vector2 DragAndDropDetector::ComputePreviewRequestedPosition() const
   return ToRequestedUnits(mPreviewLocalPosition, Ui::GetImpl(mSessionDragPreview).GetEffectiveLayoutScale());
 }
 
-void DragAndDropDetector::ApplyDefaultDragPreviewPosition()
+void DragAndDropDetector::ApplyDefaultDragPreviewPosition(const Vector2& requestedPosition)
 {
   if(!mDragPreviewPositioningPropertiesOverridden)
   {
@@ -1154,22 +1154,20 @@ void DragAndDropDetector::ApplyDefaultDragPreviewPosition()
       mSessionDragPreview.GetProperty<Vector3>(Actor::Property::PIVOT);
     mOriginalDragPreviewParentOrigin =
       mSessionDragPreview.GetProperty<Vector3>(Actor::Property::PARENT_ORIGIN);
-    mOriginalDragPreviewLayoutMode    = mSessionDragPreview.GetLayoutMode();
-    mOriginalDragPreviewUiScalePolicy = mSessionDragPreview.GetUiScalePolicy();
-    mOriginalDragPreviewRequestedX    = mSessionDragPreview.GetRequestedX();
-    mOriginalDragPreviewRequestedY    = mSessionDragPreview.GetRequestedY();
+    mOriginalDragPreviewLayoutMode = mSessionDragPreview.GetLayoutMode();
+    mOriginalDragPreviewRequestedX = mSessionDragPreview.GetRequestedX();
+    mOriginalDragPreviewRequestedY = mSessionDragPreview.GetRequestedY();
     mOriginalDragPreviewPositionUsesPivot =
       mSessionDragPreview.GetProperty<bool>(Actor::Property::POSITION_USES_PIVOT);
-    mOriginalDragPreviewWindowScalePolicy =
-      ViewDataImpl::Get(Ui::GetImpl(mSessionDragPreview)).GetWindowScalePolicy();
 
+    // Only what turns a requested position into the grab point's position is overridden.
+    // STANDALONE: the layout places a STANDALONE view at its requested position times its OWN
+    // effective scale -- the scale GetPreviewRequestedX() and GetPreviewRequestedY() divide by --
+    // under any parent, with no padding, layout-manager flow or RTL mirroring. TOP_LEFT is the
+    // origin ScreenToLocal() measures from, and POSITION_USES_PIVOT with the anchor pivot puts the
+    // grabbed point, not a corner, at that position. The preview's UiScalePolicy is left alone: the
+    // preview and its children are laid out like any other View added to the same container.
     mSessionDragPreview.SetLayoutMode(LayoutMode::STANDALONE);
-    mSessionDragPreview.SetUiScalePolicy(UiScalePolicy::DISABLED);
-    // mPreviewLocalPosition is already in the container's local ACTOR coordinates and the layout
-    // multiplies a requested position by the preview's own effective scale, so the preview must resolve
-    // to 1.0: UiScalePolicy::DISABLED above removes the system term, and this removes the per-window
-    // term, which would otherwise place the preview at the window scale times the pointer position.
-    ViewDataImpl::Get(Ui::GetImpl(mSessionDragPreview)).SetWindowScalePolicy(WindowScalePolicy::DISABLED);
     mSessionDragPreview.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     mSessionDragPreview.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
     mSessionDragPreview.SetProperty(
@@ -1178,8 +1176,8 @@ void DragAndDropDetector::ApplyDefaultDragPreviewPosition()
     mDragPreviewPositioningPropertiesOverridden = true;
   }
 
-  mSessionDragPreview.SetRequestedX(mPreviewLocalPosition.x);
-  mSessionDragPreview.SetRequestedY(mPreviewLocalPosition.y);
+  mSessionDragPreview.SetRequestedX(requestedPosition.x);
+  mSessionDragPreview.SetRequestedY(requestedPosition.y);
 }
 
 void DragAndDropDetector::RestoreDragPreviewPositioningProperties(Dali::Ui::View visual)
@@ -1189,8 +1187,6 @@ void DragAndDropDetector::RestoreDragPreviewPositioningProperties(Dali::Ui::View
     visual.SetProperty(Actor::Property::PIVOT, mOriginalDragPreviewPivot);
     visual.SetProperty(Actor::Property::PARENT_ORIGIN, mOriginalDragPreviewParentOrigin);
     visual.SetLayoutMode(mOriginalDragPreviewLayoutMode);
-    visual.SetUiScalePolicy(mOriginalDragPreviewUiScalePolicy);
-    ViewDataImpl::Get(Ui::GetImpl(visual)).SetWindowScalePolicy(mOriginalDragPreviewWindowScalePolicy);
     visual.SetRequestedX(mOriginalDragPreviewRequestedX);
     visual.SetRequestedY(mOriginalDragPreviewRequestedY);
     visual.SetProperty(Actor::Property::POSITION_USES_PIVOT,

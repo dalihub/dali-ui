@@ -2131,10 +2131,10 @@ int UtcDaliUiScaleWindowScalePolicyDisabledDropsWindowTermP(void)
   END_TEST;
 }
 
-// (c) The drag-preview shape: a root that opts out of BOTH terms, holding application
-// views that set only a UiScalePolicy. Their window term is inherited from the root, so
-// none of them picks the window scale back up -- a DISABLED child stays at 1.0 and an
-// ENABLED child gets the system scale alone -- while an ordinary root beside them is
+// (c) A root that opts out of BOTH terms -- the shape the framework gives a view it feeds already-
+// scaled geometry -- holding views that set only a UiScalePolicy. Their window term is inherited
+// from the root, so none of them picks the window scale back up -- a DISABLED child stays at 1.0
+// and an ENABLED child gets the system scale alone -- while an ordinary root beside them is
 // window-scaled.
 //
 // The claim this test pins (stated, not demonstrated by a mutation run here -- no
@@ -2154,21 +2154,21 @@ int UtcDaliUiScaleWindowScalePolicyDisabledSubtreeStaysUnscaledP(void)
   LayoutScaleManager::Get().SetUiScale(1.5f);
   LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
 
-  View preview       = MakePolicyView(UiScalePolicy::DISABLED, WindowScalePolicy::DISABLED);
+  View optedOutRoot  = MakePolicyView(UiScalePolicy::DISABLED, WindowScalePolicy::DISABLED);
   View disabledChild = MakePolicyView(UiScalePolicy::DISABLED, WindowScalePolicy::INHERIT);
   View enabledChild  = MakePolicyView(UiScalePolicy::ENABLED, WindowScalePolicy::INHERIT);
   View grandChild    = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
-  preview.Add(disabledChild);
-  preview.Add(enabledChild);
+  optedOutRoot.Add(disabledChild);
+  optedOutRoot.Add(enabledChild);
   enabledChild.Add(grandChild);
 
   View plain = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
 
-  application.GetScene().Add(preview);
+  application.GetScene().Add(optedOutRoot);
   application.GetScene().Add(plain);
   Settle(application);
 
-  DALI_TEST_EQUALS(GetImpl(preview).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(optedOutRoot).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(GetImpl(disabledChild).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(GetImpl(enabledChild).GetEffectiveLayoutScale(), 1.5f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(GetImpl(grandChild).GetEffectiveLayoutScale(), 1.5f, 0.001f, TEST_LOCATION);
