@@ -168,6 +168,13 @@ struct RecyclerViewImpl::RecyclerImpl : public Recycler
       total.end += offs.end;
       total.bottom += offs.bottom;
     }
+    // Decorations reserve space in natural units, like the list's other lengths; the layouter
+    // places items in rendered pixels.
+    const float scale = Ui::Extension::View::GetEffectiveLayoutScale(rv);
+    total.start *= scale;
+    total.top *= scale;
+    total.end *= scale;
+    total.bottom *= scale;
     return total;
   }
 

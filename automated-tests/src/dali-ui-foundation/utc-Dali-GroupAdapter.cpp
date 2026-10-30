@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/recycler/group-adapter.h>
 #include <dali-ui-foundation/integration-api/recycler/group-body-decoration.h>
 #include <dali-ui-foundation/integration-api/recycler/group-data-source.h>
@@ -40,6 +41,7 @@ using Dali::Ui::Integration::RecyclerView;
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {
@@ -83,6 +85,25 @@ public:
   uint32_t createdPosition{0u};
   uint32_t boundPosition{0u};
   uint32_t recycledPosition{0u};
+};
+
+// Sets the system UI scale for the scope of a test and restores 1.0 when the scope ends, also when
+// a DALI_TEST_* check throws. Declare it after the UiTestApplication so that it is destroyed first.
+class ScopedUiScale
+{
+public:
+  explicit ScopedUiScale(float scale)
+  {
+    LayoutScaleManager::Get().SetUiScale(scale);
+  }
+
+  ~ScopedUiScale()
+  {
+    LayoutScaleManager::Get().SetUiScale(1.0f);
+  }
+
+  ScopedUiScale(const ScopedUiScale&)            = delete;
+  ScopedUiScale& operator=(const ScopedUiScale&) = delete;
 };
 } // unnamed namespace
 
@@ -402,5 +423,42 @@ int UtcDaliGroupAdapterPreventsReservedInnerViewTypesP(void)
   DALI_TEST_EQUALS(flat.GetItemViewType(3u), GroupAdapter::RESERVED_VIEW_TYPE_GAP, TEST_LOCATION);
   DALI_TEST_EQUALS(flat.GetItemViewType(1u), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(flat.GetItemViewType(4u), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+// GroupBodyDecoration returns its margins in natural units (RecyclerView multiplies them) and insets
+// the card by the same scaled margins. At a UI scale of 2 margins of (5, 12) in a 100 wide slot put
+// the card at x 10, 100 - 10 - 24 = 66 wide. Fails before this change: the card was at x 5, 83 wide.
+int UtcDaliGroupBodyDecorationMarginsFollowScaleP(void)
+{
+  UiTestApplication   application;
+  ScopedUiScale       uiScale(2.0f);
+  View                scroller = View::New();
+  GroupBodyDecoration decoration;
+  decoration.SetBodyHorizontalMargin(5.0f, 12.0f);
+
+  ItemViewHolder top;
+  top.rowType    = GroupRowType::BODY_TOP;
+  top.groupIndex = 3u;
+  top.view       = View::New();
+  ItemViewHolder bottom = top;
+  bottom.rowType        = GroupRowType::BODY_BOTTOM;
+  decoration.OnItemActivated(top, scroller);
+  decoration.OnItemActivated(bottom, scroller);
+
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(top).start, 5.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(decoration.GetItemOffsets(top).end, 12.0f, 0.001f, TEST_LOCATION);
+
+  decoration.OnLayoutStart();
+  decoration.OnItemBoundsUpdated(top, LayoutRect(0.0f, 20.0f, 100.0f, 30.0f));
+  decoration.OnItemBoundsUpdated(bottom, LayoutRect(0.0f, 50.0f, 100.0f, 40.0f));
+  View background = View::DownCast(scroller.GetChildAt(0u));
+  DALI_TEST_CHECK(background);
+  DALI_TEST_EQUALS(background.GetProperty<Vector3>(Actor::Property::POSITION), Vector3(10.0f, 20.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(background.GetProperty<Vector3>(Actor::Property::SIZE), Vector3(66.0f, 70.0f, 1.0f), TEST_LOCATION);
+
+  decoration.OnItemRecycled(top);
+  decoration.OnItemRecycled(bottom);
+  DALI_TEST_EQUALS(scroller.GetChildCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
