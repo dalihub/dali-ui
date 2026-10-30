@@ -79,6 +79,8 @@ layout.Add(child);
 
 Bounds effect channel은 mirror semantics를 사용합니다. 하나의 `LayoutBoundsEffect` descriptor가 ENTER에서는 endpoint -> base, EXIT에서는 base -> endpoint로 해석됩니다.
 
+Bounds effect의 길이 단위는 세 가지입니다. `LayoutBoundsLength::Pixel()`은 margin과 같은 자연 단위이며, dispatcher가 ENTER / EXIT 되는 view의 유효 스케일(`Extension::View::GetEffectiveLayoutScale()`, [UI Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale-(Kr)) 참고)을 곱합니다. 따라서 유효 스케일이 `2.0`이면 `SlideFrom(LayoutBoundsEdge::BOTTOM, LayoutBoundsLength::Pixel(40.0f), timing)`은 최종 bounds보다 렌더링 기준 80 pixel 아래에서 시작합니다. `SUBTREE` owner의 ENTER / EXIT는 owner가 아니라 애니메이션되는 descendant의 스케일을 사용합니다. `SelfFraction()`과 `ParentFraction()`은 렌더링 크기의 비율이므로 다시 스케일하지 않습니다. `SelfFraction()`은 view 자신의 크기(ENTER에서는 최종 bounds, EXIT에서는 현재 bounds)의 비율로 view의 스케일이 반영되어 있고, `ParentFraction()`은 부모의 arranged 크기의 비율로 view가 아니라 부모의 스케일이 반영되어 있습니다. 이전 릴리스는 `Pixel()` offset을 렌더링 pixel 그대로 더했으므로, 유효 스케일이 `1.0`이 아니면 같은 값이 이제 유효 스케일 배만큼 더 멀리 움직입니다.
+
 ---
 
 ## Quick Start: Animator Mode

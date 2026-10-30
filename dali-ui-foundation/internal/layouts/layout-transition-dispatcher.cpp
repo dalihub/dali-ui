@@ -167,26 +167,31 @@ LayoutRect ParentLocalBoundsOf(ViewImpl* parent)
   return {0.0f, 0.0f, arranged.width, arranged.height};
 }
 
+// PIXEL is in natural units, like a margin: @p pixelScale, the effective scale of the view that
+// enters or exits, turns it into the rendered units @p childBase and @p parentLocalBounds are in.
+// The fractions read those rendered sizes, so they take no scale.
 float ResolveBoundsLength(const LayoutBoundsLength& length,
                           bool                      xAxis,
                           const LayoutRect&         childBase,
-                          const LayoutRect&         parentLocalBounds)
+                          const LayoutRect&         parentLocalBounds,
+                          float                     pixelScale)
 {
   switch(length.unit)
   {
     case LayoutBoundsUnit::PIXEL:
-      return length.value;
+      return length.value * pixelScale;
     case LayoutBoundsUnit::SELF_FRACTION:
       return length.value * (xAxis ? childBase.width : childBase.height);
     case LayoutBoundsUnit::PARENT_FRACTION:
       return length.value * (xAxis ? parentLocalBounds.width : parentLocalBounds.height);
   }
-  return length.value;
+  return length.value * pixelScale;
 }
 
 LayoutRect ComputeBoundsEndpoint(const LayoutRect&         base,
                                  const LayoutRect&         parentLocalBounds,
-                                 const LayoutBoundsEffect& effect)
+                                 const LayoutBoundsEffect& effect,
+                                 float                     pixelScale)
 {
   LayoutRect result = base;
 
@@ -203,8 +208,8 @@ LayoutRect ComputeBoundsEndpoint(const LayoutRect&         base,
   if(effect.HasOffset())
   {
     const LayoutBoundsOffset& offset = effect.GetOffset();
-    result.x += ResolveBoundsLength(offset.x, true, base, parentLocalBounds);
-    result.y += ResolveBoundsLength(offset.y, false, base, parentLocalBounds);
+    result.x += ResolveBoundsLength(offset.x, true, base, parentLocalBounds, pixelScale);
+    result.y += ResolveBoundsLength(offset.y, false, base, parentLocalBounds, pixelScale);
   }
 
   return result;
@@ -1610,7 +1615,9 @@ void LayoutTransitionDispatcher::StartEnterTransition(ViewImpl* child, Ui::Layou
 
   // ENTER base = final layout bounds. The dispatcher walks from the bounds
   // effect's endpoint toward this base. Sourcing from the actor's current
-  // bounds would leak prior animation state into the new transition.
+  // bounds would leak prior animation state into the new transition. A PIXEL
+  // offset takes the entering view's own effective scale, also for an inherited
+  // ENTER: the owner supplies only the effect.
   ViewImpl*   parentImpl  = nullptr;
   Dali::Actor parentActor = childActor ? childActor.GetParent() : Dali::Actor();
   if(parentActor)
@@ -1623,7 +1630,7 @@ void LayoutTransitionDispatcher::StartEnterTransition(ViewImpl* child, Ui::Layou
   }
   const LayoutRect toBounds          = VisualBoundsOf(parentImpl, child);
   const LayoutRect parentLocalBounds = ParentLocalBoundsOf(parentImpl);
-  const LayoutRect fromBounds        = hasEffect ? ComputeBoundsEndpoint(toBounds, parentLocalBounds, *effectPtr)
+  const LayoutRect fromBounds        = hasEffect ? ComputeBoundsEndpoint(toBounds, parentLocalBounds, *effectPtr, ViewDataImpl::GetEffectiveLayoutScaleOf(*child))
                                                  : toBounds;
 
   // Snap actor to the from-bounds so the animation begins from the effect
@@ -2396,10 +2403,13 @@ void LayoutTransitionDispatcher::ScheduleExit(ViewImpl* parent, Ui::View child, 
   // visual-spec-only EXIT (no bounds effect), the dispatcher still pins
   // currentBounds back after cancellation so ENTER -> EXIT does not jump
   // to ENTER's final bounds before fading out.
+  // A PIXEL offset takes the exiting view's own effective scale, whichever
+  // transition supplies the effect; the ghost keeps its actor parent, so its
+  // scale is unchanged by the logical removal.
   Actor            childActor        = child;
   const LayoutRect currentBounds     = CurrentVisualBoundsForExit(parent, childImpl, childActor);
   const LayoutRect parentLocalBounds = ParentLocalBoundsOf(parent);
-  const LayoutRect toBounds          = hasEffect ? ComputeBoundsEndpoint(currentBounds, parentLocalBounds, *effectPtr)
+  const LayoutRect toBounds          = hasEffect ? ComputeBoundsEndpoint(currentBounds, parentLocalBounds, *effectPtr, ViewDataImpl::GetEffectiveLayoutScaleOf(*childImpl))
                                                  : currentBounds;
 
   // Cancel any in-flight CHANGE / ENTER on this child BEFORE we capture
