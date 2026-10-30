@@ -2935,3 +2935,29 @@ int UtcDaliRecyclerViewWheelStepFollowsScaleP(void)
   impl.CancelScrollAnimation();
   END_TEST;
 }
+
+// The keyboard edge bump of RecyclerView follows the scale like ScrollView's: +-1200 at a UI scale
+// of 2. Fails before this change: +-600.
+int UtcDaliRecyclerViewKeyEdgeFeedbackFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  RecyclerView recycler = RecyclerView::New();
+  EdgeEffect   start    = EdgeEffect::New();
+  EdgeEffect   end      = EdgeEffect::New();
+  recycler.SetStartEdgeEffect(start);
+  recycler.SetEndEdgeEffect(end);
+
+  float startVelocity = 0.0f;
+  float endVelocity   = 0.0f;
+  start.AbsorbSignal().Connect(&application, [&startVelocity](float velocity) { startVelocity = velocity; });
+  end.AbsorbSignal().Connect(&application, [&endVelocity](float velocity) { endVelocity = velocity; });
+
+  auto& impl = GetRecyclerImpl(recycler);
+  impl.TriggerKeyEdgeFeedback(FocusDirection::UP);
+  impl.TriggerKeyEdgeFeedback(FocusDirection::DOWN);
+  DALI_TEST_EQUALS(startVelocity, 1200.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(endVelocity, -1200.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}

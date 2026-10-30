@@ -1521,13 +1521,15 @@ uint32_t RecyclerViewImpl::NextItemPosition(uint32_t pos, FocusDirection dir) co
 
 void RecyclerViewImpl::TriggerKeyEdgeFeedback(FocusDirection dir)
 {
+  // The bump is a design length expressed as a synthetic velocity: scale it like the content.
+  const float velocity = KEY_ABSORB_VEL * Ui::Extension::View::GetEffectiveLayoutScale(*this);
   if(IsForwardDirection(dir))
   {
-    if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-KEY_ABSORB_VEL);
+    if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-velocity);
   }
   else
   {
-    if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(KEY_ABSORB_VEL);
+    if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(velocity);
   }
 }
 
