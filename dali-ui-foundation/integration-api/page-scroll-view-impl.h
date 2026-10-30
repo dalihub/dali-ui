@@ -78,6 +78,7 @@ public: // Page API
    *
    * Only the component on the active scroll axis is used.
    * Set to (0, 0) to derive the page size from the current viewport.
+   * The size is in natural units: GetEffectivePageSize() multiplies it by the effective scale.
    */
   void SetPageSize(const Vector2& size);
 
@@ -210,7 +211,8 @@ private:
   /**
    * @brief Returns the effective page size.
    *
-   * Uses mPageSize if non-zero; falls back to the current viewport dimensions.
+   * Uses mPageSize times the effective scale if non-zero; falls back to the current viewport
+   * dimensions. Rendered pixels either way.
    */
   Vector2 GetEffectivePageSize() const;
 
