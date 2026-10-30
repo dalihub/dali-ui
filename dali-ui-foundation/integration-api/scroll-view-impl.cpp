@@ -1066,7 +1066,8 @@ void ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNa
       break;
   }
 
-  if(distance < mKeyScrollStep)
+  // The step is set in natural units; the distance is in rendered pixels.
+  if(distance < mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this))
   {
     mKeyScrollLastChild.Reset();
     result.MoveTo(next);
@@ -1332,19 +1333,21 @@ void ScrollViewImpl::TriggerKeyEdgeFeedback(FocusDirection direction)
 void ScrollViewImpl::ScrollByKeyDirection(FocusDirection direction)
 {
   Vector2 pos = GetScrollPosition();
+  // The step is set in natural units; scroll positions are rendered pixels.
+  const float step = mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this);
   switch(direction)
   {
     case FocusDirection::UP:
-      ScrollToWithDuration(Vector2(pos.x, pos.y - mKeyScrollStep), KEY_SCROLL_ANIM_SEC);
+      ScrollToWithDuration(Vector2(pos.x, pos.y - step), KEY_SCROLL_ANIM_SEC);
       break;
     case FocusDirection::DOWN:
-      ScrollToWithDuration(Vector2(pos.x, pos.y + mKeyScrollStep), KEY_SCROLL_ANIM_SEC);
+      ScrollToWithDuration(Vector2(pos.x, pos.y + step), KEY_SCROLL_ANIM_SEC);
       break;
     case FocusDirection::LEFT:
-      ScrollToWithDuration(Vector2(pos.x - mKeyScrollStep, pos.y), KEY_SCROLL_ANIM_SEC);
+      ScrollToWithDuration(Vector2(pos.x - step, pos.y), KEY_SCROLL_ANIM_SEC);
       break;
     case FocusDirection::RIGHT:
-      ScrollToWithDuration(Vector2(pos.x + mKeyScrollStep, pos.y), KEY_SCROLL_ANIM_SEC);
+      ScrollToWithDuration(Vector2(pos.x + step, pos.y), KEY_SCROLL_ANIM_SEC);
       break;
     case FocusDirection::PAGE_UP:
       ScrollToWithDuration(Vector2(pos.x, pos.y - mViewportHeight), KEY_SCROLL_ANIM_SEC);

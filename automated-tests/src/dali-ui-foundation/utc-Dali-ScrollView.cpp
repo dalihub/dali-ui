@@ -2777,3 +2777,59 @@ int UtcDaliScrollViewPreLayoutClampUsesScaledSizesP(void)
   DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -700.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
+
+// The key scroll step is a design length: at a UI scale of 2 a step of 70 is 140 rendered pixels,
+// both as the "close enough to focus" threshold and as the distance a key scrolls. A 200 x 200 view
+// (400 rendered) over 700 of content: the second item starts at 240 (480 rendered), 80 rendered
+// pixels below the viewport -- 40 natural, within the step -- so DOWN focuses it; a step scroll then
+// moves 140. Fails before this change: 80 >= 70 kept the focus on the first item and scrolled by 70.
+int UtcDaliScrollViewKeyScrollStepFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetKeyScrollEnabled(true);
+  scrollView.SetKeyScrollStep(70.0f);
+  scrollView.SetScrollOnFocus(false);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(700.0f);
+  View first = View::New();
+  first.SetRequestedWidth(40.0f);
+  first.SetRequestedHeight(40.0f);
+  first.SetRequestedY(20.0f);
+  first.SetFocusable(true);
+  View second = View::New();
+  second.SetRequestedWidth(40.0f);
+  second.SetRequestedHeight(40.0f);
+  second.SetRequestedY(240.0f);
+  second.SetFocusable(true);
+  content.Add(first);
+  content.Add(second);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::POSITION_Y), 480.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetKeyScrollStep(), 70.0f, 0.001f, TEST_LOCATION);
+
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(first));
+  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_EQUALS(FocusManager::Get().GetCurrentFocusView(), second, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 0.0f, 0.001f, TEST_LOCATION);
+
+  auto& impl = GetScrollImpl(scrollView);
+  impl.ScrollByKeyDirection(FocusDirection::DOWN);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 140.0f, 0.001f, TEST_LOCATION);
+  impl.CancelScrollAnimation();
+  FocusManager::Get().ClearFocus();
+  END_TEST;
+}
