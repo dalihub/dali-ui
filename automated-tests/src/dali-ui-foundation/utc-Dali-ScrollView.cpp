@@ -2899,3 +2899,26 @@ int UtcDaliScrollViewWheelStepFollowsScaleP(void)
   impl.CancelScrollAnimation();
   END_TEST;
 }
+
+// The overscroll limit is a design length: at a UI scale of 2 the 100 limit is 200 rendered pixels,
+// while the pull itself still follows the finger (resistance 1). Fails before this change: the first
+// pull of 150 was clamped to 100.
+int UtcDaliBounceEdgeEffectPullLimitFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  View             source = View::New();
+  BounceEdgeEffect effect = BounceEdgeEffect::New(ScrollDirection::Vertical);
+  effect.SetSource(source);
+  effect.SetPullResistance(1.0f);
+
+  effect.OnPull(150.0f, 150.0f);
+  DALI_TEST_EQUALS(source.GetProperty<float>(Actor::Property::POSITION_Y), 150.0f, 0.001f, TEST_LOCATION);
+  effect.OnPull(100.0f, 250.0f);
+  DALI_TEST_EQUALS(source.GetProperty<float>(Actor::Property::POSITION_Y), 200.0f, 0.001f, TEST_LOCATION);
+
+  effect.Finish();
+  DALI_TEST_EQUALS(source.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}

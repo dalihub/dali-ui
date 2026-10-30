@@ -39,7 +39,8 @@ class BounceEdgeEffectImpl;
  *
  * During a drag past the edge:
  *   - Content is moved by @p deltaDistance × pullResistance, clamped to an
- *     internal maximum, giving the appearance of stretching.
+ *     internal maximum (a design length that follows the source view's
+ *     effective scale), giving the appearance of stretching.
  *
  * On release:
  *   - Content animates back to the boundary position with an EASE_OUT_BACK
@@ -47,6 +48,7 @@ class BounceEdgeEffectImpl;
  *
  * On a fling hitting the edge (OnAbsorb):
  *   - Content first pushes out a distance proportional to the fling velocity,
+ *     up to an internal maximum that follows the same scale,
  *     then springs back, producing a "thud and bounce" feel.
  *
  * Example:
