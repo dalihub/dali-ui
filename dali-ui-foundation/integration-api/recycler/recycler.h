@@ -57,6 +57,11 @@ public:
   // Move all currently active views to the recycle pool.
   virtual void RecycleAllViews() = 0;
 
+  // Extents, cache distances and decoration offsets are rendered pixels: the RecyclerView multiplies
+  // its cache extent and its decorations' offsets (natural units) by its effective scale. A custom
+  // layouter scales its own lengths by that owner scale -- read it from the scroller, the parent of
+  // the item views, not from an item view, whose UiScalePolicy can differ -- and is not laid out
+  // again on a scale change that keeps the viewport size.
   virtual uint32_t GetItemCount() const      = 0;
   virtual float    GetViewportExtent() const = 0;
   virtual float    GetCrossExtent() const    = 0;

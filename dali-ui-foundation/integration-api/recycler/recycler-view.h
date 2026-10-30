@@ -65,6 +65,8 @@ public:
   void          SetItemsLayouter(ItemsLayouter layouter);
   ItemsLayouter GetItemsLayouter() const;
 
+  // Distances realised before and after the viewport, in natural units: this view multiplies them
+  // by its effective scale (default 300 each).
   void SetCacheExtent(float before, float after);
   void GetCacheExtent(float& before, float& after) const;
 
