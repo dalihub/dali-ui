@@ -108,11 +108,6 @@ Ui::AsyncImageLoader::ImageLoadedSignalType& AsyncImageLoader::ImageLoadedSignal
   return mLoadedSignal;
 }
 
-Ui::Integration::PixelBufferLoadedSignalType& AsyncImageLoader::PixelBufferLoadedSignal()
-{
-  return mPixelBufferLoadedSignal;
-}
-
 bool AsyncImageLoader::Cancel(uint32_t loadingTaskId)
 {
   auto end = mLoadingTasks.end();
@@ -155,19 +150,12 @@ void AsyncImageLoader::ProcessLoadedImage(LoadingTaskPtr task)
     }
   }
 
-  if(mPixelBufferLoadedSignal.GetConnectionCount() > 0)
+  PixelBuffer pixelBuffer;
+  if(!task->pixelBuffers.empty())
   {
-    mPixelBufferLoadedSignal.Emit(task->id, task->pixelBuffers);
+    pixelBuffer = task->pixelBuffers[0];
   }
-  else if(mLoadedSignal.GetConnectionCount() > 0)
-  {
-    PixelData pixelData;
-    if(!task->pixelBuffers.empty())
-    {
-      pixelData = PixelBuffer::Convert(task->pixelBuffers[0]);
-    }
-    mLoadedSignal.Emit(task->id, pixelData);
-  }
+  mLoadedSignal.Emit(task->id, pixelBuffer);
 }
 
 } // namespace Internal

@@ -133,11 +133,6 @@ public:
   Ui::AsyncImageLoader::ImageLoadedSignalType& ImageLoadedSignal();
 
   /**
-   * @copydoc Ui::AsyncImageLoader::PixelBufferLoadedSignal
-   */
-  Ui::Integration::PixelBufferLoadedSignalType& PixelBufferLoadedSignal();
-
-  /**
    * @copydoc Ui::AsyncImageLoader::Cancel
    */
   bool Cancel(uint32_t loadingTaskId);
@@ -159,10 +154,9 @@ protected:
   ~AsyncImageLoader() override;
 
 private:
-  Ui::AsyncImageLoader::ImageLoadedSignalType  mLoadedSignal;
-  Ui::Integration::PixelBufferLoadedSignalType mPixelBufferLoadedSignal;
-  std::vector<AsyncImageLoadingInfo>           mLoadingTasks;
-  uint32_t                                     mLoadTaskId;
+  Ui::AsyncImageLoader::ImageLoadedSignalType mLoadedSignal;
+  std::vector<AsyncImageLoadingInfo>          mLoadingTasks;
+  uint32_t                                    mLoadTaskId;
 };
 
 } // namespace Internal

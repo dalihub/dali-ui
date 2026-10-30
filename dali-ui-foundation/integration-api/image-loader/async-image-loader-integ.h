@@ -31,8 +31,6 @@ namespace Ui
 {
 namespace Integration
 {
-typedef Signal<void(uint32_t, std::vector<PixelBuffer>&)> PixelBufferLoadedSignalType;
-
 /**
  * @brief Whether to multiply alpha into color channels on load
  */
@@ -91,12 +89,6 @@ DALI_UI_API uint32_t Load(AsyncImageLoader asyncImageLoader, const std::string& 
 DALI_UI_API uint32_t ApplyMask(AsyncImageLoader asyncImageLoader, PixelBuffer pixelBuffer,
                                PixelBuffer maskPixelBuffer, float contentScale, bool cropToMask,
                                PreMultiplyOnLoad preMultiplyOnLoad);
-
-/**
- * Connect to this signal if you want to load a PixelBuffer instead of a PixelData.
- * @note Connecting to this signal prevents the emission of the ImageLoadedSignal.
- */
-DALI_UI_API PixelBufferLoadedSignalType& PixelBufferLoadedSignal(AsyncImageLoader asyncImageLoader);
 
 } // namespace Integration
 } // namespace Ui

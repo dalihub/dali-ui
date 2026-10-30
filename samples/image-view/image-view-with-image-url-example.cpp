@@ -47,13 +47,14 @@ private:
     mWindow.SetBackgroundColor(UiColor(0x171717));
     mWindow.KeyEventSignal().Connect(this, &ImageViewWithImageUrlController::OnKeyEvent);
 
-    PixelData pixelData = SyncImageLoader::Load(RESOURCES_DIR "gallery-large-3.jpg");
-    if(pixelData)
+    // The loaded PixelBuffer could be edited here through GetBuffer(); once the
+    // pixels are ready, Convert() turns it into a PixelData for displaying.
+    PixelBuffer pixelBuffer = Dali::LoadImageFromFile(RESOURCES_DIR "gallery-large-3.jpg");
+    if(pixelBuffer)
     {
       // The temporary ImageUrl is retained by ImageView. The PixelData and the
       // application's ImageUrl handle may both be discarded after this call.
-      mImageView = ImageView::New(ImageUrlUtils::GenerateUrl(pixelData));
-      pixelData.Reset();
+      mImageView = ImageView::New(ImageUrlUtils::GenerateUrl(PixelBuffer::Convert(pixelBuffer)));
     }
     else
     {

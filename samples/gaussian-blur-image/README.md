@@ -44,8 +44,8 @@ Keyboard shortcuts mirror the buttons: `1`-`7`, `I`, `O`, `C`, Space, and `R`.
 After applying or refreshing the effect, the sample walks the window's
 `RenderTaskList`. For every task with a `FrameBuffer`, it calls
 `KeepRenderResult()` and retains that task handle. The blur effect's
-`FinishedSignal` then calls `GetRenderResult()`, obtains the pixel buffer with
-`Dali::Integration::GetPixelDataBuffer()`, and writes it with `EncodeToFile()`.
+`FinishedSignal` then calls `GetRenderResultBuffer()`, reads the pixels with
+`PixelBuffer::GetBuffer()`, and writes them with `EncodeToFile()`.
 
 Files are named:
 

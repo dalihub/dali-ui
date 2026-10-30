@@ -39,6 +39,9 @@ namespace SyncImageLoader
 /**
  * @brief The methods in the SyncImageLoader namespace are used to load pixel data from a URL synchronously.
  *
+ * @deprecated Use Dali::LoadImageFromFile(), which returns a PixelBuffer whose pixels the
+ * application can read, instead.
+ *
  * Example:
  *
  * @code
@@ -54,6 +57,8 @@ namespace SyncImageLoader
  */
 
 /**
+ * @deprecated Use Dali::LoadImageFromFile() instead.
+ *
  * @brief Loads an image synchronously.
  * Note: When using this method, the following defaults will be used:
  * samplingMode = SamplingMode::BOX_THEN_LINEAR
@@ -67,6 +72,8 @@ namespace SyncImageLoader
 DALI_UI_API PixelData Load(const Dali::String& url);
 
 /**
+ * @deprecated Use Dali::LoadImageFromFile() instead.
+ *
  * @brief Loads an image synchronously by specifying the target dimensions.
  * Note: When using this method, the following defaults will be used:
  * samplingMode = SamplingMode::BOX_THEN_LINEAR
@@ -81,6 +88,8 @@ DALI_UI_API PixelData Load(const Dali::String& url);
 DALI_UI_API PixelData Load(const Dali::String& url, ImageDimensions dimensions);
 
 /**
+ * @deprecated Use Dali::LoadImageFromFile() instead.
+ *
  * @brief Loads an image synchronously by specifying the target dimensions and options.
  * @REMARK_INTERNET
  * @REMARK_STORAGE

@@ -32,23 +32,18 @@ namespace
 {
 struct LoadObserver : public ConnectionTracker
 {
-  void OnImageLoaded(uint32_t taskId, PixelData pixels)
+  void OnImageLoaded(uint32_t taskId, PixelBuffer pixelBuffer)
   {
     ++callCount;
     lastTaskId = taskId;
-    loaded = static_cast<bool>(pixels);
-  }
-
-  void OnPixelBufferLoaded(uint32_t taskId, std::vector<PixelBuffer>& buffers)
-  {
-    ++callCount;
-    lastTaskId = taskId;
-    loaded = !buffers.empty() && static_cast<bool>(buffers.front());
+    loaded = static_cast<bool>(pixelBuffer);
+    lastPixelBuffer = pixelBuffer;
   }
 
   uint32_t lastTaskId{0u};
   int callCount{0};
   bool loaded{false};
+  PixelBuffer lastPixelBuffer;
 };
 } // namespace
 
@@ -99,7 +94,7 @@ int UtcDaliAsyncImageLoaderAnimatedFramesAndBuffersP(void)
   UiTestApplication application;
   AsyncImageLoader loader = AsyncImageLoader::New();
   LoadObserver observer;
-  Dali::Ui::Integration::PixelBufferLoadedSignal(loader).Connect(&observer, &LoadObserver::OnPixelBufferLoaded);
+  loader.ImageLoadedSignal().Connect(&observer, &LoadObserver::OnImageLoaded);
 
   auto animation = AnimatedImageLoading::New("../samples/image-view/res/dali-logo-anim.gif", true);
   DALI_TEST_CHECK(animation);
@@ -123,7 +118,7 @@ int UtcDaliAsyncImageLoaderEncodedAndMaskTasksP(void)
   UiTestApplication application;
   AsyncImageLoader loader = AsyncImageLoader::New();
   LoadObserver observer;
-  Dali::Ui::Integration::PixelBufferLoadedSignal(loader).Connect(&observer, &LoadObserver::OnPixelBufferLoaded);
+  loader.ImageLoadedSignal().Connect(&observer, &LoadObserver::OnImageLoaded);
   auto& impl = Ui::GetImplementation(loader);
 
   EncodedImageBuffer::RawBufferType invalidBytes;
@@ -142,5 +137,26 @@ int UtcDaliAsyncImageLoaderEncodedAndMaskTasksP(void)
   DALI_TEST_EQUALS(observer.callCount, 2, TEST_LOCATION);
   DALI_TEST_EQUALS(observer.lastTaskId, maskedId, TEST_LOCATION);
   DALI_TEST_CHECK(observer.loaded);
+  END_TEST;
+}
+
+int UtcDaliAsyncImageLoaderImageLoadedSignalSharedP(void)
+{
+  UiTestApplication application;
+  AsyncImageLoader loader = AsyncImageLoader::New();
+  LoadObserver firstObserver;
+  LoadObserver secondObserver;
+  loader.ImageLoadedSignal().Connect(&firstObserver, &LoadObserver::OnImageLoaded);
+  loader.ImageLoadedSignal().Connect(&secondObserver, &LoadObserver::OnImageLoaded);
+
+  // Every connected callback receives a handle to the same PixelBuffer, which keeps its pixels.
+  const uint32_t validId = loader.Load("../samples/image-view/res/sample.jpg");
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5, true));
+  DALI_TEST_EQUALS(firstObserver.callCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondObserver.callCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstObserver.lastTaskId, validId, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondObserver.lastTaskId, validId, TEST_LOCATION);
+  DALI_TEST_CHECK(firstObserver.lastPixelBuffer == secondObserver.lastPixelBuffer);
+  DALI_TEST_CHECK(firstObserver.lastPixelBuffer.GetBuffer() != nullptr);
   END_TEST;
 }
