@@ -1743,3 +1743,84 @@ int UtcDaliLabelGradientSpanUiScaleAsyncPublicationP(void)
   }
   END_TEST;
 }
+
+
+int UtcDaliLabelGradientUiScaleAsyncStyleTransitionsP(void)
+{
+  UiTestApplication application;
+  GradientScaleRestore restore;
+  UiScaleManager::Get().SetScalable(true);
+  for(int source = 0; source < 3; ++source)
+  {
+    for(int transition = 0; transition < 3; ++transition)
+    {
+      for(bool completeBeforeMeasure : {false, true})
+      {
+        UiScaleManager::Get().SetScale(1.0f);
+        Label label = Label::New();
+        label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+        label.SetRequestedWidth(240.0f);
+        label.SetRequestedHeight(80.0f);
+        label.SetFontSize(18.0f);
+        label.SetAsyncRendering(true);
+        const bool replaceWithBbox = transition != 0;
+        const auto setGradient = [&](bool userSpace)
+        {
+          auto gradient = userSpace || replaceWithBbox ? MakeScaleGradient(0, !userSpace) : Gradient::Base::None();
+          if(source == 0)
+          {
+            label.SetTextGradient(gradient);
+          }
+          else if(source == 1)
+          {
+            label.SetTextGradientOverlay(gradient);
+          }
+          else
+          {
+            auto builder = Text::StyledTextBuilder::New("Async gradient removal");
+            if(userSpace || replaceWithBbox)
+            {
+              builder.SetSpan(Text::GradientSpan::New(gradient, Text::GradientSpan::BoundsMode::VIEW_BOUND), 0u, 22u);
+            }
+            label.SetStyledText(builder.Build());
+          }
+        };
+        label.SetText("Async gradient removal");
+        setGradient(transition != 2);
+        GradientCompletion observer;
+        label.AsyncRenderFinishedSignal().Connect(&observer, &GradientCompletion::Finished);
+        application.GetScene().Add(label);
+        SettleGradient(application);
+        DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 1u));
+        auto& impl = static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation());
+        Texture previousTexture = label.GetRendererAt(0u).GetTextures().GetTexture(0u);
+
+        impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
+        setGradient(transition == 2);
+        UiScaleManager::Get().SetScale(2.0f);
+        if(completeBeforeMeasure)
+        {
+          // Explicitly deliver the old result before the scale-change Measure.
+          DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+          DALI_TEST_EQUALS(observer.count, 1u, TEST_LOCATION);
+          DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTexture(0u) == previousTexture);
+        }
+        SettleGradient(application);
+        DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 2u));
+        DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTexture(0u) != previousTexture);
+        if(replaceWithBbox && source < 2)
+        {
+          CheckDisplayedGradient(FindGradientRenderer(label, source == 1 ? "uTextGradientOverlayEndPosition" : "uTextGradientEndPosition"), 0, 2.0f, transition == 1, source == 1);
+        }
+
+        // The rejected request must not leave the manual state latched.
+        impl.RequestAsyncRenderWithFixedSize(260.0f, 80.0f);
+        DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 3u));
+        SettleGradient(application);
+        DALI_TEST_EQUALS(observer.count, 3u, TEST_LOCATION);
+        application.GetScene().Remove(label);
+      }
+    }
+  }
+  END_TEST;
+}

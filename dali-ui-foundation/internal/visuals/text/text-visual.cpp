@@ -324,7 +324,8 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mIsConstraintAppliedAlways(false),
   mIsTextLoadingTaskRunning(false),
   mIsNaturalSizeTaskRunning(false),
-  mIsHeightForWidthTaskRunning(false)
+  mIsHeightForWidthTaskRunning(false),
+  mAsyncRenderUsesUserSpaceGradient(false)
 {
   // Enable fitting mode, to acquire effectiveScale value.
   mImpl->mFittingModeRequired = true;
@@ -1128,10 +1129,12 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
   Text::AsyncTextParameters parameters          = textInformation.parameters;
   const auto                publicationRevision = mController->GetRenderRevision();
 
-  const bool isRenderRequest         = IsAsyncRenderRequest(parameters.requestType);
+  const bool isRenderRequest = IsAsyncRenderRequest(parameters.requestType);
+  // Current styles may have switched from BBOX to USER_SPACE since dispatch.
+  const bool usesUserSpaceGradient   = isRenderRequest && (parameters.hasUserSpaceGradient || UsesUserSpaceGradient());
   const auto hasCurrentGradientScale = [&]()
   {
-    if(!parameters.hasUserSpaceGradient)
+    if(!usesUserSpaceGradient)
     {
       return true;
     }
@@ -1404,7 +1407,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     {
       return;
     }
-    if(!parameters.hasUserSpaceGradient)
+    if(!usesUserSpaceGradient)
     {
       mImpl->mRenderer.SetShader(shader);
       RemoveRenderer(control, false);
@@ -1425,7 +1428,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
         AddTexture(textureSet, renderInfo.textGradientPreservedPixelData, sampler, textureSetIndex);
         ++textureSetIndex;
-        if(!parameters.hasUserSpaceGradient)
+        if(!usesUserSpaceGradient)
         {
           gradientData.mTextGradientMaskPixelData = renderInfo.textGradientMaskPixelData;
         }
@@ -1483,7 +1486,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         AddTexture(textureSet, renderInfo.revealMetadataTiles.front(), nearestSampler, textureSetIndex);
       }
 
-      if(parameters.hasUserSpaceGradient)
+      if(usesUserSpaceGradient)
       {
         if(!hasCurrentGradientScale() || mController->GetRenderRevision() != publicationRevision)
         {
@@ -1528,7 +1531,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       Sampler sampler = Sampler::New();
       sampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
 
-      if(parameters.hasUserSpaceGradient)
+      if(usesUserSpaceGradient)
       {
         mImpl->mRenderer.SetShader(shader);
         RemoveRenderer(control, false);
@@ -2530,7 +2533,8 @@ void TextVisual::RequestAsyncSizeComputationOwned(Text::AsyncTextParameters&& pa
 
 void TextVisual::CancelAsyncRender(Ui::Integration::Visual::Base visual)
 {
-  TextVisual& visualObject = GetVisualObject(visual);
+  TextVisual& visualObject                       = GetVisualObject(visual);
+  visualObject.mAsyncRenderUsesUserSpaceGradient = false;
   if(visualObject.mIsTextLoadingTaskRunning)
   {
     Text::AsyncTextManager::Get().RequestCancel(visualObject.mTextLoadingTaskId);
@@ -2548,6 +2552,7 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
   if((fabsf(parameters.textWidth) < Math::MACHINE_EPSILON_1000) ||
      (fabsf(parameters.textHeight) < Math::MACHINE_EPSILON_1000) || parameters.text.empty())
   {
+    mAsyncRenderUsesUserSpaceGradient = false;
     if(mIsTextLoadingTaskRunning)
     {
       Text::AsyncTextManager::Get().RequestCancel(mTextLoadingTaskId);
@@ -2605,7 +2610,8 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
     Text::AsyncTextManager::Get().RequestCancel(mTextLoadingTaskId);
   }
 
-  parameters.hasUserSpaceGradient = UsesUserSpaceGradient();
+  parameters.hasUserSpaceGradient   = UsesUserSpaceGradient();
+  mAsyncRenderUsesUserSpaceGradient = parameters.hasUserSpaceGradient;
 
   mIsTextLoadingTaskRunning        = true;
   mTextLoadingMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;

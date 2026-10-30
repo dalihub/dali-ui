@@ -251,7 +251,6 @@ struct AtlasRenderer::Impl
   };
 
   Impl()
-  : mDepth(0)
   {
     mGlyphManager = AtlasGlyphManager::Get();
     mFontClient   = TextAbstraction::FontClient::Get();
@@ -539,7 +538,7 @@ struct AtlasRenderer::Impl
 
   void CreateActors(const std::vector<MeshRecord>& meshContainer, const Size& textSize, const Vector4& color,
                     const Vector4& shadowColor, const Vector2& shadowOffset, Actor textControl,
-                    Property::Index animatablePropertyIndex, bool drawShadow, bool allowGradient)
+                    Property::Index animatablePropertyIndex, bool drawShadow, bool allowGradient, int depth)
   {
     if(!mActor)
     {
@@ -557,7 +556,7 @@ struct AtlasRenderer::Impl
       const MeshRecord& meshRecord = *it;
 
       Actor actor = CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_NORMAL,
-                                    allowGradient);
+                                    allowGradient, depth);
 
       // Whether the actor has renderers.
       const bool hasRenderer = actor.GetRendererCount() > 0u;
@@ -576,7 +575,7 @@ struct AtlasRenderer::Impl
         }
 
         Actor shadowActor =
-          CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_DROP_SHADOW, false);
+          CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_DROP_SHADOW, false, depth);
 #if defined(DEBUG_ENABLED)
         shadowActor.SetProperty(Dali::Actor::Property::NAME, "Text Shadow renderable actor");
 #endif
@@ -625,7 +624,6 @@ struct AtlasRenderer::Impl
     std::vector<MeshRecord> meshContainerOutline;
     Vector<Extent>          underlineExtents;
     Vector<Extent>          strikethroughExtents;
-    mDepth = depth;
 
     const Vector2&   textSize(view.GetLayoutSize());
     const Vector2    halfTextSize(textSize * 0.5f);
@@ -981,7 +979,7 @@ struct AtlasRenderer::Impl
     {
       const bool drawShadow = STYLE_DROP_SHADOW == style;
       CreateActors(meshContainerOutline, textSize, outlineColor, shadowColor, shadowOffset, textControl,
-                   animatablePropertyIndex, drawShadow, false);
+                   animatablePropertyIndex, drawShadow, false, depth);
 
       isShadowDrawn = drawShadow;
     }
@@ -991,7 +989,7 @@ struct AtlasRenderer::Impl
     {
       const bool drawShadow = !isShadowDrawn && (STYLE_DROP_SHADOW == style);
       CreateActors(meshContainer, textSize, defaultColor, shadowColor, shadowOffset, textControl,
-                   animatablePropertyIndex, drawShadow, true);
+                   animatablePropertyIndex, drawShadow, true, depth);
     }
 
 #if defined(DEBUG_ENABLED)
@@ -1331,7 +1329,7 @@ struct AtlasRenderer::Impl
   }
 
   Actor CreateMeshActor(Actor textControl, Property::Index animatablePropertyIndex, const Vector4& defaultColor,
-                        const MeshRecord& meshRecord, const Vector2& actorSize, Style style, bool allowGradient)
+                        const MeshRecord& meshRecord, const Vector2& actorSize, Style style, bool allowGradient, int depth)
   {
     VertexBuffer quadVertices = VertexBuffer::New(mQuadVertexFormat);
     quadVertices.SetData(const_cast<AtlasManager::Vertex2D*>(&meshRecord.mMesh.mVertices[0]),
@@ -1443,7 +1441,7 @@ struct AtlasRenderer::Impl
     Dali::Renderer renderer = Dali::Renderer::New(quadGeometry, shader);
     renderer.SetTextures(textureSet);
     renderer.SetProperty(Dali::Renderer::Property::BLEND_MODE, BlendMode::ON);
-    renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::CONTENT + mDepth);
+    renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::CONTENT + depth);
     if(useGradientShader)
     {
       if(gradientSpanResource)
@@ -1913,7 +1911,6 @@ struct AtlasRenderer::Impl
   Vector2                                  mGradientCoordinateSize{Vector2::ONE};
   float                                    mGradientUiScale{1.0f};
   Vector4                                  mGradientBounds{0.0f, 0.0f, 1.0f, 1.0f};
-  int                                      mDepth; ///< DepthIndex passed by control when connect to stage
   bool                                     mGradientAnimApplyAlways{false};
 };
 

@@ -13,6 +13,7 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
@@ -669,6 +670,60 @@ int UtcDaliTextAtlasMixedGradientSpanUiScaleP(void)
     if(globalEnabled)
     {
       DALI_TEST_EQUALS(prepared.GetLookupGenerationCount(), 1u, TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}
+
+
+int UtcDaliTextAtlasRenderDepthPerRequestP(void)
+{
+  UiTestApplication application;
+  auto controller = Dali::Ui::Text::Controller::New();
+  controller->SetText("Atlas request depth");
+  controller->SetDefaultFontSize(22.0f, Dali::Ui::Text::Controller::PIXEL_SIZE);
+  controller->SetShadowOffset(Vector2(2.0f, 2.0f));
+  controller->SetShadowEnabled(true);
+  controller->SetShadowColor(Color::BLACK);
+  controller->Relayout(Size(300.0f, 60.0f));
+  auto renderer = Dali::Ui::Text::AtlasRenderer::New();
+  for(int kind = 0; kind < 3; ++kind)
+  {
+    AtlasGradient::AtlasResource prepared;
+    if(kind != 0)
+    {
+      auto gradient = MakeGradient();
+      gradient.SetUnits(kind == 1 ? PublicGradient::Units::OBJECT_BOUNDING_BOX : PublicGradient::Units::USER_SPACE);
+      prepared.Set(gradient);
+    }
+    renderer->SetAtlasGradientState(prepared.GetRendererState());
+    for(int depth : {-7, 15, 0})
+    {
+      float offset = 0.0f;
+      Actor text = renderer->Render(controller->GetView(), Actor::New(), Property::INVALID_INDEX, offset, depth);
+      uint32_t normal = 0u;
+      uint32_t shadow = 0u;
+      for(uint32_t i = 0u; i < text.GetChildCount(); ++i)
+      {
+        Actor child = text.GetChildAt(i);
+        for(uint32_t j = 0u; j < child.GetRendererCount(); ++j)
+        {
+          const int actual = child.GetRendererAt(j).GetProperty<int>(Renderer::Property::DEPTH_INDEX);
+          if(actual == Dali::Ui::Integration::DepthIndex::CONTENT + depth)
+          {
+            ++normal;
+          }
+          else if(actual == Dali::Ui::Integration::DepthIndex::CONTENT + depth - 1)
+          {
+            ++shadow;
+          }
+          else
+          {
+            DALI_TEST_CHECK(false);
+          }
+        }
+      }
+      DALI_TEST_CHECK(normal > 0u && shadow > 0u);
     }
   }
   END_TEST;
