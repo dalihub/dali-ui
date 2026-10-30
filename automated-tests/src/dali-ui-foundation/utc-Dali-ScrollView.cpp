@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-test-suite-utils.h>
@@ -34,6 +35,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace Test
 {
@@ -268,6 +270,25 @@ public:
   ScrollView receivedView;
   float      deltaX;
   float      deltaY;
+};
+
+// Sets the system UI scale for the scope of a test and restores 1.0 when the scope ends, also when
+// a DALI_TEST_* check throws. Declare it after the UiTestApplication so that it is destroyed first.
+class ScopedUiScale
+{
+public:
+  explicit ScopedUiScale(float scale)
+  {
+    LayoutScaleManager::Get().SetUiScale(scale);
+  }
+
+  ~ScopedUiScale()
+  {
+    LayoutScaleManager::Get().SetUiScale(1.0f);
+  }
+
+  ScopedUiScale(const ScopedUiScale&)            = delete;
+  ScopedUiScale& operator=(const ScopedUiScale&) = delete;
 };
 
 } // namespace
@@ -1628,7 +1649,7 @@ int UtcDaliScrollViewIsViewP(void)
 // Phase 5c: ScrollViewLayoutManager must stay ALWAYS.
 //
 // ScrollViewLayoutManager::Arrange takes the scrolled child's CURRENT actor position
-// as that child's arrange input (childBounds.x = child.GetPositionX() * s, and the
+// as that child's arrange input (childBounds.x = child.GetPositionX(), and the
 // same for y). That read is how a scroll survives a layout pass: scrolling is applied
 // with Ui::Extension::SetPositionX/Y on the content (ScrollViewImpl::ApplyScrollPosition),
 // which writes the actor property without invalidating layout.
@@ -1728,6 +1749,97 @@ int UtcDaliScrollViewScrolledContentSurvivesSettledLayoutPassP(void)
   DALI_TEST_EQUALS(sibling.GetProperty<float>(Actor::Property::POSITION_X), 12.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), scrolledAgainY, TEST_LOCATION);
 
+  END_TEST;
+}
+
+// The same contract as UtcDaliScrollViewScrolledContentSurvivesSettledLayoutPassP, at a UI scale
+// of 2. ApplyScrollPosition writes the content's actor position in rendered pixels, and
+// ScrollViewLayoutManager::Arrange reads it back as the content's arrange input. A read multiplied
+// by the effective scale moved the content from -120 to -240 on the first later pass and to -480 on
+// the next, and nothing recomputed it: SetScrollableWidth/Height ignore an unchanged extent. At a
+// scale of 1 the factor is the identity, which is why the test above cannot see it.
+//
+// The comparisons after the scroll are exact (==): the defect multiplies, and an exact compare also
+// rules out a slow one-ulp creep.
+int UtcDaliScrollViewScrolledContentSurvivesSettledLayoutPassAtNonUnitScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+  tet_infoline("A scrolled ScrollView holds its content position exactly at a non-unit UI scale");
+
+  View root = View::New();
+  root.SetRequestedWidth(400.0f);
+  root.SetRequestedHeight(400.0f);
+  application.GetScene().Add(root);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(300.0f);
+  scrollView.SetRequestedHeight(300.0f);
+  root.Add(scrollView);
+
+  View content = View::New();
+  content.SetRequestedWidth(300.0f);
+  content.SetRequestedHeight(1000.0f);
+  scrollView.SetContent(content);
+
+  // The reason a later pass happens at all: a sibling of the ScrollView, so its
+  // invalidation walks up to the root and never touches the ScrollView.
+  View sibling = View::New();
+  sibling.SetRequestedWidth(30.0f);
+  sibling.SetRequestedHeight(30.0f);
+  root.Add(sibling);
+
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  // Rendered: a 600 tall scroll view over 2000 of content.
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 2000.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, TEST_LOCATION);
+
+  // Scroll positions are rendered pixels: 120 moves the content up by 120.
+  scrollView.ScrollToY(120.0f, false);
+  const float scrolledY = content.GetProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_EQUALS(scrolledY, -120.0f, TEST_LOCATION);
+
+  for(int i = 0; i < 5; ++i)
+  {
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(content.GetProperty<float>(Actor::Property::POSITION_Y) == scrolledY);
+  }
+
+  // A pass an unrelated sibling drives arranges the settled ScrollView (its manager is ALWAYS).
+  sibling.SetRequestedX(11.0f);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(sibling.GetProperty<float>(Actor::Property::POSITION_X), 22.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(content.GetProperty<float>(Actor::Property::POSITION_Y) == scrolledY);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 120.0f, TEST_LOCATION);
+
+  // A second scroll settles at its own exact value, so the position is genuinely re-applied
+  // rather than merely frozen.
+  scrollView.ScrollToY(200.0f, false);
+  const float scrolledAgainY = content.GetProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_EQUALS(scrolledAgainY, -200.0f, TEST_LOCATION);
+
+  sibling.SetRequestedX(12.0f);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(sibling.GetProperty<float>(Actor::Property::POSITION_X), 24.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(content.GetProperty<float>(Actor::Property::POSITION_Y) == scrolledAgainY);
   END_TEST;
 }
 
