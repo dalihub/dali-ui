@@ -48,6 +48,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -1060,11 +1061,13 @@ struct AtlasRenderer::Impl
     }
   }
 
-  void UpdateGradient(const Vector2& coordinateSize, const Vector4& bounds)
+  void UpdateGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale)
   {
     const bool coordinateChange = mGradientCoordinateSize != coordinateSize;
     const bool boundsChange     = mGradientBounds != bounds;
-    if(!coordinateChange && !boundsChange)
+    const bool scaleChange      = mGradientUiScale != uiScale && mGradientState.style.units == Dali::Ui::Gradient::Units::USER_SPACE;
+    mGradientUiScale            = uiScale;
+    if(!coordinateChange && !boundsChange && !scaleChange)
     {
       return;
     }
@@ -1076,7 +1079,7 @@ struct AtlasRenderer::Impl
     mGradientBounds             = bounds;
     for(auto& renderer : mGradientRenderers)
     {
-      ApplyGradientFrameProperties(renderer, coordinateChange, boundsChange, boundsSizeChange);
+      ApplyGradientFrameProperties(renderer, coordinateChange, boundsChange, boundsSizeChange || scaleChange);
     }
   }
 
@@ -1213,7 +1216,11 @@ struct AtlasRenderer::Impl
     }
 
     const auto data = Internal::Gradient::ResolveRenderData(
-      mGradientState.style, mGradientBounds, mGradientCoordinateSize);
+      mGradientState.style, mGradientBounds, Internal::ResolveGradientCoordinateSize(mGradientState.style.units, mGradientCoordinateSize, mGradientUiScale));
+    if(!data.enabled)
+    {
+      return;
+    }
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientStartPosition", data.startPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEndPosition", data.endPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialCenter", data.radialCenter);
@@ -1231,7 +1238,11 @@ struct AtlasRenderer::Impl
     }
 
     const auto data = Internal::Gradient::ResolveRenderData(
-      mGradientState.style, mGradientBounds, mGradientCoordinateSize);
+      mGradientState.style, mGradientBounds, Internal::ResolveGradientCoordinateSize(mGradientState.style.units, mGradientCoordinateSize, mGradientUiScale));
+    if(!data.enabled)
+    {
+      return;
+    }
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
     Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
     ApplyGradientGeometryProperties(renderer);
@@ -1268,19 +1279,24 @@ struct AtlasRenderer::Impl
       return;
     }
 
-    ApplyGradientProperties(renderer, mGradientState.style, mGradientBounds);
+    ApplyGradientProperties(renderer, mGradientState.style, mGradientBounds, mGradientUiScale);
   }
 
   void ApplyGradientProperties(Dali::Renderer                   renderer,
                                const Internal::Gradient::Style& style,
-                               const Vector4&                   bounds)
+                               const Vector4&                   bounds,
+                               float                            uiScale = 1.0f)
   {
     if(!renderer || !Internal::Gradient::IsRenderable(style))
     {
       return;
     }
 
-    const auto data = Internal::Gradient::ResolveRenderData(style, bounds, mGradientCoordinateSize);
+    const auto data = Internal::Gradient::ResolveRenderData(style, bounds, Internal::ResolveGradientCoordinateSize(style.units, mGradientCoordinateSize, uiScale));
+    if(!data.enabled)
+    {
+      return;
+    }
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", mGradientCoordinateSize);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", bounds);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
@@ -1875,6 +1891,7 @@ struct AtlasRenderer::Impl
   WeakHandle<Actor>                        mGradientAnimSourceActor;
   Property::Index                          mGradientAnimOffsetIndex{Property::INVALID_INDEX};
   Vector2                                  mGradientCoordinateSize{Vector2::ONE};
+  float                                    mGradientUiScale{1.0f};
   Vector4                                  mGradientBounds{0.0f, 0.0f, 1.0f, 1.0f};
   int                                      mDepth; ///< DepthIndex passed by control when connect to stage
   bool                                     mGradientAnimApplyAlways{false};
@@ -1897,6 +1914,11 @@ Actor AtlasRenderer::Render(Text::ViewInterface& view, Actor textControl, Proper
   mImpl->mGradientRenderers.clear();
   mImpl->mGradientSpanRendererBindings.clear();
   mImpl->mGradientCoordinateSize = view.GetLayoutSize();
+  if(mImpl->mGradientState.IsEnabled())
+  {
+    Ui::View owner          = Ui::View::DownCast(textControl);
+    mImpl->mGradientUiScale = owner ? Ui::GetImpl(owner).GetEffectiveScale() : 1.0f;
+  }
 
   Length numberOfGlyphs = view.GetNumberOfGlyphs();
 
@@ -1945,9 +1967,9 @@ bool AtlasRenderer::SetAtlasGradientState(const Internal::Gradient::AtlasRendere
   return true;
 }
 
-void AtlasRenderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds)
+void AtlasRenderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale)
 {
-  mImpl->UpdateGradient(coordinateSize, bounds);
+  mImpl->UpdateGradient(coordinateSize, bounds, uiScale);
 }
 
 void AtlasRenderer::UpdateAtlasGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds)

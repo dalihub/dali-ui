@@ -10,6 +10,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali.h>
+#include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
@@ -88,7 +89,7 @@ public:
     return renderableActor;
   }
 
-  void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds) override
+  void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale) override
   {
     ++updateAtlasGradientCount;
     lastCoordinateSize = coordinateSize;
@@ -534,5 +535,53 @@ int UtcDaliTextAtlasGradientAnimationConstraintP(void)
   source.SetProperty(offset, 0.75f);
   renderer->SetAtlasGradientAnimApplyAlways(false, true);
   renderer->SetAtlasGradientAnimProperties(Actor(), Property::INVALID_INDEX);
+  END_TEST;
+}
+
+int UtcDaliTextAtlasGradientUiScaleUniformsAndResourcesP(void)
+{
+  UiTestApplication application;
+  AtlasGradient::AtlasResource prepared;
+  PublicGradient::Radial gradient(Vector2(40.0f, 20.0f), 30.0f);
+  gradient.SetUnits(PublicGradient::Units::USER_SPACE);
+  SetStops(gradient);
+  DALI_TEST_CHECK(prepared.Set(gradient));
+  auto controller = Dali::Ui::Text::Controller::New();
+  controller->SetText("Atlas gradient geometry");
+  controller->SetDefaultFontSize(22.0f, Dali::Ui::Text::Controller::PIXEL_SIZE);
+  controller->Relayout(Size(300.0f, 60.0f));
+  auto renderer = Dali::Ui::Text::AtlasRenderer::New();
+  renderer->SetAtlasGradientState(prepared.GetRendererState());
+  float offset = 0.0f;
+  Actor text = renderer->Render(controller->GetView(), Actor::New(), Property::INVALID_INDEX, offset, 0);
+  DALI_TEST_CHECK(text && text.GetChildCount() > 0u);
+  Renderer mesh = text.GetChildAt(0u).GetRendererAt(0u);
+  auto geometry = mesh.GetGeometry();
+  auto shader = mesh.GetShader();
+  auto glyphTexture = mesh.GetTextures().GetTexture(0u);
+  auto lookupTexture = mesh.GetTextures().GetTexture(1u);
+  const Vector2 size(300.0f, 60.0f);
+  const Vector4 bounds(0.0f, 0.0f, 1.0f, 1.0f);
+  for(float scale : {0.5f, 1.0f, 1.25f, 2.0f, 1.0f})
+  {
+    renderer->UpdateAtlasGradient(size, bounds, scale);
+    renderer->UpdateAtlasGradient(size, bounds, scale);
+    const auto center = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter"));
+    const auto radial = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale"));
+    DALI_TEST_EQUALS(center.x * size.x, 40.0f * scale, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(center.y * size.y, 20.0f * scale, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(size.x / radial.x, 30.0f * scale, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientLayoutSize")), size, TEST_LOCATION);
+    DALI_TEST_CHECK(mesh.GetGeometry() == geometry && mesh.GetShader() == shader);
+    DALI_TEST_CHECK(mesh.GetTextures().GetTexture(0u) == glyphTexture && mesh.GetTextures().GetTexture(1u) == lookupTexture);
+    DALI_TEST_EQUALS(prepared.GetLookupGenerationCount(), 1u, TEST_LOCATION);
+  }
+  const auto center = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter"));
+  const auto radial = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale"));
+  renderer->UpdateAtlasGradient(size, bounds, std::numeric_limits<float>::min());
+  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter")), center, TEST_LOCATION);
+  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale")), radial, TEST_LOCATION);
+  renderer->UpdateAtlasGradient(size, bounds, 1.0f);
+  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale")), radial, TEST_LOCATION);
   END_TEST;
 }

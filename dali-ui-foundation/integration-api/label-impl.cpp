@@ -2422,6 +2422,16 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   const float effectiveScale = GetEffectiveScale();
   if(SetTextUiScale(effectiveScale))
   {
+    if(mController->IsAsyncRendering())
+    {
+      if(mVisual && Internal::TextVisual::UsesUserSpaceGradient(mVisual))
+      {
+        Internal::TextVisual::CancelAsyncRender(mVisual);
+        mIsManualRenderInProgress = false;
+        mIsManualRenderFinished   = false;
+        RequestAsyncRender();
+      }
+    }
     mController->InvalidateFontData();
     RequestRendererUpdate();
     RequestSyncMarqueeRestart();
@@ -2865,7 +2875,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                                                                            textGradientUseTextureCoordinates);
         compositionRequest.baseBoundsResolved               = true;
         compositionRequest.baseBounds.bounds                = textGradientBounds;
-        compositionRequest.baseBounds.coordinateSize        = textGradientCoordinateSize;
+        compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, GetEffectiveScale());
         compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
       }
 
@@ -2878,7 +2888,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                                                                               textGradientOverlayUseTextureCoordinates);
         compositionRequest.overlayBoundsResolved               = true;
         compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
-        compositionRequest.overlayBounds.coordinateSize        = textGradientOverlayCoordinateSize;
+        compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, GetEffectiveScale());
         compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
       }
 
@@ -3670,7 +3680,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                                                              textGradientUseTextureCoordinates);
           compositionRequest.baseBoundsResolved               = true;
           compositionRequest.baseBounds.bounds                = textGradientBounds;
-          compositionRequest.baseBounds.coordinateSize        = textGradientCoordinateSize;
+          compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, GetEffectiveScale());
           compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
         }
 
@@ -3683,7 +3693,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                                                                 textGradientOverlayUseTextureCoordinates);
           compositionRequest.overlayBoundsResolved               = true;
           compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
-          compositionRequest.overlayBounds.coordinateSize        = textGradientOverlayCoordinateSize;
+          compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, GetEffectiveScale());
           compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
         }
       }

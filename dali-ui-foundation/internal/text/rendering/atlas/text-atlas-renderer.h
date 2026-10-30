@@ -46,7 +46,7 @@ public:
                        float& alignmentOffset, int depth) override;
 
   bool SetAtlasGradientState(const Internal::Gradient::AtlasRendererState& state) override;
-  void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds) override;
+  void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale = 1.0f) override;
   void UpdateAtlasGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds) override;
   void SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex) override;
   void SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint = false) override;

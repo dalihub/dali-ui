@@ -177,7 +177,8 @@ struct AsyncTextParameters
     isTextGradientRequested{false},
     isTextGradientOverlayRequested{false},
     isTextRevealEnabled{false},
-    isTextRevealBlurRequested{false}
+    isTextRevealBlurRequested{false},
+    hasUserSpaceGradient{false}
   {
   }
 
@@ -319,6 +320,7 @@ struct AsyncTextParameters
   bool isTextGradientOverlayRequested : 1; ///< Whether async render may generate TextGradientOverlay-only payloads.
   bool isTextRevealEnabled : 1;            ///< Whether the worker should produce reveal metadata.
   bool isTextRevealBlurRequested : 1;      ///< Blur requested; worker checks kernel and raster capabilities.
+  bool hasUserSpaceGradient : 1;           ///< Whether publication depends on the captured decoration UI scale.
 };
 
 struct AsyncTextRenderInfo

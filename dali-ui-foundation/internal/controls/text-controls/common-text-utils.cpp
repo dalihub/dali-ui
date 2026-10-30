@@ -103,7 +103,7 @@ void UpdateAtlasGradient(Ui::Text::RendererPtr                                re
       layoutSize, model->GetLines(), model->GetNumberOfLines(), minLineOffset);
   }
 
-  renderer->UpdateAtlasGradient(layoutSize, bounds);
+  renderer->UpdateAtlasGradient(layoutSize, bounds, controller->GetUiScale());
 }
 } // namespace
 

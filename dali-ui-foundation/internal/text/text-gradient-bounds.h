@@ -41,6 +41,26 @@ namespace Internal
 {
 
 /**
+ * @brief Resolves the coordinate size used to normalize authored gradient geometry.
+ *
+ * Physical layout and texture sizes remain unchanged. OBJECT_BOUNDING_BOX
+ * keeps its normalized coordinates independently of the owning View's scale.
+ *
+ * @param[in] units The authored gradient units.
+ * @param[in] displaySize The displayed coordinate space size.
+ * @param[in] uiScale The owning View's effective UI scale.
+ * @return The coordinate size used only for gradient geometry preparation.
+ */
+inline Vector2 ResolveGradientCoordinateSize(Dali::Ui::Gradient::Units units,
+                                             const Vector2&            displaySize,
+                                             float                     uiScale)
+{
+  return units == Dali::Ui::Gradient::Units::USER_SPACE && uiScale != 1.0f
+           ? displaySize / uiScale
+           : displaySize;
+}
+
+/**
  * @brief Returns the selected gradient bounds size in target-space pixels.
  *
  * @param[in] bounds Normalized gradient bounds in the target coordinate space.

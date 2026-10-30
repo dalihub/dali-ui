@@ -302,6 +302,17 @@ public:
   };
 
   /**
+   * @brief Checks whether the prepared gradient styles use logical UI coordinates.
+   *
+   * @param[in] visual The text visual owning the prepared style snapshots.
+   * @return True if a renderable global or overlay gradient uses USER_SPACE.
+   */
+  static bool UsesUserSpaceGradient(Ui::Integration::Visual::Base visual)
+  {
+    return GetVisualObject(visual).UsesUserSpaceGradient();
+  }
+
+  /**
    * @brief Store the TextGradient style snapshot for a future gradient-enabled render path.
    * @param[in] visual The text visual.
    * @param[in] style The TextGradient style snapshot.
@@ -846,14 +857,30 @@ private:
   Vector4 ResolveTextGradientOverlayBounds(const Vector2& textureSize, const Vector4& contentBounds) const;
 
   /**
-   * @brief Register TextGradient uniforms on a gradient-enabled renderer.
+   * @brief Checks prepared gradient units without copying authored stop arrays.
+   * @return True when gradient geometry depends on the owning View's UI scale.
    */
-  void ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds);
+  bool UsesUserSpaceGradient() const;
+
+  /**
+   * @brief Register TextGradient uniforms on a gradient-enabled renderer.
+   *
+   * @param[in] renderer The renderer receiving the gradient uniforms.
+   * @param[in] textureSize The displayed texture size, before world transforms.
+   * @param[in] textBounds The selected normalized bounds.
+   * @param[in] uiScale The owner scale, or the scale captured by the async request.
+   */
+  void ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale);
 
   /**
    * @brief Register TextGradientOverlay uniforms on an overlay-enabled renderer.
+   *
+   * @param[in] renderer The renderer receiving the gradient uniforms.
+   * @param[in] textureSize The displayed texture size, before world transforms.
+   * @param[in] textBounds The selected normalized bounds.
+   * @param[in] uiScale The owner scale, or the scale captured by the async request.
    */
-  void ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds);
+  void ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale);
 
   /**
    * Get the texture of the text for rendering. It will use cached shader feature for text visual.

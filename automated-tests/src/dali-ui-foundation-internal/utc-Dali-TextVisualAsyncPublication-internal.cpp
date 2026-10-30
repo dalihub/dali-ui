@@ -21,6 +21,8 @@
 #include <dali/integration-api/pixel-data-integ.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <cstring>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <utility>
 
 // INTERNAL INCLUDES
@@ -1912,5 +1914,57 @@ int UtcDaliTextDecorationScaleAsyncSupersedeP(void)
   DALI_TEST_CHECK(actual.bufferSize == expected.bufferSize &&
                   std::memcmp(actual.buffer, expected.buffer, actual.bufferSize) == 0);
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}
+
+int UtcDaliTextVisualUserSpaceScaleAllocationReentryP(void)
+{
+  UiTestApplication application;
+  const auto originalScale = Ui::UiScaleManager::Get().GetScale();
+  const auto originalScalable = Ui::UiScaleManager::Get().IsScalable();
+  Ui::UiScaleManager::Get().SetScalable(true);
+  Ui::UiScaleManager::Get().SetScale(1.0f);
+  auto rendered = CreateTextVisual(application);
+  rendered.view.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
+  Ui::Gradient::Linear gradient(Vector2::ZERO, Vector2(100.0f, 0.0f));
+  gradient.SetUnits(Ui::Gradient::Units::USER_SPACE);
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, UiText::Internal::Gradient::CreateStyle(gradient));
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+  auto parameters = MakeParameters("Before allocation reentry");
+  parameters.isMarqueeEnabled = false;
+  parameters.isTextGradientRequested = true;
+  parameters.hasUserSpaceGradient = true;
+  auto loader = UiText::AsyncTextLoader::New();
+  PublishDirect(rendered, parameters, loader.RenderText(parameters, false, Size::ZERO));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+  auto oldRenderer = rendered.view.GetRendererAt(0u);
+  auto oldTexture = oldRenderer.GetTextures().GetTexture(0u);
+  parameters.text = "New text must not replace the previous texture during allocation reentry";
+  // Force a new shader variant: texture/constraint allocation does not emit
+  // ObjectCreated, whereas shader allocation is an actual application callback.
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.visual, UiText::Internal::Gradient::CreateStyle(gradient));
+  parameters.isTextGradientOverlayRequested = true;
+  const auto candidate = loader.RenderText(parameters, false, Size::ZERO);
+  bool fired = false;
+  ConnectionTracker tracker;
+  application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle object)
+  {
+    if(!fired && Shader::DownCast(object))
+    {
+      fired = true;
+      Ui::UiScaleManager::Get().SetScale(2.0f);
+    }
+  });
+  PublishDirect(rendered, parameters, candidate);
+  DALI_TEST_CHECK(fired);
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(rendered.view.GetRendererAt(0u) == oldRenderer);
+  DALI_TEST_CHECK(oldRenderer.GetTextures().GetTexture(0u) == oldTexture);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  rendered.view.Unparent();
+  Ui::UiScaleManager::Get().SetScale(originalScale);
+  Ui::UiScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
