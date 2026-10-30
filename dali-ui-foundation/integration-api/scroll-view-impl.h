@@ -797,7 +797,7 @@ private:
   // Focus-scroll behaviour
   bool             mScrollOnFocus;         ///< Auto-scroll to child when it gains focus
   ScrollToPosition mFocusScrollToPosition; ///< Target position for focus-triggered scroll
-  float            mFocusScrollPeek;       ///< Extra scroll distance past the item edge on focus (MakeVisible only)
+  float            mFocusScrollPeek;       ///< Extra scroll distance past the item edge on focus (MakeVisible only) (natural units)
 
   // Key-scroll behaviour
   bool           mKeyScrollEnabled;   ///< Whether key-based step scrolling is active

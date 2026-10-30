@@ -2833,3 +2833,40 @@ int UtcDaliScrollViewKeyScrollStepFollowsScaleP(void)
   FocusManager::Get().ClearFocus();
   END_TEST;
 }
+
+// The focus scroll peek is a design length: at a UI scale of 2 a peek of 12 is 24 rendered pixels.
+// A 200 x 200 view (400 rendered) over 700 of content makes an item at 600 (1200 rendered, 80 tall)
+// visible at the end edge: 1200 - (400 - 80) = 880, plus the peek 24 = 904.
+// Fails before this change: the peek added 12 (892).
+int UtcDaliScrollViewFocusScrollPeekFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetFocusScrollPeek(12.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(700.0f);
+  View item = View::New();
+  item.SetRequestedWidth(40.0f);
+  item.SetRequestedHeight(40.0f);
+  item.SetRequestedY(600.0f);
+  content.Add(item);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(scrollView.GetFocusScrollPeek(), 12.0f, 0.001f, TEST_LOCATION);
+  scrollView.ScrollTo(item, false, ScrollToPosition::MakeVisible);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 904.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -904.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
