@@ -2003,6 +2003,8 @@ void ViewDataImpl::RelayoutDefault(const Vector2& size, RelayoutContainer& conta
      (mPadding.bottom != 0) || (mMargin.start != 0) || (mMargin.end != 0) ||
      (mMargin.top != 0) || (mMargin.bottom != 0))
   {
+    // Padding and margin are natural units; the relayout size is rendered.
+    const float s = GetEffectiveLayoutScale();
     for(unsigned int i = 0, numChildren = mViewImpl.Self().GetChildCount(); i < numChildren; ++i)
     {
       Actor   child = mViewImpl.Self().GetChildAt(i);
@@ -2017,12 +2019,12 @@ void ViewDataImpl::RelayoutDefault(const Vector2& size, RelayoutContainer& conta
         std::swap(padding.start, padding.end);
       }
 
-      newChildSize.width  = size.width - (padding.start + padding.end);
-      newChildSize.height = size.height - (padding.top + padding.bottom);
+      newChildSize.width  = size.width - (padding.start + padding.end) * s;
+      newChildSize.height = size.height - (padding.top + padding.bottom) * s;
 
       Vector2 childOffset(0.f, 0.f);
-      childOffset.x += (mMargin.start + padding.start);
-      childOffset.y += (mMargin.top + padding.top);
+      childOffset.x += (mMargin.start + padding.start) * s;
+      childOffset.y += (mMargin.top + padding.top) * s;
 
       child.SetProperty(Actor::Property::POSITION, Vector2(childOffset.x, childOffset.y));
 

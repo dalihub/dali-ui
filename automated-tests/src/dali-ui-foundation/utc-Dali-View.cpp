@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
@@ -12126,6 +12127,26 @@ protected:
 
 Dali::TypeRegistration onInitializeBackgroundViewTypeReg(
   typeid(OnInitializeBackgroundViewImpl), typeid(ViewImpl), nullptr);
+
+// A SizeNegotiatedViewImpl subclass that keeps the base OnRelayout, whose ViewDataImpl::RelayoutDefault
+// places the actor children of a parentless view.
+class LegacyRelayoutViewImpl : public Dali::Ui::Integration::SizeNegotiatedViewImpl
+{
+public:
+  static IntrusivePtr<LegacyRelayoutViewImpl> New()
+  {
+    return IntrusivePtr<LegacyRelayoutViewImpl>(new LegacyRelayoutViewImpl());
+  }
+
+protected:
+  LegacyRelayoutViewImpl()
+  : SizeNegotiatedViewImpl()
+  {
+  }
+};
+
+Dali::TypeRegistration legacyRelayoutViewTypeReg(
+  typeid(LegacyRelayoutViewImpl), typeid(Dali::Ui::View), nullptr);
 } // namespace
 
 int UtcDaliViewImplConstructorSetBackgroundColorIgnoredP(void)
@@ -12308,5 +12329,34 @@ int UtcDaliViewRegistrationFacadeNamed(void)
   BaseHandle empty = typeInfo.CreateInstance();
   DALI_TEST_CHECK(!empty);
 
+  END_TEST;
+}
+
+int UtcDaliViewLegacyRelayoutScalesPaddingAndMarginP(void)
+{
+  UiTestApplication application;
+  tet_infoline("The legacy relayout offsets actor children by the scaled padding and margin");
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  IntrusivePtr<LegacyRelayoutViewImpl> impl = LegacyRelayoutViewImpl::New();
+  View                                 view(*impl);
+  impl->Initialize();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(50.0f);
+  view.SetPadding(Insets(10.0f, 6.0f, 5.0f, 3.0f));
+  view.SetMargin(Insets(3.0f, 0.0f, 4.0f, 0.0f));
+
+  Actor child = Actor::New();
+  IntegrationView::AddActorChild(view, child); // a raw Actor: not laid out, placed by RelayoutDefault
+  application.GetWindow().Add(view);
+  SettleLayout(application);
+
+  // ((3 + 10) * 2, (4 + 5) * 2); the unscaled path gave (13, 9).
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 26.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 18.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
