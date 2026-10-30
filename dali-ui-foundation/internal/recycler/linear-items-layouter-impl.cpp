@@ -325,10 +325,11 @@ bool LinearItemsLayouterImpl::MeasureSlot(Integration::Recycler& recycler, uint3
   const bool      horizontal = (mOrientation == Orientation::HORIZONTAL);
 
   // Main axis = X with start/end offsets for a horizontal list, Y with top/bottom otherwise.
+  // The cross inset is in natural units; the decoration offsets arrive in rendered pixels.
   slot.leading              = horizontal ? decoOffs.start : decoOffs.top;
   slot.trailing             = horizontal ? decoOffs.end : decoOffs.bottom;
-  slot.crossStart           = crossInset.leadingCrossOffset + (horizontal ? decoOffs.top : decoOffs.start);
-  const float trailingCross = crossInset.trailingCrossOffset + (horizontal ? decoOffs.bottom : decoOffs.end);
+  slot.crossStart           = crossInset.leadingCrossOffset * mEffectiveScale + (horizontal ? decoOffs.top : decoOffs.start);
+  const float trailingCross = crossInset.trailingCrossOffset * mEffectiveScale + (horizontal ? decoOffs.bottom : decoOffs.end);
   slot.cross                = std::max(0.0f, mCrossExtent - slot.crossStart - trailingCross);
 
   // Every item is laid out at slot.cross: its cross axis is measured exactly there, the scroll axis

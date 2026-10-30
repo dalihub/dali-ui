@@ -49,7 +49,7 @@ class DALI_UI_API LinearItemsLayouterImpl : public Integration::ItemsLayouterImp
 {
 public:
   /**
-   * @brief Per-item cross-axis inset returned by GetItemCrossInset.
+   * @brief Per-item cross-axis inset returned by GetItemCrossInset, in natural units.
    *
    * For a vertical list: leadingCrossOffset = left margin, trailingCrossOffset = right margin.
    * For a horizontal list: leadingCrossOffset = top margin, trailingCrossOffset = bottom margin.
@@ -108,6 +108,7 @@ public:
    * implementation returns zero inset (no offset). Override in subclasses
    * to apply per-item horizontal (vertical list) or vertical (horizontal list)
    * margins without modifying LayoutChunk directly.
+   * The inset is in natural units: the layouter multiplies it by GetEffectiveLayoutScale().
    */
   virtual ItemInset GetItemCrossInset(uint32_t position) const;
 

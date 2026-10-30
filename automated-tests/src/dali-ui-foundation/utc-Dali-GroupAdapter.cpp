@@ -462,3 +462,56 @@ int UtcDaliGroupBodyDecorationMarginsFollowScaleP(void)
   DALI_TEST_EQUALS(scroller.GetChildCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
+
+// GroupLinearItemsLayouter body margins are natural units multiplied by the RecyclerView's effective
+// scale. At a UI scale of 2 a 200 x 400 list is 400 wide and margins (10, 20) inset a body row by
+// (20, 40): its slot is 340 wide at x 20, and its view is arranged there. A header row keeps the full
+// width. The getters return the values set. Fails before this change: x 10, 370 wide.
+int UtcDaliGroupLinearItemsLayouterBodyMarginFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  GroupAdapter group = GroupAdapter::New();
+  group.SetDataSource(std::make_shared<TestGroupDataSource>());
+  ItemAdapter inner = ItemAdapter::New();
+  View        firstBody;
+  inner.CreateViewHolderSignal().Connect(&application, [&firstBody](ItemViewHolder& holder)
+  {
+    View body = View::New();
+    body.SetRequestedHeight(40.0f);
+    holder.view = body;
+    if(holder.position == 0u)
+    {
+      firstBody = body;
+    }
+  });
+  group.SetInnerAdapter(inner);
+
+  GroupLinearItemsLayouter layouter = GroupLinearItemsLayouter::New();
+  layouter.SetGroupAdapter(group);
+  layouter.SetBodyHorizontalMargin(10.0f, 20.0f);
+
+  RecyclerView recycler = RecyclerView::New();
+  recycler.SetRequestedWidth(200.0f);
+  recycler.SetRequestedHeight(400.0f);
+  application.GetWindow().Add(recycler);
+  recycler.SetItemsLayouter(layouter);
+  recycler.SetAdapter(group.GetAdapter());
+  application.SendNotification();
+  application.SendNotification();
+
+  DALI_TEST_EQUALS(layouter.GetBodyMarginLeft(), 10.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(layouter.GetBodyMarginRight(), 20.0f, 0.001f, TEST_LOCATION);
+  const LayoutRect header = layouter.GetItemBounds(0u, 400.0f);
+  const LayoutRect body   = layouter.GetItemBounds(1u, 400.0f);
+  DALI_TEST_EQUALS(header.x, 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(header.width, 400.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(body.x, 20.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(body.width, 340.0f, 0.001f, TEST_LOCATION);
+
+  DALI_TEST_CHECK(firstBody);
+  DALI_TEST_EQUALS(firstBody.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstBody.GetProperty<float>(Actor::Property::SIZE_WIDTH), 340.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
