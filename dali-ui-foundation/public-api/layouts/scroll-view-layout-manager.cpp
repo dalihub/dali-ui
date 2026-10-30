@@ -23,7 +23,6 @@
 #include <limits>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
@@ -69,11 +68,12 @@ ScrollViewLayoutManager::ScrollViewLayoutManager()
   // This producer must execute on every arrange pass.
   //
   // Arrange() below takes the scrolled child's CURRENT ACTOR POSITION as that child's
-  // arrange input (childBounds.x = child.GetPositionX() * s, and the same for y). That
+  // arrange input (childBounds.x = child.GetPositionX(), and the same for y). That
   // read is exactly how a scrolled content view survives a layout pass: ScrollView
   // drives scrolling through Ui::Extension::SetPositionX/Y on its content
   // (ScrollViewImpl::ApplyScrollPosition), which writes the actor property WITHOUT
-  // invalidating layout, and this manager reads it back on the next pass.
+  // invalidating layout, and this manager reads it back on the next pass -- in the
+  // same units it was written, which is why no scale factor appears here.
   //
   // ArrangePolicy::IF_CHANGED would let a settled ScrollView serve its children from the
   // arrange cache and re-apply the bounds published BEFORE the scroll, so the content
@@ -147,7 +147,6 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
   Integration::ScrollViewImpl*  scrollImpl = dynamic_cast<Integration::ScrollViewImpl*>(view);
   const uint32_t                count      = GetChildViewCount(view);
-  float                         s          = Ui::Extension::View::GetEffectiveLayoutScale(*view);
   const Internal::ViewDataImpl& viewData   = Internal::ViewDataImpl::Get(*view);
   const bool                    modeAware  = (viewData.GetMeasureModeParent() == Internal::MeasureModeParent::SCROLL);
 
@@ -168,8 +167,13 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
     MeasuredSize childMeasured = childImpl.GetMeasuredSize();
     LayoutRect   childBounds;
-    childBounds.x      = child.GetPositionX() * s;
-    childBounds.y      = child.GetPositionY() * s;
+    // The actor position is read back RAW: it is already in rendered pixels, written by
+    // ScrollViewImpl::ApplyScrollPosition through Ui::Extension::View::SetPositionX/Y (a bare
+    // Actor::SetPositionX) in the units Arrange applies. Multiplying it by the effective scale
+    // moved the content by that factor on every pass at a scale other than 1, and nothing
+    // recomputed it: SetScrollableWidth/Height ignore an unchanged extent.
+    childBounds.x      = child.GetPositionX();
+    childBounds.y      = child.GetPositionY();
     childBounds.width  = childMeasured.width;
     childBounds.height = childMeasured.height;
 
