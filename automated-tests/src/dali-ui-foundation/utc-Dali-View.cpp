@@ -7933,6 +7933,120 @@ int UtcDaliViewRemoveThenWindowAddRelayoutsSubtreeAtNewScaleP(void)
   END_TEST;
 }
 
+// RequestedX/Y of a child in a plain View (no LayoutManager) are the child's natural units,
+// scaled by the CHILD's effective scale like its margin -- the STANDALONE and AbsoluteLayout
+// convention -- and the WRAP_CONTENT container measures the same extent.
+int UtcDaliViewRequestedPositionUsesDisabledChildScaleP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  View parent = View::New(); // WRAP_CONTENT, scale 2
+
+  View child = View::New(); // scale 1
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::DISABLED);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetRequestedX(100.0f);
+  child.SetRequestedY(20.0f);
+  child.SetMargin(Insets(10.0f, 0.0f, 5.0f, 0.0f));
+  parent.Add(child);
+
+  View twin = View::New(); // the same request as a STANDALONE child
+  twin.SetLayoutMode(LayoutMode::STANDALONE);
+  Ui::Extension::View::SetUiScalePolicy(twin, Ui::Extension::UiScalePolicy::DISABLED);
+  twin.SetRequestedWidth(40.0f);
+  twin.SetRequestedHeight(30.0f);
+  twin.SetRequestedX(100.0f);
+  twin.SetRequestedY(20.0f);
+  twin.SetMargin(Insets(10.0f, 0.0f, 5.0f, 0.0f));
+  parent.Add(twin);
+
+  window.Add(parent);
+  SettleLayout(application);
+
+  // x = 10 * 1 + 100 * 1 = 110, y = 5 * 1 + 20 * 1 = 25 (the container's scale gave 210, 45).
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 110.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 25.0f, TEST_LOCATION);
+  // STANDALONE: (100 + 10) * 1, (20 + 5) * 1.
+  DALI_TEST_EQUALS(twin.GetProperty<float>(Actor::Property::POSITION_X), 110.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(twin.GetProperty<float>(Actor::Property::POSITION_Y), 25.0f, TEST_LOCATION);
+  // (100 * 1/2 + 10 / 2 + 40 / 2) * 2 = 150 = 110 + 40; (20 * 1/2 + 5 / 2 + 30 / 2) * 2 = 55 = 25 + 30.
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 150.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 55.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
+int UtcDaliViewRequestedPositionUsesEnabledChildScaleP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  View parent = View::New(); // WRAP_CONTENT, scale 1
+  Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::DISABLED);
+
+  View child = View::New(); // scale 2, 80 x 60 rendered
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::ENABLED);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetRequestedX(100.0f);
+  child.SetRequestedY(20.0f);
+  child.SetMargin(Insets(10.0f, 0.0f, 5.0f, 0.0f));
+  parent.Add(child);
+
+  window.Add(parent);
+  SettleLayout(application);
+
+  // x = 10 * 2 + 100 * 2 = 220, y = 5 * 2 + 20 * 2 = 50 (the container's scale gave 120, 30).
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 220.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 50.0f, TEST_LOCATION);
+  // 100 * 2 + 10 * 2 + 80 = 300 = 220 + 80; 20 * 2 + 5 * 2 + 60 = 110 = 50 + 60.
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 300.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 110.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
+int UtcDaliViewRequestedPositionInheritChildUnchangedAtScaleP(void)
+{
+  // An INHERIT child has its container's scale, so nothing moves.
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  View parent = View::New();
+  View child  = View::New();
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetRequestedX(30.0f);
+  child.SetRequestedY(10.0f);
+  child.SetMargin(Insets(10.0f, 0.0f, 5.0f, 0.0f));
+  parent.Add(child);
+
+  window.Add(parent);
+  SettleLayout(application);
+
+  // x = 10 * 2 + 30 * 2 = 80, y = 5 * 2 + 10 * 2 = 30; (30 + 10 + 40) * 2 = 160, (10 + 5 + 30) * 2 = 90.
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 160.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 90.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
 // Phase 3d (off-scene root gap). A layout ROOT removed from the Window -- not from
 // a View parent, so no ViewDataImpl::OnChildRemoved fires -- is no longer tracked
 // by LayoutScaleManager, so a global SetUiScale() made while it is detached invalidates

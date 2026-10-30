@@ -836,8 +836,10 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    *
    * This value is the layout input. The parent's Arrange pass uses it
    * (offset by the parent's left padding and this view's left margin) to
-   * compute the final rendered position. The Actor::Property::POSITION_X
-   * property is updated only by the next Arrange.
+   * compute the final rendered position. Like the margin, it is in natural
+   * units: the layout multiplies it by this view's own effective scale.
+   * The Actor::Property::POSITION_X property is updated only by the next
+   * Arrange.
    *
    * To drive the rendered position without affecting the layout request
    * (e.g. for scrolling or animation that should not feed back into
