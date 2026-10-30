@@ -1613,10 +1613,14 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
       }
       MeasuredSize childSize = ViewDataImpl::Get(childImpl).Measure(childWidthConstraint, childHeightConstraint, modeW, modeH, check);
 
+      // The requested position is in the CHILD's natural units: ArrangeDefault scales it by
+      // childScale, like the child's margin. In this view's natural units that is childScale / s
+      // of the value -- exactly 1 for a child that inherits both scale terms (UiScalePolicy and
+      // WindowScalePolicy INHERIT), whose scale is this view's own.
       float childNatW  = (s > 0.0f) ? childSize.width / s : childSize.width;
       float childNatH  = (s > 0.0f) ? childSize.height / s : childSize.height;
-      float childX     = childImpl.GetRequestedX();
-      float childY     = childImpl.GetRequestedY();
+      float childX     = (s > 0.0f) ? childImpl.GetRequestedX() * (childScale / s) : childImpl.GetRequestedX();
+      float childY     = (s > 0.0f) ? childImpl.GetRequestedY() * (childScale / s) : childImpl.GetRequestedY();
       float natMarginW = (s > 0.0f) ? marginW / s : marginW;
       float natMarginH = (s > 0.0f) ? marginH / s : marginH;
       maxRight         = std::max(maxRight, childX + natMarginW + childNatW);
@@ -1867,8 +1871,9 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
       {
         childH = std::max(0.0f, bounds.height - visPadTop - visPadBottom - visMarginH);
       }
-      float childX = visPadLeft + visMarginStart + childImpl.GetRequestedX() * s;
-      float childY = visPadTop + visMarginTop + childImpl.GetRequestedY() * s;
+      // The requested position is the child's own, scaled like its margin.
+      float childX = visPadLeft + visMarginStart + childImpl.GetRequestedX() * childScale;
+      float childY = visPadTop + visMarginTop + childImpl.GetRequestedY() * childScale;
 
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
