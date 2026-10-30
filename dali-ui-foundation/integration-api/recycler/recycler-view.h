@@ -101,6 +101,7 @@ public:
   float GetKeyScrollStep() const;
 
   // Focus-scroll configuration — scroll to make focused item visible.
+  // The peek is in natural units, multiplied by this view's effective scale.
   void  SetScrollOnFocus(bool enable);
   bool  GetScrollOnFocus() const;
   void  SetFocusScrollPeek(float peek);

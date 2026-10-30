@@ -2890,3 +2890,26 @@ int UtcDaliRecyclerViewKeyScrollStepFollowsScaleP(void)
   FocusManager::Get().ClearFocus();
   END_TEST;
 }
+
+// The focus scroll peek is a design length: at a UI scale of 2 a peek of 10 is 20 rendered pixels.
+// Item 10 spans 1000..1100 rendered under an 800 viewport, so making it visible scrolls to
+// 1100 + 20 - 800 = 320. Fails before this change: the peek added 10 (310).
+int UtcDaliRecyclerViewFocusScrollPeekFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter         adapter  = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView        recycler = BuildRecycler(application, window, adapter, layouter);
+  recycler.SetFocusScrollPeek(10.0f);
+  DALI_TEST_EQUALS(recycler.GetFocusScrollPeek(), 10.0f, 0.001f, TEST_LOCATION);
+
+  auto& impl = GetRecyclerImpl(recycler);
+  DALI_TEST_CHECK(impl.FindActiveView(10u));
+  impl.ScrollToItemMakeVisible(10u, false);
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 320.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
