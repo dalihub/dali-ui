@@ -186,7 +186,7 @@ void ArcVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 void ArcVisual::OnSetTransform()
 {
   Vector2 visualSize = mImpl->GetTransformVisualSize(mImpl->mControlSize);
-  mRadius            = (std::min(visualSize.width, visualSize.height) - mThickness) / 2.0f;
+  mRadius            = (std::min(visualSize.width, visualSize.height) - mThickness * mImpl->mViewEffectiveScale) / 2.0f;
 
   if(mImpl->mRenderer)
   {
