@@ -57,7 +57,7 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_SCROLLVIEW");
 #endif
 
-constexpr float WHEEL_SCROLL_STEP   = 120.0f; ///< Pixels scrolled per wheel notch
+constexpr float WHEEL_SCROLL_STEP   = 120.0f; ///< Content distance per wheel notch, in natural units
 constexpr float WHEEL_ANIM_SEC      = 0.2f;   ///< Duration of wheel scroll animation (seconds)
 constexpr float KEY_SCROLL_ANIM_SEC = 0.25f;  ///< Duration of key step-scroll animation (seconds)
 
@@ -1696,6 +1696,9 @@ bool ScrollViewImpl::OnWheelEvent(const Dali::WheelEvent& event)
   const bool canV = CanScrollVertically(mScrollDirection);
   const bool canH = CanScrollHorizontally(mScrollDirection);
 
+  // A notch scrolls a fixed distance of content: natural units, multiplied by the effective scale.
+  const float wheelStep = WHEEL_SCROLL_STEP * Ui::Extension::View::GetEffectiveLayoutScale(*this);
+
   float stepX = 0.0f;
   float stepY = 0.0f;
 
@@ -1703,19 +1706,19 @@ bool ScrollViewImpl::OnWheelEvent(const Dali::WheelEvent& event)
   {
     if(canV)
     {
-      stepY = delta * WHEEL_SCROLL_STEP;
+      stepY = delta * wheelStep;
     }
     else if(canH)
     {
       // Redirect vertical wheel to horizontal axis when only horizontal scroll is available.
-      stepX = delta * WHEEL_SCROLL_STEP;
+      stepX = delta * wheelStep;
     }
   }
   else // hwDirection == 1
   {
     if(canH)
     {
-      stepX = delta * WHEEL_SCROLL_STEP;
+      stepX = delta * wheelStep;
     }
   }
 

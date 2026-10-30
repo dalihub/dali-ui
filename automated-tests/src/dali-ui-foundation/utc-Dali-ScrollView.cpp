@@ -2870,3 +2870,32 @@ int UtcDaliScrollViewFocusScrollPeekFollowsScaleP(void)
   DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -904.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
+
+// A wheel notch scrolls 120 natural units of content: 240 rendered pixels at a UI scale of 2.
+// Fails before this change: the notch scrolled 120.
+int UtcDaliScrollViewWheelStepFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  auto&      impl  = GetScrollImpl(scrollView);
+  WheelEvent wheel = WheelEvent::New(WheelEvent::MOUSE_WHEEL, 0, 0u, Vector2(50.0f, 50.0f), 1, 100u);
+  DALI_TEST_CHECK(impl.OnWheelEvent(wheel));
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 240.0f, 0.001f, TEST_LOCATION);
+  impl.CancelScrollAnimation();
+  END_TEST;
+}
