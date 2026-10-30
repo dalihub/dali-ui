@@ -1302,29 +1302,31 @@ bool ScrollViewImpl::IsAtScrollBoundary(FocusDirection direction) const
 
 void ScrollViewImpl::TriggerKeyEdgeFeedback(FocusDirection direction)
 {
-  // velocity chosen so |vel| * ABSORB_FACTOR (~0.05) ≈ 30 px displacement.
+  // A synthetic velocity: |vel| * ABSORB_FACTOR (~0.05) ≈ a 30-unit bump, a design length that
+  // follows this view's effective scale like the content it moves.
   constexpr float KEY_ABSORB_VEL = 600.0f;
+  const float     velocity       = KEY_ABSORB_VEL * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   switch(direction)
   {
     case FocusDirection::UP:
     case FocusDirection::PAGE_UP:
       if(mStartEdgeEffect)
-        mStartEdgeEffect.OnAbsorb(KEY_ABSORB_VEL);
+        mStartEdgeEffect.OnAbsorb(velocity);
       break;
     case FocusDirection::DOWN:
     case FocusDirection::PAGE_DOWN:
       if(mEndEdgeEffect)
-        mEndEdgeEffect.OnAbsorb(-KEY_ABSORB_VEL);
+        mEndEdgeEffect.OnAbsorb(-velocity);
       break;
     case FocusDirection::LEFT:
     {
-      if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(KEY_ABSORB_VEL);
+      if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(velocity);
       break;
     }
     case FocusDirection::RIGHT:
     {
-      if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-KEY_ABSORB_VEL);
+      if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-velocity);
       break;
     }
     default:

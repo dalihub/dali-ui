@@ -2922,3 +2922,30 @@ int UtcDaliBounceEdgeEffectPullLimitFollowsScaleP(void)
   DALI_TEST_EQUALS(source.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
+
+// The keyboard edge bump is a design length expressed as a synthetic absorb velocity: at a UI scale
+// of 2 it is 1200 instead of 600 (a 60 rendered pixel bump with the built-in effect instead of 30).
+// Fails before this change: the effects absorbed +-600.
+int UtcDaliScrollViewKeyEdgeFeedbackFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  EdgeEffect start      = EdgeEffect::New();
+  EdgeEffect end        = EdgeEffect::New();
+  scrollView.SetStartEdgeEffect(start);
+  scrollView.SetEndEdgeEffect(end);
+
+  float startVelocity = 0.0f;
+  float endVelocity   = 0.0f;
+  start.AbsorbSignal().Connect(&application, [&startVelocity](float velocity) { startVelocity = velocity; });
+  end.AbsorbSignal().Connect(&application, [&endVelocity](float velocity) { endVelocity = velocity; });
+
+  auto& impl = GetScrollImpl(scrollView);
+  impl.TriggerKeyEdgeFeedback(FocusDirection::UP);
+  impl.TriggerKeyEdgeFeedback(FocusDirection::DOWN);
+  DALI_TEST_EQUALS(startVelocity, 1200.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(endVelocity, -1200.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
