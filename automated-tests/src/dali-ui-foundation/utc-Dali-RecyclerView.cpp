@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/recycler/item-adapter.h>
 #include <dali-ui-foundation/integration-api/recycler/item-decoration.h>
 #include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
@@ -49,6 +50,7 @@ using Dali::Ui::Integration::RecyclerView;
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 void utc_dali_recycler_view_startup(void)
 {
@@ -358,6 +360,25 @@ public:
   {
     return invalidated;
   }
+};
+
+// Sets the system UI scale for the scope of a test and restores 1.0 when the scope ends, also when
+// a DALI_TEST_* check throws. Declare it after the UiTestApplication so that it is destroyed first.
+class ScopedUiScale
+{
+public:
+  explicit ScopedUiScale(float scale)
+  {
+    LayoutScaleManager::Get().SetUiScale(scale);
+  }
+
+  ~ScopedUiScale()
+  {
+    LayoutScaleManager::Get().SetUiScale(1.0f);
+  }
+
+  ScopedUiScale(const ScopedUiScale&)            = delete;
+  ScopedUiScale& operator=(const ScopedUiScale&) = delete;
 };
 
 } // namespace
@@ -2814,5 +2835,58 @@ int UtcDaliRecyclerViewBorrowedNavigationResultOutcomesP(void)
   ResetCounters();
   // Release edge-feedback animations while the test Core is still running.
   recycler.Unparent();
+  END_TEST;
+}
+
+// The key scroll step is a design length: at a UI scale of 2 a step of 80 is 160 rendered pixels.
+// The list is 200 x 400 (400 x 800 rendered) over items 50 high (100 rendered). Item 8 ends at 900,
+// 100 rendered pixels -- 50 natural -- below the viewport: within the step, so DOWN from item 7
+// focuses it. A key press on the focused list then scrolls by 160.
+// Fails before this change: 100 >= 80 kept the focus on item 7, and the key scrolled by 80.
+int UtcDaliRecyclerViewKeyScrollStepFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter         adapter  = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView        recycler = BuildRecycler(application, window, adapter, layouter);
+  recycler.SetKeyScrollEnabled(true);
+  recycler.SetKeyScrollStep(80.0f);
+  recycler.SetScrollOnFocus(false);
+  recycler.SetFocusable(true);
+  auto& impl = GetRecyclerImpl(recycler);
+  for(auto& record : impl.mActiveItems)
+  {
+    if(record.view)
+    {
+      record.view.SetFocusable(true);
+    }
+  }
+
+  View seventh = impl.FindActiveView(7u);
+  View eighth  = impl.FindActiveView(8u);
+  DALI_TEST_CHECK(seventh);
+  DALI_TEST_CHECK(eighth);
+  DALI_TEST_EQUALS(MainPosition(eighth, false), 800.0f, 0.001f, TEST_LOCATION);
+
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(seventh));
+  DALI_TEST_CHECK(FocusManager::Get().MoveFocus(FocusDirection::DOWN));
+  DALI_TEST_EQUALS(FocusManager::Get().GetCurrentFocusView(), eighth, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 0.0f, 0.001f, TEST_LOCATION);
+
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(recycler));
+  KeyEvent key = KeyEvent::New();
+  key.SetState(KeyEvent::DOWN);
+  key.SetKeyName("Down");
+  DALI_TEST_CHECK(impl.OnKeyEvent(key));
+  // A playing animation reports its target: the scroller heads for -160.
+  DALI_TEST_EQUALS(impl.mScroller.GetProperty<float>(Actor::Property::POSITION_Y), -160.0f, 0.001f, TEST_LOCATION);
+
+  impl.CancelScrollAnimation();
+  impl.StopKeyRepeatTimer();
+  FocusManager::Get().ClearFocus();
   END_TEST;
 }
