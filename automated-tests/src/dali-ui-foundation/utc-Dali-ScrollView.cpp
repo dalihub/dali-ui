@@ -2743,3 +2743,37 @@ int UtcDaliScrollViewPaddingFollowsScaleChangeP(void)
   DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -60.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
+
+// Before the first layout AdjustScrollPosition clamps against the requested sizes (natural units)
+// while the position is in rendered pixels. At a UI scale of 2 a 100 x 100 scroll view over a
+// 100 x 500 content has a range of 1000 - 200 = 800: a ScrollToY(700) made before the first layout
+// must keep 700, then and after the layout. Fails before this change: the clamp used 500 - 100 = 400
+// (and the first layout's width update re-clamped that to 500 - 200 = 300).
+int UtcDaliScrollViewPreLayoutClampUsesScaledSizesP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(100.0f);
+  scrollView.SetRequestedHeight(100.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(100.0f);
+  content.SetRequestedHeight(500.0f);
+  scrollView.SetContent(content);
+
+  scrollView.ScrollToY(700.0f, false);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 700.0f, 0.001f, TEST_LOCATION);
+
+  application.GetWindow().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 700.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -700.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}

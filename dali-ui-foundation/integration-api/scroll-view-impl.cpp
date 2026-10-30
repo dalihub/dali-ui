@@ -1618,12 +1618,14 @@ Vector2 ScrollViewImpl::AdjustScrollPosition(const Vector2& position) const
 
   // If layout hasn't run yet, fall back to requested sizes so that
   // SetScrollPosition / ScrollTo work correctly before the first layout pass.
+  // A requested size is in natural units: multiply it by its own view's effective scale, as the
+  // layout will, to compare it with a position in rendered pixels.
   float scrollableW = (mScrollableWidth > 0.0f) ? mScrollableWidth
-                                                : (mContent ? mContent.GetRequestedWidth() : 0.0f);
+                                                : (mContent ? mContent.GetRequestedWidth() * Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(mContent)) : 0.0f);
   float scrollableH = (mScrollableHeight > 0.0f) ? mScrollableHeight
-                                                 : (mContent ? mContent.GetRequestedHeight() : 0.0f);
-  float viewportW   = (mViewportWidth > 0.0f) ? mViewportWidth : std::max(0.0f, GetRequestedWidth());
-  float viewportH   = (mViewportHeight > 0.0f) ? mViewportHeight : std::max(0.0f, GetRequestedHeight());
+                                                 : (mContent ? mContent.GetRequestedHeight() * Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(mContent)) : 0.0f);
+  float viewportW   = (mViewportWidth > 0.0f) ? mViewportWidth : std::max(0.0f, GetRequestedWidth()) * Ui::Extension::View::GetEffectiveLayoutScale(*this);
+  float viewportH   = (mViewportHeight > 0.0f) ? mViewportHeight : std::max(0.0f, GetRequestedHeight()) * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   float maxScrollY = std::max(0.0f, scrollableH - viewportH);
   float maxScrollX = std::max(0.0f, scrollableW - viewportW);
