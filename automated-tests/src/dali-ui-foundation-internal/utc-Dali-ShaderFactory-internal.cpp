@@ -299,3 +299,14 @@ int UtcDaliImageFallbackTextureCoordinates(void)
   DALI_TEST_CHECK(vertex.find("MEDIA_VIEW_SWAP_AXES") == std::string::npos);
   END_TEST;
 }
+
+int UtcDaliImageShaderScalesAbsoluteCornerRadiusP(void)
+{
+  UiTestApplication application;
+  Dali::Ui::Internal::ImageVisualShaderFactory factory;
+  const std::string vertex(factory.GetVertexShaderSource());
+
+  // An ABSOLUTE radius is natural, as in the color and gradient shaders: it takes viewEffectiveScale.
+  DALI_TEST_CHECK(vertex.find("vCornerRadius = mix(cornerRadius * minSize, cornerRadius * viewEffectiveScale, cornerRadiusPolicy);") != std::string::npos);
+  END_TEST;
+}

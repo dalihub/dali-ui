@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
@@ -24,10 +25,12 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/rendering/frame-buffer-devel.h>
+#include <dali/integration-api/rendering/decorated-visual-renderer.h>
 #include <test-native-image.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 void utc_dali_imageview_startup(void)
 {
@@ -922,5 +925,44 @@ int UtcDaliImageViewAnimatePixelArea(void)
   DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), Vector4(0.125f, 0.0f, 0.625f, 1.0f), TEST_LOCATION);
   application.Render(500u);
   DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), secondTarget, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliImageViewAbsoluteCornerRadiusFollowsEffectiveScaleP(void)
+{
+  UiTestApplication application;
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  ImageView view = ImageView::New("../samples/image-view/res/contact-cards-mask.png");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetCornerRadius(20.0f);
+  application.GetScene().Add(view);
+  for(int i = 0; i < 2; ++i)
+  {
+    application.SendNotification();
+    application.Render();
+    application.RunIdles();
+  }
+
+  // 200x200 pixels at scale 2, and the view's viewEffectiveScale uniform is 2.
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(view.GetPropertyIndex("viewEffectiveScale")), 2.0f, TEST_LOCATION);
+
+  // The image renderer keeps the natural radius 20, and its rounded-corner shader multiplies it by
+  // viewEffectiveScale: a 40-pixel corner, as a background colour with radius 20 draws.
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  Renderer renderer = view.GetRendererAt(0u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(DecoratedVisualRenderer::Property::CORNER_RADIUS), Vector4(20.0f, 20.0f, 20.0f, 20.0f), TEST_LOCATION);
+  const Property::Value programValue = renderer.GetShader().GetProperty(Shader::Property::PROGRAM);
+  const Property::Map*  program      = programValue.GetMap();
+  Dali::String          vertex;
+  DALI_TEST_CHECK(program && program->Find("vertex") && program->Find("vertex")->Get(vertex));
+  const std::string vertexSource(vertex.CStr());
+  DALI_TEST_CHECK(vertexSource.find("#define IS_REQUIRED_ROUNDED_CORNER") != std::string::npos);
+  DALI_TEST_CHECK(vertexSource.find("cornerRadius * viewEffectiveScale, cornerRadiusPolicy") != std::string::npos);
+
+  LayoutScaleManager::Get().SetUiScale(1.0f);
   END_TEST;
 }
