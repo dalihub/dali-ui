@@ -2235,3 +2235,77 @@ int UtcDaliImageViewReloadBeforeZeroSizeLayout(void)
 {
   return TestReloadBeforeImageSize(true);
 }
+
+int UtcDaliImageViewViewSizeNaturalSizeFollowsScaleP(void)
+{
+  UiTestApplication application;
+  LayoutScaleManager::Get().SetUiScale(0.5f);
+
+  ImageView view = ImageView::New();
+  view.SetSynchronousLoading(true);
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetWindow().Add(view);
+
+  // Nothing arranged yet: the natural size is the 400x200 image, measured at scale 0.5.
+  MeasuredSize measured = view.Measure(480.0f, 800.0f);
+  DALI_TEST_EQUALS(measured.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measured.GetHeight(), 100.0f, TEST_LOCATION);
+
+  // Arranged at 200x100 pixels: the image reloads at that size, as a 200x100 texture.
+  view.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+  DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(200, 100), TEST_LOCATION);
+  const auto texture = VisualOf(view).GetRenderer().GetTextures().GetTexture(0);
+  DALI_TEST_EQUALS(texture.GetWidth(), 200u, TEST_LOCATION);
+  DALI_TEST_EQUALS(texture.GetHeight(), 100u, TEST_LOCATION);
+
+  // The natural size is that view size in natural units, and the view measures to it again.
+  DALI_TEST_EQUALS(view.GetNaturalSize(), Vector3(400.0f, 200.0f, 0.0f), TEST_LOCATION);
+  view.InvalidateMeasure();
+  measured = view.Measure(480.0f, 800.0f);
+  DALI_TEST_EQUALS(measured.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measured.GetHeight(), 100.0f, TEST_LOCATION);
+
+  // A new URL rebuilds the visual from the arranged 200x100 pixels, at the scale they were arranged at.
+  view.SetResourceUrl(MakeImageViewTestUrl(5));
+  measured = view.Measure(480.0f, 800.0f);
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(200, 100), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNaturalSize(), Vector3(400.0f, 200.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(measured.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measured.GetHeight(), 100.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+  END_TEST;
+}
+
+int UtcDaliImageViewViewSizeSourceSmallerThanViewP(void)
+{
+  UiTestApplication application;
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  ImageView view = ImageView::New();
+  view.SetSynchronousLoading(true);
+  view.SetImageLoadWithViewSizeEnabled(true);
+  view.SetResourceUrl(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "/view-size.png");
+  application.GetWindow().Add(view);
+
+  MeasuredSize measured = view.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(measured.GetWidth(), 800.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measured.GetHeight(), 400.0f, TEST_LOCATION);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 800.0f, 400.0f));
+  DataOf(view).EmitLayoutFinishedSignal(LayoutRect(0.0f, 0.0f, 800.0f, 400.0f));
+
+  // Loading never enlarges the 400x200 source: the texture is the source, already in natural units.
+  DALI_TEST_EQUALS(ReportedLoadSize(view), ImageDimensions(800, 400), TEST_LOCATION);
+  const auto texture = VisualOf(view).GetRenderer().GetTextures().GetTexture(0);
+  DALI_TEST_EQUALS(texture.GetWidth(), 400u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNaturalSize(), Vector3(400.0f, 200.0f, 0.0f), TEST_LOCATION);
+  view.InvalidateMeasure();
+  measured = view.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(measured.GetWidth(), 800.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measured.GetHeight(), 400.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+  END_TEST;
+}

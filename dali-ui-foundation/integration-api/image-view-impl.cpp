@@ -1047,7 +1047,7 @@ void ImageViewImpl::UpdateVisual()
     // IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY tells the factory not to upgrade
     // a GIF/WebP URL to AnimatedImageVisual. Only the first frame is decoded.
     // (NPatch detection via BORDER property is unaffected by this flag.)
-    mVisual = Ui::GetImplementation(visualFactory).CreateVisual(map, Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY, Vector2(arrangedBounds.width, arrangedBounds.height));
+    mVisual = Ui::GetImplementation(visualFactory).CreateVisual(map, Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY, Vector2(arrangedBounds.width, arrangedBounds.height), Ui::Extension::View::GetEffectiveLayoutScale(*this));
     if(mVisual)
     {
       Ui::GetImplementation(mVisual).SetInitialLoadingSizeProvider(GetInitialImageSize);

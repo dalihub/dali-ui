@@ -254,6 +254,7 @@ When enabled:
 - Image is (re)loaded at the view's resolved layout size
 - Avoids loading full-resolution image when only smaller display is needed
 - Direction: view size → image load size
+- The natural size is the current view size in natural units, so a WRAP_CONTENT view keeps its size at any scale
 
 ---
 

@@ -255,6 +255,7 @@ bool enabled = imageView.IsImageLoadWithViewSizeEnabled();
 - 뷰의 결정된 레이아웃 크기로 이미지가 (재)로드됨
 - 작은 화면에 표시할 때 전체 해상도 이미지를 로드하지 않아도 됨
 - 방향: 뷰 크기 → 이미지 로드 크기
+- natural size는 현재 뷰 크기를 natural 단위로 나타낸 값이므로, WRAP_CONTENT 뷰는 어떤 스케일에서도 크기가 유지됨
 
 ---
 
