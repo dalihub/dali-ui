@@ -50,6 +50,18 @@ struct MarqueeTextureAnchor;
 typedef IntrusivePtr<Typesetter> TypesetterPtr;
 
 /**
+ * @brief Request-local coordinates for preparing USER_SPACE span paints.
+ *
+ * Borrowed only during synchronous raster calls; never stored by Typesetter.
+ */
+struct GradientRasterContext
+{
+  Vector2 displaySize; ///< Display size of the full raster canvas, before tiling.
+  Vector4 viewBounds;  ///< View bounds normalized to the display size.
+  float   uiScale;     ///< Effective UI scale captured by the render request.
+};
+
+/**
  * @brief This class is responsible of controlling the data flow of the text's rendering process.
  */
 class Typesetter : public RefObject
@@ -154,11 +166,14 @@ public:
    * @param[in] originSize The origin size for calculating vertical alignment. (default) If zero, the control and
    * renderer sizes are used.
    *
+   * @param[in] gradientContext Request-local USER_SPACE coordinates, or nullptr for raster coordinates.
+   *
    * @return A pixel data with the text rendered.
    */
   PixelData Render(const Vector2& size, Direction textDirection,
                    RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES, bool ignoreHorizontalAlignment = false,
-                   Pixel::Format pixelFormat = Pixel::RGBA8888, const Vector2& originSize = Size::ZERO);
+                   Pixel::Format pixelFormat = Pixel::RGBA8888, const Vector2& originSize = Size::ZERO,
+                   const GradientRasterContext* gradientContext = nullptr);
 
   /**
    * @brief Resolves an anchor in the exact ViewModel geometry used by the preceding render.
@@ -205,12 +220,15 @@ public:
    * @param[in] originSize The origin size for calculating vertical alignment. (default) If zero, the control and
    * renderer sizes are used.
    *
+   * @param[in] gradientContext Request-local USER_SPACE coordinates, or nullptr for raster coordinates.
+   *
    * @return A pixel data containing non-gradient text glyphs only.
    */
   PixelData RenderTextGradientPreserved(const Vector2& size, Direction textDirection,
-                                        bool           ignoreHorizontalAlignment = false,
-                                        Pixel::Format  pixelFormat               = Pixel::RGBA8888,
-                                        const Vector2& originSize                = Size::ZERO);
+                                        bool                         ignoreHorizontalAlignment = false,
+                                        Pixel::Format                pixelFormat               = Pixel::RGBA8888,
+                                        const Vector2&               originSize                = Size::ZERO,
+                                        const GradientRasterContext* gradientContext           = nullptr);
 
   /**
    * @brief After the Render, use the pixel information of the given cutoutBuffer to make the part where the pixel is
@@ -251,13 +269,16 @@ public:
    * @param[in] originSize The origin size for calculating vertical alignment. (default) If zero, the control and
    * renderer sizes are used.
    *
+   * @param[in] gradientContext Request-local USER_SPACE coordinates, or nullptr for raster coordinates.
+   *
    * @return A pixel data with the text rendered.
    */
   PixelBuffer RenderWithPixelBuffer(const Vector2& size, Direction textDirection,
-                                    RenderBehaviour behaviour                 = RENDER_TEXT_AND_STYLES,
-                                    bool            ignoreHorizontalAlignment = false,
-                                    Pixel::Format   pixelFormat               = Pixel::RGBA8888,
-                                    const Vector2&  originSize                = Size::ZERO);
+                                    RenderBehaviour              behaviour                 = RENDER_TEXT_AND_STYLES,
+                                    bool                         ignoreHorizontalAlignment = false,
+                                    Pixel::Format                pixelFormat               = Pixel::RGBA8888,
+                                    const Vector2&               originSize                = Size::ZERO,
+                                    const GradientRasterContext* gradientContext           = nullptr);
 
   /**
    * @brief Projects source reveal semantics onto the current final glyph sequence.
@@ -353,12 +374,14 @@ public:
    * ownership expansion. Non-metadata planes retain the full width.
    * Non-metadata GradientSpan planes require the full target so their paint
    * coordinates and overlap coverage retain the ordinary raster semantics.
+   * @param[in] gradientContext Request-local USER_SPACE coordinates, or nullptr for raster coordinates.
    */
   PixelData RenderRuntimeBlurLine(const Vector2& size, LineIndex lineIndex,
                                   RuntimeBlurPlane plane, Pixel::Format format,
                                   const Internal::Reveal::Plan& plan,
                                   uint32_t rasterOffsetY = 0u, uint32_t rasterHeight = 0u,
-                                  uint32_t rasterOffsetX = 0u, uint32_t rasterWidth = 0u);
+                                  uint32_t rasterOffsetX = 0u, uint32_t rasterWidth = 0u,
+                                  const GradientRasterContext* gradientContext = nullptr);
 
   /**
    * @brief Create & draw the image buffer of single background color.

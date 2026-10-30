@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <optional>
 #include <utility>
 
 // INTERNAL INCLUDES
@@ -1551,6 +1552,28 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                                   activeFinalElision,
                                                                                   parameters);
 
+  std::optional<GradientRasterContext> gradientContext;
+  if(Internal::HasUserSpaceGradientSpan(gradientSpanData))
+  {
+    const float   controlWidth  = isRenderScale ? parameters.renderScaleWidth : parameters.textWidth;
+    const float   controlHeight = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;
+    const Vector2 viewSize(controlWidth + parameters.padding.start + parameters.padding.end,
+                           controlHeight + parameters.padding.top + parameters.padding.bottom);
+    const bool    verticalScroll = parameters.isMarqueeEnabled && parameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL;
+    const float   alignmentY     = verticalScroll ? 0.0f : (controlHeight - renderInfo.size.y) * VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)];
+    Vector2       offset(std::round(parameters.padding.start),
+                   isRenderScale ? std::round((renderInfo.size.y + parameters.padding.top + alignmentY) * 2.0f) * 0.5f - renderInfo.size.y
+                                       : std::round(parameters.padding.top + alignmentY));
+    if(cutoutEnabled)
+    {
+      offset = Vector2::ZERO;
+    }
+    gradientContext.emplace(GradientRasterContext{renderInfo.size,
+                                                  CalculateGradientViewBounds(renderInfo.size, viewSize, offset), parameters.decorationUiScale});
+  }
+
+  const auto* context = gradientContext ? &*gradientContext : nullptr;
+
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
 
@@ -1558,7 +1581,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   if(cutoutEnabled)
   {
     cutoutData = mTypesetter->RenderWithPixelBuffer(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
-                                                    ignoreHorizontalAlignment, textPixelFormat);
+                                                    ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
 
     // Make transparent buffer.
     // If the cutout is enabled, a separate texture is not used for the text.
@@ -1572,7 +1595,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     // Create a pixel data for the text without any styles
     renderInfo.textPixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat);
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
   }
 
   std::unique_ptr<Internal::Reveal::Plan> blurPlan;
@@ -1716,7 +1739,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     const Vector2 originSize = parameters.isMarqueeEnabled ? Size(parameters.originWidth, parameters.originHeight)
                                                            : Size::ZERO;
     renderInfo.textGradientPreservedPixelData =
-      mTypesetter->RenderTextGradientPreserved(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
+      mTypesetter->RenderTextGradientPreserved(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888, originSize, context);
     renderInfo.textGradientMaskPixelData =
       mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::L8, originSize);
   }
@@ -1760,7 +1783,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     renderInfo.marqueePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
                           ignoreHorizontalAlignment, Pixel::RGBA8888,
-                          Size(parameters.originWidth, parameters.originHeight));
+                          Size(parameters.originWidth, parameters.originHeight), context);
     if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
     {
       renderInfo.marqueeStartAnchor = parameters.marqueeStartAnchor;
@@ -1817,7 +1840,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     options.decorations      = styleEnabled || isOverlayStyle;
     renderInfo.revealBlur    = Ui::Internal::PrepareRevealBlur(*mTypesetter, std::move(*blurPlan),
                                                                renderInfo.replacementRevealTimings, options,
-                                                            mReplacementData ? &mReplacementData->renderState.placements : nullptr);
+                                                            mReplacementData ? &mReplacementData->renderState.placements : nullptr, context);
   }
 
   CopyReplacementResult(renderInfo, parameters.renderScale);

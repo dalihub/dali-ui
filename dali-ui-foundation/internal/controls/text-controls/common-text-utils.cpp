@@ -82,28 +82,26 @@ void UpdateAtlasGradient(Ui::Text::RendererPtr                                re
     contentOffset += Vector2(stencilPosition.x, stencilPosition.y);
   }
 
+  Vector4 spanViewBounds;
   if(hasGradientSpan)
   {
-    const Vector4 viewBounds = Ui::Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
-    renderer->UpdateAtlasGradientSpanViewBounds(layoutSize, viewBounds);
+    spanViewBounds = Ui::Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
   }
-  if(!state.enabled)
+  Vector4 bounds(0.0f, 0.0f, 1.0f, 1.0f);
+  if(state.enabled)
   {
-    return;
+    if(state.boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
+    {
+      bounds = Ui::Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
+    }
+    else
+    {
+      bounds = Ui::Text::Internal::CalculateAtlasGradientContentBounds(
+        layoutSize, model->GetLines(), model->GetNumberOfLines(), minLineOffset);
+    }
   }
 
-  Vector4 bounds;
-  if(state.boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
-  {
-    bounds = Ui::Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
-  }
-  else
-  {
-    bounds = Ui::Text::Internal::CalculateAtlasGradientContentBounds(
-      layoutSize, model->GetLines(), model->GetNumberOfLines(), minLineOffset);
-  }
-
-  renderer->UpdateAtlasGradient(layoutSize, bounds, controller->GetUiScale());
+  renderer->UpdateAtlasGradient(layoutSize, bounds, controller->GetUiScale(), hasGradientSpan ? &spanViewBounds : nullptr);
 }
 } // namespace
 

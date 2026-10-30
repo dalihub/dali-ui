@@ -30,6 +30,7 @@
 #include <string.h>
 #include <cmath>
 #include <limits>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -599,12 +600,17 @@ PixelData TextVisual::RenderMarqueeText(Ui::Integration::Visual::Base     visual
   TextVisual& visualObject = GetVisualObject(visual);
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
   visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
+  std::optional<Text::GradientRasterContext> gradientContext;
+  if(Text::Internal::HasUserSpaceGradientSpan(visualObject.mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  {
+    gradientContext.emplace(Text::GradientRasterContext{size, CalculateGradientViewBounds(visual, size), visualObject.mController->GetUiScale()});
+  }
   PixelData pixelData = visualObject.mTypesetter->Render(size,
                                                          textDirection,
                                                          behaviour,
                                                          ignoreHorizontalAlignment,
                                                          pixelFormat,
-                                                         originSize);
+                                                         originSize, gradientContext ? &*gradientContext : nullptr);
   if(marqueeTextureAnchor)
   {
     *marqueeTextureAnchor = visualObject.mTypesetter->ResolveMarqueeTextureAnchor(marqueeStartAnchor);
@@ -622,7 +628,12 @@ PixelData TextVisual::RenderMarqueeTextGradientPreserved(Ui::Integration::Visual
   TextVisual& visualObject = GetVisualObject(visual);
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
   visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
-  return visualObject.mTypesetter->RenderTextGradientPreserved(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize);
+  std::optional<Text::GradientRasterContext> gradientContext;
+  if(Text::Internal::HasUserSpaceGradientSpan(visualObject.mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  {
+    gradientContext.emplace(Text::GradientRasterContext{size, CalculateGradientViewBounds(visual, size), visualObject.mController->GetUiScale()});
+  }
+  return visualObject.mTypesetter->RenderTextGradientPreserved(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize, gradientContext ? &*gradientContext : nullptr);
 }
 
 PixelData TextVisual::RenderMarqueeTextGradientMask(Ui::Integration::Visual::Base visual,
@@ -2773,16 +2784,27 @@ Vector4 TextVisual::ResolveTextGradientOverlayBounds(const Vector2& textureSize,
 
 bool TextVisual::UsesUserSpaceGradient() const
 {
-  const auto* gradientData = GetTextVisualGradientData(mGradientData);
-  if(!gradientData)
-  {
-    return false;
-  }
-  const auto usesUserSpace = [](const Text::Internal::Gradient::Style& style)
+  const auto* gradientData  = GetTextVisualGradientData(mGradientData);
+  const auto  usesUserSpace = [](const Text::Internal::Gradient::Style& style)
   {
     return style.units == Ui::Gradient::Units::USER_SPACE && Text::Internal::Gradient::IsRenderable(style);
   };
-  return usesUserSpace(gradientData->mTextGradientStyle) || usesUserSpace(gradientData->mTextGradientOverlayStyle);
+  if(gradientData && (usesUserSpace(gradientData->mTextGradientStyle) || usesUserSpace(gradientData->mTextGradientOverlayStyle)))
+  {
+    return true;
+  }
+  const auto* spans = mController->GetLogicalTextModel()->GetGradientSpanModelData();
+  if(spans)
+  {
+    for(const auto& paint : spans->paints)
+    {
+      if(usesUserSpace(paint.style))
+      {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale)
@@ -2864,6 +2886,15 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
                              bool styleEnabled, bool styleTextureEnabled, bool styleBlocksTextGradient,
                              bool isOverlayStyle, bool embossEnabled)
 {
+  std::optional<Text::GradientRasterContext> gradientContext;
+  if(Text::Internal::HasUserSpaceGradientSpan(mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  {
+    const Vector2 offset = mImpl->mTransform ? mImpl->mTransform->mOffset : Vector2::ZERO;
+    gradientContext.emplace(Text::GradientRasterContext{size,
+                                                        Text::Internal::CalculateGradientViewBounds(size, mImpl->mControlSize, offset), mController->GetUiScale()});
+  }
+  const auto* context = gradientContext ? &*gradientContext : nullptr;
+
   auto* revealData = GetTextVisualRevealData(mRevealData);
 
   // Get the maximum size.
@@ -2925,7 +2956,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
   // No tiling required. Use the default renderer.
   if(size.height < maxTextureSize)
   {
-    TextureSet textureSet = GetTextTexture(size);
+    TextureSet textureSet = GetTextTexture(size, context);
 
     mImpl->mRenderer.SetTextures(textureSet);
     mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex, static_cast<float>(hasMultipleTextColors));
@@ -2971,7 +3002,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
     // Create a texture for the text without any styles
     PixelData data =
-      mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
+      mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat, Size::ZERO, context);
 
     if(textRevealEnabled)
     {
@@ -3179,7 +3210,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       options.colorMask        = !mTextShaderFeatureCache.IsEnabledAnyTextGradient() &&
                           mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor();
       const auto prepared = PrepareRevealBlur(*mTypesetter, std::move(plan), timings, options,
-                                              &mController->GetReplacementRenderState().placements);
+                                              &mController->GetReplacementRenderState().placements, context);
       if(prepared)
       {
         PublishPreparedRevealBlur(actor, *prepared, sourceRevision, timings);
@@ -3611,7 +3642,7 @@ void TextVisual::RefreshRevealBlurImages(Ui::Integration::Visual::Base visual)
   }
 }
 
-TextureSet TextVisual::GetTextTexture(const Vector2& size)
+TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientRasterContext* gradientContext)
 {
   const bool cutoutEnabled = mController->IsTextCutout();
 
@@ -3637,7 +3668,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
   {
     auto&     gradientData = GetOrCreateTextVisualGradientData(mGradientData);
     PixelData preservedData =
-      mTypesetter->RenderTextGradientPreserved(size, textDirection, false, Pixel::RGBA8888);
+      mTypesetter->RenderTextGradientPreserved(size, textDirection, false, Pixel::RGBA8888, Size::ZERO, gradientContext);
     AddTexture(textureSet, preservedData, sampler, textureSetIndex);
     ++textureSetIndex;
 
@@ -3658,7 +3689,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     if(cutoutEnabled)
     {
       cutoutData = mTypesetter->RenderWithPixelBuffer(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false,
-                                                      textPixelFormat);
+                                                      textPixelFormat, Size::ZERO, gradientContext);
 
       // Make transparent buffer.
       // If the cutout is enabled, a separate texture is not used for the text.
@@ -3670,7 +3701,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     else
     {
       PixelData data =
-        mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
+        mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat, Size::ZERO, gradientContext);
       AddTexture(textureSet, data, sampler, textureSetIndex);
       ++textureSetIndex;
     }

@@ -350,7 +350,7 @@ std::shared_ptr<const PreparedRevealBlur> PrepareRevealBlur(
   Ui::Text::Typesetter& typesetter, Ui::Text::Internal::Reveal::Plan plan,
   const Vector<Ui::Text::ReplacementRevealTiming>& timings,
   const RevealBlurPreparationOptions&              options,
-  const Vector<Ui::Text::ReplacementPlacement>*    placements)
+  const Vector<Ui::Text::ReplacementPlacement>* placements, const Ui::Text::GradientRasterContext* gradientContext)
 {
   const auto   size           = options.rasterSize;
   const auto   control        = options.controlSize;
@@ -564,7 +564,7 @@ std::shared_ptr<const PreparedRevealBlur> PrepareRevealBlur(
     auto render       = [&](Plane plane, Pixel::Format format, const Rect<uint32_t>& bounds)
     {
       return typesetter.RenderRuntimeBlurLine(size, sequence.lineIndex, plane, format, plan,
-                                              bounds.y, bounds.height, bounds.x, bounds.width);
+                                              bounds.y, bounds.height, bounds.x, bounds.width, gradientContext);
     };
     auto renderForeground = [&]()
     {

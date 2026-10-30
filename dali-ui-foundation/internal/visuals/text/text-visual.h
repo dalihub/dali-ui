@@ -883,10 +883,12 @@ private:
   void ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale);
 
   /**
-   * Get the texture of the text for rendering. It will use cached shader feature for text visual.
+   * @brief Gets text textures using the cached shader features.
    * @param[in] size The texture size.
+   * @param[in] gradientContext Borrowed USER_SPACE raster coordinates, or nullptr.
+   * @return The textures prepared for the text renderer.
    */
-  TextureSet GetTextTexture(const Vector2& size);
+  TextureSet GetTextTexture(const Vector2& size, const Ui::Text::GradientRasterContext* gradientContext);
 
   /**
    * Get the text rendering shader.

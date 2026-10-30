@@ -237,10 +237,11 @@ TextAbstraction::FontClient Typesetter::GetFontClient()
 
 PixelData Typesetter::Render(const Vector2& size, Direction textDirection,
                              RenderBehaviour behaviour, bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
-                             const Vector2& originSize)
+                             const Vector2&               originSize,
+                             const GradientRasterContext* gradientContext)
 {
   PixelBuffer result =
-    RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
+    RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize, gradientContext);
   PixelData pixelData = result ? PixelBuffer::Convert(result) : PixelData{};
 
   return pixelData;
@@ -379,7 +380,8 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
 
 PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction textDirection,
                                                   bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
-                                                  const Vector2& originSize)
+                                                  const Vector2&               originSize,
+                                                  const GradientRasterContext* gradientContext)
 {
   uint32_t bufferWidth, bufferHeight;
   if(!ResolveRasterSize(size, bufferWidth, bufferHeight, Pixel::GetBytesPerPixel(pixelFormat)))
@@ -457,7 +459,7 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
 
   PixelBuffer result =
     mImpl->CreateTextGradientPreservedImageBuffer(bufferWidth, bufferHeight, ignoreHorizontalAlignment, pixelFormat,
-                                                  penX, penY, 0u, endIndexOfGlyphs);
+                                                  penX, penY, 0u, endIndexOfGlyphs, gradientContext);
 
   return result ? PixelBuffer::Convert(result) : PixelData{};
 }
@@ -483,7 +485,8 @@ PixelData Typesetter::RenderWithCutout(const Vector2& size, Direction textDirect
 PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
                                               Direction       textDirection,
                                               RenderBehaviour behaviour, bool ignoreHorizontalAlignment,
-                                              Pixel::Format pixelFormat, const Vector2& originSize)
+                                              Pixel::Format pixelFormat, const Vector2& originSize,
+                                              const GradientRasterContext* gradientContext)
 {
   uint32_t       bufferWidth, bufferHeight;
   const uint32_t bytesPerPixel = (behaviour == RENDER_NO_STYLES || behaviour == RENDER_MASK)
@@ -608,7 +611,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   {
     // Generate the image buffer for the text with no style.
     imageBuffer = mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_NONE, ignoreHorizontalAlignment,
-                                           pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
+                                           pixelFormat, penX, penY, 0u, endIndexOfGlyphs, 0u, 0u, gradientContext);
   }
 
   if((RENDER_NO_STYLES != behaviour) && (RENDER_MASK != behaviour))
@@ -1017,7 +1020,8 @@ PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineI
                                             RuntimeBlurPlane plane, Pixel::Format format,
                                             const Internal::Reveal::Plan& plan,
                                             uint32_t rasterOffsetY, uint32_t rasterHeight,
-                                            uint32_t rasterOffsetX, uint32_t rasterWidth)
+                                            uint32_t rasterOffsetX, uint32_t rasterWidth,
+                                            const GradientRasterContext* gradientContext)
 {
   const auto& model = *mImpl->GetViewModel();
   if(lineIndex >= model.GetNumberOfLines())
@@ -1064,7 +1068,7 @@ PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineI
   switch(plane)
   {
     case RuntimeBlurPlane::GRADIENT_PRESERVED:
-      buffer = mImpl->CreateTextGradientPreservedImageBuffer(width, rasterHeight, false, format, 0, penY, first, last);
+      buffer = mImpl->CreateTextGradientPreservedImageBuffer(width, rasterHeight, false, format, 0, penY, first, last, gradientContext);
       break;
     case RuntimeBlurPlane::GRADIENT_MASK:
       buffer = mImpl->CreateTextGradientMaskImageBuffer(width, rasterHeight, false, format, 0, penY, first, last);
@@ -1078,7 +1082,7 @@ PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineI
     default:
       buffer = mImpl->CreateImageBuffer(width, rasterHeight,
                                         plane == RuntimeBlurPlane::COLOR_MASK ? STYLE_MASK : STYLE_NONE,
-                                        false, format, 0, penY, first, last);
+                                        false, format, 0, penY, first, last, 0u, 0u, gradientContext);
       break;
   }
   return PixelBuffer::Convert(buffer);

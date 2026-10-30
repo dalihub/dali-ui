@@ -1148,6 +1148,7 @@ std::vector<Internal::Gradient::Stop> PrepareGradientStops(const Internal::Gradi
  * @param[in] ignoreHorizontalAlignment Whether to ignore line alignment.
  * @param[in] horizontalOffset Raster origin x offset.
  * @param[in] verticalOffset Raster origin y offset.
+ * @param[in] gradientContext Request-local USER_SPACE coordinates, or nullptr for raster coordinates.
  * @return Resolved paint entries in the same order as data.paints.
  */
 std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&                             viewModel,
@@ -1156,7 +1157,8 @@ std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&         
                                                              uint32_t                               bufferHeight,
                                                              bool                                   ignoreHorizontalAlignment,
                                                              int32_t                                horizontalOffset,
-                                                             int32_t                                verticalOffset)
+                                                             int32_t                                verticalOffset,
+                                                             const GradientRasterContext*           gradientContext)
 {
   std::vector<GradientRasterPaint> result(data.paints.Count());
   if(data.paints.Empty() || data.glyphPaintIndices.Empty() || bufferWidth == 0u || bufferHeight == 0u)
@@ -1282,7 +1284,9 @@ std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&         
     Vector4     bounds = contentBounds;
     if(source.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND)
     {
-      bounds = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+      bounds = source.style.units == Ui::Gradient::Units::USER_SPACE && gradientContext
+                 ? gradientContext->viewBounds
+                 : Vector4(0.0f, 0.0f, 1.0f, 1.0f);
     }
     else if(source.boundsMode == GradientSpan::BoundsMode::SPAN_BOUND && spanBounds[index].valid)
     {
@@ -1293,7 +1297,23 @@ std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&         
                                           std::max(pixels.maxY - pixels.minY, Math::MACHINE_EPSILON_1000) / coordinateSize.height);
     }
 
-    result[index].renderData   = Internal::Gradient::ResolveRenderData(source.style, bounds, coordinateSize);
+    // Bounds and sampling remain in raster UVs. Only USER_SPACE geometry uses
+    // the actual displayed canvas, including independent x/y raster rounding.
+    const Vector2 geometrySize = source.style.units == Ui::Gradient::Units::USER_SPACE && gradientContext
+                                   ? Internal::ResolveGradientCoordinateSize(source.style.units, gradientContext->displaySize, gradientContext->uiScale)
+                                   : coordinateSize;
+    if(source.style.units == Ui::Gradient::Units::USER_SPACE &&
+       (!std::isfinite(bounds.x) || !std::isfinite(bounds.y) || !std::isfinite(bounds.z) || !std::isfinite(bounds.w)))
+    {
+      DALI_LOG_ERROR("Text gradient span bounds are not finite\n");
+      continue;
+    }
+    result[index].renderData = Internal::Gradient::ResolveRenderData(source.style, bounds, geometrySize);
+    if(!result[index].renderData.enabled && Internal::Gradient::IsRenderable(source.style))
+    {
+      // Rejected geometry has no paint. The existing empty-stop path stays transparent.
+      continue;
+    }
     result[index].spreadMethod = source.style.spreadMethod;
     result[index].stops        = PrepareGradientStops(source.style);
   }
@@ -2268,7 +2288,8 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
                                                 const Pixel::Format pixelFormat, const int32_t horizontalOffset,
                                                 const int32_t verticalOffset, const GlyphIndex fromGlyphIndex,
                                                 const GlyphIndex toGlyphIndex,
-                                                uint32_t revealOffsetY, uint32_t revealFullHeight)
+                                                uint32_t revealOffsetY, uint32_t revealFullHeight,
+                                                const GradientRasterContext* gradientContext)
 {
   if(!Raster::BufferFits(bufferWidth, bufferHeight, Pixel::GetBytesPerPixel(pixelFormat)))
   {
@@ -2341,7 +2362,8 @@ PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidth, cons
                                                        bufferHeight,
                                                        ignoreHorizontalAlignment,
                                                        horizontalOffset,
-                                                       verticalOffset);
+                                                       verticalOffset,
+                                                       gradientContext);
   }
 
   // clang-format off
@@ -2639,14 +2661,15 @@ PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t  
   return glyphData.bitmapBuffer;
 }
 
-PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint32_t      bufferWidth,
-                                                                     const uint32_t      bufferHeight,
-                                                                     const bool          ignoreHorizontalAlignment,
-                                                                     const Pixel::Format pixelFormat,
-                                                                     const int32_t       horizontalOffset,
-                                                                     const int32_t       verticalOffset,
-                                                                     const GlyphIndex    fromGlyphIndex,
-                                                                     const GlyphIndex    toGlyphIndex)
+PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint32_t               bufferWidth,
+                                                                     const uint32_t               bufferHeight,
+                                                                     const bool                   ignoreHorizontalAlignment,
+                                                                     const Pixel::Format          pixelFormat,
+                                                                     const int32_t                horizontalOffset,
+                                                                     const int32_t                verticalOffset,
+                                                                     const GlyphIndex             fromGlyphIndex,
+                                                                     const GlyphIndex             toGlyphIndex,
+                                                                     const GradientRasterContext* gradientContext)
 {
   if(!Raster::BufferFits(bufferWidth, bufferHeight, Pixel::GetBytesPerPixel(pixelFormat)))
   {
@@ -2729,7 +2752,8 @@ PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint3
                                                        bufferHeight,
                                                        ignoreHorizontalAlignment,
                                                        horizontalOffset,
-                                                       verticalOffset);
+                                                       verticalOffset,
+                                                       gradientContext);
   }
 
   const InputParameterForEachGlyph inputParamsForGlyph{Typesetter::STYLE_NONE,

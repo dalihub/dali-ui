@@ -160,6 +160,8 @@ public: // Image buffer creation
    * @param[in] revealOffsetY Metadata storage origin in the original target, otherwise zero.
    * @param[in] revealFullHeight Original target height for metadata line traversal, or zero to use bufferHeight.
    *
+   * @param[in] gradientContext Request-local USER_SPACE coordinates, or nullptr for raster coordinates.
+   *
    * @return An image buffer with the text.
    */
   PixelBuffer CreateImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
@@ -167,7 +169,8 @@ public: // Image buffer creation
                                 const Pixel::Format pixelFormat, const int32_t horizontalOffset,
                                 const int32_t verticalOffset, const TextAbstraction::GlyphIndex fromGlyphIndex,
                                 const TextAbstraction::GlyphIndex toGlyphIndex,
-                                uint32_t revealOffsetY = 0u, uint32_t revealFullHeight = 0u);
+                                uint32_t revealOffsetY = 0u, uint32_t revealFullHeight = 0u,
+                                const GradientRasterContext* gradientContext = nullptr);
 
   /**
    * @brief Create & draw a L8 mask containing TextGradient target glyph coverage only.
@@ -208,6 +211,8 @@ public: // Image buffer creation
    * @param[in] fromGlyphIndex The index of the first glyph within the text to be drawn.
    * @param[in] toGlyphIndex The index of the last glyph within the text to be drawn.
    *
+   * @param[in] gradientContext Request-local USER_SPACE coordinates, or nullptr for raster coordinates.
+   *
    * @return An image buffer containing TextGradient non-target glyphs only.
    */
   PixelBuffer CreateTextGradientPreservedImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
@@ -216,7 +221,8 @@ public: // Image buffer creation
                                                      const int32_t                     horizontalOffset,
                                                      const int32_t                     verticalOffset,
                                                      const TextAbstraction::GlyphIndex fromGlyphIndex,
-                                                     const TextAbstraction::GlyphIndex toGlyphIndex);
+                                                     const TextAbstraction::GlyphIndex toGlyphIndex,
+                                                     const GradientRasterContext*      gradientContext = nullptr);
 
 private:
   std::unique_ptr<ViewModel>           mModel;

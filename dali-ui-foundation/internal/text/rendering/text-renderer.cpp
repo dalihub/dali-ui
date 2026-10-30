@@ -37,7 +37,7 @@ bool Renderer::SetAtlasGradientState(const Internal::Gradient::AtlasRendererStat
   return false;
 }
 
-void Renderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale)
+void Renderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale, const Vector4* spanViewBounds)
 {
 }
 

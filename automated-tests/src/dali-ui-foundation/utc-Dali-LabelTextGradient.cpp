@@ -34,6 +34,8 @@
 
 #include <dali-ui-foundation/integration-api/label-impl.h>
 
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <utility>
 #include <vector>
 
@@ -1687,5 +1689,57 @@ int UtcDaliLabelTextGradientUiScaleLifecycleP(void)
   label.SetUiScalePolicy(UiScalePolicy::ENABLED);
   SettleGradient(application);
   CheckDisplayedGradient(FindGradientRenderer(label, "uTextGradientEndPosition"), 1, 0.5f, true);
+  END_TEST;
+}
+
+int UtcDaliLabelGradientSpanUiScaleAsyncPublicationP(void)
+{
+  UiTestApplication    application;
+  GradientScaleRestore restore;
+  UiScaleManager::Get().SetScalable(true);
+  for(int type = 0; type < 3; ++type)
+  {
+    for(float renderScale : {1.0f, 1.5f, 2.0f})
+    {
+      UiScaleManager::Get().SetScale(1.0f);
+      auto label = Label::New();
+      label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+      label.SetRequestedWidth(240.5f);
+      label.SetRequestedHeight(80.25f);
+      label.SetAsyncRendering(true);
+      label.SetRenderScale(renderScale);
+      auto builder = Text::StyledTextBuilder::New(Dali::String("Gradient span request"));
+      builder.SetSpan(Text::GradientSpan::New(MakeScaleGradient(type, false), Text::GradientSpan::BoundsMode::VIEW_BOUND), 0u, 21u);
+      label.SetStyledText(builder.Build());
+      GradientCompletion observer;
+      label.AsyncRenderFinishedSignal().Connect(&observer, &GradientCompletion::Finished);
+      application.GetScene().Add(label);
+      SettleGradient(application);
+      DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 1u));
+      auto&      impl    = static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation());
+      const auto texture = label.GetRendererAt(0u).GetTextures().GetTexture(0u);
+      impl.RequestAsyncRenderWithFixedSize(240.5f, 80.25f);
+      UiScaleManager::Get().SetScale(2.0f);
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+      DALI_TEST_EQUALS(observer.count, 1u, TEST_LOCATION);
+      DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTexture(0u) == texture);
+      SettleGradient(application);
+      DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 2u));
+      impl.RequestAsyncRenderWithFixedSize(240.5f, 80.25f);
+      label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+      DALI_TEST_EQUALS(observer.count, 2u, TEST_LOCATION);
+      SettleGradient(application);
+      DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 3u));
+      // Reuse the worker/typesetter for ordinary text and a new span request.
+      label.SetText("Ordinary replacement");
+      SettleGradient(application);
+      DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 4u));
+      label.SetStyledText(builder.Build());
+      SettleGradient(application);
+      DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 5u));
+      application.GetScene().Remove(label);
+    }
+  }
   END_TEST;
 }
