@@ -70,6 +70,7 @@ Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Int
       constraint.AddSource(Source(view, Dali::Actor::Property::SIZE));
       constraint.AddSource(LocalSource(Dali::VisualRenderer::Property::EXTRA_SIZE));
       constraint.AddSource(LocalSource(Dali::DecoratedVisualRenderer::Property::BORDERLINE_WIDTH));
+      constraint.AddSource(Source(view, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
       Dali::Integration::ConstraintSetInternalTag(constraint, INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG);
     }
   }

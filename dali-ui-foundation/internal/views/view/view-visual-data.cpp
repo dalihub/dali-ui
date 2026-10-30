@@ -945,7 +945,7 @@ void ViewDataImpl::VisualData::EnableCornerPropertiesOverridden(Ui::Integration:
         {
           DALI_LOG_INFO(
             gLogFilter, Debug::Verbose,
-            "View::EnableCornerPropertiesOverridden Visual %s(%p) use default scaled corner radius constraint\n",
+            "View::EnableCornerPropertiesOverridden Visual %s(%p) use default corner radius constraint\n",
             (*iter)->visual.GetName().c_str(), &visual);
           cornerRadiusConstraint = Constraint::New<Vector4>(
             visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, Dali::EqualToConstraint());
