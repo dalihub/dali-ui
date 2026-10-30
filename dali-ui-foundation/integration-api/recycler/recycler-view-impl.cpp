@@ -1888,7 +1888,8 @@ bool RecyclerViewImpl::OnWheelEvent(const Dali::WheelEvent& event)
     return false;
   }
 
-  ScrollBy(static_cast<float>(event.GetDelta()) * WHEEL_SCROLL_STEP, true);
+  // A notch scrolls 120 natural units of content: multiply by the effective scale.
+  ScrollBy(static_cast<float>(event.GetDelta()) * WHEEL_SCROLL_STEP * Ui::Extension::View::GetEffectiveLayoutScale(*this), true);
   return true;
 }
 
