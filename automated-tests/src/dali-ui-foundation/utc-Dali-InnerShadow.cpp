@@ -16,15 +16,62 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/views/view/inner-shadow.h>
+#include <dali-ui-foundation/internal/views/view/view-internal-depth-slots.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/integration-api/rendering/decorated-visual-renderer.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
+
+namespace
+{
+Renderer FindRendererWithDepthIndex(View view, int depthIndex)
+{
+  for(uint32_t i = 0u; i < view.GetRendererCount(); ++i)
+  {
+    Renderer renderer = view.GetRendererAt(i);
+    if(renderer.GetProperty<int>(Renderer::Property::DEPTH_INDEX) == depthIndex)
+    {
+      return renderer;
+    }
+  }
+  return Renderer();
+}
+
+float CornerRadiusFraction(Renderer renderer)
+{
+  return renderer ? renderer.GetCurrentProperty<Vector4>(DecoratedVisualRenderer::Property::CORNER_RADIUS).x : -1.0f;
+}
+
+void SettleDecorations(UiTestApplication& application)
+{
+  for(int i = 0; i < 2; ++i)
+  {
+    application.SendNotification();
+    application.Render();
+    application.RunIdles();
+  }
+}
+
+void DecorateRelative(View view)
+{
+  // Corner first, so the decoration constraints apply when they are registered.
+  view.SetCornerRadius(0.25f);
+  view.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+  view.SetBorderlineWidth(10.0f);
+  view.SetBorderlineOffset(1.0f);
+  view.SetBorderlineColor(UiColor(0.2f, 0.4f, 0.6f, 1.0f));
+}
+} // namespace
 
 void utc_dali_inner_shadow_startup(void)
 {
@@ -233,5 +280,110 @@ int UtcDaliViewDecorationCornerRadiusConstraintsP(void)
 
   DALI_TEST_CHECK(relativeView.GetRendererCount() >= 2u);
   DALI_TEST_CHECK(absoluteView.GetRendererCount() >= 2u);
+  END_TEST;
+}
+
+int UtcDaliViewRelativeDecorationCornerRadiusAtScaleP(void)
+{
+  UiTestApplication application;
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  DecorateRelative(view);
+  view.SetInnerShadow(InnerShadow(Insets(10.0f, 10.0f, 10.0f, 10.0f), 0.0f, UiColor(0.0f, 0.0f, 0.0f, 0.5f)));
+  application.GetScene().Add(view);
+  SettleDecorations(application);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+
+  // Borderline: radius 0.25 * 200 = 50 pixels and extension 10 * (1 + 1) * 0.5 * 2 = 20 pixels, over
+  // 200 + 20: the fraction the view has at scale 1, (25 + 10) / (100 + 10).
+  DALI_TEST_EQUALS(CornerRadiusFraction(FindRendererWithDepthIndex(view, Ui::Internal::ViewInternalDepthIndex::BORDERLINE)), 70.0f / 220.0f, 0.0001f, TEST_LOCATION);
+  // Inner shadow: its own borderline 22 and extra size 24 are natural: (50 + 44) / (200 + 48).
+  DALI_TEST_EQUALS(CornerRadiusFraction(FindRendererWithDepthIndex(view, Ui::Internal::ViewInternalDepthIndex::INNER_SHADOW)), 94.0f / 248.0f, 0.0001f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+  END_TEST;
+}
+
+int UtcDaliViewRelativeDecorationCornerRadiusFollowsScaleChangeP(void)
+{
+  UiTestApplication application;
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+
+  // The parent ignores the UI scale, so the child keeps 200x120 pixels while its own scale changes.
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(120.0f);
+  Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::DISABLED);
+  View view = View::New();
+  view.SetRequestedWidth(MATCH_PARENT);
+  view.SetRequestedHeight(MATCH_PARENT);
+  Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::ENABLED);
+  DecorateRelative(view);
+  view.SetInnerShadow(InnerShadow(Insets(10.0f, 10.0f, 10.0f, 10.0f), 0.0f, UiColor(0.0f, 0.0f, 0.0f, 0.5f)));
+  parent.Add(view);
+  application.GetScene().Add(parent);
+  SettleDecorations(application);
+
+  Renderer borderline  = FindRendererWithDepthIndex(view, Ui::Internal::ViewInternalDepthIndex::BORDERLINE);
+  Renderer innerShadow = FindRendererWithDepthIndex(view, Ui::Internal::ViewInternalDepthIndex::INNER_SHADOW);
+  DALI_TEST_EQUALS(view.GetProperty<Vector3>(Actor::Property::SIZE), Vector3(200.0f, 120.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(CornerRadiusFraction(borderline), 40.0f / 130.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(CornerRadiusFraction(innerShadow), 52.0f / 144.0f, 0.0001f, TEST_LOCATION);
+
+  // Only the scale changes: the constraints re-run with it. Borderline extension 20, inner shadow 44 and 48.
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+  SettleDecorations(application);
+  DALI_TEST_EQUALS(view.GetProperty<Vector3>(Actor::Property::SIZE), Vector3(200.0f, 120.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(CornerRadiusFraction(borderline), 50.0f / 140.0f, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(CornerRadiusFraction(innerShadow), 74.0f / 168.0f, 0.0001f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+  END_TEST;
+}
+
+int UtcDaliVisualsContainerInnerShadowCornerRadiusFollowsScaleChangeP(void)
+{
+  UiTestApplication application;
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(120.0f);
+  Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::DISABLED);
+  View view = View::New();
+  view.SetRequestedWidth(MATCH_PARENT);
+  view.SetRequestedHeight(MATCH_PARENT);
+  Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::ENABLED);
+  view.SetCornerRadius(0.25f);
+  view.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+  parent.Add(view);
+  application.GetScene().Add(parent);
+
+  // The inner shadow View::SetInnerShadow() builds for insets 10 and no blur, added as a container object.
+  ColorVisual shadow = ColorVisual::New();
+  shadow.SetColor(UiColor(0.0f, 0.0f, 0.0f, 0.0f));
+  shadow.SetExtraWidth(24.0f);
+  shadow.SetExtraHeight(24.0f);
+  shadow.SetOrigin(VisualOrigin::CENTER);
+  shadow.SetPivot(VisualPivot::CENTER);
+  shadow.SetTransformProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  shadow.SetBorderlineColor(UiColor(0.0f, 0.0f, 0.0f, 0.5f));
+  shadow.SetBorderlineWidth(22.0f);
+  shadow.SetBorderlineOffset(-1.0f);
+  shadow.SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS);
+  Ui::Integration::VisualsContainer container = Ui::Integration::VisualsContainer::New(view, Visual::DepthLayer::DECORATION);
+  DALI_TEST_CHECK(container.AddShadowVisualBase(shadow, Ui::Integration::VisualsContainer::ShadowType::INNER_SHADOW));
+  SettleDecorations(application);
+
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+  SettleDecorations(application);
+  DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+  // (30 + 22 * 2) / (120 + 24 * 2), as for View::SetInnerShadow().
+  DALI_TEST_EQUALS(CornerRadiusFraction(view.GetRendererAt(0u)), 74.0f / 168.0f, 0.0001f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(1.0f);
   END_TEST;
 }

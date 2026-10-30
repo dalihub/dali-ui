@@ -5233,8 +5233,9 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
 
   float s = GetEffectiveLayoutScale();
 
-  // Push effective scale to the actor animatable property so that decoration
-  // constraints (corner radius, borderline width) can read it as a scale input.
+  // Push effective scale to the actor animatable property: visual shaders read it as the uniform
+  // viewEffectiveScale, and the RELATIVE branches of the borderline and inner-shadow corner-radius
+  // constraints read it as a source.
   //
   // GATED by mEffectiveScaleActorSynced, the sync bit for that ACTOR-side copy --
   // the second half of the pair whose first half, mEffectiveScaleValid, is the sync
@@ -5279,8 +5280,8 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
     if(!Dali::Equals(s, mViewImpl.Self().GetProperty<float>(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX)))
     {
       // SetProperty triggers ViewDataImpl::SetProperty(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), which:
-      //   - updates the actor animatable so decoration constraints re-evaluate, and
-      //   - calls UpdateCornerRadius() for active RenderEffect / OffscreenRendering.
+      //   - re-runs the decoration constraints that read the scale, and
+      //   - calls SizeOrUiScaleChanged(): the fitting mode is applied again and the render effects are refreshed.
       mViewImpl.Self().SetProperty(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, s);
     }
     mEffectiveScaleActorSynced = true;
@@ -6306,8 +6307,8 @@ void ViewDataImpl::DropCachedEffectiveScale()
   //    is only true because every caller pairs this with InvalidateLayoutCaches().
   //  - the actor push: required. The bit cleared just above is the ONLY record that
   //    the animatable VIEW_EFFECTIVE_SCALE property is behind, so without this clear
-  //    the next Measure() would skip the push and leave decoration constraints on the
-  //    old scale.
+  //    the next Measure() would skip the push and leave the visual shaders and the
+  //    decoration constraints on the old scale.
   //  - the MEASURE cache: no longer required for CORRECTNESS. That cache keys on the
   //    effective scale (the scale key), so a caller that forgot the pairing would
   //    take a miss rather than serve a size computed at the old scale. The pairing is
@@ -8267,6 +8268,13 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         // sets the bit AFTER its own SetProperty, so this clear does not fight it.
         dataImpl.mEffectiveScaleActorSynced = false;
 
+        // Re-run the APPLY_ONCE corner-radius constraints of the borderline and the inner shadows,
+        // whose RELATIVE branch reads this property. No visual context means no such constraint.
+        if(dataImpl.mVisualData)
+        {
+          dataImpl.mVisualData->NotifyConstraintPropertyChanged(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, false);
+        }
+
         // We don't need to hold data for it. But need to apply fitting mode now.
         dataImpl.SizeOrUiScaleChanged();
         break;
@@ -9561,6 +9569,7 @@ void ViewDataImpl::RegisterInnerShadowVisual(Ui::Integration::Visual::Base visua
         innerShadowCornerRadiusConstraint.AddSource(LocalSource(Dali::VisualRenderer::Property::EXTRA_SIZE));
         innerShadowCornerRadiusConstraint.AddSource(
           LocalSource(Dali::DecoratedVisualRenderer::Property::BORDERLINE_WIDTH));
+        innerShadowCornerRadiusConstraint.AddSource(Source(handle, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
 
         Dali::Integration::ConstraintSetInternalTag(innerShadowCornerRadiusConstraint,
                                                     INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG);
@@ -9648,6 +9657,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Dali::Actor::Property::SIZE));
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_WIDTH));
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_OFFSET));
+          borderlineCornerRadiusConstraint.AddSource(Source(handle, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
 
           Dali::Integration::ConstraintSetInternalTag(borderlineCornerRadiusConstraint,
                                                       BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG);
@@ -9995,7 +10005,7 @@ void ViewDataImpl::UpdateBorderline()
   Property::Map map;
   map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::COLOR);
   map.Insert(Ui::Integration::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
-  // Scale natural-pixel width to visual pixels for the initial visual creation.
+  // Natural-pixel width: the shader multiplies it by viewEffectiveScale.
   map.Insert(Ui::Integration::Visual::Property::BORDERLINE_WIDTH,
              self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH));
   map.Insert(Ui::Integration::Visual::Property::BORDERLINE_COLOR,

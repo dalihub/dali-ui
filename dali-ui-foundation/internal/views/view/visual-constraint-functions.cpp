@@ -47,14 +47,18 @@ void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputConta
   const float borderlineWidth  = inputs[3]->GetFloat();
   const float borderlineOffset = inputs[4]->GetFloat();
 
+  // Corner Radius for Borderline is expand about borderlineWidth.
+  float expendedRadius = borderlineWidth * (1.0f + borderlineOffset) * 0.5f;
+
   if(viewCornerRadiusPolicy == Ui::Integration::Visual::Transform::Policy::RELATIVE)
   {
     const float minViewSize = std::min(visualSize.x, visualSize.y);
     viewCornerRadius *= minViewSize;
-  }
 
-  // Corner Radius for Borderline is expand about borderlineWidth.
-  const float expendedRadius = borderlineWidth * (1.0f + borderlineOffset) * 0.5f;
+    // The view size is in pixels here, so the natural borderline width takes the view's effective
+    // scale. An ABSOLUTE result stays natural: the shader multiplies it by viewEffectiveScale.
+    expendedRadius *= inputs[5]->GetFloat();
+  }
 
   // Calculate on pixel scale.
   current.x = viewCornerRadius.x < Dali::Math::MACHINE_EPSILON_100 ? 0.0f : viewCornerRadius.x + expendedRadius;
@@ -87,13 +91,19 @@ void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputCont
   const int     viewCornerRadiusPolicy = inputs[1]->GetInteger();
   const Vector3 visualSize             = inputs[2]->GetVector3(); // We use VisualSize as ViewSize.
 
-  Vector2     extraSize       = inputs[3]->GetVector2();
-  const float borderlineWidth = inputs[4]->GetFloat(); // inner shadow's own borderline
+  Vector2 extraSize       = inputs[3]->GetVector2();
+  float   borderlineWidth = inputs[4]->GetFloat(); // inner shadow's own borderline
 
   if(viewCornerRadiusPolicy == Ui::Integration::Visual::Transform::Policy::RELATIVE)
   {
     const float minViewSize = std::min(visualSize.x, visualSize.y);
     viewCornerRadius *= minViewSize;
+
+    // The view size is in pixels here, so the natural extra size and borderline width take the
+    // view's effective scale. An ABSOLUTE result stays natural: the shader multiplies it.
+    const float viewEffectiveScale = inputs[5]->GetFloat();
+    extraSize *= viewEffectiveScale;
+    borderlineWidth *= viewEffectiveScale;
   }
 
   // Corner Radius for InnerShadow is expanded about the inner shadow's own borderline width.

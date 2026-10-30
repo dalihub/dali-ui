@@ -26,7 +26,7 @@ namespace DALI_NAMESPACE::Ui::Internal
 /**
  * @brief Constraint function for Borderline's CornerRadius
  * inputs[0] : View CornerRadius (natural px), [1] : View CornerRadiusPolicy, [2] : View size,
- * [3] : Borderline Width (natural px), [4] : Borderline Offset
+ * [3] : Borderline Width (natural px), [4] : Borderline Offset, [5] : View effective scale (read under RELATIVE only)
  * @param[out] current Borderline visual corner radius value.
  * @param[in] inputs Input properties.
  */
@@ -35,7 +35,7 @@ void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputConta
 /**
  * @brief Constraint function for InnerShadow's CornerRadius
  * inputs[0] : View CornerRadius (natural px), [1] : View CornerRadiusPolicy, [2] : View size,
- * [3] : ExtraSize, [4] : InnerShadow Borderline Width
+ * [3] : ExtraSize, [4] : InnerShadow Borderline Width, [5] : View effective scale (read under RELATIVE only)
  * @param[out] current InnerShadow's corner radius value.
  * @param[in] inputs Input properties.
  */
