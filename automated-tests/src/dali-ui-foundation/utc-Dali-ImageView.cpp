@@ -966,3 +966,41 @@ int UtcDaliImageViewAbsoluteCornerRadiusFollowsEffectiveScaleP(void)
   LayoutScaleManager::Get().SetUiScale(1.0f);
   END_TEST;
 }
+
+int UtcDaliImageViewNPatchFrameFollowsEffectiveScaleP(void)
+{
+  UiTestApplication application;
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  // 25x29 with its guide lines: a 23x27 image with one stretchable column and row, so its fixed
+  // frame is 11 + 11 source pixels wide and 13 + 13 high.
+  ImageView view = ImageView::New("../samples/image-view/res/button-up-1.9.png");
+  view.SetSynchronousLoading(true);
+  application.GetScene().Add(view);
+  for(int i = 0; i < 2; ++i)
+  {
+    application.SendNotification();
+    application.Render();
+    application.RunIdles();
+  }
+
+  // WRAP_CONTENT: the natural 23x27 at scale 2.
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 46.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 54.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(view.GetPropertyIndex("viewEffectiveScale")), 2.0f, TEST_LOCATION);
+
+  // The frame uniforms stay in source pixels, and the shader draws them at viewEffectiveScale:
+  // 22 | 2 | 22 by 26 | 2 | 26 pixels, the image magnified twice.
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  Renderer renderer = view.GetRendererAt(0u);
+  DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uFixed[1]")), Vector2(11.0f, 13.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uFixed[2]")), Vector2(22.0f, 26.0f), TEST_LOCATION);
+  const Property::Value programValue = renderer.GetShader().GetProperty(Shader::Property::PROGRAM);
+  const Property::Map*  program      = programValue.GetMap();
+  Dali::String          vertex;
+  DALI_TEST_CHECK(program && program->Find("vertex") && program->Find("vertex")->Get(vertex));
+  DALI_TEST_CHECK(std::string(vertex.CStr()).find("min(viewEffectiveScale, min(visualSize.x / fixedTotal.x, visualSize.y / fixedTotal.y))") != std::string::npos);
+
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+  END_TEST;
+}

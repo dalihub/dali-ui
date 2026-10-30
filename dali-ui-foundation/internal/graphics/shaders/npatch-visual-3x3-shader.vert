@@ -39,10 +39,11 @@ void main()
   highp vec2 stretch  = floor(aPosition * 0.5);
   highp vec2 fixedTotal = uFixed[2];
 
-  // Scale down if fixedTotal is bigger than visualSize
-  highp float fixedScaleDownRate = min(1.0, min(visualSize.x / fixedTotal.x, visualSize.y / fixedTotal.y));
+  // The fixed frame is in source pixels, which are natural units like the natural size, so it is drawn
+  // at the view's effective scale; scale it down further if it is bigger than visualSize.
+  highp float fixedScale = min(viewEffectiveScale, min(visualSize.x / fixedTotal.x, visualSize.y / fixedTotal.y));
 
-  highp vec4 gridPosition = vec4(fixedFactor * fixedScaleDownRate + (visualSize - fixedTotal * fixedScaleDownRate) * stretch, 0.0, 1.0);
+  highp vec4 gridPosition = vec4(fixedFactor * fixedScale + (visualSize - fixedTotal * fixedScale) * stretch, 0.0, 1.0);
   highp vec4 vertexPosition = gridPosition;
   vertexPosition.xy -= visualSize * vec2(0.5, 0.5);
   vertexPosition.xy += pivot * visualSize + visualOffset + origin * uSize.xy;

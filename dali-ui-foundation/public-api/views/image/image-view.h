@@ -574,9 +574,9 @@ public: // N-Patch Border
    * @brief Sets which part of the image is a fixed frame that does not stretch.
    *
    * Each value is a distance measured inward from its own edge of the source image, in
-   * source pixels. What lies outside them keeps its size, while the region they enclose is
-   * stretched to fill the view. Giving an ordinary image a non-zero border makes it behave
-   * as an n-patch image.
+   * source pixels. What lies outside them keeps its size, drawn at the effective scale of the
+   * View like the image's natural size, while the region they enclose is stretched to fill the
+   * view. Giving an ordinary image a non-zero border makes it behave as an n-patch image.
    *
    * @SINCE_3_0.0
    * @param[in] border The frame widths as start, end, top and bottom distances

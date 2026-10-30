@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/precompile-shader-option.h>
+#include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/custom-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-debug.h>
@@ -308,5 +309,19 @@ int UtcDaliImageShaderScalesAbsoluteCornerRadiusP(void)
 
   // An ABSOLUTE radius is natural, as in the color and gradient shaders: it takes viewEffectiveScale.
   DALI_TEST_CHECK(vertex.find("vCornerRadius = mix(cornerRadius * minSize, cornerRadius * viewEffectiveScale, cornerRadiusPolicy);") != std::string::npos);
+  END_TEST;
+}
+
+int UtcDaliNpatchShaderScalesFixedFrameP(void)
+{
+  UiTestApplication application;
+  for(const std::string_view source : {SHADER_NPATCH_VISUAL_3X3_SHADER_VERT, SHADER_NPATCH_VISUAL_SHADER_VERT})
+  {
+    const std::string vertex(source);
+    // The fixed frame is in source pixels, natural units like the natural size: it takes viewEffectiveScale.
+    DALI_TEST_CHECK(vertex.find("highp float fixedScale = min(viewEffectiveScale, min(visualSize.x / fixedTotal.x, visualSize.y / fixedTotal.y));") != std::string::npos);
+    // The texture coordinates stay in source pixels.
+    DALI_TEST_CHECK(vertex.find("vTexCoord = (fixedFactor + stretch") != std::string::npos);
+  }
   END_TEST;
 }
