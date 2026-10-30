@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/integration-api/recycler/recycler-view-impl.h>
 #include <dali-ui-foundation/integration-api/recycler/recycler.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
+#include <dali-ui-foundation/internal/recycler/linear-items-layouter-impl.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
@@ -55,6 +56,16 @@ constexpr size_t   MAX_RECYCLED_PER_TYPE = 8u;
 // An absolute scroll target is aimed at again after a scroll whose measurements moved it. Each
 // pass measures what the previous one brought in, so the distance left shrinks quickly.
 constexpr uint32_t MAX_AIM_PASSES = 3u;
+
+// The built-in linear layouters keep their item extent, spacing and body margins in natural units
+// and multiply them by the scale handed over here: this RecyclerView's effective scale. Returns true
+// when that scale changed, which drops the layouter's measured extents: the caller lays the items
+// out again. Another ItemsLayouterImpl scales its own lengths.
+bool SetLayouterScale(ItemsLayouter& layouter, float scale)
+{
+  auto* linear = dynamic_cast<Internal::LinearItemsLayouterImpl*>(&layouter.GetImpl());
+  return linear != nullptr && linear->SetEffectiveLayoutScale(scale);
+}
 
 BaseHandle Create()
 {
@@ -262,6 +273,9 @@ void RecyclerViewImpl::OnInitialize()
 
 void RecyclerViewImpl::LayoutChildrenScoped()
 {
+  // A full layout resolves the layouter's natural lengths at this view's current scale.
+  SetLayouterScale(mLayouter, Ui::Extension::View::GetEffectiveLayoutScale(*this));
+
   // The scope sits on the recycler side of the layouter boundary so that third-party
   // ItemsLayouterImpl subclasses are covered without having to opt in.
   Ui::Internal::LayoutDependency::RecyclerLayoutOwnerScope ownerScope(this, &mLayouter.GetImpl());
@@ -714,9 +728,13 @@ LayoutRect RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
 
   EnsureScroller();
 
-  // Full relayout only when the viewport dimensions actually change.
+  // The layouter's natural lengths follow this view's effective scale: a changed scale lays the
+  // items out again even when the viewport kept its size.
+  const bool scaleChanged = mLayouter && SetLayouterScale(mLayouter, Ui::Extension::View::GetEffectiveLayoutScale(*this));
+
+  // Full relayout only when the viewport dimensions or the effective scale actually change.
   // SetAdapter / SetItemsLayouter / NotifyDataSetChanged call OnLayoutChildren directly.
-  if(sizeChanged && mLayouter && mAdapter)
+  if((sizeChanged || scaleChanged) && mLayouter && mAdapter)
   {
     LayoutChildrenScoped();
   }

@@ -40,6 +40,10 @@ class RecyclerViewImpl;
  * RecyclerView keeps only the item views required for the current viewport and
  * cache area. It scrolls an internal content view using DALi render animation
  * and recycles item views as the relative viewport anchor moves.
+ *
+ * Scroll requests made after an effective-scale change and before the next layout pass use the
+ * previous layout geometry; with the built-in layouters, the layout pass that follows the scale
+ * change lays the items out again at the new scale.
  */
 class DALI_UI_API RecyclerView : public Ui::View
 {

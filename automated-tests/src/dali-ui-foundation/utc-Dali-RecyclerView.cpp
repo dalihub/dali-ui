@@ -3026,3 +3026,132 @@ int UtcDaliRecyclerViewCacheExtentFollowsScaleP(void)
   DALI_TEST_EQUALS(recycler.GetFirstVisiblePosition(), 2u, TEST_LOCATION);
   END_TEST;
 }
+
+// The item spacing and the extent assumed for an unmeasured item are design lengths. At a UI scale
+// of 2 a spacing of 10 and an extent of 50 are 20 and 100 rendered pixels: item 1 sits at
+// 100 + 20 = 120, the 40 items span 40 x 100 + 39 x 20 = 4780 whether measured or estimated, and the
+// default cache of 300 (600 rendered) realises items 0..11 (11 x 120 = 1320 < 1400). The getters
+// return the values set. Fails before this change: item 1 at 110, a range of 3040, items 0..12.
+int UtcDaliRecyclerViewItemSpacingAndExtentFollowScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter         adapter  = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  layouter.SetItemSpacing(10.0f);
+  layouter.SetItemExtent(50.0f);
+  RecyclerView recycler = BuildRecycler(application, window, adapter, layouter);
+
+  DALI_TEST_EQUALS(layouter.GetItemSpacing(), 10.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(layouter.GetItemExtent(), 50.0f, 0.001f, TEST_LOCATION);
+  View second = GetRecyclerImpl(recycler).FindActiveView(1u);
+  DALI_TEST_CHECK(second);
+  DALI_TEST_EQUALS(MainPosition(second, false), 120.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(layouter.GetItemBounds(1u, 400.0f).y, 120.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(layouter.ComputeScrollRange(), 4780.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetLastVisiblePosition(), 11u, TEST_LOCATION);
+  END_TEST;
+}
+
+// A pure scale change lays the items out again. A window-filling list keeps its 480 x 800 size at
+// any scale, so its viewport does not change; at scale 1 items 50 high with a spacing of 10 put item 1
+// at 60, and the list is scrolled to 130. At scale 2 item 1 must be 100 high at 100 + 20 = 120, and
+// the offset stays 130 (offsets are rendered pixels and are not converted).
+// Fails before this change: nothing re-measured the items and item 1 stayed 50 high at 60.
+int UtcDaliRecyclerViewScaleChangeRelaysOutItemsP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(1.0f);
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter adapter = ItemAdapter::New();
+  adapter.GetItemCountSignal().Connect(&TestItemCount);
+  adapter.CreateViewHolderSignal().Connect(&TestCreateViewHolder);
+  adapter.BindViewHolderSignal().Connect(&TestBindViewHolder);
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  layouter.SetItemSpacing(10.0f);
+
+  RecyclerView recycler = RecyclerView::New();
+  recycler.SetRequestedWidth(MATCH_PARENT);
+  recycler.SetRequestedHeight(MATCH_PARENT);
+  window.Add(recycler);
+  recycler.SetItemsLayouter(layouter);
+  recycler.SetAdapter(adapter);
+  application.SendNotification();
+  application.SendNotification();
+
+  auto& impl = GetRecyclerImpl(recycler);
+  DALI_TEST_CHECK(impl.FindActiveView(1u));
+  DALI_TEST_EQUALS(MainPosition(impl.FindActiveView(1u), false), 60.0f, 0.001f, TEST_LOCATION);
+  recycler.ScrollBy(130.0f, false);
+  application.SendNotification();
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 130.0f, 0.001f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+  application.SendNotification();
+  application.SendNotification();
+
+  DALI_TEST_EQUALS(recycler.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 800.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 130.0f, 0.001f, TEST_LOCATION);
+  View second = impl.FindActiveView(1u);
+  DALI_TEST_CHECK(second);
+  DALI_TEST_EQUALS(MainPosition(second, false), 120.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 100.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// Regression guard: a focus change made between a scale change and the layout pass that follows it
+// must not lay the list out inside the focus-change emission. Item 2 of a window-filling list is
+// focused at a UI scale of 1; after SetUiScale(2), SetCurrentFocusView(item 3) made before any render
+// must leave item 3 focused. The focus slot aims with the previous geometry, in which item 3 is
+// visible, so nothing moves; the layout pass that follows lays the items out at the new scale. A
+// rebuild inside the slot would recycle item 3: the FocusManager would clear the focus inside its own
+// emission, the nested emission of that loss would be dropped, and GetCurrentFocusView() would be
+// empty.
+int UtcDaliRecyclerViewFocusRightAfterScaleChangeP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(1.0f);
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter adapter = ItemAdapter::New();
+  adapter.GetItemCountSignal().Connect(&TestItemCount);
+  adapter.CreateViewHolderSignal().Connect(&TestCreateViewHolder);
+  adapter.BindViewHolderSignal().Connect(&TestBindViewHolder);
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+
+  RecyclerView recycler = RecyclerView::New();
+  recycler.SetRequestedWidth(MATCH_PARENT);
+  recycler.SetRequestedHeight(MATCH_PARENT);
+  window.Add(recycler);
+  recycler.SetItemsLayouter(layouter);
+  recycler.SetAdapter(adapter);
+  application.SendNotification();
+  application.SendNotification();
+
+  auto& impl = GetRecyclerImpl(recycler);
+  for(auto& record : impl.mActiveItems)
+  {
+    if(record.view)
+    {
+      record.view.SetFocusable(true);
+    }
+  }
+  View item2 = impl.FindActiveView(2u);
+  View item3 = impl.FindActiveView(3u);
+  DALI_TEST_CHECK(item2);
+  DALI_TEST_CHECK(item3);
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(item2));
+
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+  DALI_TEST_CHECK(FocusManager::Get().SetCurrentFocusView(item3));
+  DALI_TEST_EQUALS(FocusManager::Get().GetCurrentFocusView(), item3, TEST_LOCATION);
+
+  FocusManager::Get().ClearFocus();
+  END_TEST;
+}
