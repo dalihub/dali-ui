@@ -966,7 +966,7 @@ private:
   bool                     mIsTextLoadingTaskRunning : 1;         ///< Whether the requested text loading task is running or not.
   bool                     mIsNaturalSizeTaskRunning : 1;         ///< Whether the requested natural size task is running or not.
   bool                     mIsHeightForWidthTaskRunning : 1;      ///< Whether the requested height for width task is running or not.
-  bool                     mAsyncRenderUsesUserSpaceGradient : 1; ///< Last render snapshot; retained after rejection until cancellation or replacement.
+  bool                     mAsyncRenderUsesUserSpaceGradient : 1; ///< Render snapshot retained while completion or recovery is pending.
 };
 
 } // namespace Internal

@@ -21,11 +21,11 @@
 #include <dali/integration-api/pixel-data-integ.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <cstring>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
-#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <utility>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
@@ -1967,4 +1967,343 @@ int UtcDaliTextVisualUserSpaceScaleAllocationReentryP(void)
   Ui::UiScaleManager::Get().SetScale(originalScale);
   Ui::UiScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
+}
+
+int UtcDaliTextVisualGradientCompletedSnapshotP(void)
+{
+  UiTestApplication    application;
+  auto                 rendered = CreateTextVisual(application);
+  Ui::Gradient::Linear gradient(Vector2::ZERO, Vector2(100.0f, 0.0f));
+  gradient.SetUnits(Ui::Gradient::Units::USER_SPACE);
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, UiText::Internal::Gradient::CreateStyle(gradient));
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+  auto parameters                    = MakeParameters("Completed user space snapshot");
+  parameters.isMarqueeEnabled        = false;
+  parameters.isTextGradientRequested = true;
+  DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, {});
+  DALI_TEST_CHECK(!UiInternal::TextVisual::UsesUserSpaceGradient(rendered.visual));
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}
+
+namespace
+{
+// source: Global / Overlay / Span. Style: None / BBOX / USER_SPACE.
+int CheckGradientStyleAllocationReentry(int source, int from, int to)
+{
+  UiTestApplication application;
+  const auto        originalScale    = Ui::UiScaleManager::Get().GetScale();
+  const auto        originalScalable = Ui::UiScaleManager::Get().IsScalable();
+  Ui::UiScaleManager::Get().SetScalable(true);
+  Ui::UiScaleManager::Get().SetScale(1.0f);
+  auto rendered = CreateTextVisual(application);
+  rendered.view.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
+  auto controller             = UiInternal::TextVisual::GetController(rendered.visual);
+  auto parameters             = MakeParameters("Gradient callback test");
+  parameters.isMarqueeEnabled = false;
+  auto setStyle               = [&](int mode, bool snapshot)
+  {
+    Ui::Gradient::Linear gradient(Vector2::ZERO, Vector2(100.0f, 0.0f));
+    gradient.SetUnits(mode == 2 ? Ui::Gradient::Units::USER_SPACE : Ui::Gradient::Units::OBJECT_BOUNDING_BOX);
+    gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+    const auto style = mode ? UiText::Internal::Gradient::CreateStyle(gradient) : UiText::Internal::Gradient::Style{};
+    if(source == 0)
+    {
+      UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, style);
+    }
+    else if(source == 1)
+    {
+      UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.visual, style);
+    }
+    else
+    {
+      auto builder = UiText::StyledTextBuilder::New(parameters.text.c_str());
+      if(mode)
+      {
+        builder.SetSpan(UiText::GradientSpan::New(gradient), 0u, static_cast<uint32_t>(parameters.text.size()));
+      }
+      auto styled = builder.Build();
+      controller->SetStyledText(styled);
+      if(snapshot)
+      {
+        parameters.hasStyledTextStyleSnapshot = true;
+        parameters.styledTextStyleSnapshot    = UiInternal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(styled, 96.0f);
+      }
+    }
+    if(snapshot)
+    {
+      parameters.hasUserSpaceGradient           = mode == 2;
+      parameters.isTextGradientRequested        = source == 0 && mode != 0;
+      parameters.isTextGradientOverlayRequested = source == 1 && mode != 0;
+    }
+  };
+  setStyle(from, true);
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+  auto loader = UiText::AsyncTextLoader::New();
+  PublishDirect(rendered, parameters, loader.RenderText(parameters, false, Size::ZERO));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+  auto oldRenderer              = rendered.view.GetRendererAt(0u);
+  auto oldTexture               = oldRenderer.GetTextures().GetTexture(0u);
+  auto oldShader                = oldRenderer.GetShader();
+  parameters.isUnderlineEnabled = true;
+  parameters.underlineHeight    = 2.0f;
+  parameters.underlineColor     = Color::WHITE;
+  const auto        candidate   = loader.RenderText(parameters, false, Size::ZERO);
+  bool              fired       = false;
+  ConnectionTracker tracker;
+  application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle object)
+  {
+    if(!fired && Shader::DownCast(object))
+    {
+      fired = true;
+      if(from != to)
+      {
+        setStyle(to, false);
+      }
+      Ui::UiScaleManager::Get().SetScale(2.0f);
+    }
+  });
+  PublishDirect(rendered, parameters, candidate);
+  DALI_TEST_CHECK(fired);
+  const bool reject = from == 2 || to == 2;
+  DALI_TEST_EQUALS(observer.mCompletionCount, reject ? 1u : 2u, TEST_LOCATION);
+  if(reject)
+  {
+    DALI_TEST_CHECK(rendered.view.GetRendererCount() == 1u);
+    DALI_TEST_CHECK(rendered.view.GetRendererAt(0u) == oldRenderer);
+    DALI_TEST_CHECK(oldRenderer.GetTextures().GetTexture(0u) == oldTexture);
+    DALI_TEST_CHECK(oldRenderer.GetShader() == oldShader);
+  }
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  rendered.view.Unparent();
+  Ui::UiScaleManager::Get().SetScale(originalScale);
+  Ui::UiScaleManager::Get().SetScalable(originalScalable);
+  END_TEST;
+}
+
+} // unnamed namespace
+
+int UtcDaliTextVisualGradientGlobalUserToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(0, 2, 2);
+}
+
+int UtcDaliTextVisualGradientGlobalUserToBboxShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(0, 2, 1);
+}
+
+int UtcDaliTextVisualGradientGlobalUserToNoneShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(0, 2, 0);
+}
+
+int UtcDaliTextVisualGradientGlobalBboxToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(0, 1, 2);
+}
+
+int UtcDaliTextVisualGradientGlobalNoneToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(0, 0, 2);
+}
+
+int UtcDaliTextVisualGradientGlobalBboxToBboxShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(0, 1, 1);
+}
+
+int UtcDaliTextVisualGradientGlobalNoneToNoneShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(0, 0, 0);
+}
+
+int UtcDaliTextVisualGradientOverlayUserToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(1, 2, 2);
+}
+
+int UtcDaliTextVisualGradientOverlayUserToBboxShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(1, 2, 1);
+}
+
+int UtcDaliTextVisualGradientOverlayUserToNoneShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(1, 2, 0);
+}
+
+int UtcDaliTextVisualGradientOverlayBboxToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(1, 1, 2);
+}
+
+int UtcDaliTextVisualGradientOverlayNoneToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(1, 0, 2);
+}
+
+int UtcDaliTextVisualGradientOverlayBboxToBboxShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(1, 1, 1);
+}
+
+int UtcDaliTextVisualGradientOverlayNoneToNoneShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(1, 0, 0);
+}
+
+int UtcDaliTextVisualGradientSpanUserToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(2, 2, 2);
+}
+
+int UtcDaliTextVisualGradientSpanUserToBboxShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(2, 2, 1);
+}
+
+int UtcDaliTextVisualGradientSpanUserToNoneShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(2, 2, 0);
+}
+
+int UtcDaliTextVisualGradientSpanBboxToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(2, 1, 2);
+}
+
+int UtcDaliTextVisualGradientSpanNoneToUserShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(2, 0, 2);
+}
+
+int UtcDaliTextVisualGradientSpanBboxToBboxShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(2, 1, 1);
+}
+
+int UtcDaliTextVisualGradientSpanNoneToNoneShaderReentryP(void)
+{
+  return CheckGradientStyleAllocationReentry(2, 0, 0);
+}
+
+int UtcDaliTextVisualGradientRequestShaderReentryP(void)
+{
+  UiTestApplication    application;
+  auto                 rendered = CreateTextVisual(application);
+  Ui::Gradient::Linear gradient(Vector2::ZERO, Vector2(100.0f, 0.0f));
+  gradient.SetUnits(Ui::Gradient::Units::USER_SPACE);
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, UiText::Internal::Gradient::CreateStyle(gradient));
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+  auto parameters                    = MakeParameters("Initial");
+  parameters.isMarqueeEnabled        = false;
+  parameters.isTextGradientRequested = true;
+  DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+  auto oldRenderer              = rendered.view.GetRendererAt(0u);
+  auto oldTexture               = oldRenderer.GetTextures().GetTexture(0u);
+  parameters.text               = "Old result A";
+  parameters.isUnderlineEnabled = true;
+  parameters.underlineHeight    = 2.0f;
+  bool              fired = false, accepted = false;
+  ConnectionTracker tracker;
+  application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle object)
+  {
+    if(!fired && Shader::DownCast(object))
+    {
+      fired     = true;
+      auto next = parameters;
+      next.text = "New request B owns completion";
+      accepted  = UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, next);
+    }
+  });
+  DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_CHECK(fired && accepted);
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(oldRenderer.GetTextures().GetTexture(0u) == oldTexture);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 2u, TEST_LOCATION);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}
+
+namespace
+{
+int CheckGradientRequestCancellationReentry(bool emptyRequest)
+{
+  UiTestApplication    application;
+  auto                 rendered = CreateTextVisual(application);
+  Ui::Gradient::Linear gradient(Vector2::ZERO, Vector2(100.0f, 0.0f));
+  gradient.SetUnits(Ui::Gradient::Units::USER_SPACE);
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, UiText::Internal::Gradient::CreateStyle(gradient));
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+  auto parameters                    = MakeParameters("Initial");
+  parameters.isMarqueeEnabled        = false;
+  parameters.isTextGradientRequested = true;
+  DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
+  auto oldRenderer              = rendered.view.GetRendererAt(0u);
+  auto oldTexture               = oldRenderer.GetTextures().GetTexture(0u);
+  parameters.text               = "Old result A";
+  parameters.isUnderlineEnabled = true;
+  parameters.underlineHeight    = 2.0f;
+  bool              fired = false, accepted = false;
+  ConnectionTracker tracker;
+  application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle object)
+  {
+    if(!fired && Shader::DownCast(object))
+    {
+      fired = true;
+      if(emptyRequest)
+      {
+        auto next = parameters;
+        next.text.clear();
+        accepted = UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, next);
+      }
+      else
+      {
+        UiInternal::TextVisual::CancelAsyncRender(rendered.visual);
+        accepted = true;
+      }
+    }
+  });
+  DALI_TEST_CHECK(UiInternal::TextVisual::UpdateAsyncRenderer(rendered.visual, parameters));
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+  DALI_TEST_CHECK(fired && accepted);
+  DALI_TEST_EQUALS(observer.mCompletionCount, emptyRequest ? 2u : 1u, TEST_LOCATION);
+  if(emptyRequest)
+  {
+    DALI_TEST_CHECK(!oldRenderer.GetTextures());
+  }
+  else
+  {
+    DALI_TEST_CHECK(oldRenderer.GetTextures().GetTexture(0u) == oldTexture);
+  }
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}
+} // unnamed namespace
+
+int UtcDaliTextVisualGradientCancelShaderReentryP(void)
+{
+  return CheckGradientRequestCancellationReentry(false);
+}
+
+int UtcDaliTextVisualGradientEmptyShaderReentryP(void)
+{
+  return CheckGradientRequestCancellationReentry(true);
 }

@@ -1128,20 +1128,28 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
   }
   Text::AsyncTextParameters parameters          = textInformation.parameters;
   const auto                publicationRevision = mController->GetRenderRevision();
+  const auto                publicationTaskId   = mTextLoadingTaskId;
 
   const bool isRenderRequest = IsAsyncRenderRequest(parameters.requestType);
   // Current styles may have switched from BBOX to USER_SPACE since dispatch.
   const bool usesUserSpaceGradient   = isRenderRequest && (parameters.hasUserSpaceGradient || UsesUserSpaceGradient());
   const auto hasCurrentGradientScale = [&]()
   {
-    if(!usesUserSpaceGradient)
+    if(!isRenderRequest)
     {
       return true;
     }
     Ui::View owner = Ui::View::DownCast(mControl.GetHandle());
     // Match Controller::SetUiScale: sub-epsilon changes do not schedule a
     // new text layout and must not strand a manual request.
-    return !owner || Dali::Equals(GetImpl(owner).GetEffectiveScale(), parameters.decorationUiScale, Math::MACHINE_EPSILON_1000);
+    if(!owner || Dali::Equals(GetImpl(owner).GetEffectiveScale(), parameters.decorationUiScale, Math::MACHINE_EPSILON_1000))
+    {
+      return true;
+    }
+    // Shader creation can invoke application code without changing the text
+    // revision. Recheck styles only on a scale mismatch; stable completions
+    // do not repeat the span-paint lookup.
+    return !usesUserSpaceGradient && !UsesUserSpaceGradient();
   };
   if(isRenderRequest && !hasCurrentGradientScale())
   {
@@ -1403,7 +1411,8 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       .EnableTextReveal(textRevealEnabled);
 
     Shader shader = GetTextShader(mFactoryCache, featureBuilder);
-    if(!hasCurrentGradientScale())
+    if(!Dali::Adaptor::IsAvailable() || mControl.GetHandle() != control ||
+       !mController->IsAsyncRendering() || mTextLoadingTaskId != publicationTaskId || !hasCurrentGradientScale())
     {
       return;
     }
@@ -1716,7 +1725,8 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     // Allocation/attachment above can invoke application code. Do not deliver
     // the old result's image timings or completion after a newer publication.
     const auto* publishedReveal = GetTextVisualRevealData(mRevealData);
-    if(!Dali::Adaptor::IsAvailable() || mController->GetRenderRevision() != publicationRevision ||
+    if(!Dali::Adaptor::IsAvailable() || mTextLoadingTaskId != publicationTaskId ||
+       mController->GetRenderRevision() != publicationRevision ||
        parameters.textRevealRevision != (publishedReveal ? publishedReveal->revision : 0u) ||
        !mController->IsAsyncRendering() || mControl.GetHandle() != control || !hasCurrentGradientScale())
     {
@@ -1738,7 +1748,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       mAsyncTextInterface->AsyncTextFitChanged(parameters.fontSize);
     }
 
-    if(!hasCurrentGradientScale())
+    if(mTextLoadingTaskId != publicationTaskId || !hasCurrentGradientScale())
     {
       return;
     }
@@ -1761,6 +1771,13 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       }
     }
 
+    // Retain rejected snapshots for Measure to release a manual request,
+    // but do not let a completed USER_SPACE request affect later plain/BBOX
+    // work. A callback above may already have dispatched a newer task.
+    if(mAsyncRenderUsesUserSpaceGradient && mTextLoadingTaskId == publicationTaskId && !mIsTextLoadingTaskRunning)
+    {
+      mAsyncRenderUsesUserSpaceGradient = false;
+    }
     if(mAsyncTextInterface)
     {
       mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
@@ -2540,6 +2557,9 @@ void TextVisual::CancelAsyncRender(Ui::Integration::Visual::Base visual)
     Text::AsyncTextManager::Get().RequestCancel(visualObject.mTextLoadingTaskId);
     visualObject.mIsTextLoadingTaskRunning = false;
   }
+  // A completion callback may already be publishing with the running flag
+  // cleared. Invalidate its ownership as well as cancelling queued work.
+  visualObject.mTextLoadingTaskId = 0u;
 }
 
 bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextParameters& parameters)
@@ -2558,6 +2578,7 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
       Text::AsyncTextManager::Get().RequestCancel(mTextLoadingTaskId);
       mIsTextLoadingTaskRunning = false;
     }
+    mTextLoadingTaskId = 0u;
 
     // Remove the texture set and any renderer previously set.
     RemoveRenderer(control, true);
