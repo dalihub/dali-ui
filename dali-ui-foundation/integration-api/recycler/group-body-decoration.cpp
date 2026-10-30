@@ -15,7 +15,9 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/recycler/group-body-decoration.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/math/vector3.h>
 #include <dali/public-api/math/vector4.h>
@@ -185,11 +187,13 @@ void GroupBodyDecoration::OnItemBoundsUpdated(const ItemViewHolder& holder, cons
 
   GroupState& gs = it->second;
 
-  // bounds is slot-space: for a VERTICAL list, x=0 and width=full cross extent.
-  // The item view is placed inside at x=mMarginLeft, width=bounds.width-mMarginLeft-mMarginRight
-  // (via GetItemOffsets). Apply the same margins here so the card aligns with the items.
-  const float cardX = bounds.x + mMarginLeft;
-  const float cardW = std::max(0.0f, bounds.width - mMarginLeft - mMarginRight);
+  // bounds is slot-space in rendered pixels: for a VERTICAL list, x=0 and width=full cross extent.
+  // The item view is placed inside at the margins GetItemOffsets() returns, which RecyclerView
+  // multiplies by its effective scale. Apply the same scaled margins here so the card aligns with
+  // the items: the card is a child of the same scroller, so it has that scale.
+  const float scale = Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(gs.bgView));
+  const float cardX = bounds.x + mMarginLeft * scale;
+  const float cardW = std::max(0.0f, bounds.width - mMarginLeft * scale - mMarginRight * scale);
 
   // Track the vertical extent of ALL visible body items this pass.
   gs.topY    = std::min(gs.topY, bounds.y);

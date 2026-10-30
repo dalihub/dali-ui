@@ -63,9 +63,9 @@ public:
   virtual float    GetCacheBefore() const    = 0;
   virtual float    GetCacheAfter() const     = 0;
 
-  // Returns the sum of all registered ItemDecoration::GetItemOffsets() for the
-  // item at @a position. Called by the layouter in LayoutChunk after
-  // GetViewForPosition() has populated the holder. start/end mean physical
+  // Returns the sum of all registered ItemDecoration::GetItemOffsets(), multiplied by the
+  // RecyclerView's effective scale, for the item at @a position. Called by the layouter in
+  // LayoutChunk after GetViewForPosition() has populated the holder. start/end mean physical
   // left/right and are not swapped for a right-to-left layout direction.
   virtual Insets GetDecorationOffsets(uint32_t position) const = 0;
 };

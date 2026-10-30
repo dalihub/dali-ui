@@ -2961,3 +2961,37 @@ int UtcDaliRecyclerViewKeyEdgeFeedbackFollowsScaleP(void)
   DALI_TEST_EQUALS(endVelocity, -1200.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
+
+// Decorations reserve space in natural units, like the list's other lengths. At a UI scale of 2
+// CountingDecoration's offsets (start 1, end 4, top 2, bottom 8) are 2, 8, 4 and 16 rendered pixels:
+// the first slot is 4 + 100 + 16 = 120 long and its item sits at (2, 4), 400 - 2 - 8 = 390 wide.
+// Fails before this change: a 110 slot and the item at (1, 2), 395 wide.
+int UtcDaliRecyclerViewDecorationOffsetsFollowScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter         adapter  = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView        recycler = BuildRecycler(application, window, adapter, layouter);
+  CountingDecoration  decoration;
+  recycler.AddItemDecoration(decoration);
+  application.SendNotification();
+
+  const LayoutRect firstSlot  = layouter.GetItemBounds(0u, 400.0f);
+  const LayoutRect secondSlot = layouter.GetItemBounds(1u, 400.0f);
+  DALI_TEST_EQUALS(firstSlot.height, 120.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondSlot.y, 120.0f, 0.001f, TEST_LOCATION);
+
+  View first = GetRecyclerImpl(recycler).FindActiveView(0u);
+  DALI_TEST_CHECK(first);
+  DALI_TEST_EQUALS(first.GetProperty<Vector3>(Actor::Property::POSITION).x, 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(first.GetProperty<Vector3>(Actor::Property::POSITION).y, 4.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(first.GetProperty<Vector3>(Actor::Property::SIZE).width, 390.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(first.GetProperty<Vector3>(Actor::Property::SIZE).height, 100.0f, 0.001f, TEST_LOCATION);
+
+  recycler.RemoveItemDecoration(decoration);
+  END_TEST;
+}
