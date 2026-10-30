@@ -2995,3 +2995,34 @@ int UtcDaliRecyclerViewDecorationOffsetsFollowScaleP(void)
   recycler.RemoveItemDecoration(decoration);
   END_TEST;
 }
+
+// The cache extent is a design length: at a UI scale of 2 a cache of 150 realises 300 rendered
+// pixels beyond the 800 viewport. With items 100 high the window first ends before 1100 (items
+// 0..10); scrolled to 500 it starts at 200, so items 0 and 1 leave it. The getter returns the value
+// set. Fails before this change: the window ended before 950 (last 9) and started at 350 (first 3).
+int UtcDaliRecyclerViewCacheExtentFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter         adapter  = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView        recycler = BuildRecycler(application, window, adapter, layouter);
+  recycler.SetCacheExtent(150.0f, 150.0f);
+  application.SendNotification();
+
+  float before = 0.0f;
+  float after  = 0.0f;
+  recycler.GetCacheExtent(before, after);
+  DALI_TEST_EQUALS(before, 150.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(after, 150.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetLastVisiblePosition(), 10u, TEST_LOCATION);
+
+  recycler.ScrollBy(500.0f, false);
+  application.SendNotification();
+  DALI_TEST_EQUALS(recycler.GetScrollOffset(), 500.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetFirstVisiblePosition(), 2u, TEST_LOCATION);
+  END_TEST;
+}
