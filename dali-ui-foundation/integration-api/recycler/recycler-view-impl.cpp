@@ -1623,7 +1623,9 @@ bool RecyclerViewImpl::OnKeyRepeatTimerTick()
         // hasn't scrolled to offset 0). Step-scroll to the boundary and keep the timer.
         if(!IsAtScrollBoundary(mKeyRepeatDir))
         {
-          ScrollBy(IsForwardDirection(mKeyRepeatDir) ? mKeyScrollStep : -mKeyScrollStep, false);
+          // The step is set in natural units; scroll distances are rendered pixels.
+          const float step = mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this);
+          ScrollBy(IsForwardDirection(mKeyRepeatDir) ? step : -step, false);
           return true;
         }
         mKeyRepeatTargetPos = INVALID_ITEM_POSITION;
@@ -1706,12 +1708,15 @@ void RecyclerViewImpl::OnFocusNavigationRequested(Ui::View currentFocusedView, F
     return;
   }
 
+  // The step is set in natural units; offsets and distances are rendered pixels.
+  const float step = mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this);
+
   uint32_t nextPos = NextItemPosition(curPos, direction);
   if(nextPos == INVALID_ITEM_POSITION)
   {
     if(!IsAtScrollBoundary(direction))
     {
-      ScrollBy(IsForwardDirection(direction) ? mKeyScrollStep : -mKeyScrollStep, true);
+      ScrollBy(IsForwardDirection(direction) ? step : -step, true);
       result.Stay();
       return;
     }
@@ -1738,7 +1743,7 @@ void RecyclerViewImpl::OnFocusNavigationRequested(Ui::View currentFocusedView, F
       // of firing the edge feedback immediately.
       if(!IsAtScrollBoundary(direction))
       {
-        ScrollBy(IsForwardDirection(direction) ? mKeyScrollStep : -mKeyScrollStep, true);
+        ScrollBy(IsForwardDirection(direction) ? step : -step, true);
         result.Stay();
         return;
       }
@@ -1761,7 +1766,7 @@ void RecyclerViewImpl::OnFocusNavigationRequested(Ui::View currentFocusedView, F
                                    ? std::max(0.0f, end - (curOffset + GetViewportExtent()))
                                    : std::max(0.0f, curOffset - start);
 
-    if(dist < mKeyScrollStep)
+    if(dist < step)
     {
       // Item is within step distance — focus it directly.
       // ScrollOnFocus (OnFocusManagerChanged) handles making it fully visible.
@@ -1834,8 +1839,9 @@ bool RecyclerViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
     return false;
   }
 
+  // The key scroll step is set in natural units; the viewport extent is already rendered.
   const bool  pageScroll = (direction == FocusDirection::PAGE_UP || direction == FocusDirection::PAGE_DOWN);
-  const float step       = pageScroll ? GetViewportExtent() : mKeyScrollStep;
+  const float step       = pageScroll ? GetViewportExtent() : mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this);
   ScrollBy(IsForwardDirection(direction) ? step : -step, true);
   return true;
 }

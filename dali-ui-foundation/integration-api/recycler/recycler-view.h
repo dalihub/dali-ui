@@ -94,6 +94,7 @@ public:
   bool IsScrolling() const;
 
   // Key-scroll configuration — mirrors ScrollView API.
+  // The step is in natural units, multiplied by this view's effective scale.
   void  SetKeyScrollEnabled(bool enable);
   bool  IsKeyScrollEnabled() const;
   void  SetKeyScrollStep(float step);
