@@ -2913,3 +2913,25 @@ int UtcDaliRecyclerViewFocusScrollPeekFollowsScaleP(void)
   DALI_TEST_EQUALS(recycler.GetScrollOffset(), 320.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
+
+// A wheel notch scrolls 120 natural units of content: 240 rendered pixels at a UI scale of 2.
+// Fails before this change: the scroller headed for -120.
+int UtcDaliRecyclerViewWheelStepFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+  Window            window = application.GetWindow();
+  ResetCounters();
+
+  ItemAdapter         adapter  = ItemAdapter::New();
+  LinearItemsLayouter layouter = LinearItemsLayouter::New(LinearItemsLayouter::Orientation::VERTICAL);
+  RecyclerView        recycler = BuildRecycler(application, window, adapter, layouter);
+  auto&               impl     = GetRecyclerImpl(recycler);
+
+  WheelEvent wheel = WheelEvent::New(WheelEvent::MOUSE_WHEEL, 0, 0u, Vector2::ZERO, 1, 100u);
+  DALI_TEST_CHECK(impl.OnWheelEvent(wheel));
+  // A playing animation reports its target.
+  DALI_TEST_EQUALS(impl.mScroller.GetProperty<float>(Actor::Property::POSITION_Y), -240.0f, 0.001f, TEST_LOCATION);
+  impl.CancelScrollAnimation();
+  END_TEST;
+}
