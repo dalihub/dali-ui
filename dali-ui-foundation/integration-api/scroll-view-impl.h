@@ -274,8 +274,8 @@ public: // API
    * @brief Sets whether key-based step scrolling is enabled.
    *
    * When enabled, ScrollView intercepts focus navigation requests from children.
-   * If the next focusable view is within mKeyScrollStep pixels it is focused normally;
-   * otherwise the ScrollView scrolls by mKeyScrollStep instead.
+   * If the next focusable view is within the key scroll step it is focused normally;
+   * otherwise the ScrollView scrolls by that step instead.
    */
   void SetKeyScrollEnabled(bool enable);
 
@@ -285,7 +285,8 @@ public: // API
   bool IsKeyScrollEnabled() const;
 
   /**
-   * @brief Sets the step distance (px) used for key-based step scrolling.
+   * @brief Sets the step distance used for key-based step scrolling, in natural units
+   * (multiplied by the effective scale where it is used).
    *
    * Acts as both the proximity threshold (focus jumps if next item is within this
    * distance) and the scroll step size (scrolled by this amount when no nearby
@@ -800,7 +801,7 @@ private:
 
   // Key-scroll behaviour
   bool           mKeyScrollEnabled;   ///< Whether key-based step scrolling is active
-  float          mKeyScrollStep;      ///< Proximity threshold and step size for key scrolling (px)
+  float          mKeyScrollStep;      ///< Proximity threshold and step size for key scrolling (natural units)
   View           mKeyScrollLastChild; ///< Content child that last triggered a case-3 focus transfer to Self()
   FocusDirection mKeyScrollLastDir;   ///< Direction of that transfer (only valid when mKeyScrollLastChild is set)
 
