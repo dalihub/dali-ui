@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 void utc_dali_page_scroll_view_startup(void)
 {
@@ -233,6 +235,25 @@ void CheckPartialPageCountShrinkDuringSnap(ScrollDirection direction)
   // The settled commit finds the page already reported, so it stays silent.
   DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
 }
+
+// Sets the system UI scale for the scope of a test and restores 1.0 when the scope ends, also when
+// a DALI_TEST_* check throws. Declare it after the UiTestApplication so that it is destroyed first.
+class ScopedUiScale
+{
+public:
+  explicit ScopedUiScale(float scale)
+  {
+    LayoutScaleManager::Get().SetUiScale(scale);
+  }
+
+  ~ScopedUiScale()
+  {
+    LayoutScaleManager::Get().SetUiScale(1.0f);
+  }
+
+  ScopedUiScale(const ScopedUiScale&)            = delete;
+  ScopedUiScale& operator=(const ScopedUiScale&) = delete;
+};
 
 } // namespace
 
@@ -1452,5 +1473,36 @@ int UtcDaliPageScrollViewHalfPixelMaximumKeepsNotifiedPartialPageP(void)
   DALI_TEST_EQUALS(static_cast<int>(recorder.signals.size()), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(recorder.signals[0].first, 4, TEST_LOCATION);
   DALI_TEST_EQUALS(recorder.signals[0].second, 5, TEST_LOCATION);
+  END_TEST;
+}
+
+// An explicit page size is a design length like the viewport it defaults to. The pager is 100 x 80
+// over 500 with a page size of 50: 10 pages at a UI scale of 1. At a scale of 2 the extent is 1000
+// and a page 100 rendered pixels, so the pager keeps its 10 pages and page 3 rests at offset 300.
+// GetPageSize() still returns the value set. Fails before this change: 20 pages, page 3 at 150.
+int UtcDaliPageScrollViewExplicitPageSizeFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(1.0f);
+  View              content;
+  PageScrollView    pager = BuildPager(content);
+  pager.SetPageSize(Vector2(50.0f, 80.0f));
+  application.GetWindow().Add(pager);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(pager.GetPageCount(), 10, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::SIZE_WIDTH), 1000.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetPageSize(), Vector2(50.0f, 80.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetPageCount(), 10, TEST_LOCATION);
+
+  pager.ScrollToPage(3, false);
+  DALI_TEST_EQUALS(pager.GetScrollPosition().x, 300.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ContentPositionAlong(content, false), -300.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pager.GetCurrentPage(), 3, TEST_LOCATION);
   END_TEST;
 }
