@@ -40,7 +40,7 @@ namespace Property
 enum
 {
   /**
-   * @brief The thickness of the arc.
+   * @brief The thickness of the arc, in natural units: it is drawn multiplied by the effective scale of the View.
    * @details Name "thickness", type Property::FLOAT, animatable.
    * @note Mandatory.
    */
