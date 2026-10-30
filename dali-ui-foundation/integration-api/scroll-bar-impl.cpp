@@ -232,9 +232,11 @@ float ScrollBarImpl::GetBarMinSize() const
   {
     return mBarMinSize;
   }
+  // A twentieth of the bar's longer rendered side, returned in natural units like the other bar
+  // lengths: the bar bounds are AbsoluteLayoutParams, which the layout multiplies by the scale.
   float size = std::max(Self().GetProperty<float>(Actor::Property::SIZE_WIDTH),
                         Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT));
-  return std::max(1.0f, size / 20.0f);
+  return std::max(1.0f, size / 20.0f) / Ui::Extension::View::GetEffectiveLayoutScale(*this);
 }
 
 void ScrollBarImpl::SetBarMinSize(float minSize)
