@@ -69,7 +69,8 @@ public:
   // row-type information needed by GetItemBounds.
   void SetGroupAdapter(GroupAdapter adapter);
 
-  // Horizontal inset applied to BODY_* items. Decorations should match these margins.
+  // Horizontal inset applied to BODY_* items, in natural units: the layouter multiplies it by the
+  // RecyclerView's effective scale. Decorations should match these margins.
   void  SetBodyHorizontalMargin(float left, float right);
   float GetBodyMarginLeft() const;
   float GetBodyMarginRight() const;
