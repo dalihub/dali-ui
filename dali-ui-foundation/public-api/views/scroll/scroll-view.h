@@ -51,6 +51,9 @@ class ScrollViewImpl;
  * - Scroll event signals
  * - Drag event signals
  *
+ * The content rests at this view's padding (View::SetPadding()). Like every layout length the
+ * padding is in natural units and is multiplied by the view's effective scale.
+ *
  * Basic usage:
  * @code
  * // Create a ScrollView

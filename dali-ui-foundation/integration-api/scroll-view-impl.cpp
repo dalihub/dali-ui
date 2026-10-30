@@ -290,10 +290,16 @@ void ScrollViewImpl::RefreshViewport()
 
   // The viewport IS this view's own arranged size. Compare against the cached value
   // with the same tolerance SetScrollable* uses, so a pass that did not resize the
-  // scroll view costs one property read and nothing else.
+  // scroll view and kept its rest offset costs a few reads and nothing else.
   const float width  = Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
   const float height = Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);
-  if(std::abs(mViewportWidth - width) < 0.01f && std::abs(mViewportHeight - height) < 0.01f)
+  // The content rests at the padding in rendered pixels: a new padding or effective scale moves it
+  // even when neither the viewport nor the content extent changed. Same expression as
+  // UpdateScrollingProperties, so an unchanged offset compares equal.
+  const Insets padding = GetPadding();
+  const float  scale   = Ui::Extension::View::GetEffectiveLayoutScale(*this);
+  if(std::abs(mViewportWidth - width) < 0.01f && std::abs(mViewportHeight - height) < 0.01f &&
+     mMaximumStartX == padding.start * scale && mMaximumStartY == padding.top * scale)
   {
     return;
   }
@@ -1654,12 +1660,9 @@ Vector2 ScrollViewImpl::GetScrollPositionForChild(View child, Vector2 current) c
 
 Vector2 ScrollViewImpl::ContentPositionToScrollPosition(const Vector2& content) const
 {
-  float marginStart     = 0.0f;
-  float marginStartTop  = 0.0f;
-  float paddingStart    = GetPadding().start;
-  float paddingStartTop = GetPadding().top;
-
-  return Vector2(-(content.x - paddingStart - marginStart), -(content.y - paddingStartTop - marginStartTop));
+  // The inverse of ApplyScrollPosition, from the same rest offset it placed the content at (the
+  // padding in rendered pixels, cached by UpdateScrollingProperties).
+  return Vector2(mMaximumStartX - content.x, mMaximumStartY - content.y);
 }
 
 Vector2 ScrollViewImpl::DeltaFromScrollPosition(const Vector2& scrollPosition) const
@@ -2310,10 +2313,13 @@ void ScrollViewImpl::UpdateScrollingProperties()
     return;
   }
 
-  Insets padding = GetPadding();
+  // The content rests at the padding, a layout length in natural units: place it in rendered
+  // pixels, as the layout insets and sizes the content with the padding times the same scale.
+  const Insets padding = GetPadding();
+  const float  scale   = Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
-  mMaximumStartX = padding.start;
-  mMaximumStartY = padding.top;
+  mMaximumStartX = padding.start * scale;
+  mMaximumStartY = padding.top * scale;
 
   mViewportWidth  = Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
   mViewportHeight = Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);

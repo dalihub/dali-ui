@@ -126,9 +126,9 @@ public: // API
   void SetScrollableHeight(float height);
 
   /**
-   * @brief Re-reads this view's own arranged size as the scroll viewport and, if it
-   * changed, recomputes the scroll bounds and clamp and notifies
-   * OnScrollableAreaChanged().
+   * @brief Re-reads this view's own arranged size as the scroll viewport and, if it or
+   * the content's rest offset (the padding times the effective scale) changed, recomputes
+   * the scroll bounds and clamp and notifies OnScrollableAreaChanged().
    *
    * @note The viewport is this view's OWN size, which the layout pass applies from
    * the PARENT's arrange -- it never passes through SetScrollableWidth/Height (those
@@ -418,7 +418,8 @@ protected:
   Vector2 GetScrollPositionForChild(View child, Vector2 current) const;
 
   /**
-   * @brief Converts content position to scroll position.
+   * @brief Converts a content actor position to the scroll position: its distance from the
+   * rest offset ApplyScrollPosition() places the content at (the padding in rendered pixels).
    */
   Vector2 ContentPositionToScrollPosition(const Vector2& content) const;
 
@@ -786,8 +787,8 @@ private:
   bool            mIsScrolling;          ///< Is scrolling in progress
   float           mViewportWidth;        ///< Viewport width
   float           mViewportHeight;       ///< Viewport height
-  float           mMaximumStartY;        ///< Maximum start Y position
-  float           mMaximumStartX;        ///< Maximum start X position
+  float           mMaximumStartY;        ///< Content rest Y: the top padding in rendered pixels
+  float           mMaximumStartX;        ///< Content rest X: the start padding in rendered pixels
   float           mMinimumStartY;        ///< Minimum start Y position
   float           mMinimumStartX;        ///< Minimum start X position
   bool            mHasScrollableArea;    ///< Has scrollable area
