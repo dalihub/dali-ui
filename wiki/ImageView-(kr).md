@@ -423,7 +423,7 @@ bool borderOnly = imageView.IsNPatchBorderOnly();
 | ![Original](./assets/ImageView/np_original.svg) | ![Stretched](./assets/ImageView/np_stretched.svg) | ![NPatch Applied](./assets/ImageView/np_applied.svg) |
 
 **핵심 포인트:**
-- 🔳 **모서리**는 원래 크기 그대로 유지
+- 🔳 **모서리**는 원래 크기 그대로 유지: 소스 픽셀은 natural 단위이므로 View의 유효 스케일만큼 그려집니다(스케일 2에서 10픽셀 테두리는 20픽셀)
 - ↔️ **위/아래 가장자리**는 가로로만 늘어남
 - ↕️ **왼쪽/오른쪽 가장자리**는 세로로만 늘어남
 - 🟧 **중앙**은 가로세로 모두 늘어남

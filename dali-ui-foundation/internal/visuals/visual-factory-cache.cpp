@@ -502,6 +502,11 @@ Shader VisualFactoryCache::GetNPatchShader(int index)
       // Only cache vanilla 9 patch shaders
       shader = GenerateAndSaveShader(VisualFactoryCache::NINE_PATCH_SHADER, SHADER_NPATCH_VISUAL_3X3_SHADER_VERT,
                                      SHADER_NPATCH_VISUAL_SHADER_FRAG);
+
+      // The defaults NPatchVisual registers on this cached shader, whichever path creates it first.
+      shader.ReserveCustomProperties(2);
+      shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+      shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
     }
   }
   else if(xStretchCount > 0 || yStretchCount > 0)

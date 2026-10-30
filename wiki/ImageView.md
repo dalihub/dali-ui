@@ -422,7 +422,7 @@ bool borderOnly = imageView.IsNPatchBorderOnly();
 | ![Original](./assets/ImageView/np_original.svg) | ![Stretched](./assets/ImageView/np_stretched.svg) | ![NPatch Applied](./assets/ImageView/np_applied.svg) |
 
 **Key Points:**
-- 🔳 **Corners** remain fixed at original size
+- 🔳 **Corners** remain fixed at original size: source pixels are natural units, drawn at the View's effective scale (a 10-pixel frame is 20 pixels at scale 2)
 - ↔️ **Top/Bottom edges** stretch horizontally only
 - ↕️ **Left/Right edges** stretch vertically only
 - 🟧 **Center** stretches in both directions

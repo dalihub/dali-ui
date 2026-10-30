@@ -465,6 +465,38 @@ int UtcDaliVisualFactoryCacheGeometryAndBrokenImageFallbackP(void)
   END_TEST;
 }
 
+int UtcDaliVisualFactoryCacheBrokenNPatchShaderScaleDefaultsP(void)
+{
+  UiTestApplication application;
+  using Cache = Dali::Ui::Internal::VisualFactoryCache;
+  Cache cache(false);
+
+  const std::string source(__FILE__);
+  const std::size_t marker = source.find("/automated-tests/");
+  DALI_TEST_CHECK(marker != std::string::npos);
+  const std::string root = source.substr(0u, marker);
+  std::string defaultUrl = root + "/samples/text/res/cursor_handle.png";
+
+  // An n-patch broken image creates the cached 3x3 n-patch shader of this fresh cache. Its fixed frame
+  // reads viewEffectiveScale, so the shader needs the defaults NPatchVisual gives the same shader.
+  Shader shader = Shader::New("void main() { gl_Position = vec4(0.0); }",
+                              "void main() { gl_FragColor = vec4(1.0); }");
+  Geometry       geometry = cache.GetGeometry(Cache::QUAD_GEOMETRY);
+  VisualRenderer renderer = VisualRenderer::New(geometry, shader);
+  cache.SetBrokenImageUrl(defaultUrl, {Dali::Integration::ToDaliString(root + "/samples/image-view/res/button-up-1.9.png")});
+  cache.UpdateBrokenImageRenderer(renderer, Vector2(36.0f, 36.0f), false);
+  DALI_TEST_CHECK(cache.GetBrokenImageVisualType(0) == Dali::Ui::Internal::VisualUrl::N_PATCH);
+  DALI_TEST_CHECK(renderer.GetShader() == cache.GetShader(Cache::NINE_PATCH_SHADER));
+
+  for(const char* name : {"viewEffectiveScale", "visualTransformUseEffectiveScale"})
+  {
+    const Property::Index index = renderer.GetShader().GetPropertyIndex(name);
+    DALI_TEST_CHECK(index != Property::INVALID_INDEX);
+    DALI_TEST_EQUALS(renderer.GetShader().GetProperty<float>(index), 1.0f, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
 int UtcDaliNPatchAuxiliaryImageLifecycleP(void)
 {
   UiTestApplication application;
