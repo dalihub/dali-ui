@@ -1763,6 +1763,23 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * @brief Raises this view one step above its immediate next sibling in the
    * parent's children list.
    *
+   * @deprecated Use the inherited Dali::Actor::Raise() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. Replace a call as follows:
+   * - UPDATE: Raise(), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: Raise(); the policy changes nothing there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   Raise() or the container's own API, never DEPTH_INDEX, because these containers
+   *   restack their children themselves. RecyclerView items are children of its internal
+   *   scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: DEPTH_INDEX changes only the draw and
+   *   hit-test order and keeps the sibling and layout orders. A one-step move needs the
+   *   depth indices of the siblings (see the guide); a positive value draws the view above
+   *   every sibling left at 0 and has to be set back to 0 later, for a RecyclerView item
+   *   also on every bind.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
+   *
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1773,6 +1790,23 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * @brief Lowers this view one step below its immediate previous sibling in the
    * parent's children list.
    *
+   * @deprecated Use the inherited Dali::Actor::Lower() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. Replace a call as follows:
+   * - UPDATE: Lower(), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: Lower(); the policy changes nothing there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   Lower() or the container's own API, never DEPTH_INDEX, because these containers
+   *   restack their children themselves. RecyclerView items are children of its internal
+   *   scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: DEPTH_INDEX changes only the draw and
+   *   hit-test order and keeps the sibling and layout orders. A one-step move needs the
+   *   depth indices of the siblings (see the guide); a negative value draws the view below
+   *   every sibling left at 0 and has to be set back to 0 later. Never give a RecyclerView
+   *   item a negative value: it would hide behind the GroupBodyDecoration backgrounds.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
+   *
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1781,6 +1815,22 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
 
   /**
    * @brief Raises this view to the top of its sibling list.
+   *
+   * @deprecated Use the inherited Dali::Actor::RaiseToTop() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. Replace a call as follows:
+   * - UPDATE: RaiseToTop(), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: RaiseToTop(); the policy changes nothing there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   RaiseToTop() or the container's own API, never DEPTH_INDEX, because these containers
+   *   restack their children themselves. RecyclerView items are children of its internal
+   *   scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: SetDepthIndex() with a positive value draws the
+   *   view above every sibling left at 0 and keeps the sibling and layout orders. Set it
+   *   back to 0 when the view no longer has to be on top, and for a RecyclerView item on
+   *   every bind.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
@@ -1791,6 +1841,23 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Lowers this view to the bottom of its sibling list.
    *
+   * @deprecated Use the inherited Dali::Actor::LowerToBottom() or
+   * Actor::Property::DEPTH_INDEX instead; this overload will be removed. Replace a call as
+   * follows:
+   * - UPDATE: LowerToBottom(), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: LowerToBottom(); the policy changes nothing there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   LowerToBottom() or the container's own API, never DEPTH_INDEX, because these
+   *   containers restack their children themselves. RecyclerView items are children of its
+   *   internal scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: SetDepthIndex() with a negative value draws the
+   *   view below every sibling left at 0 and keeps the sibling and layout orders; set it
+   *   back to 0 afterwards. Never give a RecyclerView item a negative value: it would hide
+   *   behind the GroupBodyDecoration backgrounds.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
+   *
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1799,6 +1866,27 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
 
   /**
    * @brief Raises this view above the given target sibling.
+   *
+   * @deprecated Use the inherited Dali::Actor::RaiseAbove() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. It ignores an empty @p target, while the
+   * inherited call asserts on one, so check @p target first. Both calls do nothing when
+   * @p target is not a sibling, but SetDepthIndex() would still change the draw order, so
+   * check that as well before switching to SetDepthIndex(). Replace a call as follows:
+   * - UPDATE: RaiseAbove(target), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: RaiseAbove(target); the policy changes nothing
+   *   there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   RaiseAbove(target) or the container's own API, never DEPTH_INDEX, because these
+   *   containers restack their children themselves. RecyclerView items are children of its
+   *   internal scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: SetDepthIndex() with a positive value draws the
+   *   view above every sibling left at 0, not only above @p target, and keeps the sibling
+   *   and layout orders; an exact move needs the depth indices of the siblings (see the
+   *   guide). Set it back to 0 when the view no longer has to be on top, and for a
+   *   RecyclerView item on every bind.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
    * @param[in] target The target sibling view to raise above.
    * @param[in] policy UPDATE also reorders the parent layout's children;
@@ -1810,6 +1898,27 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
 
   /**
    * @brief Lowers this view below the given target sibling.
+   *
+   * @deprecated Use the inherited Dali::Actor::LowerBelow() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. It ignores an empty @p target, while the
+   * inherited call asserts on one, so check @p target first. Both calls do nothing when
+   * @p target is not a sibling, but SetDepthIndex() would still change the draw order, so
+   * check that as well before switching to SetDepthIndex(). Replace a call as follows:
+   * - UPDATE: LowerBelow(target), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: LowerBelow(target); the policy changes nothing
+   *   there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   LowerBelow(target) or the container's own API, never DEPTH_INDEX, because these
+   *   containers restack their children themselves. RecyclerView items are children of its
+   *   internal scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: SetDepthIndex() with a negative value draws the
+   *   view below every sibling left at 0, not only below @p target, and keeps the sibling
+   *   and layout orders; an exact move needs the depth indices of the siblings (see the
+   *   guide). Set it back to 0 afterwards. Never give a RecyclerView item a negative value:
+   *   it would hide behind the GroupBodyDecoration backgrounds.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
    * @param[in] target The target sibling view to lower below.
    * @param[in] policy UPDATE also reorders the parent layout's children;

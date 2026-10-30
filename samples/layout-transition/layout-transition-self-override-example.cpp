@@ -301,11 +301,11 @@ public:
     // button has no parent to be raised within, so each raise is guarded.
     if(mItemB.GetParent())
     {
-      mItemB.RaiseToTop(LayoutOrderPolicy::UPDATE);
+      mItemB.RaiseToTop();
     }
     if(mItemC.GetParent())
     {
-      mItemC.RaiseToTop(LayoutOrderPolicy::UPDATE);
+      mItemC.RaiseToTop();
     }
   }
 

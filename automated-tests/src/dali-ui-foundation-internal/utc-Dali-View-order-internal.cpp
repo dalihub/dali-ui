@@ -23,6 +23,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 
 using namespace Dali;
@@ -38,7 +39,7 @@ void utc_dali_view_order_internal_cleanup(void)
   test_return_value = TET_PASS;
 }
 
-// The sibling-order operations usable on a View (the View
+// The sibling-order operations usable on a View (the deprecated View
 // Raise/Lower/RaiseToTop/LowerToBottom/RaiseAbove/LowerBelow overloads taking
 // LayoutOrderPolicy, the inherited Dali::Actor forms,
 // and Dali::Actor::InsertAbove/InsertBelow) affect TWO orders: the
@@ -79,7 +80,8 @@ OrderFixture MakeOrderFixture()
   return f;
 }
 
-// Actor sibling order (visual z-order).
+// Actor sibling order (the GetChildAt index). It equals the draw order only
+// while every sibling has the same DEPTH_INDEX.
 uint32_t VisualIndexOf(View parent, View child)
 {
   Dali::Actor parentActor = parent;
@@ -251,6 +253,113 @@ int UtcDaliViewLowerBelowPreserveInternalP(void)
   f.c.LowerBelow(f.a, LayoutOrderPolicy::PRESERVE);
 
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 2, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewRaiseInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  // Initial: [a, b, c] in both visual and logical order.
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 1u, TEST_LOCATION);
+
+  // The inherited Actor::Raise changes the visual order; the resulting
+  // ChildOrderChangedSignal keeps the logical order in sync.
+  f.b.Raise();
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 2, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLowerInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  f.b.Lower();
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewRaiseToTopInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  // a.RaiseToTop(): a moves to top -> [b, c, a]
+  f.a.RaiseToTop();
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.a), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 2, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLowerToBottomInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  // c.LowerToBottom(): c moves to bottom -> [c, a, b]
+  f.c.LowerToBottom();
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewRaiseAboveInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  // a.RaiseAbove(c): a moves above c -> visual [b, c, a]
+  f.a.RaiseAbove(f.c);
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.a), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 2, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLowerBelowInternalP(void)
+{
+  UiTestApplication application;
+  OrderFixture      f = MakeOrderFixture();
+
+  // c.LowerBelow(a): c moves below a -> visual [c, a, b]
+  f.c.LowerBelow(f.a);
+
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewDepthIndexDoesNotChangeChildOrderInternalP(void)
+{
+  UiTestApplication application;
+  uint32_t          orderChangedCount = 0u; // Declared before the fixture so it outlives the connected parent.
+  OrderFixture      f                 = MakeOrderFixture();
+
+  DevelActor::ChildOrderChangedSignal(f.parent).Connect(&application, [&orderChangedCount](Dali::Actor, Dali::Actor)
+  { ++orderChangedCount; });
+
+  // Actor::Property::DEPTH_INDEX only changes the draw (and hit) order, so
+  // neither the actor sibling order nor the logical layout order may move,
+  // and no ChildOrderChangedSignal (hence no OnChildOrderChanged) may fire.
+  f.b.SetDepthIndex(10);
+
+  DALI_TEST_EQUALS(f.b.GetDepthIndex(), 10, TEST_LOCATION);
+  DALI_TEST_EQUALS(orderChangedCount, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.a), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.b), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.a), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.b), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(LogicalIndexOf(f.parent, f.c), 2, TEST_LOCATION);
   END_TEST;
 }
@@ -563,8 +672,8 @@ int UtcDaliViewChildOrderHookSurvivesNonChainingOnInitializeInternalP(void)
   parent.Measure(1000.0f, 1000.0f);
   DALI_TEST_EQUALS(parentImpl->measureCount, settledCount, TEST_LOCATION);
 
-  // Reorder at the ACTOR level, bypassing the View sibling-order API. This is the only
-  // path that depends on the child-order-changed connection.
+  // Reorder through the inherited Actor call; the logical resync relies
+  // solely on the child-order-changed connection.
   Dali::Actor(a).RaiseToTop();
 
   // The logical order followed the actor order...

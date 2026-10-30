@@ -524,7 +524,7 @@ private:
     // grid reorder sample's preview does); FinishDrag restores DEFAULT.
     mDraggedChild.SetLayoutMode(LayoutMode::STANDALONE);
     mTestArea.Add(mDraggedChild);
-    mDraggedChild.RaiseToTop(LayoutOrderPolicy::PRESERVE);
+    mDraggedChild.RaiseToTop();
 
     StartAutoScrollTimer();
   }

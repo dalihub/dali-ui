@@ -673,32 +673,84 @@ public: // Non-virtual API (safe to reorder / extend)
   int32_t IndexOfChildView(Ui::View view) const;
 
   /**
-   * @copydoc Ui::View::Raise()
+   * @brief Raises the view one step above its immediate next sibling.
+   *
+   * @deprecated Use Self().Raise() or Self().SetDepthIndex() instead; this overload will be
+   * removed. An unqualified Raise() does not compile in a ViewImpl subclass. Replace
+   * Raise(Ui::LayoutOrderPolicy::UPDATE) with Self().Raise(); for
+   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of Ui::View::Raise(LayoutOrderPolicy)
+   * to Self().
+   *
+   * @param[in] policy See Ui::View::Raise(LayoutOrderPolicy).
    */
   void Raise(Ui::LayoutOrderPolicy policy);
 
   /**
-   * @copydoc Ui::View::Lower()
+   * @brief Lowers the view one step below its immediate previous sibling.
+   *
+   * @deprecated Use Self().Lower() or Self().SetDepthIndex() instead; this overload will be
+   * removed. An unqualified Lower() does not compile in a ViewImpl subclass. Replace
+   * Lower(Ui::LayoutOrderPolicy::UPDATE) with Self().Lower(); for
+   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of Ui::View::Lower(LayoutOrderPolicy)
+   * to Self().
+   *
+   * @param[in] policy See Ui::View::Lower(LayoutOrderPolicy).
    */
   void Lower(Ui::LayoutOrderPolicy policy);
 
   /**
-   * @copydoc Ui::View::RaiseToTop()
+   * @brief Raises the view to the top of its sibling list.
+   *
+   * @deprecated Use Self().RaiseToTop() or Self().SetDepthIndex() instead; this overload
+   * will be removed. An unqualified RaiseToTop() does not compile in a ViewImpl subclass.
+   * Replace RaiseToTop(Ui::LayoutOrderPolicy::UPDATE) with Self().RaiseToTop(); for
+   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
+   * Ui::View::RaiseToTop(LayoutOrderPolicy) to Self().
+   *
+   * @param[in] policy See Ui::View::RaiseToTop(LayoutOrderPolicy).
    */
   void RaiseToTop(Ui::LayoutOrderPolicy policy);
 
   /**
-   * @copydoc Ui::View::LowerToBottom()
+   * @brief Lowers the view to the bottom of its sibling list.
+   *
+   * @deprecated Use Self().LowerToBottom() or Self().SetDepthIndex() instead; this overload
+   * will be removed. An unqualified LowerToBottom() does not compile in a ViewImpl subclass.
+   * Replace LowerToBottom(Ui::LayoutOrderPolicy::UPDATE) with Self().LowerToBottom(); for
+   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
+   * Ui::View::LowerToBottom(LayoutOrderPolicy) to Self().
+   *
+   * @param[in] policy See Ui::View::LowerToBottom(LayoutOrderPolicy).
    */
   void LowerToBottom(Ui::LayoutOrderPolicy policy);
 
   /**
-   * @copydoc Ui::View::RaiseAbove()
+   * @brief Raises the view above the given target sibling.
+   *
+   * @deprecated Use Self().RaiseAbove() or Self().SetDepthIndex() instead; this overload
+   * will be removed. An unqualified RaiseAbove() does not compile in a ViewImpl subclass.
+   * Replace RaiseAbove(target, Ui::LayoutOrderPolicy::UPDATE) with
+   * Self().RaiseAbove(target) after checking that @p target is not empty; for
+   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
+   * Ui::View::RaiseAbove(View, LayoutOrderPolicy) to Self().
+   *
+   * @param[in] target See Ui::View::RaiseAbove(View, LayoutOrderPolicy).
+   * @param[in] policy See Ui::View::RaiseAbove(View, LayoutOrderPolicy).
    */
   void RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy);
 
   /**
-   * @copydoc Ui::View::LowerBelow()
+   * @brief Lowers the view below the given target sibling.
+   *
+   * @deprecated Use Self().LowerBelow() or Self().SetDepthIndex() instead; this overload
+   * will be removed. An unqualified LowerBelow() does not compile in a ViewImpl subclass.
+   * Replace LowerBelow(target, Ui::LayoutOrderPolicy::UPDATE) with
+   * Self().LowerBelow(target) after checking that @p target is not empty; for
+   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
+   * Ui::View::LowerBelow(View, LayoutOrderPolicy) to Self().
+   *
+   * @param[in] target See Ui::View::LowerBelow(View, LayoutOrderPolicy).
+   * @param[in] policy See Ui::View::LowerBelow(View, LayoutOrderPolicy).
    */
   void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
 
