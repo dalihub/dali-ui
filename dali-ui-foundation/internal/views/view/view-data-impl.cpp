@@ -3218,7 +3218,13 @@ void ViewDataImpl::ApplyRequestedWidth(float width)
     if(width >= 0 && !GetParentView() &&
        !IntegrationView::HasLayoutCapability(mViewImpl) && mViewImpl.GetChildViewCount() == 0)
     {
-      mViewImpl.Self().SetSizeWidth(width);
+      // What a layout pass gives this view as a root (DeriveStandaloneRootBounds): the requested
+      // width clamped by its own minimum/maximum, times its effective scale. The scale is computed,
+      // not memoized: InvalidateMeasure() above dropped the cached one, and a setter leaves it to the
+      // next on-scene measure, arrange or GetEffectiveLayoutScale() to establish again. Off scene the view has
+      // no window yet, so the window term of that scale is 1.0; its first pass in a window applies
+      // the window term.
+      mViewImpl.Self().SetSizeWidth(std::min(std::max(width, GetMinimumWidth()), GetMaximumWidth()) * ComputeEffectiveScale());
     }
   }
 }
@@ -3247,7 +3253,8 @@ void ViewDataImpl::ApplyRequestedHeight(float height)
     if(height >= 0 && !GetParentView() &&
        !IntegrationView::HasLayoutCapability(mViewImpl) && mViewImpl.GetChildViewCount() == 0)
     {
-      mViewImpl.Self().SetSizeHeight(height);
+      // Same derivation as ApplyRequestedWidth above.
+      mViewImpl.Self().SetSizeHeight(std::min(std::max(height, GetMinimumHeight()), GetMaximumHeight()) * ComputeEffectiveScale());
     }
   }
 }

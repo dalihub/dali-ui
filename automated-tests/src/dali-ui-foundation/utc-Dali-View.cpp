@@ -2569,6 +2569,44 @@ int UtcDaliViewSetRequestedHeightMatchesPropertyRouteP(void)
   END_TEST;
 }
 
+// The parentless-leaf immediate write is the size the layout pass will give the view:
+// the requested size clamped by its own minimum/maximum, times its effective scale.
+int UtcDaliViewSetRequestedSizeImmediateWriteFollowsScaleP(void)
+{
+  UiTestApplication application;
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  // Off scene: no window term, so the effective scale is the UI scale 2.
+  View view = View::New();
+  view.SetMaximumWidth(80.0f);
+  view.SetMinimumHeight(70.0f);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(50.0f);
+  // min(100, 80) * 2 = 160, max(50, 70) * 2 = 140 (before: the raw 100 and 50).
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 160.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 140.0f, TEST_LOCATION);
+
+  // The property route shares the same write.
+  View viaProperty = View::New();
+  viaProperty.SetProperty(View::Property::REQUESTED_WIDTH, 30.0f);
+  DALI_TEST_EQUALS(viaProperty.GetProperty<float>(Actor::Property::SIZE_WIDTH), 60.0f, TEST_LOCATION);
+
+  // The layout pass gives the same size.
+  application.GetWindow().Add(view);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 160.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 140.0f, TEST_LOCATION);
+
+  // On scene (its parent is the root layer, not a View) a new request is written at once.
+  view.SetRequestedWidth(30.0f);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 60.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
 int UtcDaliViewMeasureZeroWidthP(void)
 {
   UiTestApplication application;
