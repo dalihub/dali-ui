@@ -135,6 +135,8 @@ private:
    *
    * The single entry point for ItemsLayouterImpl::OnLayoutChildren: routing every call
    * through here is what stops a future call site from silently losing the owner scope.
+   * It first hands a built-in linear layouter this view's effective scale, which the
+   * layouter's natural lengths are multiplied by.
    * @pre mLayouter is non-null.
    */
   void LayoutChildrenScoped();

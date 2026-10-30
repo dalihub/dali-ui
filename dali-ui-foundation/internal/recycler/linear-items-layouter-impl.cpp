@@ -49,6 +49,7 @@ LinearItemsLayouterImpl::LinearItemsLayouterImpl(Orientation orientation)
 : mOrientation(orientation),
   mItemExtent(64.0f),
   mItemSpacing(0.0f),
+  mEffectiveScale(1.0f),
   mScrollOffset(0.0f),
   mViewportExtent(0.0f),
   mCrossExtent(0.0f),
@@ -215,6 +216,28 @@ float LinearItemsLayouterImpl::GetItemSpacing() const
   return mItemSpacing;
 }
 
+bool LinearItemsLayouterImpl::SetEffectiveLayoutScale(float scale)
+{
+  if(scale == mEffectiveScale)
+  {
+    return false;
+  }
+  mEffectiveScale = scale;
+  // Measured extents and every offset derived from them were taken at the old scale.
+  mExtentCache.Clear();
+  mTotalMeasuredExtent = 0.0f;
+  mMeasuredItemCount   = 0u;
+  mFirstActiveOffset   = 0.0f;
+  mLastActiveEndOffset = 0.0f;
+  mHasActiveItems      = false;
+  return true;
+}
+
+float LinearItemsLayouterImpl::GetEffectiveLayoutScale() const
+{
+  return mEffectiveScale;
+}
+
 void LinearItemsLayouterImpl::OnAdapterChanged()
 {
   mExtentCache.Clear();
@@ -280,7 +303,7 @@ bool LinearItemsLayouterImpl::LayoutChunk(Integration::Recycler& recycler, Layou
   slot.view.Arrange(mOrientation == Orientation::HORIZONTAL ? LayoutRect(main, slot.crossStart, slot.extent, slot.cross)
                                                             : LayoutRect(slot.crossStart, main, slot.cross, slot.extent));
   // Advance by the recorded slot extent: placement and GetItemOffset then use the same value.
-  state.currentOffset += GetItemExtentAt(pos) + mItemSpacing;
+  state.currentOffset += GetItemExtentAt(pos) + ItemSpacing();
 
   ++state.nextPosition;
   return true;
@@ -351,7 +374,7 @@ void LinearItemsLayouterImpl::RecycleLeading(Integration::Recycler& recycler, ui
   while(first + 1u < end && firstOffset + GetItemExtentAt(first) <= windowStart)
   {
     recycler.RecycleViewForPosition(first);
-    firstOffset += GetItemExtentAt(first) + mItemSpacing;
+    firstOffset += GetItemExtentAt(first) + ItemSpacing();
     ++first;
   }
 }
@@ -366,7 +389,17 @@ float LinearItemsLayouterImpl::GetItemExtentAt(uint32_t position) const
   {
     return mExtentCache[position];
   }
-  return mItemExtent;
+  return EstimatedItemExtent();
+}
+
+float LinearItemsLayouterImpl::ItemSpacing() const
+{
+  return mItemSpacing * mEffectiveScale;
+}
+
+float LinearItemsLayouterImpl::EstimatedItemExtent() const
+{
+  return mItemExtent * mEffectiveScale;
 }
 
 float LinearItemsLayouterImpl::GetItemOffset(uint32_t position) const
@@ -374,7 +407,7 @@ float LinearItemsLayouterImpl::GetItemOffset(uint32_t position) const
   float offset = 0.0f;
   for(uint32_t i = 0u; i < position; ++i)
   {
-    offset += GetItemExtentAt(i) + mItemSpacing;
+    offset += GetItemExtentAt(i) + ItemSpacing();
   }
   return offset;
 }
@@ -392,7 +425,7 @@ float LinearItemsLayouterImpl::GetItemOffsetFrom(uint32_t anchorPos, float ancho
     float offset = anchorOffset;
     for(uint32_t i = anchorPos; i < targetPos; ++i)
     {
-      offset += GetItemExtentAt(i) + mItemSpacing;
+      offset += GetItemExtentAt(i) + ItemSpacing();
     }
     return offset;
   }
@@ -401,7 +434,7 @@ float LinearItemsLayouterImpl::GetItemOffsetFrom(uint32_t anchorPos, float ancho
   float offset = anchorOffset;
   for(uint32_t i = anchorPos; i > targetPos; --i)
   {
-    offset -= GetItemExtentAt(i - 1u) + mItemSpacing;
+    offset -= GetItemExtentAt(i - 1u) + ItemSpacing();
   }
   return offset;
 }
@@ -416,8 +449,8 @@ float LinearItemsLayouterImpl::GetEstimatedContentExtent(uint32_t itemCount) con
   // The per-item rule of GetItemExtentAt, kept in O(1): measured extents plus the estimate for every
   // item not measured yet. The content therefore ends exactly where the last item's offset says.
   const uint32_t unmeasured   = itemCount - std::min(itemCount, mMeasuredItemCount);
-  const float    totalExtent  = mTotalMeasuredExtent + static_cast<float>(unmeasured) * mItemExtent;
-  const float    totalSpacing = mItemSpacing * static_cast<float>(itemCount - 1u);
+  const float    totalExtent  = mTotalMeasuredExtent + static_cast<float>(unmeasured) * EstimatedItemExtent();
+  const float    totalSpacing = ItemSpacing() * static_cast<float>(itemCount - 1u);
 
   return totalExtent + totalSpacing;
 }
@@ -442,7 +475,7 @@ uint32_t LinearItemsLayouterImpl::FindFirstVisiblePosition(float scrollOffset, f
     {
       return i;
     }
-    cursor = end + mItemSpacing;
+    cursor = end + ItemSpacing();
   }
   return itemCount - 1u;
 }
@@ -506,7 +539,7 @@ float LinearItemsLayouterImpl::LayoutWindow(Integration::Recycler& recycler, uin
   // A window with no item in the new range has no surviving boundary: filling from it would
   // materialize the skipped gap. Rebuild from the first item the estimated offsets place in the
   // range; its offset is exact because anchor coordinates always equal those offsets.
-  const bool rebuilt = rebuild || !mHasActiveItems || endOff - mItemSpacing <= windowStart || firstOff >= windowEnd;
+  const bool rebuilt = rebuild || !mHasActiveItems || endOff - ItemSpacing() <= windowStart || firstOff >= windowEnd;
   if(rebuilt)
   {
     const uint32_t anchor = FindFirstVisiblePosition(mScrollOffset, mCacheBefore, itemCount);
@@ -520,11 +553,11 @@ float LinearItemsLayouterImpl::LayoutWindow(Integration::Recycler& recycler, uin
   {
     RecycleLeading(recycler, first, end, firstOff, windowStart);
     // Items that start at or below the window end leave it as well.
-    while(end > first && endOff - mItemSpacing - GetItemExtentAt(end - 1u) >= windowEnd)
+    while(end > first && endOff - ItemSpacing() - GetItemExtentAt(end - 1u) >= windowEnd)
     {
       --end;
       recycler.RecycleViewForPosition(end);
-      endOff -= GetItemExtentAt(end) + mItemSpacing;
+      endOff -= GetItemExtentAt(end) + ItemSpacing();
     }
   }
 
@@ -556,12 +589,12 @@ float LinearItemsLayouterImpl::LayoutWindow(Integration::Recycler& recycler, uin
   {
     const float windowTop = (request <= 0.0f) ? 0.0f : std::max(0.0f, mScrollOffset + correction - mCacheBefore);
     const float assumed   = GetItemExtentAt(first - 1u);
-    if(start + correction - mItemSpacing <= windowTop || !MeasureSlot(recycler, first - 1u, slot))
+    if(start + correction - ItemSpacing() <= windowTop || !MeasureSlot(recycler, first - 1u, slot))
     {
       break;
     }
     --first;
-    start -= GetItemExtentAt(first) + mItemSpacing;
+    start -= GetItemExtentAt(first) + ItemSpacing();
     correction += GetItemExtentAt(first) - assumed;
   }
   if(first < survivors)
