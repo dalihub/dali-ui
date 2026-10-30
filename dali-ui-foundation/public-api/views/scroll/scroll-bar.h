@@ -156,6 +156,10 @@ public: // Properties
 
   /**
    * @brief Gets or sets the minimum size of the scroll bar.
+   *
+   * Like the thickness and the offset it is a length in natural units, multiplied by the effective
+   * scale. A value <= 0 selects a twentieth of the scroll bar's longer side; GetBarMinSize() then
+   * returns that length in natural units.
    * @SINCE_3_0.0
    * @return The minimum size of the scroll bar.
    */
