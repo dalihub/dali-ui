@@ -1542,15 +1542,17 @@ void RecyclerViewImpl::ScrollToItemMakeVisible(uint32_t position, bool animate)
   const bool       vertical   = mLayouter.CanScrollVertically();
   const float      itemStart  = vertical ? bounds.y : bounds.x;
   const float      itemEnd    = itemStart + (vertical ? bounds.height : bounds.width);
+  // The peek is set in natural units; offsets are rendered pixels.
+  const float peek = mFocusScrollPeek * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   float target = curOffset;
-  if(itemStart - mFocusScrollPeek < curOffset)
+  if(itemStart - peek < curOffset)
   {
-    target = itemStart - mFocusScrollPeek;
+    target = itemStart - peek;
   }
-  else if(itemEnd + mFocusScrollPeek > curOffset + viewExtent)
+  else if(itemEnd + peek > curOffset + viewExtent)
   {
-    target = itemEnd + mFocusScrollPeek - viewExtent;
+    target = itemEnd + peek - viewExtent;
   }
   else
   {
@@ -1574,7 +1576,7 @@ void RecyclerViewImpl::ScrollToItemMakeVisible(uint32_t position, bool animate)
     const LayoutRect measured = mLayouter.GetItemBounds(position, GetCrossExtent());
     const float      start    = vertical ? measured.y : measured.x;
     const float      end      = start + (vertical ? measured.height : measured.width);
-    const float      aim      = alignStart ? start - mFocusScrollPeek : end + mFocusScrollPeek - viewExtent;
+    const float      aim      = alignStart ? start - peek : end + peek - viewExtent;
     const float      distance = ClampScrollOffset(aim) - mLayouter.ComputeScrollOffset();
     if(std::abs(distance) < 0.5f)
     {
