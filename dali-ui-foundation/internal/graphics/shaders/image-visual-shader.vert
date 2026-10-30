@@ -109,7 +109,7 @@ vec4 ComputeVertexPosition()
   highp float maxSize = max(visualSize.x, visualSize.y);
   highp float minSize = min(visualSize.x, visualSize.y);
 #endif
-  vCornerRadius = mix(cornerRadius * minSize, cornerRadius, cornerRadiusPolicy);
+  vCornerRadius = mix(cornerRadius * minSize, cornerRadius * viewEffectiveScale, cornerRadiusPolicy);
   vCornerRadius = min(vCornerRadius, minSize * 0.5);
   // Optimize fragment shader. 0.2929 ~= 1.0 - sqrt(0.5)
   highp float maxRadius = max(max(vCornerRadius.x, vCornerRadius.y), max(vCornerRadius.z, vCornerRadius.w));
