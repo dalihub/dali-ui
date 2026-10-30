@@ -258,8 +258,9 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
       }
       else if(mVisualSize != Vector2::ZERO)
       {
-        // Animation not yet loaded: fall back to last rendered size
-        naturalSize = mVisualSize;
+        // Animation not yet loaded: fall back to last rendered size, in pixels at the scale of the
+        // last transform. Report it in natural units.
+        naturalSize = mVisualSize / (mImpl->mViewEffectiveScale > 0.0f ? mImpl->mViewEffectiveScale : 1.0f);
       }
     }
   }

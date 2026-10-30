@@ -427,3 +427,31 @@ int UtcDaliAnimatedImageVisualNaturalSizeAndFailureP(void)
   DALI_TEST_CHECK(animated.mRendererAdded);
   END_TEST;
 }
+
+int UtcDaliAnimatedImageVisualViewSizeNaturalSizeIsNaturalP(void)
+{
+  UiTestApplication application;
+  Dali::Property::Map properties;
+  properties.Add(UiIntegration::Visual::Property::TYPE, UiIntegration::InternalVisualType::ANIMATED_IMAGE);
+  properties.Add(UiIntegration::ImageVisual::Property::URL, "natural-size.gif");
+  UiIntegration::Visual::Base visual = UiIntegration::VisualFactory::Get().CreateVisual(properties);
+  auto& animated = static_cast<UiInternal::AnimatedImageVisual&>(Dali::Ui::GetImplementation(visual).GetVisualObject());
+
+  // As a fitting pass at scale 2 leaves it: the view size requested in pixels, no frame decoded yet.
+  animated.mImageLoadWithViewSize      = true;
+  animated.mLastRequiredSize           = Dali::ImageDimensions(60u, 80u);
+  animated.mImpl->mViewEffectiveScale  = 2.0f;
+  animated.mImpl->mRenderer.RemoveTextures();
+  Dali::Vector2 naturalSize;
+  animated.GetNaturalSize(naturalSize);
+  DALI_TEST_EQUALS(naturalSize, Dali::Vector2(30.0f, 40.0f), TEST_LOCATION);
+
+  // A decoded frame reports the source size, which is natural already.
+  Dali::TextureSet frame = Dali::TextureSet::New();
+  frame.SetTexture(0u, Dali::Texture::New(Dali::TextureType::TEXTURE_2D, Dali::Pixel::RGBA8888, 20u, 12u));
+  animated.mImageSize = Dali::ImageDimensions(20u, 12u);
+  animated.mImpl->mRenderer.SetTextures(frame);
+  animated.GetNaturalSize(naturalSize);
+  DALI_TEST_EQUALS(naturalSize, Dali::Vector2(20.0f, 12.0f), TEST_LOCATION);
+  END_TEST;
+}

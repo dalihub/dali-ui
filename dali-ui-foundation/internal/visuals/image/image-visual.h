@@ -132,10 +132,11 @@ public:
    * @param[in] desiredSize The default desired size, overridden by desired-size properties.
    * @param[in] arrangedViewSize The already arranged view size in pixels, used for the
    * first load when IMAGE_LOAD_WITH_VIEW_SIZE is enabled. Does not replace desiredSize.
+   * @param[in] arrangedViewScale The effective scale the view was arranged at, kept with arrangedViewSize.
    * Other parameters have the same meaning as the property-map overload above.
    */
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
-                            const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions desiredSize, const Vector2& arrangedViewSize);
+                            const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions desiredSize, const Vector2& arrangedViewSize, float arrangedViewScale);
 
   /**
    * @brief Create a new image visual with a URL.

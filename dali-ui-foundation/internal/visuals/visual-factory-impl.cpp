@@ -134,7 +134,8 @@ Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&  
 
 Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&                            propertyMap,
                                                           Ui::Integration::VisualFactory::CreationOptions creationOptions,
-                                                          const Vector2&                                  initialViewSize)
+                                                          const Vector2&                                  initialViewSize,
+                                                          float                                           initialViewScale)
 {
   Visual::BasePtr visualPtr;
 
@@ -216,7 +217,7 @@ Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&  
                 }
                 else
                 {
-                  visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap, ImageDimensions(), initialViewSize);
+                  visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap, ImageDimensions(), initialViewSize, initialViewScale);
                 }
                 break;
               }

@@ -465,8 +465,10 @@ void AnimatedImageVisual::GetNaturalSize(Vector2& naturalSize)
       }
     }
 
-    naturalSize.x = mLastRequiredSize.GetWidth();
-    naturalSize.y = mLastRequiredSize.GetHeight();
+    // The required size is the view size in pixels at the scale of the last transform; report natural units.
+    const float scale = mImpl->mViewEffectiveScale > 0.0f ? mImpl->mViewEffectiveScale : 1.0f;
+    naturalSize.x     = mLastRequiredSize.GetWidth() / scale;
+    naturalSize.y     = mLastRequiredSize.GetHeight() / scale;
     return;
   }
   else if(mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)

@@ -164,15 +164,21 @@ Geometry CreateGeometry(VisualFactoryCache& factoryCache, ImageDimensions gridSi
 ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                 const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions size)
 {
-  return New(factoryCache, shaderFactory, creationOptions, imageUrl, properties, size, Vector2::ZERO);
+  return New(factoryCache, shaderFactory, creationOptions, imageUrl, properties, size, Vector2::ZERO, 1.0f);
 }
 
 ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
-                                const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions desiredSize, const Vector2& arrangedViewSize)
+                                const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions desiredSize, const Vector2& arrangedViewSize, float arrangedViewScale)
 {
   ImageVisualPtr imageVisualPtr(
     new ImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, desiredSize));
   imageVisualPtr->mImpl->mControlSize = arrangedViewSize;
+  if(std::round(arrangedViewSize.width) > 0.0f && std::round(arrangedViewSize.height) > 0.0f)
+  {
+    // The arranged size is in pixels at this scale. Keep the two together, as SetTransformAndSize()
+    // does, so the natural size of a view-size load is reported in natural units.
+    imageVisualPtr->mImpl->mViewEffectiveScale = arrangedViewScale;
+  }
   imageVisualPtr->SetProperties(properties);
   imageVisualPtr->Initialize();
   return imageVisualPtr;
@@ -573,6 +579,10 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
 {
   if(mImageLoadWithViewSize && (mLastRequiredSize.GetWidth() > 0 && mLastRequiredSize.GetHeight() > 0))
   {
+    // The required size is the view size in pixels at the scale of the last transform. Report natural
+    // units: the owner multiplies the natural size by its effective scale.
+    const float   scale = mImpl->mViewEffectiveScale > 0.0f ? mImpl->mViewEffectiveScale : 1.0f;
+    const Vector2 requiredSize(static_cast<float>(mLastRequiredSize.GetWidth()), static_cast<float>(mLastRequiredSize.GetHeight()));
     if(mImpl->mRenderer)
     {
       auto textureSet = mImpl->mRenderer.GetTextures();
@@ -583,15 +593,17 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
         {
           if(mTextureSize != Vector2::ZERO)
           {
-            naturalSize = mTextureSize;
+            // A texture that covers the required size was decoded at it, in pixels. One that does not is
+            // the source image, which loading never enlarges, so it is in natural units already.
+            const bool decodedAtRequiredSize = mTextureSize.width >= requiredSize.width && mTextureSize.height >= requiredSize.height;
+            naturalSize                      = decodedAtRequiredSize ? mTextureSize / scale : mTextureSize;
             return;
           }
         }
       }
     }
 
-    naturalSize.x = mLastRequiredSize.GetWidth();
-    naturalSize.y = mLastRequiredSize.GetHeight();
+    naturalSize = requiredSize / scale;
     return;
   }
   else if(mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)

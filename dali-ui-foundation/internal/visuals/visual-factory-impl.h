@@ -84,9 +84,10 @@ public:
   /**
    * @brief Creates a visual with an already arranged view size, in pixels.
    * The size is consumed by ImageVisual before its first view-size load.
+   * The size is in pixels at initialViewScale, the effective scale of the view.
    */
   Ui::Integration::Visual::Base CreateVisual(const Property::Map& propertyMap, Ui::Integration::VisualFactory::CreationOptions creationOptions,
-                                             const Vector2& initialViewSize);
+                                             const Vector2& initialViewSize, float initialViewScale = 1.0f);
 
   /**
    * @copydoc Ui::Integration::VisualFactory::CreateVisual( const std::string&, ImageDimensions )
