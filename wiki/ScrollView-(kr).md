@@ -340,7 +340,7 @@ scrollView.SetScrollOnFocus(true);
 // 기본값은 MakeVisible입니다. Start, Center, End도 사용할 수 있습니다.
 scrollView.SetFocusScrollToPosition(ScrollToPosition::MakeVisible);
 
-// MakeVisible이 경계로 스크롤할 때 24px의 peek offset을 추가합니다.
+// MakeVisible이 경계로 스크롤할 때 24(자연 단위)의 peek offset을 추가합니다.
 scrollView.SetFocusScrollPeek(24.0f);
 ```
 
@@ -352,6 +352,8 @@ Key 기반 단계 스크롤은 다음과 같이 설정합니다.
 scrollView.SetKeyScrollEnabled(true);
 scrollView.SetKeyScrollStep(200.0f);
 ```
+
+key scroll step과 peek은 레이아웃 길이와 같은 자연 단위입니다. 뷰가 유효 스케일을 곱해 적용하므로 스케일이 달라져도 콘텐츠의 같은 부분만큼 스크롤합니다.
 
 Key scroll이 켜져 있을 때 방향키 이동 원칙은 다음과 같습니다.
 

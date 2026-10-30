@@ -332,7 +332,7 @@ scrollView.SetScrollOnFocus(true);
 // Default: MakeVisible. Other options are Start, Center, and End.
 scrollView.SetFocusScrollToPosition(ScrollToPosition::MakeVisible);
 
-// Add a 24px peek offset when MakeVisible scrolls to an edge.
+// Add a peek of 24 (natural units) when MakeVisible scrolls to an edge.
 scrollView.SetFocusScrollPeek(24.0f);
 ```
 
@@ -344,6 +344,8 @@ For key-based step scrolling:
 scrollView.SetKeyScrollEnabled(true);
 scrollView.SetKeyScrollStep(200.0f);
 ```
+
+The key scroll step and the peek are natural units like layout lengths: the view multiplies them by its effective scale, so they cover the same part of the content at every scale.
 
 When key scrolling is enabled, arrow navigation follows this principle:
 

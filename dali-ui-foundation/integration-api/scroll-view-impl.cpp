@@ -579,6 +579,8 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
 
   Vector2    childScrollPos = GetScrollPositionForChild(child, Vector2::ZERO);
   const bool wasMakeVisible = (scrollToPosition == ScrollToPosition::MakeVisible);
+  // The peek is set in natural units; scroll positions are rendered pixels.
+  const float peek = mFocusScrollPeek * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   if(scrollToPosition == ScrollToPosition::MakeVisible)
   {
@@ -625,16 +627,16 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
           posY = scrollPos.y + (childBottom - scrollBottom);
         }
         // Apply peek: scroll a little further past the item edge to hint more content
-        if(mFocusScrollPeek > 0.0f)
+        if(peek > 0.0f)
         {
           if(posX > scrollPos.x)
-            posX += mFocusScrollPeek;
+            posX += peek;
           else if(posX < scrollPos.x)
-            posX -= mFocusScrollPeek;
+            posX -= peek;
           if(posY > scrollPos.y)
-            posY += mFocusScrollPeek;
+            posY += peek;
           else if(posY < scrollPos.y)
-            posY -= mFocusScrollPeek;
+            posY -= peek;
         }
         ScrollTo(Vector2(posX, posY), animation);
         return;
@@ -653,19 +655,19 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
       childScrollPos.y -= mViewportHeight - child.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       childScrollPos.x -= mViewportWidth - child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
       // Apply peek: scroll further past the bottom/right edge
-      if(wasMakeVisible && mFocusScrollPeek > 0.0f)
+      if(wasMakeVisible && peek > 0.0f)
       {
-        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y += mFocusScrollPeek;
-        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x += mFocusScrollPeek;
+        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y += peek;
+        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x += peek;
       }
       break;
     case ScrollToPosition::Start:
     default:
       // Apply peek: scroll further past the top/left edge
-      if(wasMakeVisible && mFocusScrollPeek > 0.0f)
+      if(wasMakeVisible && peek > 0.0f)
       {
-        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y -= mFocusScrollPeek;
-        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x -= mFocusScrollPeek;
+        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y -= peek;
+        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x -= peek;
       }
       break;
   }

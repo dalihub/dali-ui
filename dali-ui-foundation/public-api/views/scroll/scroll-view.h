@@ -344,14 +344,15 @@ public: // Focus Scroll
    * @brief Sets the peek distance applied when auto-scrolling to a focused child.
    *
    * When @p peek is greater than zero and the scroll mode is ScrollToPosition::MakeVisible,
-   * the view scrolls an additional @p peek pixels past the item edge in the direction of
+   * the view scrolls an additional @p peek past the item edge in the direction of
    * travel. This hints to the user that more content is available beyond the focused item.
    *
    * The final position is still clamped to the valid scroll range, so peek is silently
    * reduced near the content boundaries.
    *
    * @SINCE_3_0.0
-   * @param[in] peek Extra scroll distance in pixels (default: 0.0f, disabled)
+   * @param[in] peek Extra scroll distance (default: 0.0f, disabled). Like a layout length it is
+   *            in natural units: the view multiplies it by its effective scale.
    */
   void SetFocusScrollPeek(float peek);
 
@@ -359,7 +360,7 @@ public: // Focus Scroll
    * @brief Gets the peek distance applied when auto-scrolling to a focused child.
    *
    * @SINCE_3_0.0
-   * @return The peek distance in pixels
+   * @return The peek distance, as set (natural units)
    */
   float GetFocusScrollPeek() const;
 
