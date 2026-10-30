@@ -2642,3 +2642,104 @@ int UtcDaliScrollViewBorrowedNavigationResultOutcomesP(void)
   manager.ClearFocus();
   END_TEST;
 }
+
+// The content rests at the padding, a layout length in natural units. At a UI scale of 2 a
+// 100 x 100 scroll view with padding (start 10, end 10, top 20) is 200 x 200, and the layout gives
+// a MATCH_PARENT content a width of 200 - 20 - 20 = 160: the content must rest at (20, 40), not at
+// the natural (10, 20), so its insets are even and the drag and clamp bounds agree with it. Scroll
+// positions stay rendered pixels: 100 moves the content to 40 - 100 = -60, the range is
+// 1000 - 200 = 800 (content at 40 - 800 = -760), and a drag of +10 from there reports +10.
+// Fails before this change: the content rested at (10, 20).
+int UtcDaliScrollViewPaddingRestsAtScaledOffsetP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(100.0f);
+  scrollView.SetRequestedHeight(100.0f);
+  scrollView.SetPadding(Insets(10.0f, 10.0f, 20.0f, 0.0f));
+
+  View content = View::New();
+  content.SetRequestedWidth(MATCH_PARENT);
+  content.SetRequestedHeight(500.0f);
+  scrollView.SetContent(content);
+  application.GetWindow().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::SIZE_WIDTH), 160.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition(), Vector2::ZERO, 0.001f, TEST_LOCATION);
+
+  scrollView.ScrollToY(100.0f, false);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -60.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 100.0f, 0.001f, TEST_LOCATION);
+
+  scrollView.ScrollToY(10000.0f, false);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 800.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -760.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, 0.001f, TEST_LOCATION);
+
+  DraggingCallback dragging;
+  scrollView.DraggingSignal().Connect(&dragging, &DraggingCallback::OnDragging);
+  auto&      impl = GetScrollImpl(scrollView);
+  PanGesture drag = DevelPanGesture::New(GestureState::CONTINUING);
+  DevelPanGesture::SetDisplacement(drag, Vector2(0.0f, 10.0f));
+  impl.OnDragging(drag);
+
+  DALI_TEST_CHECK(dragging.called);
+  DALI_TEST_EQUALS(dragging.deltaY, 10.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -750.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 790.0f, 0.001f, TEST_LOCATION);
+
+  impl.OnDragFinished(DevelPanGesture::New(GestureState::FINISHED));
+  DALI_TEST_CHECK(!scrollView.IsScrolling());
+  END_TEST;
+}
+
+// A scale change re-places the resting content even when neither the viewport nor the content
+// extent changes. A window-filling scroll view (480 x 800 at any scale) with a top padding of 20
+// holds a content whose UiScalePolicy is DISABLED (100 x 1000 at any scale). Scrolled to 100 at
+// scale 1 the content sits at 20 - 100 = -80. At scale 2 the padding is 40 rendered pixels: the
+// content moves to 40 - 100 = -60, while the scroll position stays 100 (positions are rendered
+// pixels and are not converted). Fails before this change: the content stayed at -80.
+int UtcDaliScrollViewPaddingFollowsScaleChangeP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(1.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(MATCH_PARENT);
+  scrollView.SetRequestedHeight(MATCH_PARENT);
+  scrollView.SetTopPadding(20.0f);
+
+  View content = View::New();
+  Ui::Extension::View::SetUiScalePolicy(content, Ui::Extension::UiScalePolicy::DISABLED);
+  content.SetRequestedWidth(100.0f);
+  content.SetRequestedHeight(1000.0f);
+  scrollView.SetContent(content);
+  application.GetWindow().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  scrollView.ScrollToY(100.0f, false);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -80.0f, 0.001f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(scrollView.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 800.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 1000.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 100.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -60.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
