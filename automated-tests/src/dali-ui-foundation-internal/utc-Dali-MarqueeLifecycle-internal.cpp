@@ -21,6 +21,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <set>
 #include <string>
 #include <vector>
@@ -35,6 +36,7 @@
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
@@ -3118,6 +3120,587 @@ int UtcDaliMarqueeFocusTextAdjacentBeforeRelayoutP(void)
 int UtcDaliMarqueeFocusTextAdjacentAfterRelayoutP(void)
 {
   CheckFocusStopTextTiming(FocusTextTiming::AFTER_RELAYOUT, false, true);
+  END_TEST;
+}
+
+namespace
+{
+struct MarqueeUiScaleGuard
+{
+  const float scale    = Ui::UiScaleManager::Get().GetScale();
+  const bool  scalable = Ui::UiScaleManager::Get().IsScalable();
+
+  MarqueeUiScaleGuard()
+  {
+    Ui::UiScaleManager::Get().SetScalable(true);
+    Ui::UiScaleManager::Get().SetScale(1.0f);
+  }
+
+  ~MarqueeUiScaleGuard()
+  {
+    Ui::UiScaleManager::Get().SetScale(scale);
+    Ui::UiScaleManager::Get().SetScalable(scalable);
+  }
+};
+
+float CheckScaledMarqueeMotion(Lifecycle& test, float uiScale, bool advance = true)
+{
+  const bool vertical = test.label.GetMarqueeOrientation() == Text::MarqueeOrientation::VERTICAL;
+  auto       visual   = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(test.label)).GetVisual(Text::LabelPropertyIndex::TEXT);
+  DALI_TEST_EQUALS(Ui::Internal::TextVisual::GetController(visual)->GetUiScale(), uiScale, TEST_LOCATION);
+  auto          shader      = test.label.GetRendererAt(0u).GetShader();
+  const Vector2 textureSize = shader.GetProperty<Vector2>(shader.GetPropertyIndex("uTextureSize"));
+  const Vector3 controlSize = test.label.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  const float   distance    = vertical ? std::max(textureSize.y, controlSize.y) : std::max(textureSize.x, controlSize.x);
+  const float   speed       = test.label.GetMarqueeSpeed() * uiScale;
+  const float   delay       = test.label.GetMarqueeLoopDelay();
+  auto          animation   = test.Current();
+  const float   duration    = animation.GetDuration();
+  DALI_TEST_CHECK(std::isfinite(duration) && duration > 0.0f);
+  DALI_TEST_EQUALS(duration, delay + distance / speed, 0.00001f, TEST_LOCATION);
+  if(advance)
+  {
+    DALI_TEST_CHECK(distance / speed > 0.1f);
+    const auto  deltaIndex      = shader.GetPropertyIndex("uDelta");
+    const float initial         = shader.GetCurrentProperty<float>(deltaIndex);
+    const float initialProgress = animation.GetCurrentProgress();
+    if(delay > 0.0f)
+    {
+      test.Advance(static_cast<unsigned>(std::round(delay * 1000.0f)));
+      DALI_TEST_EQUALS(shader.GetCurrentProperty<float>(deltaIndex), initial, 0.001f, TEST_LOCATION);
+    }
+    // Accumulate travel across wrap boundaries when a replacement keeps progress.
+    float previous = shader.GetCurrentProperty<float>(deltaIndex);
+    float delta    = 0.0f;
+    // Each 50ms sample is shorter than half the asserted travel duration.
+    for(unsigned step = 0u; step < 2u; ++step)
+    {
+      test.Advance(50u);
+      const float current = shader.GetCurrentProperty<float>(deltaIndex);
+      const float segment = std::fabs(current - previous);
+      delta += segment > distance * 0.5f ? distance - segment : segment;
+      previous = current;
+    }
+    DALI_TEST_EQUALS(delta, speed * 0.1f, 0.01f, TEST_LOCATION);
+    DALI_TEST_EQUALS(animation.GetCurrentProgress(), std::fmod(initialProgress + (delay + 0.1f) / duration, 1.0f), 0.0001f, TEST_LOCATION);
+    tet_printf("UISCALE async=%d vertical=%d ui=%.2f render=%.2f distance=%.3f duration=%.6f delta100ms=%.6f speed=%d",
+               test.asynchronous, vertical, uiScale, test.label.GetRenderScale(), distance, duration, delta, test.label.GetMarqueeSpeed());
+  }
+  test.CheckTexture();
+  return duration;
+}
+
+void CheckMarqueeUiScaleMatrix(bool async, bool vertical)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  for(float scale : {1.0f, 1.25f, 1.5f, 2.0f})
+    for(float renderScale : {1.0f, 1.5f, 2.0f})
+      for(float actorScale : {1.0f, 1.5f})
+      {
+        Ui::UiScaleManager::Get().SetScale(scale);
+        Lifecycle test(app, async, vertical);
+        test.label.SetMarqueeGap(20);
+        test.label.SetRenderScale(renderScale);
+        test.parent.SetProperty(Actor::Property::SCALE, Vector3::ONE * actorScale);
+        test.Start();
+        CheckScaledMarqueeMotion(test, scale);
+        DALI_TEST_EQUALS(test.label.GetMarqueeSpeed(), 200, TEST_LOCATION);
+        DALI_TEST_EQUALS(test.label.GetCurrentProperty<Vector3>(Actor::Property::WORLD_SCALE), Vector3::ONE * actorScale, 0.0001f, TEST_LOCATION);
+      }
+}
+
+void CheckMarqueeUiScalePolicy(bool async)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Lifecycle test(app, async);
+  auto      branch = Ui::View::New();
+  auto      root   = Ui::View::New();
+  root.SetRequestedWidth(600.0f);
+  root.SetRequestedHeight(300.0f);
+  branch.SetRequestedWidth(400.0f);
+  branch.SetRequestedHeight(100.0f);
+  root.SetUiScalePolicy(Ui::UiScalePolicy::DISABLED);
+  root.SetProperty(Actor::Property::SCALE, Vector3::ONE * 1.5f);
+  branch.SetProperty(Actor::Property::SCALE, Vector3::ONE * 1.5f);
+  root.Add(branch);
+  branch.Add(test.label);
+  test.parent.Add(root);
+  for(unsigned policy = 0u; policy < 5u; ++policy)
+  {
+    if(policy == 1u) test.label.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
+    if(policy == 2u) test.label.SetUiScalePolicy(Ui::UiScalePolicy::DISABLED);
+    if(policy == 3u)
+    {
+      test.label.SetUiScalePolicy(Ui::UiScalePolicy::INHERIT);
+      branch.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
+    }
+    if(policy == 4u) Ui::UiScaleManager::Get().SetScalable(false);
+    test.Start();
+    CheckScaledMarqueeMotion(test, policy == 1u || policy == 3u ? 2.0f : 1.0f);
+    DALI_TEST_EQUALS(test.label.GetCurrentProperty<Vector3>(Actor::Property::WORLD_SCALE), Vector3::ONE * 2.25f, 0.0001f, TEST_LOCATION);
+  }
+}
+
+void CheckMarqueeUiScaleRuntime(bool async, bool vertical)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Lifecycle           test(app, async, vertical, false, 3);
+  test.Start();
+  for(float scale : {2.0f, 1.0f})
+  {
+    test.Advance(test.DurationMs() + 1u);
+    auto       old       = test.Current();
+    const auto oldBudget = old.GetLoopCount();
+    DALI_TEST_EQUALS(old.GetCurrentLoop(), 1, TEST_LOCATION);
+    Ui::UiScaleManager::Get().SetScale(scale);
+    DALI_TEST_CHECK(test.Current() == old);
+    if(async)
+    {
+      Task pending = test.Dispatch();
+      DALI_TEST_CHECK(test.Current() == old);
+      DALI_TEST_EQUALS(old.GetLoopCount(), oldBudget, TEST_LOCATION);
+      test.Complete(pending);
+    }
+    test.Drain();
+    DALI_TEST_CHECK(test.Current() != old);
+    DALI_TEST_EQUALS(test.Current().GetLoopCount(), async ? 2 : 3, TEST_LOCATION);
+    DALI_TEST_EQUALS(test.Current().GetCurrentLoop(), 0, TEST_LOCATION);
+    CheckScaledMarqueeMotion(test, scale);
+  }
+  test.label.SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE);
+  test.label.StopMarquee();
+  test.Drain();
+  test.Start();
+  DALI_TEST_EQUALS(test.Current().GetLoopCount(), 3, TEST_LOCATION);
+}
+
+void CheckMarqueeUiScaleManualSnapshot(bool measure)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Lifecycle           test(app);
+  test.label.StartMarquee();
+  auto& impl = static_cast<Ui::Integration::LabelImpl&>(test.label.GetImplementation());
+  impl.RequestAsyncRenderWithFixedSize(180.0f, 48.0f);
+  auto tasks = test.Take();
+  DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
+  Task pending = tasks.front();
+  pending->Process();
+  DALI_TEST_EQUALS(pending->mParameters.decorationUiScale, 1.0f, TEST_LOCATION);
+  const auto completed = test.completed;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  if(measure) test.Frame();
+  test.Deliver(pending);
+  DALI_TEST_EQUALS(test.completed, completed + (measure ? 0u : 1u), TEST_LOCATION);
+  if(!measure)
+  {
+    DALI_TEST_EQUALS(Ui::GetImpl(test.label).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+    // Before measure the accepted geometry and controller still use scale 1.
+    CheckScaledMarqueeMotion(test, 1.0f, false);
+  }
+  test.Drain();
+  CheckScaledMarqueeMotion(test, 2.0f);
+}
+
+void CheckMarqueeUiScaleOptions(bool async, bool vertical)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  for(int speed : {0, -20, 200, 1000000, (std::numeric_limits<int>::max)()})
+  {
+    Lifecycle test(app, async, vertical);
+    test.label.SetMarqueeSpeed(speed);
+    test.label.SetMarqueeGap(20);
+    test.label.SetMarqueeLoopDelay(0.25f);
+    test.Start();
+    DALI_TEST_EQUALS(test.label.GetMarqueeSpeed(), std::max(1, speed), TEST_LOCATION);
+    CheckScaledMarqueeMotion(test, 2.0f, speed < 1000000);
+  }
+  for(bool fit : {false, true})
+    for(float fontScale : {1.0f, 2.0f})
+    {
+      Lifecycle test(app, async, vertical);
+      test.label.SetSystemFontSizeScaleEnabled(false);
+      test.label.SetMinimumFontSizeScale(fontScale);
+      test.label.SetMaximumFontSizeScale(fontScale);
+      if(fit) test.label.SetTextFit(Text::Fit::Range(12.0f, 20.0f, 2.0f));
+      test.Start();
+      CheckScaledMarqueeMotion(test, 2.0f);
+      auto old = test.Current();
+      test.label.SetMarqueeSpeed(300);
+      test.Drain();
+      DALI_TEST_CHECK(test.Current() == old);
+      test.label.SetRequestedWidth(160.0f);
+      test.Drain();
+      DALI_TEST_CHECK(test.Current() != old);
+      CheckScaledMarqueeMotion(test, 2.0f);
+      test.label.SetText(vertical ? "First\nSecond\nThird\nFourth\nFifth\nSixth" : "Changed long content must retain the authored speed with UI scaling");
+      test.Drain();
+      CheckScaledMarqueeMotion(test, 2.0f);
+    }
+}
+
+void CheckMarqueeUiScaleFocusStop(unsigned order)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  StopRace test(app);
+  test.Focus(true);
+  Task stale = test.Request(true);
+  test.Raster(stale);
+  test.Focus(false);
+  Ui::UiScaleManager::Get().SetScale(1.0f);
+  const auto      completed = test.completed;
+  StopPublication previous(test.label);
+  if(order == 0u) test.Deliver(stale);
+  previous.Check(test.label);
+  test.Stopped(0u);
+  Task current = test.Request(false);
+  test.Raster(current);
+  if(order == 1u) test.Deliver(stale);
+  previous.Check(test.label);
+  DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+  test.Deliver(current);
+  StopPublication latest(test.label);
+  if(order == 2u) test.Deliver(stale);
+  latest.Check(test.label);
+  test.StaticFrames(0u);
+  test.Focus(true);
+  test.Drain();
+  CheckScaledMarqueeMotion(test, 1.0f);
+  test.Focus(false);
+  test.Drain();
+  test.StaticFrames(1u);
+}
+} // namespace
+
+int UtcDaliMarqueeUiScaleSyncHorizontalP(void)
+{
+  CheckMarqueeUiScaleMatrix(false, false);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleSyncVerticalP(void)
+{
+  CheckMarqueeUiScaleMatrix(false, true);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleAsyncHorizontalP(void)
+{
+  CheckMarqueeUiScaleMatrix(true, false);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleAsyncVerticalP(void)
+{
+  CheckMarqueeUiScaleMatrix(true, true);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleSyncPolicyP(void)
+{
+  CheckMarqueeUiScalePolicy(false);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleAsyncPolicyP(void)
+{
+  CheckMarqueeUiScalePolicy(true);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleSyncRuntimeHorizontalP(void)
+{
+  CheckMarqueeUiScaleRuntime(false, false);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleSyncRuntimeVerticalP(void)
+{
+  CheckMarqueeUiScaleRuntime(false, true);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleAsyncRuntimeHorizontalP(void)
+{
+  CheckMarqueeUiScaleRuntime(true, false);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleAsyncRuntimeVerticalP(void)
+{
+  CheckMarqueeUiScaleRuntime(true, true);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleManualBeforeMeasureP(void)
+{
+  CheckMarqueeUiScaleManualSnapshot(false);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleManualAfterMeasureP(void)
+{
+  CheckMarqueeUiScaleManualSnapshot(true);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleSyncHorizontalOptionsP(void)
+{
+  CheckMarqueeUiScaleOptions(false, false);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleSyncVerticalOptionsP(void)
+{
+  CheckMarqueeUiScaleOptions(false, true);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleAsyncHorizontalOptionsP(void)
+{
+  CheckMarqueeUiScaleOptions(true, false);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleAsyncVerticalOptionsP(void)
+{
+  CheckMarqueeUiScaleOptions(true, true);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleDirectionP(void)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  for(bool async : {false, true})
+    for(const char* text : {"مرحبا بالعالم هذا نص طويل لاختبار التمرير", "English مرحبا 123 mixed text with a long final section"})
+    {
+      Lifecycle test(app, async);
+      test.label.SetText(text);
+      test.Start();
+      CheckScaledMarqueeMotion(test, 2.0f);
+    }
+  END_TEST;
+}
+namespace
+{
+void CheckMarqueeUiScaleFinitePublication(int loops, bool vertical)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  FinitePublicationBudget(app, loops, vertical);
+}
+} // namespace
+
+int UtcDaliMarqueeUiScaleFinitePublicationInfiniteHorizontalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(0, false);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationInfiniteVerticalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(0, true);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationOneHorizontalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(1, false);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationOneVerticalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(1, true);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationTwoHorizontalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(2, false);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationTwoVerticalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(2, true);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationThreeHorizontalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(3, false);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationThreeVerticalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(3, true);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationThirtyTwoHorizontalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(32, false);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinitePublicationThirtyTwoVerticalP(void)
+{
+  CheckMarqueeUiScaleFinitePublication(32, true);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFinishLoopP(void)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  for(bool async : {false, true})
+    for(bool vertical : {false, true})
+      for(unsigned phase = 0u; phase < 4u; ++phase) FinishLoopAt(app, phase, async, vertical, 3);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleFinishedPendingP(void)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  for(bool vertical : {false, true}) FinishedBeforePublication(app, vertical);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleSessionRestartP(void)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  for(unsigned ending = 0u; ending < 5u; ++ending) ReducedBudgetSessionEnd(app, ending);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleFocusStopBeforeRelayoutP(void)
+{
+  CheckMarqueeUiScaleFocusStop(0u);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleFocusStopAfterRelayoutP(void)
+{
+  CheckMarqueeUiScaleFocusStop(1u);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleFocusStopAfterStaticP(void)
+{
+  CheckMarqueeUiScaleFocusStop(2u);
+  END_TEST;
+}
+int UtcDaliMarqueeUiScaleInvalidInputP(void)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Lifecycle test(app);
+  test.Start();
+  auto original = test.Current();
+  for(float invalid : {0.0f, -1.0f, std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::denorm_min()})
+  {
+    Ui::UiScaleManager::Get().SetScale(invalid);
+    test.Drain();
+    DALI_TEST_CHECK(test.Current() == original);
+    DALI_TEST_EQUALS(Ui::UiScaleManager::Get().GetScale(), 2.0f, TEST_LOCATION);
+  }
+  CheckScaledMarqueeMotion(test, 2.0f);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleFocusRapidP(void)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  StopRace            test(app);
+  std::vector<Task>   tasks;
+  const auto          completed = test.completed;
+  for(bool focused : {true, false, true, false})
+  {
+    test.Focus(focused);
+    Ui::UiScaleManager::Get().SetScale(focused ? 2.0f : 1.0f);
+    tasks.push_back(test.Request(focused));
+    test.Raster(tasks.back());
+  }
+  test.Deliver(tasks.back());
+  StopPublication latest(test.label);
+  for(unsigned i = 0u; i + 1u < tasks.size(); ++i)
+  {
+    test.Deliver(tasks[i]);
+    latest.Check(test.label);
+    test.Stopped(0u);
+    DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+  }
+  test.StaticFrames(0u);
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleLocalScaleAndFontChangeP(void)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  Ui::UiScaleManager::Get().SetScale(2.0f);
+  for(bool async : {false, true})
+  {
+    Lifecycle test(app, async);
+    test.Start();
+    const auto animation = test.Current();
+    const auto textures  = test.label.GetRendererAt(0u).GetTextures();
+    test.label.SetProperty(Actor::Property::SCALE, Vector3::ONE * 1.5f);
+    test.Drain();
+    DALI_TEST_CHECK(test.Take().empty());
+    DALI_TEST_CHECK(test.Current() == animation);
+    DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == textures);
+    CheckScaledMarqueeMotion(test, 2.0f);
+    DALI_TEST_EQUALS(test.label.GetCurrentProperty<Vector3>(Actor::Property::WORLD_SCALE), Vector3::ONE * 1.5f, 0.0001f, TEST_LOCATION);
+    for(float fontScale : {2.0f, 1.0f})
+    {
+      test.label.SetSystemFontSizeScaleEnabled(false);
+      test.label.SetMinimumFontSizeScale(fontScale);
+      test.label.SetMaximumFontSizeScale(fontScale);
+      test.Drain();
+      CheckScaledMarqueeMotion(test, 2.0f);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliMarqueeUiScaleResourcesP(void)
+{
+  UiTestApplication   app;
+  MarqueeUiScaleGuard guard;
+  for(bool async : {false, true})
+    for(float uiScale : {1.0f, 2.0f})
+    {
+      Ui::UiScaleManager::Get().SetScale(uiScale);
+      Lifecycle test(app, async);
+      test.Start();
+      const auto renderer = test.label.GetRendererAt(0u);
+      const auto geometry = renderer.GetGeometry();
+      const auto created  = test.animationsCreated;
+      // Sync retires for the size change and rebuilds for the changed content.
+      const unsigned replacements = async ? 1u : 2u;
+      for(unsigned update = 0u; update < 8u; ++update)
+      {
+        test.label.SetRequestedWidth(update % 2u ? 180.0f : 160.0f);
+        test.label.SetText(update % 2u ? LONG_TEXT : "A different long text for the same repeated publication resource workload");
+        test.Drain();
+        DALI_TEST_CHECK(test.label.GetRendererAt(0u) == renderer);
+        DALI_TEST_CHECK(renderer.GetGeometry() == geometry);
+        DALI_TEST_EQUALS(test.animationsCreated, created + (update + 1u) * replacements, TEST_LOCATION);
+        DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), 1u, TEST_LOCATION);
+      }
+      const auto textures  = renderer.GetTextures();
+      const auto completed = test.completed;
+      test.Advance(100u);
+      test.Drain();
+      DALI_TEST_CHECK(test.Take().empty());
+      DALI_TEST_CHECK(renderer.GetTextures() == textures);
+      DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+      DALI_TEST_EQUALS(test.animationsCreated, created + 8u * replacements, TEST_LOCATION);
+      test.label.Unparent();
+      test.label.Reset();
+      test.Frame();
+      DALI_TEST_EQUALS(DevelAnimation::GetAnimationCount(), 0u, TEST_LOCATION);
+    }
   END_TEST;
 }
 

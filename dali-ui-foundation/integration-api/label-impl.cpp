@@ -2979,7 +2979,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                renderInfo.isMarqueeContentOverflow, renderInfo.isTextDirectionRTL,
                                mController->GetHorizontalAlignment(),
                                mController->GetVerticalAlignment(), true, preparedContent.textGradient,
-                               marqueeInitialDelta);
+                               marqueeInitialDelta, GetTextUiScale());
 }
 
 void LabelImpl::AsyncTextFitChanged(float pointSize)
@@ -3798,7 +3798,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                isTextContentOverflow, direction,
                                mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(),
                                mRendererUpdateNeeded, preparedContent.textGradient,
-                               marqueeInitialDelta);
+                               marqueeInitialDelta, GetTextUiScale());
   mController->SetTextElideEnabled(actualellipsis);
   mController->SetMarqueeMaxTextureExceeded(false);
 }
