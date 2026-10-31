@@ -76,6 +76,7 @@ SET(TC_SOURCES
         utc-Dali-VideoView.cpp
         utc-Dali-DragAndDropDetector.cpp
         utc-Dali-ViewTypeRegistry.cpp
+        utc-Dali-Constexpr.cpp
 )
 
 SET(TC_SOURCE_LIST ${TC_SOURCES})

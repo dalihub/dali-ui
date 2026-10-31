@@ -137,8 +137,6 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
 
   bool      isLastLine     = lineIndex + 1 == numberOfLines;
   LineIndex firstLineIndex = lineIndex;
-  Size      textInLineSize;
-  Vector2   textInLinePosition;
 
   lineRun += firstLineIndex;
 
