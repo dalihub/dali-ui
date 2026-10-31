@@ -41,10 +41,12 @@
  *   F         — programmatically focus Item 15 (tests scroll-on-focus via API)
  *   K         — toggle KeyScrollEnabled on / off
  *   [ / ]     — decrease / increase KeyScrollStep by 20 px
- *   E         — toggle BounceEdgeEffect on / off (drag past top/bottom to test)
+ *   D         — toggle BounceEdgeEffect on / off (drag past top/bottom to test)
+ *   Q W E R T — UI scale 0.8 / 1.0 / 1.2 / 1.5 / 2.0
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
 #include <dali/devel-api/adaptor-framework/application.h>
@@ -247,7 +249,7 @@ private:
     mFlingVelocityLabel.SetTextColor(Color::WHITE);
     panel.Add(mFlingVelocityLabel);
 
-    mEdgeEffectLabel = Label::New("EdgeEffect: OFF  ( E to toggle )");
+    mEdgeEffectLabel = Label::New("EdgeEffect: OFF  ( D to toggle )");
     mEdgeEffectLabel.SetRequestedWidth(WINDOW_W - 8.0f);
     mEdgeEffectLabel.SetRequestedHeight(26.0f);
     mEdgeEffectLabel.SetRequestedX(8.0f);
@@ -403,7 +405,7 @@ private:
     panel.Add(mKeyScrollStepLabel);
 
     // Key hint row
-    Label keyHint = Label::New("Keys: ↑↓ focus  F focus-last  S scroll-on-focus  1~4 mode  +/- peek  K key-scroll  [/] step  E edge-effect");
+    Label keyHint = Label::New("Keys: ↑↓ focus  F focus-last  S scroll-on-focus  1~4 mode  +/- peek  K key-scroll  [/] step  D edge-effect");
     keyHint.SetRequestedWidth(WINDOW_W - 8.0f);
     keyHint.SetRequestedHeight(22.0f);
     keyHint.SetRequestedX(8.0f);
@@ -661,7 +663,7 @@ private:
     mTopEdgeEffect.FinishedSignal().Connect(this, &ScrollViewController::OnEdgeEffectFinished);
     mBottomEdgeEffect.FinishedSignal().Connect(this, &ScrollViewController::OnEdgeEffectFinished);
 
-    // Attach to ScrollView (edge effects are initially disabled until user presses E)
+    // Attach to ScrollView (edge effects are initially disabled until user presses D)
     RefreshEdgeEffects();
 
     window.Add(mScrollView);
@@ -844,10 +846,30 @@ private:
       mScrollView.SetKeyScrollStep(mScrollView.GetKeyScrollStep() + 20.0f);
       RefreshFocusPanel();
     }
-    else if(key == "e" || key == "E")
+    else if(key == "d" || key == "D")
     {
       mEdgeEffectEnabled = !mEdgeEffectEnabled;
       RefreshEdgeEffects();
+    }
+    else if(key == "q" || key == "Q")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
+    }
+    else if(key == "w" || key == "W")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
+    }
+    else if(key == "e" || key == "E")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
+    }
+    else if(key == "r" || key == "R")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+    }
+    else if(key == "t" || key == "T")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
   }
 
@@ -873,7 +895,7 @@ private:
     std::ostringstream oss;
     if(!mEdgeEffectEnabled)
     {
-      oss << "EdgeEffect: OFF  ( E to enable )";
+      oss << "EdgeEffect: OFF  ( D to enable )";
     }
     else
     {
@@ -895,7 +917,7 @@ private:
       };
       oss << "EdgeEffect: ON  Top=" << stateStr(mTopEdgeEffect.GetState())
           << "  Bottom=" << stateStr(mBottomEdgeEffect.GetState())
-          << "  ( E to disable )";
+          << "  ( D to disable )";
     }
     mEdgeEffectLabel.SetText(oss.str().c_str());
   }
