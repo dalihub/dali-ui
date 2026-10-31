@@ -35,16 +35,25 @@ samples/ui-scale/bin/ui-scale.example
 
 - `x0.80` ~ `x2.00`, 또는 `Custom scale` 입력 후 `Apply`: 시스템 스케일을 바꾼다. Zone A의 `INHERIT` 박스와
   Zone B·C의 `ENABLED` 박스는 함께 커지거나 작아지고, `DISABLED` 컨테이너 안의 `INHERIT` 박스는 원래 크기를 유지한다.
+- Zone B 아래쪽 plain View 행: 두 박스 모두 `SetRequestedX(100)`이다. `x2.00`에서 초록 `ENABLED` 박스는
+  자기 스케일로 200 px에, 빨강 `INHERIT` 박스는 100 px에 놓인다.
 - `win x1.00` ~ `win x2.00`: 메인 Window의 윈도우별 스케일을 바꾼다. `DISABLED` 박스를 포함해 모든 박스가
   함께 커진다. Window의 픽셀 크기는 그대로이고 한 화면에 보이는 내용이 줄어든다. `win x1.00`이 리셋이다.
 - `Scaling: ON (tap to disable)` / `Scaling: OFF (tap to enable)`: 마스터 스위치를 전환한다. OFF이면
   시스템 스케일과 윈도우별 스케일이 모두 꺼져 모든 박스가 1.0으로 그려지고 상태 문구가 `Final x1.00`이
   된다. 저장된 값은 유지되며 ON으로 돌리면 다시 적용된다.
 - Zone D·E·F: 모서리 반경, 보더 두께, VisualBase 장식, RenderEffect가 유효 스케일에 비례해 바뀐다.
+- Zone D의 `Border 20 px outside` 박스: `RELATIVE` 모서리 바깥쪽 20 보더의 모서리 모양이 어느 스케일에서도
+  같다(바깥 모서리 반경 `x1.00`에서 48 px, `x2.00`에서 96 px).
 - Zone G: `→ INHERIT 부모로` / `← DISABLED 부모로`로 박스를 옮기면 새 부모 기준의 스케일이 바로 적용된다.
 - Zone H: `① Unparent` 후 위 패널에서 시스템 스케일이나 윈도우별 스케일을 바꾸고 `③ Re-add`를 누르면 바뀐
   스케일로 다시 배치된다. 상태 문구는 박스의 유효 스케일과 두 항을 보여 준다(`x1.50`, `win x2.00`에서
   `Scale x3.00 적용됨 (System x1.50 * Window x2.00)`).
+- Zone H의 `④ Leaf size`: 부모 없는 leaf View(최대 폭 80)에 `SetRequestedWidth(100)`을 한 직후의 actor
+  폭을 상태 문구에 표시한다. 위 박스가 연결된 상태면 leaf를 이 Window의 루트 바로 아래에서 측정하므로
+  윈도우별 스케일이 포함되고, `① Unparent` 상태면 Window 밖에서 측정하므로 시스템 스케일만 적용된다
+  (`x2.00`, `win x2.00`에서 `(Window 안): 320.00 (min(100, max 80) x 4.00)`, `① Unparent` 후
+  `(Window 밖): 160.00 (min(100, max 80) x 2.00)`).
 - Zone I: `비교 Window 열기 (win x2.00)`는 같은 비교 카드를 가진 두 번째 Window를 메인 Window 옆에 연다.
   각 카드는 자기 Window의 `System x.. * Window x.. = Final x..`를 표시하고, 패널에서 시스템 스케일이나 스위치를
   바꾸면 두 카드가 함께 갱신된다. 두 번째 Window의 `win x..` 행은 그 Window에만 적용된다.
