@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 
 #include <random>
@@ -199,8 +200,10 @@ private:
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetSpacing(STACK_SPACING);
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
+    mRoot = root;
+
+    const PositionSize windowSize = window.GetPositionSize();
+    SetRootSize(static_cast<float>(windowSize.width), static_cast<float>(windowSize.height));
     root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     Label titleLabel = Label::New("ImageVisual Example");
@@ -297,6 +300,21 @@ private:
 
     UpdateVisualCount();
     window.KeyEventSignal().Connect(this, &VisualBaseController::OnKeyEvent);
+    window.ResizedSignal().Connect(this, &VisualBaseController::OnWindowResized);
+  }
+
+  // The root is as large as the window in natural units rather than MATCH_PARENT. The layout multiplies a natural
+  // size by the effective scale, so the root grows with the UI scale, and with it the view that takes the root's
+  // left-over space, which would shrink under a root of the window's pixel size.
+  void SetRootSize(float width, float height)
+  {
+    mRoot.SetRequestedWidth(width);
+    mRoot.SetRequestedHeight(height);
+  }
+
+  void OnWindowResized(Window /*window*/, Window::WindowSize windowSize)
+  {
+    SetRootSize(static_cast<float>(windowSize.GetWidth()), static_cast<float>(windowSize.GetHeight()));
   }
 
   void PushVisual()
@@ -356,10 +374,31 @@ private:
     {
       PopVisual();
     }
+    else if(event.GetKeyName() == "q")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
+    }
+    else if(event.GetKeyName() == "e")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
+    }
+    else if(event.GetKeyName() == "r")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+    }
+    else if(event.GetKeyName() == "t")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
+    }
   }
 
 private:
   Application& mApplication;
+  StackLayout  mRoot;
   View         mView;
   Label        mVisualCounter;
 };

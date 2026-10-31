@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
@@ -81,20 +82,35 @@ private:
     window.SetBackgroundColor(UiColor(0x202124));
 
     window.Add(CreateContents());
+    const PositionSize windowSize = window.GetPositionSize();
+    SetRootSize(static_cast<float>(windowSize.width), static_cast<float>(windowSize.height));
     window.KeyEventSignal().Connect(this, &ImageCornerRadiusController::OnKeyEvent);
+    window.ResizedSignal().Connect(this, &ImageCornerRadiusController::OnWindowResized);
   }
 
   View CreateContents()
   {
-    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
-    contents.SetRequestedWidth(MATCH_PARENT);
-    contents.SetRequestedHeight(MATCH_PARENT);
-    contents.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
-    contents.SetSpacing(8.0f);
-    contents.Add(CreateTypeButton());
-    contents.Add(CreateImageGrid());
-    contents.Add(CreateSwapButton());
-    return contents;
+    mRoot = StackLayout::New(StackOrientation::VERTICAL);
+    mRoot.SetPadding(Insets(10.0f, 10.0f, 10.0f, 10.0f));
+    mRoot.SetSpacing(8.0f);
+    mRoot.Add(CreateTypeButton());
+    mRoot.Add(CreateImageGrid());
+    mRoot.Add(CreateSwapButton());
+    return mRoot;
+  }
+
+  // The root is as large as the window in natural units rather than MATCH_PARENT. The layout multiplies a natural
+  // size by the effective scale, so the root grows with the UI scale, and with it the view that takes the root's
+  // left-over space, which would shrink under a root of the window's pixel size.
+  void SetRootSize(float width, float height)
+  {
+    mRoot.SetRequestedWidth(width);
+    mRoot.SetRequestedHeight(height);
+  }
+
+  void OnWindowResized(Window /*window*/, Window::WindowSize windowSize)
+  {
+    SetRootSize(static_cast<float>(windowSize.GetWidth()), static_cast<float>(windowSize.GetHeight()));
   }
 
   View CreateImageGrid()
@@ -286,10 +302,34 @@ private:
 
   void OnKeyEvent(Window /*window*/, KeyEvent event)
   {
-    if(event.GetState() == KeyEvent::DOWN &&
-       (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK)))
+    if(event.GetState() != KeyEvent::DOWN)
+    {
+      return;
+    }
+
+    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
       mApplication.Quit();
+    }
+    else if(event.GetKeyName() == "q")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
+    }
+    else if(event.GetKeyName() == "e")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
+    }
+    else if(event.GetKeyName() == "r")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+    }
+    else if(event.GetKeyName() == "t")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
   }
 
@@ -308,6 +348,7 @@ private:
   Application&        mApplication;
   int                 mResourceIndex;
   int                 mViewType;
+  StackLayout         mRoot;
   StackLayout         mGridContainer;
   Label               mTypeLabel;
   ImageView           mImages[RADIUS_CASE_COUNT];
