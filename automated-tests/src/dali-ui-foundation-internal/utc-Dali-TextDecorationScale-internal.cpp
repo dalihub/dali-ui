@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/decoration-scale.h>
+#include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
@@ -971,5 +972,111 @@ int UtcDaliTextDecorationScaleLabelAsyncRuntimeP(void)
     auto texture = label.GetRendererAt(0u).GetTextures().GetTexture(0u);
     DALI_TEST_CHECK(texture && texture.GetWidth() > 0u);
   }
+  END_TEST;
+}
+
+namespace
+{
+template<typename Control>
+void CheckCursorInsetScale(UiTestApplication& application, bool enabled)
+{
+  ScaleGuard guard;
+  auto       control = Control::New();
+  auto       oracle  = Control::New();
+  for(auto input : {control, oracle})
+  {
+    input.SetSystemFontSizeScaleEnabled(false);
+    input.SetPadding(Insets(0.f, 0.f, 0.f, 0.f));
+    input.SetCursorWidth(4);
+    // Exercise the existing engine switch without adding a public enable path.
+    ControllerFor(input)->GetLayoutEngine().SetCursorInsetEnabled(enabled);
+    application.GetScene().Add(input);
+  }
+  oracle.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  for(float fontScale : {1.f, 2.f})
+  {
+    control.SetMinimumFontSizeScale(fontScale);
+    control.SetMaximumFontSizeScale(fontScale);
+    for(const char* text : {"ABCD", "אבג דהו", "ABCD\nEFGH"})
+    {
+      control.SetText(text);
+      oracle.SetText(text);
+      for(float scale : {1.f, 1.5f, 2.f, 1.f})
+      {
+        UiScaleManager::Get().SetScale(scale);
+        control.SetFontSize(20.f);
+        control.SetRequestedWidth(320.f);
+        control.SetRequestedHeight(160.f);
+        oracle.SetFontSize(20.f * fontScale * scale);
+        oracle.SetCursorWidth(static_cast<int>(4.f * scale));
+        oracle.SetRequestedWidth(320.f * scale);
+        oracle.SetRequestedHeight(160.f * scale);
+        application.SendNotification();
+        application.Render();
+        auto  controller = ControllerFor(control);
+        auto& actual     = Text::Controller::Impl::GetImplementation(*controller);
+        auto& expected   = Text::Controller::Impl::GetImplementation(*ControllerFor(oracle));
+        auto& visual     = *actual.mModel->mVisualModel;
+        auto& reference  = *expected.mModel->mVisualModel;
+        tet_printf("cursor inset=%d scale=%.1f fontScale=%.1f text=%s", enabled, scale, fontScale, text);
+        DALI_TEST_EQUALS(control.GetCursorWidth(), 4, TEST_LOCATION);
+        DALI_TEST_EQUALS(controller->GetLayoutEngine().GetCursorWidth(), 4, TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.mEventData->mDecorator->GetEffectiveCursorWidth(), 4.f * scale, EPSILON, TEST_LOCATION);
+        DALI_TEST_EQUALS(visual.GetLayoutSize(), reference.GetLayoutSize(), EPSILON, TEST_LOCATION);
+        DALI_TEST_EQUALS(visual.mGlyphPositions.Count(), reference.mGlyphPositions.Count(), TEST_LOCATION);
+        for(unsigned glyph = 0u; glyph < visual.mGlyphPositions.Count(); ++glyph)
+        {
+          DALI_TEST_EQUALS(visual.mGlyphPositions[glyph], reference.mGlyphPositions[glyph], EPSILON, TEST_LOCATION);
+        }
+        for(unsigned character : {0u, 2u, 4u})
+        {
+          Text::CursorInfo cursor, expectedCursor;
+          actual.GetCursorPosition(character, cursor);
+          expected.GetCursorPosition(character, expectedCursor);
+          DALI_TEST_EQUALS(cursor.primaryPosition, expectedCursor.primaryPosition, EPSILON, TEST_LOCATION);
+        }
+        control.SelectText(1u, 3u);
+        application.SendNotification();
+        application.Render();
+        const auto selected = control.GetSelectedText();
+        DALI_TEST_EQUALS(control.GetSelectedTextStart(), 1u, TEST_LOCATION);
+        DALI_TEST_EQUALS(control.GetSelectedTextEnd(), 3u, TEST_LOCATION);
+        // Selecting the oracle transfers focus and clears the first selection.
+        oracle.SelectText(1u, 3u);
+        application.SendNotification();
+        application.Render();
+        DALI_TEST_EQUALS(selected, oracle.GetSelectedText(), TEST_LOCATION);
+        DALI_TEST_EQUALS(controller->Relayout(Vector2(320.f, 160.f) * scale), Text::Controller::NONE_UPDATED, TEST_LOCATION);
+      }
+    }
+  }
+}
+} // namespace
+
+int UtcDaliTextCursorInsetScaleFieldEnabledP(void)
+{
+  UiTestApplication application;
+  CheckCursorInsetScale<InputField>(application, true);
+  END_TEST;
+}
+
+int UtcDaliTextCursorInsetScaleFieldDisabledP(void)
+{
+  UiTestApplication application;
+  CheckCursorInsetScale<InputField>(application, false);
+  END_TEST;
+}
+
+int UtcDaliTextCursorInsetScaleEditorEnabledP(void)
+{
+  UiTestApplication application;
+  CheckCursorInsetScale<InputEditor>(application, true);
+  END_TEST;
+}
+
+int UtcDaliTextCursorInsetScaleEditorDisabledP(void)
+{
+  UiTestApplication application;
+  CheckCursorInsetScale<InputEditor>(application, false);
   END_TEST;
 }

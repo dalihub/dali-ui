@@ -743,7 +743,7 @@ struct Engine::Impl
                                              (*(glyphsBuffer + glyphIndex)).advance);
     GetGlyphsMetrics(glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
 
-    float penX = -glyphMetrics.xBearing + GetCursorInsetWidth() + outlineWidth;
+    float penX = -glyphMetrics.xBearing + GetCursorInsetWidth(parameters) + outlineWidth;
 
     // Continue after any trailing whitespace consumed above.
     for(; characterLogicalIndex < bidirectionalLineInfo.characterRun.numberOfCharacters;)
@@ -1028,7 +1028,7 @@ struct Engine::Impl
     // It needs to add as well space for the cursor if the text is in edit mode and extra space in case the text is
     // outlined.
 
-    tmpLineLayout.penX = GetCursorInsetWidth() + outlineWidth;
+    tmpLineLayout.penX = GetCursorInsetWidth(parameters) + outlineWidth;
     if(parameters.textModel->mRemoveFrontInset)
     {
       tmpLineLayout.penX -= glyphMetrics.xBearing;
@@ -1317,7 +1317,7 @@ struct Engine::Impl
     // If it has a negative x bearing, it will exceed the boundaries of the actor,
     // so the penX position needs to be moved to the right.
     const GlyphInfo& glyph = *(glyphsBuffer + startIndexForGlyph);
-    float            penX  = GetCursorInsetWidth() + outlineWidth;
+    float            penX  = GetCursorInsetWidth(layoutParameters) + outlineWidth;
 
     if(layoutParameters.textModel->mRemoveFrontInset)
     {
@@ -2439,9 +2439,10 @@ struct Engine::Impl
     }
   }
 
-  float GetCursorInsetWidth()
+  float GetCursorInsetWidth(const Parameters& parameters)
   {
-    return mIsCursorInsetEnabled ? mCursorWidth : 0.0f;
+    // Match the painted cursor width, independently of the font size scale.
+    return mIsCursorInsetEnabled ? mCursorWidth * parameters.textModel->mVisualModel->GetDecorationUiScale() : 0.0f;
   }
 
   /**
