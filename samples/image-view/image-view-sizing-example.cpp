@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
@@ -41,6 +42,9 @@ using namespace Dali::Ui;
  * NOTE: Do NOT use ImageLoadWithViewSize together with a WRAP_CONTENT axis expecting
  * aspect-ratio adjustment. ImageLoadWithViewSize overrides GetNaturalSize with the view
  * size, making aspect-ratio layout ineffective.
+ *
+ * [Section 1b] A WRAP_CONTENT ImageView with ImageLoadWithViewSize: its natural size is the
+ *   view size in natural units, so it keeps 128 x 128 x the UI scale (q/w/e/r/t).
  *
  * [Section 2: OrientationCorrection]
  * - Corrects EXIF orientation metadata embedded in JPEG files.
@@ -81,6 +85,7 @@ private:
     contents.Add(CreateSyncSizeContainer());
     contents.Add(CreateSyncSizeInfoLabel());
     contents.Add(CreateSyncSizeRow());
+    contents.Add(CreateWrapViewSizeImage());
     contents.Add(CreateSectionLabel("2. OrientationCorrection  (exif-rotated.jpg: EXIF orientation=6, Rotate 90 CW)"));
     contents.Add(CreateOrientationArea());
     contents.Add(CreateOrientationInfoLabel());
@@ -112,6 +117,18 @@ private:
     container.SetBackgroundColor(UiColor(0x2A2A2A));
     container.Add(mSyncImage);
     return container;
+  }
+
+  // A WRAP_CONTENT image loaded at its view size: the natural size it reports is that view size
+  // in natural units, so the view keeps 128 x 128 times the UI scale.
+  View CreateWrapViewSizeImage()
+  {
+    Ui::ImageView image = ImageView::New(RESOURCES_DIR "contact-cards-mask.png");
+    image.SetRequestedWidth(WRAP_CONTENT);
+    image.SetRequestedHeight(WRAP_CONTENT);
+    image.SetImageLoadWithViewSizeEnabled(true);
+    image.SetBackgroundColor(UiColor(0x3A3A3A));
+    return image;
   }
 
   View CreateSyncSizeInfoLabel()
@@ -304,6 +321,26 @@ private:
       if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
+      }
+      else if(event.GetKeyName() == "q")
+      {
+        Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
+      }
+      else if(event.GetKeyName() == "w")
+      {
+        Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
+      }
+      else if(event.GetKeyName() == "e")
+      {
+        Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
+      }
+      else if(event.GetKeyName() == "r")
+      {
+        Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+      }
+      else if(event.GetKeyName() == "t")
+      {
+        Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
       }
     }
   }

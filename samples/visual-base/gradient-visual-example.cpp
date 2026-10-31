@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 
 #include <random>
@@ -193,8 +194,10 @@ private:
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetSpacing(STACK_SPACING);
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
+    mRoot = root;
+
+    const PositionSize windowSize = window.GetPositionSize();
+    SetRootSize(static_cast<float>(windowSize.width), static_cast<float>(windowSize.height));
     root.SetPadding(Insets(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     Label titleLabel = Label::New("GradientVisual Example");
@@ -291,6 +294,21 @@ private:
 
     UpdateVisualCount();
     window.KeyEventSignal().Connect(this, &VisualBaseController::OnKeyEvent);
+    window.ResizedSignal().Connect(this, &VisualBaseController::OnWindowResized);
+  }
+
+  // The root is as large as the window in natural units rather than MATCH_PARENT. The layout multiplies a natural
+  // size by the effective scale, so the root grows with the UI scale, and with it the view that takes the root's
+  // left-over space, which would shrink under a root of the window's pixel size.
+  void SetRootSize(float width, float height)
+  {
+    mRoot.SetRequestedWidth(width);
+    mRoot.SetRequestedHeight(height);
+  }
+
+  void OnWindowResized(Window /*window*/, Window::WindowSize windowSize)
+  {
+    SetRootSize(static_cast<float>(windowSize.GetWidth()), static_cast<float>(windowSize.GetHeight()));
   }
 
   void PushVisual()
@@ -366,6 +384,35 @@ private:
     else if(event.GetKeyName() == "3")
     {
       ChangeVisual();
+    }
+    else if(event.GetKeyName() == "4")
+    {
+      // A USER_SPACE ramp over the first 200 units of the view: the points are natural units,
+      // so it covers the same part of the view at every UI scale.
+      Ui::Gradient::Linear gradient(Vector2(0.0f, 0.0f), Vector2(200.0f, 0.0f));
+      gradient.SetUnits(Ui::Gradient::Units::USER_SPACE);
+      gradient.SetStopNodes({Ui::Gradient::StopNode(0.0f, UiColor(0x2563EB)), Ui::Gradient::StopNode(1.0f, UiColor(0xF97316))});
+      mView.SetBackgroundGradient(gradient);
+    }
+    else if(event.GetKeyName() == "q")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
+    }
+    else if(event.GetKeyName() == "e")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
+    }
+    else if(event.GetKeyName() == "r")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+    }
+    else if(event.GetKeyName() == "t")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
   }
 
@@ -451,6 +498,7 @@ private:
 
 private:
   Application& mApplication;
+  StackLayout  mRoot;
   View         mView;
   Label        mVisualCounter;
 };
