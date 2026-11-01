@@ -118,7 +118,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
   PositionSize positionSize(100, 100, 1400, 650);
   // Leave enough physical pixels for high-DPI desktop scale factors.
   windowData.SetPositionSize(positionSize);
-  windowData.SetTransparency(true);
+  windowData.SetTransparent(true);
 
   Application                 application = Application::New(&argc, &argv, "", false, windowData);
   TransparentWindowController controller(application);

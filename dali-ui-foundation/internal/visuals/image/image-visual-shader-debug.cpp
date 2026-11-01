@@ -381,7 +381,7 @@ void ApplyImageVisualShaderDebugScriptCode(std::string& vertexShader, std::strin
     auto        key   = resultMaps[0].GetKeyAt(i);
     const auto& value = resultMaps[0].GetValue(i);
 
-    RedefineMacro(vertexShader, ToStdString(key.stringKey), ToStdString(value));
+    RedefineMacro(vertexShader, ToStdString(key.GetStringKey()), ToStdString(value));
   }
 
   for(Property::Map::SizeType i = 0u; i < resultMaps[1].Count(); ++i)
@@ -389,7 +389,7 @@ void ApplyImageVisualShaderDebugScriptCode(std::string& vertexShader, std::strin
     auto        key   = resultMaps[1].GetKeyAt(i);
     const auto& value = resultMaps[1].GetValue(i);
 
-    RedefineMacro(fragmentShader, ToStdString(key.stringKey), ToStdString(value));
+    RedefineMacro(fragmentShader, ToStdString(key.GetStringKey()), ToStdString(value));
   }
 }
 } // namespace ImageVisualShaderDebug

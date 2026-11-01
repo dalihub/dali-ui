@@ -186,7 +186,7 @@ private:
   {
     mWindow = application.GetWindow();
     mWindow.SetBackgroundColor(Color::TRANSPARENT);
-    mWindow.SetTransparency(true);
+    mWindow.SetTransparent(true);
     mWindow.SetPositionSize(PositionSize(80, 80, 400, 260));
     mWindow.KeyEventSignal().Connect(this, &WindowFrameExample::OnKeyEvent);
 

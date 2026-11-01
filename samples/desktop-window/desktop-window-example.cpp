@@ -62,7 +62,7 @@ private:
     // The shadow is drawn in the surface outside the frame, so the window has
     // to be transparent for it to show.
     window.SetBackgroundColor(Color::TRANSPARENT);
-    window.SetTransparency(true);
+    window.SetTransparent(true);
     window.KeyEventSignal().Connect(this, &GalleryApplication::OnKeyEvent);
 
     // Four calls. No border thickness, no window state, no handle to keep alive.

@@ -778,7 +778,7 @@ void Builder::LoadConfiguration(const TreeNode& root, Property::Map& intoMap)
 
                     // Compare string which is between "{" and "}" with constant string
                     // If they are same, change string in stringConfigValue to mapped constant value.
-                    if(0 == stringConfigValue.compare(leftPos + 1, rightPos - leftPos - 1, ToStdString(constant.stringKey)))
+                    if(0 == stringConfigValue.compare(leftPos + 1, rightPos - leftPos - 1, ToStdString(constant.GetStringKey())))
                     {
                       std::string replaceString;
                       if(DALI_LIKELY(GetStdString(mReplacementMap.GetValue(i), replaceString)))

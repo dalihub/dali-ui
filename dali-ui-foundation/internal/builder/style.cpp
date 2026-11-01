@@ -108,9 +108,9 @@ void Style::ApplyProperties(Handle handle) const
   for(Property::Map::SizeType i = 0; i < properties.Count(); ++i)
   {
     KeyValuePair keyValue = properties.GetKeyValue(i);
-    if(keyValue.first.type == Property::Key::INDEX)
+    if(keyValue.first.GetType() == Property::Key::INDEX)
     {
-      handle.SetProperty(keyValue.first.indexKey, keyValue.second);
+      handle.SetProperty(keyValue.first.GetIndexKey(), keyValue.second);
     }
   }
 }

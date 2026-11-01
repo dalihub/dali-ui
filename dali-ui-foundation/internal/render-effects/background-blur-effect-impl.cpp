@@ -432,7 +432,7 @@ void BackgroundBlurEffectImpl::OnActivate()
   if(!mCamera)
   {
     mCamera = CameraActor::New();
-    mCamera.SetInvertYAxis(true);
+    mCamera.SetYAxisInverted(true);
     mCamera.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
     mCamera.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
     mCamera.SetType(Dali::Camera::FREE_LOOK);
@@ -443,7 +443,7 @@ void BackgroundBlurEffectImpl::OnActivate()
   if(!mRenderDownsampledCamera)
   {
     mRenderDownsampledCamera = CameraActor::New();
-    mRenderDownsampledCamera.SetInvertYAxis(true);
+    mRenderDownsampledCamera.SetYAxisInverted(true);
     mRenderDownsampledCamera.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
     mRenderDownsampledCamera.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
     mRenderDownsampledCamera.SetType(Dali::Camera::FREE_LOOK);

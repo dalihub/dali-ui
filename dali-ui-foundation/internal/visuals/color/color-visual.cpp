@@ -450,8 +450,8 @@ Dali::Property ColorVisual::OnGetPropertyObject(Dali::Property::Key key, bool ch
     return Dali::Property(handle, Property::INVALID_INDEX);
   }
 
-  if((key.type == Property::Key::INDEX && key.indexKey == Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS) ||
-     (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME))
+  if((key.GetType() == Property::Key::INDEX && key.GetIndexKey() == Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS) ||
+     (key.GetType() == Property::Key::STRING && key.GetStringKey() == BLUR_RADIUS_NAME))
   {
     if(changeProperties)
     {

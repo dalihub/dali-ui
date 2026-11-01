@@ -55,40 +55,40 @@ const char* const PLACEHOLDER_ELLIPSIS     = "ellipsis";
  */
 static Dali::Property::Index GetIntKey(const Dali::Property::Key& key)
 {
-  if(key.type == Dali::Property::Key::INDEX)
+  if(key.GetType() == Dali::Property::Key::INDEX)
   {
-    return key.indexKey;
+    return key.GetIndexKey();
   }
 
-  if(key.stringKey == PLACEHOLDER_TEXT)
+  if(key.GetStringKey() == PLACEHOLDER_TEXT)
   {
     return Dali::Ui::Text::PlaceHolder::Property::TEXT;
   }
-  else if(key.stringKey == PLACEHOLDER_TEXT_FOCUSED)
+  else if(key.GetStringKey() == PLACEHOLDER_TEXT_FOCUSED)
   {
     return Dali::Ui::Text::PlaceHolder::Property::TEXT_FOCUSED;
   }
-  else if(key.stringKey == PLACEHOLDER_COLOR)
+  else if(key.GetStringKey() == PLACEHOLDER_COLOR)
   {
     return Dali::Ui::Text::PlaceHolder::Property::COLOR;
   }
-  else if(key.stringKey == PLACEHOLDER_FONT_FAMILY)
+  else if(key.GetStringKey() == PLACEHOLDER_FONT_FAMILY)
   {
     return Dali::Ui::Text::PlaceHolder::Property::FONT_FAMILY;
   }
-  else if(key.stringKey == PLACEHOLDER_FONT_STYLE)
+  else if(key.GetStringKey() == PLACEHOLDER_FONT_STYLE)
   {
     return Dali::Ui::Text::PlaceHolder::Property::FONT_STYLE;
   }
-  else if(key.stringKey == PLACEHOLDER_POINT_SIZE)
+  else if(key.GetStringKey() == PLACEHOLDER_POINT_SIZE)
   {
     return Dali::Ui::Text::PlaceHolder::Property::POINT_SIZE;
   }
-  else if(key.stringKey == PLACEHOLDER_PIXEL_SIZE)
+  else if(key.GetStringKey() == PLACEHOLDER_PIXEL_SIZE)
   {
     return Dali::Ui::Text::PlaceHolder::Property::PIXEL_SIZE;
   }
-  else if(key.stringKey == PLACEHOLDER_ELLIPSIS)
+  else if(key.GetStringKey() == PLACEHOLDER_ELLIPSIS)
   {
     return Dali::Ui::Text::PlaceHolder::Property::ELLIPSIS;
   }

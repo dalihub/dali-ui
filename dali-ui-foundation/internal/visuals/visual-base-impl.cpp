@@ -79,7 +79,7 @@ const uint16_t PROPERTY_NAME_INDEX_TABLE_COUNT =
 
 Property::Index GetVisualPropertyIndex(Property::Key key)
 {
-  if(key.type == Property::Key::STRING)
+  if(key.GetType() == Property::Key::STRING)
   {
     for(auto tableId = 0u; tableId < PROPERTY_NAME_INDEX_TABLE_COUNT; ++tableId)
     {
@@ -90,7 +90,7 @@ Property::Index GetVisualPropertyIndex(Property::Key key)
       }
     }
   }
-  return key.indexKey;
+  return key.GetIndexKey();
 }
 
 } // namespace
@@ -1155,6 +1155,11 @@ Visual::Base& Visual::Base::GetVisualObject()
   return *this;
 }
 
+const Visual::Base& Visual::Base::GetVisualObject() const
+{
+  return *this;
+}
+
 VisualRenderer Visual::Base::GetRenderer() const
 {
   return mImpl->mRenderer;
@@ -1162,9 +1167,9 @@ VisualRenderer Visual::Base::GetRenderer() const
 
 Property::Index Visual::Base::GetIntKey(Property::Key key)
 {
-  if(key.type == Property::Key::INDEX)
+  if(key.GetType() == Property::Key::INDEX)
   {
-    return key.indexKey;
+    return key.GetIndexKey();
   }
 
   Property::Index index = Internal::Visual::Transform::GetIntKey(key);
@@ -1174,43 +1179,43 @@ Property::Index Visual::Base::GetIntKey(Property::Key key)
     return index;
   }
 
-  if(key.stringKey == MIX_COLOR)
+  if(key.GetStringKey() == MIX_COLOR)
   {
     return Ui::Integration::Visual::Property::MIX_COLOR;
   }
-  else if(key.stringKey == OPACITY)
+  else if(key.GetStringKey() == OPACITY)
   {
     return Ui::Integration::Visual::Property::OPACITY;
   }
-  else if(key.stringKey == CUSTOM_SHADER)
+  else if(key.GetStringKey() == CUSTOM_SHADER)
   {
     return Ui::Integration::Visual::Property::SHADER;
   }
-  else if(key.stringKey == TRANSFORM)
+  else if(key.GetStringKey() == TRANSFORM)
   {
     return Ui::Integration::Visual::Property::TRANSFORM;
   }
-  else if(key.stringKey == CORNER_RADIUS)
+  else if(key.GetStringKey() == CORNER_RADIUS)
   {
     return Ui::Integration::Visual::Property::CORNER_RADIUS;
   }
-  else if(key.stringKey == CORNER_RADIUS_POLICY)
+  else if(key.GetStringKey() == CORNER_RADIUS_POLICY)
   {
     return Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY;
   }
-  else if(key.stringKey == CORNER_SQUARENESS)
+  else if(key.GetStringKey() == CORNER_SQUARENESS)
   {
     return Ui::Integration::Visual::Property::CORNER_SQUARENESS;
   }
-  else if(key.stringKey == BORDERLINE_WIDTH)
+  else if(key.GetStringKey() == BORDERLINE_WIDTH)
   {
     return Ui::Integration::Visual::Property::BORDERLINE_WIDTH;
   }
-  else if(key.stringKey == BORDERLINE_COLOR)
+  else if(key.GetStringKey() == BORDERLINE_COLOR)
   {
     return Ui::Integration::Visual::Property::BORDERLINE_COLOR;
   }
-  else if(key.stringKey == BORDERLINE_OFFSET)
+  else if(key.GetStringKey() == BORDERLINE_OFFSET)
   {
     return Ui::Integration::Visual::Property::BORDERLINE_OFFSET;
   }
@@ -1289,8 +1294,8 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
   }
 
   // Fast-out for invalid key.
-  if((key.type == Property::Key::INDEX && key.indexKey == Property::INVALID_KEY) ||
-     (key.type == Property::Key::STRING && key.stringKey.Empty()))
+  if((key.GetType() == Property::Key::INDEX && key.GetIndexKey() == Property::INVALID_KEY) ||
+     (key.GetType() == Property::Key::STRING && key.GetStringKey().Empty()))
   {
     return Property::INVALID_INDEX;
   }
@@ -1308,14 +1313,14 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
       // independently, as shaders are shared across multiple renderers.
       Dali::String    keyName;
       Property::Index keyIndex(Property::INVALID_KEY);
-      if(key.type == Property::Key::INDEX)
+      if(key.GetType() == Property::Key::INDEX)
       {
         keyName  = shader.GetPropertyName(index);
-        keyIndex = key.indexKey;
+        keyIndex = key.GetIndexKey();
       }
       else
       {
-        keyName = key.stringKey;
+        keyName = key.GetStringKey();
         // Leave keyIndex as INVALID_KEY - it can still be registered against the string key.
       }
       Property::Value value = shader.GetProperty(index);
@@ -1479,24 +1484,24 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     default:
     {
       // Special case for MIX_COLOR
-      if(key.type == Property::Key::INDEX &&
-         ((mImpl->mType == Ui::Integration::InternalVisualType::PRIMITIVE && key.indexKey == Ui::Integration::PrimitiveVisual::Property::MIX_COLOR)))
+      if(key.GetType() == Property::Key::INDEX &&
+         ((mImpl->mType == Ui::Integration::InternalVisualType::PRIMITIVE && key.GetIndexKey() == Ui::Integration::PrimitiveVisual::Property::MIX_COLOR)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::MIX_COLOR);
       }
 
       // Special case for PRE_MULTIPLIED_ALPHA (It is not animatable, but keep it just for logical flow)
       if((mImpl->mType == Ui::Integration::InternalVisualType::IMAGE || mImpl->mType == Ui::Integration::InternalVisualType::ANIMATED_IMAGE || mImpl->mType == Ui::Integration::InternalVisualType::N_PATCH) &&
-         ((key.type == Property::Key::INDEX && key.indexKey == Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA) ||
-          (key.type == Property::Key::STRING && key.stringKey == PRE_MULTIPLIED_ALPHA)))
+         ((key.GetType() == Property::Key::INDEX && key.GetIndexKey() == Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA) ||
+          (key.GetType() == Property::Key::STRING && key.GetStringKey() == PRE_MULTIPLIED_ALPHA)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA);
       }
 
       // Special case for BLUR_RADIUS
       if(mImpl->mType == Ui::Integration::InternalVisualType::COLOR &&
-         ((key.type == Property::Key::INDEX && key.indexKey == Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS) ||
-          (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME)))
+         ((key.GetType() == Property::Key::INDEX && key.GetIndexKey() == Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS) ||
+          (key.GetType() == Property::Key::STRING && key.GetStringKey() == BLUR_RADIUS_NAME)))
       {
         // Request to color-visual class
         return OnGetPropertyObject(key, changeProperties);

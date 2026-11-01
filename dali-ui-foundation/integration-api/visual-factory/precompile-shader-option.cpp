@@ -112,12 +112,12 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
   for(unsigned int shaderIdx = 0; shaderIdx < shaderOption.Count(); ++shaderIdx)
   {
     const KeyValuePair pair(shaderOption.GetKeyValue(shaderIdx));
-    if(pair.first.type == Property::Key::INDEX)
+    if(pair.first.GetType() == Property::Key::INDEX)
     {
       continue; // We don't consider index keys.
     }
 
-    const Dali::String&    key(pair.first.stringKey);
+    const Dali::String&    key(pair.first.GetStringKey());
     const Property::Value& value(pair.second);
 
     if(key == TOKEN_TYPE)
@@ -136,13 +136,13 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
       {
         const KeyValuePair optionPair(optionMap.GetKeyValue(optionMapIdx));
 
-        if(optionPair.first.type == Property::Key::INDEX)
+        if(optionPair.first.GetType() == Property::Key::INDEX)
         {
           continue; // We don't consider index keys.
         }
 
         Flag                flag = Flag::UNKNOWN;
-        const Dali::String& optionKey(optionPair.first.stringKey);
+        const Dali::String& optionKey(optionPair.first.GetStringKey());
         if(GetEnumeration(optionKey.CStr(), SHADER_OPTION_FLAG_TABLE, SHADER_OPTION_FLAG_TABLE_COUNT, flag) &&
            flag != Flag::UNKNOWN)
         {

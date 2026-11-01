@@ -632,7 +632,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   WindowData windowData;
-  windowData.SetTransparency(false);
+  windowData.SetTransparent(false);
 #if !defined(FOCUS_KEY_GRAB_TIZEN)
   PositionSize bounds(0, 0, 960, 900);
   windowData.SetPositionSize(bounds);

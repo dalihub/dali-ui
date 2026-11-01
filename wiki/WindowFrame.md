@@ -49,7 +49,7 @@ protected:
   {
     mWindow = GetDefaultWindow();
     mWindow.SetBackgroundColor(Color::TRANSPARENT);
-    mWindow.SetTransparency(true);
+    mWindow.SetTransparent(true);
 
     WindowFrameOptions options;
     options.SetInitialStatePolicy(WindowFrameInitialStatePolicy::AUTO);
@@ -147,7 +147,7 @@ maximize/restore, and close buttons, and the bottom-right resize handle.
 
 Only the decoration paints. The frame background is transparent, so the area
 the application draws into is not tinted, and a window created with
-`SetTransparency(true)` stays see-through wherever the application has not
+`SetTransparent(true)` stays see-through wherever the application has not
 drawn.
 
 The frame also casts a shadow. It is drawn in the window surface outside the
@@ -155,7 +155,7 @@ frame, so **the window has to be created transparent**:
 
 ```cpp
 window.SetBackgroundColor(Color::TRANSPARENT);
-window.SetTransparency(true);
+window.SetTransparent(true);
 ```
 
 Without that, the space the shadow needs shows the opaque window background as

@@ -185,36 +185,36 @@ Vector2 Transform::GetVisualSize(const Vector2& controlSize, float viewEffective
 
 Property::Index Transform::GetIntKey(const Property::Key& key)
 {
-  if(key.type == Property::Key::INDEX)
+  if(key.GetType() == Property::Key::INDEX)
   {
-    return key.indexKey;
+    return key.GetIndexKey();
   }
 
-  if(key.stringKey == PIVOT)
+  if(key.GetStringKey() == PIVOT)
   {
     return Ui::Integration::Visual::Transform::Property::PIVOT;
   }
-  else if(key.stringKey == EXTRA_SIZE)
+  else if(key.GetStringKey() == EXTRA_SIZE)
   {
     return Ui::Integration::Visual::Transform::Property::EXTRA_SIZE;
   }
-  else if(key.stringKey == OFFSET)
+  else if(key.GetStringKey() == OFFSET)
   {
     return Ui::Integration::Visual::Transform::Property::OFFSET;
   }
-  else if(key.stringKey == OFFSET_POLICY)
+  else if(key.GetStringKey() == OFFSET_POLICY)
   {
     return Ui::Integration::Visual::Transform::Property::OFFSET_POLICY;
   }
-  else if(key.stringKey == ORIGIN)
+  else if(key.GetStringKey() == ORIGIN)
   {
     return Ui::Integration::Visual::Transform::Property::ORIGIN;
   }
-  else if(key.stringKey == SIZE)
+  else if(key.GetStringKey() == SIZE)
   {
     return Ui::Integration::Visual::Transform::Property::SIZE;
   }
-  else if(key.stringKey == SIZE_POLICY)
+  else if(key.GetStringKey() == SIZE_POLICY)
   {
     return Ui::Integration::Visual::Transform::Property::SIZE_POLICY;
   }

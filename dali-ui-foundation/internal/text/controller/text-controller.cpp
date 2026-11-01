@@ -365,12 +365,12 @@ void Controller::SetVariationsMap(const Property::Map& map)
   {
     const KeyValuePair& keyvalue = map.GetKeyValue(index);
 
-    if(keyvalue.first.type == Property::Key::STRING)
+    if(keyvalue.first.GetType() == Property::Key::STRING)
     {
       float value = 0.f;
-      if(keyvalue.first.stringKey.Size() == 4 && keyvalue.second.Get(value)) // Variable tag must be 4-length string.
+      if(keyvalue.first.GetStringKey().Size() == 4 && keyvalue.second.Get(value)) // Variable tag must be 4-length string.
       {
-        logicalModel.GetOrCreateVariationsMap()[keyvalue.first.stringKey] = value;
+        logicalModel.GetOrCreateVariationsMap()[keyvalue.first.GetStringKey()] = value;
       }
     }
   }
@@ -389,12 +389,12 @@ Dali::Vector<Text::FontVariation::Axis> Controller::GetVariations() const
   for(Property::Map::SizeType i = 0u; i < count; ++i)
   {
     const auto& keyValue = map->GetKeyValue(i);
-    if(keyValue.first.type == Property::Key::STRING)
+    if(keyValue.first.GetType() == Property::Key::STRING)
     {
       float value = 0.0f;
       if(keyValue.second.Get(value))
       {
-        axes.PushBack(Text::FontVariation::Axis(keyValue.first.stringKey, value));
+        axes.PushBack(Text::FontVariation::Axis(keyValue.first.GetStringKey(), value));
       }
     }
   }

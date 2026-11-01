@@ -227,12 +227,12 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
   for(unsigned int mapIdx = 0; mapIdx < map.Count(); ++mapIdx)
   {
     const KeyValuePair pair(map.GetKeyValue(mapIdx));
-    if(pair.first.type == Property::Key::INDEX)
+    if(pair.first.GetType() == Property::Key::INDEX)
     {
       continue; // We don't consider index keys.
     }
 
-    const Dali::String&    key(pair.first.stringKey);
+    const Dali::String&    key(pair.first.GetStringKey());
     const Property::Value& value(pair.second);
 
     if(key == TOKEN_TARGET)
@@ -266,12 +266,12 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
       {
         const KeyValuePair pair(animatorMap.GetKeyValue(animatorMapIdx));
 
-        if(pair.first.type == Property::Key::INDEX)
+        if(pair.first.GetType() == Property::Key::INDEX)
         {
           continue; // We don't consider index keys.
         }
 
-        const Dali::String&    key(pair.first.stringKey);
+        const Dali::String&    key(pair.first.GetStringKey());
         const Property::Value& value(pair.second);
 
         if(key == TOKEN_ALPHA_FUNCTION)
@@ -302,11 +302,11 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
           for(Property::Map::SizeType timeMapIdx = 0u; timeMapIdx < timeMap.Count(); ++timeMapIdx)
           {
             const KeyValuePair pair(timeMap.GetKeyValue(timeMapIdx));
-            if(pair.first.type == Property::Key::INDEX)
+            if(pair.first.GetType() == Property::Key::INDEX)
             {
               continue;
             }
-            const Dali::String& key(pair.first.stringKey);
+            const Dali::String& key(pair.first.GetStringKey());
 
             if(key == TOKEN_DELAY)
             {
@@ -369,13 +369,13 @@ Property::Map TransitionData::GetAnimatorAt(size_t index)
   Animator*     animator = mAnimators[index];
   Property::Map map;
   map[TOKEN_TARGET] = ToPropertyValue(animator->objectName);
-  if(animator->propertyKey.type == Property::Key::INDEX)
+  if(animator->propertyKey.GetType() == Property::Key::INDEX)
   {
-    map[TOKEN_PROPERTY] = animator->propertyKey.indexKey;
+    map[TOKEN_PROPERTY] = animator->propertyKey.GetIndexKey();
   }
   else
   {
-    map[TOKEN_PROPERTY] = animator->propertyKey.stringKey;
+    map[TOKEN_PROPERTY] = animator->propertyKey.GetStringKey();
   }
   if(animator->initialValue.GetType() != Property::NONE)
   {

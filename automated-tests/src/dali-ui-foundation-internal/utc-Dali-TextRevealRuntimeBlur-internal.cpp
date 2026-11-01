@@ -2171,7 +2171,7 @@ int UtcDaliTextRevealRuntimeGaussianHorizontalGeometryP(void)
   DALI_TEST_EQUALS(tasks.GetTaskCount(), 4u, TEST_LOCATION);
   for(uint32_t task = 1u; task < tasks.GetTaskCount(); ++task)
   {
-    DALI_TEST_CHECK(tasks.GetTask(task).GetClearEnabled());
+    DALI_TEST_CHECK(tasks.GetTask(task).IsClearEnabled());
     DALI_TEST_EQUALS(tasks.GetTask(task).GetClearColor(), Color::TRANSPARENT, TEST_LOCATION);
   }
   auto           geometryHandle = horizontal[0u].GetGeometry();

@@ -1059,10 +1059,10 @@ int UtcDaliViewLeaveRequiredDefaultP(void)
   UiTestApplication application;
   View              view = View::New();
 
-  DALI_TEST_CHECK(view.GetLeaveRequired());
+  DALI_TEST_CHECK(view.IsLeaveRequired());
 
   view.SetLeaveRequired(false);
-  DALI_TEST_CHECK(!view.GetLeaveRequired());
+  DALI_TEST_CHECK(!view.IsLeaveRequired());
   END_TEST;
 }
 

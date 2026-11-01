@@ -181,9 +181,9 @@ void SvgVisual::DoSetProperties(const Property::Map& propertyMap)
   for(Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
   {
     KeyValuePair keyValue = propertyMap.GetKeyValue(iter);
-    if(keyValue.first.type == Property::Key::INDEX)
+    if(keyValue.first.GetType() == Property::Key::INDEX)
     {
-      DoSetProperty(keyValue.first.indexKey, keyValue.second);
+      DoSetProperty(keyValue.first.GetIndexKey(), keyValue.second);
     }
     else
     {

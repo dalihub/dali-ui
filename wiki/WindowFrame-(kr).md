@@ -49,7 +49,7 @@ protected:
   {
     mWindow = GetDefaultWindow();
     mWindow.SetBackgroundColor(Color::TRANSPARENT);
-    mWindow.SetTransparency(true);
+    mWindow.SetTransparent(true);
 
     WindowFrameOptions options;
     options.SetInitialStatePolicy(WindowFrameInitialStatePolicy::AUTO);
@@ -145,7 +145,7 @@ bottom-left resize handle, 늘어나는 move region, 앱 action, 기본 제공 m
 maximize/restore, close 버튼, bottom-right resize handle 순서입니다.
 
 칠하는 것은 decoration뿐입니다. frame 배경은 투명하므로 앱이 그리는 영역에 색이
-입혀지지 않고, `SetTransparency(true)`로 만든 창은 앱이 그리지 않은 곳에서 계속
+입혀지지 않고, `SetTransparent(true)`로 만든 창은 앱이 그리지 않은 곳에서 계속
 비쳐 보입니다.
 
 frame은 shadow도 그립니다. shadow는 frame 바깥의 window surface 영역에 그려지므로
@@ -153,7 +153,7 @@ frame은 shadow도 그립니다. shadow는 frame 바깥의 window surface 영역
 
 ```cpp
 window.SetBackgroundColor(Color::TRANSPARENT);
-window.SetTransparency(true);
+window.SetTransparent(true);
 ```
 
 그렇지 않으면 shadow가 차지하는 공간에 불투명한 window 배경이 frame 주변 여백으로

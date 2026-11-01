@@ -117,9 +117,9 @@ private:
     // Show the key (layer name) of the first entry
     Dali::String  firstName;
     Property::Key key = map.GetKeyAt(0);
-    if(key.type == Property::Key::STRING)
+    if(key.GetType() == Property::Key::STRING)
     {
-      firstName = key.stringKey;
+      firstName = key.GetStringKey();
     }
     mContentLabel.SetText(
       Dali::String("ContentInfo: ") + Dali::String(std::to_string(count).c_str()) +
@@ -138,9 +138,9 @@ private:
 
     Dali::String  firstName;
     Property::Key key = map.GetKeyAt(0);
-    if(key.type == Property::Key::STRING)
+    if(key.GetType() == Property::Key::STRING)
     {
-      firstName = key.stringKey;
+      firstName = key.GetStringKey();
     }
     // The marker's frame range too, so 통과 기준 2 can pin name AND frames.
     // The plugin decides the value's Property type (measured on emulator:

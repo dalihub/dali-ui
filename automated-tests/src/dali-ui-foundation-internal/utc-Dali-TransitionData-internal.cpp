@@ -63,7 +63,7 @@ int UtcDaliTransitionDataMapRoundTripP(void)
   DALI_TEST_EQUALS(data->Count(), 1u, TEST_LOCATION);
   TransitionData::Animator* entry = *data->Begin();
   DALI_TEST_EQUALS(entry->objectName, std::string("targetActor"), TEST_LOCATION);
-  DALI_TEST_EQUALS(entry->propertyKey.stringKey, Dali::String("position"), TEST_LOCATION);
+  DALI_TEST_EQUALS(entry->propertyKey.GetStringKey(), Dali::String("position"), TEST_LOCATION);
   DALI_TEST_EQUALS(entry->timePeriodDelay, 0.25f, TEST_LOCATION);
   DALI_TEST_EQUALS(entry->timePeriodDuration, 1.5f, TEST_LOCATION);
   DALI_TEST_EQUALS(entry->animationType, TransitionData::AnimationType::BY, TEST_LOCATION);
@@ -96,7 +96,7 @@ int UtcDaliTransitionDataArrayAndAlphaFunctionsP(void)
 
   for(auto iter = data->Begin(); iter != data->End(); ++iter)
   {
-    DALI_TEST_CHECK((*iter)->propertyKey.indexKey == Actor::Property::COLOR_MULTIPLIER);
+    DALI_TEST_CHECK((*iter)->propertyKey.GetIndexKey() == Actor::Property::COLOR_MULTIPLIER);
     DALI_TEST_EQUALS((*iter)->animationType, TransitionData::AnimationType::TO, TEST_LOCATION);
     DALI_TEST_CHECK((*iter)->animate);
   }
