@@ -3915,8 +3915,8 @@ int UtcDaliInlineReplacementManagerRevealLifecycleP(void)
   DALI_TEST_CHECK(activeConstraint.GetState() != Constraint::State::INITIALIZED);
   DALI_TEST_CHECK(activeConstraint.GetTargetObject() == renderer);
   DALI_TEST_EQUALS(activeConstraint.GetSourceCount(), 2u, TEST_LOCATION);
-  DALI_TEST_CHECK(activeConstraint.GetSourceAt(0u).object == renderer);
-  DALI_TEST_CHECK(activeConstraint.GetSourceAt(1u).object == owner);
+  DALI_TEST_CHECK(activeConstraint.GetSourceAt(0u).GetObject() == renderer);
+  DALI_TEST_CHECK(activeConstraint.GetSourceAt(1u).GetObject() == owner);
 
   const Property::Index baseOpacityIndex =
     renderer.GetPropertyIndex("__dali_ui_inline_replacement_reveal_base_opacity");
