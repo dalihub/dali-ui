@@ -318,7 +318,7 @@ public:
    * @param[in] visual The text visual owning the prepared style snapshots.
    * @return True if a current global, overlay, span or last async request uses USER_SPACE.
    */
-  static bool UsesUserSpaceGradient(Ui::Integration::Visual::Base visual)
+  static bool UsesUserSpaceGradient(const Ui::Integration::Visual::Base& visual)
   {
     const auto& visualObject = GetVisualObject(visual);
     return visualObject.mAsyncRenderUsesUserSpaceGradient || visualObject.UsesUserSpaceGradient();
@@ -920,9 +920,19 @@ private:
    * @param[in] visual A handle to the TextVisual
    * @return The TextVisual object
    */
-  static TextVisual& GetVisualObject(Ui::Integration::Visual::Base visual)
+  static TextVisual& GetVisualObject(Ui::Integration::Visual::Base& visual)
   {
     return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject());
+  };
+
+  /**
+   * @brief Retrieve the TextVisual object.
+   * @param[in] visual A handle to the TextVisual
+   * @return The TextVisual object
+   */
+  static const TextVisual& GetVisualObject(const Ui::Integration::Visual::Base& visual)
+  {
+    return static_cast<const TextVisual&>(Ui::GetImplementation(visual).GetVisualObject());
   };
 
   /**

@@ -54,7 +54,7 @@ VisualFactoryCache& GetArcWireframeFactoryCache()
 int UtcDaliArcVisualPropertiesAndSceneP(void)
 {
   UiTestApplication application;
-  Property::Map properties;
+  Property::Map     properties;
   properties.Insert(Ui::Integration::ArcVisual::Property::THICKNESS, 8.0f);
   properties.Insert(Ui::Integration::ArcVisual::Property::START_ANGLE, 25.0f);
   properties.Insert(Ui::Integration::ArcVisual::Property::SWEEP_ANGLE, 220.0f);
@@ -99,8 +99,8 @@ int UtcDaliArcVisualPropertiesAndSceneP(void)
 int UtcDaliArcVisualDefaultsInvalidAndShaderCacheP(void)
 {
   UiTestApplication application;
-  ArcVisualPtr visual(new ArcVisual(GetArcWireframeFactoryCache()));
-  Property::Map output;
+  ArcVisualPtr      visual(new ArcVisual(GetArcWireframeFactoryCache()));
+  Property::Map     output;
   visual->DoCreatePropertyMap(output);
   DALI_TEST_EQUALS(output.Count(), 5u, TEST_LOCATION);
 
@@ -114,7 +114,7 @@ int UtcDaliArcVisualDefaultsInvalidAndShaderCacheP(void)
   DALI_TEST_CHECK(visual->mImpl->mRenderer);
 
   Property::Map defaults;
-  ArcVisualPtr cached = ArcVisual::New(GetArcWireframeFactoryCache(), defaults);
+  ArcVisualPtr  cached = ArcVisual::New(GetArcWireframeFactoryCache(), defaults);
   DALI_TEST_CHECK(cached->mImpl->mRenderer);
   END_TEST;
 }
@@ -122,7 +122,7 @@ int UtcDaliArcVisualDefaultsInvalidAndShaderCacheP(void)
 int UtcDaliWireframeVisualStandaloneP(void)
 {
   UiTestApplication application;
-  Property::Map properties;
+  Property::Map     properties;
   properties.Insert(Ui::Integration::Visual::Property::TRANSFORM, "bad");
   WireframeVisualPtr visual = WireframeVisual::New(GetArcWireframeFactoryCache(), properties);
 
@@ -156,7 +156,7 @@ int UtcDaliWireframeVisualStandaloneP(void)
 int UtcDaliWireframeVisualProxyAndCacheP(void)
 {
   UiTestApplication application;
-  Property::Map arcProperties;
+  Property::Map     arcProperties;
   arcProperties.Insert(Ui::Integration::ArcVisual::Property::THICKNESS, 3.0f);
   ArcVisualPtr arc = ArcVisual::New(GetArcWireframeFactoryCache(), arcProperties);
 
@@ -180,5 +180,35 @@ int UtcDaliWireframeVisualProxyAndCacheP(void)
   WireframeVisualPtr transformed =
     WireframeVisual::New(GetArcWireframeFactoryCache(), Ui::Internal::Visual::BasePtr(arc.Get()), properties);
   DALI_TEST_CHECK(transformed->mImpl->mRenderer);
+  END_TEST;
+}
+
+int UtcDaliWireframeVisualConstGetVisualObjectStandaloneP(void)
+{
+  UiTestApplication                 application;
+  Property::Map                     properties;
+  WireframeVisualPtr                visual = WireframeVisual::New(GetArcWireframeFactoryCache(), properties);
+  const Ui::Internal::Visual::Base& base   = *visual;
+
+  tet_infoline("Const GetVisualObject returns the standalone wireframe itself through virtual dispatch");
+  const Ui::Internal::Visual::Base& actual = base.GetVisualObject();
+  DALI_TEST_CHECK(&actual == visual.Get());
+  DALI_TEST_CHECK(dynamic_cast<const WireframeVisual*>(&actual));
+  END_TEST;
+}
+
+int UtcDaliWireframeVisualConstGetVisualObjectProxyP(void)
+{
+  UiTestApplication                 application;
+  Property::Map                     properties;
+  ArcVisualPtr                      arc   = ArcVisual::New(GetArcWireframeFactoryCache(), properties);
+  WireframeVisualPtr                proxy = WireframeVisual::New(GetArcWireframeFactoryCache(), Ui::Internal::Visual::BasePtr(arc.Get()));
+  const Ui::Internal::Visual::Base& base  = *proxy;
+
+  tet_infoline("Const GetVisualObject returns the encapsulated visual through virtual dispatch");
+  const Ui::Internal::Visual::Base& actual = base.GetVisualObject();
+  DALI_TEST_CHECK(&actual == arc.Get());
+  DALI_TEST_CHECK(&actual != proxy.Get());
+  DALI_TEST_CHECK(dynamic_cast<const ArcVisual*>(&actual));
   END_TEST;
 }
