@@ -391,6 +391,13 @@ public:
   virtual Base& GetVisualObject();
 
   /**
+   * @brief Get the actual Visual Object.
+   * @return The actual visual object
+   * @note Should be overridden by deriving controls if they are acting as a proxy to other visual objects.
+   */
+  virtual const Base& GetVisualObject() const;
+
+  /**
    * @brief Query whether resources requires to be loaded synchronously.
    * @return Returns true if synchronous resource loading is required, false otherwise.
    */

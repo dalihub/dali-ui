@@ -218,6 +218,16 @@ Visual::Base& WireframeVisual::GetVisualObject()
   return *this;
 }
 
+const Visual::Base& WireframeVisual::GetVisualObject() const
+{
+  if(mActualVisual)
+  {
+    return *mActualVisual.Get();
+  }
+
+  return *this;
+}
+
 } // namespace Internal
 
 } // namespace Ui
