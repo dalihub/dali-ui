@@ -246,7 +246,7 @@ const Property::Map& Builder::GetConstants() const
 
 const Property::Value& Builder::GetConstant(const std::string& key) const
 {
-  Property::Value* match = mReplacementMap.Find(ToDaliStringView(key));
+  const Property::Value* match = mReplacementMap.Find(ToDaliStringView(key));
   if(match)
   {
     return (*match);

@@ -164,13 +164,13 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // URL is already passed in via constructor
 
-  Property::Value* borderOnlyValue = propertyMap.Find(Ui::Integration::ImageVisual::Property::BORDER_ONLY, BORDER_ONLY);
+  const Property::Value* borderOnlyValue = propertyMap.Find(Ui::Integration::ImageVisual::Property::BORDER_ONLY, BORDER_ONLY);
   if(borderOnlyValue)
   {
     borderOnlyValue->Get(mBorderOnly);
   }
 
-  Property::Value* borderValue = propertyMap.Find(Ui::Integration::ImageVisual::Property::BORDER, BORDER);
+  const Property::Value* borderValue = propertyMap.Find(Ui::Integration::ImageVisual::Property::BORDER, BORDER);
   if(borderValue)
   {
     if(!borderValue->Get(mBorder)) // If value exists and is Insets (or Vector4), just set mBorder
@@ -189,7 +189,7 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
     mBorder.bottom = Dali::Clamp(std::round(mBorder.bottom), 0.0f, 32767.0f);
   }
 
-  Property::Value* auxImage = propertyMap.Find(Ui::Integration::ImageVisual::Property::AUXILIARY_IMAGE, AUXILIARY_IMAGE_NAME);
+  const Property::Value* auxImage = propertyMap.Find(Ui::Integration::ImageVisual::Property::AUXILIARY_IMAGE, AUXILIARY_IMAGE_NAME);
   if(auxImage)
   {
     std::string url;
@@ -199,14 +199,14 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* auxImageAlpha =
+  const Property::Value* auxImageAlpha =
     propertyMap.Find(Ui::Integration::ImageVisual::Property::AUXILIARY_IMAGE_ALPHA, AUXILIARY_IMAGE_ALPHA_NAME);
   if(auxImageAlpha)
   {
     auxImageAlpha->Get(mAuxiliaryImageAlpha);
   }
 
-  Property::Value* synchronousLoading =
+  const Property::Value* synchronousLoading =
     propertyMap.Find(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, SYNCHRONOUS_LOADING);
   if(synchronousLoading)
   {
@@ -222,13 +222,13 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* releasePolicy = propertyMap.Find(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, RELEASE_POLICY_NAME);
+  const Property::Value* releasePolicy = propertyMap.Find(Ui::Integration::ImageVisual::Property::RELEASE_POLICY, RELEASE_POLICY_NAME);
   if(releasePolicy)
   {
     releasePolicy->Get(mReleasePolicy);
   }
 
-  Property::Value* preMultiplied = propertyMap.Find(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA);
+  const Property::Value* preMultiplied = propertyMap.Find(Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA);
   if(preMultiplied)
   {
     bool premultipliedAlpha = false;
@@ -238,7 +238,7 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* fittingMode = propertyMap.Find(Ui::Integration::ImageVisual::Property::FITTING_MODE, FITTING_MODE);
+  const Property::Value* fittingMode = propertyMap.Find(Ui::Integration::ImageVisual::Property::FITTING_MODE, FITTING_MODE);
   if(fittingMode)
   {
     fittingMode->Get(mFittingMode);

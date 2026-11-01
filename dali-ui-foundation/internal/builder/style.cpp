@@ -77,8 +77,8 @@ void Style::ApplyVisual(Handle handle, const std::string& visualName, const Prop
     // merge them into the visual map
     if(instancedProperties)
     {
-      Property::Value* instanceTypeValue = instancedProperties->Find(Ui::Integration::Visual::Property::TYPE);
-      Property::Value* newTypeValue      = visualMap.Find(Ui::Integration::Visual::Property::TYPE, VISUAL_TYPE);
+      const Property::Value* instanceTypeValue = instancedProperties->Find(Ui::Integration::Visual::Property::TYPE);
+      const Property::Value* newTypeValue      = visualMap.Find(Ui::Integration::Visual::Property::TYPE, VISUAL_TYPE);
       if(instanceTypeValue && newTypeValue)
       {
         int instanceVisualType = -1;

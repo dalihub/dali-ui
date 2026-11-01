@@ -932,7 +932,7 @@ Shadow GetShadowProperty(View view)
 
 int GetVisualType(const Property::Map& map)
 {
-  Property::Value* typeValue = map.Find(Ui::Integration::Visual::Property::TYPE);
+  const Property::Value* typeValue = map.Find(Ui::Integration::Visual::Property::TYPE);
   DALI_TEST_CHECK(typeValue);
 
   int type = static_cast<int>(Ui::Integration::InternalVisualType::INVALID);
