@@ -227,6 +227,17 @@ public:
   };
 
   /**
+   * @brief Checks whether an async render task is awaiting completion.
+   *
+   * @param[in] visual The text visual.
+   * @return True if an async render task is pending, false otherwise.
+   */
+  static bool IsAsyncRenderPending(Ui::Integration::Visual::Base visual)
+  {
+    return GetVisualObject(visual).mIsTextLoadingTaskRunning;
+  }
+
+  /**
    * @brief Cancels pending async render publication without changing the current renderer.
    *
    * Does not cancel natural-size or height-for-width requests.

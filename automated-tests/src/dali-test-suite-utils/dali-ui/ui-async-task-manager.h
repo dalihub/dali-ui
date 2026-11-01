@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/async-task-manager.h>
+#include <vector>
 
 namespace Test
 {
@@ -38,5 +39,17 @@ void GrabNotifyToReady();
 
 // Call all delayed NotifyToReady calls.
 void UngrabNotifyToReady();
+
+/**
+ * @brief Captures production tasks so tests can control processing and delivery.
+ * @param[in] enabled True to capture newly submitted tasks instead of scheduling them.
+ */
+void SetTaskCaptureEnabled(bool enabled);
+
+/**
+ * @brief Takes the captured tasks from the mock scheduler.
+ * @return The captured tasks, leaving the capture queue empty.
+ */
+std::vector<Dali::AsyncTaskPtr> TakeCapturedTasks();
 } // namespace AsyncTaskManager
 } // namespace Test

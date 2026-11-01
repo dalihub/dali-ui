@@ -1410,12 +1410,17 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       .EnableTextGradientOverlay(textGradientOverlayCompositionEnabled)
       .EnableTextReveal(textRevealEnabled);
 
-    Shader shader = GetTextShader(mFactoryCache, featureBuilder);
+    // Shader creation can reenter application code. Preserve a nested publication's cache.
+    Shader      shader        = mTextVisualShaderFactory.GetShader(mFactoryCache, featureBuilder);
+    const auto* currentReveal = GetTextVisualRevealData(mRevealData);
     if(!Dali::Adaptor::IsAvailable() || mControl.GetHandle() != control ||
-       !mController->IsAsyncRendering() || mTextLoadingTaskId != publicationTaskId || !hasCurrentGradientScale())
+       !mController->IsAsyncRendering() || mTextLoadingTaskId != publicationTaskId ||
+       mController->GetRenderRevision() != publicationRevision ||
+       parameters.textRevealRevision != (currentReveal ? currentReveal->revision : 0u) || !hasCurrentGradientScale())
     {
       return;
     }
+    mTextShaderFeatureCache = featureBuilder;
     if(!usesUserSpaceGradient)
     {
       mImpl->mRenderer.SetShader(shader);
