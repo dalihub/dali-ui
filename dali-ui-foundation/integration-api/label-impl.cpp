@@ -4197,8 +4197,8 @@ bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
 
   if(backgroundValue.GetType() == Property::MAP)
   {
-    const Property::Map& backgroundMap = backgroundValue.Get<Property::Map>();
-    Property::Value*     mixColorValue = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
+    const Property::Map&   backgroundMap = backgroundValue.Get<Property::Map>();
+    const Property::Value* mixColorValue = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
     if(mixColorValue)
     {
       backgroundColor = mixColorValue->Get<Vector4>();
