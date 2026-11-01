@@ -134,6 +134,13 @@ protected: // from Visual::Base
    */
   Base& GetVisualObject() override;
 
+  /**
+   * @copydoc Visual::Base::GetVisualObject
+   *
+   * Overriding as this visual can sometimes act as a proxy to the actual visual, i.e. when using debug rendering.
+   */
+  const Base& GetVisualObject() const override;
+
 private:
   /**
    * Create the geometry which presents the quad wireframe.
