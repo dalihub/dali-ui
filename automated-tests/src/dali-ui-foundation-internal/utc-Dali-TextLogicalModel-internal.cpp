@@ -90,7 +90,6 @@ int UtcDaliTextVariationsDefaultAndValidationP(void)
   DALI_TEST_EQUALS(controller->GetVariations().Count(), 2u, TEST_LOCATION);
   auto* storage = logical.GetVariationsMap();
   DALI_TEST_CHECK(storage);
-  auto* impl = storage->Read();
   controller->GetVariationsMap(output);
   DALI_TEST_CHECK(output == *storage);
   controller->SetVariations(invalid); // Invalid setter still clears previous content.
@@ -101,7 +100,6 @@ int UtcDaliTextVariationsDefaultAndValidationP(void)
   DALI_TEST_CHECK(output.Empty());
   controller->SetVariations(axes);
   DALI_TEST_CHECK(logical.GetVariationsMap() == storage);
-  DALI_TEST_CHECK(storage->Read() == impl);
 
   // The Map API accepts non-finite float values; the axes API above rejects them.
   Property::Map nonFinite;
@@ -114,7 +112,7 @@ int UtcDaliTextVariationsDefaultAndValidationP(void)
   DALI_TEST_CHECK(output.Find("wdth")->Get(value) && std::isinf(value));
   controller->SetVariationsMap(invalidMap);
   DALI_TEST_CHECK(!logical.GetVariationsMap());
-  DALI_TEST_CHECK(logical.mVariationsMap->Read() == impl);
+  DALI_TEST_CHECK(&*logical.mVariationsMap == storage);
   END_TEST;
 }
 
@@ -132,24 +130,22 @@ int UtcDaliTextVariationsReplacementCopyP(void)
   values.Insert("wdth", 90.0f);
   source->mLogicalModel->SetVariationsMap(&values);
   CopyTextProcessingProperties(*source, *target);
-  auto* targetMap  = target->mLogicalModel->GetVariationsMap();
-  auto* targetImpl = targetMap->Read();
+  auto* targetMap = target->mLogicalModel->GetVariationsMap();
   DALI_TEST_CHECK(*targetMap == values);
-  DALI_TEST_CHECK(targetMap->Read() != source->mLogicalModel->GetVariationsMap()->Read());
+  DALI_TEST_CHECK(targetMap != source->mLogicalModel->GetVariationsMap());
   (*source->mLogicalModel->GetVariationsMap())["wght"] = 700.0f;
   DALI_TEST_CHECK(*targetMap == values);
 
   source->mLogicalModel->SetVariationsMap(nullptr);
   CopyTextProcessingProperties(*source, *target);
   DALI_TEST_CHECK(!target->mLogicalModel->GetVariationsMap());
-  DALI_TEST_CHECK(target->mLogicalModel->mVariationsMap->Read() == targetImpl);
+  DALI_TEST_CHECK(&*target->mLogicalModel->mVariationsMap == targetMap);
   auto fresh = Model::New();
   CopyTextProcessingProperties(*source, *fresh); // Engaged-empty also copies as empty.
   DALI_TEST_CHECK(!fresh->mLogicalModel->mVariationsMap);
   source->mLogicalModel->SetVariationsMap(&values);
   CopyTextProcessingProperties(*source, *target);
   DALI_TEST_CHECK(target->mLogicalModel->GetVariationsMap() == targetMap);
-  DALI_TEST_CHECK(targetMap->Read() == targetImpl);
   DALI_TEST_CHECK(*targetMap == values);
   END_TEST;
 }
@@ -248,7 +244,9 @@ int UtcDaliTextVariationsAsyncWorkerReuseP(void)
       DALI_TEST_CHECK(state && state->processingModel);
       auto* copied = state->processingModel->mLogicalModel->GetVariationsMap();
       DALI_TEST_CHECK(copied && *copied == request.variationsMap);
-      DALI_TEST_CHECK(copied->Read() != request.variationsMap.Read());
+      const Property::Map expectedMap = request.variationsMap;
+      request.variationsMap["wght"]   = 800.0f;
+      DALI_TEST_CHECK(*copied == expectedMap);
     }
   }
   END_TEST;
