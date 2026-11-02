@@ -2085,6 +2085,13 @@ struct Engine::Impl
          ? SetRelativeLineSize(&currentParagraphRun, layout)
          : SetRelativeLineSize(nullptr, layout));
 
+      const bool maximumNumberOfLinesExceeded =
+        layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
+        layoutParameters.startLineIndex + numberOfLines >= layoutParameters.maximumNumberOfLines;
+      const bool discardHyphens = maximumNumberOfLinesExceeded && !elideTextEnabled &&
+                                  (layoutParameters.textModel->mLineWrapMode == LineWrapMode::HYPHENATION ||
+                                   layoutParameters.textModel->mLineWrapMode == LineWrapMode::MIXED);
+      const auto hyphenCountBeforeLine = discardHyphens ? layoutParameters.textModel->mVisualModel->mHyphen.glyph.Count() : 0u;
       GetLineLayoutForBox(layoutParameters, layoutBidiParameters, layout, false, isHiddenInputEnabled);
       if(layoutParameters.replacementLayoutData != nullptr)
       {
@@ -2121,15 +2128,19 @@ struct Engine::Impl
         return false;
       }
 
-      const bool maximumNumberOfLinesExceeded =
-        layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
-        layoutParameters.startLineIndex + numberOfLines >= layoutParameters.maximumNumberOfLines;
       maximumNumberOfLinesWasApplied |= maximumNumberOfLinesExceeded;
       layoutParameters.maximumNumberOfLinesExceeded |= maximumNumberOfLinesExceeded;
       if(maximumNumberOfLinesExceeded && !elideTextEnabled)
       {
         // The candidate proves that more content exists, but CLIP must not
         // manufacture an ellipsis marker or retain the N+1 line.
+        if(discardHyphens)
+        {
+          // Discard only the paired hyphen records appended by this candidate.
+          auto& hyphens = layoutParameters.textModel->mVisualModel->mHyphen;
+          hyphens.glyph.Resize(hyphenCountBeforeLine);
+          hyphens.index.Resize(hyphenCountBeforeLine);
+        }
         break;
       }
 
