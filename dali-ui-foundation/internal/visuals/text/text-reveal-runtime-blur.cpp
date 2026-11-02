@@ -30,6 +30,7 @@
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/rendering/visual-renderer.h>
+#include <dali/integration-api/shader-integ.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/camera-actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
@@ -1021,7 +1022,7 @@ public:
                               mSourceTextures.GetTexture(0u).GetPixelFormat() == Pixel::L8 &&
                               mForeground.GetPropertyIndex("uTextColorAnimatable") != Property::INVALID_INDEX &&
                               Dali::Graphics::GetCurrentGraphicsBackend() == Dali::Graphics::Backend::GLES &&
-                              Shader::GetShaderLanguageVersion() >= 300u;
+                              Dali::Integration::GetShaderLanguageVersion() >= 300u;
     if(mDecorations && !perLine)
     {
       mCaptureShader = mDecorations->planes->foregroundShader;
