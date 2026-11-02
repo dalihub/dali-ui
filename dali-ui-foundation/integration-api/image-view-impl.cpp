@@ -950,17 +950,11 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
     }
   }
 
-  DALI_LOG_DEBUG_INFO("[ImageViewImpl] OnMeasure: constraint=(%.0f,%.0f) layoutW=%.0f layoutH=%.0f natural=(%.0f,%.0f) -> result=(%.0f,%.0f) hasVisual=%d\n",
-                      widthConstraint, heightConstraint, layoutW, layoutH,
-                      naturalSize.width, naturalSize.height, w, h, mVisual ? 1 : 0);
-
   return MeasuredSize(w * s, h * s);
 }
 
 LayoutRect ImageViewImpl::OnArrange(const LayoutRect& bounds)
 {
-  DALI_LOG_DEBUG_INFO("[ImageViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f) hasVisual=%d\n",
-                      bounds.x, bounds.y, bounds.width, bounds.height, mVisual ? 1 : 0);
   return ViewImpl::OnArrange(bounds);
 }
 
@@ -996,8 +990,6 @@ void ImageViewImpl::EnsureVisualUpdated()
 
 void ImageViewImpl::UpdateVisual()
 {
-  DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: url=%s\n", mUrl.CStr());
-
   auto&            viewData       = Internal::ViewDataImpl::Get(*this);
   const LayoutRect arrangedBounds = GetArrangedBounds();
 
@@ -1006,7 +998,6 @@ void ImageViewImpl::UpdateVisual()
     viewData.UnregisterVisual(ImageViewImpl::Property::IMAGE);
     mVisual.Reset();
     UpdatePlaceholderVisual();
-    DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: url is empty, visual cleared\n");
     return;
   }
 
@@ -1058,7 +1049,6 @@ void ImageViewImpl::UpdateVisual()
     mVisual = Ui::GetImplementation(visualFactory).CreateVisual(map, Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY, Vector2(arrangedBounds.width, arrangedBounds.height));
     if(mVisual)
     {
-      DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: RegisterVisual result=ok\n");
       Ui::GetImplementation(mVisual).SetInitialLoadingSizeProvider(GetInitialImageSize);
       // ResourceReadySignal can clear or replace mVisual during registration.
       // Keep the registered handle alive and stop if the callback changed it.
