@@ -297,16 +297,8 @@ float ProgressViewImpl::GetValueRatio() const
   return mImpl->ratio;
 }
 
-bool ProgressViewImpl::OnAccessibilityRequestValue(Dali::String& value)
+bool ProgressViewImpl::OnAccessibilityRequestDefaultValue(Dali::String& value)
 {
-  Ui::View           self          = Ui::View::DownCast(Self());
-  const Dali::String explicitValue = self.GetAccessibilityValue();
-  if(!explicitValue.Empty())
-  {
-    value = explicitValue;
-    return true;
-  }
-
   if(!mImpl->determinate)
   {
     return false;

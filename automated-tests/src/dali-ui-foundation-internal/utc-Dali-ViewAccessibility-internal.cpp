@@ -146,6 +146,11 @@ public:
     mDefaultDescriptionMode = mode;
   }
 
+  void SetDefaultValueMode(RequestedMode mode)
+  {
+    mDefaultValueMode = mode;
+  }
+
   bool OnAccessibilityActivate() override
   {
     ++activateCount;
@@ -226,6 +231,13 @@ public:
     return ResolveRequestedValue(value, "Requested value");
   }
 
+  bool OnAccessibilityRequestDefaultValue(Dali::String& value) override
+  {
+    ++requestDefaultValueCount;
+    value = mDefaultValueMode == RequestedMode::EMPTY ? "" : "Requested default value";
+    return mDefaultValueMode != RequestedMode::FALLBACK;
+  }
+
   int  activateCount{0};
   int  escapeCount{0};
   int  valueChangeCount{0};
@@ -238,6 +250,7 @@ public:
   int  requestDescriptionCount{0};
   int  requestDefaultDescriptionCount{0};
   int  requestValueCount{0};
+  int requestDefaultValueCount{0};
   View lastScrolledChild;
 
 protected:
@@ -265,6 +278,7 @@ private:
     return true;
   }
 
+  RequestedMode mDefaultValueMode{RequestedMode::FALLBACK};
   RequestedMode          mRequestedMode{RequestedMode::FALLBACK};
   DefaultNameMode        mDefaultNameMode{DefaultNameMode::FALLBACK};
   DefaultDescriptionMode mDefaultDescriptionMode{DefaultDescriptionMode::FALLBACK};
@@ -340,19 +354,9 @@ public:
     return result;
   }
 
-  bool OnRequestName(View view, Dali::String& value)
-  {
-    return ResolveValue(view, value, "Callback name", requestNameCount);
-  }
-
   bool OnRequestDefaultName(View view, Dali::String& value)
   {
     return ResolveValue(view, value, "Callback default name", requestDefaultNameCount);
-  }
-
-  bool OnRequestDescription(View view, Dali::String& value)
-  {
-    return ResolveValue(view, value, "Callback description", requestDescriptionCount);
   }
 
   bool OnRequestDefaultDescription(View view, Dali::String& value)
@@ -360,9 +364,9 @@ public:
     return ResolveValue(view, value, "Callback default description", requestDefaultDescriptionCount);
   }
 
-  bool OnRequestValue(View view, Dali::String& value)
+  bool OnRequestDefaultValue(View view, Dali::String& value)
   {
-    return ResolveValue(view, value, "Callback value", requestValueCount);
+    return ResolveValue(view, value, "Callback default value", requestDefaultValueCount);
   }
 
   View expectedView;
@@ -373,12 +377,11 @@ public:
   int  valueChangeBalance{0};
   int  scrollToChildCount{0};
   int  zoomCount{0};
-  int  requestNameCount{0};
   int  requestDefaultNameCount{0};
-  int  requestDescriptionCount{0};
   int  requestDefaultDescriptionCount{0};
-  int  requestValueCount{0};
   bool receivedExpectedView{true};
+  int requestDefaultValueCount{0};
+  bool emptyValue{false};
   bool result{false};
 
 private:
@@ -391,7 +394,7 @@ private:
   {
     RecordView(view);
     ++count;
-    value = callbackValue;
+    value = emptyValue ? "" : callbackValue;
     return result;
   }
 };
@@ -1046,76 +1049,119 @@ int UtcDaliViewAccessibilityActionCallbacksP(void)
   END_TEST;
 }
 
-int UtcDaliViewAccessibilityRequestCallbacksP(void)
+int UtcDaliViewAccessibilityDefaultValueHookP(void)
 {
   UiTestApplication application;
-
   TestAccessibilityViewImpl* implementation = nullptr;
-  View                       view           = CreateTestAccessibilityView(implementation);
-  auto*                      accessible     = dynamic_cast<ViewAccessible*>(Dali::Accessibility::Accessible::Get(view));
+  View view = CreateTestAccessibilityView(implementation);
+  auto* accessible = Dali::Accessibility::Accessible::Get(view);
   DALI_TEST_CHECK(accessible);
 
-  view.SetAccessibilityName("Property name");
-  view.SetAccessibilityDescription("Property description");
-  view.SetAccessibilityValue("Property value");
+  implementation->SetDefaultValueMode(TestAccessibilityViewImpl::RequestedMode::DYNAMIC);
+  view.SetAccessibilityValue("Explicit value");
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Explicit value"), TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDefaultValueCount, 0, TEST_LOCATION);
+
+  view.SetAccessibilityValue("");
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Requested default value"), TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDefaultValueCount, 1, TEST_LOCATION);
+
+  implementation->SetDefaultValueMode(TestAccessibilityViewImpl::RequestedMode::EMPTY);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
+  implementation->SetDefaultValueMode(TestAccessibilityViewImpl::RequestedMode::FALLBACK);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDefaultValueCount, 3, TEST_LOCATION);
+
+  // Deprecated request hooks keep their priority over explicit and default values.
+  view.SetAccessibilityValue("Explicit value");
+  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::DYNAMIC);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Requested value"), TEST_LOCATION);
+  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::EMPTY);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDefaultValueCount, 3, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityDefaultRequestCallbacksP(void)
+{
+  UiTestApplication application;
+  TestAccessibilityViewImpl* implementation = nullptr;
+  View view = CreateTestAccessibilityView(implementation);
+  auto* accessible = Dali::Accessibility::Accessible::Get(view);
+  DALI_TEST_CHECK(accessible);
+  view.SetProperty(Actor::Property::NAME, "Actor fallback");
+  implementation->SetDefaultNameMode(TestAccessibilityViewImpl::DefaultNameMode::DYNAMIC);
+  implementation->SetDefaultDescriptionMode(TestAccessibilityViewImpl::DefaultDescriptionMode::DYNAMIC);
+  implementation->SetDefaultValueMode(TestAccessibilityViewImpl::RequestedMode::DYNAMIC);
 
   AccessibilityCallbacksHandler handler;
   handler.expectedView = view;
-  Extension::View::SetAccessibilityRequestNameCallback(
-    view,
-    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestName));
-  Extension::View::SetAccessibilityRequestDescriptionCallback(
-    view,
-    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDescription));
-  Extension::View::SetAccessibilityRequestValueCallback(
-    view,
-    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestValue));
-
-  DALI_TEST_EQUALS(accessible->GetName(), std::string("Property name"), TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Property description"), TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Property value"), TEST_LOCATION);
-  DALI_TEST_EQUALS(implementation->requestNameCount, 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(implementation->requestDescriptionCount, 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(implementation->requestValueCount, 0, TEST_LOCATION);
-
   handler.result = true;
-  DALI_TEST_EQUALS(accessible->GetName(), std::string("Callback name"), TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Callback description"), TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Callback value"), TEST_LOCATION);
-  DALI_TEST_CHECK(handler.receivedExpectedView);
-  DALI_TEST_EQUALS(handler.requestNameCount, 2, TEST_LOCATION);
-  DALI_TEST_EQUALS(handler.requestDescriptionCount, 2, TEST_LOCATION);
-  DALI_TEST_EQUALS(handler.requestValueCount, 2, TEST_LOCATION);
-
-  Extension::View::SetAccessibilityRequestNameCallback(view, {});
-  Extension::View::SetAccessibilityRequestDescriptionCallback(view, {});
-  Extension::View::SetAccessibilityRequestValueCallback(view, {});
-  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Property value"), TEST_LOCATION);
-  DALI_TEST_EQUALS(implementation->requestValueCount, 1, TEST_LOCATION);
-  view.SetAccessibilityName("");
-  view.SetAccessibilityDescription("");
-
   Extension::View::SetAccessibilityRequestDefaultNameCallback(
     view,
     Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultName));
   Extension::View::SetAccessibilityRequestDefaultDescriptionCallback(
     view,
     Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultDescription));
+  Extension::View::SetAccessibilityRequestDefaultValueCallback(
+    view,
+    Dali::Callback<bool(View, Dali::String&)>::New(&handler, &AccessibilityCallbacksHandler::OnRequestDefaultValue));
 
+  view.SetAccessibilityName("Property name");
+  view.SetAccessibilityDescription("Property description");
+  view.SetAccessibilityValue("Property value");
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Property name"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Property description"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Property value"), TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultNameCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultDescriptionCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultValueCount, 0, TEST_LOCATION);
+
+  // Legacy overrides still precede explicit properties and registered defaults.
+  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::DYNAMIC);
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Requested name"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Requested description"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Requested value"), TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultNameCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultDescriptionCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultValueCount, 0, TEST_LOCATION);
+  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::FALLBACK);
+
+  view.SetAccessibilityName("");
+  view.SetAccessibilityDescription("");
+  view.SetAccessibilityValue("");
   DALI_TEST_EQUALS(accessible->GetName(), std::string("Callback default name"), TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Callback default description"), TEST_LOCATION);
-  DALI_TEST_EQUALS(implementation->requestNameCount, 1, TEST_LOCATION);
-  DALI_TEST_EQUALS(implementation->requestDescriptionCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Callback default value"), TEST_LOCATION);
+  DALI_TEST_CHECK(handler.receivedExpectedView);
+
+  // An unhandled callback skips the replaced virtual and ignores its output.
+  handler.result = false;
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Actor fallback"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Raw fallback description"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
   DALI_TEST_EQUALS(implementation->requestDefaultNameCount, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(implementation->requestDefaultDescriptionCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(implementation->requestDefaultValueCount, 0, TEST_LOCATION);
+
+  handler.result = true;
+  handler.emptyValue = true;
+  DALI_TEST_EQUALS(accessible->GetName(), std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultNameCount, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultDescriptionCount, 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(handler.requestDefaultValueCount, 3, TEST_LOCATION);
 
   Extension::View::SetAccessibilityRequestDefaultNameCallback(view, {});
   Extension::View::SetAccessibilityRequestDefaultDescriptionCallback(view, {});
-  accessible->GetName();
-  accessible->GetDescription();
+  Extension::View::SetAccessibilityRequestDefaultValueCallback(view, {});
+  DALI_TEST_EQUALS(accessible->GetName(), std::string("Requested default name"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Requested default description"), TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Requested default value"), TEST_LOCATION);
   DALI_TEST_EQUALS(implementation->requestDefaultNameCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(implementation->requestDefaultDescriptionCount, 1, TEST_LOCATION);
-
+  DALI_TEST_EQUALS(implementation->requestDefaultValueCount, 1, TEST_LOCATION);
   END_TEST;
 }
 

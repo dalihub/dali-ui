@@ -324,9 +324,12 @@ int UtcDaliProgressViewAccessibilityP(void)
   fixture.view.SetValue(50.0f);
   DALI_TEST_EQUALS(accessible->GetValue(), std::string("Loading files"), TEST_LOCATION);
 
-  fixture.view.SetAccessibilityValue("");
   fixture.view.SetDeterminate(false);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Loading files"), TEST_LOCATION);
+  fixture.view.SetAccessibilityValue("");
   DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
+  fixture.view.SetDeterminate(true);
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("50%"), TEST_LOCATION);
 
   Property::Map actionAttributes;
   DALI_TEST_CHECK(!fixture.view.DoAction("increment", actionAttributes));

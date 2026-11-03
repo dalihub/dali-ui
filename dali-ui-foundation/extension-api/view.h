@@ -226,20 +226,6 @@ DALI_UI_API void SetAccessibilityScrollToChildCallback(Ui::View view, Callback<b
 DALI_UI_API void SetAccessibilityZoomCallback(Ui::View view, Callback<bool(Ui::View)> callback);
 
 /**
- * @brief Sets a per-instance dynamic accessibility name callback.
- *
- * When set, the callback replaces ViewImpl::OnAccessibilityRequestName(). A
- * true return accepts the output value, including an intentionally empty value;
- * false continues the existing framework fallback. Pass an empty callback to
- * restore virtual dispatch.
- * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
- *
- * @param[in] view The View whose accessibility name is customized
- * @param[in] callback Callback invoked with the View and output value
- */
-DALI_UI_API void SetAccessibilityRequestNameCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback);
-
-/**
  * @brief Sets a per-instance default accessibility name callback.
  *
  * When set, the callback replaces ViewImpl::OnAccessibilityRequestDefaultName().
@@ -251,20 +237,6 @@ DALI_UI_API void SetAccessibilityRequestNameCallback(Ui::View view, Callback<boo
  * @param[in] callback Callback invoked with the View and output value
  */
 DALI_UI_API void SetAccessibilityRequestDefaultNameCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback);
-
-/**
- * @brief Sets a per-instance dynamic accessibility description callback.
- *
- * When set, the callback replaces ViewImpl::OnAccessibilityRequestDescription().
- * A true return accepts the output value, including an intentionally empty
- * value; false continues the existing framework fallback. Pass an empty
- * callback to restore virtual dispatch.
- * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
- *
- * @param[in] view The View whose accessibility description is customized
- * @param[in] callback Callback invoked with the View and output value
- */
-DALI_UI_API void SetAccessibilityRequestDescriptionCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback);
 
 /**
  * @brief Sets a per-instance default accessibility description callback.
@@ -281,18 +253,20 @@ DALI_UI_API void SetAccessibilityRequestDescriptionCallback(Ui::View view, Callb
 DALI_UI_API void SetAccessibilityRequestDefaultDescriptionCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback);
 
 /**
- * @brief Sets a per-instance dynamic accessibility value callback.
+ * @brief Sets a per-instance default accessibility value callback.
  *
- * When set, the callback replaces ViewImpl::OnAccessibilityRequestValue(). A
- * true return accepts the output value, including an intentionally empty value;
- * false continues the existing framework fallback. Pass an empty callback to
- * restore virtual dispatch.
+ * The callback is called only when the deprecated request-value hook did not
+ * handle the request and the explicit accessibility value is empty.
+ * When set, it replaces ViewImpl::OnAccessibilityRequestDefaultValue().
+ * Returning true accepts the output, including an intentionally empty value.
+ * Returning false leaves the accessible value empty; it does not call the
+ * virtual hook. Pass an empty callback to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
- * @param[in] view The View whose accessibility value is customized
+ * @param[in] view The View whose default accessibility value is customized
  * @param[in] callback Callback invoked with the View and output value
  */
-DALI_UI_API void SetAccessibilityRequestValueCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback);
+DALI_UI_API void SetAccessibilityRequestDefaultValueCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback);
 
 /**
  * @brief Requests accessibility highlight for the given View.

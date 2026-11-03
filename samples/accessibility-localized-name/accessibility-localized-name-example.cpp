@@ -141,21 +141,21 @@ private:
     });
 
     mFragmentButton = CreateTestButton("1  Compose IDS_WIFI + IDS_CONNECT + IDS_COMPLETE", 0xDDEEFFu);
-    Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
+    Dali::Ui::Extension::View::SetAccessibilityRequestDefaultNameCallback(
       mFragmentButton,
       Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
         this,
         &AccessibilityLocalizedNameController::OnRequestWifiConnectCompleteName));
 
     mCompleteFirstButton = CreateTestButton("2  Compose IDS_COMPLETE + IDS_CONNECT + IDS_WIFI", 0xFFF0D8u);
-    Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
+    Dali::Ui::Extension::View::SetAccessibilityRequestDefaultNameCallback(
       mCompleteFirstButton,
       Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
         this,
         &AccessibilityLocalizedNameController::OnRequestCompleteConnectWifiName));
 
     mConnectFirstButton = CreateTestButton("3  Compose IDS_CONNECT + IDS_WIFI + IDS_COMPLETE", 0xF0E3F7u);
-    Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
+    Dali::Ui::Extension::View::SetAccessibilityRequestDefaultNameCallback(
       mConnectFirstButton,
       Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
         this,
@@ -163,11 +163,6 @@ private:
 
     mSentenceButton = CreateTestButton("4  Bind IDS_WIFI_CONNECT_COMPLETE", 0xE3F3E6u);
     mSentenceButton.SetTranslatableAccessibilityName(SENTENCE_RESOURCE_ID, LOCALIZATION_DOMAIN);
-    Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
-      mSentenceButton,
-      Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
-        this,
-        &AccessibilityLocalizedNameController::OnRequestSentenceName));
 
     ConfigureButton(mFragmentButton);
     ConfigureButton(mCompleteFirstButton);
@@ -261,16 +256,6 @@ private:
   {
     result = ComposeFragmentName(CONNECT_RESOURCE_ID, WIFI_RESOURCE_ID, COMPLETE_RESOURCE_ID);
     LogRequestedName("3", result);
-    return true;
-  }
-
-  bool OnRequestSentenceName(Dali::Ui::View view, Dali::String& result)
-  {
-    // SetTranslatableAccessibilityName() stores the resolved binding in the
-    // View's accessibility-name property. Return that exact value so button 4
-    // is logged at the same name-request point as buttons 1-3.
-    result = view.GetAccessibilityName();
-    LogRequestedName("4", result);
     return true;
   }
 

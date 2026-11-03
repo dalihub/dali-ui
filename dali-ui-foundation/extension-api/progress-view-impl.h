@@ -56,7 +56,7 @@ protected:
   ~ProgressViewImpl() override;
 
   void OnInitialize() override;
-  bool OnAccessibilityRequestValue(Dali::String& value) override;
+  bool OnAccessibilityRequestDefaultValue(Dali::String& value) override;
 
   virtual void OnValueRatioChanged(float valueRatio)  = 0;
   virtual void OnDeterminateChanged(bool determinate) = 0;

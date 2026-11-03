@@ -4,7 +4,7 @@
 two ways to build a localized accessibility name:
 
 1. Resolve `IDS_WIFI`, `IDS_CONNECT`, and `IDS_COMPLETE` separately and compose
-   them in three different orders with `SetAccessibilityRequestNameCallback()`.
+   them in three different orders with `SetAccessibilityRequestDefaultNameCallback()`.
 2. Bind the complete sentence `IDS_WIFI_CONNECT_COMPLETE` to the last button with
    `SetTranslatableAccessibilityName()`.
 
@@ -63,7 +63,8 @@ localization from the value exposed to the Screen Reader:
 - `[LOCALIZATION LOOKUP]`: active locale, `LANGUAGE`, and all four resource
   lookup results.
 - `[A11Y NAME REQUEST]`: exact Name returned by the accessibility-name callback
-  when the accessibility framework requests it.
+  for the three fragment buttons when the accessibility framework requests it.
+  The complete-sentence button uses its explicit translation binding directly.
 - `[LOCALE SWITCH]`: result of selecting English or Korean inside the sample.
 - `[KEY FOCUS]`: result of moving key focus to a test button.
 

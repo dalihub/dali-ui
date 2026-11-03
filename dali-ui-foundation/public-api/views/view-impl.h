@@ -173,6 +173,11 @@ public:
 
   /**
    * @brief Called when the accessibility client requests a dynamic name.
+   * @deprecated For component-provided fallback names, use
+   * OnAccessibilityRequestDefaultName(). Unlike this hook, the default-name
+   * hook is called only when the explicit accessibility name is empty.
+   * Use View::SetAccessibilityName() to set an explicit name.
+   * This hook retains precedence over the explicit name when it returns true.
    * @param[out] value The requested name, including an intentionally empty value
    * @return true if this view supplied the value
    */
@@ -194,6 +199,11 @@ public:
 
   /**
    * @brief Called when the accessibility client requests a dynamic description.
+   * @deprecated For component-provided fallback descriptions, use
+   * OnAccessibilityRequestDefaultDescription(). Unlike this hook, the default-description
+   * hook is called only when the explicit accessibility description is empty.
+   * Use View::SetAccessibilityDescription() to set an explicit description.
+   * This hook retains precedence over the explicit description when it returns true.
    * @param[out] value The requested description, including an intentionally empty value
    * @return true if this view supplied the value
    */
@@ -215,6 +225,11 @@ public:
 
   /**
    * @brief Called when the accessibility client requests a dynamic value.
+   * @deprecated For component-provided fallback values, use
+   * OnAccessibilityRequestDefaultValue(). Unlike this hook, the default-value
+   * hook is called only when the explicit accessibility value is empty.
+   * Use View::SetAccessibilityValue() to set an explicit value.
+   * This hook retains precedence over the explicit value when it returns true.
    * @param[out] value The requested value, including an intentionally empty value
    * @return true if this view supplied the value
    */
@@ -1105,9 +1120,8 @@ public:
   /**
    * @brief Retrieves the extension for this view.
    *
-   * Deliberately the LAST virtual declared in this class: the overrides above
-   * fill dali-core base-class slots and introduce none, so this is the final
-   * slot of the frozen vtable.
+   * The overrides above fill dali-core base-class slots and introduce none.
+   * New virtual hooks are appended after this existing extension slot.
    *
    * @return The extension if available, nullptr otherwise
    */
@@ -1115,6 +1129,19 @@ public:
   {
     return nullptr;
   }
+
+  /**
+   * @brief Called when this View may supply a fallback accessibility value.
+   *
+   * This method is called only when OnAccessibilityRequestValue() did not
+   * handle the request and the explicit accessibility value is empty.
+   * Returning true accepts @p value as the final default, including an
+   * intentionally empty value. Returning false leaves the accessible value empty.
+   *
+   * @param[out] value The default value
+   * @return true if this view supplied the default, false to leave the value empty
+   */
+  virtual bool OnAccessibilityRequestDefaultValue(Dali::String& value);
 
 protected:
   // ============================================================

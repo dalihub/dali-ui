@@ -323,6 +323,13 @@ std::string ViewAccessible::GetValue() const
   {
     value.Clear();
     value = view.GetAccessibilityValue();
+    if(value.Empty())
+    {
+      if(!viewDataImpl.DispatchAccessibilityRequestDefaultValue(value))
+      {
+        value.Clear();
+      }
+    }
   }
   return ToStdString(value);
 }

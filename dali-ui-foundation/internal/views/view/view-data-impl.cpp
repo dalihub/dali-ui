@@ -171,11 +171,9 @@ const TraitId ACCESSIBILITY_PAN_CALLBACK_TRAIT_ID                         = Trai
 const TraitId ACCESSIBILITY_VALUE_CHANGE_CALLBACK_TRAIT_ID                = TraitId::Alloc();
 const TraitId ACCESSIBILITY_SCROLL_TO_CHILD_CALLBACK_TRAIT_ID             = TraitId::Alloc();
 const TraitId ACCESSIBILITY_ZOOM_CALLBACK_TRAIT_ID                        = TraitId::Alloc();
-const TraitId ACCESSIBILITY_REQUEST_NAME_CALLBACK_TRAIT_ID                = TraitId::Alloc();
 const TraitId ACCESSIBILITY_REQUEST_DEFAULT_NAME_CALLBACK_TRAIT_ID        = TraitId::Alloc();
-const TraitId ACCESSIBILITY_REQUEST_DESCRIPTION_CALLBACK_TRAIT_ID         = TraitId::Alloc();
 const TraitId ACCESSIBILITY_REQUEST_DEFAULT_DESCRIPTION_CALLBACK_TRAIT_ID = TraitId::Alloc();
-const TraitId ACCESSIBILITY_REQUEST_VALUE_CALLBACK_TRAIT_ID               = TraitId::Alloc();
+const TraitId ACCESSIBILITY_REQUEST_DEFAULT_VALUE_CALLBACK_TRAIT_ID       = TraitId::Alloc();
 
 template<typename Signature>
 class AccessibilityCallbackObject final : public TraitObject
@@ -2500,20 +2498,8 @@ bool ViewDataImpl::DispatchAccessibilityZoom()
   return mViewImpl.OnAccessibilityZoom();
 }
 
-void ViewDataImpl::SetAccessibilityRequestNameCallback(Callback<bool(View, Dali::String&)> callback)
-{
-  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_NAME_CALLBACK_TRAIT_ID, std::move(callback));
-}
-
 bool ViewDataImpl::DispatchAccessibilityRequestName(Dali::String& value)
 {
-  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_NAME_CALLBACK_TRAIT_ID);
-  if(object)
-  {
-    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, Dali::String&)>*>(object.Get());
-    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), value);
-  }
-
   return mViewImpl.OnAccessibilityRequestName(value);
 }
 
@@ -2534,20 +2520,8 @@ bool ViewDataImpl::DispatchAccessibilityRequestDefaultName(Dali::String& value)
   return mViewImpl.OnAccessibilityRequestDefaultName(value);
 }
 
-void ViewDataImpl::SetAccessibilityRequestDescriptionCallback(Callback<bool(View, Dali::String&)> callback)
-{
-  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_DESCRIPTION_CALLBACK_TRAIT_ID, std::move(callback));
-}
-
 bool ViewDataImpl::DispatchAccessibilityRequestDescription(Dali::String& value)
 {
-  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_DESCRIPTION_CALLBACK_TRAIT_ID);
-  if(object)
-  {
-    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, Dali::String&)>*>(object.Get());
-    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), value);
-  }
-
   return mViewImpl.OnAccessibilityRequestDescription(value);
 }
 
@@ -2568,21 +2542,26 @@ bool ViewDataImpl::DispatchAccessibilityRequestDefaultDescription(Dali::String& 
   return mViewImpl.OnAccessibilityRequestDefaultDescription(value);
 }
 
-void ViewDataImpl::SetAccessibilityRequestValueCallback(Callback<bool(View, Dali::String&)> callback)
-{
-  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_VALUE_CALLBACK_TRAIT_ID, std::move(callback));
-}
-
 bool ViewDataImpl::DispatchAccessibilityRequestValue(Dali::String& value)
 {
-  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_VALUE_CALLBACK_TRAIT_ID);
+  return mViewImpl.OnAccessibilityRequestValue(value);
+}
+
+void ViewDataImpl::SetAccessibilityRequestDefaultValueCallback(Callback<bool(View, Dali::String&)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_DEFAULT_VALUE_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityRequestDefaultValue(Dali::String& value)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_DEFAULT_VALUE_CALLBACK_TRAIT_ID);
   if(object)
   {
     auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, Dali::String&)>*>(object.Get());
     return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), value);
   }
 
-  return mViewImpl.OnAccessibilityRequestValue(value);
+  return mViewImpl.OnAccessibilityRequestDefaultValue(value);
 }
 
 ViewAccessible* ViewDataImpl::CreateAccessibleObject()

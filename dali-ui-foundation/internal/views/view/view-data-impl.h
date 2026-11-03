@@ -1025,20 +1025,20 @@ public:
   void SetAccessibilityZoomCallback(Callback<bool(View)> callback);
   bool DispatchAccessibilityZoom();
 
-  void SetAccessibilityRequestNameCallback(Callback<bool(View, Dali::String&)> callback);
   bool DispatchAccessibilityRequestName(Dali::String& value);
 
   void SetAccessibilityRequestDefaultNameCallback(Callback<bool(View, Dali::String&)> callback);
   bool DispatchAccessibilityRequestDefaultName(Dali::String& value);
 
-  void SetAccessibilityRequestDescriptionCallback(Callback<bool(View, Dali::String&)> callback);
   bool DispatchAccessibilityRequestDescription(Dali::String& value);
 
   void SetAccessibilityRequestDefaultDescriptionCallback(Callback<bool(View, Dali::String&)> callback);
   bool DispatchAccessibilityRequestDefaultDescription(Dali::String& value);
 
-  void SetAccessibilityRequestValueCallback(Callback<bool(View, Dali::String&)> callback);
   bool DispatchAccessibilityRequestValue(Dali::String& value);
+
+  void SetAccessibilityRequestDefaultValueCallback(Callback<bool(View, Dali::String&)> callback);
+  bool DispatchAccessibilityRequestDefaultValue(Dali::String& value);
 
   void                SetAccessibilityName(StringView name);
   Dali::String        GetAccessibilityName() const;

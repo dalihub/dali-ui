@@ -235,7 +235,7 @@ role은 View의 구현 클래스가 아니라 **사용자에게 제공하는 기
 전체 role은 `Accessibility::Role`을 참고하세요. 의미 있는 role을 지정하면 기본적으로 highlightable 대상이 됩니다.
 
 > [!NOTE]
-> Component의 표시 content를 기본 Name/Description으로 사용할 때는 `OnAccessibilityRequestDefaultName()`과 `OnAccessibilityRequestDefaultDescription()`을 사용합니다. `OnAccessibilityRequestName/Description/Value()`는 explicit property보다 우선해야 하는 authoritative 값에만 사용합니다. 자세한 우선순위는 [동적 값과 Component 기본 Name/Description](#165-동적-값과-component-기본-namedescription)을 참고하세요.
+> Component 기본값에는 `OnAccessibilityRequestDefaultName/Description/Value()`를 사용합니다. 기존 `OnAccessibilityRequestName/Description/Value()`는 deprecated이며 explicit property보다 우선하는 기존 동작을 유지합니다. 자세한 우선순위는 [동적 값과 Component 기본 Name/Description/Value](#165-동적-값과-component-기본-namedescriptionvalue)를 참고하세요.
 
 <br/>
 
@@ -780,13 +780,13 @@ Application은 checked 값을 Toggle Component의 기능 API로 설정하고, Co
 
 #### 기존 Component instance를 설정하는 경우
 
-Application이 Component의 public handle을 화면에 배치하는 경우에는 virtual을 override하지 않습니다. 화면별 Name, Description, Value가 query 시점 계산을 필요로 하지 않으면 explicit setter나 translation binding을 사용합니다. Screen Reader가 조회하는 순간에 Application 소유 데이터를 계산해야 할 때만 해당 instance에 per-View `SetAccessibilityRequestNameCallback()`, `SetAccessibilityRequestDescriptionCallback()`, `SetAccessibilityRequestValueCallback()`을 연결합니다. 조절 Component가 소유하는 현재 Value는 이 callback으로 가로채지 말고 Component의 기능 API와 접근성 contract에 맡기세요.
+Application이 Component의 public handle을 화면에 배치할 때는 virtual을 override하지 않습니다. 화면별 Name, Description, Value에는 explicit setter나 translation binding을 사용합니다. Query 시점에 fallback을 계산하려면 per-View `SetAccessibilityRequestDefaultNameCallback()`, `SetAccessibilityRequestDefaultDescriptionCallback()`, `SetAccessibilityRequestDefaultValueCallback()`을 연결합니다. 이 callback은 explicit property가 비어 있을 때만 호출됩니다. 조절 Component의 현재 Value는 Component 기능 API와 접근성 contract에 맡기세요.
 
 #### Application 내부 custom Component를 구현하는 경우
 
-Application project 안의 코드라도 `ViewImpl` subclass를 만들거나 일반 View를 조합해 custom control을 구현한다면 그 코드는 Component 계층입니다. 이 경우 `OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, `OnAccessibilityRequestValue()` virtual을 override할 수 있으며 Role, State, Value, action, 내부 tree 노출까지 [16. Component 개발자 가이드](#16-component-개발자-가이드)의 contract를 따라야 합니다.
+Application project 안의 코드라도 `ViewImpl` subclass를 만들거나 일반 View를 조합해 custom control을 구현한다면 Component 계층입니다. 계산된 기본값에는 `OnAccessibilityRequestDefaultName/Description/Value()` virtual을 사용하며 Role, State, Value, action, 내부 tree 노출까지 [16. Component 개발자 가이드](#16-component-개발자-가이드)의 contract를 따라야 합니다.
 
-같은 View의 같은 request hook에 virtual override와 per-View callback을 함께 사용하지 마세요. Per-View callback이 설치되면 대응 virtual을 대체하며, callback이 `false`를 반환해도 virtual로 돌아가지 않고 framework fallback을 계속합니다. Callback의 우선순위와 lifecycle은 [16.5 동적 값과 Component 기본 Name/Description](#165-동적-값과-component-기본-namedescription)과 [17.1 `ViewImpl` subclass 없이 Per-View callback 사용](#171-viewimpl-subclass-없이-per-view-callback-사용)을 따릅니다.
+같은 View의 같은 request hook에 virtual override와 per-View callback을 함께 사용하지 마세요. Per-View callback이 설치되면 대응 virtual을 대체하며, callback이 `false`를 반환해도 virtual로 돌아가지 않고 framework fallback을 계속합니다. Callback의 우선순위와 lifecycle은 [16.5 동적 값과 Component 기본 Name/Description/Value](#165-동적-값과-component-기본-namedescriptionvalue)과 [17.1 `ViewImpl` subclass 없이 Per-View callback 사용](#171-viewimpl-subclass-없이-per-view-callback-사용)을 따릅니다.
 
 ### 15.3 Page와 remote focus lifecycle
 
@@ -977,16 +977,15 @@ Component 초기화 시 `ADJUSTABLE` 또는 `SPIN_BUTTON` Role, Name, 초기 Val
 
 위 문자열 생성은 model 동기화만 설명하는 예입니다. Production suffix, unit, range, 문장은 반드시 localization해야 합니다. [11.3 동적 또는 formatted Accessibility Value](#113-동적-또는-formatted-accessibility-value)의 binding pattern을 사용하고 locale refresh와 model 변경 양쪽에서 Value를 다시 만드세요.
 
-### 16.5 동적 값과 Component 기본 Name/Description
+### 16.5 동적 값과 Component 기본 Name/Description/Value
 
-Application이 설정하는 static/explicit 값은 public handle의 `SetAccessibilityName()`, `SetAccessibilityDescription()`, `SetAccessibilityValue()`를 사용하는 것이 기본입니다. Component가 표시 content에서 합리적인 기본 Name이나 Description을 제공할 때는 default hook을 사용합니다.
+Application의 명시적 값에는 `SetAccessibilityName()`, `SetAccessibilityDescription()`, `SetAccessibilityValue()` 또는 translation binding을 사용합니다. Screen Reader 조회 시 Component 기본값을 계산하려면 `OnAccessibilityRequestDefaultName/Description/Value()`를 사용합니다. Per-View default callback은 composed Component나 개별 instance에 같은 기능을 제공합니다.
 
-사용 목적 | 기본 책임과 API
+사용 목적 | 책임과 API
 --|--
-화면별 static/explicit Name, Description, Value | Application이 setter 또는 translation binding 사용
-화면별이며 query 시점에 계산해야 하는 authoritative Name, Description, Value | Application이 per-View `SetAccessibilityRequest*Callback()` 사용
-표시 content에서 유도되는 Component 기본 Name, Description | Component가 `OnAccessibilityRequestDefaultName/Description()` 사용
-조절값처럼 Component가 소유하고 action과 함께 바뀌는 현재 Value | Component가 저장 property를 동기화하거나 `OnAccessibilityRequestValue()` 사용
+명시적 Name, Description, Value | Application setter 또는 translation binding
+조회 시 계산하는 기본 Name, Description, Value | Component의 `OnAccessibilityRequestDefaultName/Description/Value()` 또는 per-View `SetAccessibilityRequestDefault*Callback()`
+Component action에 따라 바뀌는 현재 Value | Component가 저장 property를 동기화하거나 `OnAccessibilityRequestDefaultValue()` 구현
 
 ```cpp
 bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
@@ -994,36 +993,25 @@ bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
   value = mLabel.GetText();
   return !value.Empty();
 }
-```
 
-`OnAccessibilityRequestDefaultName()`과 `OnAccessibilityRequestDefaultDescription()`은 authoritative request가 값을 처리하지 않았고 explicit property가 비어 있을 때만 호출됩니다. 따라서 Component fallback은 Application의 `SetAccessibilityName()` 또는 `SetAccessibilityDescription()`을 덮어쓰지 않습니다.
-
-Default hook이 `true`를 반환하면 빈 output도 의도적인 최종값으로 사용합니다. Integration raw fallback이나 Actor Name까지 계속 조회하려면 `false`를 반환합니다.
-
-Screen Reader가 값을 조회하는 순간에 계산해야 하고 explicit property보다 우선해야 하는 authoritative 값에만 request hook을 사용합니다. 화면 문맥에서 정해지는 Name과 Description은 일반적으로 Application이 per-View callback으로 제공합니다. 재사용 Component가 일반적인 Name이나 Description을 위해 authoritative hook을 사용하면 Application override를 가리므로 default hook을 사용해야 합니다. Value는 현재 값의 원천을 가진 쪽이 담당합니다. Slider처럼 Component가 action과 현재 값을 소유하면 Component의 `OnAccessibilityRequestValue()`가 적절하고, Application 화면이 계산하는 status라면 Application의 per-View callback이 적절합니다.
-
-```cpp
-bool VolumeSliderImpl::OnAccessibilityRequestValue(Dali::String& value)
+bool VolumeSliderImpl::OnAccessibilityRequestDefaultValue(Dali::String& value)
 {
   value = BuildCurrentVolumeText();
   return true;
 }
 ```
 
-Request hook의 반환 규칙은 다음과 같습니다.
+Default hook은 기존 request hook이 요청을 처리하지 않았고 explicit property가 비어 있을 때만 호출됩니다. `true`이면 의도적인 빈 문자열을 포함해 output을 채택합니다. `false`이면 output을 무시하고 기존 Name/Description fallback으로 진행하며, Value는 빈 값이 됩니다.
 
-- `true`: output 값을 최종값으로 사용합니다. 빈 문자열도 의도적으로 처리한 값입니다.
-- `false`: 저장된 explicit/translated property로 fallback합니다. Name과 Description은 해당 property가 비어 있으면 default hook과 framework fallback을 계속 확인합니다.
-
-`OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, `OnAccessibilityRequestValue()`가 `true`를 반환하면 explicit property보다 우선합니다. 표시 text 같은 일반 fallback에 이 hook을 사용하면 Application override를 가리므로 default hook을 사용해야 합니다.
-
-최종 조회 순서는 다음과 같습니다.
+`OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, `OnAccessibilityRequestValue()`는 deprecated입니다. 기존 우선순위는 유지되므로 `true`이면 explicit property도 덮어씁니다. 새 코드에는 explicit setter 또는 default hook을 권장합니다. Default hook으로 이전하면 explicit property가 우선하므로 동작이 달라집니다. 대응하는 non-default request callback setter는 제거되었습니다.
 
 정보 | 조회 순서
 --|--
-Name | authoritative request → explicit/translated property → Component default hook → integration raw fallback → Actor Name
-Description | authoritative request → explicit/translated property → Component default hook → integration raw fallback
-Value | authoritative request → stored property
+Name | deprecated request hook → explicit/translated property → default callback 또는 virtual → integration raw fallback → Actor Name
+Description | deprecated request hook → explicit/translated property → default callback 또는 virtual → integration raw fallback
+Value | deprecated request hook → explicit property → default callback 또는 virtual → 빈 값
+
+등록된 default callback은 해당 virtual hook을 대체합니다. `false`를 반환해도 virtual을 호출하지 않으며, callback을 해제하면 virtual dispatch로 복귀합니다.
 
 ### 16.6 복합 tree와 recycling
 
@@ -1078,7 +1066,7 @@ public:
     return true;
   }
 
-  bool OnAccessibilityRequestValue(Dali::String& value) override
+  bool OnAccessibilityRequestDefaultValue(Dali::String& value) override
   {
     value = GetVolumeText();
     return true;
@@ -1096,13 +1084,14 @@ Virtual API | 접근성 요청
 `OnAccessibilityScrollToChild(View child)` | scroll container가 child를 화면에 표시
 `OnAccessibilityPan(PanGesture)` | 접근성 pan 처리
 `OnAccessibilityZoom()` | 접근성 zoom 처리
-`OnAccessibilityRequestName()` | explicit property보다 우선하는 authoritative name 조회
+`OnAccessibilityRequestName()` | Deprecated: explicit property보다 우선하는 기존 동작 유지
 `OnAccessibilityRequestDefaultName()` | explicit Name이 없을 때 Component 기본 name 제공
-`OnAccessibilityRequestDescription()` | explicit property보다 우선하는 authoritative description 조회
+`OnAccessibilityRequestDescription()` | Deprecated: explicit property보다 우선하는 기존 동작 유지
 `OnAccessibilityRequestDefaultDescription()` | explicit Description이 없을 때 Component 기본 description 제공
-`OnAccessibilityRequestValue()` | 동적 value 조회
+`OnAccessibilityRequestValue()` | Deprecated: explicit property보다 우선하는 기존 동작 유지
+`OnAccessibilityRequestDefaultValue()` | explicit Value가 비어 있을 때 Component 기본값 제공
 
-Action callback은 요청을 처리했으면 `true`, 지원하지 않거나 처리하지 못했으면 `false`를 반환합니다. 문자열 조회 hook의 우선순위와 반환 규칙은 [16.5 동적 값과 Component 기본 Name/Description](#165-동적-값과-component-기본-namedescription)을 참고하세요.
+Action callback은 요청을 처리했으면 `true`, 지원하지 않거나 처리하지 못했으면 `false`를 반환합니다. 문자열 조회 hook의 우선순위와 반환 규칙은 [16.5 동적 값과 Component 기본 Name/Description/Value](#165-동적-값과-component-기본-namedescriptionvalue)을 참고하세요.
 
 일반 애플리케이션은 이 virtual을 직접 호출하지 않습니다. Accessibility bridge가 Screen Reader 요청을 받아 적절한 callback으로 dispatch합니다.
 
@@ -1113,7 +1102,7 @@ Custom View의 handle/impl 구조는 [View Architecture](https://github.sec.sams
 
 ### 17.1 `ViewImpl` subclass 없이 Per-View callback 사용
 
-Extension API를 사용하면 같은 action/request hook을 기존 `View` instance 하나에 연결할 수 있습니다. 화면별 동적 semantic을 소유하는 Application이나, native View를 소유하지만 `ViewImpl` subclass는 소유하지 않는 composed Component에 유용합니다.
+Extension API로 action hook과 기본 Name/Description/Value 제공자를 기존 `View` instance 하나에 연결할 수 있습니다. 화면별 동적 semantic을 소유하는 Application이나, native View를 소유하지만 `ViewImpl` subclass는 소유하지 않는 composed Component에 유용합니다.
 
 ```cpp
 #include <dali-ui-foundation/extension-api/view.h>
@@ -1123,10 +1112,10 @@ Dali::Ui::Extension::View::SetAccessibilityValueChangeCallback(
   Dali::Callback<bool(Dali::Ui::View, bool)>::New(
     this, &Slider::HandleAccessibilityValueChange));
 
-Dali::Ui::Extension::View::SetAccessibilityRequestValueCallback(
+Dali::Ui::Extension::View::SetAccessibilityRequestDefaultValueCallback(
   slider,
   Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
-    this, &Slider::HandleAccessibilityValueRequest));
+    this, &Slider::HandleAccessibilityDefaultValueRequest));
 ```
 
 Per-View setter | 대체하는 virtual hook
@@ -1137,11 +1126,9 @@ Per-View setter | 대체하는 virtual hook
 `SetAccessibilityValueChangeCallback()` | `OnAccessibilityValueChange()`
 `SetAccessibilityScrollToChildCallback()` | `OnAccessibilityScrollToChild()`
 `SetAccessibilityZoomCallback()` | `OnAccessibilityZoom()`
-`SetAccessibilityRequestNameCallback()` | `OnAccessibilityRequestName()`
 `SetAccessibilityRequestDefaultNameCallback()` | `OnAccessibilityRequestDefaultName()`
-`SetAccessibilityRequestDescriptionCallback()` | `OnAccessibilityRequestDescription()`
 `SetAccessibilityRequestDefaultDescriptionCallback()` | `OnAccessibilityRequestDefaultDescription()`
-`SetAccessibilityRequestValueCallback()` | `OnAccessibilityRequestValue()`
+`SetAccessibilityRequestDefaultValueCallback()` | `OnAccessibilityRequestDefaultValue()`
 
 Callback을 설치하면 해당 View에서 대응 virtual hook을 대체합니다. Callback 반환값은 최종 결과이며 `false`를 반환해도 virtual method로 fallback하지 않습니다. `SetAccessibilityValueChangeCallback(view, {})`처럼 empty callback을 전달하면 virtual dispatch로 복귀합니다.
 
