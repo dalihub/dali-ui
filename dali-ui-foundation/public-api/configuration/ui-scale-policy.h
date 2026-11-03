@@ -38,6 +38,12 @@ namespace Ui
  * DISABLED views as well; the comments below name the term the policy chooses, not the
  * resulting effective scale. (Both terms are 1.0 while
  * Extension::LayoutScaleManager::SetScalable(false) is in force.)
+ *
+ * A view's policy is set and read through Extension::View::SetUiScalePolicy() and
+ * Extension::View::GetUiScalePolicy() (dali-ui-foundation/extension-api/view.h), extension
+ * APIs for platform integrators and module providers; View::SetUiScalePolicy() and
+ * View::GetUiScalePolicy() are deprecated. The enumeration stays in the public API because
+ * those deprecated members take and return it.
  */
 enum class UiScalePolicy : uint8_t
 {

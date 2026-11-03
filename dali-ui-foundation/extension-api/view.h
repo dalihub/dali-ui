@@ -386,6 +386,36 @@ DALI_UI_API void SetSizeHeight(Ui::View view, float height);
  */
 DALI_UI_API void SetSizeDepth(Ui::View view, float depth);
 
+/**
+ * @brief Sets how the view takes part in the UI scale.
+ *
+ * The policy selects the UI-scale term of the view's effective scale: the term of its
+ * parent (UiScalePolicy::INHERIT, the default; a root takes the UI scale), the UI scale
+ * Extension::LayoutScaleManager holds (UiScalePolicy::ENABLED), or 1.0
+ * (UiScalePolicy::DISABLED, which descendant INHERIT views follow). The window scale
+ * multiplies whichever term the policy selects, so it also applies under DISABLED. A new
+ * policy drops the cached effective scale of the view's subtree and requests a re-layout;
+ * setting the current policy again does nothing.
+ *
+ * This replaces the deprecated Ui::View::SetUiScalePolicy() and ViewImpl::SetUiScalePolicy().
+ * Like the rest of the scale configuration, it is an extension API for platform
+ * integrators and module providers, and not part of the application-facing public API.
+ *
+ * @param[in] view The view to configure; it must not be empty
+ * @param[in] policy The policy to apply
+ */
+DALI_UI_API void SetUiScalePolicy(Ui::View view, UiScalePolicy policy);
+
+/**
+ * @brief Returns how the view takes part in the UI scale.
+ *
+ * This replaces the deprecated Ui::View::GetUiScalePolicy() and ViewImpl::GetUiScalePolicy().
+ *
+ * @param[in] view The view to query; it must not be empty
+ * @return The policy set through SetUiScalePolicy(); UiScalePolicy::INHERIT by default
+ */
+DALI_UI_API UiScalePolicy GetUiScalePolicy(Ui::View view);
+
 } // namespace View
 } // namespace Extension
 } // namespace Ui

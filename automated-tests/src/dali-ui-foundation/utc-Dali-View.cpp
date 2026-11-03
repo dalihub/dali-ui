@@ -5017,6 +5017,168 @@ int UtcDaliViewExtensionGeometrySettersP(void)
   END_TEST;
 }
 
+// === Extension::View UI scale policy ===
+
+namespace
+{
+// Counts the measure passes of the view it is set on. The size is fixed, so only an
+// invalidation of that view makes the count move.
+int gExtensionPolicyMeasureCount = 0;
+
+MeasuredSize ExtensionPolicyCountingMeasure(View, float, float)
+{
+  ++gExtensionPolicyMeasureCount;
+  return MeasuredSize(50.0f, 50.0f);
+}
+} // namespace
+
+int UtcDaliViewExtensionSetUiScalePolicyP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionSetUiScalePolicyP - Extension::View sets and reads back every UiScalePolicy");
+
+  View view = View::New();
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::INHERIT);
+
+  Ui::Extension::View::SetUiScalePolicy(view, UiScalePolicy::ENABLED);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::ENABLED);
+
+  Ui::Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::DISABLED);
+
+  Ui::Extension::View::SetUiScalePolicy(view, UiScalePolicy::INHERIT);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::INHERIT);
+
+  END_TEST;
+}
+
+// The extension accessors and the deprecated View and ViewImpl members read and write the
+// same policy, in both directions.
+int UtcDaliViewExtensionUiScalePolicyMatchesDeprecatedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionUiScalePolicyMatchesDeprecatedP - the extension accessors and the deprecated members share one policy");
+
+  View view = View::New();
+
+  Ui::Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED);
+  DALI_TEST_CHECK(view.GetUiScalePolicy() == UiScalePolicy::DISABLED);
+  DALI_TEST_CHECK(GetImpl(view).GetUiScalePolicy() == UiScalePolicy::DISABLED);
+
+  view.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::ENABLED);
+
+  GetImpl(view).SetUiScalePolicy(UiScalePolicy::INHERIT);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::INHERIT);
+
+  END_TEST;
+}
+
+// A policy set through the extension API re-lays the view out at the scale it selects: a
+// child requested 40 x 30 renders 80 x 60 at the UI scale 2.0, 40 x 30 once it opts out, and
+// 80 x 60 again when it inherits again.
+int UtcDaliViewExtensionSetUiScalePolicyRelayoutsP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("UtcDaliViewExtensionSetUiScalePolicyRelayoutsP - a policy set through Extension::View re-lays the view out");
+
+  LayoutScaleManager manager          = LayoutScaleManager::Get();
+  const float        originalScale    = manager.GetUiScale();
+  const bool         originalScalable = manager.IsScalable();
+  manager.SetScalable(true);
+  manager.SetUiScale(2.0f);
+
+  View parent = View::New(); // WRAP_CONTENT, scale 2
+  View child  = View::New(); // INHERIT, scale 2
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  parent.Add(child);
+  window.Add(parent);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  Ui::Extension::View::SetUiScalePolicy(child, UiScalePolicy::DISABLED); // scale 1
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
+
+  Ui::Extension::View::SetUiScalePolicy(child, UiScalePolicy::INHERIT); // scale 2 again
+  SettleLayout(application);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
+
+  manager.SetUiScale(originalScale);
+  manager.SetScalable(originalScalable);
+  END_TEST;
+}
+
+// Setting the current policy again invalidates nothing: the cycle after it measures exactly
+// what an idle control cycle measures. A new policy measures more (the anti-vacuity check).
+int UtcDaliViewExtensionSetUiScalePolicySameValueIsNoOpP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionSetUiScalePolicySameValueIsNoOpP - setting the current policy again does nothing");
+
+  LayoutScaleManager manager          = LayoutScaleManager::Get();
+  const float        originalScale    = manager.GetUiScale();
+  const bool         originalScalable = manager.IsScalable();
+  manager.SetScalable(true);
+  manager.SetUiScale(2.0f);
+
+  gExtensionPolicyMeasureCount = 0;
+  View root                    = View::New();
+  root.SetMeasureCallback(MeasureCallback::New(&ExtensionPolicyCountingMeasure));
+  Ui::Extension::View::SetUiScalePolicy(root, UiScalePolicy::DISABLED);
+  application.GetWindow().Add(root);
+  SettleLayout(application);
+  DALI_TEST_CHECK(gExtensionPolicyMeasureCount > 0);
+
+  // Control: what one idle cycle measures.
+  int before = gExtensionPolicyMeasureCount;
+  application.SendNotification();
+  application.Render();
+  const int idleDelta = gExtensionPolicyMeasureCount - before;
+
+  before = gExtensionPolicyMeasureCount;
+  Ui::Extension::View::SetUiScalePolicy(root, UiScalePolicy::DISABLED);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(gExtensionPolicyMeasureCount - before, idleDelta, TEST_LOCATION);
+
+  before = gExtensionPolicyMeasureCount;
+  Ui::Extension::View::SetUiScalePolicy(root, UiScalePolicy::ENABLED);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(gExtensionPolicyMeasureCount - before > idleDelta);
+
+  manager.SetUiScale(originalScale);
+  manager.SetScalable(originalScalable);
+  END_TEST;
+}
+
+int UtcDaliViewExtensionSetUiScalePolicyEmptyHandleN(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionSetUiScalePolicyEmptyHandleN - an empty View asserts");
+
+  DALI_TEST_ASSERTION(Ui::Extension::View::SetUiScalePolicy(View(), UiScalePolicy::DISABLED), "view");
+
+  END_TEST;
+}
+
+int UtcDaliViewExtensionGetUiScalePolicyEmptyHandleN(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionGetUiScalePolicyEmptyHandleN - an empty View asserts");
+
+  DALI_TEST_ASSERTION(Ui::Extension::View::GetUiScalePolicy(View()), "view");
+
+  END_TEST;
+}
+
 // A MeasureCallback that calls Measure() on its OWN view must not re-run the
 // producer. Measure() is public and LayoutController::ProcessLayouts() is
 // nestable, so this is reachable from application code and must be safe in

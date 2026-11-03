@@ -357,6 +357,23 @@ touch sequence를 더 이상 intercept하지 않는다.
 핸들은 서로 다른 객체라서 변환되지 않는다. 한쪽 핸들을 다른 쪽 `DownCast()`에 넘기면 빈
 핸들이 반환된다.
 
+## View::SetUiScalePolicy()/GetUiScalePolicy() → Extension::View
+
+`View`와 `ViewImpl`의 `SetUiScalePolicy()`/`GetUiScalePolicy()`는 deprecated되었으며 문서 태그만
+바뀌었다. 릴리스된 심볼과 시그니처는 그대로 유지된다. 대체 API는 extension API
+`Extension::View::SetUiScalePolicy(Ui::View, UiScalePolicy)`와
+`Extension::View::GetUiScalePolicy(Ui::View)`(`dali-ui-foundation/extension-api/view.h`)이다.
+`UiScalePolicy` 열거형은 공개 API에 남는다. 라이브러리와 샘플은 새 함수를 사용한다.
+UTC는 deprecated 멤버도 계속 검증하고, Public API만 사용하는 text manual test
+(`manual-tests/dali-ui-text`)는 deprecated 멤버를 계속 사용한다.
+
+| Before (deprecated) | After |
+|---|---|
+| `view.SetUiScalePolicy(policy)` | `Extension::View::SetUiScalePolicy(view, policy)` |
+| `view.GetUiScalePolicy()` | `Extension::View::GetUiScalePolicy(view)` |
+| `ViewImpl::SetUiScalePolicy(policy)` | `Ui::Extension::View::SetUiScalePolicy(Ui::View::DownCast(Self()), policy)` |
+| `ViewImpl::GetUiScalePolicy()` | `Ui::Extension::View::GetUiScalePolicy(Ui::View::DownCast(Self()))` |
+
 ## ViewImpl::GetEffectiveScale() → GetEffectiveLayoutScale()
 
 `ViewImpl::GetEffectiveScale()`은 deprecated되었으며 문서 태그만 바뀌었다. 릴리스된 심볼과

@@ -183,6 +183,16 @@ void SetSizeDepth(Ui::View view, float depth)
   static_cast<Dali::Actor&>(view).SetSizeDepth(depth);
 }
 
+void SetUiScalePolicy(Ui::View view, UiScalePolicy policy)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetUiScalePolicy(policy);
+}
+
+UiScalePolicy GetUiScalePolicy(Ui::View view)
+{
+  return Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetUiScalePolicy();
+}
+
 } // namespace View
 } // namespace Extension
 } // namespace Ui

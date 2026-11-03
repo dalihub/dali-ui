@@ -340,12 +340,23 @@ public: // Non-virtual API (safe to reorder / extend)
 
   /**
    * @brief Sets the UiScale participation policy for this view.
+   *
+   * @deprecated Use Ui::Extension::View::SetUiScalePolicy() instead; this function will be
+   * removed. It takes the View handle: in a ViewImpl subclass replace SetUiScalePolicy(policy)
+   * with Ui::Extension::View::SetUiScalePolicy(Ui::View::DownCast(Self()), policy). Write the
+   * Ui:: qualifier: an unqualified Extension:: names CustomActorImpl::Extension there.
+   *
    * @param[in] policy The UiScalePolicy to apply
    */
   void SetUiScalePolicy(UiScalePolicy policy);
 
   /**
    * @brief Gets the UiScale participation policy of this view.
+   *
+   * @deprecated Use Ui::Extension::View::GetUiScalePolicy() instead; this function will be
+   * removed. In a ViewImpl subclass replace GetUiScalePolicy() with
+   * Ui::Extension::View::GetUiScalePolicy(Ui::View::DownCast(Self())).
+   *
    * @return The current UiScalePolicy
    */
   UiScalePolicy GetUiScalePolicy() const;

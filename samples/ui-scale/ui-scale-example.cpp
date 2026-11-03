@@ -82,6 +82,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/window-system.h>
 #include <algorithm>
@@ -680,7 +681,7 @@ private:
     StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_B_BG));
 
     // ★★★ Key: DISABLED — this container and its INHERIT descendants don't scale
-    zone.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(zone, UiScalePolicy::DISABLED);
 
     zone.Add(MakeZoneTitle("[Zone B] DISABLED container + ENABLED children"));
     zone.Add(MakeDesc(
@@ -742,7 +743,7 @@ private:
     disabledSub.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     disabledSub.SetSpacing(6.0f);
     disabledSub.SetCornerRadius(Vector4(ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS));
-    disabledSub.SetUiScalePolicy(UiScalePolicy::DISABLED); // ★ isolated island
+    Ui::Extension::View::SetUiScalePolicy(disabledSub, UiScalePolicy::DISABLED); // ★ isolated island
 
     Label disabledSubLabel = Label::New("DISABLED sub-container");
     disabledSubLabel.SetRequestedWidth(WRAP_CONTENT);
@@ -1543,7 +1544,7 @@ private:
     mDisabledSlot.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     mDisabledSlot.SetSpacing(6.0f);
     mDisabledSlot.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
-    mDisabledSlot.SetUiScalePolicy(UiScalePolicy::DISABLED); // ★ blocks scale
+    Ui::Extension::View::SetUiScalePolicy(mDisabledSlot, UiScalePolicy::DISABLED); // ★ blocks scale
     mDisabledSlot.Add(MakeSmallLabel("DISABLED parent", 0xB71C1C));
 
     // Right slot: INHERIT parent (teal tint)
@@ -1945,7 +1946,7 @@ private:
     box.SetRequestedHeight(size);
     box.SetBackgroundColor(color);
     box.SetCornerRadius(Vector4(BOX_RADIUS, BOX_RADIUS, BOX_RADIUS, BOX_RADIUS));
-    box.SetUiScalePolicy(policy); // ← apply the policy
+    Ui::Extension::View::SetUiScalePolicy(box, policy); // ← apply the policy
     box.Add(lbl);
     return box;
   }

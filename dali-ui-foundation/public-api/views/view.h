@@ -745,12 +745,20 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the UiScale participation policy for this view.
    *
+   * @deprecated Use Extension::View::SetUiScalePolicy() instead; this function will be removed.
+   * The UI scale is configured through the extension API
+   * (dali-ui-foundation/extension-api/view.h) for platform integrators and module providers.
+   * Replace view.SetUiScalePolicy(policy) with Extension::View::SetUiScalePolicy(view, policy).
+   *
    * @param[in] policy The UiScalePolicy to apply
    */
   void SetUiScalePolicy(UiScalePolicy policy);
 
   /**
    * @brief Gets the UiScale participation policy of this view.
+   *
+   * @deprecated Use Extension::View::GetUiScalePolicy() instead; this function will be removed.
+   * Replace view.GetUiScalePolicy() with Extension::View::GetUiScalePolicy(view).
    *
    * @return The current UiScalePolicy
    */

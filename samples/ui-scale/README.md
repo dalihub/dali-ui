@@ -10,7 +10,7 @@ extension API(`dali-ui-foundation/extension-api/`)이며 앱 개발자용 공개
 - `Extension::LayoutScaleManager::SetUiScale()`, `GetUiScale()`: 시스템 스케일
 - `Extension::LayoutScaleManager::SetWindowScale()`, `GetWindowScale()`: 윈도우별 스케일
 - `Extension::LayoutScaleManager::SetScalable()`, `IsScalable()`: 두 스케일을 함께 켜고 끄는 마스터 스위치
-- `View::SetUiScalePolicy()`
+- `Extension::View::SetUiScalePolicy()`
 - `Window::New()`, `LayoutController::Remove()`: Zone I의 두 번째 Window
 
 ## 로컬 빌드와 실행
