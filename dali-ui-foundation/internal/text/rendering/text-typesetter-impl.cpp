@@ -739,11 +739,10 @@ void TypesetGradientGlyph(GlyphData& __restrict__ data,
       uint32_t      packedColor               = 0u;
       uint8_t* __restrict__ packedColorBuffer = reinterpret_cast<uint8_t*>(&packedColor);
       const float normalizedCoverage          = static_cast<float>(paintCoverage) / 255.0f;
-      const float effectiveCoverage           = normalizedCoverage * std::max(0.0f, std::min(1.0f, fallbackColor->a));
-      packedColorBuffer[0u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.r * effectiveCoverage)));
-      packedColorBuffer[1u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.g * effectiveCoverage)));
-      packedColorBuffer[2u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.b * effectiveCoverage)));
-      packedColorBuffer[3u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.a * effectiveCoverage)));
+      packedColorBuffer[0u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.r * normalizedCoverage)));
+      packedColorBuffer[1u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.g * normalizedCoverage)));
+      packedColorBuffer[2u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.b * normalizedCoverage)));
+      packedColorBuffer[3u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.a * normalizedCoverage)));
 
       currentColor = packedColor;
     }
@@ -1345,7 +1344,8 @@ template<bool RECORD_REVEAL, bool APPLY_GRADIENT_SPAN, bool PIXEL_REVEAL = false
 void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, GlyphData& glyphData, GlyphIndex& glyphIndex,
                                    const GlyphIndex elidedGlyphIndex, const GlyphInfo* glyphInfo, const bool addHyphen,
                                    const InputParameterForEachGlyph& inputParamsForGlyph,
-                                   OutputParameterForEachGlyph&      outputParamsForGlyph)
+                                   OutputParameterForEachGlyph&      outputParamsForGlyph,
+                                   const Vector4&                    defaultForegroundColor)
 {
   const GlyphIndex           styleGlyphIndex = inputParamsForGlyph.finalGlyphStyleSourceBuffer
                                                  ? ResolveFinalStyleSourceGlyph(inputParamsForGlyph.finalGlyphStyleSourceBuffer,
@@ -1518,7 +1518,7 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
   else
   {
     color = (inputParamsForGlyph.useDefaultColor || (0u == colorIndex))
-              ? inputParamsForGlyph.defaultColor
+              ? defaultForegroundColor
               : *(inputParamsForGlyph.colorsBuffer + (colorIndex - 1u));
   }
 
@@ -1737,7 +1737,7 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
     // clang-format on
 
     CreateImageBufferForEachGlyph<RECORD_REVEAL, APPLY_GRADIENT_SPAN, PIXEL_REVEAL>(
-      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph);
+      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph, inputParamsForGlyph.defaultColor);
 
     if(inputParamsForLine.hyphenIndices)
     {
@@ -1918,8 +1918,15 @@ void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient   
 
                                                      lastFontId};
 
+    // Global gradients preserve unstyled color glyphs with their original RGBA.
+    // Explicit foreground and gradient spans retain their existing raster policy.
+    const Vector4& defaultForegroundColor =
+      classification.isColorGlyph && !classification.hasExplicitColor && !usesGradientSpan
+        ? Color::WHITE
+        : inputParamsForGlyph.defaultColor;
+
     CreateImageBufferForEachGlyph<false, APPLY_GRADIENT_SPAN>(
-      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph);
+      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph, defaultForegroundColor);
 
     if(inputParamsForLine.hyphenIndices)
     {

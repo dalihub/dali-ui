@@ -41,6 +41,11 @@ namespace Text
  * paint for the overlapping characters. Color glyphs, such as emoji, retain
  * their native colors.
  *
+ * Monochrome glyphs use the gradient RGBA independently of the default
+ * TextColor. Color glyphs are not gradient-filled. Label color glyphs retain
+ * the fallback foreground alpha: TextColor alpha unless an explicit foreground
+ * color supplies it.
+ *
  * @note This is a static paint payload. To change the gradient, replace the
  * span with a newly created one.
  */

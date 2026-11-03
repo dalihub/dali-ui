@@ -271,10 +271,10 @@ public: // Setters for chaining
   /**
    * @brief Sets the gradient used to fill the default monochrome text glyphs.
    *
-   * A renderable gradient replaces TextColor RGB for monochrome glyphs that
-   * otherwise use the default text color. TextColor alpha remains an opacity
-   * multiplier. Explicit foreground colors, color glyphs, embedded items, and
-   * text decorations are not replaced. Password masking glyphs are treated as
+   * A renderable gradient replaces TextColor RGBA, including alpha, for
+   * monochrome glyphs that otherwise use the default text color. Explicit
+   * foreground colors, color glyphs, embedded items, and text decorations are
+   * not replaced. Password masking glyphs are treated as
    * default monochrome glyphs and receive the gradient.
    *
    * Changing TextColor while a gradient is active does not clear the gradient.

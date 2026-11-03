@@ -1459,6 +1459,9 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
   const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
   const bool embossEnabled               = parameters.isEmbossEnabled;
+  const bool marqueeGradientCoverage     = parameters.isMarqueeEnabled && parameters.isTextGradientRequested &&
+                                       !hasMultipleTextColors && !containsColorGlyph &&
+                                       !styleBlocksTextGradient && !embossEnabled;
 
   // Create RGBA texture if the text contains emojis or multiple text colors, otherwise L8 texture
   Pixel::Format textPixelFormat =
@@ -1595,7 +1598,9 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     // Create a pixel data for the text without any styles
     renderInfo.textPixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
+      marqueeGradientCoverage
+        ? mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, textPixelFormat)
+        : mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
   }
 
   std::unique_ptr<Internal::Reveal::Plan> blurPlan;
@@ -1759,8 +1764,10 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     if(!hasMixedColorTarget)
     {
       renderInfo.marqueeFillPixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
-                            ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
+        marqueeGradientCoverage
+          ? mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888, originSize)
+          : mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
+                                ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
     }
     renderInfo.marqueeStylePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT,
@@ -1781,9 +1788,12 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     // Resolve immediately after the primary text render. Later supplemental
     // render passes must not replace the texture geometry used by the delta.
     renderInfo.marqueePixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
-                          ignoreHorizontalAlignment, Pixel::RGBA8888,
-                          Size(parameters.originWidth, parameters.originHeight), context);
+      marqueeGradientCoverage
+        ? mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888,
+                                              Size(parameters.originWidth, parameters.originHeight))
+        : mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
+                              ignoreHorizontalAlignment, Pixel::RGBA8888,
+                              Size(parameters.originWidth, parameters.originHeight), context);
     if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
     {
       renderInfo.marqueeStartAnchor = parameters.marqueeStartAnchor;

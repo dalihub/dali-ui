@@ -4244,3 +4244,43 @@ int UtcDaliAsyncPolicySuppressedNoopConstraintsP(void)
   CheckSuppressedManualStop(3u);
   END_TEST;
 }
+
+int UtcDaliMarqueeColorEmojiGradientVisibilityP(void)
+{
+  UiTestApplication application;
+  for(bool async : {false, true})
+  {
+    for(bool vertical : {false, true})
+    {
+      Lifecycle test(application, async, vertical, true);
+      // The test FontClient reserves U+F0002 for a color emoji bitmap.
+      std::string text;
+      for(unsigned i = 0u; i < 40u; ++i)
+      {
+        text += vertical ? "A\xF3\xB0\x80\x82\n" : "A\xF3\xB0\x80\x82";
+      }
+      Ui::Gradient::Linear gradient(Vector2::ZERO, Vector2::ONE);
+      gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::BLUE)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+      test.label.SetText(text.c_str());
+      test.label.SetTextColor(Ui::UiColor(Color::TRANSPARENT));
+      test.label.SetTextGradient(gradient);
+      test.Drain();
+      DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+      DALI_TEST_EQUALS(test.label.GetRendererCount(), 1u, TEST_LOCATION);
+      auto renderer = test.label.GetRendererAt(0u);
+      DALI_TEST_EQUALS(renderer.GetTextures().GetTextureCount(), 3u, TEST_LOCATION);
+      const auto requireRender = renderer.GetPropertyIndex("requireRender");
+      DALI_TEST_CHECK(requireRender != Property::INVALID_INDEX);
+      DALI_TEST_CHECK(renderer.GetProperty<bool>(requireRender));
+      test.label.SetTextGradient(Ui::Gradient::Base());
+      test.Drain();
+      renderer = test.label.GetRendererAt(0u);
+      DALI_TEST_CHECK(!renderer.GetProperty<bool>(renderer.GetPropertyIndex("requireRender")));
+      test.label.SetTextGradient(gradient);
+      test.Drain();
+      renderer = test.label.GetRendererAt(0u);
+      DALI_TEST_CHECK(renderer.GetProperty<bool>(renderer.GetPropertyIndex("requireRender")));
+    }
+  }
+  END_TEST;
+}

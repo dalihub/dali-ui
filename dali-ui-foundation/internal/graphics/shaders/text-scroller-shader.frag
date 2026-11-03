@@ -120,8 +120,8 @@ highp float EvaluateTextGradientOverlayPosition(highp vec2 textGradientCoord)
 
 mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill)
 {
-  mediump float glyphAlpha = baseFill.a;
-  if(glyphAlpha <= 0.000001)
+  mediump float foregroundAlpha = baseFill.a;
+  if(foregroundAlpha <= 0.0)
   {
     return baseFill;
   }
@@ -131,20 +131,19 @@ mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill)
   highp float gradientPosition = EvaluateTextGradientOverlayPosition(textGradientOverlayCoord);
   mediump vec4 overlayColor =
     TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5));
-  mediump vec3 baseRgb = baseFill.rgb / max(glyphAlpha, 0.000001);
+  // Both inputs are premultiplied. Overlay changes color within the existing
+  // foreground alpha; it does not add glyph coverage or increase opacity.
   mediump vec3 blendedRgb;
-
   const highp float TEXT_GRADIENT_OVERLAY_MODE_SCREEN = 1.0;
   if(abs(uTextGradientOverlayMode - TEXT_GRADIENT_OVERLAY_MODE_SCREEN) < 0.5)
   {
-    mediump vec3 screen = vec3(1.0) - (vec3(1.0) - baseRgb) * (vec3(1.0) - overlayColor.rgb);
-    blendedRgb = mix(baseRgb, screen, overlayColor.a);
+    blendedRgb = baseFill.rgb + overlayColor.rgb * (foregroundAlpha - baseFill.rgb);
   }
   else
   {
-    blendedRgb = overlayColor.rgb * overlayColor.a + baseRgb * (1.0 - overlayColor.a);
+    blendedRgb = overlayColor.rgb * foregroundAlpha + baseFill.rgb * (1.0 - overlayColor.a);
   }
-  return vec4(blendedRgb * glyphAlpha, glyphAlpha);
+  return vec4(blendedRgb, foregroundAlpha);
 }
 #endif
 

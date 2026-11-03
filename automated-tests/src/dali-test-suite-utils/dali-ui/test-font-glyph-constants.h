@@ -24,4 +24,6 @@ namespace DALI_NAMESPACE::TextAbstraction::Test
 // Reserved by the test FontClient for deterministic half-coverage bitmaps.
 // Keep this distinct from UINT32_MAX, which text code uses as an invalid or synthetic glyph sentinel.
 constexpr uint32_t HALF_COVERAGE_GLYPH_INDEX = 0xF0000001u;
+// Private-use codepoint reserved for a BGRA emoji with varying intrinsic alpha.
+constexpr uint32_t COLOR_EMOJI_GLYPH_INDEX = 0xF0002u;
 } // namespace Dali::TextAbstraction::Test

@@ -607,12 +607,18 @@ PixelData TextVisual::RenderMarqueeText(Ui::Integration::Visual::Base     visual
   {
     gradientContext.emplace(Text::GradientRasterContext{size, CalculateGradientViewBounds(visual, size), visualObject.mController->GetUiScale()});
   }
-  PixelData pixelData = visualObject.mTypesetter->Render(size,
-                                                         textDirection,
-                                                         behaviour,
-                                                         ignoreHorizontalAlignment,
-                                                         pixelFormat,
-                                                         originSize, gradientContext ? &*gradientContext : nullptr);
+  const bool gradientCoverage = visualObject.mTextShaderFeatureCache.IsEnabledTextGradient() &&
+                                !visualObject.mTextShaderFeatureCache.IsEnabledTextGradientMixed() &&
+                                (behaviour == Text::Typesetter::RENDER_TEXT_AND_STYLES ||
+                                 behaviour == Text::Typesetter::RENDER_NO_STYLES);
+  PixelData pixelData = gradientCoverage
+                          ? visualObject.mTypesetter->RenderTextGradientMask(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize)
+                          : visualObject.mTypesetter->Render(size,
+                                                             textDirection,
+                                                             behaviour,
+                                                             ignoreHorizontalAlignment,
+                                                             pixelFormat,
+                                                             originSize, gradientContext ? &*gradientContext : nullptr);
   if(marqueeTextureAnchor)
   {
     *marqueeTextureAnchor = visualObject.mTypesetter->ResolveMarqueeTextureAnchor(marqueeStartAnchor);
@@ -1422,6 +1428,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       return;
     }
     mTextShaderFeatureCache = featureBuilder;
+    SetRequireRender(isCutoutEnabled || (isMarqueeEnabled && textGradientMixedPixelDataAvailable));
     if(!usesUserSpaceGradient)
     {
       mImpl->mRenderer.SetShader(shader);
@@ -3821,6 +3828,7 @@ Shader TextVisual::GetTextShader(VisualFactoryCache&                      factor
 {
   // Cache feature builder informations.
   mTextShaderFeatureCache = featureBuilder;
+  SetRequireRender(mController->IsTextCutout());
 
   Shader shader = mTextVisualShaderFactory.GetShader(factoryCache, mTextShaderFeatureCache);
   return shader;
@@ -3828,6 +3836,18 @@ Shader TextVisual::GetTextShader(VisualFactoryCache&                      factor
 
 void TextVisual::SetRequireRender(bool requireRender)
 {
+  // Independent foregrounds remain visible when the default text color is transparent.
+  requireRender = requireRender || mTextShaderFeatureCache.IsEnabledMultiColor() ||
+                  mTextShaderFeatureCache.IsEnabledAnyTextGradient();
+  if(!requireRender && mTextShaderFeatureCache.IsEnabledEmoji() && mController->IsMarqueeEnabled())
+  {
+    // Mixed marquee uses the scroller shader instead of the cached text shader.
+    // Its preserved color glyphs are independent of the default text alpha.
+    const auto* gradientData = GetTextVisualGradientData(mGradientData);
+    requireRender            = gradientData && Text::Internal::Gradient::IsRenderable(gradientData->mTextGradientStyle) &&
+                    !mController->IsEmbossEnabled();
+  }
+
   // Avoid function calls if there is no change.
   if(mTextRequireRender != requireRender)
   {

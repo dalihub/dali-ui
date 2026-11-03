@@ -328,8 +328,18 @@ public: // Setters for chaining
   /**
    * @brief Sets the text gradient.
    *
+   * A renderable gradient replaces the default TextColor RGBA, including alpha.
+   * Gradient-filled glyphs can remain visible when TextColor alpha is zero.
+   * ForegroundColorSpan and GradientSpan retain their own foreground RGBA.
+   * TextColor remains stored and is used again when the gradient is removed.
+   *
+   * Unstyled color glyphs retain their native RGBA while the gradient is active,
+   * independently of TextColor and gradient stop alpha. Actor opacity still
+   * applies. Explicit spans on color glyphs retain their own rendering policy.
+   *
    * A gradient value with Type::NONE, or a gradient with fewer than two stops,
-   * removes the text gradient and restores normal single-color text rendering.
+   * removes the text gradient and restores the stored TextColor for default
+   * foreground glyphs. Explicit foreground spans remain in effect.
    *
    * @note For Label text rendering, Gradient::Units::OBJECT_BOUNDING_BOX uses
    * normalized coordinates inside the bounds selected by
@@ -383,7 +393,8 @@ public: // Setters for chaining
    * shadow, underline, strikethrough, outline, or background.
    *
    * The overlay mode is evaluated inside the text shader and does not change
-   * the framebuffer blending state.
+   * the framebuffer blending state. The resolved foreground alpha is preserved;
+   * a fully transparent foreground remains transparent with any overlay.
    *
    * @param[in] gradient The overlay gradient. Use Gradient::Base::None()
    * to remove the overlay.

@@ -608,11 +608,11 @@ int UtcDaliTextGradientOverlayShaderUniformSymbolsP(void)
   DALI_TEST_CHECK(fragmentShader.find("uTextGradientOverlayBounds") != std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("uTextGradientOverlayMode") != std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("ApplyTextGradientOverlay(textColor, vTexCoord)") != std::string::npos);
-  DALI_TEST_CHECK(fragmentShader.find("mediump float glyphAlpha = baseFill.a") != std::string::npos);
-  DALI_TEST_CHECK(fragmentShader.find("if(glyphAlpha <= 0.000001)") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("mediump float foregroundAlpha = baseFill.a") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("if(foregroundAlpha <= 0.0)") != std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("return baseFill;") != std::string::npos);
-  DALI_TEST_CHECK(fragmentShader.find("mediump vec3 baseRgb = baseFill.rgb / max(glyphAlpha, 0.000001)") != std::string::npos);
-  DALI_TEST_CHECK(fragmentShader.find("return vec4(blendedRgb * glyphAlpha, glyphAlpha)") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("blendedRgb = baseFill.rgb + overlayColor.rgb * (foregroundAlpha - baseFill.rgb)") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("return vec4(blendedRgb, foregroundAlpha)") != std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("result.rgb = overlayColor.rgb * overlayColor.a + baseFill.rgb * (1.0 - overlayColor.a)") == std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("result.a = baseFill.a") == std::string::npos);
   END_TEST;
@@ -1781,8 +1781,8 @@ int UtcDaliTextGradientShaderCompositionMarqueeHorizontalOverlayFeatureP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientOverlayConicStartAngle") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("(GetTextGradientOverlayCoordinate() - uTextGradientOverlayBounds.xy)") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5))") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("baseFill.rgb / max(glyphAlpha, 0.000001)") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("vec4(blendedRgb * glyphAlpha, glyphAlpha)") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("baseFill.rgb + overlayColor.rgb * (foregroundAlpha - baseFill.rgb)") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("vec4(blendedRgb, foregroundAlpha)") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1804,8 +1804,8 @@ int UtcDaliTextGradientShaderCompositionMarqueeVerticalOverlayFeatureP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientOverlayConicStartAngle") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("(GetTextGradientOverlayCoordinate() - uTextGradientOverlayBounds.xy)") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5))") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("baseFill.rgb / max(glyphAlpha, 0.000001)") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("vec4(blendedRgb * glyphAlpha, glyphAlpha)") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("baseFill.rgb + overlayColor.rgb * (foregroundAlpha - baseFill.rgb)") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("vec4(blendedRgb, foregroundAlpha)") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1867,7 +1867,7 @@ int UtcDaliTextGradientShaderCompositionAtlasVariantP(void)
   DALI_TEST_CHECK(fragmentShader.find("UNIFORM sampler2D sGradientLookup;") != std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("if(vGradientFill > 0.5)") != std::string::npos);
   DALI_TEST_CHECK(fragmentShader.find("gradient.rgb / gradient.a") != std::string::npos);
-  DALI_TEST_CHECK(fragmentShader.find("vColor.a * textColorAnimatable.a * gradient.a * coverage") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("uColor.a * gradient.a * coverage") != std::string::npos);
   END_TEST;
 }
 

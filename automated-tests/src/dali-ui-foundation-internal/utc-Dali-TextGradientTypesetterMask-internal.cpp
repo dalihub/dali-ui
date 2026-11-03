@@ -1258,3 +1258,112 @@ int UtcDaliGradientSpanRasterDisplayScalePixelsP(void)
   }
   END_TEST;
 }
+
+int UtcDaliTextGradientSpanIndependentForegroundAlphaP(void)
+{
+  UiTestApplication application;
+
+  for(uint32_t glyphIndex : {1u, Dali::TextAbstraction::Test::HALF_COVERAGE_GLYPH_INDEX})
+  {
+    MaskModel referenceModel(1u);
+    referenceModel.SetSingleGradientSpan(Color::BLUE, Vector2::ZERO, glyphIndex);
+    const PixelData reference       = RenderTextGradientPreserved(referenceModel);
+    const auto      referenceBuffer = Dali::Integration::GetPixelDataBuffer(reference);
+    DALI_TEST_CHECK(referenceBuffer.buffer);
+    DALI_TEST_CHECK(SumRgbaAlphaPixels(reference) > 0u);
+
+    for(float foregroundAlpha : {0.0f, 0.25f, 0.5f, 1.0f})
+    {
+      for(float defaultAlpha : {0.0f, 0.25f, 0.5f, 1.0f})
+      {
+        MaskModel model(1u);
+        model.SetDefaultColor(Vector4(1.0f, 0.0f, 0.0f, defaultAlpha));
+        model.SetSingleGradientSpan(Vector4(0.0f, 0.0f, 1.0f, foregroundAlpha), Vector2::ZERO, glyphIndex);
+        const PixelData result       = RenderTextGradientPreserved(model);
+        const auto      resultBuffer = Dali::Integration::GetPixelDataBuffer(result);
+        DALI_TEST_CHECK(resultBuffer.buffer);
+        DALI_TEST_EQUALS(result.GetWidth(), reference.GetWidth(), TEST_LOCATION);
+        DALI_TEST_EQUALS(result.GetHeight(), reference.GetHeight(), TEST_LOCATION);
+        for(uint32_t y = 0u; y < result.GetHeight(); ++y)
+        {
+          for(uint32_t x = 0u; x < result.GetWidth(); ++x)
+          {
+            const uint8_t* pixel    = resultBuffer.buffer + y * result.GetStrideBytes() + x * 4u;
+            const uint8_t  coverage = referenceBuffer.buffer[y * reference.GetStrideBytes() + x * 4u + 3u];
+            const int      expected = static_cast<int>(coverage * foregroundAlpha);
+            DALI_TEST_EQUALS(pixel[0u], 0u, TEST_LOCATION);
+            DALI_TEST_EQUALS(pixel[1u], 0u, TEST_LOCATION);
+            DALI_TEST_CHECK(std::abs(static_cast<int>(pixel[2u]) - expected) <= 1);
+            DALI_TEST_CHECK(std::abs(static_cast<int>(pixel[3u]) - expected) <= 1);
+          }
+        }
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextGradientPreservedColorEmojiAlphaP(void)
+{
+  UiTestApplication application;
+  MaskModel         referenceModel(1u);
+  referenceModel.SetGlyphBitmapIndex(0u, TextAbstraction::Test::COLOR_EMOJI_GLYPH_INDEX);
+  referenceModel.SetDefaultColor(Color::WHITE);
+  const auto reference      = UiText::Typesetter::New(&referenceModel)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
+  const auto referenceBytes = Integration::GetPixelDataBuffer(reference);
+  DALI_TEST_CHECK(SumRgbaAlphaPixels(reference) > 0u);
+
+  for(float alpha : {0.0f, 0.5f, 1.0f})
+  {
+    MaskModel model(1u);
+    model.SetGlyphBitmapIndex(0u, TextAbstraction::Test::COLOR_EMOJI_GLYPH_INDEX);
+    model.SetDefaultColor(Vector4(0.2f, 0.6f, 0.8f, alpha));
+    const auto preserved     = RenderTextGradientPreserved(model);
+    const auto ordinary      = UiText::Typesetter::New(&model)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
+    const auto ordinaryBytes = Integration::GetPixelDataBuffer(ordinary);
+    DALI_TEST_EQUALS(SumMaskPixels(RenderTextGradientMask(model)), uint64_t(0u), TEST_LOCATION);
+    DALI_TEST_EQUALS(std::memcmp(Integration::GetPixelDataBuffer(preserved).buffer, referenceBytes.buffer, reference.GetStrideBytes() * reference.GetHeight()), 0, TEST_LOCATION);
+    for(uint32_t y = 0u; y < reference.GetHeight(); ++y)
+    {
+      for(uint32_t x = 0u; x < reference.GetWidth(); ++x)
+      {
+        const auto* pixel = referenceBytes.buffer + y * reference.GetStrideBytes() + x * 4u;
+        const auto* plain = ordinaryBytes.buffer + y * ordinary.GetStrideBytes() + x * 4u;
+        // The intrinsic BGRA bitmap is converted to premultiplied RGBA.
+        for(uint32_t channel = 0u; channel < 3u; ++channel)
+        {
+          const uint32_t intrinsic = 192u - channel * 64u;
+          DALI_TEST_CHECK(std::abs(int(pixel[channel]) - int(intrinsic * pixel[3u] / 255u)) <= 1);
+          DALI_TEST_CHECK(pixel[channel] <= pixel[3u]);
+        }
+        for(uint32_t channel = 0u; channel < 4u; ++channel)
+        {
+          DALI_TEST_CHECK(std::abs(int(plain[channel]) - int(pixel[channel] * alpha)) <= 1);
+        }
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextGradientColorEmojiExplicitSpanCompatibilityP(void)
+{
+  UiTestApplication application;
+  for(bool gradientSpan : {false, true})
+  {
+    for(float alpha : {0.0f, 0.5f, 1.0f})
+    {
+      MaskModel model(1u, {1u});
+      model.SetGlyphBitmapIndex(0u, TextAbstraction::Test::COLOR_EMOJI_GLYPH_INDEX);
+      model.SetDefaultColor(Vector4(0.2f, 0.6f, 0.8f, alpha));
+      if(gradientSpan)
+      {
+        model.SetSingleGradientSpan(Vector4(0.1f, 0.9f, 0.3f, 0.5f), Vector2::ZERO, TextAbstraction::Test::COLOR_EMOJI_GLYPH_INDEX);
+      }
+      const auto ordinary  = UiText::Typesetter::New(&model)->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
+      const auto preserved = RenderTextGradientPreserved(model);
+      DALI_TEST_EQUALS(std::memcmp(Integration::GetPixelDataBuffer(preserved).buffer, Integration::GetPixelDataBuffer(ordinary).buffer, ordinary.GetStrideBytes() * ordinary.GetHeight()), 0, TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}

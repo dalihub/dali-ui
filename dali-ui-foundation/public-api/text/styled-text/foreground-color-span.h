@@ -31,6 +31,9 @@ namespace Text
 
 /**
  * @brief Span payload that applies a foreground text color.
+ *
+ * Monochrome glyphs use the span RGBA independently of the default TextColor.
+ * For Label color glyphs, native RGB is preserved and the span alpha applies.
  */
 class DALI_UI_API ForegroundColorSpan : public Span
 {

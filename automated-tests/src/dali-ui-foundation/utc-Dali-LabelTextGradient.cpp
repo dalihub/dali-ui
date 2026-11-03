@@ -26,6 +26,7 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-event-thread-callback.h>
 #include <dali.h>
+#include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
@@ -1822,6 +1823,53 @@ int UtcDaliLabelGradientUiScaleAsyncStyleTransitionsP(void)
         application.GetScene().Remove(label);
       }
     }
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelGradientIndependentOpacityAndRemovalP(void)
+{
+  UiTestApplication application;
+  for(bool async : {false, true})
+  {
+    Label             label = Label::New();
+    label.SetRequestedWidth(240.0f);
+    label.SetRequestedHeight(80.0f);
+    label.SetText("Independent foreground");
+    label.SetTextColor(UiColor(Color::TRANSPARENT));
+    label.SetTextGradient(MakeRenderableLinear());
+    label.SetAsyncRendering(async);
+    GradientCompletion observer;
+    label.AsyncRenderFinishedSignal().Connect(&observer, &GradientCompletion::Finished);
+    application.GetScene().Add(label);
+    SettleGradient(application);
+    if(async)
+    {
+      DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 1u));
+    }
+    DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetRendererAt(0u).GetCurrentProperty<float>(DevelRenderer::Property::OPACITY), 1.0f, EPSILON, TEST_LOCATION);
+
+    label.SetTextGradient(Gradient::Base::None());
+    SettleGradient(application);
+    if(async)
+    {
+      DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 2u));
+    }
+    // Removing the independent foreground restores transparent TextColor culling.
+    DALI_TEST_EQUALS(label.GetRendererAt(0u).GetCurrentProperty<float>(DevelRenderer::Property::OPACITY), 0.0f, EPSILON, TEST_LOCATION);
+
+    label.SetTextColor(UiColor(Vector4(1.0f, 0.0f, 0.0f, 0.25f)));
+    SettleGradient(application);
+    DALI_TEST_EQUALS(label.GetRendererAt(0u).GetCurrentProperty<float>(DevelRenderer::Property::OPACITY), 1.0f, EPSILON, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetRendererAt(0u).GetCurrentProperty<Vector4>(label.GetRendererAt(0u).GetPropertyIndex("uTextColorAnimatable")),
+                     Vector4(0.25f, 0.0f, 0.0f, 0.25f), EPSILON, TEST_LOCATION);
+    if(async)
+    {
+      DALI_TEST_EQUALS(observer.count, 2u, TEST_LOCATION);
+    }
+    application.GetScene().Remove(label);
+    SettleGradient(application);
   }
   END_TEST;
 }

@@ -58,10 +58,10 @@ void main()
     mediump vec4 gradient = TEXTURE(sGradientLookup, vec2(position, 0.5));
 
     // Gradient lookup RGB is premultiplied. Atlas L8 output is straight alpha,
-    // so recover straight RGB while preserving Label's effective alpha meaning.
+    // so recover straight RGB independently of the default foreground color.
     mediump vec3 straightRgb = gradient.a > 0.000001 ? gradient.rgb / gradient.a : vec3(0.0);
     gl_FragColor = vec4(straightRgb * uColor.rgb,
-                        uColor.a * vColor.a * textColorAnimatable.a * gradient.a * coverage);
+                        uColor.a * gradient.a * coverage);
   }
   else
   {

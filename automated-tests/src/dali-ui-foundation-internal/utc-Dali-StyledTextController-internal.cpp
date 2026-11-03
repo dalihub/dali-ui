@@ -1328,7 +1328,14 @@ int UtcDaliStyledTextControllerGradientSpanReachesRenderersP(void)
                                                      false,
                                                      Pixel::RGBA8888);
   DALI_TEST_CHECK(transparentTexture);
-  DALI_TEST_CHECK(!ContainsVisibleTextPixel(transparentTexture));
+  // GradientSpan owns its alpha even when the default foreground is transparent.
+  DALI_TEST_CHECK(ContainsVisibleTextPixel(transparentTexture));
+  const auto opaqueBuffer = Dali::Integration::GetPixelDataBuffer(texture);
+  const auto transparentBuffer = Dali::Integration::GetPixelDataBuffer(transparentTexture);
+  DALI_TEST_EQUALS(texture.GetWidth(), transparentTexture.GetWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(texture.GetHeight(), transparentTexture.GetHeight(), TEST_LOCATION);
+  DALI_TEST_EQUALS(std::memcmp(opaqueBuffer.buffer, transparentBuffer.buffer,
+                             texture.GetStrideBytes() * texture.GetHeight()), 0, TEST_LOCATION);
   controller->SetDefaultColor(Color::BLACK);
   RelayoutController(controller);
 
