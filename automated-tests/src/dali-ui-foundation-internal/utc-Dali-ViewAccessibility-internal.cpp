@@ -1049,6 +1049,23 @@ int UtcDaliViewAccessibilityActionCallbacksP(void)
   END_TEST;
 }
 
+int UtcDaliViewAccessibilityDefaultValueWithoutOverrideP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  auto* accessible = Dali::Accessibility::Accessible::Get(view);
+  DALI_TEST_CHECK(accessible);
+
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
+
+  view.SetAccessibilityValue("Explicit value");
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Explicit value"), TEST_LOCATION);
+
+  view.SetAccessibilityValue("");
+  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliViewAccessibilityDefaultValueHookP(void)
 {
   UiTestApplication application;
