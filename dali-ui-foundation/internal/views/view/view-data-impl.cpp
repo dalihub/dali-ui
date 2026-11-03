@@ -1451,7 +1451,7 @@ ViewDataImpl::VisualData& ViewDataImpl::EnsureVisualData()
 
 MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightConstraint)
 {
-  float s    = mViewImpl.GetEffectiveLayoutScale();
+  float s    = GetEffectiveLayoutScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
@@ -1573,7 +1573,7 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
         continue;
       }
 
-      float  childScale            = childImpl.GetEffectiveLayoutScale();
+      float  childScale            = GetEffectiveLayoutScaleOf(childImpl);
       Insets margin                = childImpl.GetMargin();
       float  marginW               = static_cast<float>(margin.start + margin.end) * childScale;
       float  marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
@@ -1817,7 +1817,7 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
   // the default arrange only places regular children and echoes the input bounds.
   if(!mChildren.Empty())
   {
-    float s            = mViewImpl.GetEffectiveLayoutScale();
+    float s            = GetEffectiveLayoutScale();
     float visPadLeft   = static_cast<float>(mPadding.start) * s;
     float visPadRight  = static_cast<float>(mPadding.end) * s;
     float visPadTop    = static_cast<float>(mPadding.top) * s;
@@ -1838,7 +1838,7 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
         continue;
       }
 
-      float        childScale      = childImpl.GetEffectiveLayoutScale();
+      float        childScale      = GetEffectiveLayoutScaleOf(childImpl);
       Insets       margin          = childImpl.GetMargin();
       float        visMarginStart  = static_cast<float>(margin.start) * childScale;
       float        visMarginEnd    = static_cast<float>(margin.end) * childScale;
@@ -2677,6 +2677,11 @@ float ViewDataImpl::GetEffectiveLayoutScale() const
     mEffectiveScaleValid = true;
   }
   return mEffectiveScale;
+}
+
+float ViewDataImpl::GetEffectiveLayoutScaleOf(const ViewImpl& viewImpl)
+{
+  return viewImpl.GetViewDataImpl().GetEffectiveLayoutScale();
 }
 
 void ViewDataImpl::InvalidateMeasure()
@@ -5226,7 +5231,7 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
     return mMeasuredSize; // {0,0} until a pass completes
   }
 
-  float s = mViewImpl.GetEffectiveLayoutScale();
+  float s = GetEffectiveLayoutScale();
 
   // Push effective scale to the actor animatable property so that decoration
   // constraints (corner radius, borderline width) can read it as a scale input.
@@ -5957,7 +5962,7 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // publish gate below declines, deliberately (see there). Amortised O(1) on scene:
   // the walk stops at the first ancestor whose bit is already live. Return value
   // intentionally discarded -- called for its side effect of establishing the bit.
-  (void)mViewImpl.GetEffectiveLayoutScale();
+  (void)GetEffectiveLayoutScale();
 
   // This view is never laid out outside its own minimum/maximum: the size of the slot is clamped
   // here (ClampToOwnSizeBounds, max wins) and its start edge -- the logical x/y -- is kept. The
@@ -6243,8 +6248,8 @@ float ViewDataImpl::ComputeEffectiveScale() const
   // branch had before WindowScalePolicy existed: two one-byte compares and ONE parent
   // lookup. ONE parent lookup, the same collapse InvalidateMeasure makes: Ui::Layout
   // derives from Ui::View and LayoutImpl from ViewImpl, so Ui::View::DownCast also matches
-  // a Layout parent and GetImpl reaches the very same ViewImpl -- and GetEffectiveLayoutScale is
-  // a non-virtual ViewImpl member, so the Layout branch resolved to this exact call. The
+  // a Layout parent and GetImpl reaches the very same ViewImpl -- and GetEffectiveLayoutScaleOf()
+  // is a non-virtual static read, so the Layout branch resolved to this exact call. The
   // dropped branch cost a second Actor::GetParent() plus a Layout::DownCast that FAILS for
   // the common plain-View parent, once per node on every effective-scale cache miss.
   //
@@ -6259,7 +6264,7 @@ float ViewDataImpl::ComputeEffectiveScale() const
     Ui::View parentView = GetParentView();
     if(parentView)
     {
-      return GetImpl(parentView).GetEffectiveLayoutScale();
+      return GetEffectiveLayoutScaleOf(GetImpl(parentView));
     }
 
     // Root: both terms are taken here, each through its single read site, so the master
@@ -6527,7 +6532,7 @@ void ViewDataImpl::RegisterWithLayoutController()
 MeasuredSize ViewDataImpl::ApplyConstraints(const MeasuredSize& size) const
 {
   // size is in visual (scale-applied) units; scale min/max (natural) accordingly.
-  float        s           = mViewImpl.GetEffectiveLayoutScale();
+  float        s           = GetEffectiveLayoutScale();
   MeasuredSize constrained = size;
   constrained.width        = std::max(constrained.width, GetMinimumWidth() * s);
   constrained.height       = std::max(constrained.height, GetMinimumHeight() * s);
@@ -6890,7 +6895,7 @@ MeasuredSize ViewDataImpl::GetMatchFollowerSize() const
 {
   // The same product the producers return, through the same clamp Measure() applies, hence
   // bit-identical to what a measurement would report.
-  const float s = mViewImpl.GetEffectiveLayoutScale();
+  const float s = GetEffectiveLayoutScale();
   return ApplyConstraints(MeasuredSize(GetMinimumWidth() * s, GetMinimumHeight() * s));
 }
 
@@ -7037,7 +7042,7 @@ bool ViewDataImpl::CanSkipArrangeRemeasure(float visualW, float visualH, Measure
   {
     return false;
   }
-  const float s = mViewImpl.GetEffectiveLayoutScale();
+  const float s = GetEffectiveLayoutScale();
   if(mMeasureKeyOrPropagation.scaleKey != s)
   {
     return false;
@@ -7104,7 +7109,7 @@ void ViewDataImpl::SetBackgroundColorInternal(const Vector4& color)
 
 MeasuredSize ViewDataImpl::DispatchMeasureWithLayoutManager(LayoutManager* manager, float widthConstraint, float heightConstraint)
 {
-  float s = mViewImpl.GetEffectiveLayoutScale();
+  float s = GetEffectiveLayoutScale();
 
   Insets padding = mViewImpl.GetPadding();
   float  visPadW = static_cast<float>(padding.start + padding.end) * s;
@@ -7148,7 +7153,7 @@ void ViewDataImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, cons
 {
   // Self geometry is applied centrally in Arrange(); the manager arranges
   // children only within the padding-adjusted content bounds. Owner final == input.
-  float  s       = mViewImpl.GetEffectiveLayoutScale();
+  float  s       = GetEffectiveLayoutScale();
   Insets padding = mViewImpl.GetPadding();
 
   LayoutRect visContentBounds;

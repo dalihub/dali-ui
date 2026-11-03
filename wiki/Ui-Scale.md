@@ -12,7 +12,7 @@ dali-ui provides three independent scaling mechanisms that together produce the 
 
 This document covers the **dynamic scale** system (`UiScale`) and the **per-window scale**, which is an independent multiplier on top of it.
 
-The runtime scale APIs — `Extension::LayoutScaleManager` (`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()` (`dali-ui-foundation/extension-api/view.h`) — are extension APIs for platform integrators and module providers: the system or accessibility handler that applies the display scale, or a module that scales one window's content. They are not part of the application-facing public API, but they are installed with it and remain usable. In this page `LayoutScaleManager` means `Dali::Ui::Extension::LayoutScaleManager`.
+The runtime scale APIs — `Extension::LayoutScaleManager` (`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()` and `Extension::View::GetEffectiveLayoutScale()` (`dali-ui-foundation/extension-api/view.h`) — are extension APIs for platform integrators and module providers: the system or accessibility handler that applies the display scale, or a module that scales one window's content. They are not part of the application-facing public API, but they are installed with it and remain usable. In this page `LayoutScaleManager` means `Dali::Ui::Extension::LayoutScaleManager`.
 
 <br/>
 
@@ -20,7 +20,7 @@ The runtime scale APIs — `Extension::LayoutScaleManager` (`dali-ui-foundation/
 
 Every view in the tree carries an **effective scale** — a single `float` multiplier that is applied to all layout measurements (sizes, margins, padding, positions) during the Measure and Arrange passes.
 
-The **UI scale** (also called the system scale) is the process-wide scale held by `LayoutScaleManager` and set with `LayoutScaleManager::SetUiScale()`, usually by an OS or accessibility handler. `LayoutScaleManager::GetUiScale()` returns that stored value; a view's own effective scale is `ViewImpl::GetEffectiveLayoutScale()`.
+The **UI scale** (also called the system scale) is the process-wide scale held by `LayoutScaleManager` and set with `LayoutScaleManager::SetUiScale()`, usually by an OS or accessibility handler. `LayoutScaleManager::GetUiScale()` returns that stored value; a view's own effective scale is `Extension::View::GetEffectiveLayoutScale()`.
 
 The effective scale is the product of two independent terms:
 
@@ -47,7 +47,7 @@ LayoutScaleManager (system scale 1.5) + window scale 2.0
         └── Badge             effectiveScale = 3.0  (ENABLED — always tracks system)
 ```
 
-When `LayoutScaleManager::SetUiScale()` is called, every registered layout root recomputes its effective scale and triggers a full re-layout automatically. A window scale change does the same for the roots of that one window. A view that is not on the scene (never added, or removed) belongs to no registered root and is not re-laid out, but it caches no effective scale either: its `GetEffectiveLayoutScale()` and `View::Measure()` follow a new UI scale or switch state at once, and it is laid out at the current scale when it is added to a window.
+When `LayoutScaleManager::SetUiScale()` is called, every registered layout root recomputes its effective scale and triggers a full re-layout automatically. A window scale change does the same for the roots of that one window. A view that is not on the scene (never added, or removed) belongs to no registered root and is not re-laid out, but it caches no effective scale either: its `Extension::View::GetEffectiveLayoutScale()` and `View::Measure()` follow a new UI scale or switch state at once, and it is laid out at the current scale when it is added to a window.
 
 <br/>
 
@@ -120,7 +120,7 @@ Passing `1.0` is the reset: it restores the default and drops the window's recor
 
 Destroying a window needs no reset. A destroyed window's record is dropped automatically, and it never applies to a later window.
 
-The window scale applies to a view only while the view is in that window. A view removed from its window has no window term, together with its whole subtree, and so does a view whose window is destroyed while the application still holds it: until it is added to a window again, `GetEffectiveLayoutScale()` and `View::Measure()` use the current UI-scale term alone (they follow `SetUiScale()` and `SetScalable()` while it is detached). Adding it to a window applies that window's scale again.
+The window scale applies to a view only while the view is in that window. A view removed from its window has no window term, together with its whole subtree, and so does a view whose window is destroyed while the application still holds it: until it is added to a window again, `Extension::View::GetEffectiveLayoutScale()` and `View::Measure()` use the current UI-scale term alone (they follow `SetUiScale()` and `SetScalable()` while it is detached). Adding it to a window applies that window's scale again.
 
 > **Note:** `SetWindowScale()` takes the same values as `SetUiScale()`: positive, finite and normal (`>= FLT_MIN`). Anything else — `NaN`, infinities, zero, negatives, subnormals — and an empty `Window` are ignored, leave the current window scale in place, and log an error. The layout divides by the effective scale, which is why the bounds are this strict.
 
@@ -140,7 +140,7 @@ The window scale applies to a view only while the view is in that window. A view
 | `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | None; the library registers layout roots itself |
 | None | `GetWindowScale(Window)`, `SetWindowScale(Window, float)` |
 
-`ViewImpl::GetEffectiveScale()` is deprecated along with it: use `ViewImpl::GetEffectiveLayoutScale()`, which returns the same value.
+`ViewImpl::GetEffectiveScale()` is deprecated along with it: use `Extension::View::GetEffectiveLayoutScale()`, which returns the same value.
 
 <br/>
 
@@ -252,7 +252,7 @@ Dynamic scale (`effectiveScale`) stretches or shrinks the entire layout tree at 
 
 If your custom view (implemented via `ViewImpl`) caches pixel-unit values, those caches must be invalidated when scale changes. Since `InvalidateMeasure()` is called automatically on the root when `SetUiScale()` fires, derived views that override `OnMeasure` / `OnArrange` receive fresh constraints and `effectiveScale` on each layout pass — no extra work is required.
 
-For views that cache values outside the layout pass, subscribe to property change notifications or call `GetEffectiveLayoutScale()` lazily inside `OnMeasure`.
+For views that cache values outside the layout pass, subscribe to property change notifications or call `Ui::Extension::View::GetEffectiveLayoutScale(*this)` lazily inside `OnMeasure` (inside a `ViewImpl` subclass write the `Ui::` qualifier: an unqualified `Extension::` names `CustomActorImpl::Extension` there).
 
 <br/>
 
@@ -272,7 +272,7 @@ For views that cache values outside the layout pass, subscribe to property chang
 | Opt a subtree out of the system scale | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED)` |
 | Force a view to always track system scale | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::ENABLED)` |
 | Reset to default inherited behavior | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::INHERIT)` |
-| Query a view's effective scale (framework use) | `viewImpl.GetEffectiveLayoutScale()` |
+| Query a view's effective scale (framework use) | `Extension::View::GetEffectiveLayoutScale(viewImpl)` |
 
 <br/>
 

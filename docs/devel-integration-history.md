@@ -374,13 +374,15 @@ UTC는 deprecated 멤버도 계속 검증하고, Public API만 사용하는 text
 | `ViewImpl::SetUiScalePolicy(policy)` | `Ui::Extension::View::SetUiScalePolicy(Ui::View::DownCast(Self()), policy)` |
 | `ViewImpl::GetUiScalePolicy()` | `Ui::Extension::View::GetUiScalePolicy(Ui::View::DownCast(Self()))` |
 
-## ViewImpl::GetEffectiveScale() → GetEffectiveLayoutScale()
+## ViewImpl::GetEffectiveScale() → Extension::View::GetEffectiveLayoutScale()
 
 `ViewImpl::GetEffectiveScale()`은 deprecated되었으며 문서 태그만 바뀌었다. 릴리스된 심볼과
-시그니처는 그대로 유지되고, 같은 값을 반환하는 새 non-virtual 멤버
-`ViewImpl::GetEffectiveLayoutScale()`로 위임한다. 라이브러리, 테스트, 샘플, 문서는 새 이름을
-사용한다.
+시그니처는 그대로 유지되고 같은 값을 반환한다. 대체 API는 extension API
+`Extension::View::GetEffectiveLayoutScale(const ViewImpl&)`(`dali-ui-foundation/extension-api/view.h`)이다.
+`ViewImpl` 하위 클래스 안에서는 `Ui::Extension::View::GetEffectiveLayoutScale(*this)`로 호출한다(한정자
+없는 `Extension::`은 `CustomActorImpl::Extension`을 가리킨다). 라이브러리, 테스트, 샘플, 문서는 새
+함수를 사용한다.
 
 | Before (deprecated) | After |
 |---|---|
-| `ViewImpl::GetEffectiveScale()` | `ViewImpl::GetEffectiveLayoutScale()` |
+| `ViewImpl::GetEffectiveScale()` | `Extension::View::GetEffectiveLayoutScale(viewImpl)` |

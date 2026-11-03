@@ -32,6 +32,7 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-property-handler.h>
 #include <dali-ui-foundation/internal/controls/text-controls/input-field-accessible.h>
@@ -1078,7 +1079,7 @@ void InputFieldImpl::UpdateInlineReplacementData(const Vector2& ownerSize, const
                        Vector2::ZERO,
                        contentSize,
                        contentSize,
-                       GetEffectiveLayoutScale(),
+                       Ui::Extension::View::GetEffectiveLayoutScale(*this),
                        source.sourceRevision);
 }
 
@@ -2092,7 +2093,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
 {
   mMeasureInvalidated = false;
 
-  const float effectiveScale = GetEffectiveLayoutScale();
+  const float effectiveScale = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   if(SetTextUiScale(effectiveScale))
   {
     mController->InvalidateFontData();

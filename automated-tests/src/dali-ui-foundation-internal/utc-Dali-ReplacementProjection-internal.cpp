@@ -28,6 +28,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
@@ -1997,7 +1998,7 @@ int UtcDaliReplacementEditableVisualLayerIgnoresWindowScaleP(void)
     application.SendNotification();
     application.Render();
 
-    DALI_TEST_EQUALS(Dali::Ui::GetImpl(data.visualLayer).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Dali::Ui::Extension::View::GetEffectiveLayoutScale(Dali::Ui::GetImpl(data.visualLayer)), 1.0f, 0.001f, TEST_LOCATION);
     DALI_TEST_EQUALS(data.visualLayer.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, 0.001f, TEST_LOCATION);
   }
 

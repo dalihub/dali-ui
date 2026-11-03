@@ -26,6 +26,7 @@
 #include <string>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h> // public GetImpl(Ui::View&)
 
@@ -355,7 +356,7 @@ void CheckBoxImpl::OnSceneConnection(int depth)
 
 MeasuredSize CheckBoxImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  float s = GetEffectiveLayoutScale();
+  float s = Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   Insets padding = GetPadding();
   float  visPadW = static_cast<float>(padding.start + padding.end) * s;
@@ -442,7 +443,7 @@ LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
 {
   // Self geometry (x/y/width/height) is applied centrally in ViewImpl::Arrange
   // from this method's returned LayoutRect; no actor-level setters needed here.
-  float  s       = GetEffectiveLayoutScale();
+  float  s       = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   Insets padding = GetPadding();
 
   // Children are arranged in the LOGICAL (left-to-right) frame and NOTHING is mirrored

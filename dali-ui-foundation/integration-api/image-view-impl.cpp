@@ -28,6 +28,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
@@ -71,7 +72,7 @@ Vector2 GetInitialImageSize(Actor& actor)
   const float  width   = std::min(std::max(requestedWidth, viewImpl.GetMinimumWidth()), viewImpl.GetMaximumWidth());
   const float  height  = std::min(std::max(requestedHeight, viewImpl.GetMinimumHeight()), viewImpl.GetMaximumHeight());
   const Insets padding = viewImpl.GetPadding();
-  return Vector2(width - padding.start - padding.end, height - padding.top - padding.bottom) * viewImpl.GetEffectiveLayoutScale();
+  return Vector2(width - padding.start - padding.end, height - padding.top - padding.bottom) * Ui::Extension::View::GetEffectiveLayoutScale(viewImpl);
 }
 
 BaseHandle CreateImageView()
@@ -570,7 +571,7 @@ void ImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
       float h    = self.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       if(w > 0.0f && h > 0.0f)
       {
-        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding(), GetEffectiveLayoutScale());
+        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding(), Ui::Extension::View::GetEffectiveLayoutScale(*this));
       }
       else
       {
@@ -897,7 +898,7 @@ void ImageViewImpl::SetImageColorInternal(const Vector4& color)
 MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
-  float s    = GetEffectiveLayoutScale();
+  float s    = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 

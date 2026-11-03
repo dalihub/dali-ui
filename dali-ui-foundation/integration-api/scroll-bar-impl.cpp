@@ -30,6 +30,7 @@
 #include <cmath>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/scroll-bar-impl.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
@@ -440,7 +441,7 @@ void ScrollBarImpl::UpdatePosition(const Vector2& position)
   // mViewPortWidth/Height are VISUAL units (set from the ScrollView's actor size).
   // AbsoluteLayoutParams expects NATURAL units, so convert by dividing by the
   // effective scale.  At scale==1.0 this is a no-op.
-  float scale             = GetEffectiveLayoutScale();
+  float scale             = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   float naturalSelfWidth  = ((mViewPortWidth > 0.0f) ? mViewPortWidth : Self().GetProperty<float>(Actor::Property::SIZE_WIDTH)) / scale;
   float naturalSelfHeight = ((mViewPortHeight > 0.0f) ? mViewPortHeight : Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT)) / scale;
 
@@ -557,7 +558,7 @@ void ScrollBarImpl::CreateVBar()
 
   // Place at right edge with offset using AbsoluteLayoutParams (natural units).
   Insets padding          = GetPadding();
-  float  scale            = GetEffectiveLayoutScale();
+  float  scale            = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   float  naturalSelfWidth = ((mViewPortWidth > 0.0f) ? mViewPortWidth : Self().GetProperty<float>(Actor::Property::SIZE_WIDTH)) / scale;
   float  contentWidth     = naturalSelfWidth - padding.start - padding.end;
   float  xPos             = contentWidth - mBarThickness - mBarOffset;
@@ -574,7 +575,7 @@ void ScrollBarImpl::UpdateVBarSize(float ratio)
     return;
 
   Insets padding           = GetPadding();
-  float  scale             = GetEffectiveLayoutScale();
+  float  scale             = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   float  naturalSelfHeight = ((mViewPortHeight > 0.0f) ? mViewPortHeight : Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT)) / scale;
   float  contentHeight     = naturalSelfHeight - padding.top - padding.bottom;
   float  sizeHeight        = std::max(GetBarMinSize(), std::round(contentHeight * ratio));
@@ -616,7 +617,7 @@ void ScrollBarImpl::CreateHBar()
 
   // Place at bottom edge with offset using AbsoluteLayoutParams (natural units).
   Insets padding           = GetPadding();
-  float  scale             = GetEffectiveLayoutScale();
+  float  scale             = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   float  naturalSelfHeight = ((mViewPortHeight > 0.0f) ? mViewPortHeight : Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT)) / scale;
   float  contentHeight     = naturalSelfHeight - padding.top - padding.bottom;
   float  yPos              = contentHeight - mBarThickness - mBarOffset;
@@ -633,7 +634,7 @@ void ScrollBarImpl::UpdateHBarSize(float ratio)
     return;
 
   Insets padding          = GetPadding();
-  float  scale            = GetEffectiveLayoutScale();
+  float  scale            = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   float  naturalSelfWidth = ((mViewPortWidth > 0.0f) ? mViewPortWidth : Self().GetProperty<float>(Actor::Property::SIZE_WIDTH)) / scale;
   float  contentWidth     = naturalSelfWidth - padding.start - padding.end;
   float  sizeWidth        = std::max(GetBarMinSize(), std::round(contentWidth * ratio));

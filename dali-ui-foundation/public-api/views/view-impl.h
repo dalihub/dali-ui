@@ -362,23 +362,14 @@ public: // Non-virtual API (safe to reorder / extend)
   UiScalePolicy GetUiScalePolicy() const;
 
   /**
-   * @brief Gets the effective layout scale of this view.
-   *
-   * The factor the layout pass multiplies this view's natural lengths by, as
-   * Extension::LayoutScaleManager describes it; 1.0 while scaling is disabled through
-   * Extension::LayoutScaleManager::SetScalable(false). Computed lazily and cached while the view is
-   * on a scene; off a scene it is computed on every call, so it always reflects the current
-   * UI scale, switch and window.
-   * @return The effective layout scale factor
-   */
-  float GetEffectiveLayoutScale() const;
-
-  /**
    * @brief Gets the effective scale for this view.
    *
-   * @deprecated Use GetEffectiveLayoutScale() instead.
+   * @deprecated Use Ui::Extension::View::GetEffectiveLayoutScale() instead. In a ViewImpl
+   * subclass replace GetEffectiveScale() with Ui::Extension::View::GetEffectiveLayoutScale(*this).
+   * Write the Ui:: qualifier: an unqualified Extension:: names CustomActorImpl::Extension there.
    *
-   * @return The effective scale factor, always the value GetEffectiveLayoutScale() returns
+   * @return The effective scale factor, always the value
+   * Ui::Extension::View::GetEffectiveLayoutScale() returns
    */
   float GetEffectiveScale() const;
 

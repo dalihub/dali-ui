@@ -35,6 +35,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
@@ -1142,7 +1143,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     Ui::View owner = Ui::View::DownCast(mControl.GetHandle());
     // Match Controller::SetUiScale: sub-epsilon changes do not schedule a
     // new text layout and must not strand a manual request.
-    if(!owner || Dali::Equals(GetImpl(owner).GetEffectiveLayoutScale(), parameters.decorationUiScale, Math::MACHINE_EPSILON_1000))
+    if(!owner || Dali::Equals(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(owner)), parameters.decorationUiScale, Math::MACHINE_EPSILON_1000))
     {
       return true;
     }
@@ -1715,7 +1716,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
          mController->IsAsyncRendering() && currentReplacement &&
          currentReveal->blurRadius > 0.0f && currentReveal->blurDurationRatio > 0.0f &&
          options.controlSize == textControlSize &&
-         options.radius == ResolveRevealBlurRadius(currentReveal->blurRadius * GetImpl(owner).GetEffectiveLayoutScale()) &&
+         options.radius == ResolveRevealBlurRadius(currentReveal->blurRadius * Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(owner))) &&
          options.durationRatio == currentReveal->blurDurationRatio &&
          options.stagger == currentReveal->sequenceStaggerRatio &&
          options.perLine == (currentReveal->sequence == Text::Internal::Reveal::Sequence::PER_LINE) &&
@@ -3277,7 +3278,7 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
     return false;
   }
   const auto padding        = ownerView.GetPadding();
-  const auto effectiveScale = GetImpl(ownerView).GetEffectiveLayoutScale();
+  const auto effectiveScale = Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(ownerView));
   // Capture quality and display radius from this revision, not a later Label
   // getter during runtime allocation (which can reenter or publish asynchronously).
   const auto  blurSettings = ResolveRuntimeRevealBlurSettings(data->blurMode, data->blurRadius * effectiveScale);
@@ -3300,7 +3301,7 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
            mTextShaderFeatureCache.GetShaderType() == features && mController->GetUiScale() == uiScale &&
            mController->GetRenderScale() == renderScale && mControl.GetHandle() == actor &&
            Dali::Integration::SceneHolder::Get(actor) == scene && actor.GetProperty<Vector3>(Actor::Property::SIZE) == ownerSize &&
-           ownerView.GetPadding() == padding && GetImpl(ownerView).GetEffectiveLayoutScale() == effectiveScale &&
+           ownerView.GetPadding() == padding && Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(ownerView)) == effectiveScale &&
            mRendererList.size() == 1u && mRendererList.front() == foreground;
   };
   if(options.radius == 0u || options.radius != ResolveRevealBlurRadius(static_cast<float>(options.radius)) || maximum <= 0 ||

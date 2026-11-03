@@ -201,7 +201,7 @@ while the view is on a scene and computes it on every read off scene. A view wit
 View parent that leaves the scene (removed from its window, under a plain `Actor` that is
 removed, or still in it when the window is destroyed) drops what it memoized there,
 together with its whole subtree's: `ViewDataImpl::OnViewSceneDisconnection()` runs the
-same cache-only subtree reset that reconnection runs. `GetEffectiveLayoutScale()` and
+same cache-only subtree reset that reconnection runs. `Extension::View::GetEffectiveLayoutScale()` and
 `View::Measure()` on a detached or never-added view therefore use no window scale and
 follow `SetUiScale()` and `SetScalable()` at once, and adding the view to a window applies
 that window's scale again. `View::Measure()` does so for a container too. Off a scene every
@@ -398,7 +398,7 @@ implementations.
 
 During Measure the parent passes the width and height constraints each as a single **sign-encoded `float`** — the public API carries one scalar per axis; internally the framework pairs it with a measure mode (see *Measure modes* below):
 
-- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `GetEffectiveLayoutScale()` to obtain the natural-unit budget before computing sizes. Under the default mode (at-most) this budget acts as an **at-most ceiling**.
+- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `Ui::Extension::View::GetEffectiveLayoutScale(*this)` to obtain the natural-unit budget before computing sizes. Under the default mode (at-most) this budget acts as an **at-most ceiling**.
 - **Negative value** — a sentinel carrying intent, not a size: `WRAP_CONTENT` (-1.0f) or `MATCH_PARENT` (-2.0f).
 
 Before `OnMeasure` runs, `ViewImpl::Measure` reconciles the incoming constraint against this view's min/max bounds: `effective = std::min(std::max(constraint, Minimum), Maximum)` -- on every axis, an axis measured exactly included (see *Measure modes*). With the default `Minimum` of `0`, a negative sentinel constraint is therefore **floored to 0** — so the budget that actually reaches `OnMeasure` is always `>= 0`. (An axis is left "unbounded" not by a negative value but by passing a large positive budget such as `FLT_MAX`, as ScrollView does on its scrollable axes.)

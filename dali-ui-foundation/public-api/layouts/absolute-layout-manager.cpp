@@ -23,6 +23,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
@@ -164,7 +165,7 @@ MeasuredSize MeasureAbsoluteModeAware(std::vector<View>& children, float content
     entry.yProportional             = HasFlag(flags, AbsoluteLayoutFlags::Y_PROPORTIONAL);
     entry.widthProportional         = HasFlag(flags, AbsoluteLayoutFlags::WIDTH_PROPORTIONAL);
     entry.heightProportional        = HasFlag(flags, AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL);
-    entry.childScale                = childImpl.GetEffectiveLayoutScale();
+    entry.childScale                = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
 
     // Today's extent resolution.
     entry.w = entry.spec.width;
@@ -261,7 +262,7 @@ MeasuredSize MeasureAbsoluteModeAware(std::vector<View>& children, float content
   }
 
   const Insets padding = view.GetPadding();
-  const float  s       = view.GetEffectiveLayoutScale();
+  const float  s       = Ui::Extension::View::GetEffectiveLayoutScale(view);
 
   // Step 2a: the width is resolved. Only a layout with a width of its own -- what its children that
   // are not MATCH_PARENT or proportional on the width and its own minimum give it, not its
@@ -440,7 +441,7 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       continue;
     }
 
-    float               childScale = childImpl.GetEffectiveLayoutScale();
+    float               childScale = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     auto*               params     = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
     LayoutRect          bounds     = GetChildBounds(params);
     AbsoluteLayoutFlags flags      = GetChildFlags(params);
@@ -594,7 +595,7 @@ void AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
       continue;
     }
 
-    float               childScale      = childImpl.GetEffectiveLayoutScale();
+    float               childScale      = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     auto*               params          = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
     LayoutRect          childBoundsSpec = GetChildBounds(params);
     AbsoluteLayoutFlags flags           = GetChildFlags(params);

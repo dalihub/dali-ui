@@ -373,6 +373,19 @@ public:
   void          SetUiScalePolicy(UiScalePolicy policy);
   UiScalePolicy GetUiScalePolicy() const;
   float         GetEffectiveLayoutScale() const;
+
+  /**
+   * @brief Returns the effective layout scale of @p viewImpl; see GetEffectiveLayoutScale().
+   *
+   * The body of Extension::View::GetEffectiveLayoutScale(), and how ViewDataImpl reads the scale
+   * of another view. Every layout manager reads it per child; unlike Get(), it adds no event-thread
+   * assert and only one out-of-line accessor call to the cached read.
+   *
+   * @param[in] viewImpl The view implementation
+   * @return The effective layout scale of @p viewImpl
+   */
+  static float GetEffectiveLayoutScaleOf(const ViewImpl& viewImpl);
+
   /**
    * @brief Sets how the PER-WINDOW term of this view's effective scale is resolved.
    *

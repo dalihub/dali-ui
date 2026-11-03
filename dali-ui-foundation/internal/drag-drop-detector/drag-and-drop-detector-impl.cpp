@@ -31,6 +31,7 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h> // VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, Ui::GetImpl()
 
 namespace DALI_NAMESPACE
@@ -1143,7 +1144,7 @@ Vector2 DragAndDropDetector::ComputePreviewRequestedPosition() const
   {
     return mPreviewLocalPosition;
   }
-  return ToRequestedUnits(mPreviewLocalPosition, Ui::GetImpl(mSessionDragPreview).GetEffectiveLayoutScale());
+  return ToRequestedUnits(mPreviewLocalPosition, Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(mSessionDragPreview)));
 }
 
 void DragAndDropDetector::ApplyDefaultDragPreviewPosition(const Vector2& requestedPosition)

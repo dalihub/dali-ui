@@ -27,6 +27,7 @@
 #include <locale>
 
 // INTERNAL
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
@@ -835,7 +836,7 @@ void VisualBaseImpl::Process(bool postProcessor)
       Vector2 viewSize(owner.GetSize());
       auto&   viewImpl       = GetImpl(owner);
       Insets  viewPadding    = viewImpl.GetPadding();
-      float   effectiveScale = viewImpl.GetEffectiveLayoutScale();
+      float   effectiveScale = Ui::Extension::View::GetEffectiveLayoutScale(viewImpl);
       ApplyFittingModeInternal(viewSize, viewPadding, effectiveScale);
     }
   }

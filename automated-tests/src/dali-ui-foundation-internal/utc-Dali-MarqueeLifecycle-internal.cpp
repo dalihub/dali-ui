@@ -34,6 +34,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
@@ -1771,14 +1772,14 @@ void FocusScaleOnly(UiTestApplication& app, int ancestry, float scale)
   const auto  completed = test.completed;
   const auto  natural   = test.label.GetNaturalSize();
   const auto  size      = test.label.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
-  const float effective = Ui::GetImpl(test.label).GetEffectiveLayoutScale();
+  const float effective = Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(test.label));
   test.Focus(true);
   test.Advance(150u);
   DALI_TEST_CHECK(test.Take().empty());
   test.CheckScale(scale);
   DALI_TEST_EQUALS(test.label.GetCurrentProperty<Vector3>(Actor::Property::SIZE), size, 0.0001f, TEST_LOCATION);
   DALI_TEST_EQUALS(test.label.GetNaturalSize(), natural, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(Ui::GetImpl(test.label).GetEffectiveLayoutScale(), effective, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(test.label)), effective, 0.0001f, TEST_LOCATION);
   DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
   DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == texture);
   DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
@@ -3298,7 +3299,7 @@ void CheckMarqueeUiScaleManualSnapshot(bool measure)
   DALI_TEST_EQUALS(test.completed, completed + (measure ? 0u : 1u), TEST_LOCATION);
   if(!measure)
   {
-    DALI_TEST_EQUALS(Ui::GetImpl(test.label).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(test.label)), 2.0f, TEST_LOCATION);
     // Before measure the accepted geometry and controller still use scale 1.
     CheckScaledMarqueeMotion(test, 1.0f, false);
   }

@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -451,7 +452,7 @@ int UtcDaliTextDecoratorDecorationsIgnoreWindowScaleP(void)
   plain.SetRequestedWidth(10.0f);
   plain.SetRequestedHeight(10.0f);
   application.GetScene().Add(plain);
-  DALI_TEST_EQUALS(GetImpl(plain).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(plain)), 2.0f, 0.001f, TEST_LOCATION);
 
   Actor root = Actor::New();
   root.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
@@ -517,7 +518,7 @@ int UtcDaliTextDecoratorDecorationsIgnoreWindowScaleP(void)
   DALI_TEST_EQUALS(views.size(), 6u, TEST_LOCATION);
   for(Ui::View& view : views)
   {
-    DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(view)), 1.0f, 0.001f, TEST_LOCATION);
     // Pins each creation site's own policy line, the markers included: a marker inherits
     // its handle's opt-out, so the 1.0 above alone cannot tell a dropped marker line.
     DALI_TEST_CHECK(Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(view)).GetWindowScalePolicy() == Dali::Ui::Internal::WindowScalePolicy::DISABLED);

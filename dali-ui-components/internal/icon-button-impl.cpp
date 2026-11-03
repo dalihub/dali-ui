@@ -1,5 +1,6 @@
 #include <dali-ui-components/internal/icon-button-impl.h>
 #include <dali-ui-components/internal/styles/style-validation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <algorithm>
@@ -23,7 +24,7 @@ MeasuredSize MeasureIcon(Ui::View view, float widthConstraint, float heightConst
   const bool    ready              = image.GetLoadingStatus() == Ui::Visual::ResourceStatus::READY;
   const bool    naturalWidthValid  = ready && std::isfinite(natural.x) && natural.x > 0.0f;
   const bool    naturalHeightValid = ready && std::isfinite(natural.y) && natural.y > 0.0f;
-  const float   scale              = Ui::GetImpl(view).GetEffectiveLayoutScale();
+  const float   scale              = Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(view));
   const float   requestedWidth     = view.GetRequestedWidth();
   const float   requestedHeight    = view.GetRequestedHeight();
   const bool    widthFixed         = requestedWidth >= 0.0f || requestedWidth == MATCH_PARENT;

@@ -18,6 +18,7 @@
 
 #include <algorithm>
 
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/animation/duration.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
@@ -288,7 +289,7 @@ void ToastImpl::RelayoutActivePresentation()
 void ToastImpl::ArrangePresentationAt(float y)
 {
   Ui::View    self  = Ui::View::DownCast(Self());
-  const float scale = std::max(0.001f, GetEffectiveLayoutScale());
+  const float scale = std::max(0.001f, Ui::Extension::View::GetEffectiveLayoutScale(*this));
   self.SetRequestedX(mPresentationX / scale);
   self.SetRequestedY(y / scale);
   self.SetRequestedWidth(mPresentationWidth / scale);
@@ -307,7 +308,7 @@ void ToastImpl::UpdatePresentationGeometry()
   const PositionSize bounds       = mWindow.GetPositionSize();
   const float        windowWidth  = std::max(0.0f, static_cast<float>(bounds.width));
   const float        windowHeight = std::max(0.0f, static_cast<float>(bounds.height));
-  const float        scale        = std::max(0.001f, GetEffectiveLayoutScale());
+  const float        scale        = std::max(0.001f, Ui::Extension::View::GetEffectiveLayoutScale(*this));
   mAppliedScale                   = scale;
   const Insets padding            = mStyle.GetPadding();
   const bool   hasIcon            = mIcon && !mIconResourceUrl.Empty();
@@ -555,7 +556,7 @@ void ToastImpl::OnEffectiveScalePropertySet(Dali::Handle, Dali::Property::Index 
 void ToastImpl::OnScaleRelayoutIdle()
 {
   mScaleRelayoutIdle = nullptr;
-  if(GetEffectiveLayoutScale() == mAppliedScale)
+  if(Ui::Extension::View::GetEffectiveLayoutScale(*this) == mAppliedScale)
   {
     return;
   }

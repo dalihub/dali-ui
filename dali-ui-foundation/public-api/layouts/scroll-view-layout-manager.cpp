@@ -23,6 +23,7 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
@@ -146,7 +147,7 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
   Integration::ScrollViewImpl*  scrollImpl = dynamic_cast<Integration::ScrollViewImpl*>(view);
   const uint32_t                count      = GetChildViewCount(view);
-  float                         s          = view->GetEffectiveLayoutScale();
+  float                         s          = Ui::Extension::View::GetEffectiveLayoutScale(*view);
   const Internal::ViewDataImpl& viewData   = Internal::ViewDataImpl::Get(*view);
   const bool                    modeAware  = (viewData.GetMeasureModeParent() == Internal::MeasureModeParent::SCROLL);
 

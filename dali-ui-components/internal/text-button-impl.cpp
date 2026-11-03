@@ -25,6 +25,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -226,7 +227,7 @@ void TextButtonImpl::ApplyInitialStyle(TextButtonStyle style)
 
 MeasuredSize TextButtonImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  float s = GetEffectiveLayoutScale();
+  float s = Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   Insets padding = GetPadding();
   float  visPadW = static_cast<float>(padding.start + padding.end) * s;
@@ -277,7 +278,7 @@ MeasuredSize TextButtonImpl::OnMeasure(float widthConstraint, float heightConstr
 
 LayoutRect TextButtonImpl::OnArrange(const LayoutRect& bounds)
 {
-  float  s       = GetEffectiveLayoutScale();
+  float  s       = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   Insets padding = GetPadding();
 
   LayoutRect contentBounds;

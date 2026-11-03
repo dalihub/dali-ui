@@ -10,7 +10,7 @@ dali-ui는 세 가지 독립적인 스케일 메커니즘을 제공하며, 이�
 
 이 문서는 **동적 스케일** 시스템(`UiScale`)과, 그 위에 독립적으로 곱해지는 **윈도우별 스케일**을 다룹니다.
 
-런타임 스케일 API인 `Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()`(`dali-ui-foundation/extension-api/view.h`)는 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API입니다. 디스플레이 스케일을 적용하는 시스템·접근성 핸들러나 한 윈도우의 콘텐츠 스케일을 정하는 모듈이 사용합니다. 앱 개발자용 공개 API 목록에는 포함되지 않지만 공개 API와 함께 설치되며 그대로 사용할 수 있습니다. 이 문서의 `LayoutScaleManager`는 `Dali::Ui::Extension::LayoutScaleManager`입니다.
+런타임 스케일 API인 `Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()`, `Extension::View::GetEffectiveLayoutScale()`(`dali-ui-foundation/extension-api/view.h`)는 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API입니다. 디스플레이 스케일을 적용하는 시스템·접근성 핸들러나 한 윈도우의 콘텐츠 스케일을 정하는 모듈이 사용합니다. 앱 개발자용 공개 API 목록에는 포함되지 않지만 공개 API와 함께 설치되며 그대로 사용할 수 있습니다. 이 문서의 `LayoutScaleManager`는 `Dali::Ui::Extension::LayoutScaleManager`입니다.
 
 <br/>
 
@@ -18,7 +18,7 @@ dali-ui는 세 가지 독립적인 스케일 메커니즘을 제공하며, 이�
 
 트리 내 모든 뷰는 **유효 스케일(effective scale)** 을 보유합니다. 이 단일 `float` 배율은 Measure 및 Arrange 패스에서 모든 레이아웃 크기(사이즈, 마진, 패딩, 위치)에 곱해집니다.
 
-**시스템 스케일**(UI 스케일)은 `LayoutScaleManager`가 보유하는 프로세스 전역 스케일이며, 보통 OS나 접근성 설정 핸들러가 `LayoutScaleManager::SetUiScale()`로 설정합니다. `LayoutScaleManager::GetUiScale()`은 이 저장값을 반환하고, 각 뷰의 유효 스케일은 `ViewImpl::GetEffectiveLayoutScale()`로 조회합니다.
+**시스템 스케일**(UI 스케일)은 `LayoutScaleManager`가 보유하는 프로세스 전역 스케일이며, 보통 OS나 접근성 설정 핸들러가 `LayoutScaleManager::SetUiScale()`로 설정합니다. `LayoutScaleManager::GetUiScale()`은 이 저장값을 반환하고, 각 뷰의 유효 스케일은 `Extension::View::GetEffectiveLayoutScale()`로 조회합니다.
 
 유효 스케일은 서로 독립적인 두 항의 곱입니다.
 
@@ -45,7 +45,7 @@ LayoutScaleManager (시스템 스케일 1.5) + 윈도우 스케일 2.0
         └── Badge             effectiveScale = 3.0  (ENABLED — 시스템 스케일 직접 추적)
 ```
 
-`LayoutScaleManager::SetUiScale()`이 호출되면, 등록된 모든 레이아웃 루트가 유효 스케일을 재계산하고 자동으로 전체 재레이아웃을 트리거합니다. 윈도우 스케일 변경도 같은 일을 하지만, 해당 윈도우의 루트에 대해서만 수행합니다. 씬에 없는 뷰(추가된 적이 없거나 제거된 뷰)는 등록된 루트에 속하지 않아 재레이아웃되지 않지만, 유효 스케일을 캐시하지도 않습니다. 그 뷰의 `GetEffectiveLayoutScale()`과 `View::Measure()`는 새 UI 스케일이나 스위치 상태를 바로 따르고, 윈도우에 추가되면 현재 스케일로 배치됩니다.
+`LayoutScaleManager::SetUiScale()`이 호출되면, 등록된 모든 레이아웃 루트가 유효 스케일을 재계산하고 자동으로 전체 재레이아웃을 트리거합니다. 윈도우 스케일 변경도 같은 일을 하지만, 해당 윈도우의 루트에 대해서만 수행합니다. 씬에 없는 뷰(추가된 적이 없거나 제거된 뷰)는 등록된 루트에 속하지 않아 재레이아웃되지 않지만, 유효 스케일을 캐시하지도 않습니다. 그 뷰의 `Extension::View::GetEffectiveLayoutScale()`과 `View::Measure()`는 새 UI 스케일이나 스위치 상태를 바로 따르고, 윈도우에 추가되면 현재 스케일로 배치됩니다.
 
 <br/>
 
@@ -118,7 +118,7 @@ LayoutScaleManager::Get().SetWindowScale(window, 1.0f);   // 기본값으로 복
 
 윈도우를 파괴하기 전에 리셋할 필요는 없습니다. 파괴된 윈도우의 레코드는 자동으로 제거되며, 이후 생성된 윈도우에 적용되는 일도 없습니다.
 
-윈도우 스케일은 뷰가 그 윈도우 안에 있는 동안에만 적용됩니다. 윈도우에서 제거된 뷰는 하위 트리 전체와 함께 윈도우 스케일 항을 잃으며, 애플리케이션이 핸들을 가진 채 윈도우가 파괴된 뷰도 마찬가지입니다. 다시 윈도우에 추가될 때까지 `GetEffectiveLayoutScale()`과 `View::Measure()`는 현재 UI 스케일 항만 사용하고(분리된 동안의 `SetUiScale()`·`SetScalable()`도 바로 따릅니다), 윈도우에 추가하면 그 윈도우의 스케일이 다시 적용됩니다.
+윈도우 스케일은 뷰가 그 윈도우 안에 있는 동안에만 적용됩니다. 윈도우에서 제거된 뷰는 하위 트리 전체와 함께 윈도우 스케일 항을 잃으며, 애플리케이션이 핸들을 가진 채 윈도우가 파괴된 뷰도 마찬가지입니다. 다시 윈도우에 추가될 때까지 `Extension::View::GetEffectiveLayoutScale()`과 `View::Measure()`는 현재 UI 스케일 항만 사용하고(분리된 동안의 `SetUiScale()`·`SetScalable()`도 바로 따릅니다), 윈도우에 추가하면 그 윈도우의 스케일이 다시 적용됩니다.
 
 > **참고:** `SetWindowScale()`이 받는 값의 범위는 `SetUiScale()`과 같습니다. 양수이고 유한하며 정상수(`>= FLT_MIN`)여야 합니다. `NaN`, 무한대, 0, 음수, 비정상수(subnormal)와 빈 `Window`는 모두 무시되고 현재 윈도우 스케일이 유지되며 오류가 로그에 기록됩니다. 레이아웃이 유효 스케일로 나눗셈을 수행하기 때문에 이렇게 엄격합니다.
 
@@ -138,7 +138,7 @@ LayoutScaleManager::Get().SetWindowScale(window, 1.0f);   // 기본값으로 복
 | `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | 없음. 라이브러리가 레이아웃 루트를 직접 등록합니다 |
 | 없음 | `GetWindowScale(Window)`, `SetWindowScale(Window, float)` |
 
-`ViewImpl::GetEffectiveScale()`도 함께 deprecated되었습니다. 같은 값을 반환하는 `ViewImpl::GetEffectiveLayoutScale()`을 사용합니다.
+`ViewImpl::GetEffectiveScale()`도 함께 deprecated되었습니다. 같은 값을 반환하는 `Extension::View::GetEffectiveLayoutScale()`을 사용합니다.
 
 <br/>
 
@@ -250,7 +250,7 @@ effectiveScale = windowScale × uiScale = 1.25 × 2.0 = 2.5
 
 `ViewImpl`을 상속해 커스텀 뷰를 구현한 경우, 픽셀 단위 값을 내부에 캐시하고 있다면 스케일 변경 시 해당 캐시를 무효화해야 합니다. `SetUiScale()`이 호출되면 루트에서 `InvalidateMeasure()`가 자동으로 실행되므로, `OnMeasure` / `OnArrange`를 오버라이드한 뷰는 매 레이아웃 패스마다 새로운 constraint와 `effectiveScale`을 받습니다 — 별도 처리는 필요 없습니다.
 
-레이아웃 패스 외부에서 값을 캐시하는 뷰는 프로퍼티 변경 알림을 구독하거나, `OnMeasure` 내에서 `GetEffectiveLayoutScale()`을 지연 호출 방식으로 사용하세요.
+레이아웃 패스 외부에서 값을 캐시하는 뷰는 프로퍼티 변경 알림을 구독하거나, `OnMeasure` 내에서 `Ui::Extension::View::GetEffectiveLayoutScale(*this)`를 지연 호출하세요(`ViewImpl` 하위 클래스 안에서는 `Ui::` 한정자를 붙입니다. 한정자 없는 `Extension::`은 `CustomActorImpl::Extension`을 가리킵니다).
 
 <br/>
 
@@ -270,7 +270,7 @@ effectiveScale = windowScale × uiScale = 1.25 × 2.0 = 2.5
 | 서브트리를 시스템 스케일에서 제외 | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED)` |
 | 특정 뷰를 항상 시스템 스케일에 추적 | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::ENABLED)` |
 | 기본 상속 동작으로 초기화 | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::INHERIT)` |
-| 뷰의 유효 스케일 조회 (프레임워크용) | `viewImpl.GetEffectiveLayoutScale()` |
+| 뷰의 유효 스케일 조회 (프레임워크용) | `Extension::View::GetEffectiveLayoutScale(viewImpl)` |
 
 <br/>
 

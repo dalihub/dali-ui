@@ -1680,7 +1680,7 @@ private:
 
         // The box is laid out at its effective scale -- this window's scale times the
         // system scale -- so report the box's own value, with both terms beside it.
-        std::string s = "상태: 부모에 연결됨 — Scale x" + Fmt(GetImpl(mScaleChangeBox).GetEffectiveLayoutScale()) +
+        std::string s = "상태: 부모에 연결됨 — Scale x" + Fmt(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(mScaleChangeBox))) +
                         " 적용됨 (System x" + Fmt(Ui::Extension::LayoutScaleManager::Get().GetUiScale()) +
                         " * Window x" + Fmt(Ui::Extension::LayoutScaleManager::Get().GetWindowScale(mWindow)) + ")";
         mHStatusLabel.SetText(s.c_str());

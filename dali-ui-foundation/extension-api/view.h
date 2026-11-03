@@ -416,6 +416,32 @@ DALI_UI_API void SetUiScalePolicy(Ui::View view, UiScalePolicy policy);
  */
 DALI_UI_API UiScalePolicy GetUiScalePolicy(Ui::View view);
 
+/**
+ * @brief Returns the effective layout scale of the view.
+ *
+ * The factor the layout pass multiplies the view's natural lengths by: the window scale
+ * of the view's Window times the UI-scale term its UiScalePolicy selects, as
+ * Extension::LayoutScaleManager describes; 1.0 while scaling is disabled through
+ * Extension::LayoutScaleManager::SetScalable(false). A view in no Window has no window
+ * term. The value is computed lazily and cached while the view is on a scene; off a scene
+ * it is computed on every call, so it always reflects the current UI scale, switch and
+ * window.
+ *
+ * A custom view multiplies each natural length it supplies -- a size, offset, radius,
+ * thickness or spacing -- by this value exactly once; the constraints OnMeasure() receives
+ * and the bounds OnArrange() receives already include it. Inside a ViewImpl subclass call
+ * it as Ui::Extension::View::GetEffectiveLayoutScale(*this): there an unqualified
+ * Extension:: names CustomActorImpl::Extension.
+ *
+ * This replaces the deprecated ViewImpl::GetEffectiveScale(). It is an extension API for
+ * platform integrators and module providers, and not part of the application-facing
+ * public API.
+ *
+ * @param[in] viewImpl The view implementation
+ * @return The effective layout scale factor
+ */
+DALI_UI_API float GetEffectiveLayoutScale(const ViewImpl& viewImpl);
+
 } // namespace View
 } // namespace Extension
 } // namespace Ui

@@ -198,7 +198,7 @@ void ProgressBarImpl::ApplyInitialStyle(ProgressBarStyle style)
     bar.SetBackgroundColor(mTrailColor);
   }
 
-  const float  scale   = GetEffectiveLayoutScale();
+  const float  scale   = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   const Insets padding = GetPadding();
   mTrackBounds         = LayoutRect(padding.start * scale, padding.top * scale, 0.0f, 0.0f);
   UpdateLocalGeometry();
@@ -323,7 +323,7 @@ Vector2 ProgressBarImpl::GetDividerPosition(uint32_t index) const
 
 MeasuredSize ProgressBarImpl::OnMeasure(float, float)
 {
-  const float  scale          = GetEffectiveLayoutScale();
+  const float  scale          = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   const Insets padding        = GetPadding();
   const float  naturalWidth   = (padding.start + padding.end) * scale;
   const float  naturalHeight  = (padding.top + padding.bottom + mTrackThickness) * scale;
@@ -334,7 +334,7 @@ MeasuredSize ProgressBarImpl::OnMeasure(float, float)
 
 LayoutRect ProgressBarImpl::OnArrange(const LayoutRect& bounds)
 {
-  const float  scale                        = GetEffectiveLayoutScale();
+  const float  scale                        = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   const Insets padding                      = GetPadding();
   const float  contentX                     = padding.start * scale;
   const float  contentY                     = padding.top * scale;
@@ -443,7 +443,7 @@ void ProgressBarImpl::UpdateLocalGeometry()
   if(mDividerStepCount > 1)
   {
     const float stepWidth    = trackWidth / static_cast<float>(mDividerStepCount);
-    const float dividerWidth = DIVIDER_WIDTH * GetEffectiveLayoutScale();
+    const float dividerWidth = DIVIDER_WIDTH * Ui::Extension::View::GetEffectiveLayoutScale(*this);
     for(uint32_t index = 0u; index < mDividers.size(); ++index)
     {
       const float logicalX = static_cast<float>(index + 1u) * stepWidth;

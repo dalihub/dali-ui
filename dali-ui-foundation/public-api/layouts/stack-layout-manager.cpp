@@ -24,6 +24,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/measure-mode.h>
@@ -202,7 +203,7 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(std::vector<View>&    
       // the resolved slot.
       if(context.modeAware && !context.crossDetermined && IsCrossMatchParent(childImpl, orientation))
       {
-        const float        probeScale  = childImpl.GetEffectiveLayoutScale();
+        const float        probeScale  = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
         const Insets       probeMargin = childImpl.GetMargin();
         const float        probeW      = static_cast<float>(probeMargin.start + probeMargin.end) * probeScale;
         const float        probeH      = static_cast<float>(probeMargin.top + probeMargin.bottom) * probeScale;
@@ -211,7 +212,7 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(std::vector<View>&    
       }
       continue;
     }
-    float  childScale            = childImpl.GetEffectiveLayoutScale();
+    float  childScale            = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     Insets margin                = childImpl.GetMargin();
     float  marginW               = static_cast<float>(margin.start + margin.end) * childScale;
     float  marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
@@ -292,7 +293,7 @@ void MeasureStackWeightChildren(std::vector<View>& children, std::vector<Measure
     }
 
     float  share              = (weight / totalWeight) * remainingMain;
-    float  childScale         = childImpl.GetEffectiveLayoutScale();
+    float  childScale         = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     Insets margin             = childImpl.GetMargin();
     float  marginH            = static_cast<float>(margin.top + margin.bottom) * childScale;
     float  marginW            = static_cast<float>(margin.start + margin.end) * childScale;
@@ -427,7 +428,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
 
   auto* impl = GetImplAs<Impl>();
 
-  float s           = view->GetEffectiveLayoutScale();
+  float s           = Ui::Extension::View::GetEffectiveLayoutScale(*view);
   float visSpacing  = impl->mSpacing * s;
   float contentMain = (impl->mOrientation == StackOrientation::VERTICAL) ? heightConstraint : widthConstraint;
 
@@ -485,7 +486,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
         continue;
       }
 
-      float       childScale = childImpl.GetEffectiveLayoutScale();
+      float       childScale = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
       Insets      margin     = childImpl.GetMargin();
       float       marginW    = static_cast<float>(margin.start + margin.end) * childScale;
       float       marginH    = static_cast<float>(margin.top + margin.bottom) * childScale;
@@ -570,7 +571,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
           continue;
         }
 
-        float  childScale            = childImpl.GetEffectiveLayoutScale();
+        float  childScale            = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
         Insets margin                = childImpl.GetMargin();
         float  marginW               = static_cast<float>(margin.start + margin.end) * childScale;
         float  marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
@@ -644,7 +645,7 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
   auto* impl = GetImplAs<Impl>();
 
-  float s          = view->GetEffectiveLayoutScale();
+  float s          = Ui::Extension::View::GetEffectiveLayoutScale(*view);
   float visSpacing = impl->mSpacing * s;
 
   const uint32_t    count = GetChildViewCount(view);
@@ -692,7 +693,7 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
       }
       else
       {
-        float  childScale = childImpl.GetEffectiveLayoutScale();
+        float  childScale = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
         Insets margin     = childImpl.GetMargin();
         float  marginM    = (impl->mOrientation == StackOrientation::VERTICAL) ? static_cast<float>(margin.top + margin.bottom) * childScale
                                                                                : static_cast<float>(margin.start + margin.end) * childScale;
@@ -721,7 +722,7 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
         }
 
         float  share      = (weight / totalWeight) * remainingMain;
-        float  childScale = childImpl.GetEffectiveLayoutScale();
+        float  childScale = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
         Insets margin     = childImpl.GetMargin();
         float  marginW    = static_cast<float>(margin.start + margin.end) * childScale;
         float  marginH    = static_cast<float>(margin.top + margin.bottom) * childScale;
@@ -785,7 +786,7 @@ void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
       continue;
     }
 
-    float      childScale = childImpl.GetEffectiveLayoutScale();
+    float      childScale = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     Insets     margin     = childImpl.GetMargin();
     float      marginW    = static_cast<float>(margin.start + margin.end) * childScale;
     float      marginH    = static_cast<float>(margin.top + margin.bottom) * childScale;

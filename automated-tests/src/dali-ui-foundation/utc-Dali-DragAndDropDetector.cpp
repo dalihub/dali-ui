@@ -5,6 +5,7 @@
  */
 
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-detector.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -336,7 +337,7 @@ struct RequestedUnitPreviewCallbacks
 
   void Update(View view, const DragAndDropEvent& event)
   {
-    updates.push_back({view.GetParent() == container, GetImpl(view).GetEffectiveLayoutScale(), event});
+    updates.push_back({view.GetParent() == container, Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(view)), event});
     view.SetProperty(Actor::Property::PIVOT,
                      Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
     view.SetRequestedX(event.GetPreviewRequestedX());
@@ -346,7 +347,7 @@ struct RequestedUnitPreviewCallbacks
   void Finalize(View view, const DragAndDropEvent& event)
   {
     finalizerEvents.push_back(event);
-    finalizerPreviewScales.push_back(GetImpl(view).GetEffectiveLayoutScale());
+    finalizerPreviewScales.push_back(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(view)));
   }
 
   View                          container;
@@ -365,7 +366,7 @@ struct RequestedPositionSignalHandler : public ConnectionTracker
   void OnPosition(View preview, const DragAndDropEvent& event)
   {
     parentIsContainer.push_back(preview.GetParent() == container);
-    previewScales.push_back(GetImpl(preview).GetEffectiveLayoutScale());
+    previewScales.push_back(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(preview)));
     events.push_back(event);
     preview.SetLayoutMode(LayoutMode::STANDALONE);
     preview.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
@@ -1951,7 +1952,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsWindowScale(void)
   Settle(application);
 
   // The source itself is an application view, so it IS window-scaled.
-  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(source)), 2.0f, 0.001f, TEST_LOCATION);
 
   const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
   const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
@@ -1963,7 +1964,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsWindowScale(void)
   // During the drag the preview keeps its policy and is window-scaled like any other view...
   DALI_TEST_CHECK(visual.GetParent() == overlay);
   DALI_TEST_CHECK(visual.GetUiScalePolicy() == originalUiScalePolicy);
-  DALI_TEST_EQUALS(GetImpl(visual).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(visual)), 2.0f, 0.001f, TEST_LOCATION);
   const Vector3 visualSize = visual.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(visualSize.x, 300.0f, 0.1f, TEST_LOCATION);
   DALI_TEST_EQUALS(visualSize.y, 120.0f, 0.1f, TEST_LOCATION);
@@ -1988,7 +1989,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsWindowScale(void)
   // Back in the window on its own, the preview is an ordinary application view.
   application.GetScene().Add(visual);
   Settle(application);
-  DALI_TEST_EQUALS(GetImpl(visual).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(visual)), 2.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetProperty<float>(Actor::Property::SIZE_WIDTH), 300.0f, 0.1f, TEST_LOCATION);
   application.GetScene().Remove(visual);
   END_TEST;
@@ -2033,7 +2034,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsSystemScale(void)
   Settle(application);
 
   // The premise: the source follows the system scale.
-  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(source)), 2.0f, 0.001f, TEST_LOCATION);
 
   const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
   const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
@@ -2046,7 +2047,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsSystemScale(void)
   // During the drag the preview keeps its policy and follows the system scale, its content too...
   DALI_TEST_CHECK(visual.GetParent() == source.GetParent());
   DALI_TEST_CHECK(visual.GetUiScalePolicy() == UiScalePolicy::INHERIT);
-  DALI_TEST_EQUALS(GetImpl(visual).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(visual)), 2.0f, 0.001f, TEST_LOCATION);
   const Vector3 visualSize = visual.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(visualSize.x, 300.0f, 0.1f, TEST_LOCATION);
   DALI_TEST_EQUALS(visualSize.y, 120.0f, 0.1f, TEST_LOCATION);
@@ -2114,7 +2115,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewKeepsItsUiScalePolicy(void)
   Settle(application);
 
   // The premise: the container follows the system scale.
-  DALI_TEST_EQUALS(GetImpl(overlay).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(overlay)), 2.0f, 0.001f, TEST_LOCATION);
 
   const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
   const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
@@ -2126,7 +2127,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewKeepsItsUiScalePolicy(void)
   // During the drag the preview keeps its own policy and the geometry it had before...
   DALI_TEST_CHECK(visual.GetParent() == overlay);
   DALI_TEST_CHECK(visual.GetUiScalePolicy() == UiScalePolicy::DISABLED);
-  DALI_TEST_EQUALS(GetImpl(visual).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(visual)), 1.0f, 0.001f, TEST_LOCATION);
   const Vector3 visualSize = visual.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(visualSize.x, 300.0f, 0.1f, TEST_LOCATION);
   DALI_TEST_EQUALS(visualSize.y, 120.0f, 0.1f, TEST_LOCATION);
@@ -2200,7 +2201,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsScaleChangeOnNextUpdate(void)
     Settle(application);
     const Bounds  bounds = target.CalculateScreenBounds();
     const Vector2 centre(bounds.x + bounds.width * 0.5f, bounds.y + bounds.height * 0.5f);
-    DALI_TEST_EQUALS(GetImpl(visual).GetEffectiveLayoutScale(), expectedScale, 0.001f, location);
+    DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(visual)), expectedScale, 0.001f, location);
     CheckAnchorUnderPointer(visual, anchor, centre, location);
   };
 
@@ -3219,7 +3220,7 @@ int UtcDaliDragAndDropDetectorPreviewCallbacksUseRequestedValues(void)
   Settle(application);
 
   // The premise: 1.5 x 2 is exactly 3.
-  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 3.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(source)), 3.0f, 0.001f, TEST_LOCATION);
 
   const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
   const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
@@ -3390,7 +3391,7 @@ int UtcDaliDragAndDropDetectorPreviewRequestedWidthHeightUseRenderedScale(void)
   Settle(application);
 
   LayoutScaleManager::Get().SetUiScale(3.0f);                                                                      // neither laid out nor rendered yet
-  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 3.0f, 0.001f, TEST_LOCATION);                        // the memo is already new
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(source)), 3.0f, 0.001f, TEST_LOCATION);    // the memo is already new
   DALI_TEST_EQUALS(source.GetCurrentProperty<Vector3>(Actor::Property::SIZE).x, 80.0f, 0.1f, TEST_LOCATION); // still rendered at 2.0
 
   DALI_TEST_CHECK(detector.StartDrag(source, Device::Class::KEYBOARD));
@@ -3443,8 +3444,8 @@ int UtcDaliDragAndDropDetectorPreviewMatchesSourceInScaleOptedOutSubtree(void)
   Settle(application);
 
   // The premises: the source does not follow the system scale, the container does.
-  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(overlay).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(source)), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(overlay)), 2.0f, 0.001f, TEST_LOCATION);
 
   const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
   const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
@@ -3527,7 +3528,7 @@ int UtcDaliDragAndDropDetectorLegacyPreviewRecipeWithoutWindowScale(void)
   const Vector2 anchor = GetExpectedAnchor(source, firstPointer);
 
   DALI_TEST_CHECK(callbacks.preview.GetParent() == overlay);
-  DALI_TEST_EQUALS(GetImpl(callbacks.preview).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(callbacks.preview)), 1.0f, 0.001f, TEST_LOCATION);
   const Vector3 sourceSize  = source.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   const Vector3 previewSize = callbacks.preview.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(sourceSize.x, 120.0f, 0.1f, TEST_LOCATION);

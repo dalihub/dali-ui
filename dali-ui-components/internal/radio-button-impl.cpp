@@ -19,6 +19,7 @@
 #include <dali-ui-components/internal/radio-button-impl.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -222,7 +223,7 @@ void RadioButtonImpl::OnSceneConnection(int depth)
 
 MeasuredSize RadioButtonImpl::OnMeasure(float /*widthConstraint*/, float heightConstraint)
 {
-  const float s = GetEffectiveLayoutScale();
+  const float s = Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   const Insets padding   = GetPadding();
   const float  padWidth  = static_cast<float>(padding.start + padding.end) * s;
@@ -287,7 +288,7 @@ MeasuredSize RadioButtonImpl::OnMeasure(float /*widthConstraint*/, float heightC
 
 LayoutRect RadioButtonImpl::OnArrange(const LayoutRect& bounds)
 {
-  const float  s       = GetEffectiveLayoutScale();
+  const float  s       = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   const Insets padding = GetPadding();
 
   const float contentX      = static_cast<float>(padding.start) * s;

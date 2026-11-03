@@ -403,14 +403,9 @@ UiScalePolicy ViewImpl::GetUiScalePolicy() const
   return mImpl->GetUiScalePolicy();
 }
 
-float ViewImpl::GetEffectiveLayoutScale() const
-{
-  return mImpl->GetEffectiveLayoutScale();
-}
-
 float ViewImpl::GetEffectiveScale() const
 {
-  return GetEffectiveLayoutScale();
+  return mImpl->GetEffectiveLayoutScale();
 }
 
 bool ViewImpl::UpdateColorBindingInternal(StringView bindingId, const UiColor& color)

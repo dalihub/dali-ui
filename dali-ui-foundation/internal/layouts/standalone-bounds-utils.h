@@ -22,6 +22,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/layouts/measure-mode.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -128,7 +129,7 @@ inline StandaloneSlotInputs SnapshotStandaloneSlotInputs(const ViewImpl& view)
 {
   StandaloneSlotInputs inputs;
 
-  inputs.scale           = view.GetEffectiveLayoutScale();
+  inputs.scale           = Ui::Extension::View::GetEffectiveLayoutScale(view);
   inputs.margin          = view.GetMargin();
   inputs.requestedX      = view.GetRequestedX();
   inputs.requestedY      = view.GetRequestedY();

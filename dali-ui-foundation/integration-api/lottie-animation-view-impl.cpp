@@ -28,6 +28,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
@@ -405,7 +406,7 @@ void LottieAnimationViewImpl::OnInitialize()
 MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
-  float s    = GetEffectiveLayoutScale();
+  float s    = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
@@ -483,7 +484,7 @@ void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
     return;
   }
 
-  Ui::GetImplementation(mVisual).ApplyFittingMode(size, GetPadding(), GetEffectiveLayoutScale());
+  Ui::GetImplementation(mVisual).ApplyFittingMode(size, GetPadding(), Ui::Extension::View::GetEffectiveLayoutScale(*this));
 }
 
 void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)

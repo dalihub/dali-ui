@@ -32,6 +32,7 @@
 #include <typeinfo>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
@@ -302,7 +303,7 @@ void GradientVisual::OnSetTransform()
 void GradientVisual::DoSetOnScene(Actor& actor)
 {
   Ui::View owner = Ui::View::DownCast(actor);
-  UpdateUiScale(owner ? GetImpl(owner).GetEffectiveLayoutScale() : 1.0f);
+  UpdateUiScale(owner ? Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(owner)) : 1.0f);
   actor.AddRenderer(mImpl->mRenderer);
 
   // Gradient Visual generated and ready to display

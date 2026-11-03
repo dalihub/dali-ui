@@ -22,6 +22,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -269,7 +270,7 @@ int UtcDaliUiScaleManagerRegisterLayoutRootReachesDetachedRootP(void)
 
   // Control: detached and unregistered, no walk reaches the root, and its entry survives.
   manager.SetUiScale(1.5f);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.0f, TEST_LOCATION);
   root.Measure(200.0f, 200.0f);
   DALI_TEST_EQUALS(gRegistryMeasureCount, 1, TEST_LOCATION);
 
@@ -301,12 +302,12 @@ int UtcDaliUiScaleManagerUnregisterLayoutRootDetachesRootP(void)
 
   // Registered by the library on connection: a scale change reaches it.
   manager.SetUiScale(1.5f);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.5f, TEST_LOCATION);
 
   // Unregistered through the deprecated API: the next scale change does not.
   UiScaleManager::Get().UnregisterLayoutRoot(root);
   manager.SetUiScale(2.0f);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.5f, TEST_LOCATION);
 
   UiScaleManager::Get().RegisterLayoutRoot(root);
   manager.SetUiScale(originalScale);

@@ -22,6 +22,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -331,9 +332,9 @@ int UtcDaliLayoutScaleManagerSetUiScaleStoredWhileNotScalableAppliedOnEnableP(vo
 
 // === Effective layout scale ===
 
-// ViewImpl::GetEffectiveScale() is deprecated in favour of GetEffectiveLayoutScale() and
-// forwards to it, so the two report the same value for every view: a scaled root, a child
-// that opts out of the UI scale, and the root again after the UI scale changes.
+// ViewImpl::GetEffectiveScale() is deprecated in favour of Extension::View::GetEffectiveLayoutScale(),
+// and the two report the same value for every view: a scaled root, a child that opts out of
+// the UI scale, and the root again after the UI scale changes.
 int UtcDaliLayoutScaleManagerDeprecatedGetEffectiveScaleMatchesP(void)
 {
   UiTestApplication  application;
@@ -355,14 +356,14 @@ int UtcDaliLayoutScaleManagerDeprecatedGetEffectiveScaleMatchesP(void)
   application.SendNotification();
   application.Render();
 
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), GetImpl(root).GetEffectiveLayoutScale(), TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(unscaled).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(unscaled).GetEffectiveScale(), GetImpl(unscaled).GetEffectiveLayoutScale(), TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(unscaled)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(unscaled).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(unscaled)), TEST_LOCATION);
 
   manager.SetUiScale(2.0f);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), GetImpl(root).GetEffectiveLayoutScale(), TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), TEST_LOCATION);
 
   manager.SetUiScale(originalScale);
   manager.SetScalable(originalScalable);
@@ -422,9 +423,9 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedWhenRootLeavesWindowP(void)
   window.Add(root);
   SettleWindowScaleLayout(application);
 
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(grandChild).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(grandChild)), 2.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetMeasuredSize().width, 200.0f, TEST_LOCATION);
   MeasuredSize measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 200.0f, TEST_LOCATION);
@@ -434,9 +435,9 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedWhenRootLeavesWindowP(void)
   DALI_TEST_CHECK(!root.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE));
 
   // Detached: no window term, on the whole subtree, and the natural size.
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(grandChild).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(grandChild)), 1.0f, TEST_LOCATION);
   measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 50.0f, TEST_LOCATION);
@@ -447,8 +448,8 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedWhenRootLeavesWindowP(void)
 
   // Back in the window: its scale applies again, and the next pass measures at it.
   window.Add(root);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(grandChild).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(grandChild)), 2.0f, TEST_LOCATION);
   SettleWindowScaleLayout(application);
   DALI_TEST_EQUALS(root.GetMeasuredSize().width, 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
@@ -485,15 +486,15 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedWhenDisabledRootLeavesWindowP(voi
   window.Add(panel);
   SettleWindowScaleLayout(application);
 
-  DALI_TEST_EQUALS(GetImpl(panel).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(icon).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(panel)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(icon)), 2.0f, TEST_LOCATION);
   MeasuredSize measured = panel.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 200.0f, TEST_LOCATION);
 
   window.Remove(panel);
 
-  DALI_TEST_EQUALS(GetImpl(panel).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(icon).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(panel)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(icon)), 1.0f, TEST_LOCATION);
   measured = panel.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 50.0f, TEST_LOCATION);
@@ -529,8 +530,8 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedUiScaleKeptWhenRootLeavesWindowP(
   window.Add(root);
   SettleWindowScaleLayout(application);
 
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 3.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 3.0f, TEST_LOCATION);
   MeasuredSize measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 300.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 150.0f, TEST_LOCATION);
@@ -538,8 +539,8 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedUiScaleKeptWhenRootLeavesWindowP(
   window.Remove(root);
 
   // Detached: the UI term stays on the whole subtree, the window term is gone.
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 1.5f, TEST_LOCATION);
   measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 150.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 75.0f, TEST_LOCATION);
@@ -549,7 +550,7 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedUiScaleKeptWhenRootLeavesWindowP(
 
   // Back in the window: both terms again.
   window.Add(root);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 3.0f, TEST_LOCATION);
   SettleWindowScaleLayout(application);
   DALI_TEST_EQUALS(root.GetMeasuredSize().width, 300.0f, TEST_LOCATION);
 
@@ -587,18 +588,18 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedWhenViewLeavesViewParentP(void)
 
   window.Add(root);
   SettleWindowScaleLayout(application);
-  DALI_TEST_EQUALS(GetImpl(card).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(label).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(card)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(label)), 2.0f, TEST_LOCATION);
 
   root.Remove(card);
   DALI_TEST_CHECK(!card.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE));
 
-  DALI_TEST_EQUALS(GetImpl(card).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(label).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(card)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(label)), 1.0f, TEST_LOCATION);
   MeasuredSize measured = card.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 50.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
 
   manager.SetWindowScale(window, 1.0f);
   manager.SetUiScale(originalScale);
@@ -631,14 +632,14 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedWhenPlainActorParentLeavesWindowP
 
   window.Add(holder);
   SettleWindowScaleLayout(application);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 2.0f, TEST_LOCATION);
 
   window.Remove(holder);
   DALI_TEST_CHECK(!root.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE));
 
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 1.0f, TEST_LOCATION);
   MeasuredSize measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 50.0f, TEST_LOCATION);
@@ -681,14 +682,14 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedWhenWindowDestroyedP(void)
     extra.Add(survivor);
 
     manager.SetWindowScale(extra, 2.0f);
-    DALI_TEST_EQUALS(GetImpl(survivor).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-    DALI_TEST_EQUALS(GetImpl(survivorChild).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(survivor)), 2.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(survivorChild)), 2.0f, TEST_LOCATION);
   }
 
   // `extra` is gone. Checked first so that a window outliving its handle fails here, by name.
   DALI_TEST_CHECK(!survivor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE));
-  DALI_TEST_EQUALS(GetImpl(survivor).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(survivorChild).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(survivor)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(survivorChild)), 1.0f, TEST_LOCATION);
   MeasuredSize measured = survivor.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 50.0f, TEST_LOCATION);
@@ -725,14 +726,14 @@ int UtcDaliLayoutScaleManagerNeverAddedViewFollowsUiScaleP(void)
   child.SetRequestedHeight(6.0f);
   view.Add(child);
 
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(view)), 1.0f, TEST_LOCATION);
   MeasuredSize measured = view.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 20.0f, TEST_LOCATION);
 
   manager.SetUiScale(1.5f);
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(view)), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 1.5f, TEST_LOCATION);
   measured = view.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 60.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 30.0f, TEST_LOCATION);
@@ -741,13 +742,13 @@ int UtcDaliLayoutScaleManagerNeverAddedViewFollowsUiScaleP(void)
   DALI_TEST_EQUALS(measured.height, 9.0f, TEST_LOCATION);
 
   manager.SetScalable(false);
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(view)), 1.0f, TEST_LOCATION);
   measured = view.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 20.0f, TEST_LOCATION);
 
   manager.SetScalable(true);
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(view)), 1.5f, TEST_LOCATION);
 
   manager.SetUiScale(originalScale);
   manager.SetScalable(originalScalable);
@@ -777,17 +778,17 @@ int UtcDaliLayoutScaleManagerDetachedViewFollowsUiScaleP(void)
 
   window.Add(root);
   SettleWindowScaleLayout(application);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
 
   window.Remove(root);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.0f, TEST_LOCATION);
   MeasuredSize measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 100.0f, TEST_LOCATION);
 
   // Detached: the UI scale reaches the whole subtree at once, values and Measure() alike.
   manager.SetUiScale(1.5f);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 1.5f, TEST_LOCATION);
   measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 150.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 75.0f, TEST_LOCATION);
@@ -797,16 +798,16 @@ int UtcDaliLayoutScaleManagerDetachedViewFollowsUiScaleP(void)
 
   // ...and so does the switch.
   manager.SetScalable(false);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.0f, TEST_LOCATION);
   measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 100.0f, TEST_LOCATION);
   manager.SetScalable(true);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.5f, TEST_LOCATION);
 
   // Back in the window: both terms, and the next pass measures at them.
   window.Add(root);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 3.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveLayoutScale(), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 3.0f, TEST_LOCATION);
   SettleWindowScaleLayout(application);
   DALI_TEST_EQUALS(root.GetMeasuredSize().width, 300.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 300.0f, TEST_LOCATION);
@@ -850,9 +851,9 @@ int UtcDaliLayoutScaleManagerOffSceneDisabledContainerFollowsEnabledChildP(void)
   DALI_TEST_EQUALS(measured.width, 10.0f, TEST_LOCATION);
 
   manager.SetUiScale(2.0f);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(panel).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(badge).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(panel)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(badge)), 2.0f, TEST_LOCATION);
   measured = root.Measure(500.0f, 500.0f);
   DALI_TEST_EQUALS(measured.width, 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 20.0f, TEST_LOCATION);

@@ -47,9 +47,9 @@ namespace Extension
  *   effectiveScale = GetWindowScale(theViewsWindow) * theViewsUiScaleTerm
  * @endcode
  * where the UI-scale term is the UI scale or 1.0, as the view's UiScalePolicy selects;
- * ViewImpl::GetEffectiveLayoutScale() returns the product. The effective scale is applied in the
- * layout pass, so rendering -- text size, borders, blur and render effects -- and the
- * conversion between requested units and on-screen pixels follow it as well.
+ * Extension::View::GetEffectiveLayoutScale() returns the product. The effective scale is
+ * applied in the layout pass, so rendering -- text size, borders, blur and render effects --
+ * and the conversion between requested units and on-screen pixels follow it as well.
  *
  * This is an extension API for platform integrators and module providers -- the system or
  * accessibility handler that applies the display scale, or a module that scales the content
@@ -127,7 +127,7 @@ public:
    * @brief Returns the UI scale.
    *
    * This is the stored value set through SetUiScale(), not the scale of a particular view;
-   * ViewImpl::GetEffectiveLayoutScale() returns a view's effective scale. The stored value is
+   * Extension::View::GetEffectiveLayoutScale() returns a view's effective scale. The stored value is
    * reported while scaling is disabled through SetScalable(false) as well.
    *
    * @return The current UI scale (1.0 by default)
@@ -143,7 +143,7 @@ public:
    * value is stored, and the re-layout is deferred until scaling is enabled again.
    *
    * A view that is not on a scene belongs to no registered layout root and is not laid out
-   * again, but it caches no effective scale either: ViewImpl::GetEffectiveLayoutScale() and
+   * again, but it caches no effective scale either: Extension::View::GetEffectiveLayoutScale() and
    * Ui::View::Measure() on it use the new value at once, and it is laid out at that value when
    * it is added to a scene.
    *
@@ -220,7 +220,7 @@ public:
    * The window scale applies to a view only while the view is in @p window. A view that
    * leaves it -- removed from it, or still in it when it is destroyed -- loses the window
    * term together with its whole subtree: until it is added to a window again, its
-   * effective scale (ViewImpl::GetEffectiveLayoutScale()) and Ui::View::Measure() on it use
+   * effective scale (Extension::View::GetEffectiveLayoutScale()) and Ui::View::Measure() on it use
    * the UI-scale term alone, the current one: they follow SetUiScale() and SetScalable()
    * while the view is detached.
    *

@@ -29,6 +29,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
@@ -702,7 +703,7 @@ struct AtlasRenderer::Impl
     if(mGradientState.IsEnabled() || gradientSpanData)
     {
       Ui::View owner   = Ui::View::DownCast(textControl);
-      mGradientUiScale = owner ? Ui::GetImpl(owner).GetEffectiveLayoutScale() : 1.0f;
+      mGradientUiScale = owner ? Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(owner)) : 1.0f;
     }
     PrepareGradientSpanResources(gradientSpanData,
                                  positions,

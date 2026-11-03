@@ -29,6 +29,7 @@
 #include <vector>
 
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
@@ -437,7 +438,7 @@ void PolicyMatrix(UiTestApplication& application, Control control)
       auto           controller = ControllerFor(control);
       const uint16_t width      = scale == 1.f ? 2u : scale == 2.f ? 4u
                                                                    : 3u;
-      DALI_TEST_EQUALS(GetImpl(control).GetEffectiveLayoutScale(), scale, EPSILON, TEST_LOCATION);
+      DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(control)), scale, EPSILON, TEST_LOCATION);
       DALI_TEST_EQUALS(controller->GetUiScale(), scale, EPSILON, TEST_LOCATION);
       CheckGeometry(Model(controller), scale, width, authoring != 0);
       DALI_TEST_EQUALS(controller->GetView().GetOutlineWidth(), width, TEST_LOCATION);

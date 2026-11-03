@@ -31,6 +31,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/integration-api/input-editor-property-handler.h>
 #include <dali-ui-foundation/internal/controls/text-controls/input-editor-accessible.h>
@@ -1076,7 +1077,7 @@ void InputEditorImpl::UpdateInlineReplacementData(const Vector2& ownerSize, cons
                        Vector2::ZERO,
                        contentSize,
                        contentSize,
-                       GetEffectiveLayoutScale(),
+                       Ui::Extension::View::GetEffectiveLayoutScale(*this),
                        source.sourceRevision);
 }
 
@@ -2114,7 +2115,7 @@ MeasuredSize InputEditorImpl::OnMeasure(float widthConstraint, float heightConst
 {
   mMeasureInvalidated = false;
 
-  const float effectiveScale = GetEffectiveLayoutScale();
+  const float effectiveScale = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   if(SetTextUiScale(effectiveScale))
   {
     mController->InvalidateFontData();

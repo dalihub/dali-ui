@@ -29,10 +29,12 @@
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-adaptor-impl.h>
 #include <dali.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/events/key-event-integ.h>
 #include <stdlib.h>
 #include <algorithm>
@@ -5179,6 +5181,215 @@ int UtcDaliViewExtensionGetUiScalePolicyEmptyHandleN(void)
   END_TEST;
 }
 
+// === Extension::View effective layout scale ===
+
+namespace
+{
+// A ViewImpl subclass that reads its own effective layout scale in OnMeasure(), spelled as
+// the extension API documents it for ViewImpl subclasses: there an unqualified Extension::
+// names CustomActorImpl::Extension, so the call carries the Ui:: qualifier.
+class ScaleProbeViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<ScaleProbeViewImpl> New()
+  {
+    return IntrusivePtr<ScaleProbeViewImpl>(new ScaleProbeViewImpl());
+  }
+
+  float GetMeasuredScale() const
+  {
+    return mMeasuredScale;
+  }
+
+protected:
+  ScaleProbeViewImpl()
+  : ViewImpl()
+  {
+  }
+
+  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override
+  {
+    mMeasuredScale = Ui::Extension::View::GetEffectiveLayoutScale(*this);
+    return ViewImpl::OnMeasure(widthConstraint, heightConstraint);
+  }
+
+private:
+  float mMeasuredScale{0.0f};
+};
+
+// Register so TypeInfo lookup can walk the chain.
+Dali::TypeRegistration scaleProbeViewTypeReg(
+  typeid(ScaleProbeViewImpl), typeid(ViewImpl), nullptr);
+} // namespace
+
+// The effective layout scale is the window scale times the UI-scale term the policy
+// selects: UI scale 1.5 and window scale 2.0 give 3.0 for an INHERIT root and an ENABLED
+// view, 2.0 for a DISABLED view and the INHERIT child that follows it; 1.0 everywhere while
+// scaling is disabled; 1.5 and 1.0 again once the window scale is reset.
+int UtcDaliViewExtensionGetEffectiveLayoutScaleP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+  tet_infoline("UtcDaliViewExtensionGetEffectiveLayoutScaleP - the effective layout scale follows the UI scale, the policy, the window scale and the switch");
+
+  LayoutScaleManager manager             = LayoutScaleManager::Get();
+  const float        originalScale       = manager.GetUiScale();
+  const bool         originalScalable    = manager.IsScalable();
+  const float        originalWindowScale = manager.GetWindowScale(window);
+  manager.SetScalable(true);
+  manager.SetUiScale(1.5f);
+  manager.SetWindowScale(window, 2.0f);
+
+  View root     = View::New(); // INHERIT
+  View disabled = View::New();
+  View enabled  = View::New();
+  View inherit  = View::New(); // INHERIT, under the DISABLED view
+  Ui::Extension::View::SetUiScalePolicy(disabled, UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(enabled, UiScalePolicy::ENABLED);
+  disabled.Add(enabled);
+  disabled.Add(inherit);
+  root.Add(disabled);
+  window.Add(root);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(disabled)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(enabled)), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(inherit)), 2.0f, TEST_LOCATION);
+
+  // It takes a const ViewImpl, as it is read in const paths.
+  const ViewImpl& constRoot = GetImpl(root);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(constRoot), 3.0f, TEST_LOCATION);
+
+  // A switch change resets the scale of every registered root at once.
+  manager.SetScalable(false);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(disabled)), 1.0f, TEST_LOCATION);
+
+  manager.SetScalable(true);
+  manager.SetWindowScale(window, 1.0f);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(disabled)), 1.0f, TEST_LOCATION);
+
+  manager.SetWindowScale(window, originalWindowScale);
+  manager.SetUiScale(originalScale);
+  manager.SetScalable(originalScalable);
+  END_TEST;
+}
+
+// The deprecated ViewImpl::GetEffectiveScale() reports what the extension function reports,
+// for a view never added to a scene, an on-scene root and its DISABLED child. A view off a
+// scene caches nothing, so a new UI scale reaches both at once.
+int UtcDaliViewExtensionGetEffectiveLayoutScaleMatchesDeprecatedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionGetEffectiveLayoutScaleMatchesDeprecatedP - ViewImpl::GetEffectiveScale() reports the extension value");
+
+  LayoutScaleManager manager          = LayoutScaleManager::Get();
+  const float        originalScale    = manager.GetUiScale();
+  const bool         originalScalable = manager.IsScalable();
+  manager.SetScalable(true);
+  manager.SetUiScale(1.25f);
+
+  View detached = View::New();
+  View root     = View::New();
+  View child    = View::New();
+  Ui::Extension::View::SetUiScalePolicy(child, UiScalePolicy::DISABLED);
+  root.Add(child);
+  application.GetWindow().Add(root);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(detached)), 1.25f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(detached).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(detached)), TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.25f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), TEST_LOCATION);
+
+  manager.SetUiScale(2.0f);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(detached)), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(detached).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+
+  manager.SetUiScale(originalScale);
+  manager.SetScalable(originalScalable);
+  END_TEST;
+}
+
+// A ViewImpl subclass reads its own scale through the extension function inside a layout
+// callback: OnMeasure() of a root at the UI scale 2.0 sees 2.0.
+int UtcDaliViewExtensionGetEffectiveLayoutScaleInViewImplP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionGetEffectiveLayoutScaleInViewImplP - a ViewImpl subclass reads its scale in OnMeasure()");
+
+  LayoutScaleManager manager          = LayoutScaleManager::Get();
+  const float        originalScale    = manager.GetUiScale();
+  const bool         originalScalable = manager.IsScalable();
+  manager.SetScalable(true);
+  manager.SetUiScale(2.0f);
+
+  IntrusivePtr<ScaleProbeViewImpl> impl = ScaleProbeViewImpl::New();
+  View                             probe(*impl);
+  probe.SetRequestedWidth(40.0f);
+  probe.SetRequestedHeight(30.0f);
+  application.GetWindow().Add(probe);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(impl->GetMeasuredScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(*impl), 2.0f, TEST_LOCATION);
+
+  manager.SetUiScale(originalScale);
+  manager.SetScalable(originalScalable);
+  END_TEST;
+}
+
+namespace
+{
+/** Restores the test adaptor's event-thread flag even when an assertion returns early. */
+struct AdaptorUnavailableScope
+{
+  AdaptorUnavailableScope()
+  {
+    Test::UiAdaptor::SetAdaptorAvailableForce(false);
+  }
+  ~AdaptorUnavailableScope()
+  {
+    Test::UiAdaptor::SetAdaptorAvailableForce(true);
+  }
+};
+} // namespace
+
+// Every layout manager reads the effective layout scale per child, so the extension function adds no
+// event-thread assert, unlike ViewDataImpl::Get(): with the test adaptor reporting no event thread, the
+// cached scale of a laid-out view is still returned.
+int UtcDaliViewExtensionGetEffectiveLayoutScaleNoEventThreadAssertP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionGetEffectiveLayoutScaleNoEventThreadAssertP - the effective layout scale is read without an event-thread assert");
+
+  LayoutScaleManager manager          = LayoutScaleManager::Get();
+  const float        originalScale    = manager.GetUiScale();
+  const bool         originalScalable = manager.IsScalable();
+  manager.SetScalable(true);
+  manager.SetUiScale(2.0f);
+
+  View root = View::New();
+  application.GetWindow().Add(root);
+  SettleLayout(application);
+
+  float scale = 0.0f;
+  {
+    AdaptorUnavailableScope noEventThread;
+    DALI_TEST_CHECK(!Dali::Adaptor::IsEventThread()); // the guard is in force
+    scale = Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root));
+  }
+  DALI_TEST_EQUALS(scale, 2.0f, TEST_LOCATION);
+
+  manager.SetUiScale(originalScale);
+  manager.SetScalable(originalScalable);
+  END_TEST;
+}
+
 // A MeasureCallback that calls Measure() on its OWN view must not re-run the
 // producer. Measure() is public and LayoutController::ProcessLayouts() is
 // nestable, so this is reachable from application code and must be safe in
@@ -7591,16 +7802,16 @@ int UtcDaliViewRemoveInvalidatesSubtreeEffectiveScaleP(void)
   // Warm every node's cached effective scale.
   application.SendNotification();
   application.SendNotification();
-  DALI_TEST_EQUALS(GetImpl(d).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(d)), 1.0f, TEST_LOCATION);
 
   // Sever C from the DISABLED parent. C, now parentless, re-roots at the global
   // scale (2.0); D, still C's child, inherits it.
   p.Remove(c);
 
-  DALI_TEST_EQUALS(GetImpl(c).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(c)), 2.0f, TEST_LOCATION);
   // The fix: D's cached scale was invalidated too, so it recomputes to 2.0.
   // Without the recursive invalidation D would report the stale 1.0.
-  DALI_TEST_EQUALS(GetImpl(d).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(d)), 2.0f, TEST_LOCATION);
 
   LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
@@ -7679,7 +7890,7 @@ int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
 
   application.SendNotification();
   application.SendNotification();
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
 
   // Detach, change the global scale while detached (the root, untracked, is not
@@ -7692,7 +7903,7 @@ int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
   application.SendNotification();
 
   // Re-connection re-derived the scale (2.0) and re-measured: 50 x 2.0 = 100.
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
 
   LayoutScaleManager::Get().SetUiScale(originalScale);

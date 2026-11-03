@@ -23,6 +23,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
@@ -174,7 +175,7 @@ void MediaViewImpl::OnPresentationChanged()
 MeasuredSize MediaViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
-  float s    = GetEffectiveLayoutScale();
+  float s    = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
@@ -238,7 +239,7 @@ LayoutRect MediaViewImpl::OnArrange(const LayoutRect& bounds)
     {
       std::swap(padding.start, padding.end);
     }
-    Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(arranged.width, arranged.height), padding, GetEffectiveLayoutScale());
+    Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(arranged.width, arranged.height), padding, Ui::Extension::View::GetEffectiveLayoutScale(*this));
   }
   return arranged;
 }

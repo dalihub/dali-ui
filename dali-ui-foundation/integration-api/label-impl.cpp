@@ -36,6 +36,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/integration-api/view-accessibility.h>
@@ -506,7 +507,7 @@ void LabelImpl::UpdateInlineReplacementData(const InlineReplacementUpdateData& u
                                std::max(0.0f,
                                         ownerSize.y - static_cast<float>(padding.top + padding.bottom))),
                        ownerSize,
-                       GetEffectiveLayoutScale(),
+                       Ui::Extension::View::GetEffectiveLayoutScale(*this),
                        updateData.sourceRevision,
                        pixelRevealRequested);
   Internal::TextVisual::RefreshRevealBlurImages(mVisual);
@@ -2401,7 +2402,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
            Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
       .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT)
       .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT);
-    visualImpl.SetTransformAndSize(visualTransform, size, GetEffectiveLayoutScale());
+    visualImpl.SetTransformAndSize(visualTransform, size, Ui::Extension::View::GetEffectiveLayoutScale(*this));
 
     if(mController->IsMarqueeEnabled())
     {
@@ -2445,7 +2446,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   const bool measureInvalidated = mMeasureInvalidated;
   mMeasureInvalidated           = false;
 
-  const float effectiveScale = GetEffectiveLayoutScale();
+  const float effectiveScale = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   if(SetTextUiScale(effectiveScale))
   {
     if(mController->IsAsyncRendering())
@@ -2908,7 +2909,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                                                                            textGradientUseTextureCoordinates);
         compositionRequest.baseBoundsResolved               = true;
         compositionRequest.baseBounds.bounds                = textGradientBounds;
-        compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, GetEffectiveLayoutScale());
+        compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
         compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
       }
 
@@ -2921,7 +2922,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                                                                               textGradientOverlayUseTextureCoordinates);
         compositionRequest.overlayBoundsResolved               = true;
         compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
-        compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, GetEffectiveLayoutScale());
+        compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
         compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
       }
 
@@ -3714,7 +3715,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                                                              textGradientUseTextureCoordinates);
           compositionRequest.baseBoundsResolved               = true;
           compositionRequest.baseBounds.bounds                = textGradientBounds;
-          compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, GetEffectiveLayoutScale());
+          compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
           compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
         }
 
@@ -3727,7 +3728,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                                                                 textGradientOverlayUseTextureCoordinates);
           compositionRequest.overlayBoundsResolved               = true;
           compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
-          compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, GetEffectiveLayoutScale());
+          compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
           compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
         }
       }
@@ -4409,7 +4410,7 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
     parameters.textRevealSequence             = Ui::Text::Internal::Reveal::ToInternalSequence(revealData->sequence);
     parameters.textRevealFadeDurationRatio    = revealData->fadeDurationRatio;
     parameters.textRevealSequenceStaggerRatio = revealData->sequenceStaggerRatio;
-    parameters.textRevealBlurRadius           = revealData->blurRadius * GetEffectiveLayoutScale();
+    parameters.textRevealBlurRadius           = revealData->blurRadius * Ui::Extension::View::GetEffectiveLayoutScale(*this);
     parameters.textRevealBlurDurationRatio    = revealData->blurDurationRatio;
     parameters.isTextRevealBlurRequested      = revealData->blurRadius > 0.0f &&
                                            revealData->blurDurationRatio > 0.0f;
