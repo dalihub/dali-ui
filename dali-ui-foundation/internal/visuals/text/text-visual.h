@@ -439,6 +439,19 @@ public:
                                                  const Vector2&                originSize);
 
   /**
+   * @brief Checks whether marquee foreground rendering uses the default text color.
+   *
+   * @param[in] visual The text visual.
+   * @param[in] alphaChanged Whether TextColor alpha changed.
+   * @return True if the marquee raster may depend on the changed text color.
+   */
+  static bool UsesDefaultMarqueeTextColor(Ui::Integration::Visual::Base visual, bool alphaChanged)
+  {
+    auto& textVisual = GetVisualObject(visual);
+    return textVisual.UsesDefaultMarqueeTextColor(textVisual.mTextShaderFeatureCache.IsEnabledEmoji(), alphaChanged);
+  }
+
+  /**
    * @brief Retrieve the stored TextGradient mask PixelData for internal rendering/tests.
    * @param[in] visual The text visual.
    * @return The stored TextGradient mask PixelData.
@@ -640,6 +653,15 @@ private:
   void SetTextGradientOverlayMode(Ui::Text::GradientOverlayMode mode);
 
   PixelData GetTextGradientMaskPixelData() const;
+
+  /**
+   * @brief Checks whether current marquee foreground sources use TextColor.
+   *
+   * @param[in] containsColorGlyph Whether the published or incoming raster contains color glyphs.
+   * @param[in] alphaChanged Whether TextColor alpha changed.
+   * @return True if default-color source characters can reach the marquee texture.
+   */
+  bool UsesDefaultMarqueeTextColor(bool containsColorGlyph, bool alphaChanged) const;
 
   /**
    * @brief Sets the TextGradient start-offset source property index registered by the control.

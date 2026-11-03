@@ -1274,6 +1274,17 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
              (!Text::Raster::Convert(size.x, width) || !Text::Raster::Convert(size.y, height) ||
               width > parameters.maxTextureSize || height > parameters.maxTextureSize);
     };
+    if(isRenderRequest && parameters.isMarqueeEnabled && parameters.textColor != mController->GetDefaultColor() &&
+       !Text::IsManualAsyncRenderInProgress(mControl.GetHandle()) &&
+       UsesDefaultMarqueeTextColor(textInformation.renderInfo.containsColorGlyph, parameters.textColor.a != mController->GetDefaultColor().a) &&
+       (textInformation.renderInfo.textPixelData || !exceedsTextureLimit()))
+    {
+      // Initial ON_OVERFLOW requests resolve marquee on the worker. Retry a
+      // stale baked color before publishing, without rerasterizing static text.
+      mController->RequestAsyncRender();
+      mController->RequestRelayout();
+      return;
+    }
     resourceStatus = Ui::Visual::ResourceStatus::READY;
 
     Text::AsyncTextRenderInfo renderInfo = textInformation.renderInfo;
@@ -1959,6 +1970,25 @@ void TextVisual::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
   {
     UpdateRenderer();
   }
+}
+
+bool TextVisual::UsesDefaultMarqueeTextColor(bool containsColorGlyph, bool alphaChanged) const
+{
+  if(mController->IsTextCutout() || mController->IsBackgroundWithCutoutEnabled())
+  {
+    return true;
+  }
+  const auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(gradientData && Text::Internal::Gradient::IsRenderable(gradientData->mTextGradientStyle) &&
+     !mController->IsEmbossEnabled())
+  {
+    // Color glyphs inside GradientSpan retain their fallback TextColor alpha.
+    // The existing result identifies color glyphs, but not their intersection
+    // with spans. Refresh this combination conservatively on alpha changes.
+    const auto* spans = mController->GetLogicalTextModel()->GetGradientSpanModelData();
+    return alphaChanged && containsColorGlyph && spans && !spans->characterRuns.Empty();
+  }
+  return mController->HasDefaultColorCharacters(alphaChanged && containsColorGlyph);
 }
 
 PixelData TextVisual::GetTextGradientMaskPixelData() const

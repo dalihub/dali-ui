@@ -795,6 +795,16 @@ public:
    */
   void RequestAsyncRenderWithConstraints(float widthConstraint, float heightConstraint);
 
+  /**
+   * @brief Returns whether a manual asynchronous render is in progress.
+   *
+   * @return True while a manual render request is pending.
+   */
+  bool IsManualAsyncRenderInProgress() const
+  {
+    return mIsManualRenderInProgress;
+  }
+
 public: // Signals
   /**
    * @copydoc Dali::Ui::Label::AnchorClickedSignal()

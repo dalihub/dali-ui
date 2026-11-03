@@ -739,6 +739,165 @@ int UtcDaliLabelRenderScaleFailureLifecycleP(void)
   END_TEST;
 }
 
+int UtcDaliLabelPixelLessCompletionScopeP(void)
+{
+  UiTestApplication application;
+  CapturedTasks     captured;
+  // Exercise non-limit no-pixel results independently of loader allocation behavior.
+  for(unsigned scenario = 0u; scenario < 7u; ++scenario)
+  {
+    auto label = Ui::Label::New("Original text before a non-limit pixel-less result");
+    label.SetRequestedWidth(48.0f);
+    label.SetRequestedHeight(24.0f);
+    label.SetFontSize(12.0f);
+    label.SetRenderScale(scenario == 0u || scenario == 5u ? 1.0f : 2.0f);
+    label.SetAsyncRendering(true);
+    if(scenario == 3u || scenario == 6u)
+    {
+      label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+    }
+    unsigned          completions = 0u;
+    ConnectionTracker tracker;
+    label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View, float, float)
+    {
+      ++completions;
+    });
+    application.GetScene().Add(label);
+    captured.Drain(application, 128);
+    DALI_TEST_EQUALS(completions, 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+    auto& impl = static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation());
+    if(scenario == 6u)
+    {
+      label.SetText("Another scrolling text for the existing stale-color request path");
+      application.SendNotification();
+      application.Render();
+    }
+    else
+    {
+      impl.RequestAsyncRenderWithFixedSize(48.0f, 24.0f);
+    }
+    auto tasks = Test::AsyncTaskManager::TakeCapturedTasks();
+    DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
+    if(tasks.empty())
+    {
+      END_TEST;
+    }
+    auto task                        = Ui::Internal::TextLoadingTaskPtr(static_cast<Ui::Internal::TextLoadingTask*>(tasks.front().Get()));
+    task->mParameters.maxTextureSize = 128;
+    task->Process();
+    DALI_TEST_CHECK(task->mRenderInfo.textPixelData);
+    if(scenario == 2u)
+    {
+      // A default result alone is not evidence of a texture-limit rejection.
+      task->mRenderInfo = Text::AsyncTextRenderInfo();
+    }
+    else
+    {
+      task->mRenderInfo.textPixelData.Reset();
+      task->mRenderInfo.marqueePixelData.Reset();
+      if(scenario == 4u || scenario == 5u)
+      {
+        task->mRenderInfo.size = Size(48.0f, 300.0f);
+        if(scenario == 4u)
+        {
+          task->mParameters.maxTextureSize = 0;
+        }
+      }
+    }
+    if(scenario == 6u)
+    {
+      auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(label));
+      auto  visual   = viewData.GetVisual(Ui::Text::LabelPropertyIndex::TEXT);
+      Ui::Internal::TextVisual::GetController(visual)->SetDefaultColor(Color::BLUE);
+    }
+    auto manager = Text::AsyncTextManager::Get();
+    Text::GetImplementation(manager).LoadComplete(task);
+    if(scenario == 6u)
+    {
+      // A non-limit no-pixel result retains the existing stale-color request path.
+      DALI_TEST_EQUALS(completions, 1u, TEST_LOCATION);
+      captured.Drain(application, 128);
+    }
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(completions, 2u, TEST_LOCATION);
+    DALI_TEST_EQUALS(label.GetRendererCount(), scenario == 6u ? 1u : 0u, TEST_LOCATION);
+    DALI_TEST_CHECK(!impl.IsManualAsyncRenderInProgress());
+    DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+    label.SetText("Recovered normal text after the pixel-less result");
+    captured.Drain(application, 128);
+    DALI_TEST_EQUALS(completions, 3u, TEST_LOCATION);
+    DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+    label.Unparent();
+    captured.Drain(application, 128);
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelRejectedRasterColorChangeP(void)
+{
+  UiTestApplication application;
+  CapturedTasks     captured;
+  for(float scale : {1.0f, 2.0f})
+  {
+    auto label = Ui::Label::New("Original scrolling text before the rejected raster");
+    label.SetRequestedWidth(96.0f);
+    label.SetRequestedHeight(24.0f);
+    label.SetFontSize(12.0f);
+    label.SetRenderScale(scale);
+    label.SetAsyncRendering(true);
+    label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+    unsigned          completions = 0u;
+    ConnectionTracker tracker;
+    label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View, float, float)
+    {
+      ++completions;
+    });
+    application.GetScene().Add(label);
+    captured.Drain(application, 128);
+    DALI_TEST_EQUALS(completions, 1u, TEST_LOCATION);
+    const auto renderer = label.GetRendererAt(0u);
+    const auto textures = renderer.GetTextures();
+    label.SetFontSize(200.0f);
+    application.SendNotification();
+    application.Render();
+    auto tasks = Test::AsyncTaskManager::TakeCapturedTasks();
+    DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
+    if(tasks.empty())
+    {
+      END_TEST;
+    }
+    auto task                        = Ui::Internal::TextLoadingTaskPtr(static_cast<Ui::Internal::TextLoadingTask*>(tasks.front().Get()));
+    task->mParameters.maxTextureSize = 128;
+    task->Process();
+    DALI_TEST_EQUALS(task->mParameters.renderScale, 1.0f, TEST_LOCATION);
+    DALI_TEST_CHECK(task->mParameters.isMarqueeEnabled);
+    DALI_TEST_CHECK(!task->mRenderInfo.textPixelData);
+    DALI_TEST_CHECK(task->mRenderInfo.size.y > 128.0f);
+    // Change the current color after rasterization without dispatching another task.
+    auto& impl     = static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation());
+    auto& viewData = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(label));
+    auto  visual   = viewData.GetVisual(Ui::Text::LabelPropertyIndex::TEXT);
+    Ui::Internal::TextVisual::GetController(visual)->SetDefaultColor(Color::BLUE);
+    auto manager = Text::AsyncTextManager::Get();
+    Text::GetImplementation(manager).LoadComplete(task);
+    DALI_TEST_EQUALS(completions, 2u, TEST_LOCATION);
+    DALI_TEST_CHECK(label.GetRendererAt(0u) == renderer);
+    DALI_TEST_CHECK(renderer.GetTextures() == textures);
+    DALI_TEST_CHECK(!impl.IsManualAsyncRenderInProgress());
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+    label.SetFontSize(12.0f);
+    captured.Drain(application, 128);
+    DALI_TEST_EQUALS(completions, 3u, TEST_LOCATION);
+    label.Unparent();
+    captured.Drain(application, 128);
+  }
+  END_TEST;
+}
+
 int UtcDaliLabelHeightTilesSurviveRasterRejectionP(void)
 {
   UiTestApplication application;

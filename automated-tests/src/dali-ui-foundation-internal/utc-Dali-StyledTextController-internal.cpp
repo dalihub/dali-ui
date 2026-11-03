@@ -2548,3 +2548,55 @@ int UtcDaliStyledTextControllerAnchorActorsFromStyledTextP(void)
   DALI_TEST_CHECK(anchors.empty());
   END_TEST;
 }
+
+int UtcDaliStyledTextDefaultForegroundRangesP(void)
+{
+  UiTestApplication application;
+  auto              controller = PublicText::Controller::New();
+  auto&             model      = GetLogicalModel(controller);
+  model.mText.Resize(100u, 'A');
+  model.mGradientSpanData = std::make_unique<PublicText::Internal::GradientSpanModelData>();
+  for(unsigned i = 0u; i < 100u; i += 2u)
+  {
+    PublicText::ColorRun color;
+    color.characterRun = {i, 1u};
+    color.color        = Color::GREEN;
+    model.mColorRuns.PushBack(color);
+    PublicText::Internal::GradientSpanCharacterRun gradient;
+    gradient.characterRun = {i + 1u, 1u};
+    gradient.paintIndex   = 1u;
+    model.mGradientSpanData->characterRuns.PushBack(gradient);
+  }
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters(true));
+  model.mGradientSpanData->characterRuns[20u].characterRun.numberOfCharacters = 0u;
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters());
+  model.mText[41u] = ' ';
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  model.mText[41u] = 0x05d0u; // Logical BiDi text still requires its default foreground.
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters());
+
+  // Unordered/overlapping/overflowing ranges must never conceal an uncovered glyph.
+  model.mGradientSpanData.reset();
+  model.mColorRuns.Clear();
+  PublicText::ColorRun run;
+  run.color        = Color::RED;
+  run.characterRun = {50u, std::numeric_limits<PublicText::Length>::max()};
+  model.mColorRuns.PushBack(run);
+  run.characterRun = {0u, 25u};
+  model.mColorRuns.PushBack(run);
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters());
+  model.mColorRuns[0u].characterRun = {0u, 100u};
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  model.mColorRuns.Clear();
+  for(auto& character : model.mText)
+  {
+    character = ' ';
+  }
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  model.mText.Clear();
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  controller->SetText("New unstyled text");
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters());
+  END_TEST;
+}

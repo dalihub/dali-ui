@@ -100,6 +100,13 @@ bool IsMarqueeStopRequested(Actor control)
   auto& impl = static_cast<Ui::Integration::LabelImpl&>(Ui::GetImpl(label));
   return impl.mTextScroller && impl.mTextScroller->IsStopRequested();
 }
+
+bool IsManualAsyncRenderInProgress(Actor control)
+{
+  Ui::Label label = Ui::Label::DownCast(control);
+  return label && static_cast<Ui::Integration::LabelImpl&>(Ui::GetImpl(label)).IsManualAsyncRenderInProgress();
+}
+
 } // namespace Text
 
 namespace Integration
@@ -4502,9 +4509,17 @@ void LabelImpl::SetTextColorInternal(const Vector4& color)
 {
   if(mController->GetDefaultColor() != color)
   {
+    const bool alphaChanged = mController->GetDefaultColor().a != color.a;
     Self().SetProperty(Ui::Text::LabelPropertyIndex::TEXT_COLOR, color);
     mController->SetDefaultColor(color);
     RequestRendererUpdate();
+
+    if(mController->IsAsyncRendering() && !mIsManualRenderInProgress && mTextScroller && mTextScroller->IsScrolling() &&
+       Internal::TextVisual::UsesDefaultMarqueeTextColor(mVisual, alphaChanged))
+    {
+      // Manual requests complete the snapshot captured at dispatch.
+      RequestAsyncRender();
+    }
 
     // Trigger constraint always.
     if(DALI_LIKELY(mVisual))
