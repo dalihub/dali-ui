@@ -1435,27 +1435,27 @@ md_build_attr_append_substr(MD_CTX* ctx, MD_ATTRIBUTE_BUILD* build,
     if(build->substr_count >= build->substr_alloc) {
         MD_TEXTTYPE* new_substr_types;
         OFF* new_substr_offsets;
-
-        build->substr_alloc = (build->substr_alloc > 0
+        int new_alloc = (build->substr_alloc > 0
                 ? build->substr_alloc + build->substr_alloc / 2
                 : 8);
+
         new_substr_types = (MD_TEXTTYPE*) realloc(build->substr_types,
-                                    build->substr_alloc * sizeof(MD_TEXTTYPE));
+                                    new_alloc * sizeof(MD_TEXTTYPE));
         if(new_substr_types == NULL) {
             MD_LOG("realloc() failed.");
             return -1;
         }
+        build->substr_types = new_substr_types;
+
         /* Note +1 to reserve space for final offset (== raw_size). */
         new_substr_offsets = (OFF*) realloc(build->substr_offsets,
-                                    (build->substr_alloc+1) * sizeof(OFF));
+                                    (new_alloc+1) * sizeof(OFF));
         if(new_substr_offsets == NULL) {
             MD_LOG("realloc() failed.");
-            free(new_substr_types);
             return -1;
         }
-
-        build->substr_types = new_substr_types;
         build->substr_offsets = new_substr_offsets;
+        build->substr_alloc = new_alloc;
     }
 
     build->substr_types[build->substr_count] = type;
@@ -1469,10 +1469,21 @@ md_free_attribute(MD_CTX* ctx, MD_ATTRIBUTE_BUILD* build)
 {
     MD_UNUSED(ctx);
 
-    if(build->substr_alloc > 0) {
+    /* A trivial build aliases caller-owned storage and must not be freed.
+     * Every other build owns all three pointers from the moment
+     * md_build_attribute() leaves the trivial branch, even if a growth
+     * realloc later failed while substr_alloc was still 0. Clearing them
+     * keeps this idempotent, which matters because md_build_attribute()
+     * frees on its own abort path before the caller frees again. */
+    if(build->substr_types != build->trivial_types) {
         free(build->text);
         free(build->substr_types);
         free(build->substr_offsets);
+        build->text = NULL;
+        build->substr_types = NULL;
+        build->substr_offsets = NULL;
+        build->substr_alloc = 0;
+        build->substr_count = 0;
     }
 }
 

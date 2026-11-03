@@ -37,6 +37,11 @@ class MarkdownParser
 {
 public:
   /**
+   * @brief The maximum Markdown source size in bytes. A larger source is not parsed and is shown as plain text.
+   */
+  static constexpr uint32_t MAXIMUM_SOURCE_SIZE = 16u * 1024u * 1024u;
+
+  /**
    * @brief Defines options used while parsing Markdown source.
    */
   struct Options

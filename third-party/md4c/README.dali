@@ -17,7 +17,13 @@ Imported files:
 Local modifications:
 
 - Removed one trailing whitespace character in a `md4c.h` comment so the DALi
-  whitespace check passes. No functional source changes were made.
+  whitespace check passes.
+- Backported `md_build_attr_append_substr()` and `md_free_attribute()` from
+  upstream `master` in `md4c.c` to fix a double free when a `realloc()` fails
+  while building an attribute. `md_build_attribute()` frees the partial build on
+  its abort path and the caller frees it again, so `md_free_attribute()` must be
+  idempotent. The only difference from upstream is that `new_alloc` is `int`,
+  as `substr_alloc` is still `int` in 0.5.3.
 
 Build configuration:
 
