@@ -2107,7 +2107,7 @@ void Controller::SetVerticalLineAlignment(Alignment alignment)
 void Controller::SetRenderScale(const float renderScale)
 {
   float scale = renderScale;
-  if(scale < 1.0f)
+  if(!std::isfinite(scale) || scale < 1.0f)
   {
     DALI_LOG_DEBUG_INFO("RenderScale must be greater than or equal to 1.0f. It will change as follows:%f -> 1.0\n", scale);
     scale = 1.0f;

@@ -388,7 +388,13 @@ struct AsyncTextRenderInfo
 
   std::shared_ptr<const Ui::Internal::PreparedRevealBlur> revealBlur; ///< Optional CPU-only result; absent for ordinary Reveal.
 
-  Size                              size;                     ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
+  /**
+   * @brief Rendered size in display units, including the scrolling extent for marquee.
+   *
+   * On final texture-limit rejection, contains the rejected raster dimensions
+   * in pixels instead. No pixel data is generated for that result.
+   */
+  Size                              size;
   Vector4                           textLogicalBounds;        ///< Normalized logical text bounds inside @p size.
   Size                              controlSize;              ///< View size used to display the rendered text.
   Size                              renderedSize;             ///< Final displayed size reported back to the caller.

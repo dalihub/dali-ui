@@ -43,7 +43,7 @@ public:
    * @param [in] parameters The async text parameters whose ownership is transferred to the task.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  TextLoadingTask(const uint32_t id, Text::AsyncTextParameters&& parameters, CallbackBase* callback);
+  TextLoadingTask(const uint32_t id, Ui::Text::AsyncTextParameters&& parameters, CallbackBase* callback);
 
   /**
    * Destructor.
@@ -61,7 +61,7 @@ public:
    * The task becomes ready to process.
    * @param [in] loader The async text loader, a loader can only process one task at a time.
    */
-  void SetLoader(Text::AsyncTextLoader& loader);
+  void SetLoader(Ui::Text::AsyncTextLoader& loader);
 
 public: // Implementation of AsyncTask
   /**
@@ -100,10 +100,10 @@ private:
   void ReleaseLoader();
 
 public:
-  uint32_t                  mId;
-  Text::AsyncTextLoader     mLoader;
-  Text::AsyncTextParameters mParameters;
-  Text::AsyncTextRenderInfo mRenderInfo;
+  uint32_t                     mId;
+  Ui::Text::AsyncTextLoader     mLoader;
+  Ui::Text::AsyncTextParameters mParameters;
+  Ui::Text::AsyncTextRenderInfo mRenderInfo;
 
 private:
   bool  mIsReady : 1; ///< Whether this task ready to run

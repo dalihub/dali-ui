@@ -16,6 +16,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali.h>
+#include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <dali/devel-api/animation/animation-devel.h>
 #include <algorithm>
 #include <array>
@@ -4281,6 +4282,137 @@ int UtcDaliMarqueeColorEmojiGradientVisibilityP(void)
       renderer = test.label.GetRendererAt(0u);
       DALI_TEST_CHECK(renderer.GetProperty<bool>(renderer.GetPropertyIndex("requireRender")));
     }
+  }
+  END_TEST;
+}
+
+int UtcDaliMarqueeLifecycleFinalTextureSizeLimitsP(void)
+{
+  UiTestApplication application;
+  const unsigned    limit = Dali::GetMaxTextureSize();
+  for(bool vertical : {false, true})
+  {
+    for(float renderScale : {1.0f, 2.0f})
+    {
+      Lifecycle   test(application, true, vertical, true);
+      std::string text;
+      for(unsigned i = 0u; i < limit; ++i)
+      {
+        text += vertical ? "Line\n" : "W";
+      }
+      test.label.SetText(text.c_str());
+      test.label.SetMarqueeGap(32);
+      test.label.SetRenderScale(renderScale);
+      const unsigned completed = test.completed;
+      test.Drain();
+      DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+      DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+      test.CheckTexture();
+
+      // Inspect the texture published by MarqueeBuilder, not the loader's
+      // PixelData or TextVisual's temporary height tiles.
+      auto texture = test.label.GetRendererAt(0u).GetTextures().GetTexture(0u);
+      DALI_TEST_EQUALS(vertical ? texture.GetHeight() : texture.GetWidth(), limit, TEST_LOCATION);
+      DALI_TEST_CHECK(texture.GetWidth() <= limit && texture.GetHeight() <= limit);
+      auto  animation = test.Current();
+      float progress  = animation.GetCurrentProgress();
+      test.Advance(100u);
+      DALI_TEST_CHECK(animation.GetCurrentProgress() > progress);
+      DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures().GetTexture(0u) == texture);
+      DALI_TEST_CHECK(test.Take().empty());
+      DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliMarqueeLifecycleFallbackFinalTextureSizeP(void)
+{
+  UiTestApplication application;
+  const unsigned    limit = Dali::GetMaxTextureSize();
+  for(bool vertical : {false, true})
+  {
+    Lifecycle test(application, true, vertical, true);
+    test.label.SetRenderScale(2.0f);
+    if(vertical)
+    {
+      test.label.SetRequestedHeight(limit / 2.0f + 1.0f);
+    }
+    else
+    {
+      test.label.SetRequestedWidth(limit / 2.0f + 1.0f);
+    }
+    std::string text;
+    for(unsigned i = 0u; i < limit; ++i)
+    {
+      text += vertical ? "Line\n" : "W";
+    }
+    test.label.SetText(text.c_str());
+    auto task = test.Dispatch();
+    DALI_TEST_CHECK(task);
+    task->Process();
+    DALI_TEST_EQUALS(task->mParameters.renderScale, 1.0f, TEST_LOCATION);
+    test.Deliver(task);
+    test.Drain();
+    test.CheckTexture();
+    auto texture = test.label.GetRendererAt(0u).GetTextures().GetTexture(0u);
+    DALI_TEST_EQUALS(vertical ? texture.GetHeight() : texture.GetWidth(), limit, TEST_LOCATION);
+    DALI_TEST_EQUALS(test.label.GetRenderScale(), 2.0f, TEST_LOCATION);
+
+    test.label.SetRequestedWidth(180.0f);
+    test.label.SetRequestedHeight(48.0f);
+    task = test.Dispatch();
+    DALI_TEST_CHECK(task);
+    task->Process();
+    DALI_TEST_EQUALS(task->mParameters.renderScale, 2.0f, TEST_LOCATION);
+    test.Deliver(task);
+    test.Drain();
+    test.CheckTexture();
+    texture = test.label.GetRendererAt(0u).GetTextures().GetTexture(0u);
+    DALI_TEST_CHECK(texture.GetWidth() <= limit && texture.GetHeight() <= limit);
+    DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+  }
+  END_TEST;
+}
+
+int UtcDaliMarqueeLifecycleCutoutPaddingTextureSizeP(void)
+{
+  UiTestApplication application;
+  const unsigned    limit = Dali::GetMaxTextureSize();
+  for(float renderScale : {1.0f, 2.0f})
+  {
+    Lifecycle   test(application, true, true, true);
+    std::string text;
+    for(unsigned i = 0u; i < limit; ++i)
+    {
+      text += "Line\n";
+    }
+    test.label.SetText(text.c_str());
+    test.label.SetRenderScale(renderScale);
+    test.label.SetPadding(4.0f);
+    test.label.SetTextCutoutEnabled(true);
+    auto task = test.Dispatch();
+    DALI_TEST_CHECK(task);
+    task->Process();
+    DALI_TEST_EQUALS(task->mParameters.renderScale, renderScale, TEST_LOCATION);
+    DALI_TEST_CHECK(task->mRenderInfo.marqueePixelData);
+    DALI_TEST_EQUALS(task->mRenderInfo.marqueePixelData.GetHeight(), limit, TEST_LOCATION);
+    const unsigned completed = test.completed;
+    test.Deliver(task);
+    test.Drain();
+    DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+    test.CheckTexture();
+    auto texture = test.label.GetRendererAt(0u).GetTextures().GetTexture(0u);
+    DALI_TEST_EQUALS(texture.GetHeight(), limit, TEST_LOCATION);
+    DALI_TEST_CHECK(texture.GetWidth() <= limit);
+    DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+    auto  animation = test.Current();
+    float progress  = animation.GetCurrentProgress();
+    test.Advance(100u);
+    DALI_TEST_CHECK(animation.GetCurrentProgress() > progress);
+    DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures().GetTexture(0u) == texture);
+    DALI_TEST_CHECK(test.Take().empty());
+    DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
   }
   END_TEST;
 }

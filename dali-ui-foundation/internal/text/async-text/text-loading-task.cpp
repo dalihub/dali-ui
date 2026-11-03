@@ -24,6 +24,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/signals/callback.h>
 
+#include <limits>
 #include <utility>
 
 // INTERNAL INCLUDES
@@ -91,6 +92,22 @@ void TextLoadingTask::Process()
   {
     // Exclude scheduling, loader release and completion callbacks.
     DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_PROCESS");
+    if(mParameters.renderScale > 1.0f && mParameters.maxTextureSize > 0 &&
+       mParameters.requestType <= Ui::Integration::Text::Async::RENDER_CONSTRAINT)
+    {
+      // Request dimensions are not RenderScale-scaled yet. Ignore unspecified
+      // axes, including MAX_FLOAT; actual raster growth is checked by the loader.
+      const double scale = static_cast<double>(mParameters.renderScale);
+      const double limit = static_cast<double>(mParameters.maxTextureSize);
+      // Cutout adds display-space padding after the requested size is scaled.
+      const double widthLimit  = limit - (mParameters.isCutoutEnabled ? static_cast<double>(mParameters.padding.start) + mParameters.padding.end : 0.0);
+      const double heightLimit = limit - (mParameters.isCutoutEnabled ? static_cast<double>(mParameters.padding.top) + mParameters.padding.bottom : 0.0);
+      if((mParameters.textWidth > 0.0f && mParameters.textWidth < std::numeric_limits<float>::max() && static_cast<double>(mParameters.textWidth) * scale > widthLimit) ||
+         (mParameters.textHeight > 0.0f && mParameters.textHeight < std::numeric_limits<float>::max() && static_cast<double>(mParameters.textHeight) * scale > heightLimit))
+      {
+        mParameters.renderScale = 1.0f;
+      }
+    }
     Load();
   }
   ReleaseLoader();

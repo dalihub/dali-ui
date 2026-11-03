@@ -43,6 +43,7 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-renderer-state.h>
+#include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-reveal-bridge.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
@@ -1115,6 +1116,8 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
   // Enable the pre-multiplied alpha to improve the text quality
   renderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, true);
 
+  // Apply the shared transform first; the tile's size/offset must survive.
+  mImpl->SetTransformUniforms(renderer);
   // Set size and offset for the tiling.
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_SIZE,
                        Vector2(static_cast<float>(info.width), static_cast<float>(info.height)));
@@ -1260,6 +1263,17 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
   if(loadingSuccess)
   {
+    // The loader records the actual rejected raster dimensions, before conversion
+    // to display units. Effective RS1 marquee still needs this final limit check.
+    const auto exceedsTextureLimit = [&]()
+    {
+      int32_t     width, height;
+      const auto& size = textInformation.renderInfo.size;
+      return parameters.maxTextureSize > 0 &&
+             (parameters.renderScale > 1.0f || parameters.isMarqueeEnabled) &&
+             (!Text::Raster::Convert(size.x, width) || !Text::Raster::Convert(size.y, height) ||
+              width > parameters.maxTextureSize || height > parameters.maxTextureSize);
+    };
     resourceStatus = Ui::Visual::ResourceStatus::READY;
 
     Text::AsyncTextRenderInfo renderInfo = textInformation.renderInfo;
@@ -1279,6 +1293,31 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     {
       // Nothing to do.
       ResourceReady(Ui::Visual::ResourceStatus::READY);
+      return;
+    }
+
+    if(!renderInfo.textPixelData)
+    {
+      // Other pixel-less results keep their existing removal/completion contract.
+      if(!exceedsTextureLimit())
+      {
+        RemoveRenderer(control, true);
+      }
+      mAsyncRenderUsesUserSpaceGradient = false;
+      if(mTextLoadingTaskId != publicationTaskId ||
+         mController->GetRenderRevision() != publicationRevision || mControl.GetHandle() != control)
+      {
+        return;
+      }
+      if(mAsyncTextInterface)
+      {
+        mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
+      }
+      if(mTextLoadingTaskId == publicationTaskId &&
+         mController->GetRenderRevision() == publicationRevision && mControl.GetHandle() == control)
+      {
+        ResourceReady(Ui::Visual::ResourceStatus::FAILED);
+      }
       return;
     }
 
@@ -1559,11 +1598,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         RemoveRenderer(control, false);
       }
 
-      int verifiedWidth  = static_cast<int>(renderInfo.size.width);
-      int verifiedHeight = static_cast<int>(renderInfo.size.height);
+      int verifiedWidth  = renderInfo.textPixelData.GetWidth();
+      int verifiedHeight = renderInfo.textPixelData.GetHeight();
 
       // Set information for creating textures.
-      TilingInfo info(verifiedWidth, maxTextureSize);
+      TilingInfo info(verifiedWidth, std::min(verifiedHeight, maxTextureSize));
 
       // Get the pixel data of text.
       info.textPixelData = renderInfo.textPixelData;
@@ -1648,7 +1687,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       if(renderer)
       {
         // Register transform properties
-        mImpl->SetTransformUniforms(renderer);
+        if(!isHeightTiling)
+        {
+          mImpl->SetTransformUniforms(renderer);
+        }
 
         control.AddRenderer(renderer);
 
@@ -3053,7 +3095,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     int verifiedHeight = data.GetHeight();
 
     // Set information for creating textures.
-    TilingInfo info(verifiedWidth, maxTextureSize);
+    TilingInfo info(verifiedWidth, std::min(verifiedHeight, maxTextureSize));
 
     // Get the pixel data of text.
     info.textPixelData = data;
@@ -3151,7 +3193,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     if(renderer)
     {
       // Register transform properties
-      mImpl->SetTransformUniforms(renderer);
+      if(!isHeightTiling)
+      {
+        mImpl->SetTransformUniforms(renderer);
+      }
 
       // Note, AddRenderer will ignore renderer if it is already added.
       actor.AddRenderer(renderer);
