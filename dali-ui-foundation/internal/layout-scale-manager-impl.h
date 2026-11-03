@@ -25,7 +25,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 namespace DALI_NAMESPACE
@@ -50,7 +50,7 @@ namespace Internal
  * applies it).
  *
  * This object is the only owner of that state in the process. RegisterLayoutRoot() and
- * UnregisterLayoutRoot() are reached through GetImpl(); the public LayoutScaleManager
+ * UnregisterLayoutRoot() are reached through GetImpl(); the Extension::LayoutScaleManager
  * handle does not expose them.
  */
 class DALI_UI_API LayoutScaleManagerImpl : public BaseObject
@@ -64,25 +64,25 @@ public:
    *
    * @return A LayoutScaleManager handle wrapping the singleton impl
    */
-  static LayoutScaleManager Get();
+  static Ui::Extension::LayoutScaleManager Get();
 
   /**
-   * @copydoc Dali::Ui::LayoutScaleManager::GetUiScale
+   * @copydoc Dali::Ui::Extension::LayoutScaleManager::GetUiScale
    */
   float GetUiScale() const;
 
   /**
-   * @copydoc Dali::Ui::LayoutScaleManager::SetUiScale
+   * @copydoc Dali::Ui::Extension::LayoutScaleManager::SetUiScale
    */
   void SetUiScale(float scale);
 
   /**
-   * @copydoc Dali::Ui::LayoutScaleManager::IsScalable
+   * @copydoc Dali::Ui::Extension::LayoutScaleManager::IsScalable
    */
   bool IsScalable() const;
 
   /**
-   * @copydoc Dali::Ui::LayoutScaleManager::SetScalable
+   * @copydoc Dali::Ui::Extension::LayoutScaleManager::SetScalable
    */
   void SetScalable(bool enable);
 
@@ -111,12 +111,12 @@ public:
   void UnregisterLayoutRoot(Ui::View root);
 
   /**
-   * @copydoc Dali::Ui::LayoutScaleManager::GetWindowScale
+   * @copydoc Dali::Ui::Extension::LayoutScaleManager::GetWindowScale
    */
   float GetWindowScale(Dali::Window window) const;
 
   /**
-   * @copydoc Dali::Ui::LayoutScaleManager::SetWindowScale
+   * @copydoc Dali::Ui::Extension::LayoutScaleManager::SetWindowScale
    */
   void SetWindowScale(Dali::Window window, float scale);
 
@@ -236,29 +236,32 @@ private:
 
 } // namespace Internal
 
+namespace Extension
+{
 /**
- * @brief Retrieves the LayoutScaleManagerImpl from a LayoutScaleManager handle.
+ * @brief Retrieves the LayoutScaleManagerImpl from an Extension::LayoutScaleManager handle.
  *
  * @param[in] obj The LayoutScaleManager handle
  * @return A reference to the internal implementation
  */
-inline Internal::LayoutScaleManagerImpl& GetImpl(LayoutScaleManager& obj)
+inline Ui::Internal::LayoutScaleManagerImpl& GetImpl(LayoutScaleManager& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Internal::LayoutScaleManagerImpl&>(handle);
+  return static_cast<Ui::Internal::LayoutScaleManagerImpl&>(handle);
 }
 
 /**
- * @brief Retrieves the LayoutScaleManagerImpl from a const LayoutScaleManager handle.
+ * @brief Retrieves the LayoutScaleManagerImpl from a const Extension::LayoutScaleManager handle.
  *
  * @param[in] obj The LayoutScaleManager handle
  * @return A const reference to the internal implementation
  */
-inline const Internal::LayoutScaleManagerImpl& GetImpl(const LayoutScaleManager& obj)
+inline const Ui::Internal::LayoutScaleManagerImpl& GetImpl(const LayoutScaleManager& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Internal::LayoutScaleManagerImpl&>(handle);
+  return static_cast<const Ui::Internal::LayoutScaleManagerImpl&>(handle);
 }
 
+} // namespace Extension
 } // namespace Ui
 } //namespace DALI_NAMESPACE

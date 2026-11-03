@@ -10,12 +10,13 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali-ui/ui-event-thread-callback.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 void utc_dali_icon_button_startup(void)
 {

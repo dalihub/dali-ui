@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/ui-scale-manager-impl.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 namespace DALI_NAMESPACE
@@ -35,8 +35,8 @@ UiScaleManagerImpl::UiScaleManagerImpl()
   // LayoutScaleManagerImpl::Get() on every forward, keeps the shared state alive for as
   // long as this object lives, in whatever order the two function-local statics are
   // destroyed at exit.
-  LayoutScaleManager layoutScaleManager = LayoutScaleManagerImpl::Get();
-  mLayoutScaleManager                   = &GetImpl(layoutScaleManager);
+  Ui::Extension::LayoutScaleManager layoutScaleManager = LayoutScaleManagerImpl::Get();
+  mLayoutScaleManager                                  = &GetImpl(layoutScaleManager);
 }
 
 UiScaleManagerImpl::~UiScaleManagerImpl() = default;

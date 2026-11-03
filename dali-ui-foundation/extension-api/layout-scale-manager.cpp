@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layout-scale-manager-impl.h>
@@ -25,22 +25,23 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
-
+namespace Extension
+{
 LayoutScaleManager::LayoutScaleManager() = default;
 
-LayoutScaleManager::LayoutScaleManager(Internal::LayoutScaleManagerImpl* impl)
+LayoutScaleManager::LayoutScaleManager(Ui::Internal::LayoutScaleManagerImpl* impl)
 : BaseHandle(impl)
 {
 }
 
 LayoutScaleManager LayoutScaleManager::Get()
 {
-  return Internal::LayoutScaleManagerImpl::Get();
+  return Ui::Internal::LayoutScaleManagerImpl::Get();
 }
 
 LayoutScaleManager LayoutScaleManager::DownCast(BaseHandle handle)
 {
-  return LayoutScaleManager(dynamic_cast<Internal::LayoutScaleManagerImpl*>(handle.GetObjectPtr()));
+  return LayoutScaleManager(dynamic_cast<Ui::Internal::LayoutScaleManagerImpl*>(handle.GetObjectPtr()));
 }
 
 float LayoutScaleManager::GetUiScale() const
@@ -73,5 +74,6 @@ void LayoutScaleManager::SetWindowScale(Window window, float scale)
   GetImpl(*this).SetWindowScale(window, scale);
 }
 
+} // namespace Extension
 } // namespace Ui
 } //namespace DALI_NAMESPACE

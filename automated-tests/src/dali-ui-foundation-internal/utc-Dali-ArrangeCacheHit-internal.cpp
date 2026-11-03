@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
@@ -27,7 +28,6 @@
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout-manager.h>
@@ -59,6 +59,7 @@ namespace ReservedTraitId = Dali::Ui::Integration::ReservedTraitId;
 using namespace Dali;
 using namespace Dali::Ui;
 
+using Dali::Ui::Extension::LayoutScaleManager;
 using Dali::Ui::Internal::ViewDataImpl;
 
 void utc_dali_arrange_cache_hit_internal_startup(void)

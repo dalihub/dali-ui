@@ -28,12 +28,13 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
-
 namespace Internal
 {
 class LayoutScaleManagerImpl;
 }
 
+namespace Extension
+{
 /**
  * @brief Holds the UI scale and the window scales that the layout pass applies to every view.
  *
@@ -50,9 +51,15 @@ class LayoutScaleManagerImpl;
  * layout pass, so rendering -- text size, borders, blur and render effects -- and the
  * conversion between requested units and on-screen pixels follow it as well.
  *
+ * This is an extension API for platform integrators and module providers -- the system or
+ * accessibility handler that applies the display scale, or a module that scales the content
+ * of a window -- and not part of the application-facing public API: an application gets both
+ * scales applied by the layout without calling it. It is installed with the public API and
+ * remains usable.
+ *
  * @code
- *   LayoutScaleManager::Get().SetUiScale(1.5f);
- *   LayoutScaleManager::Get().SetWindowScale(window, 2.0f); // views in window: 2.0 * 1.5
+ *   Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+ *   Extension::LayoutScaleManager::Get().SetWindowScale(window, 2.0f); // views in window: 2.0 * 1.5
  * @endcode
  */
 class DALI_UI_API LayoutScaleManager : public BaseHandle
@@ -137,7 +144,7 @@ public:
    *
    * A view that is not on a scene belongs to no registered layout root and is not laid out
    * again, but it caches no effective scale either: ViewImpl::GetEffectiveLayoutScale() and
-   * View::Measure() on it use the new value at once, and it is laid out at that value when
+   * Ui::View::Measure() on it use the new value at once, and it is laid out at that value when
    * it is added to a scene.
    *
    * @param[in] scale The new UI scale. It must be positive, finite and normal (>= FLT_MIN),
@@ -213,7 +220,7 @@ public:
    * The window scale applies to a view only while the view is in @p window. A view that
    * leaves it -- removed from it, or still in it when it is destroyed -- loses the window
    * term together with its whole subtree: until it is added to a window again, its
-   * effective scale (ViewImpl::GetEffectiveLayoutScale()) and View::Measure() on it use
+   * effective scale (ViewImpl::GetEffectiveLayoutScale()) and Ui::View::Measure() on it use
    * the UI-scale term alone, the current one: they follow SetUiScale() and SetScalable()
    * while the view is detached.
    *
@@ -239,9 +246,10 @@ public: // Not intended for Application developers
    *
    * @param[in] impl A pointer to the implementation
    */
-  explicit DALI_INTERNAL LayoutScaleManager(Internal::LayoutScaleManagerImpl* impl);
+  explicit DALI_INTERNAL LayoutScaleManager(Ui::Internal::LayoutScaleManagerImpl* impl);
   /// @endcond
 };
 
+} // namespace Extension
 } // namespace Ui
 } //namespace DALI_NAMESPACE

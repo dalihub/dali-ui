@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  */
 
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-detector.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -20,6 +20,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace Test
 {

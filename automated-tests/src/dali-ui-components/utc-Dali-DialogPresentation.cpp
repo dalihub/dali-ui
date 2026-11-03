@@ -16,6 +16,7 @@
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 #include <dali-ui-components/public-api/dialog/dialog-container.h>
@@ -28,6 +29,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {

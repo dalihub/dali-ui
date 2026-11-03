@@ -21,13 +21,14 @@
 #include <limits>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 // LayoutScaleManager keeps its state in a process-wide singleton, so every case below
 // records the state it moves and restores it before returning.

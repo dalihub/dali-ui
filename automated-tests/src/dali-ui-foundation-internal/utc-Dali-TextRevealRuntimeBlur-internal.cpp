@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali-ui-foundation/internal/render-effects/gaussian-blur-algorithm.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
@@ -50,6 +51,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {

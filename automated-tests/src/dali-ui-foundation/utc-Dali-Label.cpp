@@ -34,6 +34,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-async-task-manager.h>
@@ -43,6 +44,7 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 using Dali::Integration::ToStdString;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {

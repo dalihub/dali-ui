@@ -81,6 +81,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/window-system.h>
 #include <algorithm>
@@ -211,7 +212,7 @@ private:
 
   void ApplyScale(float s)
   {
-    LayoutScaleManager::Get().SetUiScale(s);
+    Ui::Extension::LayoutScaleManager::Get().SetUiScale(s);
     UpdateScaleLabels();
   }
 
@@ -241,7 +242,7 @@ private:
   // drops this window's record entirely.
   void ApplyWindowScale(float scale)
   {
-    LayoutScaleManager::Get().SetWindowScale(mWindow, scale);
+    Ui::Extension::LayoutScaleManager::Get().SetWindowScale(mWindow, scale);
     UpdateScaleLabels();
   }
 
@@ -256,9 +257,9 @@ private:
     // formed here: while the switch is off BOTH terms resolve to 1.0 and so does
     // the product, which is exactly what the label then shows next to the stored
     // values.
-    const float systemScale = LayoutScaleManager::Get().GetUiScale();
-    const bool  scalable    = LayoutScaleManager::Get().IsScalable();
-    const float windowScale = LayoutScaleManager::Get().GetWindowScale(window);
+    const float systemScale = Ui::Extension::LayoutScaleManager::Get().GetUiScale();
+    const bool  scalable    = Ui::Extension::LayoutScaleManager::Get().IsScalable();
+    const float windowScale = Ui::Extension::LayoutScaleManager::Get().GetWindowScale(window);
     const float finalScale  = scalable ? systemScale * windowScale : 1.0f;
 
     std::string text = "System x" + Fmt(systemScale) + " * Window x" + Fmt(windowScale) + " = Final x" + Fmt(finalScale);
@@ -343,7 +344,7 @@ private:
     mSubWindow.SetClass("UiScale compare", "ui-scale-compare");
     mSubWindow.SetBackgroundColor(Color::WHITE);
 
-    LayoutScaleManager::Get().SetWindowScale(mSubWindow, SUB_WINDOW_SCALE);
+    Ui::Extension::LayoutScaleManager::Get().SetWindowScale(mSubWindow, SUB_WINDOW_SCALE);
 
     mSubWindow.Add(BuildSubWindowRoot());
 
@@ -400,7 +401,7 @@ private:
     }
     if(mSubWindow)
     {
-      std::string s = "비교 Window: 열림 — win x" + Fmt(LayoutScaleManager::Get().GetWindowScale(mSubWindow));
+      std::string s = "비교 Window: 열림 — win x" + Fmt(Ui::Extension::LayoutScaleManager::Get().GetWindowScale(mSubWindow));
       mSubWindowStatus.SetText(s.c_str());
     }
     else
@@ -413,14 +414,14 @@ private:
 
   void OnToggleScalable()
   {
-    LayoutScaleManager::Get().SetScalable(!LayoutScaleManager::Get().IsScalable());
+    Ui::Extension::LayoutScaleManager::Get().SetScalable(!Ui::Extension::LayoutScaleManager::Get().IsScalable());
     UpdateScalableButton();
     UpdateScaleLabels();
   }
 
   void UpdateScalableButton()
   {
-    const bool enabled = LayoutScaleManager::Get().IsScalable();
+    const bool enabled = Ui::Extension::LayoutScaleManager::Get().IsScalable();
     mScalableBtnLabel.SetText(enabled ? "Scaling: ON (tap to disable)" : "Scaling: OFF (tap to enable)");
     mScalableBtn.SetBackgroundColor(UiColor(enabled ? 0x2E7D32 : 0xC62828));
   }
@@ -1679,8 +1680,8 @@ private:
         // The box is laid out at its effective scale -- this window's scale times the
         // system scale -- so report the box's own value, with both terms beside it.
         std::string s = "상태: 부모에 연결됨 — Scale x" + Fmt(GetImpl(mScaleChangeBox).GetEffectiveLayoutScale()) +
-                        " 적용됨 (System x" + Fmt(LayoutScaleManager::Get().GetUiScale()) +
-                        " * Window x" + Fmt(LayoutScaleManager::Get().GetWindowScale(mWindow)) + ")";
+                        " 적용됨 (System x" + Fmt(Ui::Extension::LayoutScaleManager::Get().GetUiScale()) +
+                        " * Window x" + Fmt(Ui::Extension::LayoutScaleManager::Get().GetWindowScale(mWindow)) + ")";
         mHStatusLabel.SetText(s.c_str());
       }
     });
@@ -1833,7 +1834,7 @@ private:
       {
         if(mSubWindow)
         {
-          LayoutScaleManager::Get().SetWindowScale(mSubWindow, capturedWindowScale);
+          Ui::Extension::LayoutScaleManager::Get().SetWindowScale(mSubWindow, capturedWindowScale);
           UpdateScaleLabels();
           UpdateSubWindowStatus();
         }

@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/system/system-settings.h>
 
@@ -546,7 +547,7 @@ private:
 
   void SetUiScale(float scale)
   {
-    LayoutScaleManager::Get().SetUiScale(scale);
+    Ui::Extension::LayoutScaleManager::Get().SetUiScale(scale);
     UpdateStatus();
   }
 
@@ -587,7 +588,7 @@ private:
     for(const auto& option : FONT_OPTIONS)
       if(option.value == mSystemFont) fontName = option.name;
     const float        font = mTargetLabel.GetAdjustedFontSizeScale();
-    const float        ui   = LayoutScaleManager::Get().GetUiScale();
+    const float        ui   = Ui::Extension::LayoutScaleManager::Get().GetUiScale();
     const auto         size = IMAGE_SIZE * (font * ui);
     std::ostringstream status;
     status << std::fixed << std::setprecision(2)

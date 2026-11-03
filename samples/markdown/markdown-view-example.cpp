@@ -19,6 +19,7 @@
 
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 
@@ -849,7 +850,7 @@ private:
     }
     DisableAutoTest();
     mUiScaleIndex = index;
-    LayoutScaleManager::Get().SetUiScale(UI_SCALES[index]);
+    Ui::Extension::LayoutScaleManager::Get().SetUiScale(UI_SCALES[index]);
     RefreshPanel();
   }
 

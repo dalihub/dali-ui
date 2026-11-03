@@ -82,7 +82,7 @@ LayoutScaleManagerImpl::LayoutScaleManagerImpl() = default;
 
 LayoutScaleManagerImpl::~LayoutScaleManagerImpl() = default;
 
-LayoutScaleManager LayoutScaleManagerImpl::Get()
+Ui::Extension::LayoutScaleManager LayoutScaleManagerImpl::Get()
 {
   static IntrusivePtr<LayoutScaleManagerImpl> impl;
 
@@ -91,7 +91,7 @@ LayoutScaleManager LayoutScaleManagerImpl::Get()
     impl = new LayoutScaleManagerImpl();
   }
 
-  return LayoutScaleManager(impl.Get());
+  return Ui::Extension::LayoutScaleManager(impl.Get());
 }
 
 float LayoutScaleManagerImpl::GetUiScale() const
@@ -474,8 +474,8 @@ float LayoutScaleManagerImpl::ResolveWindowScale(const ViewImpl& view)
     return 1.0f;
   }
 
-  LayoutScaleManager            manager = LayoutScaleManagerImpl::Get();
-  const LayoutScaleManagerImpl& impl    = GetImpl(manager);
+  Ui::Extension::LayoutScaleManager manager = LayoutScaleManagerImpl::Get();
+  const LayoutScaleManagerImpl&     impl    = GetImpl(manager);
 
   // THE master-switch read for the window term, the counterpart of the one in
   // GetSystemScale() (view-data-impl.cpp) for the system term: while scaling is globally

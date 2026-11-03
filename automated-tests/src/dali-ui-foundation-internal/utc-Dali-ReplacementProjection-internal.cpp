@@ -27,6 +27,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
@@ -49,7 +50,6 @@
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
@@ -68,6 +68,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {

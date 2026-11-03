@@ -8,9 +8,11 @@ dali-ui provides three independent scaling mechanisms that together produce the 
 |---|---|---|
 | **Static scale** (`ScalingFactor`, `_spx`, `_sdp`) | At startup via `UiConfig::Apply()`, frozen at runtime | App / framework developer |
 | **Dynamic scale** (`UiScale`, `UiScalePolicy`) | At runtime, propagated through the view tree on every layout pass | System / OS accessibility settings |
-| **Per-window scale** (`LayoutScaleManager::SetWindowScale()`) | At runtime, to every view in one window | App / framework developer |
+| **Per-window scale** (`Extension::LayoutScaleManager::SetWindowScale()`) | At runtime, to every view in one window | Platform integrator / module provider |
 
 This document covers the **dynamic scale** system (`UiScale`) and the **per-window scale**, which is an independent multiplier on top of it.
+
+The runtime scale APIs — `Extension::LayoutScaleManager` (`dali-ui-foundation/extension-api/layout-scale-manager.h`) — are extension APIs for platform integrators and module providers: the system or accessibility handler that applies the display scale, or a module that scales one window's content. They are not part of the application-facing public API, but they are installed with it and remain usable. In this page `LayoutScaleManager` means `Dali::Ui::Extension::LayoutScaleManager`.
 
 <br/>
 
@@ -54,7 +56,9 @@ When `LayoutScaleManager::SetUiScale()` is called, every registered layout root 
 `LayoutScaleManager` is a process-wide singleton that holds the current system scale value and the scale of each window. It is not a `LayoutManager` and lays nothing out itself; the layout pass applies what it holds.
 
 ```cpp
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+
+using Dali::Ui::Extension::LayoutScaleManager;
 
 // Read the current system scale
 float scale = LayoutScaleManager::Get().GetUiScale();  // default: 1.0
@@ -253,6 +257,8 @@ For views that cache values outside the layout pass, subscribe to property chang
 <br/>
 
 ## Summary
+
+`LayoutScaleManager` below is `Dali::Ui::Extension::LayoutScaleManager`.
 
 | Goal | How |
 |---|---|

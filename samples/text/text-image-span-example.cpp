@@ -23,6 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
@@ -1038,23 +1039,23 @@ private:
     }
     else if(event.GetKeyName() == "1")
     {
-      LayoutScaleManager::Get().SetUiScale(0.8f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
     }
     else if(event.GetKeyName() == "2")
     {
-      LayoutScaleManager::Get().SetUiScale(1.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
     }
     else if(event.GetKeyName() == "3")
     {
-      LayoutScaleManager::Get().SetUiScale(1.2f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
     }
     else if(event.GetKeyName() == "4")
     {
-      LayoutScaleManager::Get().SetUiScale(1.5f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
     }
     else if(event.GetKeyName() == "5")
     {
-      LayoutScaleManager::Get().SetUiScale(2.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
   }
 

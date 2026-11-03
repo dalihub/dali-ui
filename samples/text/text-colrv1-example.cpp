@@ -68,6 +68,7 @@
  *   https://github.com/googlefonts/color-fonts/blob/main/glyph_descriptions.md
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
@@ -177,23 +178,23 @@ private:
     }
     else if(event.GetKeyName() == "q")
     {
-      LayoutScaleManager::Get().SetUiScale(1.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
     }
     else if(event.GetKeyName() == "w")
     {
-      LayoutScaleManager::Get().SetUiScale(2.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
     else if(event.GetKeyName() == "e")
     {
-      LayoutScaleManager::Get().SetUiScale(4.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(4.0f);
     }
     else if(event.GetKeyName() == "r")
     {
-      LayoutScaleManager::Get().SetUiScale(8.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(8.0f);
     }
     else if(event.GetKeyName() == "t")
     {
-      LayoutScaleManager::Get().SetUiScale(12.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(12.0f);
     }
   }
 

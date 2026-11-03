@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
@@ -27,7 +28,6 @@
 #include <dali.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 #include <dali/integration-api/rendering/visual-renderer.h>
@@ -41,6 +41,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {

@@ -621,7 +621,7 @@ public:
    *
    * This is the x of GetPreviewLocalPosition() divided by the effective scale of
    * the session's drag preview -- its window scale times the UI-scale term its
-   * UiScalePolicy selects, both 1.0 while LayoutScaleManager::SetScalable(false) is in
+   * UiScalePolicy selects, both 1.0 while Extension::LayoutScaleManager::SetScalable(false) is in
    * force -- read when this snapshot was taken. The layout multiplies the requested
    * position of a STANDALONE View by that View's own effective scale, so a
    * STANDALONE preview whose PARENT_ORIGIN is TOP_LEFT, whose POSITION_USES_PIVOT is

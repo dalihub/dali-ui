@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
 #include <dali-ui-foundation/integration-api/recycler/linear-items-layouter.h>
 #include <dali-ui-foundation/integration-api/recycler/recycler-view.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
@@ -37,6 +38,7 @@ using Dali::Ui::Integration::RecyclerView;
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 // Measure modes, seen from the public API.
 //

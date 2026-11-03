@@ -175,9 +175,9 @@ layout direction as the keyed inputs.
 The effective scale is part of the measure cache key, so a scale change alone
 forces a re-measure. The effective scale is still resolved in exactly one place,
 `ViewDataImpl::ComputeEffectiveScale()`, and it is the product of two independent
-terms: the per-window scale (`LayoutScaleManager::SetWindowScale()`) and the UI-scale
+terms: the per-window scale (`Extension::LayoutScaleManager::SetWindowScale()`) and the UI-scale
 term the view's `UiScalePolicy` selects. When the process-wide scaling master
-switch (`LayoutScaleManager::SetScalable(false)`) is off, both terms are `1.0` for
+switch (`Extension::LayoutScaleManager::SetScalable(false)`) is off, both terms are `1.0` for
 every view regardless of its policies, so the whole tree behaves as unscaled.
 A view that inherits both terms and has a parent returns its parent's memoized
 product unchanged -- the fast path nearly every view takes. Any other view
@@ -194,7 +194,7 @@ and the editable inline replacement layer -- set it to `DISABLED` next to
 The window term applies only while a view is in a Window: a view in no Window --
 never added, or removed from its window -- resolves it to `1.0`, so its effective
 scale is the UI-scale term alone. Off a scene the effective scale is not memoized at
-all: no layout root `LayoutScaleManager` has registered covers a view that is not on a
+all: no layout root `Extension::LayoutScaleManager` has registered covers a view that is not on a
 scene, so nothing would clear a memoized value when `SetUiScale()` or `SetScalable()`
 moves it, and `ViewDataImpl::GetEffectiveLayoutScale()` therefore caches the value only
 while the view is on a scene and computes it on every read off scene. A view without a

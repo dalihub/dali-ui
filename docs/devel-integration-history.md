@@ -339,13 +339,14 @@ touch sequence를 더 이상 intercept하지 않는다.
 ## UiScaleManager → LayoutScaleManager 이전
 
 `UiScaleManager`가 맡던 시스템 스케일(UI 스케일), 스케일링 스위치, 레이아웃 루트 등록을 새
-클래스 `LayoutScaleManager`(`dali-ui-foundation/public-api/configuration/layout-scale-manager.h`)가
-맡는다. `UiScaleManager`는 deprecated되었으며 문서 태그만 바뀌었다. 릴리스된 심볼과
+클래스 `Dali::Ui::Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`)가
+맡는다. 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API이며 앱 개발자용 공개 API 목록에는
+포함되지 않는다. `UiScaleManager`는 deprecated되었으며 문서 태그만 바뀌었다. 릴리스된 심볼과
 시그니처는 그대로 유지된다.
 
-| Before (`UiScaleManager`, deprecated) | After (`LayoutScaleManager`) |
+| Before (`UiScaleManager`, deprecated) | After (`Extension::LayoutScaleManager`) |
 |---|---|
-| `UiScaleManager::Get()` | `LayoutScaleManager::Get()` |
+| `UiScaleManager::Get()` | `Extension::LayoutScaleManager::Get()` |
 | `GetScale()` | `GetUiScale()` |
 | `SetScale(float)` | `SetUiScale(float)` |
 | `IsScalable()`, `SetScalable(bool)` | 변경 없음 (`IsScalable()`, `SetScalable(bool)`) |

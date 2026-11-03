@@ -53,6 +53,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
@@ -90,7 +91,6 @@
 #include <dali-ui-foundation/internal/views/view/view-gradient-color-binding.h>
 #include <dali-ui-foundation/internal/views/view/view-internal-depth-slots.h>
 #include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
@@ -473,7 +473,7 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 // manager-handle touch and one Window lookup per effective-scale cache MISS.
 inline float GetSystemScale()
 {
-  LayoutScaleManager manager = LayoutScaleManager::Get();
+  Ui::Extension::LayoutScaleManager manager = Ui::Extension::LayoutScaleManager::Get();
   return manager.IsScalable() ? manager.GetUiScale() : 1.0f;
 }
 
@@ -4407,7 +4407,7 @@ void ViewDataImpl::OnViewSceneDisconnection()
   //   (b) standalone: boundary views self-register regardless of their parent
   if(!GetParentView() || IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
-    LayoutScaleManager layoutScaleManager = LayoutScaleManager::Get();
+    Ui::Extension::LayoutScaleManager layoutScaleManager = Ui::Extension::LayoutScaleManager::Get();
     GetImpl(layoutScaleManager).UnregisterLayoutRoot(View::DownCast(mViewImpl.Self()));
   }
 }
@@ -6519,7 +6519,7 @@ void ViewDataImpl::RegisterWithLayoutController()
 
     // Register as a layout root in LayoutScaleManager so it gets invalidated when
     // the system scale changes. Duplicate registration is silently ignored.
-    LayoutScaleManager layoutScaleManager = LayoutScaleManager::Get();
+    Ui::Extension::LayoutScaleManager layoutScaleManager = Ui::Extension::LayoutScaleManager::Get();
     GetImpl(layoutScaleManager).RegisterLayoutRoot(Ui::View::DownCast(self));
   }
 }
@@ -8340,7 +8340,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
               // self turn that a batch already collected is skipped at its tracked check.
               // A view with no View parent stays a root and keeps both registrations.
               LayoutController::ReleaseLayoutRootInternal(&viewImpl);
-              LayoutScaleManager layoutScaleManager = LayoutScaleManager::Get();
+              Ui::Extension::LayoutScaleManager layoutScaleManager = Ui::Extension::LayoutScaleManager::Get();
               GetImpl(layoutScaleManager).UnregisterLayoutRoot(Ui::View::DownCast(viewImpl.Self()));
             }
 

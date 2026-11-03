@@ -21,7 +21,7 @@
 #include <limits>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -30,6 +30,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 // UiScaleManager is deprecated. It keeps every released symbol and forwards to the state
 // LayoutScaleManager owns, so every test that uses it lives in this file: the released

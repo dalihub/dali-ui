@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 
 #include <algorithm>
@@ -2911,23 +2912,23 @@ private:
     }
     else if(keyName == "q" || keyName == "Q")
     {
-      LayoutScaleManager::Get().SetUiScale(0.8f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
     }
     else if(keyName == "w" || keyName == "W")
     {
-      LayoutScaleManager::Get().SetUiScale(1.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
     }
     else if(keyName == "e" || keyName == "E")
     {
-      LayoutScaleManager::Get().SetUiScale(1.2f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
     }
     else if(keyName == "r" || keyName == "R")
     {
-      LayoutScaleManager::Get().SetUiScale(1.5f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
     }
     else if(keyName == "t" || keyName == "T")
     {
-      LayoutScaleManager::Get().SetUiScale(2.0f);
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
   }
 

@@ -28,6 +28,7 @@
 #include <utility>
 #include <vector>
 
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
@@ -43,6 +44,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 void utc_dali_text_decoration_scale_internal_startup(void)
 {

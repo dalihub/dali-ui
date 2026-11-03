@@ -33,16 +33,16 @@ namespace Ui
  * from its parent, force-apply the system scale, or opt out of it.
  *
  * The policy selects the SYSTEM-scale term of a view's effective scale only. The
- * per-window scale set through LayoutScaleManager::SetWindowScale() is an independent
- * multiplier on top of whichever term the policy selects, so it applies to DISABLED
- * views as well; the comments below name the term the policy chooses, not the
+ * per-window scale set through Extension::LayoutScaleManager::SetWindowScale() is an
+ * independent multiplier on top of whichever term the policy selects, so it applies to
+ * DISABLED views as well; the comments below name the term the policy chooses, not the
  * resulting effective scale. (Both terms are 1.0 while
- * LayoutScaleManager::SetScalable(false) is in force.)
+ * Extension::LayoutScaleManager::SetScalable(false) is in force.)
  */
 enum class UiScalePolicy : uint8_t
 {
-  INHERIT  = 0, ///< Inherit effective scale from parent; root takes the UI scale of LayoutScaleManager (default).
-  ENABLED  = 1, ///< Always apply the current LayoutScaleManager UI scale, ignoring parent policy.
+  INHERIT  = 0, ///< Inherit effective scale from parent; root takes the UI scale of Extension::LayoutScaleManager (default).
+  ENABLED  = 1, ///< Always apply the current Extension::LayoutScaleManager UI scale, ignoring parent policy.
   DISABLED = 2, ///< Opt out of the system scale (its term is 1.0); descendant INHERIT views also opt out.
 };
 

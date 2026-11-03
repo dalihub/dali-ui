@@ -19,8 +19,8 @@
 #include <dali-ui-components/internal/markdown/markdown-parser.h>
 #include <dali-ui-components/internal/markdown/markdown-view-impl.h>
 #include <dali-ui-components/internal/markdown/markdown-render-model.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
@@ -40,6 +40,7 @@
 using namespace Dali;
 using namespace Dali::Ui;
 using namespace Dali::Ui::Internal;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {

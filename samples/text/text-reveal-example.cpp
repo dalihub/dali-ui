@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 #include "sample-slider.h"
@@ -313,7 +314,7 @@ private:
         CancelSliderEdit();
       }
     });
-    LayoutScaleManager::Get().SetUiScale(mUiScale);
+    Ui::Extension::LayoutScaleManager::Get().SetUiScale(mUiScale);
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
@@ -1352,7 +1353,7 @@ private:
   {
     CancelSliderEdit();
     mUiScale = scale;
-    LayoutScaleManager::Get().SetUiScale(scale);
+    Ui::Extension::LayoutScaleManager::Get().SetUiScale(scale);
     UpdateControlsViewport();
     mPreviewLayoutTimer.Start();
     if(mBlurEnabled)

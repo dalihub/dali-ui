@@ -20,9 +20,9 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/extension-api/view.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -46,6 +46,7 @@ namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {

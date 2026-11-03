@@ -27,12 +27,12 @@
 #include <memory>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/internal/visuals/gradient/gradient-visual.h>
 #include <dali-ui-foundation/internal/visuals/gradient/linear-gradient.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -642,7 +642,7 @@ int UtcDaliGradientTextureCacheNonKeyProperties(void)
 int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
 {
   UiTestApplication application;
-  auto              scale = Ui::LayoutScaleManager::Get();
+  auto              scale = Ui::Extension::LayoutScaleManager::Get();
   scale.SetScalable(true);
   scale.SetUiScale(1.f);
   auto enabled  = Ui::View::New();

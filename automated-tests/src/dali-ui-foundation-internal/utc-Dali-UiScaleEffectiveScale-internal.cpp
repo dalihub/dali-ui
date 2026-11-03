@@ -20,9 +20,9 @@
 #include <limits>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/internal/layout-scale-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -32,6 +32,7 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+using Dali::Ui::Extension::LayoutScaleManager;
 using Dali::Ui::Internal::LayoutScaleManagerImpl;
 using Dali::Ui::Internal::ViewDataImpl;
 using Dali::Ui::Internal::WindowScalePolicy;

@@ -6,9 +6,11 @@ dali-ui는 세 가지 독립적인 스케일 메커니즘을 제공하며, 이�
 |---|---|---|
 | **정적 스케일** (`ScalingFactor`, `_spx`, `_sdp`) | 시작 시 `UiConfig::Apply()`로 고정, 런타임 변경 불가 | 앱 / 프레임워크 개발자 |
 | **동적 스케일** (`UiScale`, `UiScalePolicy`) | 런타임, 레이아웃 패스마다 뷰 트리 전체에 전파 | 시스템 / OS 접근성 설정 |
-| **윈도우별 스케일** (`LayoutScaleManager::SetWindowScale()`) | 런타임, 한 윈도우 안의 모든 뷰에 적용 | 앱 / 프레임워크 개발자 |
+| **윈도우별 스케일** (`Extension::LayoutScaleManager::SetWindowScale()`) | 런타임, 한 윈도우 안의 모든 뷰에 적용 | 플랫폼 통합 개발자 / 모듈 제공자 |
 
 이 문서는 **동적 스케일** 시스템(`UiScale`)과, 그 위에 독립적으로 곱해지는 **윈도우별 스케일**을 다룹니다.
+
+런타임 스케일 API인 `Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`)는 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API입니다. 디스플레이 스케일을 적용하는 시스템·접근성 핸들러나 한 윈도우의 콘텐츠 스케일을 정하는 모듈이 사용합니다. 앱 개발자용 공개 API 목록에는 포함되지 않지만 공개 API와 함께 설치되며 그대로 사용할 수 있습니다. 이 문서의 `LayoutScaleManager`는 `Dali::Ui::Extension::LayoutScaleManager`입니다.
 
 <br/>
 
@@ -52,7 +54,9 @@ LayoutScaleManager (시스템 스케일 1.5) + 윈도우 스케일 2.0
 `LayoutScaleManager`는 현재 시스템 스케일 값과 각 윈도우의 스케일을 보유하는 프로세스 전역 싱글턴입니다. `LayoutManager`가 아니며 직접 배치하지 않습니다. 보유한 값은 레이아웃 패스가 적용합니다.
 
 ```cpp
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+
+using Dali::Ui::Extension::LayoutScaleManager;
 
 // 현재 시스템 스케일 읽기
 float scale = LayoutScaleManager::Get().GetUiScale();  // 기본값: 1.0
@@ -251,6 +255,8 @@ effectiveScale = windowScale × uiScale = 1.25 × 2.0 = 2.5
 <br/>
 
 ## 요약
+
+아래 표의 `LayoutScaleManager`는 `Dali::Ui::Extension::LayoutScaleManager`입니다.
 
 | 목적 | 방법 |
 |---|---|

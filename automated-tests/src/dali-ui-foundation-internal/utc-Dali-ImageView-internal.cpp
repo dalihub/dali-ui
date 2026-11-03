@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
@@ -26,7 +27,6 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
@@ -46,6 +46,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {
