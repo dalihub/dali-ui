@@ -16,9 +16,24 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/recycler/group-body-decoration.h>
-#include <dali-ui-foundation/public-api/views/recycler/group-linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/group-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/group-body-decoration.h>
+#include <dali-ui-foundation/integration-api/recycler/group-data-source.h>
+#include <dali-ui-foundation/integration-api/recycler/group-linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
+#include <dali-ui-foundation/integration-api/recycler/linear-items-layouter.h>
 #include <dali-ui-test-suite-utils.h>
+
+using Dali::Ui::Integration::GroupAdapter;
+using Dali::Ui::Integration::GroupBodyDecoration;
+using Dali::Ui::Integration::GroupDataSource;
+using Dali::Ui::Integration::GroupLinearItemsLayouter;
+using Dali::Ui::Integration::GroupRowType;
+using Dali::Ui::Integration::ItemAdapter;
+using Dali::Ui::Integration::ItemViewHolder;
+using Dali::Ui::Integration::LinearItemsLayouter;
+
 
 using namespace Dali;
 using namespace Dali::Ui;

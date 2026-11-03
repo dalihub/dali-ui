@@ -70,9 +70,9 @@ function(assert_impl_namespace header namespace_name class_name)
 endfunction()
 
 assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/integration-api/edge-effect-impl.h" "Integration" "EdgeEffectImpl")
-assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/integration-api/items-layouter-impl.h" "Integration" "ItemsLayouterImpl")
+assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/integration-api/recycler/items-layouter-impl.h" "Integration" "ItemsLayouterImpl")
 assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/internal/bounce-edge-effect-impl.h" "Internal" "BounceEdgeEffectImpl")
-assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/internal/linear-items-layouter-impl.h" "Internal" "LinearItemsLayouterImpl")
+assert_impl_namespace("${FOUNDATION_ROOT_SRC_DIR}/internal/recycler/linear-items-layouter-impl.h" "Internal" "LinearItemsLayouterImpl")
 
 file(GLOB_RECURSE foundation_sources
   "${FOUNDATION_ROOT_SRC_DIR}/*.h"
@@ -93,4 +93,21 @@ foreach(source IN LISTS foundation_sources)
       message(FATAL_ERROR "Legacy scroll interface name remains: ${name} in ${source}")
     endif()
   endforeach()
+endforeach()
+
+# Recycler APIs are intentionally excluded from the stable public/extension trees.
+file(GLOB recycler_public_headers "${FOUNDATION_ROOT_SRC_DIR}/public-api/views/recycler/*.h")
+if(recycler_public_headers)
+  message(FATAL_ERROR "Recycler headers remain in public-api: ${recycler_public_headers}")
+endif()
+file(GLOB_RECURSE stable_headers
+  "${FOUNDATION_ROOT_SRC_DIR}/public-api/*.h"
+  "${FOUNDATION_ROOT_SRC_DIR}/extension-api/*.h")
+list(APPEND stable_headers "${FOUNDATION_ROOT_SRC_DIR}/dali-ui-foundation.h"
+                           "${FOUNDATION_ROOT_SRC_DIR}/dali-ui-foundation-extension.h")
+foreach(header IN LISTS stable_headers)
+  file(STRINGS "${header}" recycler_includes REGEX "^[ \t]*#[ \t]*include.*(integration-api/recycler/|public-api/views/recycler/)")
+  if(recycler_includes)
+    message(FATAL_ERROR "Stable header includes a Recycler API: ${header}")
+  endif()
 endforeach()

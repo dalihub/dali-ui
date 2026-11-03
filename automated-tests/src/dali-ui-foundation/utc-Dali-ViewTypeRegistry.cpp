@@ -20,6 +20,10 @@
 #include <dali/devel-api/object/type-info.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/recycler/recycler-view.h>
+
+
+using Dali::Ui::Integration::RecyclerView;
 
 using namespace Dali;
 using namespace Dali::Ui;

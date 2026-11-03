@@ -21,6 +21,11 @@
 #include <vector>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/recycler/item-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
+#include <dali-ui-foundation/integration-api/recycler/items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/recycler-view.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout.h>
@@ -29,14 +34,16 @@
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
-#include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
-#include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/recycler-view.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+
+using Dali::Ui::Integration::ItemAdapter;
+using Dali::Ui::Integration::ItemViewHolder;
+using Dali::Ui::Integration::LinearItemsLayouter;
+using Dali::Ui::Integration::RecyclerView;
+
 
 using namespace Dali;
 using namespace Dali::Ui;

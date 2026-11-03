@@ -1,5 +1,10 @@
 # Recycler API ABI 리팩토링 인계
 
+> 2026-11-03: Recycler 기능군을 `integration-api/recycler/`와
+> `Dali::Ui::Integration`으로 이동했다. 현재 API·ABI 안정성을 보장하지 않으며,
+> 아래 PImpl·소유권 재설계는 public-api 승격 검토를 위한 후속 제안으로 남긴다.
+> 이번 이동에서는 해당 재설계를 구현하지 않았다.
+
 Recycler 공개 API의 상태 은닉, 복사 의미, 소유권과 확장성을 개선하기 위한 후속 작업이다.
 현재는 pre-release이므로 명확한 설계를 위해 공개 API를 변경할 수 있다는 사용자 전제를
 적용한다. 아래 설계와 commit 순서는 대화에서 정리한 권장안이며, 이번 작업에서 구현을
@@ -10,7 +15,7 @@ Recycler 공개 API의 상태 은닉, 복사 의미, 소유권과 확장성을 �
 
 ## 대상과 사용자 기준
 
-대상 헤더는 `dali-ui-foundation/public-api/views/recycler/`의 다음 네 파일이다.
+대상 헤더는 `dali-ui-foundation/integration-api/recycler/`의 다음 네 파일이다.
 
 - `group-body-decoration.h`
 - `item-adapter.h` — 최초 요청의 `item-adaptor.h`에 해당하는 실제 파일명
@@ -129,7 +134,7 @@ View 자체를 복제하는 것이 아니다. GroupAdapter는 내부 adapter 호
 
 ## 성능상 주의할 실제 호출 경로
 
-관련 코드는 `dali-ui-foundation/integration-api/`에 있다.
+관련 코드는 `dali-ui-foundation/integration-api/recycler/`에 있다.
 
 - `recycler-view-impl.cpp`: RecycleAll, RecycleRecord, CacheRecycledItem,
   ObtainItemView에서 holder의 값 복사와 vector 이동이 발생한다. PImpl 전환 전에
