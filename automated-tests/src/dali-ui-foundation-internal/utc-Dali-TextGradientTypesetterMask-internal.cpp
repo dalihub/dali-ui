@@ -1246,15 +1246,72 @@ int UtcDaliGradientSpanRasterDisplayScalePixelsP(void)
       context = {display, Vector4(0.0f, 0.0f, 1.0f, 1.0f), 1.0f};
       DALI_TEST_EQUALS(SumRgbaAlphaPixels(renderContext()), SumRgbaAlphaPixels(baseline), TEST_LOCATION);
     }
-    style.units = Ui::Gradient::Units::OBJECT_BOUNDING_BOX;
-    model.SetGradientPaint(style, UiText::GradientSpan::BoundsMode::VIEW_BOUND);
-    typesetter->SetModel(&model);
-    baseline = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
-    context  = {Vector2(120.25f, 48.125f), Vector4(-0.2f, -0.3f, 2.0f, 3.0f), 2.0f};
-    reset    = renderContext();
-    DALI_TEST_EQUALS(std::memcmp(Dali::Integration::GetPixelDataBuffer(baseline).buffer,
-                                 Dali::Integration::GetPixelDataBuffer(reset).buffer, reset.GetStrideBytes() * reset.GetHeight()),
-                     0, TEST_LOCATION);
+    style.units        = Ui::Gradient::Units::OBJECT_BOUNDING_BOX;
+    style.linearEnd    = Vector2(0.5f, 0.5f);
+    style.radialCenter = Vector2(-0.2f, -0.1f);
+    style.radialRadius = 0.6f;
+    style.conicCenter  = Vector2(-0.2f, -0.1f);
+    for(auto boundsMode : {UiText::GradientSpan::BoundsMode::VIEW_BOUND,
+                           UiText::GradientSpan::BoundsMode::CONTENT_BOUND,
+                           UiText::GradientSpan::BoundsMode::SPAN_BOUND})
+    {
+      model.SetGradientPaint(style, boundsMode);
+      typesetter->SetModel(&model);
+      baseline = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
+      for(float scale : {0.5f, 1.0f, 1.25f, 2.0f})
+      {
+        for(const Vector2& view : {MASK_SIZE, Vector2(280.0f, 96.0f), Vector2(240.0f, 128.0f), Vector2(280.0f, 128.0f)})
+        {
+          const Vector2 offset = (view - MASK_SIZE) * 0.5f;
+          context              = {MASK_SIZE, Vector4(-offset.x / MASK_SIZE.x, -offset.y / MASK_SIZE.y, view.x / MASK_SIZE.x, view.y / MASK_SIZE.y), scale};
+          reset                = renderContext();
+          if(boundsMode != UiText::GradientSpan::BoundsMode::VIEW_BOUND || view == MASK_SIZE)
+          {
+            DALI_TEST_EQUALS(std::memcmp(Dali::Integration::GetPixelDataBuffer(baseline).buffer,
+                                         Dali::Integration::GetPixelDataBuffer(reset).buffer, reset.GetStrideBytes() * reset.GetHeight()),
+                             0, TEST_LOCATION);
+          }
+          if(boundsMode == UiText::GradientSpan::BoundsMode::VIEW_BOUND)
+          {
+            const auto buffer  = Dali::Integration::GetPixelDataBuffer(reset);
+            uint32_t   checked = 0u;
+            for(uint32_t y = 0u; y < reset.GetHeight(); ++y)
+            {
+              for(uint32_t x = 0u; x < reset.GetWidth(); ++x)
+              {
+                const auto* pixel = buffer.buffer + y * reset.GetStrideBytes() + x * 4u;
+                if(pixel[3] < 200u)
+                {
+                  continue;
+                }
+                // Independent full View oracle: raster pixel center plus its View offset.
+                const double px       = (x + 0.5 + offset.x) / view.x - 0.5;
+                const double py       = (y + 0.5 + offset.y) / view.y - 0.5;
+                double       position = px + py;
+                if(style.type == Ui::Gradient::Type::RADIAL)
+                {
+                  position = std::hypot(px + 0.2, py + 0.1) / 0.6;
+                }
+                else if(style.type == Ui::Gradient::Type::CONIC)
+                {
+                  position = (std::atan2(py + 0.1, px + 0.2) - 0.4) / (2.0 * Math::PI);
+                  position -= std::floor(position);
+                }
+                position = std::max(0.0, std::min(1.0, position));
+                DALI_TEST_EQUALS(static_cast<float>(pixel[2]) / pixel[3], static_cast<float>(position), 0.01f, TEST_LOCATION);
+                ++checked;
+              }
+            }
+            DALI_TEST_CHECK(checked > 0u);
+          }
+        }
+      }
+      // A standalone call still uses its raster when no View context is supplied.
+      reset = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
+      DALI_TEST_EQUALS(std::memcmp(Dali::Integration::GetPixelDataBuffer(baseline).buffer,
+                                   Dali::Integration::GetPixelDataBuffer(reset).buffer, reset.GetStrideBytes() * reset.GetHeight()),
+                       0, TEST_LOCATION);
+    }
   }
   END_TEST;
 }
@@ -1297,6 +1354,70 @@ int UtcDaliTextGradientSpanIndependentForegroundAlphaP(void)
             DALI_TEST_CHECK(std::abs(static_cast<int>(pixel[3u]) - expected) <= 1);
           }
         }
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliGradientSpanNonFiniteGeometryPixelsN(void)
+{
+  UiTestApplication application;
+  for(auto units : {Ui::Gradient::Units::USER_SPACE, Ui::Gradient::Units::OBJECT_BOUNDING_BOX})
+  {
+    for(auto bounds : {UiText::GradientSpan::BoundsMode::CONTENT_BOUND, UiText::GradientSpan::BoundsMode::VIEW_BOUND, UiText::GradientSpan::BoundsMode::SPAN_BOUND})
+    {
+      for(auto type : {Ui::Gradient::Type::LINEAR, Ui::Gradient::Type::RADIAL, Ui::Gradient::Type::CONIC})
+      {
+        MaskModel                         model(6u);
+        UiText::Internal::Gradient::Style style;
+        style.enabled      = true;
+        style.units        = units;
+        style.type         = type;
+        style.linearEnd    = Vector2(100.f, 0.f);
+        style.radialRadius = 100.f;
+        style.stops.PushBack({0.f, Color::RED});
+        style.stops.PushBack({1.f, Color::BLUE});
+        model.SetGradientPaint(style, bounds);
+        auto typesetter = UiText::Typesetter::New(&model);
+        auto reference  = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
+        DALI_TEST_CHECK(reference);
+        auto referenceBytes = Integration::GetPixelDataBuffer(reference);
+        bool ink            = false;
+        for(uint32_t i = 3; i < referenceBytes.bufferSize; i += 4)
+        {
+          ink |= referenceBytes.buffer[i] != 0;
+        }
+        DALI_TEST_CHECK(ink);
+        for(float value : {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity()})
+        {
+          auto invalid = style;
+          if(type == Ui::Gradient::Type::LINEAR)
+          {
+            invalid.linearEnd.x = value;
+          }
+          if(type == Ui::Gradient::Type::RADIAL)
+          {
+            invalid.radialCenter.x = value;
+          }
+          if(type == Ui::Gradient::Type::CONIC)
+          {
+            invalid.conicCenter.x = value;
+          }
+          model.SetGradientPaint(invalid, bounds);
+          auto pixels = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
+          DALI_TEST_CHECK(pixels);
+          auto bytes = Integration::GetPixelDataBuffer(pixels);
+          for(uint32_t i = 3; i < bytes.bufferSize; i += 4)
+          {
+            DALI_TEST_EQUALS(bytes.buffer[i], uint8_t(0), TEST_LOCATION);
+          }
+        }
+        model.SetGradientPaint(style, bounds);
+        auto restored = typesetter->Render(MASK_SIZE, UiText::Direction::LEFT_TO_RIGHT, UiText::Typesetter::RENDER_NO_STYLES);
+        auto bytes    = Integration::GetPixelDataBuffer(restored);
+        DALI_TEST_EQUALS(bytes.bufferSize, referenceBytes.bufferSize, TEST_LOCATION);
+        DALI_TEST_EQUALS(std::memcmp(bytes.buffer, referenceBytes.buffer, bytes.bufferSize), 0, TEST_LOCATION);
       }
     }
   }

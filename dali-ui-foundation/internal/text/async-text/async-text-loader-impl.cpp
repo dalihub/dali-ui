@@ -1583,7 +1583,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                                   parameters);
 
   std::optional<GradientRasterContext> gradientContext;
-  if(Internal::HasUserSpaceGradientSpan(gradientSpanData))
+  if(Internal::RequiresGradientRasterContext(gradientSpanData))
   {
     const float   controlWidth  = isRenderScale ? parameters.renderScaleWidth : parameters.textWidth;
     const float   controlHeight = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;

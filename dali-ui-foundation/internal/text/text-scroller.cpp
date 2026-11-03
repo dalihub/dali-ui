@@ -65,9 +65,9 @@ constexpr const char*     UNIFORM_TEXT_GRADIENT_START_POSITION_NAME("uTextGradie
 constexpr const char*     UNIFORM_TEXT_GRADIENT_END_POSITION_NAME("uTextGradientEndPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME("uTextGradientStartOffset");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_BOUNDS_NAME("uTextGradientBounds");
-constexpr const char*     UNIFORM_TEXT_GRADIENT_TYPE_NAME("uTextGradientType");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_EVALUATION_MODE_NAME("uTextGradientEvaluationMode");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME("uTextGradientRadialCenter");
-constexpr const char*     UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME("uTextGradientRadialScale");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_EVALUATION_SCALE_NAME("uTextGradientEvaluationScale");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME("uTextGradientConicCenter");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME("uTextGradientConicScale");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME("uTextGradientConicStartAngle");
@@ -75,9 +75,9 @@ constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_START_POSITION_NAME("uTe
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_END_POSITION_NAME("uTextGradientOverlayEndPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME("uTextGradientOverlayStartOffset");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME("uTextGradientOverlayBounds");
-constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME("uTextGradientOverlayType");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_MODE_NAME("uTextGradientOverlayEvaluationMode");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME("uTextGradientOverlayRadialCenter");
-constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME("uTextGradientOverlayRadialScale");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_SCALE_NAME("uTextGradientOverlayEvaluationScale");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME("uTextGradientOverlayConicCenter");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME("uTextGradientOverlayConicScale");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME("uTextGradientOverlayConicStartAngle");
@@ -583,9 +583,9 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
     // Update the renderer values so stale non-marquee bounds cannot override the scroller shader.
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, textGradient.startPosition);
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, textGradient.endPosition);
-    Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(textGradient.type));
+    Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_EVALUATION_MODE_NAME, static_cast<float>(textGradient.evaluationMode));
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, textGradient.radialCenter);
-    Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, textGradient.radialScale);
+    Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_EVALUATION_SCALE_NAME, textGradient.evaluationScale);
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME, textGradient.conicCenter);
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME, textGradient.conicScale);
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, textGradient.conicStartAngle);
@@ -601,9 +601,9 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   {
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_POSITION_NAME, textGradient.overlayStartPosition);
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_END_POSITION_NAME, textGradient.overlayEndPosition);
-    Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME, static_cast<float>(textGradient.overlayType));
+    Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_MODE_NAME, static_cast<float>(textGradient.overlayEvaluationMode));
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME, textGradient.overlayRadialCenter);
-    Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME, textGradient.overlayRadialScale);
+    Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_SCALE_NAME, textGradient.overlayEvaluationScale);
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME, textGradient.overlayConicCenter);
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME, textGradient.overlayConicScale);
     Text::Internal::Gradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME, textGradient.overlayConicStartAngle);

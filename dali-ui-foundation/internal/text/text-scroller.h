@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
@@ -50,39 +51,41 @@ typedef IntrusivePtr<TextScroller> TextScrollerPtr;
 
 struct TextScrollerGradient
 {
-  bool            enabled{false};
-  Gradient::Type  type{Gradient::Type::NONE};
-  Vector2         startPosition{Vector2::ZERO};
-  Vector2         endPosition{Vector2::ONE};
-  Vector2         radialCenter{Vector2::ZERO};
-  Vector2         radialScale{Vector2::ZERO};
-  Vector2         conicCenter{Vector2::ZERO};
-  Vector2         conicScale{Vector2::ONE};
-  float           conicStartAngle{0.0f};
-  float           startOffset{0.0f};
-  Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized bounds in the selected TextGradient coordinate space.
-  bool            useTextureCoordinates{false};   ///< True for content-attached marquee coordinates; false for viewport coordinates.
-  Property::Index startOffsetPropertyIndex{Property::INVALID_INDEX};
-  bool            applyConstraintsAlways{false};
-  bool            mixedTextGradient{false};          ///< True when scroller uses preserved color + gradient mask textures.
-  bool            styleTextureEnabled{false};        ///< True when slot set includes a below-fill style texture.
-  bool            overlayStyleTextureEnabled{false}; ///< True when slot set includes underline/strikethrough texture.
+  bool                               enabled{false};
+  Gradient::Type                     type{Gradient::Type::NONE};
+  Internal::Gradient::EvaluationMode evaluationMode{Internal::Gradient::EvaluationMode::NONE};
+  Vector2                            startPosition{Vector2::ZERO};
+  Vector2                            endPosition{Vector2::ONE};
+  Vector2                            radialCenter{Vector2::ZERO};
+  Vector2                            evaluationScale{Vector2::ZERO}; ///< Packed shader coefficients selected by evaluationMode.
+  Vector2                            conicCenter{Vector2::ZERO};
+  Vector2                            conicScale{Vector2::ONE};
+  float                              conicStartAngle{0.0f};
+  float                              startOffset{0.0f};
+  Vector4                            bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized bounds in the selected TextGradient coordinate space.
+  bool                               useTextureCoordinates{false};   ///< True for content-attached marquee coordinates; false for viewport coordinates.
+  Property::Index                    startOffsetPropertyIndex{Property::INVALID_INDEX};
+  bool                               applyConstraintsAlways{false};
+  bool                               mixedTextGradient{false};          ///< True when scroller uses preserved color + gradient mask textures.
+  bool                               styleTextureEnabled{false};        ///< True when slot set includes a below-fill style texture.
+  bool                               overlayStyleTextureEnabled{false}; ///< True when slot set includes underline/strikethrough texture.
 
-  bool                      overlayEnabled{false};
-  Gradient::Type            overlayType{Gradient::Type::NONE};
-  Vector2                   overlayStartPosition{Vector2::ZERO};
-  Vector2                   overlayEndPosition{Vector2::ONE};
-  Vector2                   overlayRadialCenter{Vector2::ZERO};
-  Vector2                   overlayRadialScale{Vector2::ZERO};
-  Vector2                   overlayConicCenter{Vector2::ZERO};
-  Vector2                   overlayConicScale{Vector2::ONE};
-  float                     overlayConicStartAngle{0.0f};
-  float                     overlayStartOffset{0.0f};
-  Vector4                   overlayBounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized bounds in the selected TextGradientOverlay coordinate space.
-  bool                      overlayUseTextureCoordinates{false};   ///< True for content-attached marquee coordinates; false for viewport coordinates.
-  Text::GradientOverlayMode overlayMode{Text::GradientOverlayMode::SRC_OVER};
-  Property::Index           overlayStartOffsetPropertyIndex{Property::INVALID_INDEX};
-  bool                      overlayApplyConstraintsAlways{false};
+  bool                               overlayEnabled{false};
+  Gradient::Type                     overlayType{Gradient::Type::NONE};
+  Internal::Gradient::EvaluationMode overlayEvaluationMode{Internal::Gradient::EvaluationMode::NONE};
+  Vector2                            overlayStartPosition{Vector2::ZERO};
+  Vector2                            overlayEndPosition{Vector2::ONE};
+  Vector2                            overlayRadialCenter{Vector2::ZERO};
+  Vector2                            overlayEvaluationScale{Vector2::ZERO}; ///< Packed shader coefficients selected by overlayEvaluationMode.
+  Vector2                            overlayConicCenter{Vector2::ZERO};
+  Vector2                            overlayConicScale{Vector2::ONE};
+  float                              overlayConicStartAngle{0.0f};
+  float                              overlayStartOffset{0.0f};
+  Vector4                            overlayBounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized bounds in the selected TextGradientOverlay coordinate space.
+  bool                               overlayUseTextureCoordinates{false};   ///< True for content-attached marquee coordinates; false for viewport coordinates.
+  Text::GradientOverlayMode          overlayMode{Text::GradientOverlayMode::SRC_OVER};
+  Property::Index                    overlayStartOffsetPropertyIndex{Property::INVALID_INDEX};
+  bool                               overlayApplyConstraintsAlways{false};
 };
 
 /**

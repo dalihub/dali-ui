@@ -62,9 +62,48 @@ bool IsRenderable(const Dali::Ui::Gradient::Base& gradient)
   }
 }
 
+bool HasFiniteGeometry(const Style& style)
+{
+  const auto finite = [](const Vector2& value)
+  {
+    return std::isfinite(value.x) && std::isfinite(value.y);
+  };
+  if(!std::isfinite(style.startOffset))
+  {
+    return false;
+  }
+  switch(style.type)
+  {
+    case Dali::Ui::Gradient::Type::LINEAR:
+    {
+      return finite(style.linearStart) && finite(style.linearEnd);
+    }
+
+    case Dali::Ui::Gradient::Type::RADIAL:
+    {
+      return finite(style.radialCenter) && std::isfinite(style.radialRadius);
+    }
+
+    case Dali::Ui::Gradient::Type::CONIC:
+    {
+      return finite(style.conicCenter) && std::isfinite(style.conicStartAngle.radian);
+    }
+
+    case Dali::Ui::Gradient::Type::NONE:
+    {
+      return true;
+    }
+
+    default:
+    {
+      return false;
+    }
+  }
+}
+
 bool IsRenderable(const Style& style)
 {
-  if(!style.enabled || style.stops.Count() < 2u)
+  if(!style.enabled || style.stops.Count() < 2u || !HasFiniteGeometry(style))
   {
     return false;
   }
@@ -154,17 +193,19 @@ RenderData ResolveRenderData(const Style&   style,
     return data;
   }
 
-  if(style.units == Dali::Ui::Gradient::Units::USER_SPACE &&
-     (!std::isfinite(coordinateSize.x) || !std::isfinite(coordinateSize.y)))
+  if(!std::isfinite(coordinateSize.x) || !std::isfinite(coordinateSize.y) ||
+     !std::isfinite(bounds.x) || !std::isfinite(bounds.y) ||
+     !std::isfinite(bounds.z) || !std::isfinite(bounds.w))
   {
-    DALI_LOG_ERROR("Text gradient coordinate size is not finite\n");
+    DALI_LOG_ERROR("Text gradient coordinate size or bounds are not finite\n");
     return data;
   }
 
-  data.enabled     = true;
-  data.type        = style.type;
-  data.startOffset = style.startOffset;
-  data.bounds      = bounds;
+  data.enabled        = true;
+  data.type           = style.type;
+  data.evaluationMode = EvaluationMode::LINEAR_NORMALIZED;
+  data.startOffset    = style.startOffset;
+  data.bounds         = bounds;
 
   data.startPosition =
     Text::Internal::ResolveGradientPosition(style.units, style.linearStart, bounds, coordinateSize);
@@ -173,6 +214,7 @@ RenderData ResolveRenderData(const Style&   style,
 
   if(style.type == Dali::Ui::Gradient::Type::RADIAL)
   {
+    data.evaluationMode = EvaluationMode::RADIAL;
     data.radialCenter =
       Text::Internal::ResolveGradientPosition(style.units, style.radialCenter, bounds, coordinateSize);
     data.radialScale =
@@ -180,6 +222,7 @@ RenderData ResolveRenderData(const Style&   style,
   }
   else if(style.type == Dali::Ui::Gradient::Type::CONIC)
   {
+    data.evaluationMode = EvaluationMode::CONIC;
     data.conicCenter =
       Text::Internal::ResolveGradientPosition(style.units, style.conicCenter, bounds, coordinateSize);
     data.conicScale =
@@ -187,14 +230,16 @@ RenderData ResolveRenderData(const Style&   style,
     data.conicStartAngle = style.conicStartAngle.radian;
   }
 
-  if(style.units == Dali::Ui::Gradient::Units::USER_SPACE)
+  // Both units can contain non-finite authored values or overflow while
+  // resolving geometry. Do not publish them as uniforms or CPU paint data.
   {
     const auto finite = [](const Vector2& value)
     {
       return std::isfinite(value.x) && std::isfinite(value.y);
     };
     const bool valid = style.type == Dali::Ui::Gradient::Type::LINEAR
-                         ? finite(data.startPosition) && finite(data.endPosition)
+                         ? finite(data.startPosition) && finite(data.endPosition) &&
+                             std::isfinite((data.endPosition - data.startPosition).LengthSquared())
                        : style.type == Dali::Ui::Gradient::Type::RADIAL
                          ? finite(data.radialCenter) && finite(data.radialScale)
                          : finite(data.conicCenter) && finite(data.conicScale);
@@ -203,6 +248,34 @@ RenderData ResolveRenderData(const Style&   style,
       DALI_LOG_ERROR("Text gradient geometry is not finite\n");
       return RenderData();
     }
+  }
+  if(style.type == Dali::Ui::Gradient::Type::LINEAR &&
+     style.units == Dali::Ui::Gradient::Units::USER_SPACE)
+  {
+    // Sampling uses selected-bounds coordinates c = (P - origin) / B.
+    // Store k = B * (E - S) / |E - S|^2 so dot(c - S/B, k)
+    // projects in authored coordinates instead of the anisotropic UV metric.
+    const Vector2 boundsSize = Text::Internal::GetGradientBoundsPixelSize(bounds, coordinateSize);
+    const Vector2 vector     = data.endPosition - data.startPosition;
+    // Preserve the original rounding where normalized projection already has
+    // the right metric. Short segments still need to bypass the UV clamp.
+    if((style.linearStart.x == style.linearEnd.x || style.linearStart.y == style.linearEnd.y ||
+        boundsSize.x == boundsSize.y) &&
+       vector.LengthSquared() >= 0.000001f)
+    {
+      return data;
+    }
+    const double dx       = static_cast<double>(style.linearEnd.x) - style.linearStart.x;
+    const double dy       = static_cast<double>(style.linearEnd.y) - style.linearStart.y;
+    const double length   = dx * dx + dy * dy;
+    data.linearProjection = Vector2(static_cast<float>(boundsSize.x * dx / length),
+                                    static_cast<float>(boundsSize.y * dy / length));
+    if(!std::isfinite(data.linearProjection.x) || !std::isfinite(data.linearProjection.y))
+    {
+      DALI_LOG_ERROR("Text gradient projection is not finite\n");
+      return RenderData();
+    }
+    data.evaluationMode = EvaluationMode::LINEAR_USER_SPACE;
   }
   return data;
 }

@@ -315,6 +315,7 @@ int UtcDaliTextRenderScaleFallbackRequestKindsAndSpanP(void)
     Text::Internal::StyledTextGradientRunSnapshot run;
     run.numberOfCharacters = 10;
     run.style.enabled      = true;
+    run.style.type         = Ui::Gradient::Type::LINEAR;
     run.style.units        = Ui::Gradient::Units::USER_SPACE;
     run.style.linearStart  = Vector2::ZERO;
     run.style.linearEnd    = Vector2(80, 40);

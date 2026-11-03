@@ -306,17 +306,25 @@ Vector4 SampleGradient(const GradientRasterPaint& paint, float textureX, float t
   const Vector2 coordinate(localX, localY);
 
   float position = 0.0f;
-  if(data.type == Dali::Ui::Gradient::Type::RADIAL)
+  if(data.evaluationMode == Internal::Gradient::EvaluationMode::RADIAL)
   {
     const Vector2 delta = (coordinate - data.radialCenter) * data.radialScale;
     position            = delta.Length();
   }
-  else if(data.type == Dali::Ui::Gradient::Type::CONIC)
+  else if(data.evaluationMode >= Internal::Gradient::EvaluationMode::CONIC)
   {
-    constexpr float INV_TWO_PI = 0.15915494309189533577f;
-    const Vector2   delta      = (coordinate - data.conicCenter) * data.conicScale;
-    position                   = (std::atan2(delta.y, delta.x) - data.conicStartAngle) * INV_TWO_PI;
-    position -= std::floor(position);
+    if(data.evaluationMode == Internal::Gradient::EvaluationMode::LINEAR_USER_SPACE)
+    {
+      const Vector2 delta = coordinate - data.startPosition;
+      position            = delta.x * data.linearProjection.x + delta.y * data.linearProjection.y;
+    }
+    else
+    {
+      constexpr float INV_TWO_PI = 0.15915494309189533577f;
+      const Vector2   delta      = (coordinate - data.conicCenter) * data.conicScale;
+      position                   = (std::atan2(delta.y, delta.x) - data.conicStartAngle) * INV_TWO_PI;
+      position -= std::floor(position);
+    }
   }
   else
   {
@@ -1283,7 +1291,7 @@ std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&         
     Vector4     bounds = contentBounds;
     if(source.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND)
     {
-      bounds = source.style.units == Ui::Gradient::Units::USER_SPACE && gradientContext
+      bounds = gradientContext
                  ? gradientContext->viewBounds
                  : Vector4(0.0f, 0.0f, 1.0f, 1.0f);
     }
@@ -1308,7 +1316,8 @@ std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&         
       continue;
     }
     result[index].renderData = Internal::Gradient::ResolveRenderData(source.style, bounds, geometrySize);
-    if(!result[index].renderData.enabled && Internal::Gradient::IsRenderable(source.style))
+    if(!result[index].renderData.enabled &&
+       (Internal::Gradient::IsRenderable(source.style) || !Internal::Gradient::HasFiniteGeometry(source.style)))
     {
       // Rejected geometry has no paint. The existing empty-stop path stays transparent.
       continue;

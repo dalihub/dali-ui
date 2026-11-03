@@ -1239,10 +1239,11 @@ struct AtlasRenderer::Impl
     {
       return;
     }
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEvaluationMode", static_cast<float>(data.evaluationMode));
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientStartPosition", data.startPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEndPosition", data.endPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialCenter", data.radialCenter);
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialScale", data.radialScale);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEvaluationScale", data.GetEvaluationScale());
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicCenter", data.conicCenter);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicScale", data.conicScale);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicStartAngle", data.conicStartAngle);
@@ -1261,7 +1262,6 @@ struct AtlasRenderer::Impl
     {
       return;
     }
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
     Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
     ApplyGradientGeometryProperties(renderer, mGradientCoordinateSize, mGradientBounds, mGradientUiScale);
   }
@@ -1318,12 +1318,12 @@ struct AtlasRenderer::Impl
     }
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", coordinateSize);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", bounds);
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEvaluationMode", static_cast<float>(data.evaluationMode));
     Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientStartPosition", data.startPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEndPosition", data.endPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialCenter", data.radialCenter);
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialScale", data.radialScale);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEvaluationScale", data.GetEvaluationScale());
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicCenter", data.conicCenter);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicScale", data.conicScale);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicStartAngle", data.conicStartAngle);

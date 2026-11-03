@@ -577,6 +577,9 @@ void GradientVisual::ApplyLookupTexture()
 
     if(DALI_LIKELY(lookupTexture))
     {
+      // TODO: Radial REPEAT/REFLECT periods drift because texel-center scaling
+      // is applied before wrapping. Correct the period without allowing the
+      // end color to bleed into the first texel.
       float textureSize = static_cast<float>(lookupTexture.GetWidth());
       mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_TEXTURE_COORDINATE_SCALE_FACTOR_NAME),
                                         (textureSize - 1.0f) / textureSize);

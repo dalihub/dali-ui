@@ -1431,7 +1431,7 @@ void CheckDisplayedGradient(Renderer renderer, int type, float scale, bool bbox,
     DALI_TEST_EQUALS(normalized.y * boundsSize.y, authored.y * scale, 0.002f, TEST_LOCATION);
     if(type == 1)
     {
-      const Vector2 radial = renderer.GetProperty<Vector2>(renderer.GetPropertyIndex((prefix + "RadialScale").c_str()));
+      const Vector2 radial = renderer.GetProperty<Vector2>(renderer.GetPropertyIndex((prefix + "EvaluationScale").c_str()));
       DALI_TEST_EQUALS(boundsSize.x / radial.x, 30.0f * scale, 0.002f, TEST_LOCATION);
       DALI_TEST_EQUALS(boundsSize.y / radial.y, 30.0f * scale, 0.002f, TEST_LOCATION);
     }

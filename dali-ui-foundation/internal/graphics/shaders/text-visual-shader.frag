@@ -58,11 +58,11 @@ UNIFORM_BLOCK FragBlock
   UNIFORM lowp vec4 uColor;
 
   #ifdef IS_REQUIRED_TEXT_GRADIENT
-  UNIFORM highp float uTextGradientType;
+  UNIFORM highp float uTextGradientEvaluationMode;
   UNIFORM highp vec2 uTextGradientStartPosition;
   UNIFORM highp vec2 uTextGradientEndPosition;
   UNIFORM highp vec2 uTextGradientRadialCenter;
-  UNIFORM highp vec2 uTextGradientRadialScale;
+  UNIFORM highp vec2 uTextGradientEvaluationScale;
   UNIFORM highp vec2 uTextGradientConicCenter;
   UNIFORM highp vec2 uTextGradientConicScale;
   UNIFORM highp float uTextGradientConicStartAngle;
@@ -71,11 +71,11 @@ UNIFORM_BLOCK FragBlock
   #endif
 
   #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
-  UNIFORM highp float uTextGradientOverlayType;
+  UNIFORM highp float uTextGradientOverlayEvaluationMode;
   UNIFORM highp vec2 uTextGradientOverlayStartPosition;
   UNIFORM highp vec2 uTextGradientOverlayEndPosition;
   UNIFORM highp vec2 uTextGradientOverlayRadialCenter;
-  UNIFORM highp vec2 uTextGradientOverlayRadialScale;
+  UNIFORM highp vec2 uTextGradientOverlayEvaluationScale;
   UNIFORM highp vec2 uTextGradientOverlayConicCenter;
   UNIFORM highp vec2 uTextGradientOverlayConicScale;
   UNIFORM highp float uTextGradientOverlayConicStartAngle;
@@ -101,15 +101,21 @@ UNIFORM_BLOCK FragBlock
 #ifdef IS_REQUIRED_TEXT_GRADIENT
 highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
 {
-  const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
-  const highp float TEXT_GRADIENT_TYPE_CONIC = 3.0;
+  const highp float TEXT_GRADIENT_EVALUATION_RADIAL = 2.0;
+  const highp float TEXT_GRADIENT_EVALUATION_CONIC  = 3.0;
   const highp float TEXT_GRADIENT_INV_TWO_PI = 0.15915494309189533576888376337251;
-  if(abs(uTextGradientType - TEXT_GRADIENT_TYPE_RADIAL) < 0.5)
+  if(abs(uTextGradientEvaluationMode - TEXT_GRADIENT_EVALUATION_RADIAL) < 0.5)
   {
-    return length((textGradientCoord - uTextGradientRadialCenter) * uTextGradientRadialScale);
+    return length((textGradientCoord - uTextGradientRadialCenter) * uTextGradientEvaluationScale);
   }
-  if(abs(uTextGradientType - TEXT_GRADIENT_TYPE_CONIC) < 0.5)
+  // Conic and authored-space linear evaluations share this dispatch.
+  // Normalized linear evaluation keeps its original projection and branch count.
+  if(uTextGradientEvaluationMode > TEXT_GRADIENT_EVALUATION_CONIC - 0.5)
   {
+    if(uTextGradientEvaluationMode > TEXT_GRADIENT_EVALUATION_CONIC + 0.5)
+    {
+      return dot(textGradientCoord - uTextGradientStartPosition, uTextGradientEvaluationScale);
+    }
     highp vec2 conicVector = (textGradientCoord - uTextGradientConicCenter) * uTextGradientConicScale;
     highp float angle = atan(conicVector.y, conicVector.x) - uTextGradientConicStartAngle;
     return fract(angle * TEXT_GRADIENT_INV_TWO_PI);
@@ -124,15 +130,21 @@ highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
 #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
 highp float EvaluateTextGradientOverlayPosition(highp vec2 textGradientCoord)
 {
-  const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
-  const highp float TEXT_GRADIENT_TYPE_CONIC = 3.0;
+  const highp float TEXT_GRADIENT_EVALUATION_RADIAL = 2.0;
+  const highp float TEXT_GRADIENT_EVALUATION_CONIC  = 3.0;
   const highp float TEXT_GRADIENT_INV_TWO_PI = 0.15915494309189533576888376337251;
-  if(abs(uTextGradientOverlayType - TEXT_GRADIENT_TYPE_RADIAL) < 0.5)
+  if(abs(uTextGradientOverlayEvaluationMode - TEXT_GRADIENT_EVALUATION_RADIAL) < 0.5)
   {
-    return length((textGradientCoord - uTextGradientOverlayRadialCenter) * uTextGradientOverlayRadialScale);
+    return length((textGradientCoord - uTextGradientOverlayRadialCenter) * uTextGradientOverlayEvaluationScale);
   }
-  if(abs(uTextGradientOverlayType - TEXT_GRADIENT_TYPE_CONIC) < 0.5)
+  // Conic and authored-space linear evaluations share this dispatch.
+  // Normalized linear evaluation keeps its original projection and branch count.
+  if(uTextGradientOverlayEvaluationMode > TEXT_GRADIENT_EVALUATION_CONIC - 0.5)
   {
+    if(uTextGradientOverlayEvaluationMode > TEXT_GRADIENT_EVALUATION_CONIC + 0.5)
+    {
+      return dot(textGradientCoord - uTextGradientOverlayStartPosition, uTextGradientOverlayEvaluationScale);
+    }
     highp vec2 conicVector = (textGradientCoord - uTextGradientOverlayConicCenter) * uTextGradientOverlayConicScale;
     highp float angle = atan(conicVector.y, conicVector.x) - uTextGradientOverlayConicStartAngle;
     return fract(angle * TEXT_GRADIENT_INV_TWO_PI);

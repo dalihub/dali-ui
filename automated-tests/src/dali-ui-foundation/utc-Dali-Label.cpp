@@ -3275,7 +3275,7 @@ int UtcDaliLabelGradientSpanOverlaySyncAsyncP(void)
                          mode == Text::GradientOverlayMode::SCREEN ? 1.0f : 0.0f,
                          0.001f,
                          TEST_LOCATION);
-        DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextGradientType") != Property::INVALID_INDEX);
+        DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextGradientEvaluationMode") != Property::INVALID_INDEX);
         DALI_TEST_CHECK(renderer.GetTextures().GetTextureCount() >= 3u);
       }
       DALI_TEST_CHECK(foundCompositionRenderer);

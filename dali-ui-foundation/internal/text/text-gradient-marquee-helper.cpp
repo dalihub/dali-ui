@@ -290,10 +290,11 @@ Dali::Ui::Text::TextScrollerGradient CreateScrollerGradient(const Gradient::Styl
   Dali::Ui::Text::TextScrollerGradient textGradient;
   textGradient.enabled               = renderData.enabled;
   textGradient.type                  = renderData.type;
+  textGradient.evaluationMode        = renderData.evaluationMode;
   textGradient.startPosition         = renderData.startPosition;
   textGradient.endPosition           = renderData.endPosition;
   textGradient.radialCenter          = renderData.radialCenter;
-  textGradient.radialScale           = renderData.radialScale;
+  textGradient.evaluationScale       = renderData.GetEvaluationScale();
   textGradient.conicCenter           = renderData.conicCenter;
   textGradient.conicScale            = renderData.conicScale;
   textGradient.conicStartAngle       = renderData.conicStartAngle;
@@ -309,10 +310,11 @@ void SetOverlayGradient(Dali::Ui::Text::TextScrollerGradient&       textGradient
 {
   textGradient.overlayEnabled               = overlayGradient.enabled;
   textGradient.overlayType                  = overlayGradient.type;
+  textGradient.overlayEvaluationMode        = overlayGradient.evaluationMode;
   textGradient.overlayStartPosition         = overlayGradient.startPosition;
   textGradient.overlayEndPosition           = overlayGradient.endPosition;
   textGradient.overlayRadialCenter          = overlayGradient.radialCenter;
-  textGradient.overlayRadialScale           = overlayGradient.radialScale;
+  textGradient.overlayEvaluationScale       = overlayGradient.evaluationScale;
   textGradient.overlayConicCenter           = overlayGradient.conicCenter;
   textGradient.overlayConicScale            = overlayGradient.conicScale;
   textGradient.overlayConicStartAngle       = overlayGradient.conicStartAngle;
