@@ -23,7 +23,9 @@
 #include <dali-ui-foundation/integration-api/recycler/item-adapter.h>
 #include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
 #include <dali-ui-foundation/integration-api/recycler/linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/recycler-view.h>
 #include <dali-ui-test-suite-utils.h>
+#include <array>
 
 using Dali::Ui::Integration::GroupAdapter;
 using Dali::Ui::Integration::GroupBodyDecoration;
@@ -33,6 +35,7 @@ using Dali::Ui::Integration::GroupRowType;
 using Dali::Ui::Integration::ItemAdapter;
 using Dali::Ui::Integration::ItemViewHolder;
 using Dali::Ui::Integration::LinearItemsLayouter;
+using Dali::Ui::Integration::RecyclerView;
 
 
 using namespace Dali;
@@ -251,6 +254,77 @@ int UtcDaliGroupLinearItemsLayouterP(void)
   body = layouter.GetItemBounds(1u, 100.0f);
   DALI_TEST_EQUALS(body.x, 80.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(body.width, 0.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliGroupLinearItemsLayouterAppliesBodyMarginsDuringLayoutP(void)
+{
+  UiTestApplication application;
+  View header;
+  std::array<View, 3> bodyViews;
+  ItemAdapter inner = ItemAdapter::New();
+  inner.CreateViewHolderSignal().Connect(&application, [](ItemViewHolder& holder)
+  {
+    holder.view = View::New();
+    holder.view.SetRequestedHeight(40.0f);
+  });
+  inner.BindViewHolderSignal().Connect(&application, [&](ItemViewHolder& holder)
+  {
+    bodyViews.at(holder.position) = holder.view;
+  });
+
+  GroupAdapter group = GroupAdapter::New();
+  group.SetDataSource(std::make_shared<TestGroupDataSource>());
+  group.SetInnerAdapter(inner);
+  group.SetGapHeight(12.0f);
+  group.CreateHeaderViewHolderSignal().Connect(&application, [&](ItemViewHolder& holder)
+  {
+    header = View::New();
+    header.SetRequestedHeight(30.0f);
+    holder.view = header;
+  });
+
+  GroupLinearItemsLayouter layouter = GroupLinearItemsLayouter::New();
+  layouter.SetGroupAdapter(group);
+  layouter.SetBodyHorizontalMargin(12.0f, 23.0f);
+
+  RecyclerView recycler = RecyclerView::New();
+  recycler.SetRequestedWidth(200.0f);
+  recycler.SetRequestedHeight(240.0f);
+  recycler.SetItemsLayouter(layouter);
+  recycler.SetAdapter(group.GetAdapter());
+  application.GetWindow().Add(recycler);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(recycler.GetFirstVisiblePosition(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(recycler.GetLastVisiblePosition(), 4u, TEST_LOCATION);
+  DALI_TEST_CHECK(header);
+  DALI_TEST_EQUALS(header.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(header.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, 0.001f, TEST_LOCATION);
+  // The first group's top/bottom rows and the second group's single row all use body margins.
+  for(const View& body : bodyViews)
+  {
+    DALI_TEST_CHECK(body);
+    DALI_TEST_EQUALS(body.GetProperty<float>(Actor::Property::POSITION_X), 12.0f, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(body.GetProperty<float>(Actor::Property::SIZE_WIDTH), 165.0f, 0.001f, TEST_LOCATION);
+  }
+
+  layouter.SetBodyHorizontalMargin(7.0f, 9.0f);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(header.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(header.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, 0.001f, TEST_LOCATION);
+  for(const View& body : bodyViews)
+  {
+    DALI_TEST_EQUALS(body.GetProperty<float>(Actor::Property::POSITION_X), 7.0f, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(body.GetProperty<float>(Actor::Property::SIZE_WIDTH), 184.0f, 0.001f, TEST_LOCATION);
+  }
   END_TEST;
 }
 
