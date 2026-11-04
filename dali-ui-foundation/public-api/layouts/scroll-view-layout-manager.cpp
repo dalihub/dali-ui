@@ -26,6 +26,8 @@
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
+#include <dali-ui-foundation/internal/layouts/measure-mode.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -35,6 +37,24 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+
+namespace
+{
+using Internal::MeasureMode;
+using Internal::MeasureModeCheck;
+
+// The mode of one axis of a scrolled child: a MATCH_PARENT axis is assigned the viewport
+// extent; a WRAP_CONTENT axis scrolls, so its budget binds nothing (UNSPECIFIED, still the huge
+// finite number); an explicit size is canonical.
+MeasureMode ScrollChildMode(float requested)
+{
+  if(requested == MATCH_PARENT)
+  {
+    return MeasureMode::EXACTLY;
+  }
+  return (requested >= 0.0f) ? MeasureMode::AT_MOST : MeasureMode::UNSPECIFIED;
+}
+} // namespace
 
 class ScrollViewLayoutManager::Impl : public LayoutManager::Impl
 {
@@ -76,6 +96,12 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
   float maxWidth  = 0.0f;
   float maxHeight = 0.0f;
 
+  // Measure modes: only a view whose producer is exactly this manager is mode-aware (a
+  // subclass passes the custom-parent modes of its view). One step either way: a MATCH_PARENT
+  // axis is aggregated from the constraint below, not from the child's report.
+  const Internal::ViewDataImpl& viewData  = Internal::ViewDataImpl::Get(*view);
+  const bool                    modeAware = (viewData.GetMeasureModeParent() == Internal::MeasureModeParent::SCROLL);
+
   for(uint32_t i = 0; i < count; ++i)
   {
     View child = GetChildViewAt(view, i);
@@ -97,7 +123,10 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
     float childWidthConstraint  = widthIsMatchParent ? widthConstraint : std::numeric_limits<float>::max();
     float childHeightConstraint = heightIsMatchParent ? heightConstraint : std::numeric_limits<float>::max();
 
-    MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    // A subclass or a view with a layout callback passes the custom-parent modes of its view.
+    const Internal::MeasureModes modes     = modeAware ? Internal::MeasureModes{ScrollChildMode(childImpl.GetRequestedWidth()), ScrollChildMode(childImpl.GetRequestedHeight())}
+                                                       : viewData.DeriveChildModesAsCustomParent(childImpl.GetRequestedWidth(), childImpl.GetRequestedHeight());
+    MeasuredSize                 childSize = Internal::ViewDataImpl::Get(childImpl).Measure(childWidthConstraint, childHeightConstraint, modes.width, modes.height, MeasureModeCheck::MATCHES_DERIVATION);
 
     float effectiveWidth  = widthIsMatchParent ? widthConstraint : childSize.width;
     float effectiveHeight = heightIsMatchParent ? heightConstraint : childSize.height;
@@ -115,9 +144,11 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
     return;
   }
 
-  Integration::ScrollViewImpl* scrollImpl = dynamic_cast<Integration::ScrollViewImpl*>(view);
-  const uint32_t               count      = GetChildViewCount(view);
-  float                        s          = view->GetEffectiveScale();
+  Integration::ScrollViewImpl*  scrollImpl = dynamic_cast<Integration::ScrollViewImpl*>(view);
+  const uint32_t                count      = GetChildViewCount(view);
+  float                         s          = view->GetEffectiveScale();
+  const Internal::ViewDataImpl& viewData   = Internal::ViewDataImpl::Get(*view);
+  const bool                    modeAware  = (viewData.GetMeasureModeParent() == Internal::MeasureModeParent::SCROLL);
 
   for(uint32_t i = 0; i < count; ++i)
   {
@@ -152,15 +183,35 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
-      Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
-      childImpl.Measure(childBounds.width, childBounds.height);
+      // A mode-aware scroll view skips the call when the child already holds a measurement for
+      // exactly this slot -- the measure pass already measured a MATCH_PARENT axis EXACTLY at the
+      // viewport, which is the usual case.
+      Internal::ViewDataImpl& childData = Internal::ViewDataImpl::Get(childImpl);
+      if(modeAware)
+      {
+        const MeasureMode widthMode  = ScrollChildMode(childImpl.GetRequestedWidth());
+        const MeasureMode heightMode = ScrollChildMode(childImpl.GetRequestedHeight());
+        if(!childData.CanSkipArrangeRemeasure(childBounds.width, childBounds.height, widthMode, heightMode))
+        {
+          Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
+          childData.Measure(childBounds.width, childBounds.height, widthMode, heightMode, MeasureModeCheck::MATCHES_DERIVATION);
+        }
+      }
+      else
+      {
+        const Internal::MeasureModes                         legacy = viewData.DeriveChildModesAsCustomParent(childImpl.GetRequestedWidth(), childImpl.GetRequestedHeight());
+        Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
+        childData.Measure(childBounds.width, childBounds.height, legacy.width, legacy.height, MeasureModeCheck::MATCHES_DERIVATION);
+      }
     }
-    childImpl.Arrange(childBounds);
+    const LayoutRect arranged = childImpl.Arrange(childBounds);
 
+    // The scrollable extent is the content's real extent: the rect its arrange produced (its slot
+    // clamped by its own minimum/maximum, or the rect a custom arrange returned), not the slot.
     if(scrollImpl != nullptr && child == scrollImpl->GetContent())
     {
-      scrollImpl->SetScrollableWidth(childBounds.width);
-      scrollImpl->SetScrollableHeight(childBounds.height);
+      scrollImpl->SetScrollableWidth(arranged.width);
+      scrollImpl->SetScrollableHeight(arranged.height);
     }
   }
 

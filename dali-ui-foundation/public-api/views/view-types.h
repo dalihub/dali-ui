@@ -42,8 +42,17 @@ enum class CornerRadiusPolicy
  * also reorder the layout children list.
  *
  * Visual z-order (Actor sibling order) and layout order are kept in sync by default.
- * Use PRESERVE when only the drawing/hit order should change while layout arrangement
- * stays the same.
+ * With PRESERVE only the drawing/hit order changes while the layout arrangement stays
+ * the same.
+ *
+ * @deprecated Used only by the deprecated View and ViewImpl sibling-order overloads and
+ * removed together with them. Instead of UPDATE, call the inherited Dali::Actor method
+ * without a policy. Instead of PRESERVE, call the inherited method when the parent is not a
+ * Ui::View, or is a RecyclerView, ScrollView, Navigator or DialogContainer, which restack
+ * their children themselves; under any other Ui::View parent use
+ * Actor::Property::DEPTH_INDEX (Dali::Actor::SetDepthIndex()), which changes only the draw
+ * and hit-test order. Each overload documents its own exceptions; see also
+ * docs/view-sibling-order-migration.md in the dali-ui source tree.
  */
 enum class LayoutOrderPolicy
 {

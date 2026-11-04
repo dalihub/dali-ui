@@ -72,19 +72,9 @@ void SetAccessibilityZoomCallback(Ui::View view, Callback<bool(Ui::View)> callba
   Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityZoomCallback(std::move(callback));
 }
 
-void SetAccessibilityRequestNameCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
-{
-  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestNameCallback(std::move(callback));
-}
-
 void SetAccessibilityRequestDefaultNameCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
 {
   Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestDefaultNameCallback(std::move(callback));
-}
-
-void SetAccessibilityRequestDescriptionCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
-{
-  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestDescriptionCallback(std::move(callback));
 }
 
 void SetAccessibilityRequestDefaultDescriptionCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
@@ -92,9 +82,9 @@ void SetAccessibilityRequestDefaultDescriptionCallback(Ui::View view, Callback<b
   Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestDefaultDescriptionCallback(std::move(callback));
 }
 
-void SetAccessibilityRequestValueCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
+void SetAccessibilityRequestDefaultValueCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
 {
-  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestValueCallback(std::move(callback));
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestDefaultValueCallback(std::move(callback));
 }
 
 bool GrabAccessibilityHighlight(Ui::View view)

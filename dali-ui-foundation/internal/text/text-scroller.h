@@ -117,13 +117,15 @@ public:
    * @param[in] textGradient Full marquee gradient renderer setup data, including optional source
    * property indices for initial animation binding.
    * @param[in] marqueeInitialDelta Optional resolved first-frame shader delta.
+   * @param[in] uiScale UI scale applied to the text controller.
    */
   void SetParameters(Actor scrollingTextActor, Dali::Renderer renderer, TextureSet textureSet, const Size& controlSize,
                      const Size& textureSize, const float wrapGap, bool isTextContentOverflow, CharacterDirection direction,
                      Alignment horizontalAlignment, Alignment verticalAlignment,
                      bool                        animationReStart    = false,
                      const TextScrollerGradient& textGradient        = TextScrollerGradient(),
-                     const MarqueeInitialDelta&  marqueeInitialDelta = MarqueeInitialDelta());
+                     const MarqueeInitialDelta&  marqueeInitialDelta = MarqueeInitialDelta(),
+                     float                       uiScale             = 1.0f);
 
   /**
    * @brief Set the gap distance to elapse before the text wraps around

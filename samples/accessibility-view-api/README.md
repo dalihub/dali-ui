@@ -16,27 +16,44 @@ operation is not exposed by the generic `Accessible` interface.
 
 The effective accessible name is resolved in this order:
 
-1. `OnAccessibilityRequestName()` when it returns `true`, including an
+1. Deprecated `OnAccessibilityRequestName()` when it returns `true`, including an
    intentionally empty value.
 2. A non-empty explicitly configured (or translated) accessibility name.
 3. `OnAccessibilityRequestDefaultName()` when it returns `true`, including an
    intentionally empty value.
 4. The integration-only legacy raw-name fallback, then `Actor::Property::NAME`.
 
-`OnAccessibilityRequestName()` is for an authoritative value resolved for each
-accessibility request. `OnAccessibilityRequestDefaultName()` supplies subclass
-semantics only when the application did not configure an explicit name.
+The deprecated `OnAccessibilityRequestName()` retains its original priority.
+New components should use `OnAccessibilityRequestDefaultName()`, which supplies
+subclass semantics only when the explicit name is empty. Migrating between
+these hooks changes priority because an explicit name wins over the default.
 
 ## Description Resolution Contract
 
 The effective accessible description follows the corresponding order:
 
-1. `OnAccessibilityRequestDescription()` when it returns `true`, including an
+1. Deprecated `OnAccessibilityRequestDescription()` when it returns `true`, including an
    intentionally empty value.
 2. A non-empty explicitly configured (or translated) accessibility description.
 3. `OnAccessibilityRequestDefaultDescription()` when it returns `true`,
    including an intentionally empty value.
 4. The integration-only legacy raw-description fallback.
+
+## Value Resolution Contract
+
+The effective accessible value is resolved in this order:
+
+1. Deprecated `OnAccessibilityRequestValue()` when it returns `true`, including
+   an intentionally empty value.
+2. A non-empty explicitly configured accessibility value.
+3. The default-value callback or `OnAccessibilityRequestDefaultValue()` when
+   it returns `true`, including an intentionally empty value.
+4. An empty value.
+
+The extension API exposes only default Name, Description, and Value callbacks.
+A registered callback replaces its corresponding default virtual. Returning
+`false` continues framework fallback without invoking that virtual; clearing
+registration restores virtual dispatch.
 
 ## Build
 
@@ -45,7 +62,7 @@ From `dali-ui/samples`:
 ```sh
 source ~/setenv
 cmake --fresh -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX .
-make accessibility-view-api.example -j8
+make accessibility-view-api.example -j6
 DISPLAY=:0 ./accessibility-view-api/bin/accessibility-view-api.example
 ```
 
@@ -56,7 +73,7 @@ The sample checks:
 - Static name, description, value, role, flags, automation id, state, reading
   information, relation, language-span, translation, collection, and raw
   attribute methods.
-- Dynamic name, description, and value virtuals for handled values,
+- Deprecated name, description, and value virtuals for handled values,
   intentionally empty values, and fallback to stored values.
 - Explicit-name precedence over the default-name hook, handled-empty
   defaults, and fallback from the default-name hook to the Actor name.
@@ -64,10 +81,10 @@ The sample checks:
   handled-empty defaults, and the legacy raw-description fallback.
 - Direct virtual dispatch for activate, escape, increment, decrement,
   scroll-to-child, pan, and zoom.
-- Per-instance activate, escape, value-change, scroll-to-child, name,
-  default-name, description, default-description, and value callbacks on a
+- Per-instance activate, escape, value-change, scroll-to-child, default-name,
+  default-description, and default-value callbacks on a
   plain `View` that does not use a custom `ViewImpl` subclass.
-- Callback argument forwarding, dynamic/default request behavior, and restoring
+- Callback argument forwarding, explicit values preceding default callbacks, and restoring
   the existing virtual/property paths by setting empty callbacks.
 - Pan and zoom callback setters are not exercised because `dali-ui` does not
   currently expose production accessibility entry points for those dispatchers.

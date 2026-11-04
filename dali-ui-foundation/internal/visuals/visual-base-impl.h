@@ -122,6 +122,17 @@ public:
    */
   void SetTransformAndSize(const Property::Map& transform, Size controlSize, float effectiveScale);
 
+  using InitialLoadingSizeProvider = Vector2 (*)(Actor&);
+
+  /**
+   * @brief Sets the provider queried for content dimensions before the initial scene load.
+   * Visuals that do not support initial load sizing ignore this provider.
+   * @param[in] provider Returns the placement actor's content size in pixels, or zero if unresolved.
+   */
+  virtual void SetInitialLoadingSizeProvider(InitialLoadingSizeProvider provider)
+  {
+  }
+
   /**
    * @copydoc Ui::Integration::Visual::Base::GetHeightForWidth
    */

@@ -26,6 +26,8 @@
 #include <dali/public-api/rendering/shader.h>
 #include <dali/public-api/rendering/uniform-block.h>
 
+#include <memory>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-loader.h>
@@ -40,6 +42,7 @@ namespace Ui
 {
 namespace Internal
 {
+class GradientTextureCache;
 class NPatchLoader;
 class SvgLoader;
 class TextureManager;
@@ -380,6 +383,12 @@ public:
   TextureManager& GetTextureManager();
 
   /**
+   * @brief Lazily creates the gradient lookup cache owned by this factory.
+   * @return A weak reference that remains safe after factory destruction.
+   */
+  std::weak_ptr<GradientTextureCache> GetGradientTextureCache();
+
+  /**
    * Get the N-Patch texture cache.
    * @return A reference to the N patch loader
    */
@@ -520,6 +529,8 @@ private:
   TextureManager mTextureManager;
   NPatchLoader   mNPatchLoader;
   SvgLoader      mSvgLoader;
+
+  std::shared_ptr<GradientTextureCache> mGradientTextureCache;
 
   Dali::UniformBlock mDefaultUniformBlock;
 

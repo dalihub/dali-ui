@@ -1188,6 +1188,8 @@ namespace
 std::vector<AsyncTaskPtr> gDelayedReadyTasks{};
 bool                      gGrabReadyTasks = false;
 Dali::Mutex               gMutex;
+bool                      gCaptureTasks = false;
+std::vector<AsyncTaskPtr> gCapturedTasks;
 } // namespace
 
 void AsyncTask::NotifyToReady()
@@ -1224,6 +1226,14 @@ AsyncTaskManager AsyncTaskManager::Get()
 
 void AsyncTaskManager::AddTask(AsyncTaskPtr task)
 {
+  {
+    Dali::Mutex::ScopedLock lock(gMutex);
+    if(gCaptureTasks)
+    {
+      gCapturedTasks.push_back(task);
+      return;
+    }
+  }
   Internal::Adaptor::GetImplementation(*this).AddTask(task);
 }
 
@@ -1260,12 +1270,18 @@ namespace AsyncTaskManager
 {
 void DestroyAsyncTaskManager()
 {
+  std::vector<Dali::AsyncTaskPtr> capturedTasks;
   {
     Dali::Mutex::ScopedLock lock(gMutex);
     gDelayedReadyTasks.clear();
     gGrabReadyTasks = false;
+    gCaptureTasks   = false;
+    capturedTasks.swap(gCapturedTasks);
   }
 
+  // A task destructor can release a loader and notify another task as ready.
+  // Keep that cleanup outside gMutex, which NotifyToTaskReady also takes.
+  capturedTasks.clear();
   Dali::Internal::Adaptor::gAsyncTaskManager.Reset();
 }
 
@@ -1285,6 +1301,20 @@ void GrabNotifyToReady()
 {
   Dali::Mutex::ScopedLock lock(gMutex);
   gGrabReadyTasks = true;
+}
+
+void SetTaskCaptureEnabled(bool enabled)
+{
+  Dali::Mutex::ScopedLock lock(gMutex);
+  gCaptureTasks = enabled;
+}
+
+std::vector<Dali::AsyncTaskPtr> TakeCapturedTasks()
+{
+  Dali::Mutex::ScopedLock         lock(gMutex);
+  std::vector<Dali::AsyncTaskPtr> tasks;
+  tasks.swap(gCapturedTasks);
+  return tasks;
 }
 
 void UngrabNotifyToReady()

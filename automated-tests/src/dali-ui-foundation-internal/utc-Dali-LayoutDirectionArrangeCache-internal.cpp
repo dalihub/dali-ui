@@ -689,8 +689,9 @@ int UtcDaliLayoutDirectionRedundantWriteKeepsArrangeCacheP(void)
 //    lost by it: no layout pass can run without a window, and reconnection drops
 //    the subtree's caches before registering (see the two off-scene cases below).
 //  - a STANDALONE child is its own scheduling boundary and registers itself, so it
-//    IS hooked -- registered at scene connection as a dirty standalone boundary
-//    (OnViewSceneConnection's standalone+dirty path), with a live window in hand.
+//    IS hooked -- registered at scene connection as a standalone boundary
+//    (OnViewSceneConnection registers every standalone view), with a live window
+//    in hand.
 //    That is not an anomaly: a standalone view is a layout root in every sense the
 //    layout pipeline cares about.
 //
@@ -727,8 +728,8 @@ int UtcDaliLayoutDirectionSignalHookConnectedOnlyAtLayoutRootsP(void)
   DALI_TEST_CHECK(!DataOf(child).IsLayoutDirectionSignalConnected());
 
   // A standalone child stops propagation at itself and registers itself instead --
-  // here at scene connection, as a dirty standalone boundary with a live window in
-  // hand -- so it is hooked. See the note above this test.
+  // here at scene connection, as a standalone boundary with a live window in hand
+  // -- so it is hooked. See the note above this test.
   View standalone = View::New();
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(40.0f);

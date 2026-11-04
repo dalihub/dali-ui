@@ -132,6 +132,13 @@ public: // Creation & Destruction
    * The argc/argv pair is forwarded to the underlying web engine so that
    * engine-specific command-line options can be parsed during creation.
    *
+   * @deprecated Passing engine startup arguments during WebView creation is deprecated
+   * because it couples engine configuration to view creation.
+   *
+   * @note In the Chromium backend, engine command-line arguments are process-wide.
+   * Only the first argument-setting call is applied; later calls do not reconfigure
+   * the engine. This overload does not provide independent per-view engine arguments.
+   *
    * @param[in] argc The count of application arguments
    * @param[in] argv The string array of application arguments
    * @return A handle to a newly allocated Dali resource

@@ -46,11 +46,6 @@ uint32_t ApplyMask(AsyncImageLoader asyncImageLoader, PixelBuffer pixelBuffer,
     .ApplyMask(pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad);
 }
 
-PixelBufferLoadedSignalType& PixelBufferLoadedSignal(AsyncImageLoader asyncImageLoader)
-{
-  return GetImplementation(asyncImageLoader).PixelBufferLoadedSignal();
-}
-
 } // namespace Integration
 } // namespace Ui
 } //namespace DALI_NAMESPACE

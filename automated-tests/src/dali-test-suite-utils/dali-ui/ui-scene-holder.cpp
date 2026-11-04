@@ -326,6 +326,20 @@ Dali::Any SceneHolder::GetNativeHandle() const
   return Dali::Any(0u);
 }
 
+int32_t SceneHolder::GetNativeId() const
+{
+  // Same ABI trap as GetNativeHandle above: the real adaptor's out-of-line
+  // implementation reads mScene at a different offset of this mock object.
+  // Route to the internal stub, which uses the mock's own layout.
+  return GetImplementation(*this).GetNativeId();
+}
+
+Dali::Any SceneHolder::GetNativeRawHandle() const
+{
+  // Same ABI trap as GetNativeHandle above; no native window exists in UTCs.
+  return Dali::Any(0u);
+}
+
 void SceneHolder::SetBackgroundColor(Vector4 color)
 {
   GetImplementation(*this).SetBackgroundColor(color);
@@ -364,6 +378,20 @@ SceneHolder::KeyEventSignalType& SceneHolder::KeyEventSignal()
 SceneHolder::KeyEventGeneratedSignalType& SceneHolder::KeyEventGeneratedSignal()
 {
   return GetImplementation(*this).mSceneHolderKeyEventGeneratedSignal;
+}
+
+SceneHolder::KeyEventGeneratedSignalType& SceneHolder::InterceptKeyEventSignal()
+{
+  // Same ABI trap as GetNativeHandle above: this signal lives at a different
+  // offset in the real adaptor's SceneHolder layout.
+  return GetImplementation(*this).mSceneHolderInterceptKeyEventSignal;
+}
+
+SceneHolder::KeyEventSignalType& SceneHolder::KeyEventDelayedSignal()
+{
+  // Same ABI trap as GetNativeHandle above: this signal lives at a different
+  // offset in the real adaptor's SceneHolder layout.
+  return GetImplementation(*this).mSceneHolderKeyEventDelayedSignal;
 }
 
 SceneHolder::TouchEventSignalType& SceneHolder::TouchEventSignal()

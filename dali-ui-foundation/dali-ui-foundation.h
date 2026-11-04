@@ -59,16 +59,6 @@
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali-ui-foundation/public-api/views/progress-view.h>
-#include <dali-ui-foundation/public-api/views/recycler/group-adapter.h>
-#include <dali-ui-foundation/public-api/views/recycler/group-body-decoration.h>
-#include <dali-ui-foundation/public-api/views/recycler/group-data-source.h>
-#include <dali-ui-foundation/public-api/views/recycler/group-linear-items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
-#include <dali-ui-foundation/public-api/views/recycler/item-decoration.h>
-#include <dali-ui-foundation/public-api/views/recycler/item-view-holder.h>
-#include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/recycler-view.h>
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 #include <dali-ui-foundation/public-api/views/selection-group.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
@@ -149,6 +139,7 @@
 #include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
+#include <dali-ui-foundation/public-api/views/media/media-view.h>
 #include <dali-ui-foundation/public-api/views/video/video-source.h>
 #include <dali-ui-foundation/public-api/views/video/video-view.h>
 

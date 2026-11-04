@@ -184,10 +184,11 @@ PixelData CropRuntimeRevealBlurPixels(PixelData pixels, const Rect<uint32_t>& re
  *
  * The passed plan and timing values are private copies. Preparation never changes
  * the caller's ordinary metadata, schedule or replacement publication.
+ * @param[in] gradientContext Borrowed USER_SPACE raster coordinates, used only during this call.
  */
 std::shared_ptr<const PreparedRevealBlur> PrepareRevealBlur(
   Ui::Text::Typesetter& typesetter, Ui::Text::Internal::Reveal::Plan plan,
   const Vector<Ui::Text::ReplacementRevealTiming>& timings,
   const RevealBlurPreparationOptions&              options,
-  const Vector<Ui::Text::ReplacementPlacement>*    placements = nullptr);
+  const Vector<Ui::Text::ReplacementPlacement>* placements = nullptr, const Ui::Text::GradientRasterContext* gradientContext = nullptr);
 } //namespace DALI_NAMESPACE::Ui::Internal

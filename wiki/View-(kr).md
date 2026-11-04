@@ -129,6 +129,23 @@ interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& e)
 
 <br/>
 
+#### Touch 전파 차단
+
+`View`는 DALi Core의 `Actor::SetTouchPropagationBlocked()`를 상속합니다. 앞쪽 자식의 제스처 인식을
+유지하면서 Overlay 이후의 일반 GEOMETRY Touch 전파만 막을 때 사용합니다.
+
+```cpp
+view.SetTouchPropagationBlocked(true); // 기본값: false
+```
+
+View는 hit 후보로 남으며 Touch를 받을 수 있고, callback 없이도 뒤쪽으로의 전파를 막습니다. 전파 차단 설정은 Touch를
+소비하지 않습니다. 실제 소비 결과가 `true`이면 기존처럼 owner를 정하고 다른 active Touch recipient를 취소합니다.
+앱 callback의 `false`가 다른 callback이나 활성 InteractiveTrait의 소비를 취소하지는 않습니다.
+Hover·Wheel과 조상의 Intercept는 각각 별도 정책으로 처리합니다.
+
+Core API 버전 태그는 `@SINCE_2_5.46`입니다. 최초 DOWN에서 정한 차단 범위의 유지 규칙과 중첩 스크롤 예시는
+[Touch & Gesture — Touch 전파 차단](Touch-&-Gesture-(kr).md#touch-전파-차단)를 참고하세요.
+
 ### 4. View Inheritance
 
 Framework 개발자가 새 컴포넌트를 만들거나 앱이 커스텀 컴포넌트를 만드고 싶을때는 `View`의 **handle 클래스**와 **impl 클래스**를 각각 상속해야 합니다.

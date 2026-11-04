@@ -48,6 +48,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -250,7 +251,6 @@ struct AtlasRenderer::Impl
   };
 
   Impl()
-  : mDepth(0)
   {
     mGlyphManager = AtlasGlyphManager::Get();
     mFontClient   = TextAbstraction::FontClient::Get();
@@ -538,7 +538,7 @@ struct AtlasRenderer::Impl
 
   void CreateActors(const std::vector<MeshRecord>& meshContainer, const Size& textSize, const Vector4& color,
                     const Vector4& shadowColor, const Vector2& shadowOffset, Actor textControl,
-                    Property::Index animatablePropertyIndex, bool drawShadow, bool allowGradient)
+                    Property::Index animatablePropertyIndex, bool drawShadow, bool allowGradient, int depth)
   {
     if(!mActor)
     {
@@ -556,7 +556,7 @@ struct AtlasRenderer::Impl
       const MeshRecord& meshRecord = *it;
 
       Actor actor = CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_NORMAL,
-                                    allowGradient);
+                                    allowGradient, depth);
 
       // Whether the actor has renderers.
       const bool hasRenderer = actor.GetRendererCount() > 0u;
@@ -575,7 +575,7 @@ struct AtlasRenderer::Impl
         }
 
         Actor shadowActor =
-          CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_DROP_SHADOW, false);
+          CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_DROP_SHADOW, false, depth);
 #if defined(DEBUG_ENABLED)
         shadowActor.SetProperty(Dali::Actor::Property::NAME, "Text Shadow renderable actor");
 #endif
@@ -624,7 +624,6 @@ struct AtlasRenderer::Impl
     std::vector<MeshRecord> meshContainerOutline;
     Vector<Extent>          underlineExtents;
     Vector<Extent>          strikethroughExtents;
-    mDepth = depth;
 
     const Vector2&   textSize(view.GetLayoutSize());
     const Vector2    halfTextSize(textSize * 0.5f);
@@ -700,6 +699,11 @@ struct AtlasRenderer::Impl
     uint32_t                               hyphenIndex             = 0;
     const GlyphIndex* const                finalStyleSourceIndices = view.GetFinalGlyphStyleSourceIndices();
     const Internal::GradientSpanModelData* gradientSpanData        = view.GetGradientSpanModelData();
+    if(mGradientState.IsEnabled() || gradientSpanData)
+    {
+      Ui::View owner   = Ui::View::DownCast(textControl);
+      mGradientUiScale = owner ? Ui::GetImpl(owner).GetEffectiveScale() : 1.0f;
+    }
     PrepareGradientSpanResources(gradientSpanData,
                                  positions,
                                  glyphs,
@@ -975,7 +979,7 @@ struct AtlasRenderer::Impl
     {
       const bool drawShadow = STYLE_DROP_SHADOW == style;
       CreateActors(meshContainerOutline, textSize, outlineColor, shadowColor, shadowOffset, textControl,
-                   animatablePropertyIndex, drawShadow, false);
+                   animatablePropertyIndex, drawShadow, false, depth);
 
       isShadowDrawn = drawShadow;
     }
@@ -985,7 +989,7 @@ struct AtlasRenderer::Impl
     {
       const bool drawShadow = !isShadowDrawn && (STYLE_DROP_SHADOW == style);
       CreateActors(meshContainer, textSize, defaultColor, shadowColor, shadowOffset, textControl,
-                   animatablePropertyIndex, drawShadow, true);
+                   animatablePropertyIndex, drawShadow, true, depth);
     }
 
 #if defined(DEBUG_ENABLED)
@@ -1060,57 +1064,73 @@ struct AtlasRenderer::Impl
     }
   }
 
-  void UpdateGradient(const Vector2& coordinateSize, const Vector4& bounds)
+  void UpdateGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale, const Vector4* spanViewBounds)
   {
     const bool coordinateChange = mGradientCoordinateSize != coordinateSize;
+    const bool scaleChange      = mGradientUiScale != uiScale;
     const bool boundsChange     = mGradientBounds != bounds;
-    if(!coordinateChange && !boundsChange)
+    const bool boundsSizeChange = mGradientBounds.z != bounds.z || mGradientBounds.w != bounds.w;
+    const bool userSpace        = mGradientState.style.units == Ui::Gradient::Units::USER_SPACE;
+    // Preserve the legacy BBOX update condition when a span update supplied the
+    // shared coordinate size first. USER_SPACE must observe the original dirty state.
+    const bool globalCoordinateChange = coordinateChange && (!spanViewBounds || userSpace);
+    bool       spanViewBoundsChange   = false;
+    if(spanViewBounds)
     {
-      return;
+      for(const auto& resource : mGradientSpanResources)
+      {
+        if(resource.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND && resource.bounds != *spanViewBounds)
+        {
+          spanViewBoundsChange = true;
+          break;
+        }
+      }
     }
 
-    // ResolveRenderData normalizes USER_SPACE geometry by bounds pixel size,
-    // not bounds origin. Origin is consumed directly by the fragment shader.
-    const bool boundsSizeChange = mGradientBounds.z != bounds.z || mGradientBounds.w != bounds.w;
-    mGradientCoordinateSize     = coordinateSize;
-    mGradientBounds             = bounds;
-    for(auto& renderer : mGradientRenderers)
+    if(globalCoordinateChange || boundsChange || (scaleChange && userSpace))
     {
-      ApplyGradientFrameProperties(renderer, coordinateChange, boundsChange, boundsSizeChange);
+      for(auto& renderer : mGradientRenderers)
+      {
+        ApplyGradientFrameProperties(renderer, globalCoordinateChange, boundsChange,
+                                     boundsSizeChange || (scaleChange && userSpace), coordinateSize, bounds, uiScale);
+      }
     }
+    if(spanViewBounds && (coordinateChange || spanViewBoundsChange || scaleChange))
+    {
+      for(auto& binding : mGradientSpanRendererBindings)
+      {
+        if(binding.paintIndex == 0u || binding.paintIndex > mGradientSpanResources.size())
+        {
+          continue;
+        }
+        const auto& resource  = mGradientSpanResources[binding.paintIndex - 1u];
+        const bool  viewBound = resource.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND;
+        if(coordinateChange || (spanViewBoundsChange && viewBound) ||
+           (scaleChange && resource.style.units == Ui::Gradient::Units::USER_SPACE))
+        {
+          ApplyGradientProperties(binding.renderer, resource.style, viewBound ? *spanViewBounds : resource.bounds, coordinateSize, uiScale);
+        }
+      }
+    }
+    // Commit the shared context only after both sets of bindings consume it.
+    if(spanViewBoundsChange)
+    {
+      for(auto& resource : mGradientSpanResources)
+      {
+        if(resource.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND)
+        {
+          resource.bounds = *spanViewBounds;
+        }
+      }
+    }
+    mGradientCoordinateSize = coordinateSize;
+    mGradientBounds         = bounds;
+    mGradientUiScale        = uiScale;
   }
 
   void UpdateGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds)
   {
-    const bool coordinateChange = mGradientCoordinateSize != coordinateSize;
-    bool       viewBoundsChange = false;
-    mGradientCoordinateSize     = coordinateSize;
-
-    for(auto& resource : mGradientSpanResources)
-    {
-      if(resource.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND && resource.bounds != bounds)
-      {
-        resource.bounds  = bounds;
-        viewBoundsChange = true;
-      }
-    }
-    if(!coordinateChange && !viewBoundsChange)
-    {
-      return;
-    }
-
-    for(auto& binding : mGradientSpanRendererBindings)
-    {
-      if(binding.paintIndex == 0u || binding.paintIndex > mGradientSpanResources.size())
-      {
-        continue;
-      }
-      const GradientSpanAtlasResource& resource = mGradientSpanResources[binding.paintIndex - 1u];
-      if(coordinateChange || resource.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND)
-      {
-        ApplyGradientProperties(binding.renderer, resource.style, resource.bounds);
-      }
-    }
+    UpdateGradient(coordinateSize, mGradientBounds, mGradientUiScale, &bounds);
   }
 
   void RemoveGradientAnimConstraints()
@@ -1205,7 +1225,7 @@ struct AtlasRenderer::Impl
     }
   }
 
-  void ApplyGradientGeometryProperties(Dali::Renderer renderer)
+  void ApplyGradientGeometryProperties(Dali::Renderer renderer, const Vector2& coordinateSize, const Vector4& bounds, float uiScale)
   {
     if(!renderer || !mGradientState.IsEnabled())
     {
@@ -1213,7 +1233,11 @@ struct AtlasRenderer::Impl
     }
 
     const auto data = Internal::Gradient::ResolveRenderData(
-      mGradientState.style, mGradientBounds, mGradientCoordinateSize);
+      mGradientState.style, bounds, Internal::ResolveGradientCoordinateSize(mGradientState.style.units, coordinateSize, uiScale));
+    if(!data.enabled)
+    {
+      return;
+    }
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientStartPosition", data.startPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEndPosition", data.endPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialCenter", data.radialCenter);
@@ -1231,16 +1255,20 @@ struct AtlasRenderer::Impl
     }
 
     const auto data = Internal::Gradient::ResolveRenderData(
-      mGradientState.style, mGradientBounds, mGradientCoordinateSize);
+      mGradientState.style, mGradientBounds, Internal::ResolveGradientCoordinateSize(mGradientState.style.units, mGradientCoordinateSize, mGradientUiScale));
+    if(!data.enabled)
+    {
+      return;
+    }
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
     Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
-    ApplyGradientGeometryProperties(renderer);
+    ApplyGradientGeometryProperties(renderer, mGradientCoordinateSize, mGradientBounds, mGradientUiScale);
   }
 
   void ApplyGradientFrameProperties(Dali::Renderer renderer,
                                     bool           coordinateChange,
                                     bool           boundsChange,
-                                    bool           boundsSizeChange)
+                                    bool boundsSizeChange, const Vector2& coordinateSize, const Vector4& bounds, float uiScale)
   {
     if(!renderer || !mGradientState.IsEnabled())
     {
@@ -1249,15 +1277,15 @@ struct AtlasRenderer::Impl
 
     if(coordinateChange)
     {
-      Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", mGradientCoordinateSize);
+      Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", coordinateSize);
     }
     if(boundsChange)
     {
-      Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", mGradientBounds);
+      Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", bounds);
     }
     if(coordinateChange || boundsSizeChange)
     {
-      ApplyGradientGeometryProperties(renderer);
+      ApplyGradientGeometryProperties(renderer, coordinateSize, bounds, uiScale);
     }
   }
 
@@ -1268,20 +1296,26 @@ struct AtlasRenderer::Impl
       return;
     }
 
-    ApplyGradientProperties(renderer, mGradientState.style, mGradientBounds);
+    ApplyGradientProperties(renderer, mGradientState.style, mGradientBounds, mGradientCoordinateSize, mGradientUiScale);
   }
 
   void ApplyGradientProperties(Dali::Renderer                   renderer,
                                const Internal::Gradient::Style& style,
-                               const Vector4&                   bounds)
+                               const Vector4&                   bounds,
+                               const Vector2&                   coordinateSize,
+                               float                            uiScale)
   {
     if(!renderer || !Internal::Gradient::IsRenderable(style))
     {
       return;
     }
 
-    const auto data = Internal::Gradient::ResolveRenderData(style, bounds, mGradientCoordinateSize);
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", mGradientCoordinateSize);
+    const auto data = Internal::Gradient::ResolveRenderData(style, bounds, Internal::ResolveGradientCoordinateSize(style.units, coordinateSize, uiScale));
+    if(!data.enabled)
+    {
+      return;
+    }
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", coordinateSize);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", bounds);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
     Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
@@ -1295,7 +1329,7 @@ struct AtlasRenderer::Impl
   }
 
   Actor CreateMeshActor(Actor textControl, Property::Index animatablePropertyIndex, const Vector4& defaultColor,
-                        const MeshRecord& meshRecord, const Vector2& actorSize, Style style, bool allowGradient)
+                        const MeshRecord& meshRecord, const Vector2& actorSize, Style style, bool allowGradient, int depth)
   {
     VertexBuffer quadVertices = VertexBuffer::New(mQuadVertexFormat);
     quadVertices.SetData(const_cast<AtlasManager::Vertex2D*>(&meshRecord.mMesh.mVertices[0]),
@@ -1407,12 +1441,12 @@ struct AtlasRenderer::Impl
     Dali::Renderer renderer = Dali::Renderer::New(quadGeometry, shader);
     renderer.SetTextures(textureSet);
     renderer.SetProperty(Dali::Renderer::Property::BLEND_MODE, BlendMode::ON);
-    renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::CONTENT + mDepth);
+    renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::CONTENT + depth);
     if(useGradientShader)
     {
       if(gradientSpanResource)
       {
-        ApplyGradientProperties(renderer, gradientSpanResource->style, gradientSpanResource->bounds);
+        ApplyGradientProperties(renderer, gradientSpanResource->style, gradientSpanResource->bounds, mGradientCoordinateSize, mGradientUiScale);
         mGradientSpanRendererBindings.push_back({renderer, meshRecord.mGradientSpanPaintIndex});
       }
       else
@@ -1875,8 +1909,8 @@ struct AtlasRenderer::Impl
   WeakHandle<Actor>                        mGradientAnimSourceActor;
   Property::Index                          mGradientAnimOffsetIndex{Property::INVALID_INDEX};
   Vector2                                  mGradientCoordinateSize{Vector2::ONE};
+  float                                    mGradientUiScale{1.0f};
   Vector4                                  mGradientBounds{0.0f, 0.0f, 1.0f, 1.0f};
-  int                                      mDepth; ///< DepthIndex passed by control when connect to stage
   bool                                     mGradientAnimApplyAlways{false};
 };
 
@@ -1945,9 +1979,9 @@ bool AtlasRenderer::SetAtlasGradientState(const Internal::Gradient::AtlasRendere
   return true;
 }
 
-void AtlasRenderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds)
+void AtlasRenderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale, const Vector4* spanViewBounds)
 {
-  mImpl->UpdateGradient(coordinateSize, bounds);
+  mImpl->UpdateGradient(coordinateSize, bounds, uiScale, spanViewBounds);
 }
 
 void AtlasRenderer::UpdateAtlasGradientSpanViewBounds(const Vector2& coordinateSize, const Vector4& bounds)

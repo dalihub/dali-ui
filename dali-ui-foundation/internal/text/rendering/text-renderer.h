@@ -77,8 +77,13 @@ public:
 
   /**
    * @brief Updates bounds-dependent uniforms without rebuilding text geometry.
+   *
+   * @param[in] coordinateSize The physical coordinate space used by the shader.
+   * @param[in] bounds The selected normalized gradient bounds.
+   * @param[in] uiScale The owning View's effective UI scale for USER_SPACE geometry.
+   * @param[in] spanViewBounds Optional span view bounds, updated in the same frame context.
    */
-  virtual void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds);
+  virtual void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale = 1.0f, const Vector4* spanViewBounds = nullptr);
 
   /**
    * @brief Updates GradientSpan VIEW_BOUND uniforms without rebuilding text geometry.

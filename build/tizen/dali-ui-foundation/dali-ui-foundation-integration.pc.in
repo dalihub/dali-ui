@@ -1,0 +1,11 @@
+prefix=@PREFIX@
+exec_prefix=@EXEC_PREFIX@
+libdir=@LIB_DIR@
+includedir=@DEV_INCLUDE_PATH@
+
+Name: dali-ui-integration
+Description: Integration APIs for @PROJECT_LIB_NAME@
+Version: @DALI_UI_VERSION@
+Requires: @PROJECT_LIB_NAME@
+Libs: -L${libdir}
+Cflags: -I${includedir}

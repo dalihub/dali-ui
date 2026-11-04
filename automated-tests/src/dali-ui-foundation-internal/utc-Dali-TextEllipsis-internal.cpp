@@ -18,7 +18,9 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
+#include <initializer_list>
 #include <limits>
 #include <utility>
 
@@ -3127,5 +3129,282 @@ int UtcDaliTextLayoutEmptyTrailingParagraphP(void)
   DALI_TEST_CHECK(!lines.Back().ellipsis);
   DALI_TEST_CHECK(!engine.LayoutText(parameters, size, false, marquee, false, false));
   DALI_TEST_EQUALS(lines.Count(), 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+namespace
+{
+// Feed the real engine fixed glyphs and explicit hyphen opportunities. Neither
+// shaping nor the platform hyphenation dictionary chooses the line breaks.
+struct MaximumLinesHyphenFixture
+{
+  TextAbstraction::FontClient           fontClient = TextAbstraction::FontClient::New();
+  TextAbstraction::BidirectionalSupport bidi       = TextAbstraction::BidirectionalSupport::New();
+  Text::ModelPtr                        model      = Text::Model::New();
+  Text::MetricsPtr                      metrics    = Text::Metrics::New(fontClient);
+  Text::Layout::Engine                  engine;
+  Size                                  size;
+  bool                                  exceeded = false;
+
+  MaximumLinesHyphenFixture(Text::LineWrapMode mode, bool retainedHyphens, unsigned length = 16u)
+  {
+    engine.SetMetrics(metrics);
+    engine.SetLayout(Text::Layout::Engine::MULTI_LINE_BOX);
+    engine.SetFontPixelSize(20.0f);
+    model->mLineWrapMode = mode;
+    SetText(retainedHyphens, length);
+  }
+
+  void SetText(bool retainedHyphens, unsigned length)
+  {
+    // Request the common FontClient mock's fixed 20px metrics through the API
+    // rather than encoding the mock's FontId.
+    const auto fontId  = fontClient.GetFontId(TextAbstraction::FontDescription{}, 20u * fontClient.GetNumberOfPointsPerOneUnitOfPointSize());
+    auto&      logical = *model->mLogicalModel;
+    auto&      visual  = *model->mVisualModel;
+    logical.mText.Clear();
+    logical.mLineBreakInfo.Clear();
+    visual.mGlyphs.Clear();
+    visual.mGlyphsToCharacters.Clear();
+    visual.mCharactersToGlyph.Clear();
+    visual.mCharactersPerGlyph.Clear();
+    visual.mGlyphsPerCharacter.Clear();
+    visual.mLines.Clear();
+    visual.mGlyphPositions.Clear();
+    for(unsigned index = 0u; index < length; ++index)
+    {
+      logical.mText.PushBack('a' + index % 26u);
+      const bool hyphen = index % 2u == 1u && (retainedHyphens || index >= 7u);
+      logical.mLineBreakInfo.PushBack(index + 1u == length ? TextAbstraction::LINE_MUST_BREAK : hyphen ? TextAbstraction::LINE_HYPHENATION_BREAK
+                                                                                                       : TextAbstraction::LINE_NO_BREAK);
+      Text::GlyphInfo glyph;
+      glyph.fontId = fontId;
+      glyph.index  = index + 1u;
+      glyph.width = glyph.advance = 10.0f;
+      glyph.height                = 20.0f;
+      glyph.xBearing              = 0.0f;
+      glyph.yBearing              = 16.0f;
+      glyph.scaleFactor           = 1.0f;
+      glyph.isItalicRequired      = false;
+      glyph.isBoldRequired        = false;
+      glyph.isShaped              = false;
+      visual.mGlyphs.PushBack(glyph);
+      visual.mGlyphsToCharacters.PushBack(index);
+      visual.mCharactersToGlyph.PushBack(index);
+      visual.mCharactersPerGlyph.PushBack(1u);
+      visual.mGlyphsPerCharacter.PushBack(1u);
+    }
+  }
+
+  void Layout(unsigned maximumLines, bool ellipsis = false, float width = 35.0f)
+  {
+    auto& visual = *model->mVisualModel;
+    visual.mGlyphPositions.Resize(visual.mGlyphs.Count());
+    std::fill(visual.mGlyphPositions.Begin(), visual.mGlyphPositions.End(), Vector2::ZERO);
+    visual.mControlSize = Size(width, 1000.0f);
+    Text::Layout::Parameters parameters(visual.mControlSize, model, fontClient, bidi);
+    parameters.numberOfGlyphs         = static_cast<Text::Length>(visual.mGlyphs.Count());
+    parameters.estimatedNumberOfLines = 1u;
+    parameters.maximumNumberOfLines   = maximumLines;
+    bool marquee                      = false;
+    size                              = Size::ZERO;
+    DALI_TEST_CHECK(engine.LayoutText(parameters, size, ellipsis, marquee, false, false));
+    exceeded = parameters.maximumNumberOfLinesExceeded;
+    visual.SetLayoutSize(size);
+  }
+};
+
+void CheckHyphenRecord(const Text::GlyphInfo& actual, const Text::GlyphInfo& expected)
+{
+  // The common mock initializes only identity and metrics for generated hyphens.
+  DALI_TEST_EQUALS(actual.fontId, expected.fontId, TEST_LOCATION);
+  DALI_TEST_EQUALS(actual.index, expected.index, TEST_LOCATION);
+  DALI_TEST_EQUALS(actual.width, expected.width, TEST_LOCATION);
+  DALI_TEST_EQUALS(actual.height, expected.height, TEST_LOCATION);
+  DALI_TEST_EQUALS(actual.xBearing, expected.xBearing, TEST_LOCATION);
+  DALI_TEST_EQUALS(actual.yBearing, expected.yBearing, TEST_LOCATION);
+  DALI_TEST_EQUALS(actual.advance, expected.advance, TEST_LOCATION);
+}
+
+void CheckDiscardedHyphen(Text::LineWrapMode mode, bool retainedHyphens)
+{
+  MaximumLinesHyphenFixture unlimited(mode, retainedHyphens);
+  unlimited.Layout(0u);
+  const auto& reference = *unlimited.model->mVisualModel;
+  DALI_TEST_CHECK(reference.mLines.Count() > 2u);
+  const auto&    second         = reference.mLines[1u].glyphRun;
+  const auto&    third          = reference.mLines[2u].glyphRun;
+  const unsigned retainedEnd    = second.glyphIndex + second.numberOfGlyphs;
+  const unsigned candidateEnd   = third.glyphIndex + third.numberOfGlyphs;
+  unsigned       retainedCount  = 0u;
+  unsigned       candidateCount = 0u;
+  for(unsigned record = 0u; record < reference.mHyphen.index.Count(); ++record)
+  {
+    const auto  index = reference.mHyphen.index[record];
+    const auto& glyph = reference.mHyphen.glyph[record];
+    DALI_TEST_EQUALS(glyph.width, 10.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(glyph.height, 20.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    DALI_TEST_EQUALS(glyph.advance, 10.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+    retainedCount += index <= retainedEnd;
+    candidateCount += index > retainedEnd && index <= candidateEnd;
+  }
+  // A nonempty unlimited control proves that the discarded third candidate
+  // really creates a hyphen, independently of dictionary availability.
+  DALI_TEST_EQUALS(candidateCount, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(retainedCount, retainedHyphens ? 2u : 0u, TEST_LOCATION);
+  tet_printf("hyphen mode=%d retained=%u discarded-candidate=%u", static_cast<int>(mode), retainedCount, candidateCount);
+
+  MaximumLinesHyphenFixture clipped(mode, retainedHyphens);
+  clipped.Layout(2u);
+  const auto& visual = *clipped.model->mVisualModel;
+  DALI_TEST_CHECK(clipped.exceeded);
+  DALI_TEST_EQUALS(visual.mLines.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.mHyphen.glyph.Count(), retainedCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.mHyphen.index.Count(), retainedCount, TEST_LOCATION);
+  for(unsigned index = 0u; index < visual.mHyphen.index.Count(); ++index)
+  {
+    DALI_TEST_CHECK(visual.mHyphen.index[index] <= retainedEnd);
+    if(index < retainedCount)
+    {
+      DALI_TEST_EQUALS(visual.mHyphen.index[index], reference.mHyphen.index[index], TEST_LOCATION);
+      CheckHyphenRecord(visual.mHyphen.glyph[index], reference.mHyphen.glyph[index]);
+    }
+  }
+  for(unsigned line = 0u; line < 2u; ++line)
+  {
+    DALI_TEST_EQUALS(visual.mLines[line].glyphRun.glyphIndex, reference.mLines[line].glyphRun.glyphIndex, TEST_LOCATION);
+    DALI_TEST_EQUALS(visual.mLines[line].glyphRun.numberOfGlyphs, reference.mLines[line].glyphRun.numberOfGlyphs, TEST_LOCATION);
+    DALI_TEST_EQUALS(visual.mLines[line].width, reference.mLines[line].width, TEST_LOCATION);
+    DALI_TEST_CHECK(!visual.mLines[line].ellipsis);
+  }
+  for(unsigned glyph = 0u; glyph < retainedEnd; ++glyph)
+  {
+    DALI_TEST_EQUALS(visual.mGlyphPositions[glyph], reference.mGlyphPositions[glyph], TEST_LOCATION);
+  }
+  float height = Text::GetLineHeight(reference.mLines[0u], false) + Text::GetLineHeight(reference.mLines[1u], true);
+  DALI_TEST_EQUALS(clipped.size.height, std::ceil(height), TEST_LOCATION);
+  tet_printf("hyphen mode=%d retained=%u candidate=%u final=%u", static_cast<int>(mode), retainedCount, candidateCount, static_cast<unsigned>(visual.mHyphen.index.Count()));
+}
+} // namespace
+
+int UtcDaliMaximumLinesClipDiscardedHyphenP(void)
+{
+  tet_infoline("Discard the N+1 candidate's hyphen in MaximumLines CLIP with HYPHENATION");
+  CheckDiscardedHyphen(Text::LineWrapMode::HYPHENATION, false);
+  END_TEST;
+}
+
+int UtcDaliMaximumLinesClipDiscardedHyphenMixedP(void)
+{
+  tet_infoline("Discard the N+1 candidate's hyphen in MaximumLines CLIP with MIXED wrapping");
+  CheckDiscardedHyphen(Text::LineWrapMode::MIXED, false);
+  END_TEST;
+}
+
+int UtcDaliMaximumLinesClipRetainedHyphensP(void)
+{
+  tet_infoline("Preserve retained HYPHENATION hyphens when MaximumLines CLIP discards a candidate");
+  CheckDiscardedHyphen(Text::LineWrapMode::HYPHENATION, true);
+  END_TEST;
+}
+
+int UtcDaliMaximumLinesClipRetainedHyphensMixedP(void)
+{
+  tet_infoline("Preserve retained MIXED hyphens when MaximumLines CLIP discards a candidate");
+  CheckDiscardedHyphen(Text::LineWrapMode::MIXED, true);
+  END_TEST;
+}
+
+int UtcDaliMaximumLinesHyphenPolicyAndRelayoutP(void)
+{
+  tet_infoline("Keep hyphen records consistent across MaximumLines, wrap policy and repeated layout changes");
+  constexpr std::array<unsigned, 6u> limits{{2u, 3u, 0u, 1u, 2u, 0u}};
+  MaximumLinesHyphenFixture          reused(Text::LineWrapMode::HYPHENATION, true);
+  for(auto mode : {Text::LineWrapMode::HYPHENATION, Text::LineWrapMode::MIXED, Text::LineWrapMode::WORD, Text::LineWrapMode::CHARACTER})
+  {
+    reused.model->mLineWrapMode = mode;
+    for(unsigned repeat = 0u; repeat < 2u; ++repeat)
+    {
+      for(unsigned step = 0u; step < 6u; ++step)
+      {
+        const unsigned limit    = limits[step];
+        const bool     ellipsis = step == 1u || step == 4u;
+        const float    width    = step < 3u ? 35.0f : 45.0f;
+        const unsigned length   = repeat ? 24u : 16u;
+        if(step == 0u)
+        {
+          reused.SetText(true, length);
+        }
+        reused.Layout(limit, ellipsis, width);
+        MaximumLinesHyphenFixture fresh(mode, true, length);
+        fresh.Layout(limit, ellipsis, width);
+        DALI_TEST_CHECK(IsSameVisualGeometry(SnapshotVisualGeometry(*fresh.model->mVisualModel), *reused.model->mVisualModel));
+        DALI_TEST_EQUALS(reused.exceeded, fresh.exceeded, TEST_LOCATION);
+        const auto& actual   = reused.model->mVisualModel->mHyphen;
+        const auto& expected = fresh.model->mVisualModel->mHyphen;
+        DALI_TEST_EQUALS(actual.glyph.Count(), actual.index.Count(), TEST_LOCATION);
+        DALI_TEST_EQUALS(actual.index.Count(), expected.index.Count(), TEST_LOCATION);
+        if(!ellipsis && limit != 0u)
+        {
+          const auto& lastLine = reused.model->mVisualModel->mLines.Back().glyphRun;
+          for(auto index : actual.index)
+          {
+            DALI_TEST_CHECK(index <= lastLine.glyphIndex + lastLine.numberOfGlyphs);
+          }
+        }
+        for(unsigned index = 0u; index < std::min(actual.index.Count(), expected.index.Count()); ++index)
+        {
+          DALI_TEST_EQUALS(actual.index[index], expected.index[index], TEST_LOCATION);
+          CheckHyphenRecord(actual.glyph[index], expected.glyph[index]);
+        }
+        if(!ellipsis && (limit == 0u || limit > 2u) && mode == Text::LineWrapMode::HYPHENATION)
+        {
+          DALI_TEST_CHECK(!actual.index.Empty());
+        }
+      }
+    }
+    // The final candidate fits without a hyphen. Rolling back an unchanged
+    // count must still preserve a legitimate hyphen on the retained line.
+    reused.SetText(true, 5u);
+    reused.Layout(1u);
+    DALI_TEST_CHECK(reused.exceeded);
+    const unsigned retainedCount = (mode == Text::LineWrapMode::HYPHENATION || mode == Text::LineWrapMode::MIXED) ? 1u : 0u;
+    DALI_TEST_EQUALS(reused.model->mVisualModel->mHyphen.glyph.Count(), retainedCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(reused.model->mVisualModel->mHyphen.index.Count(), retainedCount, TEST_LOCATION);
+    reused.Layout(0u);
+    DALI_TEST_CHECK(!reused.exceeded);
+    DALI_TEST_EQUALS(reused.model->mVisualModel->mLines.Count(), 2u, TEST_LOCATION);
+    DALI_TEST_EQUALS(reused.model->mVisualModel->mHyphen.glyph.Count(), retainedCount, TEST_LOCATION);
+    DALI_TEST_EQUALS(reused.model->mVisualModel->mHyphen.index.Count(), retainedCount, TEST_LOCATION);
+
+    reused.SetText(false, 7u);
+    reused.Layout(2u);
+    DALI_TEST_CHECK(reused.exceeded);
+    DALI_TEST_CHECK(reused.model->mVisualModel->mHyphen.glyph.Empty());
+    DALI_TEST_CHECK(reused.model->mVisualModel->mHyphen.index.Empty());
+  }
+  END_TEST;
+}
+
+int UtcDaliMaximumLinesClipHyphenRasterBoundsP(void)
+{
+  tet_infoline("Discarded hyphens do not disable cropped blur bounds; retained hyphens keep full bounds");
+  for(auto mode : {Text::LineWrapMode::HYPHENATION, Text::LineWrapMode::MIXED})
+  {
+    MaximumLinesHyphenFixture clipped(mode, false);
+    clipped.Layout(2u);
+    auto typesetter = Text::Typesetter::New(clipped.model.Get());
+    typesetter->SetFontClient(clipped.fontClient);
+    auto bounds = typesetter->GetRuntimeBlurLineRasterBounds(Size(35.0f, 1000.0f), 0u);
+    DALI_TEST_CHECK(bounds.height > 0u && bounds.height < 1000u);
+    // A genuinely retained hyphen still selects the established conservative
+    // full raster bounds; clearing the entire hyphen list would break this.
+    MaximumLinesHyphenFixture retained(mode, true);
+    retained.Layout(2u);
+    typesetter = Text::Typesetter::New(retained.model.Get());
+    typesetter->SetFontClient(retained.fontClient);
+    bounds = typesetter->GetRuntimeBlurLineRasterBounds(Size(35.0f, 1000.0f), 0u);
+    DALI_TEST_CHECK(bounds == Rect<uint32_t>(0u, 0u, 35u, 1000u));
+  }
   END_TEST;
 }

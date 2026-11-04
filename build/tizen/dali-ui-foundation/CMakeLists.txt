@@ -1,5 +1,5 @@
 PROJECT(dali-ui-foundation)
-SET(PROJECT_LIB_NAME dali2-ui-foundation)
+SET(PROJECT_LIB_NAME dali${DALI_API_MAJOR}-ui-foundation)
 SET(FOUNDATION_ROOT_SRC_DIR ${ROOT_SRC_DIR}/dali-ui-foundation)
 
 # ---------------------------------------------------------
@@ -199,7 +199,7 @@ IF(INSTALL_CMAKE_MODULES)
   )
 
   SET(PACKAGE_DEPENDENCIES
-"    find_dependency(dali2-core CONFIG REQUIRED)\n    find_dependency(dali2-adaptor CONFIG REQUIRED)\n")
+"    find_dependency(${core_name} CONFIG REQUIRED)\n    find_dependency(${adaptor_name} CONFIG REQUIRED)\n")
 
   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LIB_NAME}-config.cmake
 "include(CMakeFindDependencyMacro)\n${PACKAGE_DEPENDENCIES}include(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_LIB_NAME}-targets.cmake)\n")
@@ -243,8 +243,8 @@ IF( ENABLE_PKG_CONFIGURE )
   SET( DEV_INCLUDE_PATH ${INCLUDE_DIR} )
   SET( PKG_CFG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_LIB_NAME}.pc )
   SET( INTEGRATION_PKG_CFG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_LIB_NAME}-integration.pc )
-  CONFIGURE_FILE( ${PKG_CFG_FILE}.in ${PKG_CFG_FILE} @ONLY )
-  CONFIGURE_FILE( ${INTEGRATION_PKG_CFG_FILE}.in ${INTEGRATION_PKG_CFG_FILE} @ONLY )
+  CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/dali-ui-foundation.pc.in ${PKG_CFG_FILE} @ONLY )
+  CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/dali-ui-foundation-integration.pc.in ${INTEGRATION_PKG_CFG_FILE} @ONLY )
   INSTALL( FILES ${PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
   INSTALL( FILES ${INTEGRATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
 ENDIF()

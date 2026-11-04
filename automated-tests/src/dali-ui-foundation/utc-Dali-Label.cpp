@@ -5334,3 +5334,65 @@ int UtcDaliLabelRelativeAndAbsoluteLineHeightLayoutP(void)
   DALI_TEST_CHECK(tallHeight > shortHeight);
   END_TEST;
 }
+
+// A WRAP_CONTENT standalone Label floating over a parent that has no size keeps its natural
+// text size: every pass measures it against the window (480x800 here), never against the
+// parent's 0x0. The reference Label carries the same text and is measured at exactly that
+// constraint, so the two must agree -- after the first settle, after a re-placement by the
+// parent, and after the Label's own measure is invalidated.
+//
+// Non-vacuity: before the shared derivation the Label's own layout-root pass measured it
+// against the parent actor's 0x0 SIZE, so the first settle ended at 0x0.
+int UtcDaliLabelStandaloneWrapContentKeepsNaturalSizeUnderZeroSizedParentP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  auto settle = [&application]()
+  {
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+  };
+
+  Label reference = Label::New("Standalone label");
+  window.Add(reference);
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(0.0f);
+  parent.SetRequestedHeight(0.0f);
+
+  Label label = Label::New("Standalone label");
+  label.SetLayoutMode(LayoutMode::STANDALONE);
+
+  parent.Add(label);
+  root.Add(parent);
+  window.Add(root);
+
+  settle();
+
+  // Same text, same scene, and exactly the window constraint.
+  const MeasuredSize natural = reference.Measure(480.0f, 800.0f);
+  DALI_TEST_CHECK(natural.GetWidth() > 0.0f && natural.GetHeight() > 0.0f);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Actor::Property::SIZE_WIDTH), natural.GetWidth(), 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Actor::Property::SIZE_HEIGHT), natural.GetHeight(), 0.01f, TEST_LOCATION);
+
+  // A re-placement by the parent derives the same constraint.
+  parent.InvalidateArrange();
+  settle();
+  DALI_TEST_EQUALS(label.GetProperty<float>(Actor::Property::SIZE_WIDTH), natural.GetWidth(), 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Actor::Property::SIZE_HEIGHT), natural.GetHeight(), 0.01f, TEST_LOCATION);
+
+  // The Label's own pass alone re-measures it, at the same window-bounded constraint.
+  label.InvalidateMeasure();
+  settle();
+  DALI_TEST_EQUALS(label.GetProperty<float>(Actor::Property::SIZE_WIDTH), natural.GetWidth(), 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Actor::Property::SIZE_HEIGHT), natural.GetHeight(), 0.01f, TEST_LOCATION);
+
+  END_TEST;
+}

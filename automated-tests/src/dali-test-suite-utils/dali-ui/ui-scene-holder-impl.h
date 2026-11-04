@@ -102,6 +102,8 @@ public:
 
   Dali::Integration::SceneHolder::KeyEventSignalType            mSceneHolderKeyEventSignal;
   Dali::Integration::SceneHolder::KeyEventGeneratedSignalType   mSceneHolderKeyEventGeneratedSignal;
+  Dali::Integration::SceneHolder::KeyEventSignalType            mSceneHolderKeyEventDelayedSignal;
+  Dali::Integration::SceneHolder::KeyEventGeneratedSignalType   mSceneHolderInterceptKeyEventSignal;
   Dali::Integration::SceneHolder::TouchEventSignalType          mSceneHolderTouchEventSignal;
   Dali::Integration::SceneHolder::WheelEventSignalType          mSceneHolderWheelEventSignal;
   Dali::Integration::SceneHolder::WheelEventGeneratedSignalType mSceneHolderWheelEventGeneratedSignal;

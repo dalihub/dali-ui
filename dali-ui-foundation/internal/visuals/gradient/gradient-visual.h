@@ -23,6 +23,7 @@
 #include <dali/public-api/math/vector2.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-foundation/internal/visuals/gradient/gradient.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
@@ -98,6 +99,13 @@ public:
    */
   static GradientVisualPtr New(VisualFactoryCache& factoryCache, const Property::Map& properties);
 
+  /**
+   * @brief Updates the gradient alignment transform for the given UI scale.
+   *
+   * @param[in] effectiveScale The owning View's effective UI scale
+   */
+  void UpdateUiScale(float effectiveScale);
+
 public: // from Visual
   /**
    * @copydoc Visual::Base::CreatePropertyMap
@@ -154,6 +162,13 @@ protected:
 
 private:
   /**
+   * @brief Resolves the alignment uniform from the authored gradient and current UI scale.
+   *
+   * Keeps the previous alignment if the resolved matrix is not finite.
+   */
+  void UpdateAlignmentTransform();
+
+  /**
    * New a gradient object with the given property map.
    *
    * @return True if the property map provides valid properties to create a gradient. Otherwise, returns false.
@@ -196,10 +211,12 @@ private:
   GradientVisual& operator=(const GradientVisual& gradientVisual);
 
 private:
-  Matrix3                mGradientTransform;
-  IntrusivePtr<Gradient> mGradient;
-  Type                   mGradientType;
-  Dali::Property::Index  mStartOffsetIndex;
+  Matrix3                             mGradientTransform;
+  IntrusivePtr<Gradient>              mGradient;
+  std::weak_ptr<GradientTextureCache> mGradientTextureCache;
+  GradientTextureCache::Id            mLookupTextureId{GradientTextureCache::INVALID_ID};
+  Type                                mGradientType;
+  Dali::Property::Index               mStartOffsetIndex;
 };
 
 } // namespace Internal

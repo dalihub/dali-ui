@@ -6,7 +6,7 @@
 ## 준비와 실행
 
 저장소 루트에서 실행한다. C++17 도구와 pkg-config로 검색 가능한
-`dali2-core`, `dali2-adaptor`, `dali2-ui-foundation`, `dali2-ui-components` 설치가 필요하다.
+`dali3-core`, `dali3-adaptor`, `dali3-ui-foundation`, `dali3-ui-components` 설치가 필요하다.
 사용자 설치 prefix가 있다면 해당 `lib/pkgconfig` 경로를 `PKG_CONFIG_PATH`에 추가한다.
 실제 화면을 제공하는 DALi 실행 환경이 필요하며, 런처가 Components UiConfig를 적용한다.
 

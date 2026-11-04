@@ -268,10 +268,10 @@ private:
     label.SetRequestedY(mWindowSize.y - LOG_LABEL_BOTTOM_MARGIN - height);
   }
 
-  // A WRAP_CONTENT height is still capped at the parent's height, and text past
-  // that point would be ellipsized away - which would drop the newest entries.
-  // Discard the oldest lines instead, so the newest one always stays visible on
-  // the bottom line and earlier ones scroll off the top.
+  // A WRAP_CONTENT height of this STANDALONE label is still capped at the window
+  // height, and text past that point would be ellipsized away - which would drop
+  // the newest entries. Discard the oldest lines instead, so the newest one always
+  // stays visible on the bottom line and earlier ones scroll off the top.
   void TrimLogToWindow()
   {
     const float available = mWindowSize.y - LOG_LABEL_BOTTOM_MARGIN;

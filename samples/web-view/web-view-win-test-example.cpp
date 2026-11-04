@@ -310,7 +310,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
 
   UiConfig config = UiConfig::New();
   // The Windows web-engine backend is the LWE plugin
-  // (dali2-web-engine-lwe-plugin-win.dll). UiConfig defaults to CHROMIUM,
+  // (dali3-web-engine-lwe-plugin-win.dll). UiConfig defaults to CHROMIUM,
   // which does not exist on Windows, so selecting LWE here is required.
   config.SetWebEngineType(WebEngineType::LWE);
   config.Apply();

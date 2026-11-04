@@ -1011,6 +1011,11 @@ bool ViewImpl::OnAccessibilityRequestValue(Dali::String& value)
   return false;
 }
 
+bool ViewImpl::OnAccessibilityRequestDefaultValue(Dali::String& value)
+{
+  return false;
+}
+
 void ViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result)
 {
 }

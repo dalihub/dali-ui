@@ -9,10 +9,10 @@ Source0:    %{name}-%{version}.tar.gz
 
 BuildRequires:  cmake
 BuildRequires:  pkgconfig
-BuildRequires:  pkgconfig(dali2-core)
-BuildRequires:  pkgconfig(dali2-adaptor)
-BuildRequires:  pkgconfig(dali2-ui-foundation)
-BuildRequires:  pkgconfig(dali2-ui-components)
+BuildRequires:  pkgconfig(dali3-core)
+BuildRequires:  pkgconfig(dali3-adaptor)
+BuildRequires:  pkgconfig(dali3-ui-foundation)
+BuildRequires:  pkgconfig(dali3-ui-components)
 
 %description
 DALi UI IconButton sample application.

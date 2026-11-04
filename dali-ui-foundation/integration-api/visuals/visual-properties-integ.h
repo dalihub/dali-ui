@@ -43,12 +43,13 @@ enum class InternalVisualType
   ANIMATED_IMAGE   = static_cast<int>(Dali::Ui::VisualType::ANIMATED_IMAGE),
   LOTTIE_ANIMATION = static_cast<int>(Dali::Ui::VisualType::LOTTIE_ANIMATION),
 
-  MESH,      ///< Renders a mesh using an "obj" file, optionally with textures provided by an "mtl" file.
-  PRIMITIVE, ///< Renders a simple 3D shape, such as a cube or sphere.
-  WIREFRAME, ///< Renders a simple wire-frame outlining a quad.
-  N_PATCH,   ///< Renders an n-patch image.
-  SVG,       ///< Renders an SVG image.
-  ARC,       ///< Renders an arc.
+  MESH,           ///< Renders a mesh using an "obj" file, optionally with textures provided by an "mtl" file.
+  PRIMITIVE,      ///< Renders a simple 3D shape, such as a cube or sphere.
+  WIREFRAME,      ///< Renders a simple wire-frame outlining a quad.
+  N_PATCH,        ///< Renders an n-patch image.
+  SVG,            ///< Renders an SVG image.
+  ARC,            ///< Renders an arc.
+  STREAMED_IMAGE, ///< Renders frames pushed by an external producer; not created from a property map.
 };
 
 namespace Visual

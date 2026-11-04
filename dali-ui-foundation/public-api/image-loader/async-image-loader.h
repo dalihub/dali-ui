@@ -28,7 +28,7 @@
 
 namespace DALI_NAMESPACE
 {
-class PixelData;
+class PixelBuffer;
 
 namespace Ui
 {
@@ -51,9 +51,11 @@ class AsyncImageLoader;
  * To know when the Load has completed, connect to the ImageLoadedSignal.
  * This signal should be connected before Load is called (in case the signal is emitted immediately).
  *
- * Load errors can be detected by checking the PixelData object is valid from within the signal handler.
-
- * Note: The PixelData object will automatically be destroyed when it leaves its scope.
+ * Load errors can be detected by checking the PixelBuffer object is valid from within the signal handler.
+ *
+ * Note: Every connected callback receives a handle to the same PixelBuffer object, so the
+ * loaded pixels are shared rather than copied. They are released when the last handle goes
+ * out of scope.
  *
  * Example:
  *
@@ -62,10 +64,10 @@ class AsyncImageLoader;
  * {
  *   public:
  *
- *   MyCallback( uint32_t loadedTaskId, PixelData pixelData )
+ *   MyCallback( uint32_t loadedTaskId, PixelBuffer pixelBuffer )
  *   {
  *     // First check if the image loaded correctly.
- *     if( pixelData )
+ *     if( pixelBuffer )
  *     {
  *       if( loadedTaskId == mId1 )
  *       {
@@ -97,7 +99,7 @@ class AsyncImageLoader;
 class DALI_UI_API AsyncImageLoader : public BaseHandle
 {
 public:
-  typedef Signal<void(uint32_t, PixelData)> ImageLoadedSignalType; ///< Image loaded signal type
+  typedef Signal<void(uint32_t, PixelBuffer)> ImageLoadedSignalType; ///< Image loaded signal type
 
 public:
   /**
@@ -215,12 +217,13 @@ public:
   void CancelAll();
 
   /**
-   * @brief Signal emitted for connected callback functions to get access to the loaded pixel data.
+   * @brief Signal emitted for connected callback functions to get access to the loaded pixels.
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallbackName( uint32_t id, PixelData pixelData );
+   *   void YourCallbackName( uint32_t id, PixelBuffer pixelBuffer );
    * @endcode
+   * @note Every connected callback receives a handle to the same PixelBuffer object.
    * @return A reference to a signal object to Connect() with
    */
   ImageLoadedSignalType& ImageLoadedSignal();

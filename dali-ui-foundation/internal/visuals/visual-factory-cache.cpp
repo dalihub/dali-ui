@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-manager.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual.h>
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
@@ -246,6 +247,15 @@ Geometry VisualFactoryCache::CreateQuadGeometry()
   geometry.SetType(Geometry::TRIANGLE_STRIP);
 
   return geometry;
+}
+
+std::weak_ptr<GradientTextureCache> VisualFactoryCache::GetGradientTextureCache()
+{
+  if(!mGradientTextureCache)
+  {
+    mGradientTextureCache = std::make_shared<GradientTextureCache>();
+  }
+  return mGradientTextureCache;
 }
 
 TextureManager& VisualFactoryCache::GetTextureManager()

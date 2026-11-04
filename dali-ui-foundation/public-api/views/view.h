@@ -137,19 +137,19 @@ public: // Property & enumeration declarations
       REQUESTED_HEIGHT,
 
       /**
-       * @brief The minimum width applied during measurement.
+       * @brief The minimum width of the View, applied when it is measured and when it is laid out (see SetMinimumWidth()).
        * @details Name "minimumWidth", type Property::FLOAT.
        */
       MINIMUM_WIDTH,
 
       /**
-       * @brief The minimum height applied during measurement.
+       * @brief The minimum height of the View, applied when it is measured and when it is laid out (see SetMinimumHeight()).
        * @details Name "minimumHeight", type Property::FLOAT.
        */
       MINIMUM_HEIGHT,
 
       /**
-       * @brief The maximum width applied during measurement.
+       * @brief The maximum width of the View, applied when it is measured and when it is laid out (see SetMaximumWidth()).
        * @details Name "maximumWidth", type Property::FLOAT.
        * @note max-wins: if the minimum exceeds the maximum, the MAXIMUM wins
        * (measurement floors to the minimum then ceils to the maximum).
@@ -158,7 +158,7 @@ public: // Property & enumeration declarations
       MAXIMUM_WIDTH,
 
       /**
-       * @brief The maximum height applied during measurement.
+       * @brief The maximum height of the View, applied when it is measured and when it is laid out (see SetMaximumHeight()).
        * @details Name "maximumHeight", type Property::FLOAT.
        */
       MAXIMUM_HEIGHT,
@@ -382,6 +382,21 @@ public: // Measure / Arrange API
    * The framework keys the measure cache on the effective scale as well as on the
    * constraint, so a scale change alone forces a re-measure.
    *
+   * Each constraint is an upper bound unless the parent's layout ASSIGNS the axis:
+   * a first-party parent (a plain View, StackLayout, GridLayout, a single-line
+   * FlexLayout, AbsoluteLayout or ScrollView) assigns a MATCH_PARENT axis, a stretched
+   * axis, or an axis its layout params size explicitly or proportionally (AbsoluteLayout
+   * bounds); on an assigned axis the view reports the constraint, clamped by its own
+   * minimum/maximum, as its measured size -- the size it is laid out at. An axis with its own
+   * explicit requested size always reports that size (clamped the same way), whatever the
+   * parent decides. On any other axis it reports the size it wants within the bound;
+   * a MATCH_PARENT axis then reports its minimum size.
+   * This call derives which axes are assigned from the view's parent, the same way the
+   * parent's layout does, and the measure cache keys on it as well. A view without a View
+   * parent (a layout root, a detached view) is assigned on its MATCH_PARENT axes -- the caller's
+   * constraint is its size -- and under any other parent a MATCH_PARENT axis is assigned when
+   * that parent's own size is determined (explicit, or itself assigned).
+   *
    * @param[in] widthConstraint The width constraint for measurement
    * @param[in] heightConstraint The height constraint for measurement
    * @return The measured size
@@ -424,6 +439,10 @@ public: // Measure / Arrange API
    * @note An ArrangePolicy::IF_CHANGED arrange implementation must arrange the same set
    * of children for the same tracked inputs. If that set depends on untracked state,
    * use ArrangePolicy::ALWAYS or invalidate arrange whenever the state changes.
+   *
+   * @note The size of @p bounds is first clamped to the View's own minimum/maximum, keeping
+   * the start edge of @p bounds; the arrange implementation receives the clamped bounds, and
+   * its returned rect is applied as is.
    *
    * @param[in] bounds The bounds to arrange the view in
    * @return The final arranged bounds (parent-local, pre-RTL logical)
@@ -518,6 +537,9 @@ public: // Measure / Arrange API
    * resolves to RIGHT_TO_LEFT, so callbacks must not apply RTL mirroring
    * themselves.
    *
+   * The callback receives the bounds after the View's own minimum/maximum clamp
+   * (see Arrange()).
+   *
    * @note The callback replaces OnArrange() as this view's arrange implementation. This
    * one-argument overload uses ArrangePolicy::IF_CHANGED, so the framework
    * may reuse an unchanged result without invoking the callback. Use the two-argument
@@ -550,6 +572,9 @@ public: // Measure / Arrange API
    * actor tree.
    *
    * Installing a callback replaces the policy of the previously installed callback.
+   *
+   * The callback receives the bounds after the View's own minimum/maximum clamp
+   * (see Arrange()).
    *
    * @param[in] callback The arrange callback (ownership transferred)
    * @param[in] policy   When the callback runs
@@ -815,6 +840,12 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the minimum width.
    *
+   * The View is never measured or laid out narrower than this. When its parent's layout gives
+   * it a narrower slot, the View is laid out at the minimum width from the start edge of that
+   * slot (its left edge, or its right edge when the parent's layout direction is
+   * RIGHT_TO_LEFT) and extends past the slot; the parent's placement of the View's siblings
+   * is unaffected.
+   *
    * @param[in] width The minimum width
    */
   void SetMinimumWidth(float width);
@@ -829,6 +860,11 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the minimum height.
    *
+   * The View is never measured or laid out shorter than this. When its parent's layout gives
+   * it a shorter slot, the View is laid out at the minimum height from the top edge of that
+   * slot and extends past the slot; the parent's placement of the View's siblings is
+   * unaffected.
+   *
    * @param[in] height The minimum height
    */
   void SetMinimumHeight(float height);
@@ -842,6 +878,12 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
 
   /**
    * @brief Sets the maximum width.
+   *
+   * The View is never measured or laid out wider than this. When its parent's layout gives it
+   * a wider slot -- a MATCH_PARENT or stretched axis, a flex-grow share, a grid cell -- the
+   * View is laid out at the maximum width from the start edge of that slot (its left edge, or
+   * its right edge when the parent's layout direction is RIGHT_TO_LEFT) and the rest of the
+   * slot stays empty; the parent's placement of the View's siblings is unaffected.
    *
    * @param[in] width The maximum width
    * @note max-wins: when the minimum width exceeds the maximum width, the
@@ -859,6 +901,11 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
 
   /**
    * @brief Sets the maximum height.
+   *
+   * The View is never measured or laid out taller than this. When its parent's layout gives it
+   * a taller slot -- a MATCH_PARENT or stretched axis, a flex-grow share, a grid cell -- the
+   * View is laid out at the maximum height from the top edge of that slot and the rest of the
+   * slot stays empty; the parent's placement of the View's siblings is unaffected.
    *
    * @param[in] height The maximum height
    * @note max-wins: when the minimum height exceeds the maximum height, the
@@ -999,19 +1046,27 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * this View's size and position normally.
    *
    * LayoutMode::STANDALONE excludes this View from the parent's accumulation,
-   * spacing and index calculations. The View's size is still measured normally
-   * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
+   * spacing and index calculations. The View's size is still measured (so
+   * MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
    * but its position is taken from SetRequestedX/SetRequestedY instead of being
    * decided by the parent layout. This is useful for floating overlays, drag
    * previews, tooltips and absolute positioning inside any LayoutManager.
    *
-   * Standalone children ignore the parent's padding entirely. Their measured
-   * size is the parent's full inner size minus the child's own margin, and
-   * their final position is SetRequestedX/SetRequestedY plus the child's own
-   * margin in the parent's coordinate space. This keeps size and position
-   * consistent: a Standalone child with MATCH_PARENT fills the parent edge
-   * to edge regardless of parent padding, and any margin set on the child
-   * shifts it inward in both axes.
+   * Standalone children ignore the parent's padding entirely. A MATCH_PARENT
+   * axis is measured against the parent's size minus the child's own margin,
+   * and measured again when the parent places the child if the parent's final
+   * size differs from the size it was first measured against. A WRAP_CONTENT
+   * axis is measured against the size of the window the View is shown in minus
+   * its own margin, whichever layout pass measures it (against the parent's size
+   * minus its margin while the View is in no window). An explicitly sized axis
+   * is measured at that size. A WRAP_CONTENT Standalone child is therefore not
+   * limited to its parent's size; use SetMaximumWidth() / SetMaximumHeight() to
+   * bound it. The window is not a display bound: the View's own minimum and
+   * maximum size, which are applied to the result, and an explicit size may
+   * exceed it. Its final position is SetRequestedX/SetRequestedY plus its own
+   * margin in the parent's coordinate space, so a Standalone child with
+   * MATCH_PARENT fills the parent edge to edge regardless of parent padding, and
+   * any margin set on the child shifts it inward in both axes.
    *
    * @param[in] mode The layout mode to set
    */
@@ -1708,6 +1763,23 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * @brief Raises this view one step above its immediate next sibling in the
    * parent's children list.
    *
+   * @deprecated Use the inherited Dali::Actor::Raise() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. Replace a call as follows:
+   * - UPDATE: Raise(), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: Raise(); the policy changes nothing there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   Raise() or the container's own API, never DEPTH_INDEX, because these containers
+   *   restack their children themselves. RecyclerView items are children of its internal
+   *   scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: DEPTH_INDEX changes only the draw and
+   *   hit-test order and keeps the sibling and layout orders. A one-step move needs the
+   *   depth indices of the siblings (see the guide); a positive value draws the view above
+   *   every sibling left at 0 and has to be set back to 0 later, for a RecyclerView item
+   *   also on every bind.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
+   *
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1718,6 +1790,23 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * @brief Lowers this view one step below its immediate previous sibling in the
    * parent's children list.
    *
+   * @deprecated Use the inherited Dali::Actor::Lower() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. Replace a call as follows:
+   * - UPDATE: Lower(), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: Lower(); the policy changes nothing there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   Lower() or the container's own API, never DEPTH_INDEX, because these containers
+   *   restack their children themselves. RecyclerView items are children of its internal
+   *   scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: DEPTH_INDEX changes only the draw and
+   *   hit-test order and keeps the sibling and layout orders. A one-step move needs the
+   *   depth indices of the siblings (see the guide); a negative value draws the view below
+   *   every sibling left at 0 and has to be set back to 0 later. Never give a RecyclerView
+   *   item a negative value: it would hide behind the GroupBodyDecoration backgrounds.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
+   *
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1726,6 +1815,22 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
 
   /**
    * @brief Raises this view to the top of its sibling list.
+   *
+   * @deprecated Use the inherited Dali::Actor::RaiseToTop() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. Replace a call as follows:
+   * - UPDATE: RaiseToTop(), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: RaiseToTop(); the policy changes nothing there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   RaiseToTop() or the container's own API, never DEPTH_INDEX, because these containers
+   *   restack their children themselves. RecyclerView items are children of its internal
+   *   scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: SetDepthIndex() with a positive value draws the
+   *   view above every sibling left at 0 and keeps the sibling and layout orders. Set it
+   *   back to 0 when the view no longer has to be on top, and for a RecyclerView item on
+   *   every bind.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
@@ -1736,6 +1841,23 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Lowers this view to the bottom of its sibling list.
    *
+   * @deprecated Use the inherited Dali::Actor::LowerToBottom() or
+   * Actor::Property::DEPTH_INDEX instead; this overload will be removed. Replace a call as
+   * follows:
+   * - UPDATE: LowerToBottom(), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: LowerToBottom(); the policy changes nothing there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   LowerToBottom() or the container's own API, never DEPTH_INDEX, because these
+   *   containers restack their children themselves. RecyclerView items are children of its
+   *   internal scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: SetDepthIndex() with a negative value draws the
+   *   view below every sibling left at 0 and keeps the sibling and layout orders; set it
+   *   back to 0 afterwards. Never give a RecyclerView item a negative value: it would hide
+   *   behind the GroupBodyDecoration backgrounds.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
+   *
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1744,6 +1866,27 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
 
   /**
    * @brief Raises this view above the given target sibling.
+   *
+   * @deprecated Use the inherited Dali::Actor::RaiseAbove() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. It ignores an empty @p target, while the
+   * inherited call asserts on one, so check @p target first. Both calls do nothing when
+   * @p target is not a sibling, but SetDepthIndex() would still change the draw order, so
+   * check that as well before switching to SetDepthIndex(). Replace a call as follows:
+   * - UPDATE: RaiseAbove(target), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: RaiseAbove(target); the policy changes nothing
+   *   there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   RaiseAbove(target) or the container's own API, never DEPTH_INDEX, because these
+   *   containers restack their children themselves. RecyclerView items are children of its
+   *   internal scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: SetDepthIndex() with a positive value draws the
+   *   view above every sibling left at 0, not only above @p target, and keeps the sibling
+   *   and layout orders; an exact move needs the depth indices of the siblings (see the
+   *   guide). Set it back to 0 when the view no longer has to be on top, and for a
+   *   RecyclerView item on every bind.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
    * @param[in] target The target sibling view to raise above.
    * @param[in] policy UPDATE also reorders the parent layout's children;
@@ -1755,6 +1898,27 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
 
   /**
    * @brief Lowers this view below the given target sibling.
+   *
+   * @deprecated Use the inherited Dali::Actor::LowerBelow() or Actor::Property::DEPTH_INDEX
+   * instead; this overload will be removed. It ignores an empty @p target, while the
+   * inherited call asserts on one, so check @p target first. Both calls do nothing when
+   * @p target is not a sibling, but SetDepthIndex() would still change the draw order, so
+   * check that as well before switching to SetDepthIndex(). Replace a call as follows:
+   * - UPDATE: LowerBelow(target), which is the same call.
+   * - PRESERVE, parent is not a Ui::View: LowerBelow(target); the policy changes nothing
+   *   there.
+   * - PRESERVE, direct child of RecyclerView, ScrollView, Navigator or DialogContainer:
+   *   LowerBelow(target) or the container's own API, never DEPTH_INDEX, because these
+   *   containers restack their children themselves. RecyclerView items are children of its
+   *   internal scroller, not direct children, so the next rule applies to them.
+   * - PRESERVE, child of any other Ui::View: SetDepthIndex() with a negative value draws the
+   *   view below every sibling left at 0, not only below @p target, and keeps the sibling
+   *   and layout orders; an exact move needs the depth indices of the siblings (see the
+   *   guide). Set it back to 0 afterwards. Never give a RecyclerView item a negative value:
+   *   it would hide behind the GroupBodyDecoration backgrounds.
+   * - PRESERVE without a parent does nothing: delete the call rather than replacing it with
+   *   SetDepthIndex(), whose value would apply at the next Add().
+   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
    * @param[in] target The target sibling view to lower below.
    * @param[in] policy UPDATE also reorders the parent layout's children;

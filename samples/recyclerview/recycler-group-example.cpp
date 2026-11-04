@@ -15,6 +15,14 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/recycler/group-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/group-body-decoration.h>
+#include <dali-ui-foundation/integration-api/recycler/group-data-source.h>
+#include <dali-ui-foundation/integration-api/recycler/group-linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
+#include <dali-ui-foundation/integration-api/recycler/items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/recycler-view.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali/dali.h>
@@ -25,6 +33,17 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+
+using Dali::Ui::Integration::GroupAdapter;
+using Dali::Ui::Integration::GroupBodyDecoration;
+using Dali::Ui::Integration::GroupDataSource;
+using Dali::Ui::Integration::GroupLinearItemsLayouter;
+using Dali::Ui::Integration::GroupRowType;
+using Dali::Ui::Integration::ItemAdapter;
+using Dali::Ui::Integration::ItemViewHolder;
+using Dali::Ui::Integration::ItemsLayouter;
+using Dali::Ui::Integration::RecyclerView;
 
 using namespace Dali;
 using namespace Dali::Ui;

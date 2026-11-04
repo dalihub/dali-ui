@@ -154,8 +154,8 @@ UiScaleManager scale = 2.0
 The total rendered size of a view is determined by both scaling mechanisms together.
 
 Given:
-- `ScalingFactor` = `1.5` (set via `UiConfig::SetScalingFactor()` at startup)
-- `UiScaleManager` scale = `2.0` (set at runtime)
+- `ScalingFactor` = `1.5` (set via `UiConfig::SetUnitScalingFactor()` at startup)
+- UI scale = `2.0` (set at runtime)
 - A view with requested width `100_spx`
 
 The final visual width is:

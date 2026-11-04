@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-parameters.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
+#include <dali-ui-foundation/internal/text/text-trace.h>
 
 namespace DALI_NAMESPACE
 {
@@ -56,6 +57,8 @@ namespace Layout
 {
 namespace
 {
+DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
+
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_LAYOUT");
 #endif
@@ -740,7 +743,7 @@ struct Engine::Impl
                                              (*(glyphsBuffer + glyphIndex)).advance);
     GetGlyphsMetrics(glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
 
-    float penX = -glyphMetrics.xBearing + GetCursorInsetWidth() + outlineWidth;
+    float penX = -glyphMetrics.xBearing + GetCursorInsetWidth(parameters) + outlineWidth;
 
     // Continue after any trailing whitespace consumed above.
     for(; characterLogicalIndex < bidirectionalLineInfo.characterRun.numberOfCharacters;)
@@ -1025,7 +1028,7 @@ struct Engine::Impl
     // It needs to add as well space for the cursor if the text is in edit mode and extra space in case the text is
     // outlined.
 
-    tmpLineLayout.penX = GetCursorInsetWidth() + outlineWidth;
+    tmpLineLayout.penX = GetCursorInsetWidth(parameters) + outlineWidth;
     if(parameters.textModel->mRemoveFrontInset)
     {
       tmpLineLayout.penX -= glyphMetrics.xBearing;
@@ -1314,7 +1317,7 @@ struct Engine::Impl
     // If it has a negative x bearing, it will exceed the boundaries of the actor,
     // so the penX position needs to be moved to the right.
     const GlyphInfo& glyph = *(glyphsBuffer + startIndexForGlyph);
-    float            penX  = GetCursorInsetWidth() + outlineWidth;
+    float            penX  = GetCursorInsetWidth(layoutParameters) + outlineWidth;
 
     if(layoutParameters.textModel->mRemoveFrontInset)
     {
@@ -1941,6 +1944,8 @@ struct Engine::Impl
       return false;
     }
 
+    DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_LAYOUT");
+
     const GlyphIndex lastGlyphPlusOne    = layoutParameters.startGlyphIndex + layoutParameters.numberOfGlyphs;
     const Length     totalNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(layoutParameters.textModel->mVisualModel->mGlyphs.Count());
     Vector<Vector2>& glyphPositions      = layoutParameters.textModel->mVisualModel->mGlyphPositions;
@@ -2080,6 +2085,13 @@ struct Engine::Impl
          ? SetRelativeLineSize(&currentParagraphRun, layout)
          : SetRelativeLineSize(nullptr, layout));
 
+      const bool maximumNumberOfLinesExceeded =
+        layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
+        layoutParameters.startLineIndex + numberOfLines >= layoutParameters.maximumNumberOfLines;
+      const bool discardHyphens = maximumNumberOfLinesExceeded && !elideTextEnabled &&
+                                  (layoutParameters.textModel->mLineWrapMode == LineWrapMode::HYPHENATION ||
+                                   layoutParameters.textModel->mLineWrapMode == LineWrapMode::MIXED);
+      const auto hyphenCountBeforeLine = discardHyphens ? layoutParameters.textModel->mVisualModel->mHyphen.glyph.Count() : 0u;
       GetLineLayoutForBox(layoutParameters, layoutBidiParameters, layout, false, isHiddenInputEnabled);
       if(layoutParameters.replacementLayoutData != nullptr)
       {
@@ -2116,15 +2128,19 @@ struct Engine::Impl
         return false;
       }
 
-      const bool maximumNumberOfLinesExceeded =
-        layoutParameters.maximumNumberOfLines != static_cast<Length>(MAXIMUM_LINES_UNLIMITED) &&
-        layoutParameters.startLineIndex + numberOfLines >= layoutParameters.maximumNumberOfLines;
       maximumNumberOfLinesWasApplied |= maximumNumberOfLinesExceeded;
       layoutParameters.maximumNumberOfLinesExceeded |= maximumNumberOfLinesExceeded;
       if(maximumNumberOfLinesExceeded && !elideTextEnabled)
       {
         // The candidate proves that more content exists, but CLIP must not
         // manufacture an ellipsis marker or retain the N+1 line.
+        if(discardHyphens)
+        {
+          // Discard only the paired hyphen records appended by this candidate.
+          auto& hyphens = layoutParameters.textModel->mVisualModel->mHyphen;
+          hyphens.glyph.Resize(hyphenCountBeforeLine);
+          hyphens.index.Resize(hyphenCountBeforeLine);
+        }
         break;
       }
 
@@ -2434,9 +2450,10 @@ struct Engine::Impl
     }
   }
 
-  float GetCursorInsetWidth()
+  float GetCursorInsetWidth(const Parameters& parameters)
   {
-    return mIsCursorInsetEnabled ? mCursorWidth : 0.0f;
+    // Match the painted cursor width, independently of the font size scale.
+    return mIsCursorInsetEnabled ? mCursorWidth * parameters.textModel->mVisualModel->GetDecorationUiScale() : 0.0f;
   }
 
   /**

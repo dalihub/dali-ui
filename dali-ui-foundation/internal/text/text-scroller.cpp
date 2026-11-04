@@ -460,7 +460,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
                                  bool isTextContentOverflow, CharacterDirection direction, Alignment horizontalAlignment,
                                  Alignment verticalAlignment, bool animationReStart,
                                  const TextScrollerGradient& textGradient,
-                                 const MarqueeInitialDelta&  marqueeInitialDelta)
+                                 const MarqueeInitialDelta& marqueeInitialDelta, float uiScale)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                 "TextScroller::SetParameters controlSize[%f,%f] textureSize[%f,%f] direction[%d]\n", controlSize.x,
@@ -632,7 +632,8 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
 
   float scrollAmount =
     isHorizontal ? std::max(textureSize.width, controlSize.width) : std::max(textureSize.height, controlSize.height);
-  float scrollDuration = scrollAmount / mScrollSpeed;
+  // Match the UI scale already applied to the scrolling distance.
+  float scrollDuration = scrollAmount / (mScrollSpeed * uiScale);
 
   if(isHorizontal && direction)
   {

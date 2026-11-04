@@ -1,0 +1,28 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.8.2)
+
+PROJECT(media-view.example)
+
+SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_C_STANDARD 99)
+
+IF(NOT COMMAND DALI_ADD_SAMPLE)
+  INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../common.cmake")
+ENDIF()
+
+IF(WIN32)
+  MESSAGE(STATUS "media-view sample: Tizen media APIs are unavailable, skipping")
+  RETURN()
+ENDIF()
+
+PKG_CHECK_MODULES(CAPI_MEDIA_PLAYER QUIET IMPORTED_TARGET capi-media-player)
+PKG_CHECK_MODULES(CAPI_MEDIA_CAMERA QUIET IMPORTED_TARGET capi-media-camera)
+IF(NOT CAPI_MEDIA_PLAYER_FOUND OR NOT CAPI_MEDIA_CAMERA_FOUND)
+  MESSAGE(STATUS "media-view sample: Tizen player/camera APIs not found, skipping")
+  RETURN()
+ENDIF()
+
+DALI_ADD_SAMPLE(media-view.example media-view-example.cpp)
+TARGET_LINK_LIBRARIES(media-view.example PRIVATE
+  PkgConfig::CAPI_MEDIA_PLAYER
+  PkgConfig::CAPI_MEDIA_CAMERA
+)

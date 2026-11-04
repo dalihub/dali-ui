@@ -8,7 +8,7 @@
 ## 빌드와 실행
 
 저장소 루트 기준이다. CMake·C++17 도구와 pkg-config로 검색 가능한
-`dali2-core`, `dali2-adaptor`, `dali2-ui-foundation`, `dali2-ui-components`가 필요하다.
+`dali3-core`, `dali3-adaptor`, `dali3-ui-foundation`, `dali3-ui-components`가 필요하다.
 사용자 설치 prefix의 `lib/pkgconfig`를 `PKG_CONFIG_PATH`에 추가하고 런타임 라이브러리 검색 경로를
 설정한다. 실행에는 DALi가 지원하는 실제 디스플레이 환경이 필요하다.
 

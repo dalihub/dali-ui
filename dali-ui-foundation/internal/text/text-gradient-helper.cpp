@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/debug.h>
 #include <dali/public-api/math/math-utils.h>
 #include <cmath>
 
@@ -153,6 +154,13 @@ RenderData ResolveRenderData(const Style&   style,
     return data;
   }
 
+  if(style.units == Dali::Ui::Gradient::Units::USER_SPACE &&
+     (!std::isfinite(coordinateSize.x) || !std::isfinite(coordinateSize.y)))
+  {
+    DALI_LOG_ERROR("Text gradient coordinate size is not finite\n");
+    return data;
+  }
+
   data.enabled     = true;
   data.type        = style.type;
   data.startOffset = style.startOffset;
@@ -179,6 +187,23 @@ RenderData ResolveRenderData(const Style&   style,
     data.conicStartAngle = style.conicStartAngle.radian;
   }
 
+  if(style.units == Dali::Ui::Gradient::Units::USER_SPACE)
+  {
+    const auto finite = [](const Vector2& value)
+    {
+      return std::isfinite(value.x) && std::isfinite(value.y);
+    };
+    const bool valid = style.type == Dali::Ui::Gradient::Type::LINEAR
+                         ? finite(data.startPosition) && finite(data.endPosition)
+                       : style.type == Dali::Ui::Gradient::Type::RADIAL
+                         ? finite(data.radialCenter) && finite(data.radialScale)
+                         : finite(data.conicCenter) && finite(data.conicScale);
+    if(!valid)
+    {
+      DALI_LOG_ERROR("Text gradient geometry is not finite\n");
+      return RenderData();
+    }
+  }
   return data;
 }
 

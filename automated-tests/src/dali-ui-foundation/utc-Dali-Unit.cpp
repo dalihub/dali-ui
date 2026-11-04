@@ -173,12 +173,17 @@ int UtcDaliUnitWindowSystemDpi(void)
 int UtcDaliUnitExplicitDpi(void)
 {
   UiConfig config = UiConfig::New();
+  DALI_TEST_EQUALS(config.GetUnitScalingFactor(), 1.0f, TEST_LOCATION);
+  config.SetScalingFactor(1.5f);
+  DALI_TEST_EQUALS(config.GetUnitScalingFactor(), 1.5f, TEST_LOCATION);
   config.SetDpi(144);
-  config.SetScalingFactor(2.0f);
+  config.SetUnitScalingFactor(2.0f);
+  DALI_TEST_EQUALS(config.GetScalingFactor(), 2.0f, TEST_LOCATION);
   UiTestApplication application(config, 480, 800, 320.0f, 240.0f);
 
   DALI_TEST_EQUALS(config.GetDpi(), 144, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(10_spx, 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 40.0f, TEST_LOCATION);
 
   END_TEST;

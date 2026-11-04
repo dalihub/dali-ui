@@ -42,6 +42,8 @@
 #include "view-visual-data.h"
 #include "visual-constraint-functions.h"
 
+#include <dali-ui-foundation/internal/visuals/gradient/gradient-visual.h>
+
 using Dali::Integration::ToStdString;
 
 namespace DALI_NAMESPACE
@@ -925,12 +927,12 @@ void ViewDataImpl::VisualData::EnableCornerPropertiesOverridden(Ui::Integration:
           for(uint32_t i = 0; i < sourceCount; ++i)
           {
             auto source = cornerRadiusConstraint.GetSourceAt(i);
-            if(source.sourceType == Dali::SourceType::OBJECT_PROPERTY)
+            if(source.GetSourceType() == Dali::SourceType::OBJECT_PROPERTY)
             {
-              relativeProperties.insert(source.propertyIndex);
+              relativeProperties.insert(source.GetPropertyIndex());
 
               // Special case for Actor::Property::SIZE.
-              if(source.propertyIndex == Actor::Property::SIZE)
+              if(source.GetPropertyIndex() == Actor::Property::SIZE)
               {
                 relativeProperties.insert(Actor::Property::SIZE_WIDTH);
                 relativeProperties.insert(Actor::Property::SIZE_HEIGHT);
@@ -1614,6 +1616,12 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, FittingMode
     }
 
     Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
+
+    if(update == FittingModeUpdate::SIZE_OR_SCALE && visualImpl.GetType() == Ui::Integration::InternalVisualType::GRADIENT)
+    {
+      // Gradients need only their alignment uniform, not fitting or a new layout callback.
+      static_cast<Internal::GradientVisual&>(visualImpl).UpdateUiScale(mOuter.mViewImpl.GetEffectiveScale());
+    }
 
     if(!visualImpl.IsFittingModeRequired() ||
        (update == FittingModeUpdate::LAYOUT_FINISHED && visualImpl.GetType() == Ui::Integration::InternalVisualType::TEXT))

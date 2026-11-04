@@ -618,8 +618,9 @@ int UtcDaliGridLayoutSpanMixedAutoAbsoluteP(void)
   layout.Arrange(LayoutRect(0, 0, 300, 200));
 
   // AUTO column absorbs only the deficit over ABSOLUTE: 120 - 60 = 60.
-  // (A MATCH_PARENT layout view reports GetMinimum (0) as its own measured
-  // width, so the load-bearing checks are the arranged track/child sizes.)
+  // (A MATCH_PARENT layout without a View parent reports the constraint it is
+  // measured at -- here 300x200 -- so the load-bearing checks are the arranged
+  // track/child sizes.)
   DALI_TEST_EQUALS(probe.GetSize().width, 60.0f, TEST_LOCATION); // buggy: 120
   // Spanning child fills col0 + col1 = 60 + 60 = 120.
   DALI_TEST_EQUALS(span.GetSize().width, 120.0f, TEST_LOCATION); // buggy: 180

@@ -501,7 +501,7 @@ private:
     mDragPreview.SetRequestedX(mDragBounds.x);
     mDragPreview.SetRequestedY(mDragBounds.y);
     mTestArea.Add(mDragPreview);
-    mDragPreview.RaiseToTop(LayoutOrderPolicy::PRESERVE);
+    mDragPreview.RaiseToTop();
     LayoutController::Get(mWindow).ProcessLayouts();
 
     StartAutoScrollTimer();

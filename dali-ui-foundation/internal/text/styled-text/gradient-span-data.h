@@ -73,6 +73,27 @@ struct GradientSpanModelData
 };
 
 /**
+ * @brief Checks whether canonical span paints require USER_SPACE coordinates.
+ *
+ * @param[in] data Optional span data from the current render model.
+ * @return True if at least one span paint uses USER_SPACE.
+ */
+inline bool HasUserSpaceGradientSpan(const GradientSpanModelData* data)
+{
+  if(data)
+  {
+    for(const auto& paint : data->paints)
+    {
+      if(paint.style.units == Ui::Gradient::Units::USER_SPACE)
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
  * @brief Projects canonical logical GradientSpan runs into the shaped glyph domain.
  */
 void SetGradientSpanSegmentationInfo(GradientSpanModelData&    data,

@@ -24,6 +24,7 @@ SET(TC_SOURCES
         utc-Dali-IndependentFocus.cpp
         utc-Dali-View.cpp
         utc-Dali-ViewLayoutBoundary.cpp
+        utc-Dali-ViewMeasureMode.cpp
         utc-Dali-Label.cpp
         utc-Dali-LabelTextGradient.cpp
         utc-Dali-InputField.cpp
@@ -72,9 +73,11 @@ SET(TC_SOURCES
         utc-Dali-VisualBase.cpp
         utc-Dali-WebView.cpp
         utc-Dali-CanvasView.cpp
-        utc-Dali-VideoView.cpp
+        utc-Dali-MediaView.cpp
+  utc-Dali-VideoView.cpp
         utc-Dali-DragAndDropDetector.cpp
         utc-Dali-ViewTypeRegistry.cpp
+        utc-Dali-Constexpr.cpp
 )
 
 SET(TC_SOURCE_LIST ${TC_SOURCES})
@@ -117,11 +120,13 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
     ../dali-test-suite-utils/dali-ui/ui-icu.cpp
     ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
+    ../dali-test-suite-utils/dali-ui/ui-native-image.cpp
     ../dali-test-suite-utils/dali-ui/ui-native-image-queue.cpp
     ../dali-test-suite-utils/dali-ui/ui-native-image-surface.cpp
     ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
     ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
+    ../dali-test-suite-utils/dali-ui/ui-trigger-event-factory.cpp
     ../dali-test-suite-utils/dali-ui/ui-timer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-animation-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-image-renderer.cpp
@@ -141,9 +146,9 @@ ADD_CUSTOM_COMMAND(
 )
 
 PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
-     dali2-core
-     dali2-adaptor
-     dali2-ui-foundation
+     dali3-core
+     dali3-adaptor
+     dali3-ui-foundation
 )
 
 ADD_COMPILE_OPTIONS( -rdynamic )
@@ -189,3 +194,13 @@ INSTALL( TARGETS ${ADDON_NAME} DESTINATION ${BIN_DIR} )
 
 # store AddOn list
 FILE( WRITE ${CMAKE_CURRENT_BINARY_DIR}/addons.txt lib${ADDON_NAME}.so )
+
+# Host-only source plugin. Load by SONAME after the test opens this exact fixture.
+ADD_LIBRARY(media-frame-source-test-plugin SHARED ../dali-test-suite-utils/test-media-frame-source-plugin.cpp)
+SET_TARGET_PROPERTIES(media-frame-source-test-plugin PROPERTIES
+    OUTPUT_NAME dali3-media-frame-source-plugin
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/media-frame-source)
+TARGET_LINK_LIBRARIES(media-frame-source-test-plugin ${${CAPI_LIB}_LDFLAGS} --coverage)
+ADD_DEPENDENCIES(${EXEC_NAME} media-frame-source-test-plugin)
+TARGET_COMPILE_DEFINITIONS(${EXEC_NAME} PRIVATE
+    TEST_MEDIA_FRAME_SOURCE_PLUGIN_PATH="$<TARGET_FILE:media-frame-source-test-plugin>")

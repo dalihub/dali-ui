@@ -26,7 +26,7 @@ ScalingFactor is configured via [Configuration](https://github.sec.samsung.net/N
 
 ```cpp
 UiConfig config = UiConfig::New();
-config.SetScalingFactor(1.5f);
+config.SetUnitScalingFactor(1.5f);
 config.SetDpi(320);
 config.SetBaselineDpi(160);
 config.Apply();

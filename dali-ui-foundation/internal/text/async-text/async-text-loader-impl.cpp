@@ -18,10 +18,10 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/pixel-data-integ.h>
-#include <dali/integration-api/trace.h>
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <optional>
 #include <utility>
 
 // INTERNAL INCLUDES
@@ -46,6 +46,7 @@
 #include <dali-ui-foundation/internal/text/text-alignment.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
+#include <dali-ui-foundation/internal/text/text-trace.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
 namespace DALI_NAMESPACE
@@ -54,6 +55,8 @@ namespace Ui
 {
 namespace
 {
+DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
+
 constexpr float MAX_FLOAT = std::numeric_limits<float>::max();
 
 const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
@@ -257,7 +260,6 @@ std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(
   return regions;
 }
 
-DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_ASYNC, false);
 } // namespace
 
 namespace Text
@@ -447,13 +449,13 @@ void AsyncTextLoader::ClearTextModelData()
 
 void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 {
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_UPDATE");
-
   if(parameters.text.empty())
   {
     DALI_LOG_ERROR("Text is empty\n");
     return;
   }
+
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_UPDATE");
 
   const uint8_t* utf8     = nullptr; // pointer to the first character of the text (encoded in utf8)
   Length         textSize = 0u;      // The length of the utf8 string.
@@ -1102,8 +1104,6 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
 Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
                              bool& maximumNumberOfLinesExceeded)
 {
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_LAYOUT");
-
   maximumNumberOfLinesExceeded = false;
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -1363,14 +1363,6 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
     }
   }
 
-#ifdef TRACE_ENABLED
-  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("ControlSize : %f, %f, LayoutSize : %f, %f\n", textLayoutArea.x, textLayoutArea.y,
-                          newLayoutSize.x, newLayoutSize.y);
-  }
-#endif
-
   // Every secondary layout/text-fit/max-size path calls Layout(), so this is the final aligned placement source.
   UpdateReplacementProcessing(parameters, replacementDefaultFontId);
 
@@ -1389,8 +1381,6 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
 
 AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 {
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER");
-
   // Horizontal marquee textures use local glyph coordinates. Natural-size
   // measurement leaves line alignment relative to MAX_FLOAT in the model;
   // final screen alignment belongs to TextScroller. Apply the same policy to
@@ -1506,14 +1496,6 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     layoutSize.y = parameters.textHeight + (parameters.padding.top + parameters.padding.bottom);
   }
 
-#ifdef TRACE_ENABLED
-  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("ControlSize : %f, %f, LayoutSize : %f, %f\n", parameters.textWidth, parameters.textHeight,
-                          layoutSize.x, layoutSize.y);
-  }
-#endif
-
   // Check the text direction
   Direction textDirection = mIsTextDirectionRTL ? Direction::RIGHT_TO_LEFT : Direction::LEFT_TO_RIGHT;
 
@@ -1570,6 +1552,28 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                                   activeFinalElision,
                                                                                   parameters);
 
+  std::optional<GradientRasterContext> gradientContext;
+  if(Internal::HasUserSpaceGradientSpan(gradientSpanData))
+  {
+    const float   controlWidth  = isRenderScale ? parameters.renderScaleWidth : parameters.textWidth;
+    const float   controlHeight = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;
+    const Vector2 viewSize(controlWidth + parameters.padding.start + parameters.padding.end,
+                           controlHeight + parameters.padding.top + parameters.padding.bottom);
+    const bool    verticalScroll = parameters.isMarqueeEnabled && parameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL;
+    const float   alignmentY     = verticalScroll ? 0.0f : (controlHeight - renderInfo.size.y) * VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)];
+    Vector2       offset(std::round(parameters.padding.start),
+                   isRenderScale ? std::round((renderInfo.size.y + parameters.padding.top + alignmentY) * 2.0f) * 0.5f - renderInfo.size.y
+                                       : std::round(parameters.padding.top + alignmentY));
+    if(cutoutEnabled)
+    {
+      offset = Vector2::ZERO;
+    }
+    gradientContext.emplace(GradientRasterContext{renderInfo.size,
+                                                  CalculateGradientViewBounds(renderInfo.size, viewSize, offset), parameters.decorationUiScale});
+  }
+
+  const auto* context = gradientContext ? &*gradientContext : nullptr;
+
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
 
@@ -1577,7 +1581,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   if(cutoutEnabled)
   {
     cutoutData = mTypesetter->RenderWithPixelBuffer(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
-                                                    ignoreHorizontalAlignment, textPixelFormat);
+                                                    ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
 
     // Make transparent buffer.
     // If the cutout is enabled, a separate texture is not used for the text.
@@ -1591,7 +1595,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     // Create a pixel data for the text without any styles
     renderInfo.textPixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat);
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
   }
 
   std::unique_ptr<Internal::Reveal::Plan> blurPlan;
@@ -1735,7 +1739,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     const Vector2 originSize = parameters.isMarqueeEnabled ? Size(parameters.originWidth, parameters.originHeight)
                                                            : Size::ZERO;
     renderInfo.textGradientPreservedPixelData =
-      mTypesetter->RenderTextGradientPreserved(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
+      mTypesetter->RenderTextGradientPreserved(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888, originSize, context);
     renderInfo.textGradientMaskPixelData =
       mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::L8, originSize);
   }
@@ -1779,7 +1783,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     renderInfo.marqueePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
                           ignoreHorizontalAlignment, Pixel::RGBA8888,
-                          Size(parameters.originWidth, parameters.originHeight));
+                          Size(parameters.originWidth, parameters.originHeight), context);
     if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
     {
       renderInfo.marqueeStartAnchor = parameters.marqueeStartAnchor;
@@ -1836,7 +1840,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     options.decorations      = styleEnabled || isOverlayStyle;
     renderInfo.revealBlur    = Ui::Internal::PrepareRevealBlur(*mTypesetter, std::move(*blurPlan),
                                                                renderInfo.replacementRevealTimings, options,
-                                                            mReplacementData ? &mReplacementData->renderState.placements : nullptr);
+                                                            mReplacementData ? &mReplacementData->renderState.placements : nullptr, context);
   }
 
   CopyReplacementResult(renderInfo, parameters.renderScale);
@@ -1847,8 +1851,6 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                 const Size& naturalSize)
 {
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER_TEXT");
-
   Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
 
@@ -1904,24 +1906,11 @@ AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters,
 
 float AsyncTextLoader::ComputeHeightForWidth(AsyncTextParameters& parameters, float width, bool layoutOnly)
 {
-#ifdef TRACE_ENABLED
-  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("ComputeHeightForWidth, width:%f, layoutOnly:%d\n", width, layoutOnly);
-  }
-#endif
   return ComputeLayoutSize(parameters, width, MAX_FLOAT, layoutOnly).height;
 }
 
 Size AsyncTextLoader::ComputeLayoutSize(AsyncTextParameters& parameters, float width, float height, bool layoutOnly)
 {
-#ifdef TRACE_ENABLED
-  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("ComputeLayoutSize, width:%f, height:%f, layoutOnly:%d\n", width, height, layoutOnly);
-  }
-#endif
-
   float actualWidth  = parameters.textWidth;
   float actualHeight = parameters.textHeight;
 
@@ -2066,13 +2055,6 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
 
 Size AsyncTextLoader::ComputeNaturalSize(AsyncTextParameters& parameters)
 {
-#ifdef TRACE_ENABLED
-  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("ComputeNaturalSize\n");
-  }
-#endif
-
   float actualWidth  = parameters.textWidth;
   float actualHeight = parameters.textHeight;
 
@@ -2126,8 +2108,6 @@ AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& paramet
 AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                    const Size& naturalSize)
 {
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER_MARQUEE");
-
   Size      controlSize(parameters.textWidth, parameters.textHeight);
   Size      verifiedSize;
   float     wrapGap               = 0.0f;
@@ -2151,14 +2131,6 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
       controlSize.height                     = parameters.textHeight;
       mTextModel->mVisualModel->mControlSize = Size(parameters.textWidth, parameters.textHeight);
     }
-
-#ifdef TRACE_ENABLED
-    if(gTraceFilter && gTraceFilter->IsTraceEnabled())
-    {
-      DALI_LOG_RELEASE_INFO("natural size : %f, %f, control size : %f, %f\n", textNaturalSize.x, textNaturalSize.y,
-                            controlSize.x, controlSize.y);
-    }
-#endif
 
     // Calculate the actual gap before scrolling wraps.
     int textPadding     = static_cast<int>(std::max(controlSize.x - textNaturalSize.x, 0.0f));
@@ -2338,13 +2310,6 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
   if(parameters.isTextFitCandidatesEnabled)
   {
-#ifdef TRACE_ENABLED
-    if(gTraceFilter && gTraceFilter->IsTraceEnabled())
-    {
-      DALI_LOG_RELEASE_INFO("AsyncTextLoader::RenderTextFit -> TextFit candidate mode\n");
-    }
-#endif
-
     Dali::Vector<Ui::Text::Fit::Candidate> fitCandidates  = parameters.textFitCandidates;
     int                                    candidateCount = static_cast<int>(fitCandidates.Count());
 
@@ -2451,13 +2416,6 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
   }
   else if(parameters.isTextFitEnabled)
   {
-#ifdef TRACE_ENABLED
-    if(gTraceFilter && gTraceFilter->IsTraceEnabled())
-    {
-      DALI_LOG_RELEASE_INFO("AsyncTextLoader::RenderTextFit -> TextFit\n");
-    }
-#endif
-
     float minPointSize  = parameters.textFitMinSize * parameters.effectiveTextScale;
     float maxPointSize  = parameters.textFitMaxSize * parameters.effectiveTextScale;
     float pointInterval = parameters.textFitStepSize * parameters.effectiveTextScale;

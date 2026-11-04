@@ -15,12 +15,12 @@ BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(capi-appfw-application)
 BuildRequires:  pkgconfig(capi-appfw-app-control)
 BuildRequires:  pkgconfig(dlog)
-BuildRequires:  pkgconfig(dali2-core)
-BuildRequires:  pkgconfig(dali2-adaptor)
-BuildRequires:  dali2-integration-devel
-BuildRequires:  dali2-adaptor-integration-devel
-BuildRequires:  pkgconfig(dali2-ui-foundation)
-BuildRequires:  pkgconfig(dali2-ui-components)
+BuildRequires:  pkgconfig(dali3-core)
+BuildRequires:  pkgconfig(dali3-adaptor)
+BuildRequires:  dali3-integration-devel
+BuildRequires:  dali3-adaptor-integration-devel
+BuildRequires:  pkgconfig(dali3-ui-foundation)
+BuildRequires:  pkgconfig(dali3-ui-components)
 BuildRequires:  coregl
 
 %description

@@ -26,10 +26,10 @@ FOREACH(MODULE IN LISTS DALI_UI_WINDOWS_TEST_MODULES)
 ENDFOREACH()
 
 FIND_PACKAGE(dali-windows-dependencies CONFIG REQUIRED)
-FIND_PACKAGE(dali2-core CONFIG REQUIRED)
-FIND_PACKAGE(dali2-adaptor CONFIG REQUIRED)
-FIND_PACKAGE(dali2-ui-foundation CONFIG REQUIRED)
-FIND_PACKAGE(dali2-ui-components CONFIG REQUIRED)
+FIND_PACKAGE(dali3-core CONFIG REQUIRED)
+FIND_PACKAGE(dali3-adaptor CONFIG REQUIRED)
+FIND_PACKAGE(dali3-ui-foundation CONFIG REQUIRED)
+FIND_PACKAGE(dali3-ui-components CONFIG REQUIRED)
 FIND_PACKAGE(Intl REQUIRED)
 
 GET_TARGET_PROPERTY(DALI_WINDOWS_DEPENDENCIES_INCLUDE_DIRS
@@ -82,8 +82,8 @@ TARGET_COMPILE_OPTIONS(dali-ui-foundation-test-objects PRIVATE
 )
 TARGET_LINK_LIBRARIES(dali-ui-foundation-test-objects PRIVATE
   dali-windows-dependencies::dali-windows-dependencies
-  dali2-adaptor::dali2-adaptor
-  dali2-core::dali2-core
+  dali3-adaptor::dali3-adaptor
+  dali3-core::dali3-core
 )
 
 SET(DALI_TEST_SOURCE_LIST_ONLY ON)
@@ -261,7 +261,7 @@ TARGET_COMPILE_DEFINITIONS(tct-dali-ui-foundation-internal-core PRIVATE
 )
 # view-debug.h guards its Dump*() declarations (and the view-impl.h include
 # that provides GetImpl) behind DEBUG_ENABLED, and view-debug.cpp compiles the
-# matching definitions out without it. The prebuilt Release dali2-core does not
+# matching definitions out without it. The prebuilt Release dali3-core does not
 # export Debug::Filter::New (dali-core defines it only under DEBUG_ENABLED), so
 # DEBUG_ENABLED cannot be switched on target-wide: scope it to exactly the two
 # translation units that need it, in every config.
@@ -275,8 +275,8 @@ TARGET_COMPILE_OPTIONS(tct-dali-ui-foundation-internal-core PRIVATE
 )
 TARGET_LINK_LIBRARIES(tct-dali-ui-foundation-internal-core PRIVATE
   dali-windows-dependencies::dali-windows-dependencies
-  dali2-adaptor::dali2-adaptor
-  dali2-core::dali2-core
+  dali3-adaptor::dali3-adaptor
+  dali3-core::dali3-core
   Intl::Intl
   dbghelp
 )
@@ -316,10 +316,10 @@ FUNCTION(CONFIGURE_UI_TEST_RUNNER TARGET ARRAY_NAME HEADER_NAME SUITE_LABEL)
   )
   TARGET_LINK_LIBRARIES(${TARGET} PRIVATE
     dali-windows-dependencies::dali-windows-dependencies
-    dali2-ui-components::dali2-ui-components
-    dali2-ui-foundation::dali2-ui-foundation
-    dali2-adaptor::dali2-adaptor
-    dali2-core::dali2-core
+    dali3-ui-components::dali3-ui-components
+    dali3-ui-foundation::dali3-ui-foundation
+    dali3-adaptor::dali3-adaptor
+    dali3-core::dali3-core
     Intl::Intl
     dbghelp
   )
@@ -369,7 +369,7 @@ FUNCTION(ADD_UI_TEST_ADDON ADDON_TARGET TEST_TARGET TEST_SOURCE ADDON_DIRECTORY)
   )
   TARGET_LINK_LIBRARIES(${ADDON_TARGET} PRIVATE
     dali-windows-dependencies::dali-windows-dependencies
-    dali2-core::dali2-core
+    dali3-core::dali3-core
   )
   SET_TARGET_PROPERTIES(${ADDON_TARGET} PROPERTIES
     OUTPUT_NAME SampleAddOn

@@ -474,7 +474,7 @@ private:
     mDragPreview.SetRequestedX(mDragBounds.x);
     mDragPreview.SetRequestedY(mDragBounds.y);
     mWindow.Add(mDragPreview);
-    mDragPreview.RaiseToTop(LayoutOrderPolicy::PRESERVE);
+    mDragPreview.RaiseToTop();
     LayoutController::Get(mWindow).ProcessLayouts();
 
     StartAutoScrollTimer();

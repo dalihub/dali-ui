@@ -18,7 +18,6 @@
 #include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/devel-api/adaptor-framework/bitmap-saver.h>
 #include <dali/integration-api/debug.h>
-#include <dali/integration-api/pixel-data-integ.h>
 
 #include <algorithm>
 #include <iomanip>
@@ -549,26 +548,25 @@ private:
     uint32_t savedCount = 0u;
     for(size_t index = 0u; index < mDebugRenderTasks.size(); ++index)
     {
-      PixelData pixelData = mDebugRenderTasks[index].GetRenderResult();
-      if(!pixelData)
+      PixelBuffer pixelBuffer = mDebugRenderTasks[index].GetRenderResultBuffer();
+      if(!pixelBuffer)
       {
         DALI_LOG_RELEASE_INFO("[GAUSSIAN-BLUR-SAMPLE] FBO[%zu] has no retained result\n", index);
         continue;
       }
 
-      const auto        pixelBuffer = Dali::Integration::GetPixelDataBuffer(pixelData);
-      const std::string path        = "/tmp/gaussian-blur-run-" + std::to_string(mRunId) +
+      const std::string path = "/tmp/gaussian-blur-run-" + std::to_string(mRunId) +
                                "-fbo-" + std::to_string(index) + ".png";
-      const bool saved = EncodeToFile(pixelBuffer.buffer,
+      const bool saved = EncodeToFile(pixelBuffer.GetBuffer(),
                                       path,
-                                      pixelData.GetPixelFormat(),
-                                      pixelData.GetWidth(),
-                                      pixelData.GetHeight());
+                                      pixelBuffer.GetPixelFormat(),
+                                      pixelBuffer.GetWidth(),
+                                      pixelBuffer.GetHeight());
       savedCount += saved ? 1u : 0u;
       DALI_LOG_RELEASE_INFO("[GAUSSIAN-BLUR-SAMPLE] FBO[%zu] %ux%u saved=%d path=%s\n",
                             index,
-                            pixelData.GetWidth(),
-                            pixelData.GetHeight(),
+                            pixelBuffer.GetWidth(),
+                            pixelBuffer.GetHeight(),
                             static_cast<int>(saved),
                             path.c_str());
     }

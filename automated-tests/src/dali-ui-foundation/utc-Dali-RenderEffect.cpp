@@ -150,12 +150,15 @@ std::vector<Dali::RenderTask> RenderTasksAddedSince(RenderTaskList taskList, con
 /// @brief Renders once to settle a pending change, then measures the draw count of one further
 /// steady-state frame. Measuring without settling first would fold the transition frames into the
 /// count as well.
-int MeasureSteadyDrawCount(UiTestApplication& application, TraceCallStack& drawTrace)
+int MeasureSteadyDrawCount(UiTestApplication& application, TraceCallStack& drawTrace, View dirtyView)
 {
+  // Change the source subtree before each frame so unchanged FBOs are not skipped.
+  dirtyView.SetColorMultiplier(UiColor(0.9f, 0.9f, 0.9f, 1.0f));
   application.SendNotification();
   application.Render();
 
   drawTrace.Reset();
+  dirtyView.SetColorMultiplier(UiColor(1.0f, 1.0f, 1.0f, 1.0f));
   application.SendNotification();
   application.Render();
   return drawTrace.CountMethod("DrawArrays");
@@ -492,7 +495,7 @@ int UtcDaliBackgroundBlurEffectSetSourceView(void)
 
   // Everything below is expressed relative to this baseline, so that whatever the main window
   // already draws does not have to be counted here.
-  const int baseDrawCount = MeasureSteadyDrawCount(application, drawTrace);
+  const int baseDrawCount = MeasureSteadyDrawCount(application, drawTrace, parentView);
   tet_printf("Baseline draw count without any effect : %d\n", baseDrawCount);
 
   view2.SetRenderEffect(effect);
@@ -501,27 +504,27 @@ int UtcDaliBackgroundBlurEffectSetSourceView(void)
   effect.Activate();
 
   tet_printf("Drawing the grand parent, the parent and view1 offscreen, plus the effect itself\n");
-  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace), baseDrawCount + 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace, parentView), baseDrawCount + 4, TEST_LOCATION);
 
   effect.SetSourceView(parentView);
   tet_printf("The grand parent drops out of the offscreen pass\n");
-  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace), baseDrawCount + 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace, parentView), baseDrawCount + 3, TEST_LOCATION);
 
   effect.SetStopperView(view1);
   tet_printf("view1 drops out of the offscreen pass as well\n");
-  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace), baseDrawCount + 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace, parentView), baseDrawCount + 2, TEST_LOCATION);
 
   effect.SetSourceView(View()); // Set empty handle
   tet_printf("The grand parent comes back, the stopper still cuts view1 off\n");
-  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace), baseDrawCount + 3, TEST_LOCATION);
+  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace, parentView), baseDrawCount + 3, TEST_LOCATION);
 
   effect.SetStopperView(View()); // Set empty handle
   tet_printf("Back to the whole ancestor chain\n");
-  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace), baseDrawCount + 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace, parentView), baseDrawCount + 4, TEST_LOCATION);
 
   effect.SetSourceView(view1); // Not an ancestor of view2, so it must be ignored
   tet_printf("A non-ancestor source view is ignored, so nothing changes\n");
-  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace), baseDrawCount + 4, TEST_LOCATION);
+  DALI_TEST_EQUALS(MeasureSteadyDrawCount(application, drawTrace, parentView), baseDrawCount + 4, TEST_LOCATION);
 
   END_TEST;
 }

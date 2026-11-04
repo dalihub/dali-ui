@@ -152,8 +152,8 @@ UiScaleManager scale = 2.0
 뷰의 최종 렌더링 크기는 두 스케일 메커니즘의 조합으로 결정됩니다.
 
 조건:
-- `ScalingFactor` = `1.5` (시작 시 `UiConfig::SetScalingFactor()`로 설정)
-- `UiScaleManager` 스케일 = `2.0` (런타임에 설정)
+- `ScalingFactor` = `1.5` (시작 시 `UiConfig::SetUnitScalingFactor()`로 설정)
+- 시스템 스케일 = `2.0` (런타임에 설정)
 - 요청 너비 `100_spx`인 뷰
 
 최종 시각적 너비:

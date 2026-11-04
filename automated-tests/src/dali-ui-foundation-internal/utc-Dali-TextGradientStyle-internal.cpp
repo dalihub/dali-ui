@@ -15,6 +15,9 @@
  *
  */
 
+#include <limits>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
+#include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
@@ -188,5 +191,33 @@ int UtcDaliTextGradientStyleMovedFromInputN(void)
   DALI_TEST_CHECK(moved.GetType() != PublicGradient::Type::NONE);
 
   DALI_TEST_ASSERTION(TextInternal::Gradient::CreateStyle(source), MOVED_FROM_GRADIENT_ASSERTION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientUiScaleFiniteGeometryP(void)
+{
+  const Vector4 bounds(0.0f, 0.0f, 1.0f, 1.0f);
+  const Vector2 display(400.0f, 120.0f);
+  PublicGradient::Radial gradient(Vector2(30.0f, 20.0f), 0.125f);
+  SetCommonProperties(gradient);
+  auto style = TextInternal::Gradient::CreateStyle(gradient);
+  for(float scale : {0.5f, 1.0f, 1.25f, 2.0f, std::numeric_limits<float>::max()})
+  {
+    auto size = TextInternal::ResolveGradientCoordinateSize(style.units, display, scale);
+    auto data = TextInternal::Gradient::ResolveRenderData(style, bounds, size);
+    DALI_TEST_CHECK(data.enabled);
+    DALI_TEST_CHECK(std::isfinite(data.radialScale.x) && std::isfinite(data.radialScale.y));
+  }
+  auto size = TextInternal::ResolveGradientCoordinateSize(style.units, display, std::numeric_limits<float>::min());
+  DALI_TEST_CHECK(!TextInternal::Gradient::ResolveRenderData(style, bounds, size).enabled);
+  gradient = PublicGradient::Radial(Vector2(30.0f, 20.0f), 0.001f);
+  SetCommonProperties(gradient);
+  style = TextInternal::Gradient::CreateStyle(gradient);
+  size = TextInternal::ResolveGradientCoordinateSize(style.units, display, 1.0e-35f);
+  DALI_TEST_CHECK(!TextInternal::Gradient::ResolveRenderData(style, bounds, size).enabled);
+  gradient.SetUnits(PublicGradient::Units::OBJECT_BOUNDING_BOX);
+  style = TextInternal::Gradient::CreateStyle(gradient);
+  DALI_TEST_EQUALS(TextInternal::ResolveGradientCoordinateSize(style.units, display, std::numeric_limits<float>::min()), display, TEST_LOCATION);
+  DALI_TEST_CHECK(TextInternal::Gradient::ResolveRenderData(style, bounds, display).enabled);
   END_TEST;
 }

@@ -125,6 +125,24 @@ With this feature, users can make a view perform the role of a `Button` or `Swit
 
 <br/>
 
+#### Blocking Touch propagation
+
+`View` inherits `Actor::SetTouchPropagationBlocked()` from DALi Core. An overlay can stop ordinary
+GEOMETRY Touch after itself while letting foreground children continue gesture recognition:
+
+```cpp
+view.SetTouchPropagationBlocked(true); // Default: false.
+```
+
+The View remains a hit candidate and can receive Touch; no callback is required to block propagation.
+The setting does not consume Touch. An actual `true` consume result still selects an owner and interrupts
+other active Touch recipients. A callback returning `false` cannot undo consumption by another callback or
+an enabled InteractiveTrait. Hover, Wheel and ancestor interception need their own policies.
+
+The Core API is tagged `@SINCE_2_5.46`. See
+[Touch & Gesture — Blocking Touch Propagation](Touch-&-Gesture.md#blocking-touch-propagation)
+for the first-DOWN lifetime rules and nested scrolling examples.
+
 ### 4. View Inheritance
 
 When framework developers create a new component, or when an application needs a custom component, inherit from `View`'s **handle class** and **impl class** respectively.

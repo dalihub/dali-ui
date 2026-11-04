@@ -22,12 +22,21 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <typeinfo>
 #include <vector>
 
 // INTERNAL INCLUDES
+// label-impl.h stays in a block of its own, ahead of every other internal header: it is read for typeid only
+// (ReportsMatchFollowerSize) and does not compile once view-integ.h has declared Integration::View, which
+// view-data-impl.h includes.
+#include <dali-ui-foundation/integration-api/label-impl.h>
+
+#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
+#include <dali-ui-foundation/internal/layouts/measure-mode.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace DALI_NAMESPACE
@@ -95,8 +104,12 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
                                     const Dali::Vector<GridLength>& colDefs,
                                     std::vector<float>&             rowHeights,
                                     std::vector<float>&             colWidths,
-                                    float rowSpacing, float colSpacing, float scale)
+                                    float rowSpacing, float colSpacing, float scale,
+                                    const Internal::ViewDataImpl& viewData)
 {
+  // A grid that is not mode-aware (a subclass, a view with a layout callback) measures every
+  // child with the custom-parent modes of its view, which is also what the child's own
+  // derivation gives (ViewDataImpl::DeriveChildModesAsCustomParent).
   // First pass: capture the content size of every non-spanning child as the
   // floor of its auto-sized track (auto track intrinsic sizing).
   for(auto& childView : children)
@@ -117,13 +130,14 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
     rowSpan          = std::min(rowSpan, rowCount - row);
     colSpan          = std::min(colSpan, colCount - col);
 
-    float        childScale            = childImpl.GetEffectiveScale();
-    Insets       margin                = childImpl.GetMargin();
-    float        marginW               = (margin.start + margin.end) * childScale;
-    float        marginH               = (margin.top + margin.bottom) * childScale;
-    float        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
-    float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
-    MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    float                        childScale            = childImpl.GetEffectiveScale();
+    Insets                       margin                = childImpl.GetMargin();
+    float                        marginW               = (margin.start + margin.end) * childScale;
+    float                        marginH               = (margin.top + margin.bottom) * childScale;
+    float                        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
+    float                        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
+    const Internal::MeasureModes modes                 = viewData.DeriveChildModesAsCustomParent(childImpl.GetRequestedWidth(), childImpl.GetRequestedHeight());
+    MeasuredSize                 childSize             = Internal::ViewDataImpl::Get(childImpl).Measure(childWidthConstraint, childHeightConstraint, modes.width, modes.height, Internal::MeasureModeCheck::MATCHES_DERIVATION);
 
     bool rowAutoLike = IsAutoLikeTrack(rowDefs, row);
     bool colAutoLike = IsAutoLikeTrack(colDefs, col);
@@ -190,13 +204,14 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
       continue; // Non-spanning children are already handled by the first pass.
     }
 
-    float        childScale            = childImpl.GetEffectiveScale();
-    Insets       margin                = childImpl.GetMargin();
-    float        marginW               = (margin.start + margin.end) * childScale;
-    float        marginH               = (margin.top + margin.bottom) * childScale;
-    float        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
-    float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
-    MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    float                        childScale            = childImpl.GetEffectiveScale();
+    Insets                       margin                = childImpl.GetMargin();
+    float                        marginW               = (margin.start + margin.end) * childScale;
+    float                        marginH               = (margin.top + margin.bottom) * childScale;
+    float                        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
+    float                        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
+    const Internal::MeasureModes modes                 = viewData.DeriveChildModesAsCustomParent(childImpl.GetRequestedWidth(), childImpl.GetRequestedHeight());
+    MeasuredSize                 childSize             = Internal::ViewDataImpl::Get(childImpl).Measure(childWidthConstraint, childHeightConstraint, modes.width, modes.height, Internal::MeasureModeCheck::MATCHES_DERIVATION);
 
     // Column axis: grow spanned auto columns to fit the child's width.
     if(colSpan > 1)
@@ -363,6 +378,504 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
   totalHeightOut = std::accumulate(rowHeights.begin(), rowHeights.end(), 0.0f) + totalSpacingHeight;
 }
 
+// One axis of ApplyGridDefinitions, with the same float operations in the same order (the two
+// axes of ApplyGridDefinitions never read each other's values, so resolving them separately
+// gives bit-identical tracks and totals).
+void ResolveGridTracks(std::vector<float>& sizes, const Dali::Vector<GridLength>& defs, float available, float spacing,
+                       uint32_t count, float& totalOut, float scale)
+{
+  float totalAbsolute = 0.0f;
+  float totalStar     = 0.0f;
+
+  for(uint32_t i = 0; i < count; ++i)
+  {
+    if(i < defs.Size())
+    {
+      const auto& def = defs[i];
+      if(def.GetType() == GridLengthType::ABSOLUTE)
+      {
+        sizes[i] = def.GetValue() * scale;
+        totalAbsolute += sizes[i];
+      }
+      else if(def.GetType() == GridLengthType::STAR)
+      {
+        totalStar += def.GetValue();
+      }
+      else
+      {
+        totalAbsolute += sizes[i];
+      }
+    }
+    else
+    {
+      totalStar += 1.0f;
+    }
+  }
+
+  float totalSpacing = spacing * (count > 0 ? count - 1 : 0);
+  float remaining    = std::max(0.0f, available - totalAbsolute - totalSpacing);
+
+  for(uint32_t i = 0; i < count; ++i)
+  {
+    if(i < defs.Size() && defs[i].GetType() == GridLengthType::STAR)
+    {
+      float starValue = defs[i].GetValue();
+      sizes[i]        = (totalStar > 0) ? (starValue / totalStar) * remaining : 0.0f;
+    }
+    else if(i >= defs.Size())
+    {
+      float share = (totalStar > 0) ? (1.0f / totalStar) * remaining : 0.0f;
+      sizes[i]    = std::max(sizes[i], share);
+    }
+  }
+
+  totalOut = std::accumulate(sizes.begin(), sizes.end(), 0.0f) + totalSpacing;
+}
+
+// The WRAP_CONTENT extent the star tracks of one axis share in the measure pass (the expression
+// GridLayoutManager::Measure uses for a WRAP_CONTENT axis): the non-star tracks plus spacing,
+// at least the grid's own minimum content extent.
+float GridWrapStarAvailable(const std::vector<float>& sizes, const Dali::Vector<GridLength>& defs, float spacing,
+                            uint32_t count, float minimumContent)
+{
+  float nonStar = 0.0f;
+  for(uint32_t i = 0; i < count; ++i)
+  {
+    if(i >= defs.Size() || defs[i].GetType() != GridLengthType::STAR)
+    {
+      nonStar += sizes[i];
+    }
+  }
+  nonStar += spacing * (count > 0 ? count - 1 : 0);
+  return std::max(nonStar, minimumContent);
+}
+
+using Internal::MeasureMode;
+using Internal::MeasureModeCheck;
+
+// The measure cache's own tolerance (ViewDataImpl's FloatEqual).
+bool GridFloatEqual(float a, float b)
+{
+  return std::abs(a - b) < 0.001f;
+}
+
+enum class GridTrackKind
+{
+  ABSOLUTE, ///< Every spanned track is ABSOLUTE: the cell is determined before any child is measured
+  STAR,     ///< No spanned track is AUTO-like and at least one is STAR
+  AUTO      ///< At least one spanned track is AUTO-like (sized from the children)
+};
+
+// The same classification as ViewDataImpl::DeriveMeasureModes uses (file-local copy).
+GridTrackKind ClassifyGridSpan(const Dali::Vector<GridLength>& defs, uint32_t start, uint32_t span)
+{
+  bool allAbsolute = true;
+  bool anyAutoLike = false;
+  bool anyStar     = false;
+  for(uint32_t i = start; i < start + span; ++i)
+  {
+    const bool defined = i < defs.Size();
+    if(IsAutoLikeTrack(defs, i))
+    {
+      anyAutoLike = true;
+    }
+    if(!defined || defs[i].GetType() != GridLengthType::ABSOLUTE)
+    {
+      allAbsolute = false;
+    }
+    if(defined && defs[i].GetType() == GridLengthType::STAR)
+    {
+      anyStar = true;
+    }
+  }
+  if(allAbsolute && span > 0u)
+  {
+    return GridTrackKind::ABSOLUTE;
+  }
+  if(!anyAutoLike && anyStar)
+  {
+    return GridTrackKind::STAR;
+  }
+  return GridTrackKind::AUTO;
+}
+
+// Whether a MATCH_PARENT width measured AT_MOST reports exactly the minimum size whatever the
+// constraint (ViewDataImpl::GetMatchFollowerSize()): the LayoutManager dispatch substitutes it,
+// the default measure (a plain View, a Layout without a manager) and Label report it. A measure
+// callback outranks all of them and may return anything.
+bool ReportsMatchFollowerSize(ViewImpl& childImpl)
+{
+  const Internal::ViewDataImpl& childData = Internal::ViewDataImpl::Get(childImpl);
+  if(childData.HasMeasureCallback())
+  {
+    return false;
+  }
+  if(childData.GetLayoutManager() != nullptr)
+  {
+    return true;
+  }
+  const std::type_info& type = typeid(childImpl);
+  return type == typeid(ViewImpl) || type == typeid(Integration::LayoutImpl) || type == typeid(Integration::LabelImpl);
+}
+
+/**
+ * One child of a mode-aware grid pass.
+ */
+struct GridChildEntry
+{
+  ViewImpl*       impl{nullptr};
+  uint32_t        row{0u};
+  uint32_t        col{0u};
+  uint32_t        rowSpan{1u};
+  uint32_t        colSpan{1u};
+  float           marginW{0.0f};
+  float           marginH{0.0f};
+  GridTrackKind   colKind{GridTrackKind::AUTO};
+  GridTrackKind   rowKind{GridTrackKind::AUTO};
+  LayoutAlignment hAlign{LayoutAlignment::FILL};
+  LayoutAlignment vAlign{LayoutAlignment::FILL};
+  bool            matchW{false};
+  bool            matchH{false};
+  bool            wrapW{false};
+  bool            wrapH{false};
+  float           height{0.0f}; ///< The height number of every call (item 2)
+  MeasureMode     heightMode{MeasureMode::AT_MOST};
+  bool            deferred{false}; ///< MATCH_PARENT width in an AUTO column: the final call is phase B
+  MeasuredSize    sizeA;           ///< Phase-A result (width: the follower size when synthesized)
+  MeasuredSize    finalSize;
+};
+
+// A MATCH_PARENT axis measured at anything but EXACTLY is an intermediate call (a probe, or a
+// cell the measure pass cannot know yet); every other mode a grid passes is its derivation.
+MeasureModeCheck GridCallCheck(const GridChildEntry& entry, MeasureMode widthMode, MeasureMode heightMode)
+{
+  return ((entry.matchW && widthMode != MeasureMode::EXACTLY) || (entry.matchH && heightMode != MeasureMode::EXACTLY))
+           ? MeasureModeCheck::NONE
+           : MeasureModeCheck::MATCHES_DERIVATION;
+}
+
+/**
+ * The mode-aware replacement of MeasureGridChildrenAndFillAuto + ApplyGridDefinitions, used by
+ * both Measure and Arrange of a grid whose producer is exactly GridLayoutManager.
+ *
+ * Columns first:
+ *  - ABSOLUTE tracks are seeded up front (they never take a content floor, so seeding them
+ *    before the AUTO pass changes nothing).
+ *  - Phase A sizes the AUTO columns exactly as before (today's numbers, order and floors) from
+ *    the children in AUTO columns and, while the grid's width is not determined, from the children in
+ *    STAR columns too. A MATCH_PARENT child in an AUTO column contributes the size it reports as
+ *    a follower -- synthesized without a call when its producer follows the contract exactly
+ *    (bit-identical, and no second key to alternate on in Arrange), a probe otherwise -- and is
+ *    measured exactly in phase B.
+ *  - The columns are resolved, then phase B measures every child whose cell width is now determined
+ *    -- ABSOLUTE columns, STAR columns of a grid with a determined width, and the deferred
+ *    MATCH_PARENT children -- at that cell: MATCH_PARENT and FILL WRAP_CONTENT EXACTLY,
+ *    otherwise AT_MOST.
+ * Rows: every call's height is the cell for an ABSOLUTE row (EXACTLY for MATCH_PARENT / FILL),
+ * otherwise today's budget AT_MOST; the AUTO row floors and spans come from each child's final
+ * size, then the rows are resolved.
+ *
+ * @param[in] arrangePhase True in Arrange: the star tracks share the arranged extent
+ */
+void MeasureGridChildrenPhased(std::vector<View>& children, float availableWidth, float availableHeight,
+                               uint32_t rowCount, uint32_t colCount,
+                               const Dali::Vector<GridLength>& rowDefs, const Dali::Vector<GridLength>& colDefs,
+                               std::vector<float>& rowHeights, std::vector<float>& colWidths,
+                               float rowSpacing, float colSpacing, float scale, bool widthDetermined, bool heightDetermined,
+                               bool arrangePhase, ViewImpl& view, float& totalWidthOut, float& totalHeightOut)
+{
+  // 1. ABSOLUTE tracks up front.
+  for(uint32_t i = 0; i < colCount; ++i)
+  {
+    if(i < colDefs.Size() && colDefs[i].GetType() == GridLengthType::ABSOLUTE)
+    {
+      colWidths[i] = colDefs[i].GetValue() * scale;
+    }
+  }
+  for(uint32_t i = 0; i < rowCount; ++i)
+  {
+    if(i < rowDefs.Size() && rowDefs[i].GetType() == GridLengthType::ABSOLUTE)
+    {
+      rowHeights[i] = rowDefs[i].GetValue() * scale;
+    }
+  }
+
+  // 2. Per child: its cell, kinds, and the height of every call.
+  std::vector<GridChildEntry> entries;
+  entries.reserve(children.size());
+  for(auto& childView : children)
+  {
+    ViewImpl& childImpl = GetImpl(childView);
+    if(IsChildStandalone(childImpl))
+    {
+      continue;
+    }
+
+    GridChildEntry entry;
+    entry.impl    = &childImpl;
+    entry.row     = std::min(GetChildRow(childImpl), rowCount - 1);
+    entry.col     = std::min(GetChildColumn(childImpl), colCount - 1);
+    entry.rowSpan = std::min(GetChildRowSpan(childImpl), rowCount - entry.row);
+    entry.colSpan = std::min(GetChildColumnSpan(childImpl), colCount - entry.col);
+
+    float  childScale = childImpl.GetEffectiveScale();
+    Insets margin     = childImpl.GetMargin();
+    entry.marginW     = (margin.start + margin.end) * childScale;
+    entry.marginH     = (margin.top + margin.bottom) * childScale;
+    entry.colKind     = ClassifyGridSpan(colDefs, entry.col, entry.colSpan);
+    entry.rowKind     = ClassifyGridSpan(rowDefs, entry.row, entry.rowSpan);
+    entry.hAlign      = GetChildHorizontalAlignment(childImpl);
+    entry.vAlign      = GetChildVerticalAlignment(childImpl);
+    entry.matchW      = childImpl.GetRequestedWidth() == MATCH_PARENT;
+    entry.matchH      = childImpl.GetRequestedHeight() == MATCH_PARENT;
+    entry.wrapW       = childImpl.GetRequestedWidth() == WRAP_CONTENT;
+    entry.wrapH       = childImpl.GetRequestedHeight() == WRAP_CONTENT;
+
+    if(entry.rowKind == GridTrackKind::ABSOLUTE)
+    {
+      float cell = rowSpacing * static_cast<float>(entry.rowSpan - 1);
+      for(uint32_t i = 0; i < entry.rowSpan; ++i)
+      {
+        cell += rowHeights[entry.row + i];
+      }
+      entry.height     = std::max(0.0f, cell - entry.marginH);
+      entry.heightMode = (entry.matchH || (entry.wrapH && entry.vAlign == LayoutAlignment::FILL)) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+    }
+    else
+    {
+      entry.height     = std::max(0.0f, availableHeight - entry.marginH);
+      entry.heightMode = MeasureMode::AT_MOST;
+    }
+    entries.push_back(entry);
+  }
+
+  // 3. Phase A: AUTO column sizing, today's numbers and order. ownColWidths follows colWidths over
+  // the children that size themselves (deferred MATCH_PARENT children excluded): resolved like the
+  // columns, it gives the width a deferred child's cell has of its own.
+  std::vector<float> ownColWidths = colWidths;
+  bool               anyDeferred  = false;
+  for(auto& entry : entries)
+  {
+    const bool inAutoColumn       = (entry.colKind == GridTrackKind::AUTO);
+    const bool inUndeterminedStar = (entry.colKind == GridTrackKind::STAR && !widthDetermined);
+    if(!inAutoColumn && !inUndeterminedStar)
+    {
+      continue;
+    }
+
+    const float budgetWidth = std::max(0.0f, availableWidth - entry.marginW);
+    if(inAutoColumn && entry.matchW)
+    {
+      entry.deferred = true;
+      anyDeferred    = true;
+      if(ReportsMatchFollowerSize(*entry.impl))
+      {
+        entry.sizeA = Internal::ViewDataImpl::Get(*entry.impl).GetMatchFollowerSize();
+      }
+      else
+      {
+        entry.sizeA = Internal::ViewDataImpl::Get(*entry.impl).Measure(budgetWidth, entry.height, MeasureMode::AT_MOST, entry.heightMode, MeasureModeCheck::NONE);
+      }
+    }
+    else if(arrangePhase && inUndeterminedStar &&
+            Internal::ViewDataImpl::Get(*entry.impl).CanSkipArrangeRemeasure(budgetWidth, entry.height, MeasureMode::AT_MOST, entry.heightMode))
+    {
+      // An arrange-phase repeat of a WRAP_CONTENT or explicitly sized child in a STAR column of a
+      // grid whose width is not determined: such a child floors no column (STAR tracks take no
+      // floor, and a STAR span holds no AUTO-like track to grow), and its row contribution is the
+      // same whether it holds this budget measurement or the cell measurement the previous arrange
+      // made (that one is AT_MOST the very row it is laid out in, and not lower than its budget
+      // height). Reusing a valid, clean measurement keeps the child from being re-keyed to the
+      // budget -- which made the cell re-measure below run again on every arrange.
+      entry.sizeA     = entry.impl->GetMeasuredSize();
+      entry.finalSize = entry.sizeA;
+    }
+    else
+    {
+      entry.sizeA     = Internal::ViewDataImpl::Get(*entry.impl).Measure(budgetWidth, entry.height, MeasureMode::AT_MOST, entry.heightMode, GridCallCheck(entry, MeasureMode::AT_MOST, entry.heightMode));
+      entry.finalSize = entry.sizeA;
+    }
+
+    if(entry.colSpan == 1 && IsAutoLikeTrack(colDefs, entry.col))
+    {
+      colWidths[entry.col] = std::max(colWidths[entry.col], entry.sizeA.width + entry.marginW);
+      if(!entry.deferred)
+      {
+        ownColWidths[entry.col] = std::max(ownColWidths[entry.col], entry.sizeA.width + entry.marginW);
+      }
+    }
+  }
+
+  // Spanning children: grow the spanned AUTO columns by the deficit (the column half of the
+  // span pass of MeasureGridChildrenAndFillAuto, from the phase-A sizes).
+  for(const auto& entry : entries)
+  {
+    if(entry.colSpan <= 1 || !(entry.colKind == GridTrackKind::AUTO || (entry.colKind == GridTrackKind::STAR && !widthDetermined)))
+    {
+      continue;
+    }
+    uint32_t spannedAutoCount = 0u;
+    float    currentSpanSize  = colSpacing * static_cast<float>(entry.colSpan - 1);
+    for(uint32_t i = 0; i < entry.colSpan; ++i)
+    {
+      currentSpanSize += colWidths[entry.col + i];
+      if(IsAutoLikeTrack(colDefs, entry.col + i))
+      {
+        ++spannedAutoCount;
+      }
+    }
+    if(spannedAutoCount > 0u)
+    {
+      float deficit = std::max(0.0f, (entry.sizeA.width + entry.marginW) - currentSpanSize);
+      if(deficit > 0.0f)
+      {
+        float share = deficit / static_cast<float>(spannedAutoCount);
+        for(uint32_t i = 0; i < entry.colSpan; ++i)
+        {
+          if(IsAutoLikeTrack(colDefs, entry.col + i))
+          {
+            colWidths[entry.col + i] += share;
+          }
+        }
+      }
+      if(!entry.deferred)
+      {
+        // The same deficit over the own widths.
+        float ownSpanSize = colSpacing * static_cast<float>(entry.colSpan - 1);
+        for(uint32_t i = 0; i < entry.colSpan; ++i)
+        {
+          ownSpanSize += ownColWidths[entry.col + i];
+        }
+        const float ownDeficit = std::max(0.0f, (entry.sizeA.width + entry.marginW) - ownSpanSize);
+        if(ownDeficit > 0.0f)
+        {
+          const float ownShare = ownDeficit / static_cast<float>(spannedAutoCount);
+          for(uint32_t i = 0; i < entry.colSpan; ++i)
+          {
+            if(IsAutoLikeTrack(colDefs, entry.col + i))
+            {
+              ownColWidths[entry.col + i] += ownShare;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 4. Resolve the columns. The own widths are resolved the same way, so a STAR track or one without a
+  // definition has its share of the grid's width as its own -- while that width is not determined,
+  // its share of the non-STAR tracks' own widths or of the grid's own minimum.
+  const Insets padding           = view.GetPadding();
+  float        starAvailableWide = availableWidth;
+  float        ownStarAvailable  = availableWidth;
+  if(!arrangePhase && !widthDetermined)
+  {
+    const float pw         = (padding.start + padding.end) * scale;
+    const float minContent = std::max(0.0f, view.GetMinimumWidth() * scale - pw);
+    starAvailableWide      = GridWrapStarAvailable(colWidths, colDefs, colSpacing, colCount, minContent);
+    if(anyDeferred)
+    {
+      ownStarAvailable = GridWrapStarAvailable(ownColWidths, colDefs, colSpacing, colCount, minContent);
+    }
+  }
+  ResolveGridTracks(colWidths, colDefs, starAvailableWide, colSpacing, colCount, totalWidthOut, scale);
+  if(anyDeferred)
+  {
+    float ownTotalWidth = 0.0f;
+    ResolveGridTracks(ownColWidths, colDefs, ownStarAvailable, colSpacing, colCount, ownTotalWidth, scale);
+  }
+
+  // 5. Phase B: every child whose cell width is now determined, at that cell.
+  for(auto& entry : entries)
+  {
+    const bool cellDetermined = (entry.colKind == GridTrackKind::ABSOLUTE) || (entry.colKind == GridTrackKind::STAR && widthDetermined);
+    if(!cellDetermined && !entry.deferred)
+    {
+      continue;
+    }
+    float cell = colSpacing * static_cast<float>(entry.colSpan - 1);
+    for(uint32_t i = 0; i < entry.colSpan; ++i)
+    {
+      cell += colWidths[entry.col + i];
+    }
+    // The cell a deferred entry's columns have of their own (ownColWidths).
+    bool ownCell = true;
+    if(entry.deferred)
+    {
+      float own = colSpacing * static_cast<float>(entry.colSpan - 1);
+      for(uint32_t i = 0; i < entry.colSpan; ++i)
+      {
+        own += ownColWidths[entry.col + i];
+      }
+      ownCell = Internal::SnapEmptySlot(own) > 0.0f;
+    }
+    const float width = entry.deferred ? (ownCell ? Internal::SnapEmptySlot(cell - entry.marginW) : 0.0f) : std::max(0.0f, cell - entry.marginW);
+    // An AUTO column only MATCH_PARENT children span has no width of its own: such a child keeps
+    // today's budget measurement (its phase-A probe, or this call when phase A synthesized its
+    // follower size, whose height was never measured), so its rows keep the height they had before
+    // modes existed.
+    if(entry.deferred && width <= 0.0f)
+    {
+      entry.finalSize = ReportsMatchFollowerSize(*entry.impl)
+                          ? Internal::ViewDataImpl::Get(*entry.impl).Measure(std::max(0.0f, availableWidth - entry.marginW), entry.height, MeasureMode::AT_MOST, entry.heightMode, MeasureModeCheck::NONE)
+                          : entry.sizeA;
+      continue;
+    }
+    const MeasureMode widthMode = (entry.matchW || (entry.wrapW && entry.hAlign == LayoutAlignment::FILL && cellDetermined)) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+    entry.finalSize             = Internal::ViewDataImpl::Get(*entry.impl).Measure(width, entry.height, widthMode, entry.heightMode, GridCallCheck(entry, widthMode, entry.heightMode));
+  }
+
+  // 6. Rows from the final sizes: span-1 AUTO floors, then the spanning deficits.
+  for(const auto& entry : entries)
+  {
+    if(entry.rowSpan == 1 && IsAutoLikeTrack(rowDefs, entry.row))
+    {
+      rowHeights[entry.row] = std::max(rowHeights[entry.row], entry.finalSize.height + entry.marginH);
+    }
+  }
+  for(const auto& entry : entries)
+  {
+    if(entry.rowSpan <= 1)
+    {
+      continue;
+    }
+    uint32_t spannedAutoCount = 0u;
+    float    currentSpanSize  = rowSpacing * static_cast<float>(entry.rowSpan - 1);
+    for(uint32_t i = 0; i < entry.rowSpan; ++i)
+    {
+      currentSpanSize += rowHeights[entry.row + i];
+      if(IsAutoLikeTrack(rowDefs, entry.row + i))
+      {
+        ++spannedAutoCount;
+      }
+    }
+    if(spannedAutoCount > 0u)
+    {
+      float deficit = std::max(0.0f, (entry.finalSize.height + entry.marginH) - currentSpanSize);
+      if(deficit > 0.0f)
+      {
+        float share = deficit / static_cast<float>(spannedAutoCount);
+        for(uint32_t i = 0; i < entry.rowSpan; ++i)
+        {
+          if(IsAutoLikeTrack(rowDefs, entry.row + i))
+          {
+            rowHeights[entry.row + i] += share;
+          }
+        }
+      }
+    }
+  }
+
+  float starAvailableHigh = availableHeight;
+  if(!arrangePhase && !heightDetermined)
+  {
+    const float ph         = (padding.top + padding.bottom) * scale;
+    const float minContent = std::max(0.0f, view.GetMinimumHeight() * scale - ph);
+    starAvailableHigh      = GridWrapStarAvailable(rowHeights, rowDefs, rowSpacing, rowCount, minContent);
+  }
+  ResolveGridTracks(rowHeights, rowDefs, starAvailableHigh, rowSpacing, rowCount, totalHeightOut, scale);
+}
+
 void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vector<float>& colWidths,
                           const LayoutRect& bounds, float rowSpacing, float colSpacing, uint32_t rowCount,
                           uint32_t colCount, std::vector<float>& rowPositionsOut, std::vector<float>& colPositionsOut)
@@ -383,9 +896,13 @@ void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vecto
 
 // @param[in] owner The arranging View, threaded through so the final MATCH_PARENT
 //                  re-measure below can be attributed to it. nullptr makes the scope inert.
+// @param[in] modeAware       True when the grid's producer is exactly GridLayoutManager
+// @param[in] widthDetermined The grid's width is determined (its STAR columns are determined cells)
 void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, const std::vector<float>& rowPositions,
                                 const std::vector<float>& colPositions, uint32_t rowCount, uint32_t colCount,
-                                float rowSpacing, float colSpacing)
+                                float rowSpacing, float colSpacing, bool modeAware, bool widthDetermined,
+                                const Dali::Vector<GridLength>& rowDefs, const Dali::Vector<GridLength>& colDefs,
+                                const Internal::ViewDataImpl& viewData)
 {
   for(auto& childView : children)
   {
@@ -425,13 +942,47 @@ void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, co
     childBounds.width  = std::max(0.0f, childBounds.width - (margin.start + margin.end) * childScale);
     childBounds.height = std::max(0.0f, childBounds.height - (margin.top + margin.bottom) * childScale);
 
-    float        cellWidth     = childBounds.width;
-    float        cellHeight    = childBounds.height;
-    MeasuredSize childMeasured = childImpl.GetMeasuredSize();
-    float        childWidth    = childMeasured.width;
-    float        childHeight   = childMeasured.height;
+    float                   cellWidth     = childBounds.width;
+    float                   cellHeight    = childBounds.height;
+    MeasuredSize            childMeasured = childImpl.GetMeasuredSize();
+    LayoutAlignment         hAlign        = GetChildHorizontalAlignment(childImpl);
+    LayoutAlignment         vAlign        = GetChildVerticalAlignment(childImpl);
+    const float             requestedW    = childImpl.GetRequestedWidth();
+    const float             requestedH    = childImpl.GetRequestedHeight();
+    const bool              isMatch       = (requestedW == MATCH_PARENT || requestedH == MATCH_PARENT);
+    Internal::ViewDataImpl& childData     = Internal::ViewDataImpl::Get(childImpl);
 
-    LayoutAlignment hAlign = GetChildHorizontalAlignment(childImpl);
+    if(modeAware)
+    {
+      // MATCH_PARENT is assigned its cell; a FILL WRAP_CONTENT axis only when its cell is
+      // determined before the children are measured (ABSOLUTE tracks, STAR columns of a grid with
+      // a determined width).
+      const GridTrackKind colKind    = ClassifyGridSpan(colDefs, col, colSpan);
+      const bool          colCell    = (colKind == GridTrackKind::ABSOLUTE) || (widthDetermined && colKind == GridTrackKind::STAR);
+      const bool          rowCell    = (ClassifyGridSpan(rowDefs, row, rowSpan) == GridTrackKind::ABSOLUTE);
+      const MeasureMode   widthMode  = (requestedW == MATCH_PARENT || (requestedW == WRAP_CONTENT && hAlign == LayoutAlignment::FILL && colCell)) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+      const MeasureMode   heightMode = (requestedH == MATCH_PARENT || (requestedH == WRAP_CONTENT && vAlign == LayoutAlignment::FILL && rowCell)) ? MeasureMode::EXACTLY : MeasureMode::AT_MOST;
+
+      // A WRAP_CONTENT child wider (or taller) than its cell -- measured at the grid's budget
+      // because its cell was not determined then (a STAR column of a grid whose width was not
+      // determined, a STAR row), or a grid laid out smaller than it measured -- is re-measured at
+      // the cell, so its measured size is the size it is laid out at. The trigger is explicit
+      // because CanSkipArrangeRemeasure() does not compare a non-assigned WRAP_CONTENT axis. An
+      // explicit size keeps its request whatever the constraint and is clipped to the cell, as
+      // before. A MATCH_PARENT child is re-measured at its cell unless it already holds a
+      // measurement for exactly this cell (the phase-B call made at the same resolved tracks).
+      const bool wideW = (requestedW == WRAP_CONTENT) && childMeasured.width > cellWidth && !GridFloatEqual(childMeasured.width, cellWidth);
+      const bool tallH = (requestedH == WRAP_CONTENT) && childMeasured.height > cellHeight && !GridFloatEqual(childMeasured.height, cellHeight);
+      if(wideW || tallH || (isMatch && !childData.CanSkipArrangeRemeasure(cellWidth, cellHeight, widthMode, heightMode)))
+      {
+        Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(owner);
+        childMeasured = childData.Measure(cellWidth, cellHeight, widthMode, heightMode, MeasureModeCheck::MATCHES_DERIVATION);
+      }
+    }
+
+    float childWidth  = childMeasured.width;
+    float childHeight = childMeasured.height;
+
     if(childWidth > 0.0f && childWidth < cellWidth)
     {
       switch(hAlign)
@@ -453,7 +1004,6 @@ void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, co
       }
     }
 
-    LayoutAlignment vAlign = GetChildVerticalAlignment(childImpl);
     if(childHeight > 0.0f && childHeight < cellHeight)
     {
       switch(vAlign)
@@ -475,10 +1025,13 @@ void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, co
       }
     }
 
-    if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+    if(!modeAware && isMatch)
     {
+      // A grid that is not mode-aware re-measures a MATCH_PARENT child at its placement with the
+      // custom-parent modes of its view, never skipped.
+      const Internal::MeasureModes                         legacy = viewData.DeriveChildModesAsCustomParent(requestedW, requestedH);
       Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(owner);
-      childImpl.Measure(childBounds.width, childBounds.height);
+      childData.Measure(childBounds.width, childBounds.height, legacy.width, legacy.height, MeasureModeCheck::MATCHES_DERIVATION);
     }
     childImpl.Arrange(childBounds);
   }
@@ -604,9 +1157,23 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   std::vector<float> rowHeights(rowCount, 0.0f);
   std::vector<float> colWidths(colCount, 0.0f);
 
+  // Measure modes: only a view whose producer is exactly this manager is mode-aware; anything
+  // else (a subclass, a layout callback) measures every child below with the custom-parent modes
+  // of its view, in one step.
+  const Internal::ViewDataImpl& viewData = Internal::ViewDataImpl::Get(*view);
+  if(viewData.GetMeasureModeParent() == Internal::MeasureModeParent::GRID)
+  {
+    float phasedWidth  = 0.0f;
+    float phasedHeight = 0.0f;
+    MeasureGridChildrenPhased(children, availableWidth, availableHeight, rowCount, colCount, impl->mRowDefinitions,
+                              impl->mColumnDefinitions, rowHeights, colWidths, visRowSpacing, visColSpacing, s,
+                              viewData.IsWidthDetermined(), viewData.IsHeightDetermined(), false, *view, phasedWidth, phasedHeight);
+    return MeasuredSize(phasedWidth, phasedHeight);
+  }
+
   MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount,
                                  colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths,
-                                 visRowSpacing, visColSpacing, s);
+                                 visRowSpacing, visColSpacing, s, viewData);
 
   Insets parentPadding   = view->GetPadding();
   float  requestedWidth  = view->GetRequestedWidth();
@@ -685,25 +1252,41 @@ void GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
   // Re-measure children to get fresh auto row/column sizes using actual arrange bounds.
   // The helper only measures (it never arranges), so one scope around the whole call has
-  // exactly the narrow extent required and needs no threaded owner parameter.
+  // exactly the narrow extent required and needs no threaded owner parameter. A mode-aware grid
+  // runs the same phased helper as its measure (with the stored extent knowledge of its latest
+  // measurement), so a grid arranged at its measured extent repeats those calls as cache hits.
+  const Internal::ViewDataImpl& viewData        = Internal::ViewDataImpl::Get(*view);
+  const bool                    modeAware       = (viewData.GetMeasureModeParent() == Internal::MeasureModeParent::GRID);
+  const bool                    widthDetermined = modeAware && viewData.IsWidthDetermined();
+  float                         totalWidth      = 0.0f;
+  float                         totalHeight     = 0.0f;
+  if(modeAware)
   {
     Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
-    MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount,
-                                   colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths,
-                                   visRowSpacing, visColSpacing, s);
+    MeasureGridChildrenPhased(children, availableWidth, availableHeight, rowCount, colCount, impl->mRowDefinitions,
+                              impl->mColumnDefinitions, rowHeights, colWidths, visRowSpacing, visColSpacing, s,
+                              widthDetermined, viewData.IsHeightDetermined(), true, *view, totalWidth, totalHeight);
   }
+  else
+  {
+    {
+      Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
+      MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount,
+                                     colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths,
+                                     visRowSpacing, visColSpacing, s, viewData);
+    }
 
-  float totalWidth  = 0.0f;
-  float totalHeight = 0.0f;
-  ApplyGridDefinitions(rowHeights, colWidths, impl->mRowDefinitions, impl->mColumnDefinitions, availableWidth, availableHeight,
-                       visRowSpacing, visColSpacing, rowCount, colCount, totalWidth, totalHeight, s);
+    ApplyGridDefinitions(rowHeights, colWidths, impl->mRowDefinitions, impl->mColumnDefinitions, availableWidth, availableHeight,
+                         visRowSpacing, visColSpacing, rowCount, colCount, totalWidth, totalHeight, s);
+  }
 
   std::vector<float> rowPositions;
   std::vector<float> colPositions;
   ComputeGridPositions(rowHeights, colWidths, bounds, visRowSpacing, visColSpacing, rowCount, colCount, rowPositions,
                        colPositions);
 
-  ArrangeGridChildrenToCells(view, children, rowPositions, colPositions, rowCount, colCount, visRowSpacing, visColSpacing);
+  ArrangeGridChildrenToCells(view, children, rowPositions, colPositions, rowCount, colCount, visRowSpacing, visColSpacing,
+                             modeAware, widthDetermined, impl->mRowDefinitions, impl->mColumnDefinitions, viewData);
 }
 
 } // namespace Ui

@@ -4951,6 +4951,70 @@ int UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP(
   END_TEST;
 }
 
+// A standalone child's own layout-root pass follows its parent's LAYOUT TARGET -- the bounds
+// the parent was last arranged at -- and not the parent's actor SIZE. A CHANGE animator holds
+// that SIZE at the animated value: it reverts the parent's SIZE to the from-value right after
+// the pass that arranged the parent, and the standalone child's own pass runs after that, in
+// the same batch.
+//
+// The child is outside the transition: the default DIRECT_CHILDREN scope covers only the
+// parent, and a scope never crosses a standalone boundary.
+//
+// Non-vacuity: when the own pass read the parent's actor SIZE, it re-measured the child at the
+// reverted 200x100 and re-placed it there.
+int UtcDaliLayoutTransitionStandaloneChildFollowsParentLayoutTargetDuringChangeAnimatorP(void)
+{
+  UiTestApplication application;
+
+  View grandParent = View::New();
+  grandParent.SetRequestedWidth(200.0f);
+  grandParent.SetRequestedHeight(100.0f);
+  application.GetWindow().Add(grandParent);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  grandParent.Add(parent);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::STANDALONE);
+  child.SetRequestedWidth(MATCH_PARENT);
+  child.SetRequestedHeight(MATCH_PARENT);
+  parent.Add(child);
+
+  application.SendNotification();
+  application.Render(0);
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+
+  // Attached after the initial layout, so the next change of the parent is animated.
+  LayoutTransition     transition = LayoutTransition::New();
+  LayoutAnimatorTiming timing;
+  timing.SetDuration(Duration(0.2f));
+  transition.SetChangeAnimator(LayoutAnimatorCallback::New(&NoopAnimator), timing);
+  grandParent.SetLayoutTransition(transition);
+
+  grandParent.SetRequestedWidth(300.0f);
+  grandParent.SetRequestedHeight(150.0f);
+  child.InvalidateMeasure(); // gives the child its own turn in the same batch
+  application.SendNotification();
+
+  // Trace of the one batch (depth-sorted): grandParent's pass arranges the parent at 300x150,
+  // and the parent places the child at its 300x150; then grandParent's transition starts the
+  // parent's CHANGE animator, which reverts the parent's actor SIZE to 200x100. The child's
+  // own pass runs last: it reads the parent's arranged 300x150 -- a measure and arrange cache
+  // hit -- and leaves the child at 300x150.
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 300.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 150.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliLayoutTransitionSoleActiveAfterDetachCancelsExitOnReAddP(void)
 {
   // An in-flight EXIT whose LayoutTransition has been DETACHED from its view and whose

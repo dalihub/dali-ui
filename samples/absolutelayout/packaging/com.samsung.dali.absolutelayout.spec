@@ -15,10 +15,10 @@ BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(capi-appfw-application)
 BuildRequires:  pkgconfig(capi-appfw-app-control)
 BuildRequires:  pkgconfig(dlog)
-BuildRequires:  pkgconfig(dali2-core)
-BuildRequires:  pkgconfig(dali2-adaptor)
-BuildRequires:  pkgconfig(dali2-ui-foundation)
-BuildRequires:  pkgconfig(dali2-ui-components)
+BuildRequires:  pkgconfig(dali3-core)
+BuildRequires:  pkgconfig(dali3-adaptor)
+BuildRequires:  pkgconfig(dali3-ui-foundation)
+BuildRequires:  pkgconfig(dali3-ui-components)
 
 %description
 DALi UI AbsoluteLayout sample application.

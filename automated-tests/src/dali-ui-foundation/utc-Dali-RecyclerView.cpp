@@ -22,20 +22,30 @@
 #include <vector>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
-#include <dali-ui-foundation/public-api/views/recycler/item-decoration.h>
-#include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/recycler-view.h>
+#include <dali-ui-foundation/integration-api/recycler/item-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-decoration.h>
+#include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
+#include <dali-ui-foundation/integration-api/recycler/items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/recycler-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/devel-api/events/pan-gesture-devel.h>
 #include <dali.h>
 
 #define private public
 #define protected public
-#include <dali-ui-foundation/integration-api/recycler-view-impl.h>
+#include <dali-ui-foundation/integration-api/recycler/recycler-view-impl.h>
+
 #undef protected
 #undef private
+
+using Dali::Ui::Integration::ItemAdapter;
+using Dali::Ui::Integration::ItemDecoration;
+using Dali::Ui::Integration::ItemDecorationInvalidationSupport;
+using Dali::Ui::Integration::ItemViewHolder;
+using Dali::Ui::Integration::ItemsLayouter;
+using Dali::Ui::Integration::LinearItemsLayouter;
+using Dali::Ui::Integration::RecyclerView;
 
 using namespace Dali;
 using namespace Dali::Ui;

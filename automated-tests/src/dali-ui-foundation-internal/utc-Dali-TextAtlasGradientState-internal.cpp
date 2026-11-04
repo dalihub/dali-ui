@@ -10,8 +10,10 @@
 
 // EXTERNAL INCLUDES
 #include <dali.h>
+#include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
@@ -21,6 +23,8 @@
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
+#include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-test-suite-utils.h>
@@ -88,7 +92,7 @@ public:
     return renderableActor;
   }
 
-  void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds) override
+  void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds, float uiScale, const Vector4* spanViewBounds) override
   {
     ++updateAtlasGradientCount;
     lastCoordinateSize = coordinateSize;
@@ -534,5 +538,193 @@ int UtcDaliTextAtlasGradientAnimationConstraintP(void)
   source.SetProperty(offset, 0.75f);
   renderer->SetAtlasGradientAnimApplyAlways(false, true);
   renderer->SetAtlasGradientAnimProperties(Actor(), Property::INVALID_INDEX);
+  END_TEST;
+}
+
+int UtcDaliTextAtlasGradientUiScaleUniformsAndResourcesP(void)
+{
+  UiTestApplication application;
+  AtlasGradient::AtlasResource prepared;
+  PublicGradient::Radial gradient(Vector2(40.0f, 20.0f), 30.0f);
+  gradient.SetUnits(PublicGradient::Units::USER_SPACE);
+  SetStops(gradient);
+  DALI_TEST_CHECK(prepared.Set(gradient));
+  auto controller = Dali::Ui::Text::Controller::New();
+  controller->SetText("Atlas gradient geometry");
+  controller->SetDefaultFontSize(22.0f, Dali::Ui::Text::Controller::PIXEL_SIZE);
+  controller->Relayout(Size(300.0f, 60.0f));
+  auto renderer = Dali::Ui::Text::AtlasRenderer::New();
+  renderer->SetAtlasGradientState(prepared.GetRendererState());
+  float offset = 0.0f;
+  Actor text = renderer->Render(controller->GetView(), Actor::New(), Property::INVALID_INDEX, offset, 0);
+  DALI_TEST_CHECK(text && text.GetChildCount() > 0u);
+  Renderer mesh = text.GetChildAt(0u).GetRendererAt(0u);
+  auto geometry = mesh.GetGeometry();
+  auto shader = mesh.GetShader();
+  auto glyphTexture = mesh.GetTextures().GetTexture(0u);
+  auto lookupTexture = mesh.GetTextures().GetTexture(1u);
+  const Vector2 size(300.0f, 60.0f);
+  const Vector4 bounds(0.0f, 0.0f, 1.0f, 1.0f);
+  for(float scale : {0.5f, 1.0f, 1.25f, 2.0f, 1.0f})
+  {
+    renderer->UpdateAtlasGradient(size, bounds, scale);
+    renderer->UpdateAtlasGradient(size, bounds, scale);
+    const auto center = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter"));
+    const auto radial = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale"));
+    DALI_TEST_EQUALS(center.x * size.x, 40.0f * scale, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(center.y * size.y, 20.0f * scale, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(size.x / radial.x, 30.0f * scale, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientLayoutSize")), size, TEST_LOCATION);
+    DALI_TEST_CHECK(mesh.GetGeometry() == geometry && mesh.GetShader() == shader);
+    DALI_TEST_CHECK(mesh.GetTextures().GetTexture(0u) == glyphTexture && mesh.GetTextures().GetTexture(1u) == lookupTexture);
+    DALI_TEST_EQUALS(prepared.GetLookupGenerationCount(), 1u, TEST_LOCATION);
+  }
+  const auto center = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter"));
+  const auto radial = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale"));
+  renderer->UpdateAtlasGradient(size, bounds, std::numeric_limits<float>::min());
+  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter")), center, TEST_LOCATION);
+  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale")), radial, TEST_LOCATION);
+  renderer->UpdateAtlasGradient(size, bounds, 1.0f);
+  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale")), radial, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextAtlasMixedGradientSpanUiScaleP(void)
+{
+  UiTestApplication application;
+  for(int combination = 0; combination < 6; ++combination)
+  {
+    const bool             globalEnabled = combination < 4;
+    const bool             globalUser    = (combination & 1) != 0;
+    const bool             spanUser      = (combination & 2) != 0 || combination == 4;
+    PublicGradient::Radial global(Vector2(40.0f, 20.0f), 30.0f);
+    global.SetUnits(globalUser ? PublicGradient::Units::USER_SPACE : PublicGradient::Units::OBJECT_BOUNDING_BOX);
+    SetStops(global);
+    AtlasGradient::AtlasResource prepared;
+    if(globalEnabled)
+    {
+      prepared.Set(global);
+    }
+    PublicGradient::Radial span(Vector2(15.0f, 10.0f), 25.0f);
+    span.SetUnits(spanUser ? PublicGradient::Units::USER_SPACE : PublicGradient::Units::OBJECT_BOUNDING_BOX);
+    SetStops(span);
+    auto builder = Dali::Ui::Text::StyledTextBuilder::New(Dali::String("Atlas span and ordinary"));
+    builder.SetSpan(Dali::Ui::Text::GradientSpan::New(span, Dali::Ui::Text::GradientSpan::BoundsMode::VIEW_BOUND), 0u, 5u);
+    auto controller = Dali::Ui::Text::Controller::New();
+    controller->SetStyledText(builder.Build());
+    controller->SetDefaultFontSize(22.0f, Dali::Ui::Text::Controller::PIXEL_SIZE);
+    controller->Relayout(Size(300.0f, 60.0f));
+    auto renderer = Dali::Ui::Text::AtlasRenderer::New();
+    if(globalEnabled)
+    {
+      renderer->SetAtlasGradientState(prepared.GetRendererState());
+    }
+    float                 offset = 0.0f;
+    Actor                 text   = renderer->Render(controller->GetView(), Actor::New(), Property::INVALID_INDEX, offset, 0);
+    std::vector<Renderer> meshes;
+    std::vector<bool>     isSpan;
+    for(uint32_t i = 0u; i < text.GetChildCount(); ++i)
+    {
+      auto child = text.GetChildAt(i);
+      for(uint32_t j = 0u; j < child.GetRendererCount(); ++j)
+      {
+        auto       mesh  = child.GetRendererAt(j);
+        const auto index = mesh.GetPropertyIndex("uTextGradientRadialCenter");
+        if(index == Property::INVALID_INDEX)
+        {
+          continue;
+        }
+        const auto center   = mesh.GetProperty<Vector2>(index);
+        const bool spanMesh = spanUser ? center.x < 0.1f : center.x > 15.0f && center.x < 16.0f;
+        meshes.push_back(mesh);
+        isSpan.push_back(spanMesh);
+      }
+    }
+    DALI_TEST_EQUALS(meshes.size(), globalEnabled ? std::size_t(2u) : std::size_t(1u), TEST_LOCATION);
+    for(std::size_t i = 0u; i < meshes.size(); ++i)
+    {
+      auto        mesh     = meshes[i];
+      const auto  glyph    = mesh.GetTextures().GetTexture(0u);
+      const auto  lut      = mesh.GetTextures().GetTexture(1u);
+      const auto  geometry = mesh.GetGeometry();
+      const auto  shader   = mesh.GetShader();
+      const bool  user     = isSpan[i] ? spanUser : globalUser;
+      const float authored = isSpan[i] ? 15.0f : 40.0f;
+      for(float width : {300.0f, 350.0f})
+      {
+        for(float scale : {0.5f, 1.0f, 1.25f, 2.0f, 1.0f})
+        {
+          const Vector2 size(width, 60.0f);
+          const Vector4 globalBounds(0.0f, 0.0f, 1.0f, 1.0f);
+          const Vector4 spanBounds(-0.1f, -0.2f, 1.2f, 1.4f);
+          renderer->UpdateAtlasGradient(size, globalBounds, scale, &spanBounds);
+          renderer->UpdateAtlasGradient(size, globalBounds, scale, &spanBounds);
+          const auto  center   = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter"));
+          const float expected = user ? authored * scale / (width * (isSpan[i] ? spanBounds.z : 1.0f)) : authored + 0.5f;
+          DALI_TEST_EQUALS(center.x, expected, 0.0001f, TEST_LOCATION);
+          DALI_TEST_CHECK(mesh.GetTextures().GetTexture(0u) == glyph && mesh.GetTextures().GetTexture(1u) == lut);
+          DALI_TEST_CHECK(mesh.GetGeometry() == geometry && mesh.GetShader() == shader);
+        }
+      }
+    }
+    if(globalEnabled)
+    {
+      DALI_TEST_EQUALS(prepared.GetLookupGenerationCount(), 1u, TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}
+
+
+int UtcDaliTextAtlasRenderDepthPerRequestP(void)
+{
+  UiTestApplication application;
+  auto controller = Dali::Ui::Text::Controller::New();
+  controller->SetText("Atlas request depth");
+  controller->SetDefaultFontSize(22.0f, Dali::Ui::Text::Controller::PIXEL_SIZE);
+  controller->SetShadowOffset(Vector2(2.0f, 2.0f));
+  controller->SetShadowEnabled(true);
+  controller->SetShadowColor(Color::BLACK);
+  controller->Relayout(Size(300.0f, 60.0f));
+  auto renderer = Dali::Ui::Text::AtlasRenderer::New();
+  for(int kind = 0; kind < 3; ++kind)
+  {
+    AtlasGradient::AtlasResource prepared;
+    if(kind != 0)
+    {
+      auto gradient = MakeGradient();
+      gradient.SetUnits(kind == 1 ? PublicGradient::Units::OBJECT_BOUNDING_BOX : PublicGradient::Units::USER_SPACE);
+      prepared.Set(gradient);
+    }
+    renderer->SetAtlasGradientState(prepared.GetRendererState());
+    for(int depth : {-7, 15, 0})
+    {
+      float offset = 0.0f;
+      Actor text = renderer->Render(controller->GetView(), Actor::New(), Property::INVALID_INDEX, offset, depth);
+      uint32_t normal = 0u;
+      uint32_t shadow = 0u;
+      for(uint32_t i = 0u; i < text.GetChildCount(); ++i)
+      {
+        Actor child = text.GetChildAt(i);
+        for(uint32_t j = 0u; j < child.GetRendererCount(); ++j)
+        {
+          const int actual = child.GetRendererAt(j).GetProperty<int>(Renderer::Property::DEPTH_INDEX);
+          if(actual == Dali::Ui::Integration::DepthIndex::CONTENT + depth)
+          {
+            ++normal;
+          }
+          else if(actual == Dali::Ui::Integration::DepthIndex::CONTENT + depth - 1)
+          {
+            ++shadow;
+          }
+          else
+          {
+            DALI_TEST_CHECK(false);
+          }
+        }
+      }
+      DALI_TEST_CHECK(normal > 0u && shadow > 0u);
+    }
+  }
   END_TEST;
 }

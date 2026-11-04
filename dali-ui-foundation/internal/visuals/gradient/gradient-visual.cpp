@@ -27,6 +27,8 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/property-array.h>
+#include <algorithm>
+#include <cmath>
 #include <typeinfo>
 
 // INTERNAL INCLUDES
@@ -40,6 +42,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-types.h>
 
 using Dali::Integration::ToDaliStringView;
@@ -160,6 +163,7 @@ GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
 : Visual::Base(factoryCache, Ui::Integration::InternalVisualType::GRADIENT, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mGradientTransform(),
   mGradient(nullptr),
+  mGradientTextureCache(factoryCache.GetGradientTextureCache()),
   mGradientType(LINEAR),
   mStartOffsetIndex(Property::INVALID_INDEX)
 {
@@ -167,12 +171,17 @@ GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
 
 GradientVisual::~GradientVisual()
 {
+  if(auto cache = mGradientTextureCache.lock())
+  {
+    cache->RequestRelease(mLookupTextureId);
+  }
 }
 
 void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  bool needShaderUpdated  = false;
-  bool needTextureUpdated = false;
+  bool needShaderUpdated    = false;
+  bool needTextureUpdated   = false;
+  bool needAlignmentUpdated = false;
   // Mutable properties. Allow to call as UpdateProperty action
   {
     bool regenerateGradientRequired = !mGradient;
@@ -201,12 +210,11 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
       {
         if(DALI_LIKELY(mGradient))
         {
-          mGradientType      = gradientType;
-          mGradientTransform = mGradient->GetAlignmentTransform();
+          mGradientType        = gradientType;
+          needAlignmentUpdated = true;
 
           if(mImpl->mRenderer)
           {
-            mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_ALIGNMENT_MATRIX_NAME), mGradientTransform);
             if(mGradientType == Type::CONIC)
             {
               ConicGradient* gradient = static_cast<ConicGradient*>(mGradient.Get());
@@ -254,9 +262,15 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
       {
         mGradient->SetUnits(gradientUnits);
 
-        needShaderUpdated = true;
+        needShaderUpdated    = true;
+        needAlignmentUpdated = true;
       }
     }
+  }
+
+  if(needAlignmentUpdated)
+  {
+    UpdateAlignmentTransform();
   }
 
   if(DALI_LIKELY(mGradient) && mImpl->mRenderer)
@@ -274,6 +288,11 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
 
 void GradientVisual::OnSetTransform()
 {
+  // SetTransformAndSize has already stored the scale in the base implementation.
+  if(mGradient && mGradient->GetUnits() == Ui::Gradient::Units::USER_SPACE)
+  {
+    UpdateAlignmentTransform();
+  }
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
     mImpl->SetTransformUniforms(mImpl->mRenderer);
@@ -282,10 +301,60 @@ void GradientVisual::OnSetTransform()
 
 void GradientVisual::DoSetOnScene(Actor& actor)
 {
+  Ui::View owner = Ui::View::DownCast(actor);
+  UpdateUiScale(owner ? GetImpl(owner).GetEffectiveScale() : 1.0f);
   actor.AddRenderer(mImpl->mRenderer);
 
   // Gradient Visual generated and ready to display
   ResourceReady(Ui::Visual::ResourceStatus::READY);
+}
+
+void GradientVisual::UpdateUiScale(float effectiveScale)
+{
+  if(mImpl->mViewEffectiveScale != effectiveScale)
+  {
+    mImpl->mViewEffectiveScale = effectiveScale;
+    if(mGradient && mGradient->GetUnits() == Ui::Gradient::Units::USER_SPACE)
+    {
+      UpdateAlignmentTransform();
+    }
+  }
+}
+
+void GradientVisual::UpdateAlignmentTransform()
+{
+  if(!mGradient)
+  {
+    return;
+  }
+
+  Matrix3 transform = mGradient->GetAlignmentTransform();
+  if(mGradient->GetUnits() == Ui::Gradient::Units::USER_SPACE && mImpl->mViewEffectiveScale != 1.0f)
+  {
+    // M_resolved = M_authored * diag(1/s, 1/s, 1). Keep the translation column.
+    const float inverseScale = 1.0f / mImpl->mViewEffectiveScale;
+    for(unsigned int i = 0u; i < 6u; ++i)
+    {
+      transform.AsFloat()[i] *= inverseScale;
+    }
+  }
+
+  // Matrix3's approximate comparison can hide changes to small gradient coefficients.
+  if(!std::equal(transform.AsFloat(), transform.AsFloat() + 9u, mGradientTransform.AsFloat()))
+  {
+    if(!std::all_of(transform.AsFloat(), transform.AsFloat() + 9u, [](float coefficient)
+    { return std::isfinite(coefficient); }))
+    {
+      DALI_LOG_ERROR("Gradient alignment is not finite at UI scale %.9g; keeping the previous alignment.\n", mImpl->mViewEffectiveScale);
+      return;
+    }
+
+    mGradientTransform = transform;
+    if(mImpl->mRenderer)
+    {
+      mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_ALIGNMENT_MATRIX_NAME), mGradientTransform);
+    }
+  }
 }
 
 void GradientVisual::UpdateShader()
@@ -487,8 +556,14 @@ void GradientVisual::ApplyLookupTexture()
   // Set up the texture set. If lookup texture generate failed, set empty texture handle so don't be rendered anything.
   if(DALI_LIKELY(mGradient) && mImpl->mRenderer)
   {
-    TextureSet    textureSet    = TextureSet::New();
-    Dali::Texture lookupTexture = mGradient->GenerateLookupTexture();
+    TextureSet    textureSet = TextureSet::New();
+    Dali::Texture lookupTexture;
+    if(auto cache = mGradientTextureCache.lock())
+    {
+      cache->RequestRelease(mLookupTextureId);
+      mLookupTextureId = cache->Acquire(*mGradient);
+      lookupTexture    = cache->GetTexture(mLookupTextureId);
+    }
     textureSet.SetTexture(0u, lookupTexture);
     Dali::WrapMode::Type wrap = GetWrapMode(mGradient->GetSpreadMethod());
     if(wrap != Dali::WrapMode::DEFAULT)

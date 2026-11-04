@@ -35,23 +35,23 @@ if($Samples.Count -eq 0)
   Write-Host "Building all $($Samples.Count) sample directories." -ForegroundColor Cyan
 }
 
-$CorePackage = Join-Path $Context.InstallPrefix "share\dali2-core"
-$AdaptorPackage = Join-Path $Context.InstallPrefix "share\dali2-adaptor"
-$FoundationPackage = Join-Path $Context.InstallPrefix "share\dali2-ui-foundation"
-$ComponentsPackage = Join-Path $Context.InstallPrefix "share\dali2-ui-components"
+$CorePackage = Join-Path $Context.InstallPrefix "share\dali3-core"
+$AdaptorPackage = Join-Path $Context.InstallPrefix "share\dali3-adaptor"
+$FoundationPackage = Join-Path $Context.InstallPrefix "share\dali3-ui-foundation"
+$ComponentsPackage = Join-Path $Context.InstallPrefix "share\dali3-ui-components"
 Assert-DaliPaths -Paths @(
-  (Join-Path $CorePackage "dali2-core-config.cmake"),
-  (Join-Path $AdaptorPackage "dali2-adaptor-config.cmake"),
-  (Join-Path $FoundationPackage "dali2-ui-foundation-config.cmake"),
-  (Join-Path $ComponentsPackage "dali2-ui-components-config.cmake")
+  (Join-Path $CorePackage "dali3-core-config.cmake"),
+  (Join-Path $AdaptorPackage "dali3-adaptor-config.cmake"),
+  (Join-Path $FoundationPackage "dali3-ui-foundation-config.cmake"),
+  (Join-Path $ComponentsPackage "dali3-ui-components-config.cmake")
 ) -Description "DALi package; build core, adaptor, and UI first"
 
 $Arguments = (Get-DaliCommonCMakeArguments -Context $Context -Configuration $Configuration) + @(
   "-DDALI_UI_SAMPLE_LIST=$($Samples -join ';')",
-  "-Ddali2-core_DIR=$CorePackage",
-  "-Ddali2-adaptor_DIR=$AdaptorPackage",
-  "-Ddali2-ui-foundation_DIR=$FoundationPackage",
-  "-Ddali2-ui-components_DIR=$ComponentsPackage"
+  "-Ddali3-core_DIR=$CorePackage",
+  "-Ddali3-adaptor_DIR=$AdaptorPackage",
+  "-Ddali3-ui-foundation_DIR=$FoundationPackage",
+  "-Ddali3-ui-components_DIR=$ComponentsPackage"
 )
 if($ImageViewTargets.Count -gt 0)
 {

@@ -27,10 +27,10 @@
 #include <dali/integration-api/pixel-data-integ.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/texture-integ.h>
-#include <dali/integration-api/trace.h>
 #include <string.h>
 #include <cmath>
 #include <limits>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -51,6 +51,7 @@
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
+#include <dali-ui-foundation/internal/text/text-trace.h>
 #include <dali-ui-foundation/internal/visuals/text/text-reveal-runtime-blur.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
@@ -71,8 +72,7 @@ namespace Internal
 {
 namespace
 {
-DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
-DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_TEXT_ASYNC, false);
+DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_PERFORMANCE_MARKER, false);
 
 const int CUSTOM_PROPERTY_COUNT(24); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, gradient uniforms
 
@@ -184,20 +184,6 @@ bool HasCompleteTextRevealMetadata(const Text::AsyncTextRenderInfo& renderInfo, 
 
   return rendererOffsetY == rendererHeight;
 }
-
-#ifdef TRACE_ENABLED
-constexpr const char* ASYNC_REQUEST_TYPE_NAME[] = {"RENDER_FIXED_SIZE", "RENDER_FIXED_WIDTH", "RENDER_FIXED_HEIGHT",
-                                                   "RENDER_CONSTRAINT", "COMPUTE_NATURAL_SIZE", "COMPUTE_HEIGHT_FOR_WIDTH"};
-
-const char* GetRequestTypeName(Ui::Integration::Text::Async::RequestType type)
-{
-  if(type < Ui::Integration::Text::Async::RENDER_FIXED_SIZE || type > Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH)
-  {
-    return "INVALID_REQUEST_TYPE";
-  }
-  return ASYNC_REQUEST_TYPE_NAME[type];
-}
-#endif
 
 struct NameIndexMatch
 {
@@ -338,7 +324,8 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mIsConstraintAppliedAlways(false),
   mIsTextLoadingTaskRunning(false),
   mIsNaturalSizeTaskRunning(false),
-  mIsHeightForWidthTaskRunning(false)
+  mIsHeightForWidthTaskRunning(false),
+  mAsyncRenderUsesUserSpaceGradient(false)
 {
   // Enable fitting mode, to acquire effectiveScale value.
   mImpl->mFittingModeRequired = true;
@@ -614,12 +601,17 @@ PixelData TextVisual::RenderMarqueeText(Ui::Integration::Visual::Base     visual
   TextVisual& visualObject = GetVisualObject(visual);
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
   visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
+  std::optional<Text::GradientRasterContext> gradientContext;
+  if(Text::Internal::HasUserSpaceGradientSpan(visualObject.mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  {
+    gradientContext.emplace(Text::GradientRasterContext{size, CalculateGradientViewBounds(visual, size), visualObject.mController->GetUiScale()});
+  }
   PixelData pixelData = visualObject.mTypesetter->Render(size,
                                                          textDirection,
                                                          behaviour,
                                                          ignoreHorizontalAlignment,
                                                          pixelFormat,
-                                                         originSize);
+                                                         originSize, gradientContext ? &*gradientContext : nullptr);
   if(marqueeTextureAnchor)
   {
     *marqueeTextureAnchor = visualObject.mTypesetter->ResolveMarqueeTextureAnchor(marqueeStartAnchor);
@@ -637,7 +629,12 @@ PixelData TextVisual::RenderMarqueeTextGradientPreserved(Ui::Integration::Visual
   TextVisual& visualObject = GetVisualObject(visual);
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
   visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
-  return visualObject.mTypesetter->RenderTextGradientPreserved(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize);
+  std::optional<Text::GradientRasterContext> gradientContext;
+  if(Text::Internal::HasUserSpaceGradientSpan(visualObject.mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  {
+    gradientContext.emplace(Text::GradientRasterContext{size, CalculateGradientViewBounds(visual, size), visualObject.mController->GetUiScale()});
+  }
+  return visualObject.mTypesetter->RenderTextGradientPreserved(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize, gradientContext ? &*gradientContext : nullptr);
 }
 
 PixelData TextVisual::RenderMarqueeTextGradientMask(Ui::Integration::Visual::Base visual,
@@ -1131,16 +1128,37 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
   }
   Text::AsyncTextParameters parameters          = textInformation.parameters;
   const auto                publicationRevision = mController->GetRenderRevision();
-
-#ifdef TRACE_ENABLED
-  if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("LoadComplete, success:%d, type:%s\n", loadingSuccess,
-                          GetRequestTypeName(parameters.requestType));
-  }
-#endif
+  const auto                publicationTaskId   = mTextLoadingTaskId;
 
   const bool isRenderRequest = IsAsyncRenderRequest(parameters.requestType);
+  // Current styles may have switched from BBOX to USER_SPACE since dispatch.
+  const bool usesUserSpaceGradient   = isRenderRequest && (parameters.hasUserSpaceGradient || UsesUserSpaceGradient());
+  const auto hasCurrentGradientScale = [&]()
+  {
+    if(!isRenderRequest)
+    {
+      return true;
+    }
+    Ui::View owner = Ui::View::DownCast(mControl.GetHandle());
+    // Match Controller::SetUiScale: sub-epsilon changes do not schedule a
+    // new text layout and must not strand a manual request.
+    if(!owner || Dali::Equals(GetImpl(owner).GetEffectiveScale(), parameters.decorationUiScale, Math::MACHINE_EPSILON_1000))
+    {
+      return true;
+    }
+    // Shader creation can invoke application code without changing the text
+    // revision. Recheck styles only on a scale mismatch; stable completions
+    // do not repeat the span-paint lookup.
+    return !usesUserSpaceGradient && !UsesUserSpaceGradient();
+  };
+  if(isRenderRequest && !hasCurrentGradientScale())
+  {
+    // The manager delivers only its current, uncancelled task. Measure will
+    // clear the manual request state and dispatch with the owner's new scale.
+    mIsTextLoadingTaskRunning = false;
+    return;
+  }
+
   if(parameters.maximumNumberOfLinesRevision != mController->GetMaximumNumberOfLinesRevision() ||
      parameters.maximumNumberOfLines != static_cast<Text::Length>(mController->GetMaximumNumberOfLines()))
   {
@@ -1392,11 +1410,22 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       .EnableTextGradientOverlay(textGradientOverlayCompositionEnabled)
       .EnableTextReveal(textRevealEnabled);
 
-    Shader shader = GetTextShader(mFactoryCache, featureBuilder);
-    mImpl->mRenderer.SetShader(shader);
-
-    // Remove the texture set and any renderer previously set.
-    RemoveRenderer(control, false);
+    // Shader creation can reenter application code. Preserve a nested publication's cache.
+    Shader      shader        = mTextVisualShaderFactory.GetShader(mFactoryCache, featureBuilder);
+    const auto* currentReveal = GetTextVisualRevealData(mRevealData);
+    if(!Dali::Adaptor::IsAvailable() || mControl.GetHandle() != control ||
+       !mController->IsAsyncRendering() || mTextLoadingTaskId != publicationTaskId ||
+       mController->GetRenderRevision() != publicationRevision ||
+       parameters.textRevealRevision != (currentReveal ? currentReveal->revision : 0u) || !hasCurrentGradientScale())
+    {
+      return;
+    }
+    mTextShaderFeatureCache = featureBuilder;
+    if(!usesUserSpaceGradient)
+    {
+      mImpl->mRenderer.SetShader(shader);
+      RemoveRenderer(control, false);
+    }
 
     // No tiling required. Use the default renderer.
     if(renderInfo.size.height <= static_cast<float>(maxTextureSize))
@@ -1413,7 +1442,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
         AddTexture(textureSet, renderInfo.textGradientPreservedPixelData, sampler, textureSetIndex);
         ++textureSetIndex;
-        gradientData.mTextGradientMaskPixelData = renderInfo.textGradientMaskPixelData;
+        if(!usesUserSpaceGradient)
+        {
+          gradientData.mTextGradientMaskPixelData = renderInfo.textGradientMaskPixelData;
+        }
         AddTexture(textureSet, renderInfo.textGradientMaskPixelData, sampler, textureSetIndex);
         ++textureSetIndex;
         Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
@@ -1468,6 +1500,19 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         AddTexture(textureSet, renderInfo.revealMetadataTiles.front(), nearestSampler, textureSetIndex);
       }
 
+      if(usesUserSpaceGradient)
+      {
+        if(!hasCurrentGradientScale() || mController->GetRenderRevision() != publicationRevision)
+        {
+          return;
+        }
+        mImpl->mRenderer.SetShader(shader);
+        RemoveRenderer(control, false);
+        if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
+        {
+          GetOrCreateTextVisualGradientData(mGradientData).mTextGradientMaskPixelData = renderInfo.textGradientMaskPixelData;
+        }
+      }
       mImpl->mRenderer.SetTextures(textureSet);
       mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex,
                                    static_cast<float>(mTextShaderFeatureCache.IsEnabledMultiColor()));
@@ -1478,12 +1523,12 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         if(mTextShaderFeatureCache.IsEnabledAnyTextGradient())
         {
           const Vector4 textBounds = ResolveTextGradientBounds(renderInfo.size, renderInfo.textLogicalBounds);
-          ApplyTextGradientUniforms(mImpl->mRenderer, renderInfo.size, textBounds);
+          ApplyTextGradientUniforms(mImpl->mRenderer, renderInfo.size, textBounds, parameters.decorationUiScale);
         }
         if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
         {
           const Vector4 overlayBounds = ResolveTextGradientOverlayBounds(renderInfo.size, renderInfo.textLogicalBounds);
-          ApplyTextGradientOverlayUniforms(mImpl->mRenderer, renderInfo.size, overlayBounds);
+          ApplyTextGradientOverlayUniforms(mImpl->mRenderer, renderInfo.size, overlayBounds, parameters.decorationUiScale);
         }
       }
 
@@ -1499,6 +1544,12 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       // Filter mode needs to be set to linear to produce better quality while scaling.
       Sampler sampler = Sampler::New();
       sampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
+
+      if(usesUserSpaceGradient)
+      {
+        mImpl->mRenderer.SetShader(shader);
+        RemoveRenderer(control, false);
+      }
 
       int verifiedWidth  = static_cast<int>(renderInfo.size.width);
       int verifiedHeight = static_cast<int>(renderInfo.size.height);
@@ -1679,9 +1730,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     // Allocation/attachment above can invoke application code. Do not deliver
     // the old result's image timings or completion after a newer publication.
     const auto* publishedReveal = GetTextVisualRevealData(mRevealData);
-    if(!Dali::Adaptor::IsAvailable() || mController->GetRenderRevision() != publicationRevision ||
+    if(!Dali::Adaptor::IsAvailable() || mTextLoadingTaskId != publicationTaskId ||
+       mController->GetRenderRevision() != publicationRevision ||
        parameters.textRevealRevision != (publishedReveal ? publishedReveal->revision : 0u) ||
-       !mController->IsAsyncRendering() || mControl.GetHandle() != control)
+       !mController->IsAsyncRendering() || mControl.GetHandle() != control || !hasCurrentGradientScale())
     {
       return;
     }
@@ -1701,6 +1753,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       mAsyncTextInterface->AsyncTextFitChanged(parameters.fontSize);
     }
 
+    if(mTextLoadingTaskId != publicationTaskId || !hasCurrentGradientScale())
+    {
+      return;
+    }
     Ui::View owner = Ui::View::DownCast(control);
     if(IsCurrentInlineReplacementRender(owner, renderInfo.replacementLayoutGeneration))
     {
@@ -1720,6 +1776,13 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       }
     }
 
+    // Retain rejected snapshots for Measure to release a manual request,
+    // but do not let a completed USER_SPACE request affect later plain/BBOX
+    // work. A callback above may already have dispatched a newer task.
+    if(mAsyncRenderUsesUserSpaceGradient && mTextLoadingTaskId == publicationTaskId && !mIsTextLoadingTaskRunning)
+    {
+      mAsyncRenderUsesUserSpaceGradient = false;
+    }
     if(mAsyncTextInterface)
     {
       mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
@@ -2414,13 +2477,6 @@ void TextVisual::PublishReplacementRevealTimings(
 
 bool TextVisual::PrepareAsyncSizeComputationRequest(Text::AsyncTextParameters& parameters)
 {
-#ifdef TRACE_ENABLED
-  if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("Request size computation, type:%s\n", GetRequestTypeName(parameters.requestType));
-  }
-#endif
-
   switch(parameters.requestType)
   {
     case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
@@ -2499,12 +2555,16 @@ void TextVisual::RequestAsyncSizeComputationOwned(Text::AsyncTextParameters&& pa
 
 void TextVisual::CancelAsyncRender(Ui::Integration::Visual::Base visual)
 {
-  TextVisual& visualObject = GetVisualObject(visual);
+  TextVisual& visualObject                       = GetVisualObject(visual);
+  visualObject.mAsyncRenderUsesUserSpaceGradient = false;
   if(visualObject.mIsTextLoadingTaskRunning)
   {
     Text::AsyncTextManager::Get().RequestCancel(visualObject.mTextLoadingTaskId);
     visualObject.mIsTextLoadingTaskRunning = false;
   }
+  // A completion callback may already be publishing with the running flag
+  // cleared. Invalidate its ownership as well as cancelling queued work.
+  visualObject.mTextLoadingTaskId = 0u;
 }
 
 bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextParameters& parameters)
@@ -2517,11 +2577,13 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
   if((fabsf(parameters.textWidth) < Math::MACHINE_EPSILON_1000) ||
      (fabsf(parameters.textHeight) < Math::MACHINE_EPSILON_1000) || parameters.text.empty())
   {
+    mAsyncRenderUsesUserSpaceGradient = false;
     if(mIsTextLoadingTaskRunning)
     {
       Text::AsyncTextManager::Get().RequestCancel(mTextLoadingTaskId);
       mIsTextLoadingTaskRunning = false;
     }
+    mTextLoadingTaskId = 0u;
 
     // Remove the texture set and any renderer previously set.
     RemoveRenderer(control, true);
@@ -2574,12 +2636,8 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
     Text::AsyncTextManager::Get().RequestCancel(mTextLoadingTaskId);
   }
 
-#ifdef TRACE_ENABLED
-  if(gTraceFilter2 && gTraceFilter2->IsTraceEnabled())
-  {
-    DALI_LOG_RELEASE_INFO("Request render, type:%s\n", GetRequestTypeName(parameters.requestType));
-  }
-#endif
+  parameters.hasUserSpaceGradient   = UsesUserSpaceGradient();
+  mAsyncRenderUsesUserSpaceGradient = parameters.hasUserSpaceGradient;
 
   mIsTextLoadingTaskRunning        = true;
   mTextLoadingMaximumLinesRevision = parameters.maximumNumberOfLinesRevision;
@@ -2756,7 +2814,32 @@ Vector4 TextVisual::ResolveTextGradientOverlayBounds(const Vector2& textureSize,
   return contentBounds;
 }
 
-void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds)
+bool TextVisual::UsesUserSpaceGradient() const
+{
+  const auto* gradientData  = GetTextVisualGradientData(mGradientData);
+  const auto  usesUserSpace = [](const Text::Internal::Gradient::Style& style)
+  {
+    return style.units == Ui::Gradient::Units::USER_SPACE && Text::Internal::Gradient::IsRenderable(style);
+  };
+  if(gradientData && (usesUserSpace(gradientData->mTextGradientStyle) || usesUserSpace(gradientData->mTextGradientOverlayStyle)))
+  {
+    return true;
+  }
+  const auto* spans = mController->GetLogicalTextModel()->GetGradientSpanModelData();
+  if(spans)
+  {
+    for(const auto& paint : spans->paints)
+    {
+      if(usesUserSpace(paint.style))
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale)
 {
   auto* gradientData = GetTextVisualGradientData(mGradientData);
   if(!gradientData)
@@ -2764,8 +2847,9 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
     return;
   }
 
+  const Vector2                              coordinateSize = Text::Internal::ResolveGradientCoordinateSize(gradientData->mTextGradientStyle.units, textureSize, uiScale);
   const Text::Internal::Gradient::RenderData renderData =
-    Text::Internal::Gradient::ResolveRenderData(gradientData->mTextGradientStyle, textBounds, textureSize);
+    Text::Internal::Gradient::ResolveRenderData(gradientData->mTextGradientStyle, textBounds, coordinateSize);
   if(!renderData.enabled)
   {
     return;
@@ -2784,7 +2868,7 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
 
   gradientData->mGradientRenderer      = renderer;
-  gradientData->mLastGradientCoordSize = textureSize;
+  gradientData->mLastGradientCoordSize = coordinateSize;
   gradientData->mLastGradientBounds    = renderData.bounds;
   gradientData->mHasGradientContext    = true;
 
@@ -2792,7 +2876,7 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
   BindGradientAnimConstraints(renderer, startOffsetIndex);
 }
 
-void TextVisual::ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds)
+void TextVisual::ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale)
 {
   auto* gradientData = GetTextVisualGradientData(mGradientData);
   if(!gradientData)
@@ -2800,8 +2884,9 @@ void TextVisual::ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, cons
     return;
   }
 
+  const Vector2                              coordinateSize = Text::Internal::ResolveGradientCoordinateSize(gradientData->mTextGradientOverlayStyle.units, textureSize, uiScale);
   const Text::Internal::Gradient::RenderData renderData =
-    Text::Internal::Gradient::ResolveRenderData(gradientData->mTextGradientOverlayStyle, textBounds, textureSize);
+    Text::Internal::Gradient::ResolveRenderData(gradientData->mTextGradientOverlayStyle, textBounds, coordinateSize);
   if(!renderData.enabled)
   {
     return;
@@ -2821,7 +2906,7 @@ void TextVisual::ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, cons
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME, static_cast<float>(gradientData->mTextGradientOverlayMode));
 
   gradientData->mGradientOverlayRenderer      = renderer;
-  gradientData->mLastGradientOverlayCoordSize = textureSize;
+  gradientData->mLastGradientOverlayCoordSize = coordinateSize;
   gradientData->mLastGradientOverlayBounds    = renderData.bounds;
   gradientData->mHasGradientOverlayContext    = true;
 
@@ -2833,6 +2918,15 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
                              bool styleEnabled, bool styleTextureEnabled, bool styleBlocksTextGradient,
                              bool isOverlayStyle, bool embossEnabled)
 {
+  std::optional<Text::GradientRasterContext> gradientContext;
+  if(Text::Internal::HasUserSpaceGradientSpan(mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  {
+    const Vector2 offset = mImpl->mTransform ? mImpl->mTransform->mOffset : Vector2::ZERO;
+    gradientContext.emplace(Text::GradientRasterContext{size,
+                                                        Text::Internal::CalculateGradientViewBounds(size, mImpl->mControlSize, offset), mController->GetUiScale()});
+  }
+  const auto* context = gradientContext ? &*gradientContext : nullptr;
+
   auto* revealData = GetTextVisualRevealData(mRevealData);
 
   // Get the maximum size.
@@ -2862,6 +2956,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
   {
     DALI_LOG_DEBUG_INFO("Text::Reveal foreground rendering is disabled while marquee or cutout is active\n");
   }
+  // CPU render-resource preparation only. Layout may already have run in
+  // Label; actual GPU upload and ResourceReady callbacks are outside this scope.
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDER");
+
   RemoveTextRevealConstraints();
   if(!textRevealEnabled)
   {
@@ -2882,8 +2980,6 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
   Shader shader = GetTextShader(mFactoryCache, featureBuilder);
   mImpl->mRenderer.SetShader(shader);
 
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_VISUAL_UPDATE_RENDERER");
-
   if(auto* gradientData = GetTextVisualGradientData(mGradientData))
   {
     gradientData->mTextGradientMaskPixelData = PixelData();
@@ -2892,7 +2988,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
   // No tiling required. Use the default renderer.
   if(size.height < maxTextureSize)
   {
-    TextureSet textureSet = GetTextTexture(size);
+    TextureSet textureSet = GetTextTexture(size, context);
 
     mImpl->mRenderer.SetTextures(textureSet);
     mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex, static_cast<float>(hasMultipleTextColors));
@@ -2904,12 +3000,12 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       if(mTextShaderFeatureCache.IsEnabledAnyTextGradient())
       {
         const Vector4 textBounds = ResolveTextGradientBounds(size, contentBounds);
-        ApplyTextGradientUniforms(mImpl->mRenderer, size, textBounds);
+        ApplyTextGradientUniforms(mImpl->mRenderer, size, textBounds, mController->GetUiScale());
       }
       if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
       {
         const Vector4 overlayBounds = ResolveTextGradientOverlayBounds(size, contentBounds);
-        ApplyTextGradientOverlayUniforms(mImpl->mRenderer, size, overlayBounds);
+        ApplyTextGradientOverlayUniforms(mImpl->mRenderer, size, overlayBounds, mController->GetUiScale());
       }
     }
 
@@ -2938,7 +3034,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
     // Create a texture for the text without any styles
     PixelData data =
-      mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
+      mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat, Size::ZERO, context);
 
     if(textRevealEnabled)
     {
@@ -3106,6 +3202,9 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       }
     }
   }
+  // Optional blur-effect publication can create additional scene resources.
+  DALI_TEXT_TRACE_END();
+
   // Unsupported configurations keep the complete ordinary Reveal publication.
   // Keep at least two Gaussian samples, as ordinary BlurEffect does. Resolve
   // this before sizing the halo so every target and shader uses the same radius.
@@ -3143,7 +3242,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       options.colorMask        = !mTextShaderFeatureCache.IsEnabledAnyTextGradient() &&
                           mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor();
       const auto prepared = PrepareRevealBlur(*mTypesetter, std::move(plan), timings, options,
-                                              &mController->GetReplacementRenderState().placements);
+                                              &mController->GetReplacementRenderState().placements, context);
       if(prepared)
       {
         PublishPreparedRevealBlur(actor, *prepared, sourceRevision, timings);
@@ -3575,7 +3674,7 @@ void TextVisual::RefreshRevealBlurImages(Ui::Integration::Visual::Base visual)
   }
 }
 
-TextureSet TextVisual::GetTextTexture(const Vector2& size)
+TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientRasterContext* gradientContext)
 {
   const bool cutoutEnabled = mController->IsTextCutout();
 
@@ -3601,7 +3700,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
   {
     auto&     gradientData = GetOrCreateTextVisualGradientData(mGradientData);
     PixelData preservedData =
-      mTypesetter->RenderTextGradientPreserved(size, textDirection, false, Pixel::RGBA8888);
+      mTypesetter->RenderTextGradientPreserved(size, textDirection, false, Pixel::RGBA8888, Size::ZERO, gradientContext);
     AddTexture(textureSet, preservedData, sampler, textureSetIndex);
     ++textureSetIndex;
 
@@ -3622,7 +3721,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     if(cutoutEnabled)
     {
       cutoutData = mTypesetter->RenderWithPixelBuffer(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false,
-                                                      textPixelFormat);
+                                                      textPixelFormat, Size::ZERO, gradientContext);
 
       // Make transparent buffer.
       // If the cutout is enabled, a separate texture is not used for the text.
@@ -3634,7 +3733,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     else
     {
       PixelData data =
-        mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
+        mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat, Size::ZERO, gradientContext);
       AddTexture(textureSet, data, sampler, textureSetIndex);
       ++textureSetIndex;
     }

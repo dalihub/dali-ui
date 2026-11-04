@@ -18,7 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/debug.h>
-#include <dali/integration-api/trace.h>
+#include <dali/public-api/adaptor-framework/pixel-buffer-operations.h>
 #include <dali/public-api/common/constants.h>
 #include <dali/public-api/math/math-utils.h>
 #include <memory.h>
@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/text-trace.h>
 
 namespace DALI_NAMESPACE
 {
@@ -237,10 +238,11 @@ TextAbstraction::FontClient Typesetter::GetFontClient()
 
 PixelData Typesetter::Render(const Vector2& size, Direction textDirection,
                              RenderBehaviour behaviour, bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
-                             const Vector2& originSize)
+                             const Vector2&               originSize,
+                             const GradientRasterContext* gradientContext)
 {
   PixelBuffer result =
-    RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
+    RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize, gradientContext);
   PixelData pixelData = result ? PixelBuffer::Convert(result) : PixelData{};
 
   return pixelData;
@@ -302,7 +304,7 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
     return {};
   }
 
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER_TEXT_GRADIENT_MASK");
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RASTERIZE");
 
   auto& viewModel = *(mImpl->GetViewModel());
 
@@ -379,7 +381,8 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
 
 PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction textDirection,
                                                   bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
-                                                  const Vector2& originSize)
+                                                  const Vector2&               originSize,
+                                                  const GradientRasterContext* gradientContext)
 {
   uint32_t bufferWidth, bufferHeight;
   if(!ResolveRasterSize(size, bufferWidth, bufferHeight, Pixel::GetBytesPerPixel(pixelFormat)))
@@ -387,7 +390,7 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
     return {};
   }
 
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER_TEXT_GRADIENT_PRESERVED");
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RASTERIZE");
 
   auto& viewModel = *(mImpl->GetViewModel());
 
@@ -457,7 +460,7 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
 
   PixelBuffer result =
     mImpl->CreateTextGradientPreservedImageBuffer(bufferWidth, bufferHeight, ignoreHorizontalAlignment, pixelFormat,
-                                                  penX, penY, 0u, endIndexOfGlyphs);
+                                                  penX, penY, 0u, endIndexOfGlyphs, gradientContext);
 
   return result ? PixelBuffer::Convert(result) : PixelData{};
 }
@@ -483,7 +486,8 @@ PixelData Typesetter::RenderWithCutout(const Vector2& size, Direction textDirect
 PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
                                               Direction       textDirection,
                                               RenderBehaviour behaviour, bool ignoreHorizontalAlignment,
-                                              Pixel::Format pixelFormat, const Vector2& originSize)
+                                              Pixel::Format pixelFormat, const Vector2& originSize,
+                                              const GradientRasterContext* gradientContext)
 {
   uint32_t       bufferWidth, bufferHeight;
   const uint32_t bytesPerPixel = (behaviour == RENDER_NO_STYLES || behaviour == RENDER_MASK)
@@ -494,8 +498,9 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
     return {};
   }
 
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER");
   // @todo. This initial implementation for a TextLabel has only one visible page.
+
+  DALI_TEXT_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RASTERIZE");
 
   // Use l-value to make ensure it is not nullptr, so compiler happy.
   auto& viewModel = *(mImpl->GetViewModel());
@@ -607,7 +612,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   {
     // Generate the image buffer for the text with no style.
     imageBuffer = mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_NONE, ignoreHorizontalAlignment,
-                                           pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
+                                           pixelFormat, penX, penY, 0u, endIndexOfGlyphs, 0u, 0u, gradientContext);
   }
 
   if((RENDER_NO_STYLES != behaviour) && (RENDER_MASK != behaviour))
@@ -625,7 +630,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
 
       if(blurRadius > Math::MACHINE_EPSILON_1)
       {
-        outlineImageBuffer.ApplyGaussianBlur(blurRadius);
+        PixelBufferOperations::ApplyGaussianBlur(outlineImageBuffer, blurRadius);
       }
 
       // Combine the two buffers
@@ -649,7 +654,7 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
 
       if(blurRadius > Math::MACHINE_EPSILON_1)
       {
-        shadowImageBuffer.ApplyGaussianBlur(blurRadius);
+        PixelBufferOperations::ApplyGaussianBlur(shadowImageBuffer, blurRadius);
       }
 
       // Combine the two buffers
@@ -1016,7 +1021,8 @@ PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineI
                                             RuntimeBlurPlane plane, Pixel::Format format,
                                             const Internal::Reveal::Plan& plan,
                                             uint32_t rasterOffsetY, uint32_t rasterHeight,
-                                            uint32_t rasterOffsetX, uint32_t rasterWidth)
+                                            uint32_t rasterOffsetX, uint32_t rasterWidth,
+                                            const GradientRasterContext* gradientContext)
 {
   const auto& model = *mImpl->GetViewModel();
   if(lineIndex >= model.GetNumberOfLines())
@@ -1063,7 +1069,7 @@ PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineI
   switch(plane)
   {
     case RuntimeBlurPlane::GRADIENT_PRESERVED:
-      buffer = mImpl->CreateTextGradientPreservedImageBuffer(width, rasterHeight, false, format, 0, penY, first, last);
+      buffer = mImpl->CreateTextGradientPreservedImageBuffer(width, rasterHeight, false, format, 0, penY, first, last, gradientContext);
       break;
     case RuntimeBlurPlane::GRADIENT_MASK:
       buffer = mImpl->CreateTextGradientMaskImageBuffer(width, rasterHeight, false, format, 0, penY, first, last);
@@ -1077,7 +1083,7 @@ PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineI
     default:
       buffer = mImpl->CreateImageBuffer(width, rasterHeight,
                                         plane == RuntimeBlurPlane::COLOR_MASK ? STYLE_MASK : STYLE_NONE,
-                                        false, format, 0, penY, first, last);
+                                        false, format, 0, penY, first, last, 0u, 0u, gradientContext);
       break;
   }
   return PixelBuffer::Convert(buffer);

@@ -951,6 +951,12 @@ MarkdownParser::Options MarkdownParser::Options::PlainText()
 
 MarkdownRenderSnapshot MarkdownParser::Parse(const Dali::String& markdown, uint64_t revision, const Options& options) const
 {
+  // MD4C uses 32-bit sizes, and some of its buffer size calculations overflow with a source of a few GB.
+  if(markdown.Size() > MAXIMUM_SOURCE_SIZE)
+  {
+    return MakeFallbackSnapshot(markdown, revision, "Markdown source is too large");
+  }
+
   SnapshotBuilder builder(revision, markdown.Size(), options.plainTextMode);
 
   MD_PARSER parser;

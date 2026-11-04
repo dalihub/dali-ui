@@ -74,3 +74,15 @@
 #include <dali-ui-foundation/integration-api/layouts/grid-layout-impl.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/layouts/stack-layout-impl.h>
+
+// Recycler APIs are under review and do not provide API or ABI stability.
+#include <dali-ui-foundation/integration-api/recycler/group-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/group-body-decoration.h>
+#include <dali-ui-foundation/integration-api/recycler/group-data-source.h>
+#include <dali-ui-foundation/integration-api/recycler/group-linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-decoration.h>
+#include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
+#include <dali-ui-foundation/integration-api/recycler/items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/recycler-view.h>

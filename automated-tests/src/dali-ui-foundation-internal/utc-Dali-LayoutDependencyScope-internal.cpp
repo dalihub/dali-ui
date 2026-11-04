@@ -21,6 +21,11 @@
 #include <vector>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/recycler/item-adapter.h>
+#include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
+#include <dali-ui-foundation/integration-api/recycler/items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/linear-items-layouter.h>
+#include <dali-ui-foundation/integration-api/recycler/recycler-view.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout.h>
@@ -29,14 +34,16 @@
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
-#include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
-#include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter.h>
-#include <dali-ui-foundation/public-api/views/recycler/recycler-view.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+
+using Dali::Ui::Integration::ItemAdapter;
+using Dali::Ui::Integration::ItemViewHolder;
+using Dali::Ui::Integration::LinearItemsLayouter;
+using Dali::Ui::Integration::RecyclerView;
+
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -166,12 +173,30 @@ bool AllOwnedFramesMatch(LD::OwnerKind kind, const void* owner, const void* seco
 
 // ---------------------------------------------------------------------------
 // T8 helpers: one owner case is a root(200x100) -> M(fixed 200x100) -> C tree.
-// M is deliberately NOT MATCH_PARENT so the enclosing ArrangeDefault of root never
-// re-measures it: every owned frame in the recording must then belong to M itself.
+// M is deliberately NOT MATCH_PARENT so the enclosing root never re-measures it:
+// every owned frame in the recording must then belong to M itself.
+//
+// The root lays M out 50 narrower and 20 lower than M's own size. M's measure
+// already measures a MATCH_PARENT child exactly at the slot it will give it, and an
+// arrange-time re-measure at that same slot is skipped, so without the smaller
+// placement there would be no arrange-owned measure to observe. At 150 x 80 every
+// site hands C a slot its measure pass never used, and the re-measure is a genuine
+// miss that reaches the recording callback.
 // ---------------------------------------------------------------------------
 
 const float OWNER_CASE_ROOT_WIDTH  = 200.0f;
 const float OWNER_CASE_ROOT_HEIGHT = 100.0f;
+
+// The root's arrange producer: its child at the origin, 50 narrower and 20 lower than
+// the root itself.
+LayoutRect ShrinkingRootArrange(View view, const LayoutRect& bounds)
+{
+  for(uint32_t i = 0; i < view.GetChildViewCount(); ++i)
+  {
+    view.GetChildViewAt(i).Arrange(LayoutRect(0.0f, 0.0f, std::max(0.0f, bounds.width - 50.0f), std::max(0.0f, bounds.height - 20.0f)));
+  }
+  return bounds;
+}
 
 View MakeRecordingChild(bool matchParentWidth)
 {
@@ -191,6 +216,7 @@ void CheckArrangeOwner(UiTestApplication& application, Window window, const char
   View root = View::New();
   root.SetRequestedWidth(OWNER_CASE_ROOT_WIDTH);
   root.SetRequestedHeight(OWNER_CASE_ROOT_HEIGHT);
+  root.SetArrangeCallback(ArrangeCallback::New(&ShrinkingRootArrange));
   root.Add(m);
   window.Add(root);
 
@@ -259,7 +285,9 @@ void AdapterBindViewHolder(ItemViewHolder&)
 // P's ArrangeDefault re-measures C inside the site #1 scope and then arranges C
 // OUTSIDE it. C's ArrangeCallback issues an out-of-band Measure() on G, so G sees
 // the owner stack from two positions: nested inside the scope (during C's measure)
-// and after it has closed (during C's arrange).
+// and after it has closed (during C's arrange). The root lays P out smaller than P's
+// own size (ShrinkingRootArrange), so P's re-measure of C is a genuine miss rather
+// than skipped as already done at the same slot by P's measure.
 // ---------------------------------------------------------------------------
 
 std::vector<OwnerRecord> gSpanProbeArrangeRecords; ///< Recorded only from inside C's arrange.
@@ -302,14 +330,13 @@ LayoutRect SpanProbeArrangeCallback(View, const LayoutRect& bounds)
 
 } // namespace
 
-// The arrange-owned scopes span 15 Measure() statements at 14 scope objects (the grid
-// auto-fill scope spans two of the statements). Twelve statements at eleven scope objects
-// live in this suite's reach; the cases below drive nine of them -- ViewDataImpl::ArrangeDefault
-// and the five LayoutManagers -- reading the owner frame from inside the re-measured child.
-// The two remaining in-reach scopes are ArrangeStandaloneChild's pair (the slot-correcting
-// re-measure and the MATCH_PARENT placement re-measure), driven by
-// UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP below. The remaining three
-// (CheckBox x2, TextButton x1) live in dali-ui-components and are out of this suite's reach.
+// The arrange-owned scopes sit at ten re-measure sites (each with a mode-aware and a mode-less
+// branch; the grid's arrange-time track measurement spans several Measure() statements), all of
+// them in dali-ui-foundation and so all in this suite's reach; dali-ui-components opens none.
+// The cases below drive nine of the sites -- ViewDataImpl::ArrangeDefault and the five
+// LayoutManagers, through their mode-aware branch -- reading the owner frame from inside the
+// re-measured child. The remaining site is ArrangeStandaloneChild's single placement Measure(),
+// driven by UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP below.
 int UtcDaliLayoutDependencyArrangeOwnerIdentityP(void)
 {
   UiTestApplication application;
@@ -345,19 +372,21 @@ int UtcDaliLayoutDependencyArrangeOwnerIdentityP(void)
     CheckArrangeOwner(application, window, "FlexLayoutManager", m);
   }
 
-  // Sites #4/#5 — the single scope around MeasureGridChildrenAndFillAuto in
-  // GridLayoutManager::Arrange. The grid is left WRAP_CONTENT so its arrange bounds
-  // differ from its measure constraint; the child is NOT MATCH_PARENT, so the cells
-  // path below cannot be the one that produced the recording.
+  // Sites #4/#5 — the single scope around the grid's arrange-time track measurement in
+  // GridLayoutManager::Arrange. The grid is left WRAP_CONTENT and laid out smaller than
+  // its measure constraint; the child is NOT MATCH_PARENT, so the cells path below
+  // cannot be the one that produced the recording.
   {
     GridLayout m = GridLayout::New();
     m.Add(MakeRecordingChild(false));
     CheckArrangeOwner(application, window, "GridLayoutManager (auto-fill helper)", m);
   }
 
-  // Site #6 — ArrangeGridChildrenToCells via its threaded owner. Two star columns make
-  // the cell narrower than the measure-phase constraint, so the MATCH_PARENT child is
-  // genuinely re-measured while being placed into its cell.
+  // Site #6 — the grid's cells. Two star columns of a grid with a determined width are determined
+  // cells, so the MATCH_PARENT child is measured exactly at its cell; laid out at 150
+  // the cell shrinks to 75, and the arrange pass re-measures the child at it (the
+  // arrange-time track measurement does; ArrangeGridChildrenToCells then finds it already
+  // measured at that cell). Every owned recording names the grid.
   {
     GridLayout m = GridLayout::New();
     m.AddColumnDefinition(GridLength::Star(1.0f));
@@ -382,9 +411,9 @@ int UtcDaliLayoutDependencyArrangeOwnerIdentityP(void)
   // is what puts totalWeight above zero. It is deliberately NOT MATCH_PARENT on either
   // axis, so the placement loop below (sites #9/#10) skips its own re-measure and the
   // ONLY owned recording this case can produce is site #8's: drop that scope and
-  // CountOwned() falls to zero. The stack itself is left WRAP_CONTENT so its arrange
-  // bounds (its own measured size) differ from its measure constraint, making the
-  // weight re-measure a genuine cache miss that reaches the MeasureCallback.
+  // CountOwned() falls to zero. The stack itself is left WRAP_CONTENT and the root lays
+  // it out at 150 x 80, so its arrange bounds differ from its measure constraint, making
+  // the weight re-measure a genuine cache miss that reaches the MeasureCallback.
   {
     StackLayout m     = StackLayout::New(StackOrientation::VERTICAL);
     View        child = View::New();
@@ -419,21 +448,23 @@ int UtcDaliLayoutDependencyArrangeOwnerIdentityP(void)
   END_TEST;
 }
 
-// ArrangeStandaloneChild's two re-measures, which a black-box test cannot attribute:
+// ArrangeStandaloneChild's single Measure(), which a black-box test cannot attribute:
 // the ancestor-invalidation walk returns early for standalone views, so it never reads
-// the owner stack on this path and no walk behaviour can distinguish these frames from
+// the owner stack on this path and no walk behaviour can distinguish this frame from
 // no frame at all. What is pinned here is therefore SCOPE IDENTITY, not walk behaviour --
-// that both re-measures are attributed to the arranging PARENT, so that a future consumer
-// of the owner stack (or a third-party stop) sees a uniform, correctly-named frame.
+// that the placement measure is attributed to the arranging PARENT, so that a future
+// consumer of the owner stack (or a third-party stop) sees a uniform, correctly-named
+// frame.
 //
-// Case A drives the MATCH_PARENT placement re-measure, case B the slot-correcting one
-// (only reachable with an unconsumed slot, i.e. after an out-of-band Measure()).
+// Case A drives it for a MATCH_PARENT child whose parent extent changed between measure
+// and arrange, case B for a WRAP_CONTENT child after an out-of-band Measure() overwrote
+// its slot.
 int UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP(void)
 {
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  // Case A -- MATCH_PARENT standalone child, placement re-measure.
+  // Case A -- MATCH_PARENT standalone child, the placement's single Measure().
   {
     View root = View::New();
     root.SetRequestedWidth(OWNER_CASE_ROOT_WIDTH);
@@ -441,7 +472,7 @@ int UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP(void)
 
     // WRAP_CONTENT, sized by an ordinary fixed child: the parent's arrange extent
     // (100x40) differs from the constraint it forwards to MeasureStandaloneChildren
-    // (200x100), so the placement re-measure is a genuine cache miss and reaches the
+    // (200x100), so the placement measure is a genuine cache miss and reaches the
     // recording callback.
     View parent = View::New();
 
@@ -481,7 +512,8 @@ int UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP(void)
   }
 
   // Case B -- non-MATCH_PARENT standalone child whose slot was overwritten
-  // out-of-band, i.e. the slot-correcting re-measure.
+  // out-of-band, i.e. the placement's single Measure(), which replaces the
+  // out-of-band slot.
   {
     View root = View::New();
     root.SetRequestedWidth(OWNER_CASE_ROOT_WIDTH);
@@ -503,7 +535,7 @@ int UtcDaliLayoutDependencyStandaloneArrangeOwnerIdentityP(void)
     application.SendNotification();
 
     // Overwrite the slot from outside any pass, then re-arrange only: the sole
-    // Measure() the pass can issue on this child is the corrective one.
+    // Measure() the pass can issue on this child is the placement's.
     standalone.Measure(30.0f, 20.0f);
 
     gRecords.clear();
@@ -680,6 +712,7 @@ int UtcDaliLayoutDependencyScopeDoesNotSpanChildArrangeP(void)
   View root = View::New();
   root.SetRequestedWidth(OWNER_CASE_ROOT_WIDTH);
   root.SetRequestedHeight(OWNER_CASE_ROOT_HEIGHT);
+  root.SetArrangeCallback(ArrangeCallback::New(&ShrinkingRootArrange));
 
   // P arranges with ArrangeDefault: it re-measures the MATCH_PARENT child C inside the
   // site #1 scope, then calls C.Arrange() after the scope has closed.

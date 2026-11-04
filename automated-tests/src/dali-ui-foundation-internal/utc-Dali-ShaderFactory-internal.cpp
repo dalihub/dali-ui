@@ -14,26 +14,47 @@
  * limitations under the License.
  */
 
+// EXTERNAL INCLUDES
+#include <algorithm>
+#include <string>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/precompile-shader-option.h>
-#include <dali-ui-foundation/internal/visuals/custom-shader-factory.h>
-#include <dali/devel-api/adaptor-framework/environment-variable.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual-shader-factory.h>
-#include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
+#include <dali-ui-foundation/internal/visuals/custom-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-debug.h>
+#include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-shader-factory.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali/devel-api/adaptor-framework/environment-variable.h>
+#include <dali/integration-api/rendering/visual-renderer.h>
+#include <dali/public-api/math/matrix3.h>
 
 namespace Dali::EnvironmentVariable
 {
 void SetTestEnvironmentVariable(const char* variable, const char* value);
 }
 
-
 using namespace Dali;
 using namespace Dali::Ui;
 
 namespace
 {
+std::string GetRepositoryResourcePath(const char* relativePath)
+{
+#if defined(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR)
+  std::string testResourceDirectory(DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR);
+#else
+  std::string testResourceDirectory(__FILE__);
+#endif
+  std::replace(testResourceDirectory.begin(), testResourceDirectory.end(), '\\', '/');
+  const std::string marker("/automated-tests/");
+  const std::size_t markerOffset = testResourceDirectory.rfind(marker);
+  return markerOffset == std::string::npos
+           ? std::string(relativePath)
+           : testResourceDirectory.substr(0u, markerOffset + 1u) + relativePath;
+}
+
 Dali::Ui::Integration::PrecompileShaderOption MakeOption(uint32_t xStretchCount, uint32_t yStretchCount, bool masking)
 {
   Property::Map flags;
@@ -65,9 +86,9 @@ void utc_dali_shader_factory_internal_cleanup(void)
 
 int UtcDaliCustomShaderFactoryP(void)
 {
-  UiTestApplication application;
+  UiTestApplication                       application;
   Dali::Ui::Internal::CustomShaderFactory factory;
-  auto option = MakeOption(0u, 0u, false);
+  auto                                    option = MakeOption(0u, 0u, false);
   DALI_TEST_CHECK(factory.AddPrecompiledShader(option));
   DALI_TEST_CHECK(factory.AddPrecompiledShader(option));
 
@@ -88,9 +109,9 @@ int UtcDaliCustomShaderFactoryP(void)
 
 int UtcDaliNpatchShaderFactoryP(void)
 {
-  UiTestApplication application;
+  UiTestApplication                       application;
   Dali::Ui::Internal::NpatchShaderFactory factory;
-  ShaderPreCompiler::RawShaderData shaders;
+  ShaderPreCompiler::RawShaderData        shaders;
 
   auto standard = MakeOption(1u, 1u, false);
   DALI_TEST_CHECK(factory.AddPrecompiledShader(standard));
@@ -127,8 +148,8 @@ Dali::Ui::Integration::PrecompileShaderOption MakeVisualOption(const char* visua
 
 int UtcDaliImageShaderFactoryFeatureMatrixP(void)
 {
-  UiTestApplication application;
-  Dali::Ui::Internal::VisualFactoryCache cache(true);
+  UiTestApplication                            application;
+  Dali::Ui::Internal::VisualFactoryCache       cache(true);
   Dali::Ui::Internal::ImageVisualShaderFactory factory;
   DALI_TEST_CHECK(!factory.GetVertexShaderSource().empty());
   DALI_TEST_CHECK(!factory.GetFragmentShaderSource().empty());
@@ -152,7 +173,7 @@ int UtcDaliImageShaderFactoryFeatureMatrixP(void)
   }
 
   auto standard = MakeVisualOption("image", "ROUNDED_CORNER");
-  auto masked = MakeVisualOption("image", "MASKING");
+  auto masked   = MakeVisualOption("image", "MASKING");
   DALI_TEST_CHECK(!factory.AddPrecompiledShader(standard));
   DALI_TEST_CHECK(factory.AddPrecompiledShader(masked));
   DALI_TEST_CHECK(!factory.AddPrecompiledShader(masked));
@@ -166,8 +187,8 @@ int UtcDaliImageShaderFactoryFeatureMatrixP(void)
 
 int UtcDaliColorShaderFactoryFeatureMatrixP(void)
 {
-  UiTestApplication application;
-  Dali::Ui::Internal::VisualFactoryCache cache(true);
+  UiTestApplication                            application;
+  Dali::Ui::Internal::VisualFactoryCache       cache(true);
   Dali::Ui::Internal::ColorVisualShaderFactory factory;
   DALI_TEST_CHECK(!factory.GetVertexShaderSource().empty());
   DALI_TEST_CHECK(!factory.GetFragmentShaderSource().empty());
@@ -202,12 +223,12 @@ int UtcDaliColorShaderFactoryFeatureMatrixP(void)
 
 int UtcDaliImageShaderDebugScriptFallbackP(void)
 {
-  UiTestApplication application;
+  UiTestApplication                            application;
   Dali::Ui::Internal::ImageVisualShaderFactory factory;
-  std::string vertex(factory.GetVertexShaderSource());
-  std::string fragment(factory.GetFragmentShaderSource());
-  const std::string originalVertex = vertex;
-  const std::string originalFragment = fragment;
+  std::string                                  vertex(factory.GetVertexShaderSource());
+  std::string                                  fragment(factory.GetFragmentShaderSource());
+  const std::string                            originalVertex   = vertex;
+  const std::string                            originalFragment = fragment;
   Dali::Ui::Internal::ImageVisualShaderDebug::ApplyImageVisualShaderDebugScriptCode(vertex, fragment);
   DALI_TEST_CHECK(vertex != originalVertex);
   DALI_TEST_CHECK(fragment != originalFragment);
@@ -223,8 +244,8 @@ int UtcDaliImageShaderDebugScriptFromJsonP(void)
   Dali::EnvironmentVariable::SetTestEnvironmentVariable("DALI_DEBUG_IMAGE_VISUAL_SHADER_SCRIPT_FILE_NAME", scriptPath.c_str());
 
   Dali::Ui::Internal::ImageVisualShaderFactory factory;
-  std::string vertex(factory.GetVertexShaderSource());
-  std::string fragment(factory.GetFragmentShaderSource());
+  std::string                                  vertex(factory.GetVertexShaderSource());
+  std::string                                  fragment(factory.GetFragmentShaderSource());
   Dali::Ui::Internal::ImageVisualShaderDebug::ApplyImageVisualShaderDebugScriptCode(vertex, fragment);
   DALI_TEST_CHECK(vertex.find("vDebug = gl_Position.xyz") != std::string::npos);
   DALI_TEST_CHECK(vertex.find("mediump vec3 vDebug") != std::string::npos);
@@ -240,10 +261,41 @@ int UtcDaliImageShaderDebugScriptInvalidJsonP(void)
   Dali::EnvironmentVariable::SetTestEnvironmentVariable("DALI_DEBUG_IMAGE_VISUAL_SHADER_SCRIPT_FILE_NAME", __FILE__);
 
   Dali::Ui::Internal::ImageVisualShaderFactory factory;
-  std::string vertex(factory.GetVertexShaderSource());
-  std::string fragment(factory.GetFragmentShaderSource());
+  std::string                                  vertex(factory.GetVertexShaderSource());
+  std::string                                  fragment(factory.GetFragmentShaderSource());
   Dali::Ui::Internal::ImageVisualShaderDebug::ApplyImageVisualShaderDebugScriptCode(vertex, fragment);
   DALI_TEST_CHECK(vertex.find("DEBUG_APPLY_VARYING_CODE") != std::string::npos);
   DALI_TEST_CHECK(fragment.find("return false;") != std::string::npos);
+  END_TEST;
+}
+
+int UtcDaliImageFallbackTextureCoordinates(void)
+{
+  UiTestApplication                      application;
+  Dali::Ui::Internal::VisualFactoryCache cache(false);
+  std::string                            brokenUrl = GetRepositoryResourcePath("dali-ui-foundation/images/broken.png");
+  cache.SetBrokenImageUrl(brokenUrl, {});
+  DALI_TEST_CHECK(!cache.GetShader(Dali::Ui::Internal::VisualFactoryCache::IMAGE_SHADER));
+
+  // A failed non-image visual creates the shared image shader for its fallback.
+  auto geometry = cache.GetGeometry(Dali::Ui::Internal::VisualFactoryCache::QUAD_GEOMETRY);
+  auto shader   = Shader::New("void main() {}", "void main() {}");
+  auto renderer = VisualRenderer::New(geometry, shader);
+  cache.UpdateBrokenImageRenderer(renderer, Vector2(100.0f, 100.0f), false);
+  DALI_TEST_CHECK(renderer.GetTextures().GetTexture(0u));
+  Shader fallbackShader = renderer.GetShader();
+  auto   transformIndex = fallbackShader.GetPropertyIndex("uTextureCoordinateTransform");
+  DALI_TEST_EQUALS(transformIndex, Property::INVALID_INDEX, TEST_LOCATION);
+
+  // Later ordinary images reuse that shader without changing texture coordinates.
+  Dali::Ui::Internal::ImageVisualShaderFactory                 factory;
+  Dali::Ui::Internal::ImageVisualShaderFeature::FeatureBuilder features;
+  Shader                                                       imageShader = factory.GetShader(cache, features);
+  DALI_TEST_CHECK(imageShader == fallbackShader);
+  DALI_TEST_EQUALS(imageShader.GetPropertyIndex("uTextureCoordinateTransform"), Property::INVALID_INDEX, TEST_LOCATION);
+  const auto        program = imageShader.GetProperty<Property::Map>(Shader::Property::PROGRAM);
+  const std::string vertex(program.Find("vertex")->Get<Dali::String>().CStr());
+  DALI_TEST_CHECK(vertex.find("uTextureCoordinateTransform") == std::string::npos);
+  DALI_TEST_CHECK(vertex.find("MEDIA_VIEW_SWAP_AXES") == std::string::npos);
   END_TEST;
 }

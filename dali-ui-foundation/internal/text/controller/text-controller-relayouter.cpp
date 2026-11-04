@@ -17,7 +17,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
-#include <dali/integration-api/trace.h>
 #include <dali/public-api/common/constants.h>
 #include <dali/public-api/math/math-utils.h>
 #include <algorithm>
@@ -41,9 +40,6 @@ namespace
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
 #endif
-
-DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
-DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_PERFORMANCE_MARKER, false);
 
 constexpr float MAX_FLOAT = std::numeric_limits<float>::max();
 
@@ -469,7 +465,7 @@ Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Control
 Vector3 Controller::Relayouter::GetNaturalSize(Controller& controller, bool convertToEven)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::GetNaturalSize\n");
-  DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_GET_NATURAL_SIZE", "[%p]", static_cast<void*>(&controller));
+
   Vector3 naturalSizeVec3;
 
   // Make sure the model is up-to-date before layouting
@@ -570,8 +566,6 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
   const OperationsMask operations = impl.mOperationsPending;
   if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || textFit.contentSize != layoutSize)
   {
-    DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_CANDIDATES_LAYOUT", "[%p]", static_cast<void*>(&controller));
-
     Dali::Vector<Ui::Text::Fit::Candidate> fitCandidates  = textFit.candidates;
     const int                              candidateCount = static_cast<int>(fitCandidates.Count());
 
@@ -687,7 +681,6 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
   const OperationsMask operations = impl.mOperationsPending;
   if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || textFit.contentSize != layoutSize)
   {
-    DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_LAYOUT", "[%p]", static_cast<void*>(&controller));
     ModelPtr& model = impl.mModel;
 
     bool  actualellipsis      = model->mElideEnabled;
@@ -842,7 +835,6 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
 float Controller::Relayouter::GetHeightForWidth(Controller& controller, float width)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::GetHeightForWidth %p width %f\n", &controller, width);
-  DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_GET_HEIGHT_FOR_WIDTH", "[%p]", static_cast<void*>(&controller));
 
   // Make sure the model is up-to-date before layouting
   EventHandler::ProcessModifyEvents(controller);
@@ -899,8 +891,7 @@ Vector2 Controller::Relayouter::CalculateLayoutSize(Controller& controller, floa
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::CalculateLayoutSize %p width %f height %f\n", &controller,
                 width, height);
-  DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_CALCULATE_LAYOUT_SIZE", "[%p]",
-                               static_cast<void*>(&controller));
+
   Vector2 layoutSize;
 
   // Make sure the model is up-to-date before layouting
@@ -947,7 +938,6 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
 
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::Relayout %p size %f,%f, marquee[%s]\n", &controller,
                 size.width, size.height, impl.mIsMarqueeEnabled ? "true" : "false");
-  DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_RELAYOUT", "[%p]", static_cast<void*>(&controller));
 
   UpdateTextType updateTextType = NONE_UPDATED;
 
@@ -1146,7 +1136,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::Relayouter::DoRelayout %p size %f,%f\n", &impl, size.width,
                 size.height);
-  DALI_TRACE_SCOPE(gTraceFilter2, "DALI_TEXT_DORELAYOUT");
+
   bool viewUpdated(false);
   bool endEllipsisFinalizedInLayout{false};
   maximumNumberOfLinesExceeded = false;

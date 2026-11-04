@@ -1956,9 +1956,16 @@ void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, Size(contentWidth, contentHeight), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
+  // A synchronous completion may request another render; consume this request first.
+  mIsManualRenderInProgress = true;
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
+  // A rejected dispatch can submit a new request through ResourceReadySignal.
+  if(!Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters)) &&
+     !Internal::TextVisual::IsAsyncRenderPending(mVisual))
+  {
+    mIsManualRenderInProgress = false;
+  }
 }
 
 void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstraint)
@@ -1979,9 +1986,16 @@ void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstr
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_WIDTH, Size(contentWidth, contentHeightConstraint), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
+  // A synchronous completion may request another render; consume this request first.
+  mIsManualRenderInProgress = true;
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
+  // A rejected dispatch can submit a new request through ResourceReadySignal.
+  if(!Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters)) &&
+     !Internal::TextVisual::IsAsyncRenderPending(mVisual))
+  {
+    mIsManualRenderInProgress = false;
+  }
 }
 
 void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float height)
@@ -2002,9 +2016,16 @@ void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float h
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_FIXED_HEIGHT, Size(contentWidthConstraint, contentHeight), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
+  // A synchronous completion may request another render; consume this request first.
+  mIsManualRenderInProgress = true;
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
+  // A rejected dispatch can submit a new request through ResourceReadySignal.
+  if(!Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters)) &&
+     !Internal::TextVisual::IsAsyncRenderPending(mVisual))
+  {
+    mIsManualRenderInProgress = false;
+  }
 }
 
 void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float heightConstraint)
@@ -2025,9 +2046,16 @@ void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float h
   Ui::Text::AsyncTextParameters parameters =
     GetAsyncTextParameters(Text::Async::RENDER_CONSTRAINT, Size(contentWidthConstraint, contentHeightConstraint), padding, layoutDirection);
 
-  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
+  // A synchronous completion may request another render; consume this request first.
+  mIsManualRenderInProgress = true;
   mRendererUpdateNeeded     = false;
   mIsAsyncRenderRequested   = false;
+  // A rejected dispatch can submit a new request through ResourceReadySignal.
+  if(!Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters)) &&
+     !Internal::TextVisual::IsAsyncRenderPending(mVisual))
+  {
+    mIsManualRenderInProgress = false;
+  }
 }
 
 // =============================================================================
@@ -2247,9 +2275,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request async render, size:%f,%f\n", mController.Get(), contentSize.width, contentSize.height);
 
     Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
-    // Empty/zero-size content completes synchronously. Consume this request
-    // before dispatch so completion sees current state and any new request
-    // made by a completion callback remains pending.
+    // Consume this request before synchronous completion can submit another.
     mRendererUpdateNeeded   = false;
     mIsAsyncRenderRequested = false;
     Internal::TextVisual::UpdateAsyncRendererOwned(mVisual, std::move(parameters));
@@ -2422,6 +2448,16 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   const float effectiveScale = GetEffectiveScale();
   if(SetTextUiScale(effectiveScale))
   {
+    if(mController->IsAsyncRendering())
+    {
+      if(mVisual && Internal::TextVisual::UsesUserSpaceGradient(mVisual))
+      {
+        Internal::TextVisual::CancelAsyncRender(mVisual);
+        mIsManualRenderInProgress = false;
+        mIsManualRenderFinished   = false;
+        RequestAsyncRender();
+      }
+    }
     mController->InvalidateFontData();
     RequestRendererUpdate();
     RequestSyncMarqueeRestart();
@@ -2509,10 +2545,13 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   else // WRAP_CONTENT
   {
     const float allowedMaxHeight = (heightConstraint >= 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
-    // When width is MATCH_PARENT, measuredWidth is minWidth (0 by default).
-    // Use widthConstraint for height calculation since that represents the
-    // actual available width the label will receive in Arrange.
-    const float widthForHeight = (requestedWidth == MATCH_PARENT) ? std::max(0.0f, widthConstraint) : measuredWidth;
+    // When width is MATCH_PARENT, measuredWidth is minWidth (0 by default), and when the
+    // parent assigned the width (EXACTLY) the Label is laid out at exactly the width
+    // constraint. Use widthConstraint for height calculation in both cases since that
+    // represents the actual width the label will receive in Arrange.
+    const bool widthAssigned = (requestedWidth == MATCH_PARENT) ||
+                               (Internal::ViewDataImpl::Get(*this).GetMeasureModes().width == Internal::MeasureMode::EXACTLY);
+    const float widthForHeight = widthAssigned ? std::max(0.0f, widthConstraint) : measuredWidth;
     const float height         = (widthForHeight > 0.0f) ? std::max(0.0f, GetHeightForWidth(widthForHeight)) : 0.0f;
     measuredHeight             = ClampWithMinPriority(height, minHeight, allowedMaxHeight);
   }
@@ -2677,6 +2716,13 @@ void LabelImpl::InvalidateTextMeasure()
 void LabelImpl::RequestAsyncRender()
 {
   mIsAsyncRenderRequested = true;
+  if(mVisual && mController->IsAsyncRendering())
+  {
+    // A content request supersedes a manual render's relayout exemption.
+    // Keep the old result publishable until the replacement is dispatched.
+    mIsManualRenderInProgress = false;
+    mIsManualRenderFinished   = false;
+  }
 }
 
 // =============================================================================
@@ -2862,7 +2908,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                                                                            textGradientUseTextureCoordinates);
         compositionRequest.baseBoundsResolved               = true;
         compositionRequest.baseBounds.bounds                = textGradientBounds;
-        compositionRequest.baseBounds.coordinateSize        = textGradientCoordinateSize;
+        compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, GetEffectiveScale());
         compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
       }
 
@@ -2875,7 +2921,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                                                                               textGradientOverlayUseTextureCoordinates);
         compositionRequest.overlayBoundsResolved               = true;
         compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
-        compositionRequest.overlayBounds.coordinateSize        = textGradientOverlayCoordinateSize;
+        compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, GetEffectiveScale());
         compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
       }
 
@@ -2933,7 +2979,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                renderInfo.isMarqueeContentOverflow, renderInfo.isTextDirectionRTL,
                                mController->GetHorizontalAlignment(),
                                mController->GetVerticalAlignment(), true, preparedContent.textGradient,
-                               marqueeInitialDelta);
+                               marqueeInitialDelta, GetTextUiScale());
 }
 
 void LabelImpl::AsyncTextFitChanged(float pointSize)
@@ -3027,7 +3073,8 @@ void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
     height += static_cast<float>(padding.top + padding.bottom);
   }
 
-  if(mIsManualRenderInProgress)
+  // A synchronous empty completion may follow ResourceReady submitting another request.
+  if(mIsManualRenderInProgress && !Internal::TextVisual::IsAsyncRenderPending(mVisual))
   {
     mIsManualRenderInProgress = false;
     mIsManualRenderFinished   = true;
@@ -3667,7 +3714,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                                                              textGradientUseTextureCoordinates);
           compositionRequest.baseBoundsResolved               = true;
           compositionRequest.baseBounds.bounds                = textGradientBounds;
-          compositionRequest.baseBounds.coordinateSize        = textGradientCoordinateSize;
+          compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, GetEffectiveScale());
           compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
         }
 
@@ -3680,7 +3727,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                                                                 textGradientOverlayUseTextureCoordinates);
           compositionRequest.overlayBoundsResolved               = true;
           compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
-          compositionRequest.overlayBounds.coordinateSize        = textGradientOverlayCoordinateSize;
+          compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, GetEffectiveScale());
           compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
         }
       }
@@ -3751,7 +3798,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                isTextContentOverflow, direction,
                                mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(),
                                mRendererUpdateNeeded, preparedContent.textGradient,
-                               marqueeInitialDelta);
+                               marqueeInitialDelta, GetTextUiScale());
   mController->SetTextElideEnabled(actualellipsis);
   mController->SetMarqueeMaxTextureExceeded(false);
 }
@@ -3884,6 +3931,11 @@ void LabelImpl::CaptureMarqueeStartGeometry()
 
 void LabelImpl::SetMarqueeEnabled(bool enabled)
 {
+  // ON_OVERFLOW accepts Stop by suppressing automatic starts, even before playback.
+  const bool stopRequested = !enabled &&
+                             (mController->IsMarqueeEnabled() ||
+                              (mTextScroller && (mTextScroller->IsScrolling() || mTextScroller->IsStopRequested())) ||
+                              (mMarqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW && !mSuppressAutoMarquee));
   if(!enabled)
   {
     InvalidateMarqueeStartGeometry();
@@ -3909,6 +3961,10 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
     }
     else
     {
+      if(!stopRequested)
+      {
+        return;
+      }
       SuppressAutoMarqueeEvaluation();
       if(mTextScroller)
       {
@@ -3940,13 +3996,12 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
       RequestAsyncRender();
     }
   }
-  if(!enabled && mTextScroller && mTextScroller->IsStopRequested() && mController->IsAsyncRendering())
+  if(stopRequested && mVisual && mController->IsAsyncRendering())
   {
-    // FINISH_LOOP also defers results requested before Stop. Otherwise their
-    // completion can replace the moving shader or restart its animation.
-    // ScrollingFinished() will request fresh content after the current loop.
+    // Revoke results captured before the accepted Stop.
     Internal::TextVisual::CancelAsyncRender(mVisual);
     mIsManualRenderInProgress = false;
+    mIsManualRenderFinished   = false;
   }
 }
 

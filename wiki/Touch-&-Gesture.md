@@ -4,15 +4,21 @@
 
 
 ## Table of Contents
+
 1. [Scope](#scope)
 2. [TouchEvent](#touchevent)
-3. [InterceptTouchEvent](#intercepttouchevent)
-4. [HoverEvent](#hoverevent)
-5. [Gesture Detection by HandleEvent](#gesture-detection-by-handleevent)
-6. [Gesture Propagation](#gesture-propagation)
-7. [Per-Device Gesture Recognition Options](#per-device-gesture-recognition-options)
-8. [Example 1: Basic Gesture Recognition](#example-1-basic-gesture-recognition)
-9. [Example 2: Gesture Handling Using InterceptTouchEvent](#example-2-gesture-handling-using-intercepttouchevent)
+3. [Blocking Touch Propagation](#blocking-touch-propagation)
+4. [InterceptTouchEvent](#intercepttouchevent)
+5. [HoverEvent](#hoverevent)
+6. [Gesture Detection by HandleEvent](#gesture-detection-by-handleevent)
+7. [Gesture Propagation](#gesture-propagation)
+8. [Nested Scrolling with an Overlay](#nested-scrolling-with-an-overlay)
+9. [Per-Device Gesture Recognition Options](#per-device-gesture-recognition-options)
+10. [Example 1: Basic Gesture Recognition](#example-1-basic-gesture-recognition)
+11. [Example 2: Gesture Handling Using InterceptTouchEvent](#example-2-gesture-handling-using-intercepttouchevent)
+12. [Summary](#summary)
+13. [Touch Boundary Diagnostics](#touch-boundary-diagnostics)
+14. [Source References](#source-references)
 
 ---
 
@@ -28,10 +34,10 @@ application startup and do not change it after input event processing has starte
 This document uses the following terms:
 
 - **device**: the device ID that identifies a point in a `TouchEvent`, normally for the lifetime of one pointer
-- **initial routing group**: the Actor ID hit by the initial DOWN; devices starting with the same ID join the same stream
+- **initial routing group**: the ID of the frontmost eligible coordinate candidate requiring PINCH or ROTATION; if none exists, the initial hit Actor ID is used. Devices with the same group ID join the same stream.
 - **stream**: the TouchEvent delivery unit that owns the devices, candidates, recipients, and owner state for one initial routing group
 - **coordinate candidate**: a front-to-back TouchEvent candidate selected by the geometry hit test at the initial DOWN coordinate
-- **owner**: the first Actor to consume a TouchEvent and handle delivery until stream termination or interception by an ancestor
+- **owner**: the first Actor to consume a TouchEvent and handle delivery until stream termination or interception on the observation path
 - **recipient**: an Actor whose TouchEvent callback has actually been invoked at least once for the stream
 - **interceptor**: an Actor that returns `true` from an InterceptTouchEvent callback on the ancestor path and restricts the previous delivery range
 - **ancestor path**: the actual parent-child path from the root toward a target
@@ -40,14 +46,15 @@ Devices and streams are related as follows:
 
 ```text
 device 4 ─┐
-          ├─ same initial hit Actor ID ──> Stream 1
+          ├─ same initial routing group ID ──> Stream 1
 device 7 ─┘
 
-device 9 ─── different initial hit ID ──> Stream 2
+device 9 ─── different routing group ID ──> Stream 2
 
 Each Stream
 ├─ coordinate candidates
 ├─ ACTIVE/TERMINATED recipients
+├─ captured Touch propagation boundaries
 └─ owner / interceptor
 
 Stream 1 and Stream 2 remain separate even if they later select the same owner.
@@ -85,7 +92,18 @@ The normal TouchEvent delivery range depends on the current stream state:
 
 - no owner and not intercepted: initial-DOWN coordinate candidates, from front to back
 - owner selected: only the current owner
-- intercepted but no new owner: the fixed interceptor-to-root path
+- intercepted but no new owner: the fixed interceptor-to-root path, subject to the captured Touch propagation boundary
+
+A boundary limits ordinary delivery without selecting an owner; see
+[Blocking Touch Propagation](#blocking-touch-propagation).
+
+### Consumption Within One View
+
+In GEOMETRY mode, an Actor's intrinsic Touch handling and its connected Touch callbacks are combined with
+logical OR; all connected callbacks run. A callback returning `false` cannot cancel consumption elsewhere
+on the same View. For example, an enabled InteractiveTrait with click or long-press handling can consume
+DOWN even if an application callback returns `false`. The examples below assume no other intrinsic handler
+or callback consumes the event.
 
 ### Handling Touch Events
 
@@ -170,7 +188,8 @@ result. The drawing represents screen overlap; it does not imply a parent-child 
 The first Actor to return `true` from a TouchEvent becomes the owner.
 
 When Yellow returns `true`, subsequent TouchEvents are delivered to Yellow. Returning `false` from a later
-owner callback does not release ownership. An ancestor of the owner may still intercept a later event.
+owner callback does not release ownership. An Actor on the path to the initial hit Actor can still intercept,
+including the owner itself or a descendant on that path.
 
 ### Event Propagation Example
 
@@ -188,7 +207,9 @@ Yellow View TouchFinished return true
 Red already received the same DOWN and is therefore an active recipient. It receives `INTERRUPTED`
 immediately after Yellow becomes the owner. If several recipients received this or an earlier event, every
 previous active recipient other than the new owner receives exactly one `INTERRUPTED`. An Actor that received
-only an intercept callback, but no normal TouchEvent callback, is not a recipient for this rule.
+only an intercept callback is tracked separately as an intercept observer. Owner selection alone does not
+close this observation. When interception succeeds or the stream ends, remaining active intercept observers
+receive cleanup INTERRUPTED through InterceptTouchEvent, so their detectors must also handle cancellation.
 
 ```text
 Red TouchEvent false   ──> Red = ACTIVE recipient
@@ -232,20 +253,82 @@ excluded outside the parent only when the parent uses `CLIP_CHILDREN` or `CLIP_T
 
 ---
 
+## Blocking Touch Propagation
+
+Use `Actor::SetTouchPropagationBlocked(true)` when an overlay must stop ordinary Touch from reaching
+the background while allowing foreground children to keep recognizing gestures. `View` inherits this API.
+The getter is `IsTouchPropagationBlocked()`; the default is `false`. This requires a Core version
+providing the API (`@SINCE_2_5.46`), and only affects GEOMETRY Touch.
+
+This setting controls **whether Touch continues to candidates behind this Actor**. An Actor's hit area
+determines whether it is a candidate at a coordinate; blocking propagation changes neither its size nor its
+hit area. The Actor can receive Touch and return `false`, while still preventing delivery to candidates
+behind it. Below, a *propagation boundary* means the first Actor with this setting enabled.
+
+```cpp
+View overlay = View::New();
+overlay.SetTouchPropagationBlocked(true);
+
+// Optional: the boundary also works without a Touch callback.
+overlay.TouchEventSignal().Connect(&tracker, [](Actor, const TouchEvent&)
+{
+  return false; // Observe without claiming the stream.
+});
+```
+
+The boundary remains hit-test eligible without a Touch callback, subject to visibility, sensitivity and
+hit-area checks. It is included in the candidate route; connected callbacks can still receive Touch.
+Ordinary delivery stops after the first boundary in front-to-back order. A boundary is based on geometry
+candidates, so it may also be a sibling behind the foreground content.
+
+```text
+Foreground item → Horizontal list → Vertical scroll → Overlay boundary
+                                                        │
+                                                        └─ stop ordinary Touch
+                                                           Background is excluded
+```
+
+This diagram assumes those Actors are candidates at the DOWN coordinate. A parent boundary does not
+automatically cover children protruding outside its hit area; size or clip the overlay appropriately.
+
+| Operation | Result |
+|---|---|
+| Enable the boundary, with no callback or a `false` callback | Stop ordinary propagation without selecting an owner |
+| A foreground View or the boundary actually consumes Touch | Select the consumer as owner and send `INTERRUPTED` to other active Touch recipients |
+| A child consumes before reaching the boundary | The boundary has no special right to keep observing; if already active, it can receive `INTERRUPTED` |
+| Disable, hide or remove the boundary during the stream | Do not reopen this stream to excluded background candidates; apply changes to a new stream |
+| An ancestor outside the boundary explicitly intercepts | Allow the takeover; this API does not block interception |
+| Hover, Wheel or PARENT Touch | Unaffected by this API |
+
+Boundary Actors are captured at the first DOWN. That scope survives an internal restart within the same
+routed stream. If a foreground sibling later intercepts, ordinary delivery must still stay in the initial
+allowed scope: its parent route cannot reopen a background or outer boundary excluded at DOWN.
+Cancellation notifications are not blocked by a boundary. An Actor that never received Touch does not need
+a synthetic `INTERRUPTED` just because it is behind the boundary.
+
+An unconditional `true` Touch callback on the overlay selects it as owner and interrupts active foreground
+recipients. Remove that consuming callback when adopting the boundary API. Adding a `false` callback cannot
+undo another callback's or an InteractiveTrait's consumption. Hover and Wheel need their own input policy;
+do not install dummy gesture detectors merely to block background Touch.
+
+---
+
 ## InterceptTouchEvent
 
 InterceptTouchEvent follows an actual parent-child path, not the flat list of geometrically overlapping Actors.
 
 ### Event Propagation Method
 
-- Before an owner exists, the initial hit Actor's ancestor path is checked from the root toward the target.
-- After an owner is selected, the current owner's ancestor path is checked from the root up to, but excluding,
-  the owner. The owner does not receive its own intercept callback.
-- An overlapping sibling branch is not visited because it is not part of the owner's ancestry.
+- Until interception succeeds, traversal follows root → initial hit Actor, including the hit Actor.
+- Selecting a Touch owner does not shorten this path. The owner itself and descendants below it can
+  receive InterceptTouchEvent if they lie on this path and meet dispatch conditions.
+- If the initial hit leaves the Scene while an established owner remains, traversal falls back to
+  root → owner, including the owner.
+- A sibling outside the initial hit path is not visited. If a sibling behind the hit becomes the Touch
+  owner, interception still follows the initial hit branch, not that sibling's branch.
 
-**InterceptTouchEvent follows hierarchy order. Normal TouchEvent follows coordinate-candidate order before
-interception and the fixed interceptor-to-root order afterward.**
-
+Ordinary Touch follows coordinate candidates before interception and the interceptor-to-root path after
+interception. Captured propagation boundaries limit ordinary delivery, but do not disable intercept traversal.
 
 ### Event Propagation Example
 
@@ -266,14 +349,17 @@ The following example assumes that Blue → Yellow → Red → Orange is an actu
 └─────────────────────────────────────┘
 ```
 
-- If Red is the current owner, InterceptTouchEvent is called on Blue → Yellow. Red's own intercept callback is excluded.
-- If there is no owner and Orange is the initial hit Actor, the Blue → Yellow → Red → Orange path may be checked.
+- If Orange is the initial hit, Blue → Yellow → Red → Orange remains the intercept path even when Red
+  becomes the Touch owner. Red and Orange remain eligible for intercept callbacks.
+- Ordinary Touch goes only to Red after owner selection; intercept observations can continue below Red.
 - If every intercept callback returns `false`, normal TouchEvent delivery continues.
 
 ### Consume Behavior
 
 Returning `true` from InterceptTouchEvent does not automatically make the interceptor the owner. It fixes the
-normal TouchEvent delivery range to the `root → interceptor` hierarchy path.
+normal TouchEvent delivery range to the `root → interceptor` hierarchy path. Ordinary delivery walks
+from interceptor toward root, subject to captured propagation boundaries. An outside ancestor may explicitly
+intercept; enabling a boundary does not disable interception.
 
 When Yellow intercepts a later event from an existing owner, processing continues in this order:
 
@@ -287,9 +373,9 @@ Therefore, Yellow becomes the owner in the common case where it has a Touch call
 `true`, but the InterceptTouchEvent result alone does not establish ownership.
 
 ```text
-actual hierarchy: Root → Blue → Yellow → Red(owner)
+actual hierarchy: Root → Blue → Yellow → Red(owner) → Orange(initial hit)
 
-intercept traversal: Root → Blue → Yellow(true)   [Red owner is excluded]
+intercept traversal: Root → Blue → Yellow(true)   [stops because Yellow returns true]
 previous delivery:   Red → INTERRUPTED
 normal Touch:        Yellow → Blue → Root         [first Actor returning true is the new owner]
 ```
@@ -433,11 +519,26 @@ void YourClass::OnPan(Actor /*actor*/, const PanGesture& /*pan*/)
 2. **Analysis while UNOWNED**: Before the detector recognizes a gesture, `HandleEvent()` may return `false`.
    A View whose Touch callback ran remains an ACTIVE recipient and can continue receiving TouchEvents.
 
-3. **Ownership selection**: When the detector recognizes a gesture and `HandleEvent()` returns `true`, the
-   View becomes the owner. Previous active recipients receive `INTERRUPTED` and clean up their recognizers.
+3. **Ownership selection**: `HandleEvent()` may return `true` after recognition. The View becomes the owner
+   when its Touch callback returns that result, or the application handling decision, as `true`. Previous active recipients receive `INTERRUPTED` and clean up their recognizers.
 
 4. **Owner retention**: A later `false` result from `HandleEvent()` does not release ownership. The View keeps
-   receiving TouchEvents until stream termination or interception by an ancestor.
+   receiving TouchEvents until stream termination or interception on the observation path.
+
+---
+
+### Recognition and Touch Ownership Are Separate Decisions
+
+`HandleEvent()` advances a recognizer. If scrolling depends on direction, remaining scroll range or an edit
+mode, return the application's decision from the Touch callback rather than always returning the detector's
+recognition result. Keep feeding UP/INTERRUPTED so pending recognizers and pressed states are cleared.
+
+A LongPress can be recognized by a timer between Touch callbacks. Its signal alone does not return `true`
+from TouchEvent and therefore does not automatically establish a Touch owner at that instant.
+`GestureDetector::CancelAllOtherGestureDetectors()` is a separate, explicit recognizer cancellation API.
+Currently it cancels the other registered detectors in GestureEventProcessor; it is not scoped to one
+Touch owner, Actor subtree or pointer stream. Do not use it indiscriminately when independent multi-touch
+interactions must remain active.
 
 ---
 
@@ -454,8 +555,57 @@ is **gesture arbitration between touch candidates**, not gesture-signal propagat
   become a late consumer.
 - The first View to consume becomes the owner; other active recipients receive `INTERRUPTED`.
 - After ownership is selected, normal TouchEvents no longer continue to other coordinate candidates.
-- An actual ancestor of the owner may intercept a later Motion, restrict the delivery path, and let a new
-  Touch consumer on that path become the owner.
+- An Actor on the intercept observation path can intercept a later event, including the owner itself or
+  a descendant below it. A new Touch consumer on the restricted path can then become the owner.
+
+---
+
+## Nested Scrolling with an Overlay
+
+```text
+Overlay (Touch propagation boundary)
+└─ Vertical scroll                         ↑ ↓
+   ├─ Horizontal row A                     ← →
+   │  ├─ Item A1: Tap / LongPress
+   │  └─ Item A2: Tap / LongPress
+   └─ Horizontal row B                     ← →
+      ├─ Item B1: Tap / LongPress
+      └─ Item B2: Tap / LongPress
+```
+
+For custom scroll Views that feed Pan from ordinary Touch callbacks, let all required candidates receive
+DOWN without consuming it. A direction-constrained detector or the application can then decide who handles
+the movement:
+
+```cpp
+outerPan.AddDirection(PanGestureDetector::DIRECTION_VERTICAL);
+rowAPan.AddDirection(PanGestureDetector::DIRECTION_HORIZONTAL);
+rowBPan.AddDirection(PanGestureDetector::DIRECTION_HORIZONTAL);
+```
+
+| Input | Decision before ownership |
+|---|---|
+| DOWN | Candidates observe; the overlay returns `false` and stops background propagation with its boundary |
+| Horizontal drag | The row's Touch callback consumes after deciding it can scroll; other active Touch recipients are interrupted |
+| Vertical drag | The row remains unconsumed; the vertical scroll recognizes and consumes |
+| The row cannot scroll in that direction | Keep returning `false` before ownership so the next allowed candidate can decide |
+
+**NUI also needed application logic to decide whether to propagate Pan and set `e.Handled`.**
+For custom GEOMETRY Touch handling, that decision is expressed through the Touch consume result.
+The boundary supplies the separate background-blocking policy. Once a View owns the stream, returning
+`false` at a scroll edge does not hand the same drag to a parent; late takeover requires an eligible
+interceptor or an explicit application coordination policy.
+
+This is a Core routing pattern, not an assertion that the built-in `Dali::Ui::ScrollView` uses only normal
+Touch callbacks. The built-in ScrollView feeds Pan through InterceptTouchEvent, then consumes ordinary
+Touch after takeover. A child InteractiveTrait may consume DOWN; the parent's intercept observation can
+still recognize scrolling. Avoid feeding the same event in both Intercept and Touch, and configure nested
+scroll directions and priorities so an outer interceptor does not take an inner row's horizontal drag.
+See [ScrollView](ScrollView.md) and [child-drag coordination](#coordinating-scrollview-with-a-child-drag).
+
+Two rows can scroll independently when their fingers start in different routing groups. A PINCH/ROTATION
+candidate inside the boundary can intentionally group both points. Keep separate detector state for
+independent interactions; a shared detector or global cancellation policy can still couple them.
 
 ---
 
@@ -739,8 +889,8 @@ private:
 
 ### Role of InterceptTouchEvent
 
-`InterceptTouchEvent` lets an actual ancestor on the path to the current owner restrict normal Touch delivery
-to itself and the path toward the root:
+`InterceptTouchEvent` lets an Actor on the initial hit observation path restrict normal Touch delivery
+to itself and the path toward the root, subject to propagation boundaries:
 
 - **return false**: Deliver touch event to child view (default behavior)
 - **return true**: Terminate previous active recipients other than the interceptor with `INTERRUPTED`, then
@@ -749,8 +899,9 @@ to itself and the path toward the root:
 The first Actor to return `true` during that normal Touch delivery becomes the new owner. The interceptor
 usually becomes the owner by consuming its own Touch callback, but that is a separate consume decision.
 
-An overlapping sibling is not part of this path. To let a sibling behind the owner recognize a gesture
-later, use normal TouchEvent coordinate candidates and late consumption.
+A sibling outside the initial hit path cannot observe through interception. To let such a sibling compete,
+keep normal Touch unconsumed until it can decide. Once another Actor owns the stream, ordinary late
+consumption from an excluded sibling is no longer available.
 
 This allows flexible control of touch events in complex gesture scenarios.
 
@@ -764,9 +915,10 @@ This allows flexible control of touch events in complex gesture scenarios.
 | TouchEvent `false` while there is no owner | Delivery continues to the next coordinate candidate; late consumption remains possible |
 | Another Actor becomes owner | Every previous active recipient except the new owner receives exactly one `INTERRUPTED` |
 | Owner returns `false` on a later TouchEvent | Ownership remains and the owner continues receiving the stream |
-| InterceptTouchEvent `true` | An actual ancestor of the current owner restricts normal Touch delivery to the interceptor→root path |
+| InterceptTouchEvent `true` | An Actor on the observation path restricts ordinary delivery to interceptor→root, subject to propagation boundaries |
 | TouchEvent `true` after interception | The first consumer on the restricted path becomes the new owner |
-| InterceptTouchEvent on an overlapping sibling | Not called because the sibling is not in the ancestry path |
+| InterceptTouchEvent outside the initial hit path | Not called while the initial hit remains on Scene |
+| Touch propagation boundary enabled | Ordinary delivery stops at the boundary without selecting an owner; cancellation and interception remain available |
 
 ### Stream Termination, Multi-touch, and TouchEvent Data
 
@@ -778,9 +930,11 @@ This allows flexible control of touch events in complex gesture scenarios.
 - If a new DOWN arrives from a device ID already attached to an active stream, the entire old stream is
   cancelled first. Every ACTIVE recipient in that stream receives exactly one `INTERRUPTED`, and only then
   does hit testing and routing begin for the new DOWN.
-- If the tracked initial hit or current owner becomes insensitive or unhittable, that ACTIVE recipient is
-  terminated with `INTERRUPTED` during the next processing pass. Disconnecting a tracked Actor from the Scene
-  terminates all ACTIVE recipients and clears the stream.
+- If a tracked primary target or owner becomes insensitive or unhittable, that ACTIVE recipient is
+  terminated with `INTERRUPTED` during processing. Removing an established owner ends its stream. Removing
+  a different initial hit after ownership is established preserves the owner's stream, render task and
+  physical UP; interception falls back to the owner. Without an established owner, disconnecting the tracked
+  target terminates the remaining recipients.
 - A different non-owner ACTIVE recipient becoming temporarily ineligible does not transfer ownership. It is
   excluded from normal TouchEvent delivery while ineligible and remains subject to terminal cleanup when a
   new owner is selected or the stream ends.
@@ -790,11 +944,16 @@ This allows flexible control of touch events in complex gesture scenarios.
 - Every point's local position is transformed into the actual callback recipient's coordinate system.
 - An Actor with `DISPATCH_TOUCH_MOTION=false` still receives an event that mixes Motion with `UP` or
   `INTERRUPTED`, so a terminal point is not lost.
-- Multi-touch points starting with the same initial hit Actor ID, or initial routing group, share one stream.
-  Different initial routing groups remain independent even if they later select the same owner, and one
-  pointer's UP does not terminate the remaining pointers.
+- A PINCH/ROTATION candidate can group points starting on different child Actors into one stream. Without
+  such a candidate, grouping uses the initial hit Actor ID. Boundary filtering precedes this decision, so
+  a background PINCH/ROTATION detector beyond the boundary cannot merge foreground streams.
+  The grouping requirement comes from detectors attached to the Actor; manually calling `HandleEvent()`
+  alone does not register that Actor as a grouping candidate.
+- Different initial routing groups remain independent even if they later select the same Touch owner.
+  One pointer's UP does not terminate the remaining pointers in its stream.
 
 ```text
+Without a PINCH/ROTATION grouping candidate:
 device 4 DOWN on Actor A ─┐
                          ├─ Stream 1 (initial routing group = Actor A ID)
 device 7 DOWN on Actor A ─┘
@@ -856,9 +1015,35 @@ edge auto-scroll examples, see
 
 ---
 
-## References
+## Touch Boundary Diagnostics
 
-<br/>
+When ordinary delivery stops at a captured boundary without a consumer, Core emits a diagnostic such as:
+
+```text
+Touch propagation stopped by SetTouchPropagationBlocked(true): boundaryId(4), name(Overlay), deviceId(2), state(UP)
+```
+
+Each changed point is reported with its own device ID and state. DOWN/UP use ordinary release logging;
+MOTION uses the debug Touch processor filter. STATIONARY points are omitted. Thus `[STATIONARY, MOTION]`
+does not flood ordinary logs, and `[MOTION, UP]` still reports the second point's UP with the filter off.
+
+```sh
+LOG_TOUCH_PROCESSOR=1 ./your-app  # Include MOTION diagnostics in a debug-enabled Core build.
+```
+
+An earlier consumer or a cancellation/disconnection stop does not produce this boundary-stop diagnostic.
+It reports the boundary captured for the stream, even if the current setting was later disabled.
+
+## Source References
+
+This description was checked against the local implementation on 2026-10-29:
+
+- `dali-core/dali/internal/event/events/geometry-touch-stream-router.cpp`: grouping, point routes and Scene signal boundaries.
+- `dali-core/dali/internal/event/events/geometry-touch-event-processor.cpp`: owner/intercept paths, cancellation, lifetime and logging.
+- `dali-core/dali/internal/event/events/geometry-touch-propagation.h`: captured ordinary-Touch boundaries.
+- `dali-core/dali/internal/event/events/gesture-detector-impl.cpp` and `gesture-event-processor.cpp`: HandleEvent and explicit detector cancellation.
+- `dali-core/automated-tests/src/dali/utc-Dali-GeoTouchStream.cpp`: regression scenarios for boundaries, interception, removal and independent/grouped pointers.
+- `dali-ui-foundation/integration-api/scroll-view-impl.cpp` and `internal/views/view/interactive-trait-impl.cpp`: built-in ScrollView and InteractiveTrait input handling.
 
 ---
 

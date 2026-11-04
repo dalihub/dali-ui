@@ -235,7 +235,7 @@ Context | `ALERT`, `NOTIFICATION`, `DIALOG`, `POPUP_MENU`
 See `Accessibility::Role` for the complete list. Assigning a meaningful role also makes the View highlightable by default.
 
 > [!NOTE]
-> Use `OnAccessibilityRequestDefaultName()` and `OnAccessibilityRequestDefaultDescription()` when visible Component content supplies the default Name or Description. Reserve `OnAccessibilityRequestName/Description/Value()` for authoritative values that must take precedence over explicit properties. See [Dynamic Values and Default Component Name/Description](#165-dynamic-values-and-default-component-namedescription) for the resolution order.
+> Use `OnAccessibilityRequestDefaultName/Description/Value()` for Component defaults. The older `OnAccessibilityRequestName/Description/Value()` hooks are deprecated and retain precedence over explicit properties. See [Dynamic Values and Default Component Name/Description/Value](#165-dynamic-values-and-default-component-namedescriptionvalue) for the resolution order.
 
 <br/>
 
@@ -780,13 +780,13 @@ The Application sets the checked value through the Toggle Component's feature AP
 
 #### Configuring an Existing Component Instance
 
-When an Application places a Component through its public handle, it does not override virtual methods. Use an explicit setter or translation binding when a screen-specific Name, Description, or Value does not require query-time calculation. Only when Application-owned data must be calculated at the moment the Screen Reader queries it should the Application attach a per-View `SetAccessibilityRequestNameCallback()`, `SetAccessibilityRequestDescriptionCallback()`, or `SetAccessibilityRequestValueCallback()` to that instance. Do not intercept the current Value owned by an adjustable Component; leave it to the Component feature API and accessibility contract.
+When an Application places a Component through its public handle, it does not override virtual methods. Use an explicit setter or translation binding for screen-specific Name, Description, or Value. For query-time fallback calculation, attach a per-View `SetAccessibilityRequestDefaultNameCallback()`, `SetAccessibilityRequestDefaultDescriptionCallback()`, or `SetAccessibilityRequestDefaultValueCallback()`. These callbacks run only when the explicit property is empty. Do not intercept the current Value owned by an adjustable Component; leave it to the Component feature API and accessibility contract.
 
 #### Implementing an Application-Internal Custom Component
 
-Code belongs to the Component layer when it defines a `ViewImpl` subclass or composes plain Views into a custom control, even when that code resides in an Application project. It may override the `OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, and `OnAccessibilityRequestValue()` virtuals, and it must follow the Role, State, Value, action, and internal-tree contract in [16. Component Developer Guide](#16-component-developer-guide).
+Code belongs to the Component layer when it defines a `ViewImpl` subclass or composes plain Views into a custom control, even when that code resides in an Application project. Use the `OnAccessibilityRequestDefaultName/Description/Value()` virtuals for computed defaults and follow the Role, State, Value, action, and internal-tree contract in [16. Component Developer Guide](#16-component-developer-guide).
 
-Do not combine a virtual override and a per-View callback for the same request hook on one View. Installing a per-View callback replaces the corresponding virtual; returning `false` continues framework fallback instead of returning to the virtual. Follow the precedence and lifetime rules in [16.5 Dynamic Values and Default Component Name/Description](#165-dynamic-values-and-default-component-namedescription) and [17.1 Per-View Callbacks Without a `ViewImpl` Subclass](#171-per-view-callbacks-without-a-viewimpl-subclass).
+Do not combine a virtual override and a per-View callback for the same request hook on one View. Installing a per-View callback replaces the corresponding virtual; returning `false` continues framework fallback instead of returning to the virtual. Follow the precedence and lifetime rules in [16.5 Dynamic Values and Default Component Name/Description/Value](#165-dynamic-values-and-default-component-namedescriptionvalue) and [17.1 Per-View Callbacks Without a `ViewImpl` Subclass](#171-per-view-callbacks-without-a-viewimpl-subclass).
 
 ### 15.3 Page and remote focus lifecycle
 
@@ -978,16 +978,15 @@ During initialization, provide an `ADJUSTABLE` or `SPIN_BUTTON` Role, Name, and 
 
 The string construction above illustrates model synchronization only. A production suffix, unit, range, or sentence must be localized. Use the dynamic binding pattern in [11.3 Dynamic or Formatted Accessibility Values](#113-dynamic-or-formatted-accessibility-values) and rebuild the Value both after a locale refresh and after a model change.
 
-### 16.5 Dynamic Values and Default Component Name/Description
+### 16.5 Dynamic Values and Default Component Name/Description/Value
 
-For static or explicit values set by an Application, use the public-handle setters `SetAccessibilityName()`, `SetAccessibilityDescription()`, and `SetAccessibilityValue()`. When a Component can derive a reasonable default Name or Description from visible content, use a default hook.
+Use `SetAccessibilityName()`, `SetAccessibilityDescription()`, and `SetAccessibilityValue()` or translation bindings for explicit Application values. Use `OnAccessibilityRequestDefaultName/Description/Value()` for Component defaults calculated when the Screen Reader queries them. Per-View default callbacks serve the same purpose for composed Components or individual instances.
 
-Purpose | Default responsibility and API
+Purpose | Responsibility and API
 --|--
-Screen-specific static or explicit Name, Description, or Value | Application uses a setter or translation binding
-Screen-specific authoritative Name, Description, or Value that requires query-time calculation | Application uses a per-View `SetAccessibilityRequest*Callback()`
-Default Component Name or Description derived from visible content | Component uses `OnAccessibilityRequestDefaultName/Description()`
-Current Value owned by a Component and changed through its actions, such as an adjustable value | Component synchronizes the stored property or uses `OnAccessibilityRequestValue()`
+Explicit Name, Description, or Value | Application setter or translation binding
+Computed fallback Name, Description, or Value | Component `OnAccessibilityRequestDefaultName/Description/Value()` or per-View `SetAccessibilityRequestDefault*Callback()`
+Current Value changed through Component actions | Component synchronizes the stored property or implements `OnAccessibilityRequestDefaultValue()`
 
 ```cpp
 bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
@@ -995,36 +994,25 @@ bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
   value = mLabel.GetText();
   return !value.Empty();
 }
-```
 
-`OnAccessibilityRequestDefaultName()` and `OnAccessibilityRequestDefaultDescription()` run only when the authoritative request did not handle the value and the explicit property is empty. A Component fallback therefore does not override an Application's `SetAccessibilityName()` or `SetAccessibilityDescription()` value.
-
-When a default hook returns `true`, its output is final even when the string is empty. Return `false` to continue to the integration raw fallback or Actor Name.
-
-Use a request hook only for an authoritative value that must be computed when the Screen Reader queries it and must take precedence over an explicit property. A Name or Description determined by screen context normally comes from an Application per-View callback. A reusable Component must use a default hook for an ordinary Name or Description so it does not hide an Application override. Value belongs to the owner of the current value: a Slider that owns its actions and current value can use Component `OnAccessibilityRequestValue()`, while an Application-computed screen status belongs in an Application per-View callback.
-
-```cpp
-bool VolumeSliderImpl::OnAccessibilityRequestValue(Dali::String& value)
+bool VolumeSliderImpl::OnAccessibilityRequestDefaultValue(Dali::String& value)
 {
   value = BuildCurrentVolumeText();
   return true;
 }
 ```
 
-Request hooks follow these return rules:
+Default hooks run only when the older request hook did not handle the request and the explicit property is empty. Returning `true` accepts the output, including an intentionally empty string. Returning `false` ignores the output and continues the existing Name/Description fallback; for Value, the result is empty.
 
-- `true`: Use the output as the final value. An empty string is also an intentionally handled value.
-- `false`: Fall back to the stored explicit or translated property. If a Name or Description property is empty, continue to its default hook and framework fallbacks.
-
-When `OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, or `OnAccessibilityRequestValue()` returns `true`, it takes precedence over the explicit property. Do not use these hooks for an ordinary visible-text fallback because doing so hides an Application override; use a default hook instead.
-
-The final resolution order is:
+`OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, and `OnAccessibilityRequestValue()` are deprecated. Their existing priority is retained: returning `true` overrides even an explicit property. Prefer explicit setters or default hooks in new code. Migration to a default hook changes priority because an explicit property now wins. The corresponding non-default request callback setters have been removed.
 
 Information | Resolution order
 --|--
-Name | Authoritative request → explicit or translated property → Component default hook → integration raw fallback → Actor Name
-Description | Authoritative request → explicit or translated property → Component default hook → integration raw fallback
-Value | Authoritative request → stored property
+Name | Deprecated request hook → explicit or translated property → default callback or virtual → integration raw fallback → Actor Name
+Description | Deprecated request hook → explicit or translated property → default callback or virtual → integration raw fallback
+Value | Deprecated request hook → explicit property → default callback or virtual → empty
+
+A registered default callback replaces its virtual hook. Returning `false` does not call that virtual; clear the callback to restore virtual dispatch.
 
 ### 16.6 Compound trees and recycling
 
@@ -1079,7 +1067,7 @@ public:
     return true;
   }
 
-  bool OnAccessibilityRequestValue(Dali::String& value) override
+  bool OnAccessibilityRequestDefaultValue(Dali::String& value) override
   {
     value = GetVolumeText();
     return true;
@@ -1097,13 +1085,14 @@ Virtual API | Accessibility request
 `OnAccessibilityScrollToChild(View child)` | Reveal a child of a scroll container
 `OnAccessibilityPan(PanGesture)` | Handle an accessibility pan
 `OnAccessibilityZoom()` | Handle accessibility zoom
-`OnAccessibilityRequestName()` | Query an authoritative Name that precedes explicit properties
+`OnAccessibilityRequestName()` | Deprecated: retains priority over explicit properties
 `OnAccessibilityRequestDefaultName()` | Supply a Component default when no explicit Name exists
-`OnAccessibilityRequestDescription()` | Query an authoritative Description that precedes explicit properties
+`OnAccessibilityRequestDescription()` | Deprecated: retains priority over explicit properties
 `OnAccessibilityRequestDefaultDescription()` | Supply a Component default when no explicit Description exists
-`OnAccessibilityRequestValue()` | Query a dynamic Value
+`OnAccessibilityRequestValue()` | Deprecated: retains priority over explicit properties
+`OnAccessibilityRequestDefaultValue()` | Supply a Component default when the explicit Value is empty
 
-An action callback returns `true` when it handled the request and `false` when it did not. See [16.5 Dynamic Values and Default Component Name/Description](#165-dynamic-values-and-default-component-namedescription) for string-hook precedence and return rules.
+An action callback returns `true` when it handled the request and `false` when it did not. See [16.5 Dynamic Values and Default Component Name/Description/Value](#165-dynamic-values-and-default-component-namedescriptionvalue) for string-hook precedence and return rules.
 
 Applications normally do not invoke these virtual functions directly. The Accessibility bridge receives Screen Reader requests and dispatches them to the appropriate callback.
 
@@ -1114,7 +1103,7 @@ See [View Architecture](https://github.sec.samsung.net/NUI/dali-ui/wiki/View#4-v
 
 ### 17.1 Per-View Callbacks Without a `ViewImpl` Subclass
 
-The extension API can attach the same action and request hooks to one existing `View` instance. This is useful for an Application that owns screen-specific dynamic semantics, or for a composed Component that owns a native View but does not own a `ViewImpl` subclass.
+The extension API can attach action hooks and default Name/Description/Value providers to one existing `View` instance. This is useful for an Application that owns screen-specific dynamic semantics, or for a composed Component that owns a native View but does not own a `ViewImpl` subclass.
 
 ```cpp
 #include <dali-ui-foundation/extension-api/view.h>
@@ -1124,10 +1113,10 @@ Dali::Ui::Extension::View::SetAccessibilityValueChangeCallback(
   Dali::Callback<bool(Dali::Ui::View, bool)>::New(
     this, &Slider::HandleAccessibilityValueChange));
 
-Dali::Ui::Extension::View::SetAccessibilityRequestValueCallback(
+Dali::Ui::Extension::View::SetAccessibilityRequestDefaultValueCallback(
   slider,
   Dali::Callback<bool(Dali::Ui::View, Dali::String&)>::New(
-    this, &Slider::HandleAccessibilityValueRequest));
+    this, &Slider::HandleAccessibilityDefaultValueRequest));
 ```
 
 Per-View setter | Replaced virtual hook
@@ -1138,11 +1127,9 @@ Per-View setter | Replaced virtual hook
 `SetAccessibilityValueChangeCallback()` | `OnAccessibilityValueChange()`
 `SetAccessibilityScrollToChildCallback()` | `OnAccessibilityScrollToChild()`
 `SetAccessibilityZoomCallback()` | `OnAccessibilityZoom()`
-`SetAccessibilityRequestNameCallback()` | `OnAccessibilityRequestName()`
 `SetAccessibilityRequestDefaultNameCallback()` | `OnAccessibilityRequestDefaultName()`
-`SetAccessibilityRequestDescriptionCallback()` | `OnAccessibilityRequestDescription()`
 `SetAccessibilityRequestDefaultDescriptionCallback()` | `OnAccessibilityRequestDefaultDescription()`
-`SetAccessibilityRequestValueCallback()` | `OnAccessibilityRequestValue()`
+`SetAccessibilityRequestDefaultValueCallback()` | `OnAccessibilityRequestDefaultValue()`
 
 When a callback is installed, it replaces the corresponding virtual hook for that View. Its return value is final; returning `false` does not fall back to the virtual method. Pass an empty callback, such as `SetAccessibilityValueChangeCallback(view, {})`, to restore virtual dispatch.
 

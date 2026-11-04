@@ -77,7 +77,7 @@ samples/accessibility-localized-name/res/locale/*/LC_MESSAGES/*.mo
 /build/doc/*
 !/build/doc/source/
 
-libdali2-ui*.so*
+libdali*-ui*.so*
 /_build/
 /samples/_build/
 *-example

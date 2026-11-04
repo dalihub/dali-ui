@@ -227,6 +227,17 @@ public:
   };
 
   /**
+   * @brief Checks whether an async render task is awaiting completion.
+   *
+   * @param[in] visual The text visual.
+   * @return True if an async render task is pending, false otherwise.
+   */
+  static bool IsAsyncRenderPending(Ui::Integration::Visual::Base visual)
+  {
+    return GetVisualObject(visual).mIsTextLoadingTaskRunning;
+  }
+
+  /**
    * @brief Cancels pending async render publication without changing the current renderer.
    *
    * Does not cancel natural-size or height-for-width requests.
@@ -300,6 +311,18 @@ public:
   {
     GetVisualObject(visual).SetGradientOverlayAnimApplyAlways(applyAlways, notifyToConstraint);
   };
+
+  /**
+   * @brief Checks whether current styles or the last async render use logical UI coordinates.
+   *
+   * @param[in] visual The text visual owning the prepared style snapshots.
+   * @return True if a current global, overlay, span or last async request uses USER_SPACE.
+   */
+  static bool UsesUserSpaceGradient(Ui::Integration::Visual::Base visual)
+  {
+    const auto& visualObject = GetVisualObject(visual);
+    return visualObject.mAsyncRenderUsesUserSpaceGradient || visualObject.UsesUserSpaceGradient();
+  }
 
   /**
    * @brief Store the TextGradient style snapshot for a future gradient-enabled render path.
@@ -846,20 +869,38 @@ private:
   Vector4 ResolveTextGradientOverlayBounds(const Vector2& textureSize, const Vector4& contentBounds) const;
 
   /**
-   * @brief Register TextGradient uniforms on a gradient-enabled renderer.
+   * @brief Checks prepared gradient units without copying authored stop arrays.
+   * @return True when gradient geometry depends on the owning View's UI scale.
    */
-  void ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds);
+  bool UsesUserSpaceGradient() const;
+
+  /**
+   * @brief Register TextGradient uniforms on a gradient-enabled renderer.
+   *
+   * @param[in] renderer The renderer receiving the gradient uniforms.
+   * @param[in] textureSize The displayed texture size, before world transforms.
+   * @param[in] textBounds The selected normalized bounds.
+   * @param[in] uiScale The owner scale, or the scale captured by the async request.
+   */
+  void ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale);
 
   /**
    * @brief Register TextGradientOverlay uniforms on an overlay-enabled renderer.
+   *
+   * @param[in] renderer The renderer receiving the gradient uniforms.
+   * @param[in] textureSize The displayed texture size, before world transforms.
+   * @param[in] textBounds The selected normalized bounds.
+   * @param[in] uiScale The owner scale, or the scale captured by the async request.
    */
-  void ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds);
+  void ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale);
 
   /**
-   * Get the texture of the text for rendering. It will use cached shader feature for text visual.
+   * @brief Gets text textures using the cached shader features.
    * @param[in] size The texture size.
+   * @param[in] gradientContext Borrowed USER_SPACE raster coordinates, or nullptr.
+   * @return The textures prepared for the text renderer.
    */
-  TextureSet GetTextTexture(const Vector2& size);
+  TextureSet GetTextTexture(const Vector2& size, const Ui::Text::GradientRasterContext* gradientContext);
 
   /**
    * Get the text rendering shader.
@@ -923,19 +964,20 @@ private:
   float                    mLineHeight;
   Ui::Text::LineHeightMode mLineHeightMode;
   Ui::Text::OverflowMode   mOverflowMode;
-  uint32_t                 mTextLoadingTaskId;                  ///< The currently requested text loading(render) task Id.
-  uint32_t                 mNaturalSizeTaskId;                  ///< The currently requested natural size task Id.
-  uint32_t                 mHeightForWidthTaskId;               ///< The currently requested height for width task Id.
-  uint64_t                 mTextLoadingMaximumLinesRevision;    ///< MaximumLines revision owned by the latest render task.
-  uint64_t                 mNaturalSizeMaximumLinesRevision;    ///< MaximumLines revision owned by the latest natural-size task.
-  uint64_t                 mHeightForWidthMaximumLinesRevision; ///< MaximumLines revision owned by the latest HFW task.
-  bool                     mRendererUpdateNeeded : 1;           ///< The flag to indicate whether the renderer needs to be updated.
-  bool                     mApplyingFittingMode : 1;            ///< Whether renderer update is running from OnApplyFittingMode().
-  bool                     mTextRequireRender : 1;              ///< The flag to indicate whether the text needs to be rendered.
-  bool                     mIsConstraintAppliedAlways : 1;      ///< Whether the constraint need to be applied always.
-  bool                     mIsTextLoadingTaskRunning : 1;       ///< Whether the requested text loading task is running or not.
-  bool                     mIsNaturalSizeTaskRunning : 1;       ///< Whether the requested natural size task is running or not.
-  bool                     mIsHeightForWidthTaskRunning : 1;    ///< Whether the requested height for width task is running or not.
+  uint32_t                 mTextLoadingTaskId;                    ///< The currently requested text loading(render) task Id.
+  uint32_t                 mNaturalSizeTaskId;                    ///< The currently requested natural size task Id.
+  uint32_t                 mHeightForWidthTaskId;                 ///< The currently requested height for width task Id.
+  uint64_t                 mTextLoadingMaximumLinesRevision;      ///< MaximumLines revision owned by the latest render task.
+  uint64_t                 mNaturalSizeMaximumLinesRevision;      ///< MaximumLines revision owned by the latest natural-size task.
+  uint64_t                 mHeightForWidthMaximumLinesRevision;   ///< MaximumLines revision owned by the latest HFW task.
+  bool                     mRendererUpdateNeeded : 1;             ///< The flag to indicate whether the renderer needs to be updated.
+  bool                     mApplyingFittingMode : 1;              ///< Whether renderer update is running from OnApplyFittingMode().
+  bool                     mTextRequireRender : 1;                ///< The flag to indicate whether the text needs to be rendered.
+  bool                     mIsConstraintAppliedAlways : 1;        ///< Whether the constraint need to be applied always.
+  bool                     mIsTextLoadingTaskRunning : 1;         ///< Whether the requested text loading task is running or not.
+  bool                     mIsNaturalSizeTaskRunning : 1;         ///< Whether the requested natural size task is running or not.
+  bool                     mIsHeightForWidthTaskRunning : 1;      ///< Whether the requested height for width task is running or not.
+  bool                     mAsyncRenderUsesUserSpaceGradient : 1; ///< Render snapshot retained while completion or recovery is pending.
 };
 
 } // namespace Internal

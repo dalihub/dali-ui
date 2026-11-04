@@ -940,6 +940,25 @@ int UtcDaliMarkdownParserOrderedListMarkerColumnP(void)
   END_TEST;
 }
 
+int UtcDaliMarkdownParserTooLargeSourceN(void)
+{
+  MarkdownParser parser;
+
+  std::string markdown(MarkdownParser::MAXIMUM_SOURCE_SIZE + 1u, 'a');
+  markdown.replace(0u, 2u, "# ");
+
+  const auto snapshot = parser.Parse(markdown.c_str(), 13u);
+
+  DALI_TEST_CHECK(!snapshot.parseSucceeded);
+  DALI_TEST_CHECK(!snapshot.errorMessage.empty());
+  DALI_TEST_CHECK(!FindFirstRole(snapshot, MarkdownRenderRole::HEADING));
+
+  auto paragraph = FindFirstRole(snapshot, MarkdownRenderRole::PARAGRAPH);
+  DALI_TEST_CHECK(paragraph);
+  DALI_TEST_EQUALS(paragraph->text.size(), markdown.size(), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliMarkdownParserPlainTextModeIsolationP(void)
 {
   MarkdownParser parser;

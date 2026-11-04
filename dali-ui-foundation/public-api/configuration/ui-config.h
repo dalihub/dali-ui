@@ -70,7 +70,7 @@ class UiConfigImpl;
  * @code
  *  // In main(), before running the application:
  *  UiConfig config = UiConfig::New();
- *  config.SetScalingFactor(1.5f);
+ *  config.SetUnitScalingFactor(1.5f);
  *  config.SetUnitDpi(320);
  *  config.Apply();
  * @endcode
@@ -183,6 +183,8 @@ public: // Properties
   /**
    * @brief Sets the scaling factor applied to spx and sdp units.
    *
+   * @deprecated Use SetUnitScalingFactor() instead.
+   *
    * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()).
    * @param[in] scalingFactor The scaling factor value
    */
@@ -190,6 +192,8 @@ public: // Properties
 
   /**
    * @brief Retrieves the scaling factor.
+   *
+   * @deprecated Use GetUnitScalingFactor() instead.
    *
    * @return The scaling factor applied to spx and sdp units
    */
@@ -1149,6 +1153,20 @@ public: // Properties
    * @return The configured reference DPI. Default is 72.
    */
   int GetUnitBaselineDpi() const;
+
+  /**
+   * @brief Sets the scaling factor applied to spx and sdp units.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] scalingFactor The scaling factor. Default is 1.0.
+   */
+  void SetUnitScalingFactor(float scalingFactor);
+
+  /**
+   * @brief Retrieves the scaling factor applied to spx and sdp units.
+   * @return The scaling factor. Default is 1.0.
+   */
+  float GetUnitScalingFactor() const;
 
 public: // Not intended for Application developers
   /**

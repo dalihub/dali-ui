@@ -586,5 +586,15 @@ int UiConfig::GetUnitBaselineDpi() const
   return GetImpl(*this).GetUnitBaselineDpi();
 }
 
+void UiConfig::SetUnitScalingFactor(float scalingFactor)
+{
+  GetImpl(*this).SetScalingFactor(scalingFactor);
+}
+
+float UiConfig::GetUnitScalingFactor() const
+{
+  return GetImpl(*this).GetScalingFactor();
+}
+
 } // namespace Ui
 } //namespace DALI_NAMESPACE

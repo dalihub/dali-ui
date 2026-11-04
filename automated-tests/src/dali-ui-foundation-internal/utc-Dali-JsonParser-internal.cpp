@@ -151,6 +151,29 @@ int UtcDaliJsonParserReportsRepresentativeSyntaxErrorsP(void)
   END_TEST;
 }
 
+int UtcDaliJsonParserRejectsTruncatedNumbersN(void)
+{
+  // Numbers at the end of the source, so that parsing must stop at the end of the buffer
+  const char* invalidSources[] = {
+    "[-",
+    "[+",
+    "[1e",
+    "[1E",
+    "[1e-",
+    "[1e+",
+    "[1.5e",
+  };
+
+  for(const char* source : invalidSources)
+  {
+    JsonParser parser = JsonParser::New();
+    DALI_TEST_CHECK(!parser.Parse(source));
+    DALI_TEST_CHECK(parser.ParseError());
+  }
+
+  END_TEST;
+}
+
 int UtcDaliTreeNodeManipulatorValueAndWriteMatrixP(void)
 {
   using Manipulator = Dali::Ui::Internal::TreeNodeManipulator;

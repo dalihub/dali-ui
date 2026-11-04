@@ -12,13 +12,13 @@ BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(gles20)
 BuildRequires:  pkgconfig(glesv2)
 BuildRequires:  pkgconfig(egl)
-BuildRequires:  pkgconfig(dali2-core)
-BuildRequires:  pkgconfig(dali2-adaptor)
-BuildRequires:  dali2-integration-devel
-BuildRequires:  dali2-adaptor-integration-devel
-BuildRequires:  pkgconfig(dali2-ui-foundation)
-BuildRequires:  dali2-ui-foundation-integration-devel
-BuildRequires:  pkgconfig(dali2-ui-components)
+BuildRequires:  pkgconfig(dali3-core)
+BuildRequires:  pkgconfig(dali3-adaptor)
+BuildRequires:  dali3-integration-devel
+BuildRequires:  dali3-adaptor-integration-devel
+BuildRequires:  pkgconfig(dali3-ui-foundation)
+BuildRequires:  dali3-ui-foundation-integration-devel
+BuildRequires:  pkgconfig(dali3-ui-components)
 
 %description
 The dali-ui manual-tests launcher (foundation module) packaged as a Tizen ui-app

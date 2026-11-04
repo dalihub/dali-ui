@@ -1,5 +1,5 @@
 PROJECT(dali-ui-components)
-SET(PROJECT_LIB_NAME dali2-ui-components)
+SET(PROJECT_LIB_NAME dali${DALI_API_MAJOR}-ui-components)
 SET(COMPONENTS_ROOT_SRC_DIR ${ROOT_SRC_DIR}/dali-ui-components)
 
 # Collect source files
@@ -54,7 +54,7 @@ TARGET_INCLUDE_DIRECTORIES(${PROJECT_LIB_NAME}
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_LIB_NAME}
-  PUBLIC dali2-ui-foundation
+  PUBLIC dali${DALI_API_MAJOR}-ui-foundation
   PRIVATE
     ${COVERAGE}
     dali-ui-components-md4c
@@ -83,7 +83,7 @@ IF(INSTALL_CMAKE_MODULES)
   )
 
   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LIB_NAME}-config.cmake
-"include(CMakeFindDependencyMacro)\n    find_dependency(dali2-ui-foundation CONFIG REQUIRED)\ninclude(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_LIB_NAME}-targets.cmake)\n")
+"include(CMakeFindDependencyMacro)\n    find_dependency(dali${DALI_API_MAJOR}-ui-foundation CONFIG REQUIRED)\ninclude(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_LIB_NAME}-targets.cmake)\n")
   INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LIB_NAME}-config.cmake
           DESTINATION share/${PROJECT_LIB_NAME})
 
@@ -112,7 +112,7 @@ INSTALL( FILES ${COMPONENTS_ROOT_SRC_DIR}/dali-ui-components.h DESTINATION ${PRO
 IF( ENABLE_PKG_CONFIGURE )
   SET( DEV_INCLUDE_PATH ${INCLUDE_DIR} )
   SET( PKG_CFG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_LIB_NAME}.pc )
-  CONFIGURE_FILE( ${PKG_CFG_FILE}.in ${PKG_CFG_FILE} @ONLY )
+  CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/dali-ui-components.pc.in ${PKG_CFG_FILE} @ONLY )
   INSTALL( FILES ${PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
 ENDIF()
 

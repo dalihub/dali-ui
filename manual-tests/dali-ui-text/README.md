@@ -15,7 +15,7 @@ launcher의 `main.cpp`에서 해당 헤더를 직접 include하는 경우만 예
 
 저장소 루트 `dali-ui/`에서 실행한다. 현재 소스와 호환되는 DALi core, adaptor,
 ui-foundation library와 public development headers, libpng 1.6 development package가 필요하다.
-Tizen에서는 `Application` 헤더를 제공하는 `dali2-adaptor-integration-devel`도 필요하며,
+Tizen에서는 `Application` 헤더를 제공하는 `dali3-adaptor-integration-devel`도 필요하며,
 spec의 BuildRequires에 명시되어 있다. 별도의 integration library를 링크하는 것은 아니다.
 
 libpng는 PNG 기반 자동 픽셀 검사용이다. libpng 직접 의존성이 없는 수동 조작 빌드는

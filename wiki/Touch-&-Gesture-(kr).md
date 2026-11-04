@@ -1,17 +1,24 @@
+[→ English](https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-&-Gesture)
 
 # Touch & Gesture 동작 방식 및 코드 구현 가이드
 
 
 ## 목차
+
 1. [문서 범위](#문서-범위)
 2. [TouchEvent](#touchevent)
-3. [InterceptTouchEvent](#intercepttouchevent)
-4. [HoverEvent](#hoverevent)
-5. [Gesture Detection by HandleEvent](#gesture-detection-by-handleevent)
-6. [Gesture Propagation](#gesture-propagation)
-7. [입력 장치별 제스처 인식 옵션](#입력-장치별-제스처-인식-옵션)
-8. [Example 1: 기본 제스처 인식](#example-1-기본-제스처-인식)
-9. [Example 2: InterceptTouchEvent를 활용한 제스처 처리](#example-2-intercepttouchevent를-활용한-제스처-처리)
+3. [Touch 전파 차단](#touch-전파-차단)
+4. [InterceptTouchEvent](#intercepttouchevent)
+5. [HoverEvent](#hoverevent)
+6. [Gesture Detection by HandleEvent](#gesture-detection-by-handleevent)
+7. [Gesture Propagation](#gesture-propagation)
+8. [Overlay 안의 중첩 스크롤](#overlay-안의-중첩-스크롤)
+9. [입력 장치별 제스처 인식 옵션](#입력-장치별-제스처-인식-옵션)
+10. [Example 1: 기본 제스처 인식](#example-1-기본-제스처-인식)
+11. [Example 2: InterceptTouchEvent를 활용한 제스처 처리](#example-2-intercepttouchevent를-활용한-제스처-처리)
+12. [요약](#요약)
+13. [Touch 경계 진단 로그](#touch-경계-진단-로그)
+14. [구현 확인 근거](#구현-확인-근거)
 
 ---
 
@@ -27,11 +34,11 @@ TouchEvent는 최초 DOWN에서 candidate를 고정하고 stream owner를 선택
 이 문서에서 사용하는 용어는 다음과 같습니다.
 
 - **device**: `TouchEvent`의 point를 구분하는 device ID. 일반적으로 한 pointer의 수명을 식별합니다.
-- **initial routing group**: 최초 DOWN에서 hit된 Actor의 ID. 같은 ID로 시작한 device가 같은 stream에 합류합니다.
+- **initial routing group**: 전파 가능한 좌표 후보 중 앞쪽부터 찾은 PINCH 또는 ROTATION detector 요구 Actor의 ID. 해당 후보가 없으면 최초 hit Actor ID를 사용하며, 같은 group ID의 device가 같은 stream에 합류합니다.
 - **stream**: 같은 initial routing group에 속한 하나 이상의 device와 candidate, recipient, owner 상태를 함께
   관리하는 TouchEvent 전달 단위
 - **coordinate candidate**: 최초 DOWN 좌표의 geometry hit-test로 정해지는 front-to-back TouchEvent 후보
-- **owner**: TouchEvent를 처음 consume하여 stream 종료 또는 조상의 intercept 전까지 전달을 전담하는 Actor
+- **owner**: TouchEvent를 처음 consume하여 stream 종료 또는 관찰 경로의 intercept 전까지 전달을 전담하는 Actor
 - **recipient**: 해당 touch stream의 TouchEvent callback을 실제로 한 번 이상 받은 Actor
 - **interceptor**: ancestor path의 InterceptTouchEvent callback에서 `true`를 반환하여 기존 전달 범위를 제한한 Actor
 - **ancestor path**: target의 root부터 target 방향으로 이어지는 실제 부모-자식 경로
@@ -40,14 +47,15 @@ device와 stream의 관계는 다음과 같습니다.
 
 ```text
 device 4 ─┐
-          ├─ 같은 initial hit Actor ID ──> Stream 1
+          ├─ 같은 initial routing group ID ──> Stream 1
 device 7 ─┘
 
-device 9 ─── 다른 initial hit Actor ID ─> Stream 2
+device 9 ─── 다른 routing group ID ─> Stream 2
 
 각 Stream
 ├─ coordinate candidates
 ├─ ACTIVE/TERMINATED recipients
+├─ captured Touch propagation boundaries
 └─ owner / interceptor
 
 Stream 1과 Stream 2가 나중에 같은 owner를 선택해도 두 stream은 합쳐지지 않습니다.
@@ -84,7 +92,16 @@ TouchEvent는 부모-자식 관계가 아니라 coordinate candidate의 front-to
 
 - owner가 없고 아직 intercept되지 않음: 최초 DOWN의 coordinate candidate를 front-to-back으로 전달
 - owner가 있음: 현재 owner에게만 전달
-- intercept되었지만 새 owner가 없음: 고정된 interceptor→root 경로로 전달
+- intercept되었지만 새 owner가 없음: 고정된 interceptor→root 경로를 최초 Touch 전파 차단 범위 안에서 전달
+
+경계는 owner를 선택하지 않고 일반 전달만 제한합니다. [Touch 전파 차단](#touch-전파-차단)를 참고하세요.
+
+### 같은 View 안에서의 소비
+
+GEOMETRY에서는 Actor 자체의 Touch 처리와 연결된 Touch callback 반환값을 OR하며, 연결된 callback은 모두
+호출합니다. 한 callback의 `false`가 같은 View의 다른 처리에서 발생한 소비를 취소하지는 않습니다.
+예를 들어 click 또는 long-press 처리가 활성화된 InteractiveTrait는 앱 callback이 `false`여도 DOWN을
+소비할 수 있습니다. 아래 예제는 다른 내부 처리나 callback이 입력을 소비하지 않는 조건을 가정합니다.
 
 ### 터치 이벤트 수신 방법
 
@@ -169,8 +186,8 @@ view.TouchEventSignal().Connect(&tracker, [](Actor actor, const TouchEvent& touc
 TouchEvent에서 처음 `true`를 반환한 Actor가 owner가 됩니다.
 
 노란색 View가 `true`를 반환하면 이후 TouchEvent는 노란색 View에 전달됩니다. owner가 된 뒤 후속
-callback에서 `false`를 반환해도 ownership은 해제되지 않습니다. 다만 owner의 조상은 후속 이벤트를
-intercept할 수 있습니다.
+callback에서 `false`를 반환해도 ownership은 해제되지 않습니다. 최초 hit Actor 경로의 Actor는 owner
+자신이나 그 아래 자식이라도 후속 이벤트를 intercept할 수 있습니다.
 
 ### 이벤트 전파 예시
 
@@ -188,7 +205,9 @@ intercept할 수 있습니다.
 빨간색 View는 같은 DOWN을 이미 받은 active recipient이므로 노란색 View가 owner가 된 직후
 `INTERRUPTED`를 받습니다. 이전 이벤트에서 TouchEvent를 받은 recipient가 여러 개라면 새 owner를 제외한
 모든 active recipient가 각각 한 번씩 `INTERRUPTED`를 받습니다. Intercept callback만 받고 일반 TouchEvent
-callback을 받지 않은 Actor는 recipient가 아니므로 이 규칙의 대상이 아닙니다.
+callback을 받지 않은 Actor는 별도의 intercept observer로 추적합니다. owner 선택만으로 관찰이 끝나지는
+않습니다. Intercept 성공이나 stream 종료 때 남아 있는 active observer도 InterceptTouchEvent로 정리용
+INTERRUPTED를 받으므로 detector에 취소를 전달해야 합니다.
 
 ```text
 Red TouchEvent false  ──> Red = ACTIVE recipient
@@ -233,20 +252,80 @@ Yellow TouchEvent true ──> Yellow = ACTIVE recipient + owner
 
 ---
 
+## Touch 전파 차단
+
+Overlay 뒤의 일반 Touch 전파를 막으면서 앞쪽 자식들의 제스처 인식을 유지하려면
+`Actor::SetTouchPropagationBlocked(true)`를 사용합니다. `View`도 이 API를 상속합니다.
+조회 함수는 `IsTouchPropagationBlocked()`이며 기본값은 `false`입니다.
+API가 포함된 Core 버전(`@SINCE_2_5.46`)이 필요하고 GEOMETRY Touch에만 적용됩니다.
+
+이 설정은 **자신 이후의 후보로도 Touch를 전파할지**를 정합니다. Actor의 hit 영역은 해당 좌표에서
+Touch 후보가 되는지를 정하며, 전파 차단 설정으로 Actor의 크기나 hit 영역이 바뀌지는 않습니다.
+자신은 Touch를 받고 `false`를 반환해도 뒤쪽 후보로의 전파를 중단할 수 있습니다.
+이하에서 *전파 경계*는 이 설정이 켜진 Actor 중 전달 순서상 처음 만나는 Actor를 뜻합니다.
+
+```cpp
+View overlay = View::New();
+overlay.SetTouchPropagationBlocked(true);
+
+// 선택 사항: Touch callback이 없어도 경계는 동작합니다.
+overlay.TouchEventSignal().Connect(&tracker, [](Actor, const TouchEvent&)
+{
+  return false; // stream을 소비하지 않고 관찰합니다.
+});
+```
+
+경계 Actor는 Touch callback이 없어도 보임·민감도·hit 영역 조건을 만족하면 hit-test 후보가 됩니다.
+후보에서 제외되는 것이 아니므로 연결된 callback으로 Touch를 받을 수 있습니다. front-to-back 순서에서
+처음 만난 경계까지 일반 Touch를 전달하고 이후 후보로는 전파하지 않습니다. 실제 부모뿐 아니라 앞쪽 콘텐츠
+뒤에 겹친 sibling도 좌표 후보라면 경계로 사용할 수 있습니다.
+
+```text
+앞쪽 아이템 → 가로 리스트 → 세로 스크롤 → Overlay 경계
+                                           │
+                                           └─ 일반 Touch 전파 중단
+                                              배경은 전달 대상에서 제외
+```
+
+이 그림은 DOWN 좌표에서 해당 Actor들이 후보가 된 경우입니다. 자식이 부모 경계의 hit 영역 밖으로 나간 경우까지
+자동으로 막는 것은 아니므로 Overlay의 크기나 clipping 범위를 의도에 맞게 구성해야 합니다.
+
+| 동작 | 결과 |
+|---|---|
+| 경계 활성화 + callback 없음 또는 `false` 반환 | owner 선택 없이 일반 전파만 중단 |
+| 앞쪽 View나 경계가 실제로 Touch를 소비 | consumer를 owner로 정하고 다른 active Touch recipient에 `INTERRUPTED` 전달 |
+| 앞쪽 자식이 경계보다 먼저 소비 | 경계에 지속적인 관찰 권한은 없음. 이미 active였다면 경계도 `INTERRUPTED` 수신 가능 |
+| 진행 중 경계 해제·숨김·삭제 | 같은 stream을 배경으로 다시 열지 않음. 새 stream부터 변경 반영 |
+| 경계 밖 조상의 명시적 Intercept | 가로채기 허용. 경계 API는 Intercept를 막지 않음 |
+| Hover·Wheel·PARENT Touch | 신규 API의 영향 없음 |
+
+경계 Actor는 최초 DOWN에서 확정하며, 같은 routed stream의 내부 재시작 때도 범위를 유지합니다.
+앞쪽 sibling이 나중에 Intercept하더라도 일반 전달은 최초 허용 범위를 지켜야 하므로, 부모 경로를 통해
+DOWN에서 제외된 배경이나 더 바깥 경계가 다시 포함되지 않습니다. 경계는 취소 통지를 차단하지 않습니다.
+일반 Touch를 받은 적 없는 배경 Actor에 단지 경계 뒤에 있다는 이유로 `INTERRUPTED`를 만들지는 않습니다.
+
+Overlay의 Touch callback이 무조건 `true`를 반환하면 Overlay가 owner가 되고 앞쪽 active recipient를 취소합니다.
+경계 API로 전환할 때는 이 소비 callback을 제거해야 합니다. `false` callback을 추가하는 것으로 다른 callback이나
+InteractiveTrait의 소비를 취소할 수는 없습니다. Hover·Wheel은 별도 정책으로 처리하며, 배경 Touch 차단만을 위해
+빈 gesture detector를 붙일 필요는 없습니다.
+
+---
+
 ## InterceptTouchEvent
 
 InterceptTouchEvent는 geometry로 겹친 전체 Actor 목록이 아니라 실제 부모-자식 경로로 전달됩니다.
 
 ### 이벤트 전파 방식
 
-- owner가 없으면 최초 hit Actor의 ancestor path를 root에서 target 방향으로 검사합니다.
-- owner가 있으면 현재 owner의 ancestor path를 root에서 owner의 직전 부모까지 검사합니다. owner 자신은
-  intercept 대상에서 제외됩니다.
-- 겹쳐 있더라도 owner와 부모-자식 관계가 아닌 sibling branch에는 InterceptTouchEvent가 전달되지 않습니다.
+- Intercept가 성공하기 전에는 root → 최초 hit Actor 경로를 검사하며 hit Actor 자신도 포함합니다.
+- Touch owner가 정해져도 경로를 줄이지 않습니다. 경로 위의 owner 자신과 그 아래 자식도 dispatch 조건을
+  만족하면 InterceptTouchEvent를 받을 수 있습니다.
+- 최초 hit가 Scene에서 분리되어도 확정된 owner가 남아 있으면 root → owner 경로로 전환하며 owner도 포함합니다.
+- 최초 hit 경로 밖의 sibling은 검사하지 않습니다. 뒤쪽 sibling이 Touch owner가 되어도 Intercept는
+  그 sibling 경로가 아니라 최초 hit branch를 계속 따릅니다.
 
-**InterceptTouchEvent는 hierarchy 순서입니다. 일반 TouchEvent는 intercept 전에는 coordinate candidate
-순서이고, intercept 후에는 고정된 interceptor→root 순서입니다.**
-
+일반 Touch는 Intercept 전에는 좌표 후보, Intercept 후에는 interceptor→root 경로로 전달됩니다.
+최초 전파 경계는 일반 전달 범위를 제한하며, Intercept 경로의 탐색은 중단하지 않습니다.
 
 ### 이벤트 전파 예시
 
@@ -267,15 +346,16 @@ InterceptTouchEvent는 geometry로 겹친 전체 Actor 목록이 아니라 실�
 └─────────────────────────────────────┘
 ```
 
-- Red가 현재 owner라면 Blue → Yellow 순서로 InterceptTouchEvent가 호출되고 Red 자신의 intercept callback은
-  호출되지 않습니다.
-- 아직 owner가 없고 Orange가 최초 hit Actor라면 Blue → Yellow → Red → Orange 경로를 검사할 수 있습니다.
+- Orange가 최초 hit라면 Red가 Touch owner가 되어도 Blue → Yellow → Red → Orange 경로를 유지합니다.
+  Red와 Orange도 Intercept callback 대상이 될 수 있습니다.
+- owner 선택 후 일반 Touch는 Red에만 전달되지만 그 아래의 Intercept 관찰은 계속될 수 있습니다.
 - 모든 callback이 `false`이면 일반 TouchEvent 전달을 계속합니다.
 
 ### Consume 동작
 
 InterceptTouchEvent에서 `true`를 반환하면 interceptor가 자동으로 owner가 되는 것이 아니라, 현재 stream의
-일반 TouchEvent 전달 범위가 `root → interceptor` hierarchy path로 고정됩니다.
+일반 TouchEvent 전달 범위가 `root → interceptor` hierarchy path로 고정됩니다. 일반 전달은 interceptor부터
+root 방향으로 진행하며 최초 전파 경계도 적용합니다. 경계 밖 조상의 명시적 Intercept는 계속 허용합니다.
 
 Yellow View가 기존 owner의 후속 이벤트를 intercept하면 다음 순서로 처리합니다.
 
@@ -289,9 +369,9 @@ Yellow View가 기존 owner의 후속 이벤트를 intercept하면 다음 순서
 owner가 되지만, InterceptTouchEvent의 반환값만으로 ownership이 확정되지는 않습니다.
 
 ```text
-실제 hierarchy: Root → Blue → Yellow → Red(owner)
+실제 hierarchy: Root → Blue → Yellow → Red(owner) → Orange(initial hit)
 
-Intercept 검사: Root → Blue → Yellow(true)     [Red owner는 검사 대상에서 제외]
+Intercept 검사: Root → Blue → Yellow(true)     [Yellow가 true를 반환하여 여기서 중단]
 기존 전달 종료: Red → INTERRUPTED
 일반 Touch 전달: Yellow → Blue → Root           [처음 true를 반환한 Actor가 새 owner]
 ```
@@ -433,11 +513,25 @@ void YourClass::OnPan(Actor /*actor*/, const PanGesture& /*pan*/)
 2. **UNOWNED 상태에서 분석**: detector가 아직 gesture를 인식하지 않았다면 `HandleEvent()`는 `false`를 반환할
    수 있습니다. Touch callback을 받은 View는 ACTIVE recipient로 남아 후속 TouchEvent를 계속 받을 수 있습니다.
 
-3. **Ownership 선택**: detector가 gesture를 인식하여 `HandleEvent()`가 `true`를 반환하면 해당 View가 owner가
-   됩니다. 이전 active recipient는 `INTERRUPTED`를 받아 recognizer를 정리합니다.
+3. **Ownership 선택**: 인식 후 `HandleEvent()`는 `true`를 반환할 수 있습니다. Touch callback이 그 결과
+   또는 앱의 처리 결정을 `true`로 반환해야 해당 View가 owner가 됩니다. 이전 active recipient는 `INTERRUPTED`를 받아 recognizer를 정리합니다.
 
 4. **Owner 유지**: owner가 된 뒤 `HandleEvent()`가 `false`를 반환하더라도 ownership은 해제되지 않습니다.
-   stream 종료 또는 조상의 intercept까지 해당 View가 TouchEvent를 계속 받습니다.
+   stream 종료 또는 관찰 경로의 intercept까지 해당 View가 TouchEvent를 계속 받습니다.
+
+---
+
+### 인식 결과와 Touch owner 선택은 별개
+
+`HandleEvent()`는 recognizer에 입력을 전달합니다. 이동 방향, 남은 스크롤 범위, edit mode 같은 조건에 따라
+처리가 달라진다면 detector의 인식 결과를 그대로 반환하기보다 앱의 처리 결정을 Touch callback에서 반환합니다.
+대기 중 recognizer나 눌림 상태가 남지 않도록 UP/INTERRUPTED도 전달하고 정리해야 합니다.
+
+LongPress는 Touch callback 사이에 타이머로 인식될 수 있습니다. 이 signal 자체가 TouchEvent에서 `true`를
+반환하는 것은 아니므로 그 시점에 Touch owner가 자동 확정되지는 않습니다.
+`GestureDetector::CancelAllOtherGestureDetectors()`는 별도의 명시적 recognizer 취소 API입니다.
+현재 구현은 GestureEventProcessor에 등록된 다른 detector들을 취소하며, 하나의 Touch owner·Actor subtree·pointer
+stream으로 범위가 제한되지 않습니다. 여러 손가락의 독립 동작이 필요할 때는 이 API의 영향을 함께 고려해야 합니다.
 
 ---
 
@@ -454,8 +548,54 @@ Touch candidate가 같은 stream을 받고 각자의 GestureDetector를 진행�
   될 수 있습니다.
 - 처음 consume한 View가 owner가 되며, 다른 active recipient는 `INTERRUPTED`를 받습니다.
 - owner가 정해진 뒤에는 다른 coordinate candidate로 일반 TouchEvent를 계속 전파하지 않습니다.
-- owner의 실제 조상은 후속 Motion에서 intercept하여 전달 범위를 제한하고, 그 경로의 새 Touch consumer를
-  owner로 선택할 수 있습니다.
+- Intercept 관찰 경로의 Actor는 owner 자신이나 그 아래 자식이라도 후속 이벤트를 가로챌 수 있습니다.
+  제한된 경로에서 새로 Touch를 소비한 Actor가 owner가 됩니다.
+
+---
+
+## Overlay 안의 중첩 스크롤
+
+```text
+Overlay (Touch 전파 차단)
+└─ 세로 스크롤                             ↑ ↓
+   ├─ 가로 행 A                            ← →
+   │  ├─ 아이템 A1: Tap / LongPress
+   │  └─ 아이템 A2: Tap / LongPress
+   └─ 가로 행 B                            ← →
+      ├─ 아이템 B1: Tap / LongPress
+      └─ 아이템 B2: Tap / LongPress
+```
+
+일반 Touch callback에서 Pan을 처리하는 custom 스크롤 View라면 필요한 후보들이 DOWN을 소비하지 않고
+받도록 구성합니다. 이후 detector의 방향 제한이나 앱의 조건으로 이동을 처리할 View를 결정할 수 있습니다.
+
+```cpp
+outerPan.AddDirection(PanGestureDetector::DIRECTION_VERTICAL);
+rowAPan.AddDirection(PanGestureDetector::DIRECTION_HORIZONTAL);
+rowBPan.AddDirection(PanGestureDetector::DIRECTION_HORIZONTAL);
+```
+
+| 입력 | owner가 정해지기 전의 결정 |
+|---|---|
+| DOWN | 필요한 후보가 관찰. Overlay는 `false`를 반환하고 경계 설정으로 배경 전파만 중단 |
+| 가로 이동 | 해당 행이 스크롤 가능 여부를 판단한 뒤 Touch를 소비. 다른 active Touch recipient는 취소 |
+| 세로 이동 | 가로 행은 소비하지 않고, 세로 스크롤이 인식 후 소비 |
+| 해당 행에서 그 방향으로 스크롤 불가 | owner 선택 전에는 `false`를 유지해 다음 허용 후보에 판단 기회 전달 |
+
+**NUI 시절에도 Pan을 전파할지 판단하는 앱 코드가 필요했고, 그 결과로 `e.Handled`를 설정했습니다.**
+custom GEOMETRY Touch 처리에서는 그 결정을 Touch 소비 여부로 표현합니다. 전파 경계는 배경 차단을 별도로
+담당합니다. 이미 owner가 된 뒤 스크롤 끝에서 `false`를 반환한다고 같은 드래그가 부모로 넘어가지는 않습니다.
+진행 중 전환에는 관찰 경로의 Intercept나 별도의 앱 조정 정책이 필요합니다.
+
+위 흐름은 Core의 일반 Touch 처리 패턴입니다. 내장 `Dali::Ui::ScrollView`는 InterceptTouchEvent에서 Pan에
+입력을 전달하고 가로채기 후 일반 Touch를 소비합니다. 자식 InteractiveTrait가 DOWN을 소비해도 부모는
+Intercept로 스크롤을 인식할 수 있습니다. 같은 이벤트를 Intercept와 Touch 양쪽에서 detector에 중복 입력하지
+않고, 바깥 스크롤이 안쪽 행의 가로 드래그까지 선점하지 않도록 방향과 우선순위를 정해야 합니다.
+[ScrollView](ScrollView-(kr).md)와 [child drag 조정](#child-drag와-scrollview-조정)을 참고하세요.
+
+서로 다른 routing group에서 시작한 두 손가락은 각 행을 독립적으로 조작할 수 있습니다. 경계 안의
+PINCH/ROTATION 후보는 두 point를 의도적으로 하나의 그룹으로 묶을 수 있습니다. 독립 동작에는 detector 상태도
+분리해야 하며, 하나의 detector를 공유하거나 전역 취소 정책을 사용하면 다시 서로 영향을 줄 수 있습니다.
 
 ---
 
@@ -737,8 +877,8 @@ private:
 
 ### InterceptTouchEvent의 역할
 
-`InterceptTouchEvent`는 현재 owner로 이어지는 실제 ancestor가 touch stream의 일반 Touch 전달 범위를
-자신부터 root까지로 제한하는 메커니즘입니다.
+`InterceptTouchEvent`는 최초 hit로 이어지는 관찰 경로의 Actor가 일반 Touch 전달 범위를
+자신부터 root 방향으로 제한하는 메커니즘이며, 일반 전달에는 전파 경계도 적용합니다.
 
 - **return false**: 터치 이벤트를 하위 View로 전달 (기본 동작)
 - **return true**: interceptor를 제외한 기존 active recipient를 `INTERRUPTED`로 종료하고
@@ -747,8 +887,9 @@ private:
 새 owner는 이 일반 Touch 전달에서 처음 `true`를 반환한 Actor입니다. 보통 interceptor가 자신의 Touch
 callback에서 `true`를 반환하여 owner가 되지만 이는 별개의 consume 결정입니다.
 
-겹쳐 있기만 한 sibling View는 이 경로에 포함되지 않습니다. 뒤쪽 sibling이 gesture를 늦게 인식하도록
-하려면 일반 TouchEvent의 coordinate candidate 및 late consume을 사용해야 합니다.
+최초 hit 경로 밖의 sibling은 Intercept로 관찰하지 못합니다. 그런 sibling도 경쟁하게 하려면 판단할 때까지
+일반 Touch를 소비하지 않고 전파해야 합니다. 이미 다른 Actor가 owner라면 제외된 sibling은 일반 Touch의
+late consume으로 참여할 수 없습니다.
 
 이를 통해 복잡한 제스처 시나리오에서 유연하게 터치 이벤트를 제어할 수 있습니다.
 
@@ -762,9 +903,10 @@ callback에서 `true`를 반환하여 owner가 되지만 이는 별개의 consum
 | owner가 없는 상태에서 TouchEvent `false` | 다음 coordinate candidate로 전달되며 후속 이벤트에서 late consume 가능 |
 | 다른 Actor가 owner가 됨 | 새 owner를 제외한 이전 active recipient가 `INTERRUPTED`를 정확히 한 번 받음 |
 | owner의 후속 TouchEvent `false` | ownership을 해제하지 않으며 owner가 계속 수신 |
-| InterceptTouchEvent `true` | 현재 owner의 실제 ancestor가 일반 Touch 전달 범위를 interceptor→root로 제한 |
+| InterceptTouchEvent `true` | 관찰 경로의 Actor가 일반 Touch를 interceptor→root로 제한하며 전파 경계도 적용 |
 | Intercept 이후 TouchEvent `true` | 제한된 경로의 첫 consumer가 새 owner가 됨 |
-| 겹친 sibling의 InterceptTouchEvent | ancestry가 아니므로 호출되지 않음 |
+| 최초 hit 경로 밖의 InterceptTouchEvent | 최초 hit가 Scene에 있는 동안 호출되지 않음 |
+| Touch 전파 차단 활성화 | owner 선택 없이 일반 전파 중단. 취소 통지와 Intercept는 유지 |
 
 ### Stream 종료, multi-touch 및 TouchEvent 정보
 
@@ -774,9 +916,10 @@ callback에서 `true`를 반환하여 owner가 되지만 이는 별개의 consum
   terminal TouchEvent를 전달합니다. Intercept callback의 반환값은 이 종료를 막거나 새 owner를 만들지 않습니다.
 - 이미 활성 stream에 연결된 device ID에서 새 DOWN이 오면 기존 stream 전체를 먼저 취소합니다. 기존 stream의
   모든 ACTIVE recipient는 `INTERRUPTED`를 정확히 한 번 받고, 그 뒤 새 DOWN의 hit-test와 routing을 시작합니다.
-- processor가 추적하는 initial hit 또는 current owner가 insensitive/unhittable 상태가 되면 다음 처리에서 해당
-  ACTIVE recipient를 `INTERRUPTED`로 종료합니다. 추적 중인 Actor가 Scene에서 분리되면 stream의 모든 ACTIVE
-  recipient를 종료하고 stream을 정리합니다.
+- 추적 중인 primary target 또는 owner가 insensitive/unhittable 상태가 되면 처리 중 해당 ACTIVE recipient를
+  `INTERRUPTED`로 종료합니다. 확정된 owner를 제거하면 stream이 종료됩니다. owner와 다른 최초 hit만 제거된
+  경우에는 owner의 stream, render task, 물리적 UP 수신을 유지하고 Intercept 경로를 owner로 전환합니다.
+  확정된 owner가 없는 상태에서 추적 target이 분리되면 남은 recipient를 종료합니다.
 - owner가 아닌 다른 ACTIVE recipient가 일시적으로 dispatch 불가능해진 사실만으로 ownership이 바뀌지는
   않습니다. 해당 Actor는 dispatch 조건을 만족하지 않는 동안 일반 TouchEvent에서 제외되고, 새 owner 선택이나
   stream 종료 시 ACTIVE 상태라면 terminal 정리 대상이 됩니다.
@@ -786,11 +929,16 @@ callback에서 `true`를 반환하여 owner가 되지만 이는 별개의 consum
 - event의 모든 point에서 local position은 실제 callback recipient의 좌표계로 변환됩니다.
 - `DISPATCH_TOUCH_MOTION=false`인 Actor도 Motion과 `UP` 또는 `INTERRUPTED`가 섞인 event는 terminal point를
   잃지 않도록 전달받습니다.
-- 같은 initial hit Actor ID, 즉 같은 initial routing group에서 시작한 multi-touch point는 한 stream을
-  공유합니다. 서로 다른 initial routing group은 나중에 owner가 같아져도 독립 stream이며, 일부 pointer의
-  UP은 남은 pointer를 종료하지 않습니다.
+- 전파 가능한 PINCH/ROTATION 후보가 있으면 서로 다른 자식 Actor의 point도 같은 stream에 들어갑니다.
+  해당 후보가 없으면 최초 hit Actor ID로 그룹을 정합니다. 이 결정 전에 전파 경계를 적용하므로 경계 뒤
+  배경의 PINCH/ROTATION detector가 앞쪽 stream을 합칠 수 없습니다.
+  그룹화 조건은 Actor에 Attach된 detector에서 가져옵니다. `HandleEvent()`를 수동 호출하는 것만으로
+  해당 Actor가 그룹화 후보로 등록되지는 않습니다.
+- 서로 다른 initial routing group은 나중에 같은 Touch owner를 선택해도 독립적입니다. 한 stream에서 일부
+  pointer의 UP은 남은 pointer를 종료하지 않습니다.
 
 ```text
+PINCH/ROTATION 그룹 후보가 없는 경우:
 device 4 DOWN on Actor A ─┐
                          ├─ Stream 1 (initial routing group = Actor A ID)
 device 7 DOWN on Actor A ─┘
@@ -851,9 +999,35 @@ source/target 등록, custom preview, target acceptance, edge auto-scroll 전체
 
 ---
 
-## 참고 사항
+## Touch 경계 진단 로그
 
-<br/>
+consumer 없이 최초에 저장한 경계에서 일반 전달이 끝나면 Core가 다음과 같은 로그를 남깁니다.
+
+```text
+Touch propagation stopped by SetTouchPropagationBlocked(true): boundaryId(4), name(Overlay), deviceId(2), state(UP)
+```
+
+상태가 바뀐 각 point의 device ID와 상태를 기록합니다. DOWN/UP은 일반 릴리스 로그, MOTION은 Debug용 Touch
+processor 필터를 사용하며 STATIONARY는 생략합니다. 따라서 `[STATIONARY, MOTION]`은 일반 로그를 반복 출력하지
+않고, `[MOTION, UP]`에서는 필터가 꺼져 있어도 두 번째 point의 UP을 기록합니다.
+
+```sh
+LOG_TOUCH_PROCESSOR=1 ./your-app  # DEBUG_ENABLED Core 빌드에서 MOTION 로그도 확인
+```
+
+앞쪽 consumer나 취소·분리 때문에 전달이 끝난 경우에는 이 경계 차단 로그를 출력하지 않습니다.
+현재 설정이 나중에 해제되었더라도 로그는 해당 stream의 최초 경계를 기준으로 표시합니다.
+
+## 구현 확인 근거
+
+2026-10-29 로컬 구현을 기준으로 다음 경로를 대조했습니다.
+
+- `dali-core/dali/internal/event/events/geometry-touch-stream-router.cpp`: 그룹 결정, point route, Scene signal 발생 조건.
+- `dali-core/dali/internal/event/events/geometry-touch-event-processor.cpp`: owner/Intercept 경로, 취소, 수명, 로그.
+- `dali-core/dali/internal/event/events/geometry-touch-propagation.h`: 일반 Touch의 최초 전파 경계.
+- `dali-core/dali/internal/event/events/gesture-detector-impl.cpp`, `gesture-event-processor.cpp`: HandleEvent와 명시적 detector 취소.
+- `dali-core/automated-tests/src/dali/utc-Dali-GeoTouchStream.cpp`: 경계·Intercept·제거·독립/그룹 포인터 회귀 사례.
+- `dali-ui-foundation/integration-api/scroll-view-impl.cpp`, `internal/views/view/interactive-trait-impl.cpp`: 내장 ScrollView와 InteractiveTrait의 입력 처리.
 
 ---
 

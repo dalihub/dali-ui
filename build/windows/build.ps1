@@ -20,19 +20,19 @@ if(-not (Test-Path -LiteralPath $CommonScript))
 
 $Context = New-DaliBuildContext -WindowsDependenciesRoot $WindowsDependenciesRoot -VcpkgRoot $VcpkgRoot
 Initialize-DaliBuildEnvironment -Context $Context
-$CorePackage = Join-Path $Context.InstallPrefix "share\dali2-core"
-$AdaptorPackage = Join-Path $Context.InstallPrefix "share\dali2-adaptor"
+$CorePackage = Join-Path $Context.InstallPrefix "share\dali3-core"
+$AdaptorPackage = Join-Path $Context.InstallPrefix "share\dali3-adaptor"
 Assert-DaliPaths -Paths @(
-  (Join-Path $CorePackage "dali2-core-config.cmake"),
-  (Join-Path $AdaptorPackage "dali2-adaptor-config.cmake")
+  (Join-Path $CorePackage "dali3-core-config.cmake"),
+  (Join-Path $AdaptorPackage "dali3-adaptor-config.cmake")
 ) -Description "prerequisite package; build dali-core and dali-adaptor first"
 
 $Arguments = (Get-DaliCommonCMakeArguments -Context $Context -Configuration $Configuration) + @(
   "-DENABLE_PKG_CONFIGURE=OFF",
   "-DINSTALL_CMAKE_MODULES=ON",
   "-DENABLE_VECTOR_BASED_TEXT_RENDERING=OFF",
-  "-Ddali2-core_DIR=$CorePackage",
-  "-Ddali2-adaptor_DIR=$AdaptorPackage"
+  "-Ddali3-core_DIR=$CorePackage",
+  "-Ddali3-adaptor_DIR=$AdaptorPackage"
 )
 Invoke-DaliCMakeProject `
   -Name "dali-ui" `
@@ -44,9 +44,9 @@ Invoke-DaliCMakeProject `
 
 Install-DaliRuntimeScripts -Context $Context -Configuration $Configuration
 Assert-DaliPaths -Paths @(
-  (Join-Path $Context.InstallPrefix "bin\dali2-ui-foundation.dll"),
-  (Join-Path $Context.InstallPrefix "bin\dali2-ui-components.dll"),
-  (Join-Path $Context.InstallPrefix "share\dali2-ui-foundation\dali2-ui-foundation-config.cmake"),
-  (Join-Path $Context.InstallPrefix "share\dali2-ui-components\dali2-ui-components-config.cmake")
+  (Join-Path $Context.InstallPrefix "bin\dali3-ui-foundation.dll"),
+  (Join-Path $Context.InstallPrefix "bin\dali3-ui-components.dll"),
+  (Join-Path $Context.InstallPrefix "share\dali3-ui-foundation\dali3-ui-foundation-config.cmake"),
+  (Join-Path $Context.InstallPrefix "share\dali3-ui-components\dali3-ui-components-config.cmake")
 ) -Description "dali-ui installation output"
 Write-Host "`ndali-ui installed in $($Context.InstallPrefix)." -ForegroundColor Green

@@ -1,0 +1,11 @@
+prefix=@PREFIX@
+exec_prefix=@EXEC_PREFIX@
+libdir=@LIB_DIR@
+includedir=@INCLUDE_DIR@
+
+Name: dali-ui-foundation
+Description: DALi UI Foundation Library
+Version: @DALI_UI_VERSION@
+Requires: @core_name@
+Libs: -L${libdir} -l@PROJECT_LIB_NAME@
+Cflags: -I${includedir}
