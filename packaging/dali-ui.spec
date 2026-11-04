@@ -5,7 +5,7 @@
 
 Name:       dali3-ui-foundation
 Summary:    DALi UI Library
-Version:    2.5.45.11629
+Version:    2.5.46.11678
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0 and BSD-3-Clause and MIT
