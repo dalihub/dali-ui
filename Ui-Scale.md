@@ -226,7 +226,7 @@ With a window scale of `1.5` the same tree reads `1.5` / `1.5` / `3.0`: the wind
 The total rendered size of a view is determined by all three scaling mechanisms together.
 
 Given:
-- `ScalingFactor` = `1.5` (set via `UiConfig::SetScalingFactor()` at startup)
+- `ScalingFactor` = `1.5` (set via `UiConfig::SetUnitScalingFactor()` at startup)
 - UI scale = `2.0` (set at runtime with `LayoutScaleManager::SetUiScale()`)
 - Window scale = `1.25` (set at runtime for this view's window)
 - A view with requested width `100_spx`

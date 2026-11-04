@@ -31,7 +31,7 @@ int main(int argc, char** argv)
   // Apply()는 애플리케이션이 실행되기 전에 호출합니다.
   UiConfig config = UiConfig::New();
   config.SetUnitDpi(320);
-  config.SetScalingFactor(1.5f);
+  config.SetUnitScalingFactor(1.5f);
   config.Apply();
 
   MyApp app(argc, argv); // MyApp은 tizen_appfw::UiApplication을 상속합니다.
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 ```cpp
 Components::UiConfig config = Components::UiConfig::New();
 config.SetUnitDpi(320);
-config.SetScalingFactor(1.5f);
+config.SetUnitScalingFactor(1.5f);
 config.Apply();
 ```
 
@@ -59,7 +59,7 @@ config.Apply();
 
 | 항목 | 메서드 | 기본값 | 설명 |
 |---|---|---|---|
-| Scaling Factor | `SetScalingFactor(float)` | `1.0f` | `spx`, `sdp` 단위에 곱해지는 스케일 배율 |
+| Scaling Factor | `SetUnitScalingFactor(float)` | `1.0f` | `spx`, `sdp` 단위에 곱해지는 스케일 배율 |
 | Unit DPI | `SetUnitDpi(int)`, `GetUnitDpi()` | `0` | 사용자 설정값만 저장·반환하며 0은 단위 계산 시 시스템 DPI 사용 |
 | Baseline DPI | `SetUnitBaselineDpi(int)` | `72` | `dp` 계산의 기준 DPI |
 | Default Font Size | `SetDefaultFontSize(float)` | `16.0f` | 텍스트 요소의 기본 폰트 크기 (pt) |
@@ -131,7 +131,7 @@ public:
   {
     TVConfig config(Dali::Ui::UiConfig::New());
     config.SetUnitDpi(72);
-    config.SetScalingFactor(2.0f);
+    config.SetUnitScalingFactor(2.0f);
     config.SetDefaultFontSize(28.0f);
     return config;
   }
