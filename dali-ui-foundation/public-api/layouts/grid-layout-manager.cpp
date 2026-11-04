@@ -108,6 +108,13 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
                                     float rowSpacing, float colSpacing, float scale,
                                     const Internal::ViewDataImpl& viewData)
 {
+  // Every caller passes at least one track per axis; the guard states it, so the
+  // `rowCount - 1` / `colCount - 1` clamps below cannot wrap.
+  if(rowCount == 0u || colCount == 0u)
+  {
+    return; // LCOV_EXCL_LINE
+  }
+
   // A grid that is not mode-aware (a subclass, a view with a layout callback) measures every
   // child with the custom-parent modes of its view, which is also what the child's own
   // derivation gives (ViewDataImpl::DeriveChildModesAsCustomParent).
@@ -585,6 +592,15 @@ void MeasureGridChildrenPhased(std::vector<View>& children, float availableWidth
                                float rowSpacing, float colSpacing, float scale, bool widthDetermined, bool heightDetermined,
                                bool arrangePhase, ViewImpl& view, float& totalWidthOut, float& totalHeightOut)
 {
+  // Every caller passes at least one track per axis; the guard states it, so the
+  // `rowCount - 1` / `colCount - 1` clamps below cannot wrap.
+  if(rowCount == 0u || colCount == 0u)
+  {
+    totalWidthOut  = 0.0f; // LCOV_EXCL_LINE
+    totalHeightOut = 0.0f; // LCOV_EXCL_LINE
+    return;                // LCOV_EXCL_LINE
+  }
+
   // 1. ABSOLUTE tracks up front.
   for(uint32_t i = 0; i < colCount; ++i)
   {
@@ -881,6 +897,15 @@ void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vecto
                           const LayoutRect& bounds, float rowSpacing, float colSpacing, uint32_t rowCount,
                           uint32_t colCount, std::vector<float>& rowPositionsOut, std::vector<float>& colPositionsOut)
 {
+  // Every caller passes at least one track per axis; the guard states it, so the
+  // `rowCount - 1` / `colCount - 1` comparisons below cannot wrap.
+  if(rowCount == 0u || colCount == 0u)
+  {
+    rowPositionsOut.clear(); // LCOV_EXCL_LINE
+    colPositionsOut.clear(); // LCOV_EXCL_LINE
+    return;                  // LCOV_EXCL_LINE
+  }
+
   rowPositionsOut.resize(rowCount + 1);
   colPositionsOut.resize(colCount + 1);
   rowPositionsOut[0] = bounds.y;
@@ -905,6 +930,13 @@ void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, co
                                 const Dali::Vector<GridLength>& rowDefs, const Dali::Vector<GridLength>& colDefs,
                                 const Internal::ViewDataImpl& viewData)
 {
+  // Every caller passes at least one track per axis; the guard states it, so the
+  // `rowCount - 1` / `colCount - 1` clamps below cannot wrap.
+  if(rowCount == 0u || colCount == 0u)
+  {
+    return; // LCOV_EXCL_LINE
+  }
+
   for(auto& childView : children)
   {
     ViewImpl& childImpl = GetImpl(childView);
