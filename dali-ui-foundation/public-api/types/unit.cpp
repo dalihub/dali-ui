@@ -27,12 +27,12 @@ namespace Ui
 
 float operator"" _spx(unsigned long long int v)
 {
-  return static_cast<float>(v) * UiConfig::GetCurrent().GetScalingFactor();
+  return static_cast<float>(v) * UiConfig::GetCurrent().GetUnitScalingFactor();
 }
 
 float operator"" _spx(long double v)
 {
-  return static_cast<float>(v) * UiConfig::GetCurrent().GetScalingFactor();
+  return static_cast<float>(v) * UiConfig::GetCurrent().GetUnitScalingFactor();
 }
 
 float operator"" _dp(unsigned long long int v)
