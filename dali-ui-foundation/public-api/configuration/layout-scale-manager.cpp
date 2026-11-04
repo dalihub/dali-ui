@@ -63,15 +63,5 @@ void LayoutScaleManager::SetScalable(bool enable)
   GetImpl(*this).SetScalable(enable);
 }
 
-float LayoutScaleManager::GetWindowScale(Window window) const
-{
-  return GetImpl(*this).GetWindowScale(window);
-}
-
-void LayoutScaleManager::SetWindowScale(Window window, float scale)
-{
-  GetImpl(*this).SetWindowScale(window, scale);
-}
-
 } // namespace Ui
 } //namespace DALI_NAMESPACE

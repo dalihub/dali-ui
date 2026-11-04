@@ -31,7 +31,6 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture.h>
@@ -383,7 +382,6 @@ private:
   Vector3                      mOriginalDragPreviewParentOrigin;
   LayoutMode                   mOriginalDragPreviewLayoutMode;
   UiScalePolicy                mOriginalDragPreviewUiScalePolicy;
-  WindowScalePolicy            mOriginalDragPreviewWindowScalePolicy{WindowScalePolicy::INHERIT};
   float                        mOriginalDragPreviewRequestedX;
   float                        mOriginalDragPreviewRequestedY;
   bool                         mOriginalDragPreviewPositionUsesPivot;
