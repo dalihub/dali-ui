@@ -405,7 +405,7 @@ void LottieAnimationViewImpl::OnInitialize()
 MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
-  float s    = GetEffectiveLayoutScale();
+  float s    = GetEffectiveScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
@@ -483,7 +483,7 @@ void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
     return;
   }
 
-  Ui::GetImplementation(mVisual).ApplyFittingMode(size, GetPadding(), GetEffectiveLayoutScale());
+  Ui::GetImplementation(mVisual).ApplyFittingMode(size, GetPadding(), GetEffectiveScale());
 }
 
 void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)

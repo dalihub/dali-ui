@@ -2911,23 +2911,23 @@ private:
     }
     else if(keyName == "q" || keyName == "Q")
     {
-      LayoutScaleManager::Get().SetUiScale(0.8f);
+      UiScaleManager::Get().SetScale(0.8f);
     }
     else if(keyName == "w" || keyName == "W")
     {
-      LayoutScaleManager::Get().SetUiScale(1.0f);
+      UiScaleManager::Get().SetScale(1.0f);
     }
     else if(keyName == "e" || keyName == "E")
     {
-      LayoutScaleManager::Get().SetUiScale(1.2f);
+      UiScaleManager::Get().SetScale(1.2f);
     }
     else if(keyName == "r" || keyName == "R")
     {
-      LayoutScaleManager::Get().SetUiScale(1.5f);
+      UiScaleManager::Get().SetScale(1.5f);
     }
     else if(keyName == "t" || keyName == "T")
     {
-      LayoutScaleManager::Get().SetUiScale(2.0f);
+      UiScaleManager::Get().SetScale(2.0f);
     }
   }
 

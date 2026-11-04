@@ -313,7 +313,7 @@ private:
         CancelSliderEdit();
       }
     });
-    LayoutScaleManager::Get().SetUiScale(mUiScale);
+    UiScaleManager::Get().SetScale(mUiScale);
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
@@ -1352,7 +1352,7 @@ private:
   {
     CancelSliderEdit();
     mUiScale = scale;
-    LayoutScaleManager::Get().SetUiScale(scale);
+    UiScaleManager::Get().SetScale(scale);
     UpdateControlsViewport();
     mPreviewLayoutTimer.Start();
     if(mBlurEnabled)

@@ -601,7 +601,7 @@ int UtcDaliDialogPresentationLayoutParity(void)
   application.GetScene().Add(managedHost);
   for(unsigned scenario = 0u; scenario < 3u; ++scenario)
   {
-    LayoutScaleManager::Get().SetUiScale(scenario == 2u ? 1.5f : 1.0f);
+    UiScaleManager::Get().SetScale(scenario == 2u ? 1.5f : 1.0f);
     auto manual = AlertDialog::New();
     auto managed = AlertDialog::New();
     for(auto dialog : {manual, managed})
@@ -660,7 +660,7 @@ int UtcDaliDialogPresentationLayoutParity(void)
     DALI_TEST_CHECK(!managed.IsAccessibilityModal());
     DALI_TEST_EQUALS(managed.GetRequestedWidth(), requestedWidth, TEST_LOCATION);
   }
-  LayoutScaleManager::Get().SetUiScale(1.0f);
+  UiScaleManager::Get().SetScale(1.0f);
   END_TEST;
 }
 

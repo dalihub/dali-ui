@@ -1038,23 +1038,23 @@ private:
     }
     else if(event.GetKeyName() == "1")
     {
-      LayoutScaleManager::Get().SetUiScale(0.8f);
+      UiScaleManager::Get().SetScale(0.8f);
     }
     else if(event.GetKeyName() == "2")
     {
-      LayoutScaleManager::Get().SetUiScale(1.0f);
+      UiScaleManager::Get().SetScale(1.0f);
     }
     else if(event.GetKeyName() == "3")
     {
-      LayoutScaleManager::Get().SetUiScale(1.2f);
+      UiScaleManager::Get().SetScale(1.2f);
     }
     else if(event.GetKeyName() == "4")
     {
-      LayoutScaleManager::Get().SetUiScale(1.5f);
+      UiScaleManager::Get().SetScale(1.5f);
     }
     else if(event.GetKeyName() == "5")
     {
-      LayoutScaleManager::Get().SetUiScale(2.0f);
+      UiScaleManager::Get().SetScale(2.0f);
     }
   }
 

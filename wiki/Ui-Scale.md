@@ -17,79 +17,60 @@ This document covers the **dynamic scale** system (`UiScale`).
 
 Every view in the tree carries an **effective scale** — a single `float` multiplier that is applied to all layout measurements (sizes, margins, padding, positions) during the Measure and Arrange passes.
 
-The **UI scale** (also called the system scale) is the process-wide scale held by `LayoutScaleManager` and set with `LayoutScaleManager::SetUiScale()`, usually by an OS or accessibility handler. `LayoutScaleManager::GetUiScale()` returns that stored value; a view's own effective scale is `ViewImpl::GetEffectiveLayoutScale()`.
-
 The effective scale of a view is determined by:
 1. Walking up the parent chain to find the nearest ancestor (or root) that defines a concrete scale.
-2. Roots inherit their scale from `LayoutScaleManager`.
+2. Roots inherit their scale from `UiScaleManager`.
 
 ```
-LayoutScaleManager (system scale)
-  └── RootLayout             effectiveScale = 1.5  (inherited from LayoutScaleManager)
+UiScaleManager (system scale)
+  └── RootLayout             effectiveScale = 1.5  (inherited from UiScaleManager)
         ├── StackLayout       effectiveScale = 1.5  (inherited)
         │     ├── Label       effectiveScale = 1.5  (inherited)
         │     └── Button      effectiveScale = 1.0  (DISABLED — opt-out subtree)
         └── Badge             effectiveScale = 1.5  (ENABLED — always tracks system)
 ```
 
-When `LayoutScaleManager::SetUiScale()` is called, every registered layout root recomputes its effective scale and triggers a full re-layout automatically.
+When `UiScaleManager::SetScale()` is called, every registered layout root recomputes its effective scale and triggers a full re-layout automatically.
 
 <br/>
 
-## LayoutScaleManager
+## UiScaleManager
 
-`LayoutScaleManager` is a process-wide singleton that holds the current system scale value. It is not a `LayoutManager` and lays nothing out itself; the layout pass applies what it holds.
+`UiScaleManager` is a process-wide singleton that holds the current system scale value.
 
 ```cpp
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 
 // Read the current system scale
-float scale = LayoutScaleManager::Get().GetUiScale();  // default: 1.0
+float scale = UiScaleManager::Get().GetScale();  // default: 1.0
 
 // Update the system scale (typically called by an OS/vconf handler)
-LayoutScaleManager::Get().SetUiScale(1.5f);
+UiScaleManager::Get().SetScale(1.5f);
 ```
 
-Calling `SetUiScale()` does three things atomically:
+Calling `SetScale()` does three things atomically:
 1. Updates the stored scale value.
 2. Resets the effective scale cache of every registered layout root and its entire subtree.
 3. Calls `InvalidateMeasure()` on each root, scheduling a full re-layout on the next frame.
 
-> **Note:** `SetUiScale()` accepts only positive, finite and normal values (`>= FLT_MIN`). `NaN`, infinities, zero, negatives and subnormals are ignored, leave the current UI scale in place, and log an error.
+> **Note:** `SetScale()` silently ignores `NaN`, zero, and negative values. Passing such a value is a no-op and logs an error.
 
 <br/>
 
 ### Global master switch
 
-`LayoutScaleManager` also exposes a process-wide **master switch** that turns dynamic scaling on or off for the whole application.
+`UiScaleManager` also exposes a process-wide **master switch** that turns dynamic scaling on or off for the whole application.
 
 ```cpp
-bool enabled = LayoutScaleManager::Get().IsScalable();  // default: true
+bool enabled = UiScaleManager::Get().IsScalable();  // default: true
 
-LayoutScaleManager::Get().SetScalable(false);  // every view renders unscaled
-LayoutScaleManager::Get().SetScalable(true);   // restores the stored scale
+UiScaleManager::Get().SetScalable(false);  // every view renders unscaled
+UiScaleManager::Get().SetScalable(true);   // restores the stored scale
 ```
 
-While scaling is disabled, every view's effective scale resolves to `1.0` regardless of its `UiScalePolicy` (`ENABLED`, `INHERIT`, or `DISABLED`) or its position in the tree. The value set via `SetUiScale()` is preserved while disabled and re-applied the moment scaling is re-enabled. Flipping the switch invalidates all registered layout roots and triggers a full re-layout, exactly like `SetUiScale()`.
+While scaling is disabled, every view's effective scale resolves to `1.0` regardless of its `UiScalePolicy` (`ENABLED`, `INHERIT`, or `DISABLED`) or its position in the tree. The value set via `SetScale()` is preserved while disabled and re-applied the moment scaling is re-enabled. Flipping the switch invalidates all registered layout roots and triggers a full re-layout, exactly like `SetScale()`.
 
-> **Note:** Calling `SetUiScale()` while scaling is disabled stores the new value but does not re-layout; the deferred value takes effect on the next `SetScalable(true)`.
-
-<br/>
-
-### UiScaleManager (deprecated)
-
-`UiScaleManager` (`ui-scale-manager.h`) is the earlier name of this class. It is deprecated and kept for applications built against earlier releases; new code uses `LayoutScaleManager`. Both classes share one state, so a value set through either one is read back through both and the last call wins. They are separate handles: `LayoutScaleManager::DownCast()` of a `UiScaleManager` handle, and the reverse, returns an empty handle.
-
-| UiScaleManager (deprecated) | LayoutScaleManager |
-|---|---|
-| `UiScaleManager::Get()` | `LayoutScaleManager::Get()` |
-| `GetScale()` | `GetUiScale()` |
-| `SetScale(float)` | `SetUiScale(float)` |
-| `IsScalable()` | `IsScalable()` |
-| `SetScalable(bool)` | `SetScalable(bool)` |
-| `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | None; the library registers layout roots itself |
-
-`ViewImpl::GetEffectiveScale()` is deprecated along with it: use `ViewImpl::GetEffectiveLayoutScale()`, which returns the same value.
+> **Note:** Calling `SetScale()` while scaling is disabled stores the new value but does not re-layout; the deferred value takes effect on the next `SetScalable(true)`.
 
 <br/>
 
@@ -107,15 +88,15 @@ view.SetUiScalePolicy(UiScalePolicy::DISABLED);
 
 | Policy | Effective Scale | Description |
 |---|---|---|
-| `INHERIT` | From parent (or `LayoutScaleManager` at root) | Default. Inherits scale through the tree. Most views should use this. |
-| `ENABLED` | Always equals `LayoutScaleManager::GetUiScale()` | Always tracks the system scale, regardless of what the parent's policy is. |
+| `INHERIT` | From parent (or `UiScaleManager` at root) | Default. Inherits scale through the tree. Most views should use this. |
+| `ENABLED` | Always equals `UiScaleManager::GetScale()` | Always tracks the system scale, regardless of what the parent's policy is. |
 | `DISABLED` | Always `1.0` | Opts out of scaling entirely. Descendant `INHERIT` views also receive `1.0`. |
 
 <br/>
 
 ### INHERIT (default)
 
-The view inherits the effective scale from its parent. Since all views default to `INHERIT`, the system scale set on `LayoutScaleManager` naturally flows down the entire tree without any extra configuration.
+The view inherits the effective scale from its parent. Since all views default to `INHERIT`, the system scale set on `UiScaleManager` naturally flows down the entire tree without any extra configuration.
 
 ```cpp
 // No explicit policy needed — INHERIT is the default.
@@ -138,7 +119,7 @@ panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
 Because children inherit `1.0` from a `DISABLED` ancestor, only the subtree under `panel` is unscaled. Sibling views continue to scale normally.
 
 ```
-LayoutScaleManager UI scale = 2.0
+UiScaleManager scale = 2.0
   └── RootLayout         effectiveScale = 2.0
         ├── Content       effectiveScale = 2.0  (INHERIT)
         └── Panel         effectiveScale = 1.0  (DISABLED)
@@ -150,7 +131,7 @@ LayoutScaleManager UI scale = 2.0
 
 ### ENABLED — Breaking out of a DISABLED subtree
 
-Use `ENABLED` when a specific view inside a `DISABLED` subtree must still track the system scale. `ENABLED` bypasses parent inheritance and always reads directly from `LayoutScaleManager`.
+Use `ENABLED` when a specific view inside a `DISABLED` subtree must still track the system scale. `ENABLED` bypasses parent inheritance and always reads directly from `UiScaleManager`.
 
 ```cpp
 panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
@@ -158,7 +139,7 @@ badge.SetUiScalePolicy(UiScalePolicy::ENABLED);  // scales even inside DISABLED 
 ```
 
 ```
-LayoutScaleManager UI scale = 2.0
+UiScaleManager scale = 2.0
   └── Panel         effectiveScale = 1.0  (DISABLED)
         ├── Icon    effectiveScale = 1.0  (INHERIT)
         └── Badge   effectiveScale = 2.0  (ENABLED — bypasses DISABLED parent)
@@ -174,7 +155,7 @@ The total rendered size of a view is determined by both scaling mechanisms toget
 
 Given:
 - `ScalingFactor` = `1.5` (set via `UiConfig::SetUnitScalingFactor()` at startup)
-- UI scale = `2.0` (set at runtime with `LayoutScaleManager::SetUiScale()`)
+- UI scale = `2.0` (set at runtime)
 - A view with requested width `100_spx`
 
 The final visual width is:
@@ -191,9 +172,9 @@ Dynamic scale (`effectiveScale`) stretches or shrinks the entire layout tree at 
 
 ## Reacting to Scale Changes in Custom Views
 
-If your custom view (implemented via `ViewImpl`) caches pixel-unit values, those caches must be invalidated when scale changes. Since `InvalidateMeasure()` is called automatically on the root when `SetUiScale()` fires, derived views that override `OnMeasure` / `OnArrange` receive fresh constraints and `effectiveScale` on each layout pass — no extra work is required.
+If your custom view (implemented via `ViewImpl`) caches pixel-unit values, those caches must be invalidated when scale changes. Since `InvalidateMeasure()` is called automatically on the root when `SetScale()` fires, derived views that override `OnMeasure` / `OnArrange` receive fresh constraints and `effectiveScale` on each layout pass — no extra work is required.
 
-For views that cache values outside the layout pass, subscribe to property change notifications or call `GetEffectiveLayoutScale()` lazily inside `OnMeasure`.
+For views that cache values outside the layout pass, subscribe to property change notifications or call `GetEffectiveScale()` lazily inside `OnMeasure`.
 
 <br/>
 
@@ -201,14 +182,14 @@ For views that cache values outside the layout pass, subscribe to property chang
 
 | Goal | How |
 |---|---|
-| Apply system-wide scale change | `LayoutScaleManager::Get().SetUiScale(newScale)` |
-| Read the current system scale | `LayoutScaleManager::Get().GetUiScale()` |
-| Turn dynamic scaling on/off globally | `LayoutScaleManager::Get().SetScalable(enable)` |
-| Query whether scaling is enabled | `LayoutScaleManager::Get().IsScalable()` |
+| Apply system-wide scale change | `UiScaleManager::Get().SetScale(newScale)` |
+| Read the current system scale | `UiScaleManager::Get().GetScale()` |
+| Turn dynamic scaling on/off globally | `UiScaleManager::Get().SetScalable(enable)` |
+| Query whether scaling is enabled | `UiScaleManager::Get().IsScalable()` |
 | Opt a subtree out of scaling | `view.SetUiScalePolicy(UiScalePolicy::DISABLED)` |
 | Force a view to always track system scale | `view.SetUiScalePolicy(UiScalePolicy::ENABLED)` |
 | Reset to default inherited behavior | `view.SetUiScalePolicy(UiScalePolicy::INHERIT)` |
-| Query a view's effective scale (framework use) | `viewImpl.GetEffectiveLayoutScale()` |
+| Query a view's effective scale (framework use) | `viewImpl.GetEffectiveScale()` |
 
 <br/>
 

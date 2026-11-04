@@ -288,7 +288,7 @@ void ToastImpl::RelayoutActivePresentation()
 void ToastImpl::ArrangePresentationAt(float y)
 {
   Ui::View    self  = Ui::View::DownCast(Self());
-  const float scale = std::max(0.001f, GetEffectiveLayoutScale());
+  const float scale = std::max(0.001f, GetEffectiveScale());
   self.SetRequestedX(mPresentationX / scale);
   self.SetRequestedY(y / scale);
   self.SetRequestedWidth(mPresentationWidth / scale);
@@ -307,7 +307,7 @@ void ToastImpl::UpdatePresentationGeometry()
   const PositionSize bounds       = mWindow.GetPositionSize();
   const float        windowWidth  = std::max(0.0f, static_cast<float>(bounds.width));
   const float        windowHeight = std::max(0.0f, static_cast<float>(bounds.height));
-  const float        scale        = std::max(0.001f, GetEffectiveLayoutScale());
+  const float        scale        = std::max(0.001f, GetEffectiveScale());
   mAppliedScale                   = scale;
   const Insets padding            = mStyle.GetPadding();
   const bool   hasIcon            = mIcon && !mIconResourceUrl.Empty();
@@ -555,7 +555,7 @@ void ToastImpl::OnEffectiveScalePropertySet(Dali::Handle, Dali::Property::Index 
 void ToastImpl::OnScaleRelayoutIdle()
 {
   mScaleRelayoutIdle = nullptr;
-  if(GetEffectiveLayoutScale() == mAppliedScale)
+  if(GetEffectiveScale() == mAppliedScale)
   {
     return;
   }

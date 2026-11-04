@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
-#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -274,7 +274,7 @@ int UtcDaliTextVisualLabelFittingPreservesInvalidation(void)
   gl.SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
   gl.EnableTextureCallTrace(true);
 
-  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  const float originalScale = UiScaleManager::Get().GetScale();
   Label       label         = Label::New("Initial text at fixed geometry");
   label.SetRequestedWidth(420.0f);
   label.SetRequestedHeight(96.0f);
@@ -305,7 +305,7 @@ int UtcDaliTextVisualLabelFittingPreservesInvalidation(void)
   }
 
   gl.ResetTextureCallStack();
-  LayoutScaleManager::Get().SetUiScale(originalScale * 1.25f);
+  UiScaleManager::Get().SetScale(originalScale * 1.25f);
   application.SendNotification();
   application.Render(16);
   application.SendNotification();
@@ -313,7 +313,7 @@ int UtcDaliTextVisualLabelFittingPreservesInvalidation(void)
   DALI_TEST_CHECK(gl.GetTextureTrace().CountMethod("TexImage2D") > 0);
   DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
 
-  LayoutScaleManager::Get().SetUiScale(originalScale);
+  UiScaleManager::Get().SetScale(originalScale);
   application.SendNotification();
   application.Render(16);
 
