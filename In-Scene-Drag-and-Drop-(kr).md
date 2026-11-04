@@ -538,10 +538,13 @@ drag마다 별도 preview가 필요하면 factory, updater, 선택적 finalizer�
 View MyView::CreatePreview(const DragAndDropEvent& event)
 {
   View preview = View::New();
+  const Vector3 size =
+    event.GetSource().GetCurrentProperty<Vector3>(Actor::Property::SIZE);
 
-  preview.SetRequestedWidth(event.GetPreviewRequestedWidth());
-  preview.SetRequestedHeight(event.GetPreviewRequestedHeight());
+  preview.SetRequestedWidth(size.x);
+  preview.SetRequestedHeight(size.y);
   preview.SetLayoutMode(LayoutMode::STANDALONE);
+  preview.SetUiScalePolicy(UiScalePolicy::DISABLED);
   preview.SetParentOrigin(ParentOrigin::TOP_LEFT);
   preview.SetPositionUsesPivotEnabled(true);
   preview.SetSensitive(false);
@@ -553,8 +556,8 @@ void MyView::UpdatePreview(View preview, const DragAndDropEvent& event)
 {
   preview.SetPivot(
     Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
-  preview.SetRequestedX(event.GetPreviewRequestedX());
-  preview.SetRequestedY(event.GetPreviewRequestedY());
+  preview.SetRequestedX(event.GetPreviewLocalPosition().x);
+  preview.SetRequestedY(event.GetPreviewLocalPosition().y);
 }
 
 void MyView::FinalizePreview(View preview, const DragAndDropEvent& event)
@@ -572,26 +575,10 @@ detector.SetDragPreviewCallbacks(
     this, &MyView::FinalizePreview));
 ```
 
-factory는 activation 때 preview가 만들어지기 전에 한 번 호출되므로, 크기는 factory에서
-지정하고 위치는 updater에서 지정합니다. preview가 필요 없는 session은 empty `View`를
-반환할 수 있습니다. updater는 즉시 호출되므로 long-press preview가 pointer 이동 전에
-표시됩니다. factory가 이미 parent에 연결된 View를 반환하면 detector는 계약 위반을
-로그로 남기고 해당 session을 preview 없이 계속합니다.
-
-`GetPreviewRequestedWidth()`/`GetPreviewRequestedHeight()`는 source가 배치된 크기,
-`GetPreviewRequestedX()`/`GetPreviewRequestedY()`는 pointer 위치이며, 모두 유효
-스케일(각각 source와 preview 자신의 것)로 이미 나눈 값이라
-`SetRequestedWidth()`/`SetRequestedHeight()`와
-`SetRequestedX()`/`SetRequestedY()`가 받는
-단위입니다([UI Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale-(Kr))
-참고). preview에는 별도의 `UiScalePolicy`가 필요 없으며, preview와 그 안에 추가한
-`Label` 같은 자식은 다른 View처럼 시스템 스케일과 윈도우 스케일을 따릅니다.
-`GetPreviewLocalPosition()`이나 actor의 `SIZE`는 유효 스케일이 이미 적용된 값이므로
-requested 값에 넘기면 layout이 scale을 한 번 더 곱합니다. preview는 다른 자식처럼
-추가된 container의 유효 스케일을 따르므로, source와 container의 scale이 같을 때 source와
-같은 크기로 보입니다. source가 `UiScalePolicy::DISABLED` 서브트리 안에 있으면
-factory에서 preview에도 같은 정책을 지정합니다. drag 중에 유효 스케일이 바뀌면 다음 drag
-update부터 새 scale로 pointer를 변환합니다.
+factory는 activation 때 한 번 호출됩니다. preview가 필요 없는 session은 empty `View`를
+반환할 수 있습니다. updater는 즉시 호출되므로 long-press preview가 pointer 이동
+전에 표시됩니다. factory가 이미 parent에 연결된 View를 반환하면 detector는 계약
+위반을 로그로 남기고 해당 session을 preview 없이 계속합니다.
 
 ### 5.2 Scene-level overlay
 
@@ -606,17 +593,10 @@ root.Add(dragOverlay);
 detector.SetDragPreviewContainer(dragOverlay);
 ```
 
-`previewLocalPosition`은 설정한 container 좌표로 이미 변환된 pointer 위치이고,
-`previewRequestedX`/`previewRequestedY`는 같은 위치를 preview의 requested 단위로 나타낸 값입니다.
-`sourceAnchor`는 source 안에서 grab한 지점을 정규화한 값입니다. 이 값들을 함께 쓰면
-source와 overlay의 scale/rotation이 달라도 preview의 grab point가 pointer에 붙어
-있습니다.
-
-overlay는 일반 View로 유지합니다. preview는 다른 자식처럼 overlay의 유효 스케일을
-상속하므로, overlay에 `UiScalePolicy::DISABLED`를 지정하면 scale을 상속하는 preview는
-시스템 스케일을 따르지 않지만 source는 계속 따릅니다. overlay 크기를 지정한다면
-`MATCH_PARENT`를 사용합니다. requested 크기에는 유효 스케일이 곱해지므로 window의 pixel
-크기를 그대로 지정하면 유효 스케일이 1.0보다 클 때 overlay가 window보다 커집니다.
+`previewLocalPosition`은 설정한 container 좌표로 이미 변환된 pointer 위치입니다.
+`sourceAnchor`는 source 안에서 grab한 지점을 정규화한 값입니다. 두 값을 함께 쓰면
+source와 overlay의 scale/rotation이 달라도 preview의 grab point가 pointer에
+붙어 있습니다.
 
 ### 5.3 단순한 방법
 
@@ -626,16 +606,8 @@ overlay는 일반 View로 유지합니다. preview는 다른 자식처럼 overla
 detector.SetDragPreview(reusablePreview);
 ```
 
-updater나 `DragPreviewPositionSignal`이 없으면 detector가
-`previewRequestedX`/`previewRequestedY`로 anchor-aware 기본 위치를 적용하고 session 종료 시
-reusable View의 원래 layout 속성을 복구합니다. detector는 preview의 `UiScalePolicy`를
-바꾸지 않으므로, reusable preview를 나머지 UI와 같은 단위로 만들면 preview와 자식은
-추가된 container의 scale로 배치됩니다. 이전 릴리스는 배치하는 동안 preview에
-`UiScalePolicy::DISABLED`를 설정했습니다. 이 방식으로 배치되면서 그 동작을 전제로 한
-preview(pixel 크기로 만들었거나 `UiScalePolicy::DISABLED` 서브트리 안의 source를
-복사한 preview로, reusable preview와 updater 없는 factory preview 모두 해당)는
-preview에 직접 `UiScalePolicy::DISABLED`를 지정하면 이전 배치를 유지하며, 윈도우
-스케일이 없으면 결과가 이전과 같습니다.
+updater나 `DragPreviewPositionSignal`이 없으면 detector가 anchor-aware 기본 위치를
+적용하고 session 종료 시 reusable View의 원래 layout 속성을 복구합니다.
 
 preview API를 모두 설정하지 않으면 preview가 없는 headless session으로 동작합니다.
 
@@ -961,7 +933,6 @@ preview 생성과 `DroppedSignal`에서의 application state 갱신도 함께 �
 | `GetDragSessionOrigin` | Gesture/explicit session 구분 |
 | `GetDragSource`, `GetDragTarget`, `GetDragPayload` | Session data 조회 |
 | `DragAndDropEvent` | 안정적인 source, target, 좌표, payload, proposal, 결과 |
-| `DragAndDropEvent`의 `GetPreviewRequestedX/Y/Width/Height` | `SetRequestedX/Y/Width/Height`에 넣을 preview 위치와 source 크기(requested 단위) |
 | `Started`, `Entered`, `Moved`, `Exited`, `Dropped`, `Cancelled`, `Ended` | Event 기반 lifecycle signal |
 | `TargetFeedbackChangedSignal` | Accepted/rejected/none feedback |
 
@@ -972,7 +943,6 @@ preview 생성과 `DroppedSignal`에서의 application state 갱신도 함께 �
 - [Touch & Gesture](https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-&-Gesture-(kr))
 - [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView-(kr))
 - [Accessibility](https://github.sec.samsung.net/NUI/dali-ui/wiki/Accessibility-(kr))
-- [UI Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale-(Kr))
 
 <br/>
 
