@@ -34,7 +34,7 @@ int main(int argc, char** argv)
   // Apply() must be called before the application runs.
   UiConfig config = UiConfig::New();
   config.SetUnitDpi(320);
-  config.SetScalingFactor(1.5f);
+  config.SetUnitScalingFactor(1.5f);
   config.Apply();
 
   MyApp app(argc, argv); // MyApp inherits tizen_appfw::UiApplication
@@ -49,7 +49,7 @@ foundation configuration:
 ```cpp
 Components::UiConfig config = Components::UiConfig::New();
 config.SetUnitDpi(320);
-config.SetScalingFactor(1.5f);
+config.SetUnitScalingFactor(1.5f);
 config.Apply();
 ```
 
@@ -63,7 +63,7 @@ The following describes key configuration options. For the full API, see [UiConf
 
 | Option | Method | Default | Description |
 |---|---|---|---|
-| Scaling Factor | `SetScalingFactor(float)` | `1.0f` | Scale multiplier applied to `spx` and `sdp` units |
+| Scaling Factor | `SetUnitScalingFactor(float)` | `1.0f` | Scale multiplier applied to `spx` and `sdp` units |
 | Unit DPI | `SetUnitDpi(int)`, `GetUnitDpi()` | `0` | Configured override only; 0 selects automatic system DPI for unit calculations |
 | Baseline DPI | `SetUnitBaselineDpi(int)` | `72` | Reference DPI used for `dp` calculations |
 | Default Font Size | `SetDefaultFontSize(float)` | `16.0f` | Default font size for text elements (pt) |
@@ -136,7 +136,7 @@ public:
   {
     TVConfig config(Dali::Ui::UiConfig::New());
     config.SetUnitDpi(72);
-    config.SetScalingFactor(2.0f);
+    config.SetUnitScalingFactor(2.0f);
     config.SetDefaultFontSize(28.0f);
     return config;
   }

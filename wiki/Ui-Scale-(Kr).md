@@ -224,7 +224,7 @@ LayoutScaleManager 시스템 스케일 = 2.0, 윈도우 스케일 없음
 뷰의 최종 렌더링 크기는 세 스케일 메커니즘의 조합으로 결정됩니다.
 
 조건:
-- `ScalingFactor` = `1.5` (시작 시 `UiConfig::SetScalingFactor()`로 설정)
+- `ScalingFactor` = `1.5` (시작 시 `UiConfig::SetUnitScalingFactor()`로 설정)
 - 시스템 스케일 = `2.0` (`LayoutScaleManager::SetUiScale()`로 런타임에 설정)
 - 윈도우 스케일 = `1.25` (이 뷰가 속한 윈도우에 런타임으로 설정)
 - 요청 너비 `100_spx`인 뷰
