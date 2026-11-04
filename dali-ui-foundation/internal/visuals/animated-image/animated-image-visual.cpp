@@ -1521,8 +1521,8 @@ bool AnimatedImageVisual::DisplayNextFrame()
         if(mLoopCount >= 0 && mCurrentLoopIndex >= mLoopCount)
         {
           // This will stop timer
-          mActionStatus      = Dali::Ui::Integration::AnimatedImageVisual::Action::STOP;
-          bool continueTimer = DisplayNextFrame();
+          mActionStatus          = Dali::Ui::Integration::AnimatedImageVisual::Action::STOP;
+          bool continueNextTimer = DisplayNextFrame();
 
           // Naturally stopped animation. Send signal.
           if(mImpl->mEventObserver)
@@ -1530,7 +1530,7 @@ bool AnimatedImageVisual::DisplayNextFrame()
             mImpl->mEventObserver->NotifyVisualEvent(*this, Dali::Ui::Integration::AnimatedImageVisual::Signal::ANIMATION_FINISHED);
           }
 
-          return continueTimer;
+          return continueNextTimer;
         }
       }
     }

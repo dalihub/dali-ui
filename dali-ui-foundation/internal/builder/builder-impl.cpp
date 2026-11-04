@@ -482,21 +482,21 @@ Path Builder::GetPath(const std::string& name)
             ret.SetProperty(Path::Property::POINTS, points);
 
             // controlPoints property
-            if(OptionalChild pointsProperty = IsChild(*path, "controlPoints"))
+            if(OptionalChild controlPointsProperty = IsChild(*path, "controlPoints"))
             {
-              Dali::Property::Value points(Property::ARRAY);
-              if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+              Dali::Property::Value controlPoints(Property::ARRAY);
+              if(DeterminePropertyFromNode(*controlPointsProperty, Property::ARRAY, controlPoints))
               {
-                ret.SetProperty(Path::Property::CONTROL_POINTS, points);
+                ret.SetProperty(Path::Property::CONTROL_POINTS, controlPoints);
               }
             }
             else
             {
               // Curvature
               float curvature(0.25f);
-              if(OptionalFloat pointsProperty = IsFloat(*path, "curvature"))
+              if(OptionalFloat curvatureProperty = IsFloat(*path, "curvature"))
               {
-                curvature = *pointsProperty;
+                curvature = *curvatureProperty;
               }
               ret.GenerateControlPoints(curvature);
             }
@@ -555,12 +555,12 @@ PathConstrainer Builder::GetPathConstrainer(const std::string& name)
             ret.SetProperty(PathConstrainer::Property::POINTS, points);
 
             // controlPoints property
-            if(OptionalChild pointsProperty = IsChild(*pathConstrainer, "controlPoints"))
+            if(OptionalChild controlPointsProperty = IsChild(*pathConstrainer, "controlPoints"))
             {
-              Dali::Property::Value points(Property::ARRAY);
-              if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+              Dali::Property::Value controlPoints(Property::ARRAY);
+              if(DeterminePropertyFromNode(*controlPointsProperty, Property::ARRAY, controlPoints))
               {
-                ret.SetProperty(PathConstrainer::Property::CONTROL_POINTS, points);
+                ret.SetProperty(PathConstrainer::Property::CONTROL_POINTS, controlPoints);
               }
 
               // Forward vector
@@ -664,12 +664,12 @@ Dali::LinearConstrainer Builder::GetLinearConstrainer(const std::string& name)
             ret.SetProperty(LinearConstrainer::Property::VALUE, points);
 
             // controlPoints property
-            if(OptionalChild pointsProperty = IsChild(*linearConstrainer, "progress"))
+            if(OptionalChild progressProperty = IsChild(*linearConstrainer, "progress"))
             {
-              Dali::Property::Value points(Property::ARRAY);
-              if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+              Dali::Property::Value progressPoints(Property::ARRAY);
+              if(DeterminePropertyFromNode(*progressProperty, Property::ARRAY, progressPoints))
               {
-                ret.SetProperty(LinearConstrainer::Property::PROGRESS, points);
+                ret.SetProperty(LinearConstrainer::Property::PROGRESS, progressPoints);
               }
             }
             // Add the new constrainer to vector of LinearConstrainer
@@ -1199,9 +1199,9 @@ void Builder::ApplyAllStyleProperties(const TreeNode& root, const TreeNode& node
 #if defined(DEBUG_ENABLED)
           for(TreeNode::ConstIterator iter = (*inheritFromNode).CBegin(); iter != (*inheritFromNode).CEnd(); ++iter)
           {
-            if(OptionalString styleName = IsString((*iter).second))
+            if(OptionalString childStyleName = IsString((*iter).second))
             {
-              DALI_SCRIPT_VERBOSE("Style Applied '%s'\n", (*styleName).c_str());
+              DALI_SCRIPT_VERBOSE("Style Applied '%s'\n", (*childStyleName).c_str());
             }
           }
 #endif
@@ -1225,9 +1225,9 @@ void Builder::ApplyAllStyleProperties(const TreeNode& root, const TreeNode& node
 
   if(matchedStyle)
   {
-    StylePtr                  style(*matchedStyle);
+    StylePtr                  matchedStylePtr(*matchedStyle);
     Dictionary<Property::Map> instancedProperties;
-    style->ApplyVisualsAndPropertiesRecursively(handle, instancedProperties);
+    matchedStylePtr->ApplyVisualsAndPropertiesRecursively(handle, instancedProperties);
   }
   else // If there were no styles, instead set properties
   {
@@ -1255,9 +1255,9 @@ void Builder::RecordStyle(StylePtr style, const TreeNode& node, Dali::Handle& ha
         continue;
       }
 
-      for(TreeNode::ConstIterator iter = states.CBegin(); iter != states.CEnd(); ++iter)
+      for(TreeNode::ConstIterator stateIter = states.CBegin(); stateIter != states.CEnd(); ++stateIter)
       {
-        const TreeNode& stateNode = (*iter).second;
+        const TreeNode& stateNode = (*stateIter).second;
         const char*     stateName = stateNode.GetName();
         if(stateNode.GetType() != TreeNode::OBJECT)
         {
@@ -1281,10 +1281,10 @@ void Builder::RecordStyle(StylePtr style, const TreeNode& node, Dali::Handle& ha
     }
     else if(key == KEYNAME_VISUALS)
     {
-      for(TreeNode::ConstIterator iter = keyValue.second.CBegin(); iter != keyValue.second.CEnd(); ++iter)
+      for(TreeNode::ConstIterator stateIter = keyValue.second.CBegin(); stateIter != keyValue.second.CEnd(); ++stateIter)
       {
         // Each key in this table should be a property name matching a visual.
-        const TreeNode::KeyNodePair& visual = *iter;
+        const TreeNode::KeyNodePair& visual = *stateIter;
         Dali::Property::Value        property(Property::MAP);
         if(DeterminePropertyFromNode(visual.second, Property::MAP, property, replacements))
         {

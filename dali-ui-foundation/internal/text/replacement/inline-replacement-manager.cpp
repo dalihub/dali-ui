@@ -63,9 +63,9 @@ struct ReplacementRevealProgressConstraint
 
 struct ReplacementRevealOpacityConstraint
 {
-  ReplacementRevealOpacityConstraint(float start, float fadeDuration)
-  : start(start),
-    fadeDuration(fadeDuration)
+  ReplacementRevealOpacityConstraint(float initStart, float initFadeDuration)
+  : start(initStart),
+    fadeDuration(initFadeDuration)
   {
   }
 

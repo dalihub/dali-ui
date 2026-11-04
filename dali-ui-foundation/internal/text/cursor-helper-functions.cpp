@@ -38,14 +38,14 @@ const Dali::Ui::Text::CharacterDirection LTR = false; ///< Left To Right directi
 
 struct FindWordData
 {
-  FindWordData(const Dali::Ui::Text::Character* const textBuffer, Dali::Ui::Text::Length totalNumberOfCharacters,
-               Dali::Ui::Text::CharacterIndex hitCharacter, bool isWhiteSpace, bool isNewParagraph)
-  : textBuffer(textBuffer),
-    totalNumberOfCharacters(totalNumberOfCharacters),
-    hitCharacter(hitCharacter),
+  FindWordData(const Dali::Ui::Text::Character* const initTextBuffer, Dali::Ui::Text::Length initTotalNumberOfCharacters,
+               Dali::Ui::Text::CharacterIndex initHitCharacter, bool initIsWhiteSpace, bool initIsNewParagraph)
+  : textBuffer(initTextBuffer),
+    totalNumberOfCharacters(initTotalNumberOfCharacters),
+    hitCharacter(initHitCharacter),
     foundIndex(0),
-    isWhiteSpace(isWhiteSpace),
-    isNewParagraph(isNewParagraph)
+    isWhiteSpace(initIsWhiteSpace),
+    isNewParagraph(initIsNewParagraph)
   {
   }
 
@@ -693,14 +693,14 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
     {
       const CharacterIndex firstIndex = *(glyphsToCharactersBuffer + primaryGlyphIndex);
 
-      bool isCurrentRightToLeft = false;
+      bool isIndexRightToLeft = false;
       if(bidiLineFetched) // If bidiLineFetched is false, it means the whole text is left to right.
       {
-        isCurrentRightToLeft = *(directionsBuffer + index);
+        isIndexRightToLeft = *(directionsBuffer + index);
       }
 
       Length numberOfGlyphAdvance = (isFirstPositionOfLine ? 0 : 1u) + characterIndex - firstIndex;
-      if(isCurrentRightToLeft)
+      if(isIndexRightToLeft)
       {
         numberOfGlyphAdvance = primaryNumberOfCharacters - numberOfGlyphAdvance;
       }
@@ -733,13 +733,13 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
       // Set the secondary cursor's height.
       cursorInfo.secondaryCursorHeight = 0.5f * glyphMetrics.fontHeight;
 
-      CharacterIndex index = characterIndex;
+      CharacterIndex characterIndexInLine = characterIndex;
       if(!isLastPositionOfLine)
       {
-        index = (isRightToLeftParagraph == isCurrentRightToLeft) ? nextCharacterIndex : characterIndex;
+        characterIndexInLine = (isRightToLeftParagraph == isCurrentRightToLeft) ? nextCharacterIndex : characterIndex;
       }
 
-      GetGlyphMetricsFromCharacterIndex(index, parameters.visualModel, parameters.logicalModel, metrics, glyphMetrics,
+      GetGlyphMetricsFromCharacterIndex(characterIndexInLine, parameters.visualModel, parameters.logicalModel, metrics, glyphMetrics,
                                         glyphIndex, numberOfGlyphs);
 
       const GlyphIndex secondaryGlyphIndex = glyphIndex;
@@ -763,13 +763,13 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
       //       P -> isRightToLeftParagraph
       //       A -> Whether to add the glyph's advance.
 
-      const bool addGlyphAdvance =
+      const bool addCurrentGlyphAdvance =
         ((!isFirstPositionOfLine && !isCurrentRightToLeft) || (isFirstPositionOfLine && !isRightToLeftParagraph));
 
       const float characterSpacing =
         GetGlyphCharacterSpacing(secondaryGlyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
       cursorInfo.secondaryPosition.x = -glyphMetrics.xBearing + secondaryPosition.x +
-                                       (addGlyphAdvance ? (glyphMetrics.advance + characterSpacing) : 0.f);
+                                       (addCurrentGlyphAdvance ? (glyphMetrics.advance + characterSpacing) : 0.f);
       cursorInfo.secondaryPosition.y = cursorInfo.lineOffset + verticalLineOffset + cursorInfo.lineHeight - cursorInfo.secondaryCursorHeight;
 
       // Transform the cursor info from line's coords to text's coords.

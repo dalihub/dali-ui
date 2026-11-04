@@ -386,9 +386,9 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
         std::string markerName;
         if(GetStdString(value, markerName))
         {
-          Property::Array array;
-          array.Add(ToPropertyValue(markerName));
-          mAnimationData.playRange = std::move(array);
+          Property::Array markerArray;
+          markerArray.Add(ToPropertyValue(markerName));
+          mAnimationData.playRange = std::move(markerArray);
           mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_RANGE;
         }
       }

@@ -33,8 +33,8 @@ DummyComponent DummyComponent::New()
   return Internal::DummyComponentImpl::New();
 }
 
-DummyComponent::DummyComponent(const DummyComponent& DummyComponent)
-: View(DummyComponent)
+DummyComponent::DummyComponent(const DummyComponent& dummyComponent)
+: View(dummyComponent)
 {
 }
 

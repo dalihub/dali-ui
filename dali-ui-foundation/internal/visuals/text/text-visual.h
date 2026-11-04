@@ -546,14 +546,14 @@ private:
     uint32_t  offsetHeight;
     Vector2   transformOffset;
 
-    TilingInfo(int32_t width, int32_t height)
+    TilingInfo(int32_t initWidth, int32_t initHeight)
     : textPixelData(),
       stylePixelData(),
       overlayStylePixelData(),
       maskPixelData(),
       revealPixelData(),
-      width(width),
-      height(height),
+      width(initWidth),
+      height(initHeight),
       offsetHeight(0u),
       transformOffset(0.f, 0.f)
     {

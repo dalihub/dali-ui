@@ -1768,18 +1768,18 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       const auto& prepared           = *renderInfo.revealBlur;
       const auto& options            = prepared.options;
       Ui::View    owner              = Ui::View::DownCast(control);
-      const auto* currentReveal      = GetTextVisualRevealData(mRevealData);
+      const auto* latestReveal       = GetTextVisualRevealData(mRevealData);
       const bool  currentReplacement = !parameters.replacementSourceSnapshot.hasValidReplacementSource ||
                                       (IsCurrentInlineReplacementRender(owner, renderInfo.replacementLayoutGeneration) &&
                                        renderInfo.replacementSourceRevision == mController->GetReplacementSourceSnapshot().sourceRevision);
-      if(owner && currentReveal && currentReveal->revision == parameters.textRevealRevision &&
+      if(owner && latestReveal && latestReveal->revision == parameters.textRevealRevision &&
          mController->IsAsyncRendering() && currentReplacement &&
-         currentReveal->blurRadius > 0.0f && currentReveal->blurDurationRatio > 0.0f &&
+         latestReveal->blurRadius > 0.0f && latestReveal->blurDurationRatio > 0.0f &&
          options.controlSize == textControlSize &&
-         options.radius == ResolveRevealBlurRadius(currentReveal->blurRadius * Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(owner))) &&
-         options.durationRatio == currentReveal->blurDurationRatio &&
-         options.stagger == currentReveal->sequenceStaggerRatio &&
-         options.perLine == (currentReveal->sequence == Text::Internal::Reveal::Sequence::PER_LINE) &&
+         options.radius == ResolveRevealBlurRadius(latestReveal->blurRadius * Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(owner))) &&
+         options.durationRatio == latestReveal->blurDurationRatio &&
+         options.stagger == latestReveal->sequenceStaggerRatio &&
+         options.perLine == (latestReveal->sequence == Text::Internal::Reveal::Sequence::PER_LINE) &&
          PublishPreparedRevealBlur(control, prepared, renderInfo.replacementSourceRevision, renderInfo.replacementRevealTimings))
       {
         renderInfo.replacementRevealTimings = prepared.timings;
@@ -3480,12 +3480,12 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
       {
         return false;
       }
-      const auto& atlas  = prepared.sourceAtlases[line.atlasIndex];
-      const auto& entry  = line.atlasRectangle;
-      const auto  width  = atlas.foreground.GetWidth();
-      const auto  height = atlas.foreground.GetHeight();
+      const auto& atlas       = prepared.sourceAtlases[line.atlasIndex];
+      const auto& entry       = line.atlasRectangle;
+      const auto  atlasWidth  = atlas.foreground.GetWidth();
+      const auto  atlasHeight = atlas.foreground.GetHeight();
       if(w == 0u || h == 0u || entry.width != w || entry.height != h || entry.x == 0u || entry.y == 0u ||
-         entry.x >= width || entry.y >= height || w >= width - entry.x || h >= height - entry.y)
+         entry.x >= atlasWidth || entry.y >= atlasHeight || w >= atlasWidth - entry.x || h >= atlasHeight - entry.y)
       {
         return false;
       }

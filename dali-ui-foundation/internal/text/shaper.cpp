@@ -170,12 +170,12 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
     Vector<GlyphInfo>      tmpGlyphs;
     Vector<CharacterIndex> tmpGlyphToCharacterMap;
 
-    GlyphInfo glyphInfo;
-    glyphInfo.isItalicRequired = isItalicRequired;
-    glyphInfo.isBoldRequired   = isBoldRequired;
-    glyphInfo.isShaped         = true;
+    GlyphInfo shapedGlyphInfo;
+    shapedGlyphInfo.isItalicRequired = isItalicRequired;
+    shapedGlyphInfo.isBoldRequired   = isBoldRequired;
+    shapedGlyphInfo.isShaped         = true;
 
-    tmpGlyphs.Resize(numberOfGlyphs, glyphInfo);
+    tmpGlyphs.Resize(numberOfGlyphs, shapedGlyphInfo);
     tmpGlyphToCharacterMap.Resize(numberOfGlyphs);
     shaping.GetGlyphs(tmpGlyphs.Begin(), tmpGlyphToCharacterMap.Begin());
 

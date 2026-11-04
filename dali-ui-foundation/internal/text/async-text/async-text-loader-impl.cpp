@@ -874,10 +874,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                                       endIt = underlinedCharacterRuns.End();
         it != endIt; ++it)
     {
-      CharacterIndex characterIndex     = it->characterRun.characterIndex;
-      Length         numberOfCharacters = it->characterRun.numberOfCharacters;
+      CharacterIndex characterIndex        = it->characterRun.characterIndex;
+      Length         runNumberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if(numberOfCharacters == 0)
+      if(runNumberOfCharacters == 0)
       {
         continue;
       }
@@ -889,7 +889,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       underlineGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       underlineGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for(Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < runNumberOfCharacters; index++)
       {
         underlineGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }
@@ -908,10 +908,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                                          endIt = strikethroughCharacterRuns.End();
         it != endIt; ++it)
     {
-      CharacterIndex characterIndex     = it->characterRun.characterIndex;
-      Length         numberOfCharacters = it->characterRun.numberOfCharacters;
+      CharacterIndex characterIndex        = it->characterRun.characterIndex;
+      Length         runNumberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if(numberOfCharacters == 0)
+      if(runNumberOfCharacters == 0)
       {
         continue;
       }
@@ -921,7 +921,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       strikethroughGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       strikethroughGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for(Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < runNumberOfCharacters; index++)
       {
         strikethroughGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }
@@ -940,10 +940,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                                             endIt = characterSpacingCharacterRuns.End();
         it != endIt; ++it)
     {
-      const CharacterIndex& characterIndex     = it->characterRun.characterIndex;
-      const Length&         numberOfCharacters = it->characterRun.numberOfCharacters;
+      const CharacterIndex& characterIndex        = it->characterRun.characterIndex;
+      const Length&         runNumberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if(numberOfCharacters == 0)
+      if(runNumberOfCharacters == 0)
       {
         continue;
       }
@@ -953,7 +953,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       characterSpacingGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       characterSpacingGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for(Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < runNumberOfCharacters; index++)
       {
         characterSpacingGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }

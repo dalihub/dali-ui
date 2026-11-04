@@ -749,27 +749,27 @@ struct Engine::Impl
     for(; characterLogicalIndex < bidirectionalLineInfo.characterRun.numberOfCharacters;)
     {
       // Convert the character in the logical order into the character in the visual order.
-      const CharacterIndex characterVisualIndex =
+      const CharacterIndex currentCharacterVisualIndex =
         bidirectionalLineInfo.characterRun.characterIndex +
         (bidirectionalLineInfo.visualToLogicalMap
            ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
            : 0u);
-      const bool isWhiteSpace = TextAbstraction::IsWhiteSpace(*(textBuffer + characterVisualIndex));
+      const bool isWhiteSpace = TextAbstraction::IsWhiteSpace(*(textBuffer + currentCharacterVisualIndex));
 
-      const GlyphIndex glyphIndex = *(charactersToGlyphsBuffer + characterVisualIndex);
+      const GlyphIndex currentGlyphIndex = *(charactersToGlyphsBuffer + currentCharacterVisualIndex);
 
       // Check whether this glyph comes from a character that is shaped in multiple glyphs.
-      const Length numberOfGLyphsInGroup =
-        GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
+      const Length currentNumberOfGlyphsInGroup =
+        GetNumberOfGlyphsOfGroup(currentGlyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
-      characterLogicalIndex += *(charactersPerGlyphBuffer + glyphIndex + numberOfGLyphsInGroup - 1u);
+      characterLogicalIndex += *(charactersPerGlyphBuffer + currentGlyphIndex + currentNumberOfGlyphsInGroup - 1u);
 
-      GlyphMetrics glyphMetrics;
-      const float  characterSpacing =
-        GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
-      calculatedAdvance = GetCalculatedAdvance(*(textBuffer + characterVisualIndex), characterSpacing,
-                                               (*(glyphsBuffer + glyphIndex)).advance);
-      GetGlyphsMetrics(glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
+      GlyphMetrics currentGlyphMetrics;
+      const float  currentCharacterSpacing =
+        GetGlyphCharacterSpacing(currentGlyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
+      calculatedAdvance = GetCalculatedAdvance(*(textBuffer + currentCharacterVisualIndex), currentCharacterSpacing,
+                                               (*(glyphsBuffer + currentGlyphIndex)).advance);
+      GetGlyphsMetrics(currentGlyphIndex, currentNumberOfGlyphsInGroup, currentGlyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
 
       if(isWhiteSpace)
       {
@@ -779,13 +779,13 @@ struct Engine::Impl
         // But for LTR added it to the endOfLine and use "advance" to accumulate length.
         if(RTL == bidirectionalLineInfo.direction)
         {
-          length += glyphMetrics.advance;
+          length += currentGlyphMetrics.advance;
         }
         else
         {
-          whiteSpaceLengthEndOfLine += glyphMetrics.advance;
+          whiteSpaceLengthEndOfLine += currentGlyphMetrics.advance;
         }
-        penX += glyphMetrics.advance;
+        penX += currentGlyphMetrics.advance;
       }
       else
       {
@@ -801,13 +801,13 @@ struct Engine::Impl
 
         if(parameters.textModel->mRemoveBackInset)
         {
-          length = std::max(length, penX + glyphMetrics.xBearing + glyphMetrics.width);
+          length = std::max(length, penX + currentGlyphMetrics.xBearing + currentGlyphMetrics.width);
         }
         else
         {
-          length = std::max(length, penX + glyphMetrics.advance);
+          length = std::max(length, penX + currentGlyphMetrics.advance);
         }
-        penX += (glyphMetrics.advance + parameters.interGlyphExtraAdvance);
+        penX += (currentGlyphMetrics.advance + parameters.interGlyphExtraAdvance);
       }
     }
   }
@@ -1069,28 +1069,28 @@ struct Engine::Impl
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  glyph index : %d\n", glyphIndex);
 
       // Check whether this glyph comes from a character that is shaped in multiple glyphs.
-      const Length numberOfGLyphsInGroup =
+      const Length currentNumberOfGlyphsInGroup =
         GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
-      GlyphMetrics glyphMetrics;
-      const float  characterSpacing =
+      GlyphMetrics currentGlyphMetrics;
+      const float  currentCharacterSpacing =
         GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
       calculatedAdvance = GetCalculatedAdvance(*(textBuffer + (*(glyphToCharacterMapBuffer + glyphIndex))),
-                                               characterSpacing, (*(glyphsBuffer + glyphIndex)).advance);
-      GetGlyphsMetrics(glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
+                                               currentCharacterSpacing, (*(glyphsBuffer + glyphIndex)).advance);
+      GetGlyphsMetrics(glyphIndex, currentNumberOfGlyphsInGroup, currentGlyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
 
-      const bool isLastGlyph = glyphIndex + numberOfGLyphsInGroup == totalNumberOfGlyphs;
+      const bool isLastGlyph = glyphIndex + currentNumberOfGlyphsInGroup == totalNumberOfGlyphs;
 
       // Check if the font of the current glyph is the same of the previous one.
       // If it's different the ascender and descender need to be updated.
-      if(lastFontId != glyphMetrics.fontId)
+      if(lastFontId != currentGlyphMetrics.fontId)
       {
-        UpdateLineHeight(glyphMetrics, tmpLineLayout);
+        UpdateLineHeight(currentGlyphMetrics, tmpLineLayout);
         if(collectTextMetrics && !collectLogicalTextMetrics)
         {
-          UpdateReplacementTextMetrics(glyphMetrics.fontId, 1.0f, tmpLineLayout);
+          UpdateReplacementTextMetrics(currentGlyphMetrics.fontId, 1.0f, tmpLineLayout);
         }
-        lastFontId = glyphMetrics.fontId;
+        lastFontId = currentGlyphMetrics.fontId;
       }
 
       // Logical and rendered validation normally produce matching run
@@ -1103,7 +1103,7 @@ struct Engine::Impl
         float        metricScale  = 1.0f;
         const FontId metricFontId = parameters.replacementLayoutData->lineMetricData.ResolveFontId(
           parameters.textModel->mVisualModel->mGlyphsToCharacters[glyphIndex],
-          glyphMetrics.fontId,
+          currentGlyphMetrics.fontId,
           metricScale);
         if(metricFontId != lastReplacementMetricFontId || metricScale != lastReplacementMetricScale)
         {
@@ -1116,7 +1116,7 @@ struct Engine::Impl
       // Get the character indices for the current glyph. The last character index is needed
       // because there are glyphs formed by more than one character but their break info is
       // given only for the last character.
-      const Length         charactersPerGlyph  = *(charactersPerGlyphBuffer + glyphIndex + numberOfGLyphsInGroup - 1u);
+      const Length         charactersPerGlyph  = *(charactersPerGlyphBuffer + glyphIndex + currentNumberOfGlyphsInGroup - 1u);
       const bool           hasCharacters       = charactersPerGlyph > 0u;
       const CharacterIndex characterFirstIndex = *(glyphsToCharactersBuffer + glyphIndex);
       const CharacterIndex characterLastIndex  = characterFirstIndex + (hasCharacters ? charactersPerGlyph - 1u : 0u);
@@ -1129,7 +1129,7 @@ struct Engine::Impl
       tmpLineLayout.numberOfCharacters += charactersPerGlyph;
 
       // Increase the number of glyphs.
-      tmpLineLayout.numberOfGlyphs += numberOfGLyphsInGroup;
+      tmpLineLayout.numberOfGlyphs += currentNumberOfGlyphsInGroup;
 
       // Check whether is a white space.
       const Character character    = *(textBuffer + characterFirstIndex);
@@ -1150,22 +1150,22 @@ struct Engine::Impl
       if(isWhiteSpace && !hiddenInputEnabled)
       {
         // Add the length to the length of white spaces at the end of the line.
-        tmpLineLayout.whiteSpaceLengthEndOfLine += glyphMetrics.advance;
+        tmpLineLayout.whiteSpaceLengthEndOfLine += currentGlyphMetrics.advance;
         // The advance is used as the width is always zero for the white spaces.
       }
       else
       {
         tmpLineLayout.penX += tmpLineLayout.previousAdvance + tmpLineLayout.whiteSpaceLengthEndOfLine;
-        tmpLineLayout.previousAdvance = (glyphMetrics.advance + parameters.interGlyphExtraAdvance);
+        tmpLineLayout.previousAdvance = (currentGlyphMetrics.advance + parameters.interGlyphExtraAdvance);
 
         if(parameters.textModel->mRemoveBackInset)
         {
           tmpLineLayout.length =
-            std::max(tmpLineLayout.length, tmpLineLayout.penX + glyphMetrics.xBearing + glyphMetrics.width);
+            std::max(tmpLineLayout.length, tmpLineLayout.penX + currentGlyphMetrics.xBearing + currentGlyphMetrics.width);
         }
         else
         {
-          tmpLineLayout.length = std::max(tmpLineLayout.length, tmpLineLayout.penX + glyphMetrics.advance);
+          tmpLineLayout.length = std::max(tmpLineLayout.length, tmpLineLayout.penX + currentGlyphMetrics.advance);
         }
 
         // Clear the white space length at the end of the line.
@@ -1192,11 +1192,11 @@ struct Engine::Impl
           const Length candidateGlyphCount         = tmpLineLayout.numberOfGlyphs;
           const bool   firstGlyphGroupExceedsWidth = parameters.replacementLayoutData != nullptr &&
                                                    committedGlyphCount == 0u &&
-                                                   candidateGlyphCount == numberOfGLyphsInGroup;
+                                                   candidateGlyphCount == currentNumberOfGlyphsInGroup;
           if(candidateGlyphCount > 0u && !firstGlyphGroupExceedsWidth)
           {
             tmpLineLayout.numberOfCharacters -= charactersPerGlyph;
-            tmpLineLayout.numberOfGlyphs -= numberOfGLyphsInGroup;
+            tmpLineLayout.numberOfGlyphs -= currentNumberOfGlyphsInGroup;
 
             tmpLineLayout.penX                      = previousTmpPenX;
             tmpLineLayout.previousAdvance           = previousTmpAdvance;
@@ -1286,7 +1286,7 @@ struct Engine::Impl
         }
       }
 
-      glyphIndex += numberOfGLyphsInGroup;
+      glyphIndex += currentNumberOfGlyphsInGroup;
     }
 
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "<--GetLineLayoutForBox\n");
