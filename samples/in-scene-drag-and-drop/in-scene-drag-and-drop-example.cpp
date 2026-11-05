@@ -71,10 +71,9 @@ public:
       DragAndDropDetector::CanStartDragCallback::New(
         this,
         &InSceneDragAndDropExample::ApproveActivation));
-    mRoot           = View::New();
-    const auto size = window.GetPositionSize();
-    mRoot.SetRequestedWidth(static_cast<float>(size.width));
-    mRoot.SetRequestedHeight(static_cast<float>(size.height));
+    mRoot = View::New();
+    mRoot.SetRequestedWidth(MATCH_PARENT);
+    mRoot.SetRequestedHeight(MATCH_PARENT);
     window.Add(mRoot);
 
     mScrollView = ScrollView::New();
@@ -137,13 +136,14 @@ public:
 
     // Use a transformed scene-level overlay to demonstrate that the preview
     // anchor is independent of the source and container transform hierarchy.
+    // The overlay is an ordinary View that fills the root, so a preview added to
+    // it follows the system and window scale like the cards it copies.
     mDragOverlay = View::New();
-    mDragOverlay.SetRequestedWidth(static_cast<float>(size.width));
-    mDragOverlay.SetRequestedHeight(static_cast<float>(size.height));
+    mDragOverlay.SetRequestedWidth(MATCH_PARENT);
+    mDragOverlay.SetRequestedHeight(MATCH_PARENT);
     mDragOverlay.SetRequestedX(0.0f);
     mDragOverlay.SetRequestedY(0.0f);
     mDragOverlay.SetLayoutMode(LayoutMode::STANDALONE);
-    mDragOverlay.SetUiScalePolicy(UiScalePolicy::DISABLED);
     mDragOverlay.SetParentOrigin(ParentOrigin::TOP_LEFT);
     mDragOverlay.SetPivot(Pivot::CENTER);
     mDragOverlay.SetSensitive(false);
@@ -462,13 +462,13 @@ private:
 
   View CreatePreview(const DragAndDropEvent& event)
   {
-    const uint32_t identity   = FindCardIdentity(event.GetSource());
-    View           preview    = View::New();
-    const Vector3  sourceSize = event.GetSource().GetCurrentProperty<Vector3>(Actor::Property::SIZE);
-    preview.SetRequestedWidth(sourceSize.x);
-    preview.SetRequestedHeight(sourceSize.y);
+    const uint32_t identity = FindCardIdentity(event.GetSource());
+    View           preview  = View::New();
+    // The card's laid-out size in requested units: the preview and the label
+    // inside it follow the effective scale exactly like the card they copy.
+    preview.SetRequestedWidth(event.GetPreviewRequestedWidth());
+    preview.SetRequestedHeight(event.GetPreviewRequestedHeight());
     preview.SetLayoutMode(LayoutMode::STANDALONE);
-    preview.SetUiScalePolicy(UiScalePolicy::DISABLED);
     preview.SetParentOrigin(ParentOrigin::TOP_LEFT);
     preview.SetPivot(Pivot::TOP_LEFT);
     preview.SetPositionUsesPivotEnabled(true);
@@ -529,12 +529,13 @@ private:
   {
     // Position the normalized source grab point directly under the pointer.
     // This remains correct when the source, root overlay, or preview is scaled
-    // or rotated because both anchor and position use their own coordinate
-    // spaces instead of subtracting unrelated local coordinates.
+    // or rotated, and under any effective scale: the anchor is normalized, and the
+    // preview requested X/Y are already converted into the preview's own
+    // requested units.
     preview.SetPivot(
       Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
-    preview.SetRequestedX(event.GetPreviewLocalPosition().x);
-    preview.SetRequestedY(event.GetPreviewLocalPosition().y);
+    preview.SetRequestedX(event.GetPreviewRequestedX());
+    preview.SetRequestedY(event.GetPreviewRequestedY());
     if(event.GetTargetStatus() == DragAndDropTargetStatus::ACCEPTED)
     {
       preview.SetBackgroundColor(UiColor(0.15f, 0.8f, 0.35f, 0.75f));

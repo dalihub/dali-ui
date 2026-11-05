@@ -301,6 +301,20 @@ payload, terminal result가 유지된다. 공통 cleanup은 Ended callback에서
 있지만, 바깥 detach operation과의 재진입 충돌을 막기 위해 새 session은 callback
 반환 뒤 시작해야 한다.
 
+## DragAndDropDetector preview requested 단위
+
+drag preview를 다른 View와 같은 유효 스케일로 배치할 수 있도록 `DragAndDropEvent`에
+비가상 getter 네 개를 추가했다. 기존 `GetPreviewLocalPosition()`의 의미(preview
+parent의 local actor 좌표)는 바뀌지 않는다.
+
+| API | 값 |
+|---|---|
+| `GetPreviewRequestedX()`, `GetPreviewRequestedY()` | `GetPreviewLocalPosition()`의 x, y ÷ session preview 자신의 유효 스케일. preview가 없는 event(factory event, preview 없는 session)에서는 `GetPreviewLocalPosition()`과 같다 |
+| `GetPreviewRequestedWidth()`, `GetPreviewRequestedHeight()` | drag 시작 시 source의 렌더 크기 ÷ 렌더 당시 source의 유효 스케일. session 동안 고정 |
+
+앱 레시피는 preview에 `UiScalePolicy::DISABLED`를 주지 않고 네 값을
+`SetRequestedX/Y/Width/Height`에 그대로 넣는다.
+
 ## ScrollView child drag 조정 API
 
 `ScrollView` 안의 child가 drag gesture를 소유하는 동안 일반 pan scrolling을

@@ -549,13 +549,10 @@ preview:
 View MyView::CreatePreview(const DragAndDropEvent& event)
 {
   View preview = View::New();
-  const Vector3 size =
-    event.GetSource().GetCurrentProperty<Vector3>(Actor::Property::SIZE);
 
-  preview.SetRequestedWidth(size.x);
-  preview.SetRequestedHeight(size.y);
+  preview.SetRequestedWidth(event.GetPreviewRequestedWidth());
+  preview.SetRequestedHeight(event.GetPreviewRequestedHeight());
   preview.SetLayoutMode(LayoutMode::STANDALONE);
-  preview.SetUiScalePolicy(UiScalePolicy::DISABLED);
   preview.SetParentOrigin(ParentOrigin::TOP_LEFT);
   preview.SetPositionUsesPivotEnabled(true);
   preview.SetSensitive(false);
@@ -567,8 +564,8 @@ void MyView::UpdatePreview(View preview, const DragAndDropEvent& event)
 {
   preview.SetPivot(
     Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
-  preview.SetRequestedX(event.GetPreviewLocalPosition().x);
-  preview.SetRequestedY(event.GetPreviewLocalPosition().y);
+  preview.SetRequestedX(event.GetPreviewRequestedX());
+  preview.SetRequestedY(event.GetPreviewRequestedY());
 }
 
 void MyView::FinalizePreview(View preview, const DragAndDropEvent& event)
@@ -586,11 +583,29 @@ detector.SetDragPreviewCallbacks(
     this, &MyView::FinalizePreview));
 ```
 
-The factory is called once at activation. It may return an empty `View` for a
-preview-less session. The updater is called immediately, so a long-press preview
-appears before any pointer movement. If the factory returns an already-parented
-View, the detector logs the contract violation and continues that session
-without a preview.
+The factory is called once at activation, before the preview exists, so size the
+preview there and position it in the updater. It may return an empty `View` for
+a preview-less session. The updater is called immediately, so a long-press
+preview appears before any pointer movement. If the factory returns an
+already-parented View, the detector logs the contract violation and continues
+that session without a preview.
+
+`GetPreviewRequestedWidth()`/`GetPreviewRequestedHeight()` are the source's
+laid-out size and `GetPreviewRequestedX()`/`GetPreviewRequestedY()` are the
+pointer, all already divided by the effective scale -- the source's and the preview's
+own effective scale respectively -- so they are in the units
+`SetRequestedWidth()`/`SetRequestedHeight()` and
+`SetRequestedX()`/`SetRequestedY()` take (see
+[UI Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale)). The
+preview needs no `UiScalePolicy` of its own: it and anything you add to it, such
+as a `Label`, follow the system scale and the window scale like any other View.
+Do not pass `GetPreviewLocalPosition()` or an actor's `SIZE` to requested
+values; they already include the effective scale, which the layout would apply a second
+time. Like any child, the preview takes its effective scale from the container it is
+added to, so it appears as large as the source when the two resolve the same
+scale. If the source sits in a subtree with `UiScalePolicy::DISABLED`, set the
+same policy on the preview in the factory. If the effective scale changes during a drag,
+the next drag update converts the pointer with the new scale.
 
 ### 5.2 Scene-level overlay
 
@@ -606,9 +621,10 @@ detector.SetDragPreviewContainer(dragOverlay);
 ```
 
 `previewLocalPosition` is already converted into the configured container's
-coordinate space. `sourceAnchor` is the normalized point grabbed inside the
-source. Using both keeps the preview attached to the pointer even when the
-source and overlay have different scale or rotation.
+coordinate space, and `previewRequestedX`/`previewRequestedY` are the same point
+in the preview's requested units. `sourceAnchor` is the normalized point grabbed
+inside the source. Using them keeps the preview attached to the pointer even when
+the source and overlay have different scale or rotation.
 
 ### 5.3 Simpler alternatives
 
@@ -951,6 +967,7 @@ per-session `ImageView` preview creation and updating application state from
 | `GetDragSessionOrigin` | Distinguish gesture/explicit sessions |
 | `GetDragSource`, `GetDragTarget`, `GetDragPayload` | Query session data |
 | `DragAndDropEvent` | Stable source, target, coordinates, payload, proposal, and result |
+| `GetPreviewRequestedX/Y/Width/Height` on `DragAndDropEvent` | Preview position and source size in requested units for `SetRequestedX/Y/Width/Height` |
 | `Started`, `Entered`, `Moved`, `Exited`, `Dropped`, `Cancelled`, `Ended` | Event-based lifecycle signals |
 | `TargetFeedbackChangedSignal` | Accepted/rejected/none feedback |
 
@@ -961,6 +978,7 @@ per-session `ImageView` preview creation and updating application state from
 - [Touch & Gesture](https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-&-Gesture)
 - [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView)
 - [Accessibility](https://github.sec.samsung.net/NUI/dali-ui/wiki/Accessibility)
+- [UI Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale)
 
 <br/>
 
