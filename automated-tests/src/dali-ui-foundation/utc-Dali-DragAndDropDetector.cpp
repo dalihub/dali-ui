@@ -4,6 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  */
 
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-detector.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -1734,6 +1735,108 @@ int UtcDaliDragAndDropDetectorTransformSafeVisualAnchor(void)
   DALI_TEST_CHECK(
     visual.GetProperty<bool>(Actor::Property::POSITION_USES_PIVOT) ==
     originalPositionUsesPivot);
+  END_TEST;
+}
+
+// previewLocalPosition is already in the container's local ACTOR coordinates, so while
+// the detector positions the preview itself the preview is laid out at scale 1.0 -- the
+// per-window scale included -- and its anchor lands on the pointer. When the drag ends
+// the preview gets its own scale behaviour back: added to the window on its own it is
+// window-scaled again like any other view.
+//
+// The claim this test pins (stated, not demonstrated by a mutation run here -- no build
+// was performed for this change): without the detector's per-window opt-out the preview
+// resolves to the window scale, is laid out 300 wide instead of 150 and is placed at
+// twice the pointer's local position, so the anchor checks fail; without the restore it
+// keeps the opt-out and stays at scale 1.0 and 150 wide once it is back in the window.
+int UtcDaliDragAndDropDetectorDefaultPreviewIgnoresWindowScale(void)
+{
+  UiTestApplication application;
+  const float       originalScale    = LayoutScaleManager::Get().GetUiScale();
+  const bool        originalScalable = LayoutScaleManager::Get().IsScalable();
+  Window            window           = application.GetWindow();
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+  LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
+
+  DragAndDropDetector detector = DragAndDropDetector::New();
+  View                source   = CreateView(Vector2(30.0f, 20.0f));
+  View                overlay  = CreateView(Vector2::ZERO);
+  View                visual   = View::New();
+
+  overlay.SetRequestedWidth(320.0f);
+  overlay.SetRequestedHeight(280.0f);
+  overlay.SetProperty(Actor::Property::SENSITIVE, false);
+
+  const UiScalePolicy originalUiScalePolicy = visual.GetUiScalePolicy();
+  visual.SetRequestedWidth(150.0f);
+  visual.SetRequestedHeight(60.0f);
+  visual.SetProperty(Actor::Property::SENSITIVE, false);
+
+  application.GetScene().Add(source);
+  application.GetScene().Add(overlay);
+  detector.AttachSource(source);
+  detector.SetDragPreview(visual);
+  detector.SetDragPreviewContainer(overlay);
+
+  application.SendNotification();
+  application.Render();
+
+  // The source itself is an application view, so it IS window-scaled.
+  DALI_TEST_EQUALS(GetImpl(source).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+
+  const Vector2 start        = source.CalculateScreenPosition() + Vector2(10.0f, 10.0f);
+  const Vector2 firstPointer = start + Vector2(18.0f, 12.0f);
+  uint32_t      time         = 100u;
+  TestStartPan(application, start, firstPointer, time);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  float sourceLocalX = 0.0f;
+  float sourceLocalY = 0.0f;
+  DALI_TEST_CHECK(source.ScreenToLocal(
+    sourceLocalX, sourceLocalY, firstPointer.x, firstPointer.y));
+  const Vector3 sourceSize = source.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  const Vector2 expectedAnchor(
+    std::clamp(sourceLocalX / sourceSize.x, 0.0f, 1.0f),
+    std::clamp(sourceLocalY / sourceSize.y, 0.0f, 1.0f));
+
+  // During the drag the preview resolves to 1.0 and is laid out at its natural size...
+  DALI_TEST_CHECK(visual.GetParent() == overlay);
+  DALI_TEST_EQUALS(GetImpl(visual).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+  const Vector3 visualSize = visual.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  DALI_TEST_EQUALS(visualSize.x, 150.0f, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualSize.y, 60.0f, 0.1f, TEST_LOCATION);
+
+  // ...and its anchor sits under the pointer.
+  float visualLocalX = 0.0f;
+  float visualLocalY = 0.0f;
+  DALI_TEST_CHECK(visual.ScreenToLocal(
+    visualLocalX, visualLocalY, firstPointer.x, firstPointer.y));
+  DALI_TEST_EQUALS(
+    visualLocalX, expectedAnchor.x * visualSize.x, 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(
+    visualLocalY, expectedAnchor.y * visualSize.y, 0.1f, TEST_LOCATION);
+
+  TestEndPan(application, firstPointer, time + TestGetFrameInterval());
+  DALI_TEST_CHECK(!visual.GetParent());
+  DALI_TEST_CHECK(visual.GetUiScalePolicy() == originalUiScalePolicy);
+
+  // Back in the window on its own, the preview is an ordinary application view again.
+  application.GetScene().Add(visual);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(GetImpl(visual).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetProperty<float>(Actor::Property::SIZE_WIDTH), 300.0f, 0.1f, TEST_LOCATION);
+
+  application.GetScene().Remove(visual);
+  LayoutScaleManager::Get().SetWindowScale(window, 1.0f);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 

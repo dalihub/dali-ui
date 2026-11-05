@@ -369,7 +369,12 @@ public: // Measure / Arrange API
    * LayoutManager, or a MeasureCallback set through SetMeasureCallback() -- following
    * the Template Method pattern, and caches the result. When the view is re-measured
    * with the same normalised constraint and nothing has invalidated its layout, the
-   * cached result is served and that implementation is not called.
+   * cached result is served and that implementation is not called. The one exception is a
+   * view that is not on a scene, has View children and takes no UI scale because a
+   * UiScalePolicy::DISABLED policy (its own or an ancestor's) decides it: it calls its measure
+   * implementation on every Measure(), because a UiScalePolicy::ENABLED descendant follows a UI
+   * scale change that leaves its own scale unchanged, and a UI scale change invalidates no view
+   * that is not on a scene.
    *
    * Unlike arrange, measure has no ArrangePolicy::ALWAYS opt-out: measure caching
    * applies to every measure implementation including one written outside this library.

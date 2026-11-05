@@ -573,7 +573,7 @@ layout.SetArrangeCallback(LayoutArrangeCallback::New(this, &MyClass::OnArrange))
 
 매 프레임마다 `LayoutController`는 무효화된 레이아웃 루트에 대해 두 단계를 실행합니다:
 
-1. **Measure** — 부모로부터 받은 너비/높이 제약 조건에 따라 각 View가 원하는 `MeasuredSize`를 계산합니다. 결과는 캐시됩니다. 제약 조건과 유효 스케일이 변경되지 않고 이 view에 무효화가 발생하지 않았다면 measure 구현은 호출되지 않습니다.
+1. **Measure** — 부모로부터 받은 너비/높이 제약 조건에 따라 각 View가 원하는 `MeasuredSize`를 계산합니다. 결과는 캐시됩니다. 제약 조건과 유효 스케일이 변경되지 않고 이 view에 무효화가 발생하지 않았다면 measure 구현은 호출되지 않습니다(씬에 없고 자식 View가 있으며 `UiScalePolicy::DISABLED` 정책으로 UI 스케일 항이 고정된 View는 예외로, 호출할 때마다 다시 측정됩니다).
 2. **Arrange** — 각 View에 `LayoutRect`(위치 + 크기)가 주어집니다. 정렬과 마진을 적용한 후, LayoutManager가 자식을 bounds 내에 배치합니다. 이 결과도 캐시됩니다. 입력 bounds, 유효 레이아웃 방향, 유효 스케일이 변경되지 않고 무효화가 발생하지 않았다면 arrange 구현은 생략되고 저장된 결과가 재생됩니다. 지오메트리는 그대로 반영되고 `LayoutFinished`도 그대로 발생하며, 재계산만 생략됩니다.
 
 ---
@@ -627,7 +627,7 @@ LayoutController controller = LayoutController::Get(window);
 #### 8.3.1 Measure 캐시
 
 - measure 캐시는 무조건 동작합니다. opt-out은 없습니다.
-- hit이 되려면 다음이 모두 성립해야 합니다. 완료된 측정이 게시한 유효한 항목이 있고, view가 measure-dirty가 아니며, pass가 오염되지 않았고, 유효 스케일이 EXACT하게 일치하며, 두 제약 조건이 허용 오차 내에서 같아야 합니다.
+- hit이 되려면 다음이 모두 성립해야 합니다. 완료된 측정이 게시한 유효한 항목이 있고, view가 measure-dirty가 아니며, pass가 오염되지 않았고, 유효 스케일이 EXACT하게 일치하며, 두 제약 조건이 허용 오차 내에서 같고, 씬 밖에서 자식 View가 있는 view라면 UI 스케일 항이 `UiScalePolicy::DISABLED` 정책으로 고정되어 있지 않아야 합니다(그런 view의 스케일은 `ENABLED` 자손의 스케일이 바뀌어도 그대로이기 때문입니다).
 - 유효 스케일은 캐시 KEY의 항입니다. 따라서 스케일 무효화를 놓쳐도 miss로 격하되어 측정이 한 번 다시 수행될 뿐이며, 다른 스케일에서 계산된 크기가 서빙되는 일은 결코 없습니다.
 - 그러므로 measure 구현은 다음의 순수 함수여야 합니다. 두 제약 조건, view의 유효 스케일, view의 유효 레이아웃 방향, view 자신의 layout 추적 상태(요청 크기, 패딩, 마진, 최소/최대 범위, layout params, 자식 목록), 그리고 자식들의 측정 크기입니다.
 - 그 외에 읽는 것은 구현이 소유합니다. 해당 상태가 바뀔 때 구현이 직접 `InvalidateMeasure()`를 호출해야 합니다.
@@ -776,7 +776,7 @@ view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0
 
 - **레이아웃 루트가 처리를 주도합니다.** 레이아웃 루트는 부모가 레이아웃이 아닌 View입니다. 무효화는 레이아웃 루트에 도달할 때까지 상위로 전파되며, 루트가 `LayoutController`에 등록됩니다. 컨트롤러는 매 프레임마다 대기 중인 모든 루트를 처리합니다.
 
-- **Measure 결과는 캐시됩니다.** `OnMeasure()`에 전달된 너비 및 높이 제약 조건이 마지막 호출 이후 변경되지 않고, 유효 스케일도 변경되지 않으면 측정을 건너뜁니다. 재계산을 강제하려면 `InvalidateMeasure()`를 호출하세요.
+- **Measure 결과는 캐시됩니다.** `OnMeasure()`에 전달된 너비 및 높이 제약 조건이 마지막 호출 이후 변경되지 않고, 유효 스케일도 변경되지 않으면 측정을 건너뜁니다(씬 밖에서 자식 View가 있고 `DISABLED` 정책으로 UI 스케일 항이 고정된 View는 항상 다시 측정합니다). 재계산을 강제하려면 `InvalidateMeasure()`를 호출하세요.
 
 - **Arrange 결과도 캐시됩니다.** 기본 정책인 `ArrangePolicy::IF_CHANGED`에서는 입력 bounds, 유효 레이아웃 방향, 유효 스케일이 변경되지 않으면 `OnArrange()`가 생략되고 저장된 결과가 재생됩니다. 재계산을 강제하려면 `InvalidateArrange()`를 호출하거나, 구현이 매 pass마다 실행되어야 한다면 `ArrangePolicy::ALWAYS`를 선택하세요.
 

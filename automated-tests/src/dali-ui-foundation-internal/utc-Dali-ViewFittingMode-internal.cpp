@@ -1029,6 +1029,12 @@ int UtcDaliViewManualArrangeDoesNotApplyFittingMode(void)
 
   FinalFittingBounds producer;
   view.SetArrangeCallback(ArrangeCallback::New(&producer, &FinalFittingBounds::Arrange));
+
+  // On scene: the arrange cache is published only where the effective scale is memoized,
+  // so only there can the second Arrange() below be a hit. Nothing is notified, so no
+  // controller pass runs either.
+  application.GetScene().Add(view);
+
   view.Measure(100.0f, 50.0f);
   view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 50.0f)); // miss: the producer runs
   view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 50.0f)); // hit: the cached result is replayed

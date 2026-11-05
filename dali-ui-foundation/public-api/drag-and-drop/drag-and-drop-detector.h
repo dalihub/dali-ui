@@ -688,7 +688,10 @@ public:
    * If no callback is connected, the detector applies that policy itself. It
    * temporarily changes the preview's layout mode, UiScale policy, requested
    * position, PARENT_ORIGIN, PIVOT, and POSITION_USES_PIVOT, then restores
-   * them before the finalizer is invoked.
+   * them before the finalizer is invoked. While it does, the preview is laid out
+   * at scale 1.0 -- it follows neither the system scale nor a per-window scale set
+   * through LayoutScaleManager::SetWindowScale() -- because previewLocalPosition is
+   * already in the container's local actor coordinates.
    */
   DragPreviewPositionSignalType& DragPreviewPositionSignal();
 

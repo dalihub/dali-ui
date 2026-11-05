@@ -91,6 +91,30 @@ enum class TriStateProperty
 };
 
 /**
+ * @brief Framework-internal policy for the PER-WINDOW term of a view's effective scale.
+ *
+ * The window-term counterpart of UiScalePolicy, which selects the SYSTEM term, value for value:
+ * INHERIT takes the term from the parent (a root takes the scale of its window), ENABLED always
+ * takes the scale of the view's window whatever the parent says, and DISABLED takes 1.0 -- with
+ * descendant INHERIT views following it.
+ *
+ * Internal on purpose: no installed header declares it and View/ViewImpl expose no setter for it,
+ * so application code cannot move a view off INHERIT here, and the public contract "the window scale
+ * applies to UiScalePolicy::DISABLED views too" stays true for application code. It exists for the
+ * views the framework hands geometry that is ALREADY scaled -- the text cursor, the grab and
+ * selection handles and their markers, the editable inline replacement layer, and an
+ * application-supplied drag preview while the detector positions it (saved and restored around the
+ * drag). UiScalePolicy::DISABLED takes them out of the system term; DISABLED here takes them out of
+ * the window term, which would otherwise multiply those values a second time.
+ */
+enum class WindowScalePolicy : uint8_t
+{
+  INHERIT  = 0, ///< Take the window term from the parent; a root takes its window's scale (default).
+  ENABLED  = 1, ///< Always take the window's scale, ignoring the parent's policy.
+  DISABLED = 2, ///< The window term is 1.0; descendant INHERIT views also take 1.0.
+};
+
+/**
  * @brief Layout-transition changes accumulated since the preceding layout pass.
  *
  * The layout transition dispatcher consumes this state once per pass to
@@ -261,7 +285,8 @@ public:
    * (normalised) modes and the same effective scale, and every axis the parent assigns -- a
    * MATCH_PARENT axis or an EXACTLY axis -- matches the cache KEY. The remaining axes carry the
    * view's own measured size back to it, which a WRAP_CONTENT producer resolves to the same value,
-   * so they are not compared.
+   * so they are not compared. Off a scene a view with View children whose UI-scale term a
+   * DISABLED policy fixes is never skipped, because Measure() never serves its entry there.
    *
    * @param[in] visualWidth The width the re-measure would pass, visual units
    * @param[in] visualHeight The height the re-measure would pass, visual units
@@ -349,6 +374,16 @@ public:
   void          SetUiScalePolicy(UiScalePolicy policy);
   UiScalePolicy GetUiScalePolicy() const;
   float         GetEffectiveLayoutScale() const;
+  /**
+   * @brief Sets how the PER-WINDOW term of this view's effective scale is resolved.
+   *
+   * Framework-internal (see WindowScalePolicy); not reachable from View, ViewImpl or any installed
+   * header. Mirrors SetUiScalePolicy() exactly, invalidation included.
+   *
+   * @param[in] policy The window-term policy
+   */
+  void              SetWindowScalePolicy(WindowScalePolicy policy);
+  WindowScalePolicy GetWindowScalePolicy() const;
   /**
    * @brief Records and propagates a measure invalidation under the uniform layout
    * processing policy.
@@ -588,7 +623,9 @@ public:
    * every descendant.
    *
    * Used by the paths that can move the effective scale of a whole subtree at
-   * once -- a UiScalePolicy change, a global UI scale change, and a reparent --
+   * once -- a UiScalePolicy or WindowScalePolicy change, a global UI scale or
+   * master-switch change, a per-window scale change, a reparent, and a scale root
+   * leaving or rejoining a window --
    * where the change re-roots the INHERIT chain, so every descendant's cached
    * scale (and therefore every cached measure/arrange result derived from it)
    * is potentially stale.
@@ -598,7 +635,9 @@ public:
    * raises NO dirty bit and registers nothing with the LayoutController. The callers
    * follow it with InvalidateMeasure(), which propagates upward and enqueues the layout
    * root. Whether that pending work arms an idle wake depends on whether layout
-   * processing is active.
+   * processing is active. The scene hooks are the exception: a (re)connecting root
+   * registers itself instead, and a root leaving its window schedules nothing, because
+   * no layout pass can run without a window.
    */
   void  ResetSubtreeScaleAndLayoutCaches();
   float ComputeEffectiveScale() const;
@@ -642,7 +681,8 @@ public:
   }
   /// The ACTOR-side half of the scale sync pair: true when the animatable
   /// VIEW_EFFECTIVE_SCALE property is known to hold mEffectiveScale, which is what
-  /// lets Measure() skip reading that property on a cache hit.
+  /// lets Measure() skip reading that property on a cache hit (on scene; off scene
+  /// Measure() reads it on every call).
   bool IsEffectiveScaleActorSynced() const
   {
     return mEffectiveScaleActorSynced;
@@ -1951,9 +1991,10 @@ private:
   ViewImpl&                            mViewImpl;
   ViewState                            mState;
   UiScalePolicy                        mScalePolicy{UiScalePolicy::INHERIT};
-  LayoutMode                           mLayoutMode;           ///< Layout mode of the view. PACKING: parked here, next to the other one-byte policy enum, because it fills the pad mScalePolicy would otherwise leave; its logical home is the layout group further down, which cross-references it.
-  mutable float                        mEffectiveScale{1.0f}; ///< Cached effective scale. Carries NO validity sentinel of its own; whether this value is usable is recorded by mEffectiveScaleValid. Mutable because the lazy (re)compute happens inside the const GetEffectiveLayoutScale().
-  float                                mRequestedWidth;       ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f). PACKING: parked here to fill the 4-byte pad in front of mTraits; it belongs logically with mRequestedHeight, which sits in the layout group further down.
+  LayoutMode                           mLayoutMode;                                    ///< Layout mode of the view. PACKING: parked here, next to the other one-byte policy enum, because it fills the pad mScalePolicy would otherwise leave; its logical home is the layout group further down, which cross-references it.
+  WindowScalePolicy                    mWindowScalePolicy{WindowScalePolicy::INHERIT}; ///< Framework-internal policy for the PER-WINDOW term of the effective scale; see WindowScalePolicy. PACKING: the third one-byte policy enum parked beside mScalePolicy and mLayoutMode: the three sit in the pad between the 4-byte mState and the 4-aligned mEffectiveScale, where two bytes were free, so it costs no byte on a 32- or a 64-bit build.
+  mutable float                        mEffectiveScale{1.0f};                          ///< Cached effective scale, written only on scene, together with mEffectiveScaleValid. Carries NO validity sentinel of its own; whether this value is usable is recorded by mEffectiveScaleValid. Mutable because the lazy (re)compute happens inside the const GetEffectiveLayoutScale().
+  float                                mRequestedWidth;                                ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f). PACKING: parked here to fill the 4-byte pad in front of mTraits; it belongs logically with mRequestedHeight, which sits in the layout group further down.
   TraitEntries                         mTraits;
   Internal::CoreInteractionObject*     mCoreInteractionObject;
   std::unique_ptr<VisualData>          mVisualData; ///< Visual context, allocated on first use by EnsureVisualData(). Null means EITHER visuals are disabled (DISABLE_VISUALS) OR no visual has been touched yet (a mutation requested before the owner handle existed does not count: CanUseVisuals() drops it, as the pre-lazy code did) -- read paths answer both the same way.
@@ -2059,8 +2100,8 @@ private:
   bool         mArrangeOverrideAlways : 1;                        ///< True when this view's OnArrange() uses ArrangePolicy::ALWAYS. Default FALSE (ArrangePolicy::IF_CHANGED).
   bool         mArrangeCallbackAlways : 1;                        ///< True when the installed ArrangeCallback uses ArrangePolicy::ALWAYS. The one-argument overload resets it to FALSE.
   bool         mArrangeProducerAlways : 1;                        ///< Derived from the active producer and read by the arrange cache predicate. Default FALSE (ArrangePolicy::IF_CHANGED).
-  mutable bool mEffectiveScaleValid : 1;                          ///< THE sync bit for mEffectiveScale: true exactly when mEffectiveScale equals what ComputeEffectiveScale() would return now. Set by the lazy compute in the const GetEffectiveLayoutScale() (hence mutable), cleared by every scale-context invalidation.
-  bool         mEffectiveScaleActorSynced : 1;                    ///< THE sync bit for the ACTOR-side copy of the scale (the animatable VIEW_EFFECTIVE_SCALE property): true exactly when that property is known to hold mEffectiveScale. The second half of the pair whose first half is mEffectiveScaleValid -- that one says the CACHED scale is usable, this one says the ACTOR already has it. Set by Measure()'s push (after the write, which re-enters the clear below), cleared by DropCachedEffectiveScale() (the value it names has been retracted) and by ViewDataImpl::SetProperty for that index, which is the single funnel every event-side write of the property passes through. Default false, so the first Measure() always pushes.
+  mutable bool mEffectiveScaleValid : 1;                          ///< THE sync bit for mEffectiveScale: true exactly when mEffectiveScale equals what ComputeEffectiveScale() would return now. Set by the lazy compute in the const GetEffectiveLayoutScale() (hence mutable) ON SCENE ONLY -- off scene no registered layout root covers the view, so nothing would clear it when the UI scale or the switch moves, and it stays false there -- and cleared by every scale-context invalidation, a scale root's scene disconnection included.
+  bool         mEffectiveScaleActorSynced : 1;                    ///< THE sync bit for the ACTOR-side copy of the scale (the animatable VIEW_EFFECTIVE_SCALE property): true exactly when that property is known to hold mEffectiveScale. The second half of the pair whose first half is mEffectiveScaleValid -- that one says the CACHED scale is usable, this one says the ACTOR already has it. Set by Measure()'s push (after the write, which re-enters the clear below), cleared by DropCachedEffectiveScale() (the value it names has been retracted) and by ViewDataImpl::SetProperty for that index, which is the single funnel every event-side write of the property passes through. Default false, so the first Measure() always pushes. Measure() consults it only while mEffectiveScaleValid is true (on scene): off scene it re-reads the property whatever this bit says, because nothing clears it there when the UI scale moves. CanSkipArrangeRemeasure() still reads it off scene, which is sound because it also requires the measure key's scale to equal the current one, and the push of that scale always precedes the publish of that key.
   bool         mEffectiveScaleInvalidatedDuringPass : 1;          ///< True when the cached effective scale was invalidated while an arrange pass was running.
   bool         mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
   bool         mInitialEnterSettled : 1;                          ///< True once LayoutTransitionDispatcher::SettleInitialEnter has actually BAKED an ENTER spec onto this view. The fresh-child settle branch is re-entered on every pass for a child no producer ever arranges (freshChild stays true forever), and each entry would otherwise allocate a 0-duration Animation and re-bake. Cleared by OnChildAdded, the only path that can change which transition governs this view.

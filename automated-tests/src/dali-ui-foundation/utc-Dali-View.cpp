@@ -6774,9 +6774,10 @@ int UtcDaliViewStandaloneReconnectAfterScalePolicyChangeAndDirectMeasureRelayout
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
 
-  // Trace off scene: the disconnection untracks the child (an explicitly sized view drops no
-  // cache there). DISABLED on `parent` runs parent's subtree reset -- the child's cached scale
-  // and both its cache entries go, and NO dirty bit is raised on it -- and then invalidates
+  // Trace off scene: the disconnection untracks the child, and root's scale-root reset drops
+  // the whole subtree's cached scales and cache entries without raising a dirty bit. DISABLED
+  // on `parent` runs parent's subtree reset again -- nothing is left to drop, and NO dirty bit
+  // is raised on the child -- and then invalidates
   // `parent` and `root` only (nothing registers without a window). The child INHERITs, so its
   // scale is parent's 1.0 now: the direct Measure() runs the producer at (40, 30) (count 2)
   // and publishes a 40x30 slot, but places nothing, so the actor stays 80x60. The child's
@@ -6908,8 +6909,9 @@ int UtcDaliViewStandaloneToDefaultSwitchCancelsPendingSelfPassP(void)
 // its old parent therefore recomputes it against the parent extent instead of replaying the
 // window-bounded size.
 //
-// Non-vacuity: without the drop the child's entries stay valid, root's arrange replays the
-// subtree, and the child keeps 150x90.
+// Non-vacuity: without the drop -- this one and root's scale-root reset in
+// OnViewSceneDisconnection, which now covers it as well -- the child's entries stay valid,
+// root's arrange replays the subtree, and the child keeps 150x90.
 int UtcDaliViewStandaloneWindowBoundedChildRecomputedAfterOffSceneArrangeP(void)
 {
   UiTestApplication application;
@@ -7495,10 +7497,10 @@ int UtcDaliViewRemoveThenWindowAddRelayoutsSubtreeAtNewScaleP(void)
 
 // Phase 3d (off-scene root gap). A layout ROOT removed from the Window -- not from
 // a View parent, so no ViewDataImpl::OnChildRemoved fires -- is no longer tracked
-// by LayoutScaleManager, so a global SetUiScale() made while it is detached never reaches
-// it. On re-connection the root must re-derive its (stale) effective scale, which
-// OnViewSceneConnection now does. Without it the root arranges at the scale in force
-// before it was detached.
+// by LayoutScaleManager, so a global SetUiScale() made while it is detached invalidates
+// nothing in it. It holds no stale scale for that -- off scene the effective scale is not
+// memoized, and the root's subtree reset on leaving and on re-joining the scene drops
+// what it cached -- so the re-connected root is laid out at the scale in force then.
 int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
 {
   UiTestApplication application;
@@ -7517,8 +7519,8 @@ int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
   DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
 
-  // Detach, change the global scale while detached (the root, untracked, misses
-  // it), then re-attach.
+  // Detach, change the global scale while detached (the root, untracked, is not
+  // invalidated by it), then re-attach.
   window.Remove(root);
   LayoutScaleManager::Get().SetUiScale(2.0f);
   window.Add(root);

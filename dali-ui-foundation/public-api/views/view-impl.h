@@ -355,8 +355,9 @@ public: // Non-virtual API (safe to reorder / extend)
    *
    * The factor the layout pass multiplies this view's natural lengths by, as
    * LayoutScaleManager describes it; 1.0 while scaling is disabled through
-   * LayoutScaleManager::SetScalable(false). Lazily computed on first call after
-   * invalidation; valid after first Measure.
+   * LayoutScaleManager::SetScalable(false). Computed lazily and cached while the view is
+   * on a scene; off a scene it is computed on every call, so it always reflects the current
+   * UI scale, switch and window.
    * @return The effective layout scale factor
    */
   float GetEffectiveLayoutScale() const;

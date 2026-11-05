@@ -49,6 +49,7 @@
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
@@ -1951,6 +1952,58 @@ int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
   }
   DALI_TEST_EQUALS(contentParent.GetChildCount(), 3u, TEST_LOCATION);
 
+  END_TEST;
+}
+
+// PlaceVisualLayer() hands the visual layer the editable's ALREADY-scaled content size,
+// and the layer is a layout root (its parent is the editable's plain-Actor stencil, here
+// `contentParent`), so a window scale it kept would multiply that size a second time.
+// The layer therefore opts out of the per-window scale as well as the system scale.
+//
+// The claim this test pins (stated, not demonstrated by a mutation run here -- no build
+// was performed for this change): dropping the WindowScalePolicy line from the layer's
+// construction fails the policy check, makes the layer resolve to 2.0 and lays it out
+// 400 wide instead of 200.
+int UtcDaliReplacementEditableVisualLayerIgnoresWindowScaleP(void)
+{
+  UiTestApplication application;
+  tet_infoline("The editable inline replacement layer is laid out at scale 1.0 under a window scale");
+
+  const float originalScale    = LayoutScaleManager::Get().GetUiScale();
+  const bool  originalScalable = LayoutScaleManager::Get().IsScalable();
+  Window      window           = application.GetWindow();
+
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
+  LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
+
+  View  owner         = View::New();
+  Actor contentParent = Actor::New(); // the stencil stand-in: a plain Actor, so the layer is a layout root
+  Actor textActor     = Actor::New();
+  Actor cursorLayer   = Actor::New();
+  contentParent.Add(textActor);
+  contentParent.Add(cursorLayer);
+  application.GetScene().Add(contentParent);
+
+  {
+    Dali::Ui::Internal::Text::EditableInlineReplacementData data(owner);
+    DALI_TEST_CHECK(Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(data.visualLayer)).GetWindowScalePolicy() ==
+                    Dali::Ui::Internal::WindowScalePolicy::DISABLED);
+
+    data.PlaceVisualLayer(contentParent, textActor, cursorLayer, Vector2(200.0f, 160.0f));
+    application.SendNotification();
+    application.Render();
+    application.SendNotification();
+    application.Render();
+
+    DALI_TEST_EQUALS(Dali::Ui::GetImpl(data.visualLayer).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(data.visualLayer.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, 0.001f, TEST_LOCATION);
+  }
+
+  application.GetScene().Remove(contentParent);
+  LayoutScaleManager::Get().SetWindowScale(window, 1.0f);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 

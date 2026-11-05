@@ -60,6 +60,9 @@ EditableInlineReplacementData::EditableInlineReplacementData(Ui::View owner)
   visualLayer.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   visualLayer.SetProperty(Actor::Property::SENSITIVE, false);
   visualLayer.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  // PlaceVisualLayer() feeds this layer the editable's ALREADY-scaled content size, so it opts out of the
+  // per-window scale as well as the system scale; see WindowScalePolicy.
+  Internal::ViewDataImpl::Get(Ui::GetImpl(visualLayer)).SetWindowScalePolicy(Internal::WindowScalePolicy::DISABLED);
 }
 
 EditableInlineReplacementData::~EditableInlineReplacementData()
