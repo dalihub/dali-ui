@@ -577,7 +577,7 @@ layout.SetArrangeCallback(LayoutArrangeCallback::New(this, &MyClass::OnArrange))
 
 Each frame, the `LayoutController` runs two passes on invalidated layout roots:
 
-1. **Measure** — Given width/height constraints from the parent, each View computes its desired `MeasuredSize`. The result is cached: when the constraints and the effective scale are unchanged and nothing has invalidated the view, the measure implementation is not called (except for a View that is not on a scene, has View children and whose UI-scale term a `UiScalePolicy::DISABLED` policy fixes: it is measured again on every call).
+1. **Measure** — Given width/height constraints from the parent, each View computes its desired `MeasuredSize`. The result is cached: when the constraints and the effective scale are unchanged and nothing has invalidated the view, the measure implementation is not called (except for a View that is not on a scene, has View children and whose UI-scale term an `Extension::UiScalePolicy::DISABLED` policy fixes: it is measured again on every call).
 2. **Arrange** — Each View is given a `LayoutRect` (position + size). It applies alignment and margin, then its LayoutManager places children within the bounds. This result is cached too: when the input bounds, the effective layout direction and the effective scale are unchanged and nothing has invalidated the view, the arrange implementation is elided and the stored result is replayed. The geometry is still reconciled and `LayoutFinished` is still raised; only the recomputation is skipped.
 
 ---
@@ -631,7 +631,7 @@ Both phases cache their result, which is what makes a settled layout pass cheap.
 #### 8.3.1 Measure cache
 
 - The measure cache is unconditional. There is no opt-out.
-- A hit requires all of: a valid entry from a completed measurement, the view not measure-dirty, the pass not poisoned, an EXACT match on the effective scale, both constraints equal within tolerance, and -- off a scene, for a view with View children -- a UI-scale term that is not fixed by a `UiScalePolicy::DISABLED` policy (such a view's own scale does not move when an `ENABLED` descendant's does).
+- A hit requires all of: a valid entry from a completed measurement, the view not measure-dirty, the pass not poisoned, an EXACT match on the effective scale, both constraints equal within tolerance, and -- off a scene, for a view with View children -- a UI-scale term that is not fixed by an `Extension::UiScalePolicy::DISABLED` policy (such a view's own scale does not move when an `ENABLED` descendant's does).
 - The effective scale is a KEY term, so a missed scale invalidation degrades to a miss — one recomputed measurement — and can never serve a size computed at a different scale.
 - A measure implementation is therefore required to be a pure function of: its two constraints, the view's effective scale, the view's effective layout direction, the view's own layout-tracked state (requested size, padding, margin, min/max bounds, layout params, child list), and its children's measured sizes.
 - Anything else it reads, it owns: it must call `InvalidateMeasure()` itself when that state changes.

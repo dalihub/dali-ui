@@ -1,8 +1,8 @@
 # UiScale 샘플
 
 [소스](ui-scale-example.cpp)는 시스템 스케일(UI 스케일), 윈도우별 스케일, 스케일링 마스터 스위치와
-`UiScalePolicy`(`INHERIT`/`ENABLED`/`DISABLED`)가 뷰의 유효 스케일을 어떻게 정하는지 한 화면에서 보여 준다.
-뷰의 유효 스케일은 그 뷰가 속한 윈도우의 윈도우별 스케일과 `UiScalePolicy`가 고른 시스템 스케일 항의 곱이다.
+`Extension::UiScalePolicy`(`INHERIT`/`ENABLED`/`DISABLED`)가 뷰의 유효 스케일을 어떻게 정하는지 한 화면에서 보여 준다.
+뷰의 유효 스케일은 그 뷰가 속한 윈도우의 윈도우별 스케일과 `Extension::UiScalePolicy`가 고른 시스템 스케일 항의 곱이다.
 
 사용하는 API는 다음과 같다. `Extension::`으로 시작하는 API는 플랫폼 통합 개발자와 모듈 제공자를 위한
 extension API(`dali-ui-foundation/extension-api/`)이며 앱 개발자용 공개 API 목록에는 포함되지 않는다.
@@ -10,7 +10,7 @@ extension API(`dali-ui-foundation/extension-api/`)이며 앱 개발자용 공개
 - `Extension::LayoutScaleManager::SetUiScale()`, `GetUiScale()`: 시스템 스케일
 - `Extension::LayoutScaleManager::SetWindowScale()`, `GetWindowScale()`: 윈도우별 스케일
 - `Extension::LayoutScaleManager::SetScalable()`, `IsScalable()`: 두 스케일을 함께 켜고 끄는 마스터 스위치
-- `Extension::View::SetUiScalePolicy()`
+- `Extension::View::SetUiScalePolicy()`, `Extension::UiScalePolicy`: 뷰별 시스템 스케일 정책
 - `Extension::View::GetEffectiveLayoutScale()`: 상태 표시줄의 유효 스케일
 - `Window::New()`, `LayoutController::Remove()`: Zone I의 두 번째 Window
 

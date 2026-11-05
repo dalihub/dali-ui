@@ -32,4 +32,5 @@
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 #include <dali-ui-foundation/extension-api/theme-loader-interface.h>
 #include <dali-ui-foundation/extension-api/ui-config-impl.h>
+#include <dali-ui-foundation/extension-api/ui-scale-policy.h>
 #include <dali-ui-foundation/extension-api/view.h>

@@ -705,7 +705,7 @@ struct Decorator::Impl : public ConnectionTracker
   void CreateCursor(View& cursor, const Vector4& color)
   {
     cursor = View::New();
-    Ui::Extension::View::SetUiScalePolicy(cursor, UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(cursor, Ui::Extension::UiScalePolicy::DISABLED);
     // Every decoration is handed geometry that is ALREADY scaled -- the cursor's width and height, the
     // handles' positions and the markers' line height all come from the scaled text metrics -- so each one
     // opts out of BOTH scale terms: UiScalePolicy::DISABLED takes it out of the system scale, and this takes
@@ -863,7 +863,7 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         grabHandle.actor = ImageView::New(ToDaliString(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED]));
-        Ui::Extension::View::SetUiScalePolicy(grabHandle.actor, UiScalePolicy::DISABLED);
+        Ui::Extension::View::SetUiScalePolicy(grabHandle.actor, Ui::Extension::UiScalePolicy::DISABLED);
         Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(grabHandle.actor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED); // See CreateCursor().
         grabHandle.actor.SetSynchronousLoading(true);
         grabHandle.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
@@ -904,7 +904,7 @@ struct Decorator::Impl : public ConnectionTracker
     if(image.size())
     {
       handle.markerActor = ImageView::New(ToDaliString(image));
-      Ui::Extension::View::SetUiScalePolicy(handle.markerActor, UiScalePolicy::DISABLED);
+      Ui::Extension::View::SetUiScalePolicy(handle.markerActor, Ui::Extension::UiScalePolicy::DISABLED);
       Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(handle.markerActor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED); // See CreateCursor().
       handle.markerActor.SetSynchronousLoading(true);
       handle.markerActor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
@@ -934,7 +934,7 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         primary.actor = ImageView::New(ToDaliString(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
-        Ui::Extension::View::SetUiScalePolicy(primary.actor, UiScalePolicy::DISABLED);
+        Ui::Extension::View::SetUiScalePolicy(primary.actor, Ui::Extension::UiScalePolicy::DISABLED);
         Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(primary.actor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED); // See CreateCursor().
         primary.actor.SetSynchronousLoading(true);
         primary.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
@@ -978,7 +978,7 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         secondary.actor = ImageView::New(ToDaliString(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
-        Ui::Extension::View::SetUiScalePolicy(secondary.actor, UiScalePolicy::DISABLED);
+        Ui::Extension::View::SetUiScalePolicy(secondary.actor, Ui::Extension::UiScalePolicy::DISABLED);
         Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(secondary.actor)).SetWindowScalePolicy(Ui::Internal::WindowScalePolicy::DISABLED); // See CreateCursor().
         secondary.actor.SetSynchronousLoading(true);
         secondary.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);

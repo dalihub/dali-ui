@@ -361,11 +361,14 @@ touch sequence를 더 이상 intercept하지 않는다.
 
 `View`와 `ViewImpl`의 `SetUiScalePolicy()`/`GetUiScalePolicy()`는 deprecated되었으며 문서 태그만
 바뀌었다. 릴리스된 심볼과 시그니처는 그대로 유지된다. 대체 API는 extension API
-`Extension::View::SetUiScalePolicy(Ui::View, UiScalePolicy)`와
+`Extension::View::SetUiScalePolicy(Ui::View, Extension::UiScalePolicy)`와
 `Extension::View::GetUiScalePolicy(Ui::View)`(`dali-ui-foundation/extension-api/view.h`)이다.
-`UiScalePolicy` 열거형은 공개 API에 남는다. 라이브러리와 샘플은 새 함수를 사용한다.
+두 함수는 `Extension::UiScalePolicy`를 받고 반환한다(아래 'UiScalePolicy → Extension::UiScalePolicy'
+참고). 라이브러리와 샘플은 새 함수를 사용한다.
 UTC는 deprecated 멤버도 계속 검증하고, Public API만 사용하는 text manual test
 (`manual-tests/dali-ui-text`)는 deprecated 멤버를 계속 사용한다.
+
+표의 After 열에서 `policy`는 `Extension::UiScalePolicy` 값이다.
 
 | Before (deprecated) | After |
 |---|---|
@@ -373,6 +376,32 @@ UTC는 deprecated 멤버도 계속 검증하고, Public API만 사용하는 text
 | `view.GetUiScalePolicy()` | `Extension::View::GetUiScalePolicy(view)` |
 | `ViewImpl::SetUiScalePolicy(policy)` | `Ui::Extension::View::SetUiScalePolicy(Ui::View::DownCast(Self()), policy)` |
 | `ViewImpl::GetUiScalePolicy()` | `Ui::Extension::View::GetUiScalePolicy(Ui::View::DownCast(Self()))` |
+
+## UiScalePolicy → Extension::UiScalePolicy
+
+`Dali::Ui::UiScalePolicy` 열거형은 deprecated되었으며 문서 태그만 바뀌었다. 열거형과 이를 받고
+반환하는 deprecated 멤버(`View`/`ViewImpl`의 `SetUiScalePolicy()`/`GetUiScalePolicy()`)의 릴리스된
+심볼, 시그니처, 동작은 그대로 유지된다. 대체 타입은 extension API
+`Dali::Ui::Extension::UiScalePolicy`(`dali-ui-foundation/extension-api/ui-scale-policy.h`)이며
+`Extension::View::SetUiScalePolicy()`/`GetUiScalePolicy()`가 이 타입을 받고 반환한다. 두 열거형은
+열거자 이름, 값, 기반 타입(`uint8_t`)이 같은 별개의 타입이라 서로 암묵적으로 변환되지 않는다. 같은
+이름의 열거자를 쓰거나 `static_cast`로 변환한다. `using namespace Dali::Ui;`를 쓰는 코드에서는
+`Extension::UiScalePolicy`처럼 한정해서 쓴다. `using Dali::Ui::Extension::UiScalePolicy;`나
+`using namespace Dali::Ui::Extension;`을 함께 쓰면 한정자 없는 `UiScalePolicy`가 모호해진다.
+`ViewImpl` 하위 클래스 안에서는 `Ui::Extension::UiScalePolicy`로 쓴다(한정자 없는 `Extension::`은
+`CustomActorImpl::Extension`을 가리킨다). 새 헤더를 포함한 `namespace Dali::Ui::Extension` 안의 코드에서는
+한정자 없는 `UiScalePolicy`가 `Extension::UiScalePolicy`를 가리키므로, 그 안에서 deprecated 멤버에 넘기는
+값은 `Ui::UiScalePolicy::DISABLED`처럼 한정한다(한정하지 않으면 변환 컴파일 오류가 난다). 라이브러리와
+샘플은 새 타입을 사용한다. UTC와 Public API만
+사용하는 text manual test(`manual-tests/dali-ui-text`)는 deprecated 멤버와 deprecated 열거형을 계속
+사용한다.
+
+| Before (deprecated) | After |
+|---|---|
+| `UiScalePolicy::INHERIT` | `Extension::UiScalePolicy::INHERIT` |
+| `UiScalePolicy::ENABLED` | `Extension::UiScalePolicy::ENABLED` |
+| `UiScalePolicy::DISABLED` | `Extension::UiScalePolicy::DISABLED` |
+| deprecated 멤버로 읽은 `UiScalePolicy policy` | `static_cast<Extension::UiScalePolicy>(policy)` |
 
 ## ViewImpl::GetEffectiveScale() → Extension::View::GetEffectiveLayoutScale()
 

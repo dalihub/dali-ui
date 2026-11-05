@@ -370,11 +370,11 @@ public: // Measure / Arrange API
    * the Template Method pattern, and caches the result. When the view is re-measured
    * with the same normalised constraint and nothing has invalidated its layout, the
    * cached result is served and that implementation is not called. The one exception is a
-   * view that is not on a scene, has View children and takes no UI scale because a
-   * UiScalePolicy::DISABLED policy (its own or an ancestor's) decides it: it calls its measure
-   * implementation on every Measure(), because a UiScalePolicy::ENABLED descendant follows a UI
-   * scale change that leaves its own scale unchanged, and a UI scale change invalidates no view
-   * that is not on a scene.
+   * view that is not on a scene, has View children and takes no UI scale because an
+   * Extension::UiScalePolicy::DISABLED policy (its own or an ancestor's) decides it: it calls
+   * its measure implementation on every Measure(), because an
+   * Extension::UiScalePolicy::ENABLED descendant follows a UI scale change that leaves its own
+   * scale unchanged, and a UI scale change invalidates no view that is not on a scene.
    *
    * Unlike arrange, measure has no ArrangePolicy::ALWAYS opt-out: measure caching
    * applies to every measure implementation including one written outside this library.
@@ -748,7 +748,9 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * @deprecated Use Extension::View::SetUiScalePolicy() instead; this function will be removed.
    * The UI scale is configured through the extension API
    * (dali-ui-foundation/extension-api/view.h) for platform integrators and module providers.
-   * Replace view.SetUiScalePolicy(policy) with Extension::View::SetUiScalePolicy(view, policy).
+   * Replace view.SetUiScalePolicy(UiScalePolicy::DISABLED) with
+   * Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::DISABLED): the extension
+   * function takes Extension::UiScalePolicy, which has the same enumerators and values.
    *
    * @param[in] policy The UiScalePolicy to apply
    */
@@ -758,7 +760,8 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * @brief Gets the UiScale participation policy of this view.
    *
    * @deprecated Use Extension::View::GetUiScalePolicy() instead; this function will be removed.
-   * Replace view.GetUiScalePolicy() with Extension::View::GetUiScalePolicy(view).
+   * Replace view.GetUiScalePolicy() with Extension::View::GetUiScalePolicy(view), which returns
+   * the same policy as an Extension::UiScalePolicy.
    *
    * @return The current UiScalePolicy
    */

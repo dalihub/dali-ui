@@ -24,9 +24,11 @@
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
 #include <dali/public-api/animation/constraint.h>
+#include <type_traits>
 #include <utility>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/ui-scale-policy.h>
 #include <dali-ui-foundation/integration-api/view-accessibility.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
@@ -61,6 +63,29 @@ namespace
 /// Thread-local because Actor::Add invokes OnChildAdd synchronously on the same
 /// (event) thread. POD with a constant initializer: no dynamic init, no heap allocation.
 thread_local unsigned int gAllowNonViewChildDepth = 0u;
+
+// The deprecated Ui::UiScalePolicy that ViewImpl::SetUiScalePolicy() and GetUiScalePolicy() take
+// and return, and Ui::Extension::UiScalePolicy that ViewDataImpl stores, are distinct types with
+// the same underlying type and the same value for every enumerator. Those two deprecated members
+// (View's pair forwards to them) are the only place that converts between them.
+static_assert(std::is_same<std::underlying_type<UiScalePolicy>::type, std::underlying_type<Ui::Extension::UiScalePolicy>::type>::value,
+              "UiScalePolicy and Extension::UiScalePolicy must have the same underlying type");
+static_assert(static_cast<uint8_t>(UiScalePolicy::INHERIT) == static_cast<uint8_t>(Ui::Extension::UiScalePolicy::INHERIT),
+              "UiScalePolicy::INHERIT and Extension::UiScalePolicy::INHERIT must have the same value");
+static_assert(static_cast<uint8_t>(UiScalePolicy::ENABLED) == static_cast<uint8_t>(Ui::Extension::UiScalePolicy::ENABLED),
+              "UiScalePolicy::ENABLED and Extension::UiScalePolicy::ENABLED must have the same value");
+static_assert(static_cast<uint8_t>(UiScalePolicy::DISABLED) == static_cast<uint8_t>(Ui::Extension::UiScalePolicy::DISABLED),
+              "UiScalePolicy::DISABLED and Extension::UiScalePolicy::DISABLED must have the same value");
+
+constexpr Ui::Extension::UiScalePolicy ToExtensionUiScalePolicy(UiScalePolicy policy)
+{
+  return static_cast<Ui::Extension::UiScalePolicy>(policy);
+}
+
+constexpr UiScalePolicy ToDeprecatedUiScalePolicy(Ui::Extension::UiScalePolicy policy)
+{
+  return static_cast<UiScalePolicy>(policy);
+}
 
 } // namespace
 
@@ -395,12 +420,12 @@ LayoutRect ViewImpl::OnArrange(const LayoutRect& bounds)
 
 void ViewImpl::SetUiScalePolicy(UiScalePolicy policy)
 {
-  mImpl->SetUiScalePolicy(policy);
+  mImpl->SetUiScalePolicy(ToExtensionUiScalePolicy(policy));
 }
 
 UiScalePolicy ViewImpl::GetUiScalePolicy() const
 {
-  return mImpl->GetUiScalePolicy();
+  return ToDeprecatedUiScalePolicy(mImpl->GetUiScalePolicy());
 }
 
 float ViewImpl::GetEffectiveScale() const

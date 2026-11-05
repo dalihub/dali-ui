@@ -668,7 +668,8 @@ public:
    * appears as large as the source when both resolve the same scale -- for example
    * a preview that inherits its scale from an ordinary container in the source's
    * window. If the source sits in a subtree that opts out of the system scale, give
-   * the preview the same UiScalePolicy to match it (Extension::View::SetUiScalePolicy()).
+   * the preview the same Extension::UiScalePolicy to match it
+   * (Extension::View::SetUiScalePolicy()).
    *
    * The value is captured once when the drag starts and is the same in every event
    * of the session, the DragPreviewFactory event included. Unlike the source's own

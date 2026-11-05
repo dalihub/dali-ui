@@ -619,9 +619,9 @@ private:
 
     // Three boxes — all INHERIT
     StackLayout row = MakeHStack();
-    row.Add(MakePolicyBox("INHERIT", UiColor(C_RED), UiScalePolicy::INHERIT, BOX_SIZE));
-    row.Add(MakePolicyBox("INHERIT", UiColor(C_GREEN), UiScalePolicy::INHERIT, BOX_SIZE));
-    row.Add(MakePolicyBox("INHERIT", UiColor(C_BLUE), UiScalePolicy::INHERIT, BOX_SIZE));
+    row.Add(MakePolicyBox("INHERIT", UiColor(C_RED), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE));
+    row.Add(MakePolicyBox("INHERIT", UiColor(C_GREEN), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE));
+    row.Add(MakePolicyBox("INHERIT", UiColor(C_BLUE), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE));
     zone.Add(row);
 
     // Nested 2×2 GridLayout (also INHERIT)
@@ -681,7 +681,7 @@ private:
     StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_B_BG));
 
     // ★★★ Key: DISABLED — this container and its INHERIT descendants don't scale
-    Ui::Extension::View::SetUiScalePolicy(zone, UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(zone, Ui::Extension::UiScalePolicy::DISABLED);
 
     zone.Add(MakeZoneTitle("[Zone B] DISABLED container + ENABLED children"));
     zone.Add(MakeDesc(
@@ -694,13 +694,13 @@ private:
     StackLayout row = MakeHStack();
 
     // Box 1: INHERIT → inherits DISABLED parent → effectiveScale = 1.0 → no scale
-    row.Add(MakePolicyBox("INHERIT\n(no scale)", UiColor(C_RED), UiScalePolicy::INHERIT, BOX_SIZE));
+    row.Add(MakePolicyBox("INHERIT\n(no scale)", UiColor(C_RED), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE));
 
     // Box 2: ENABLED → directly reads LayoutScaleManager → effectiveScale = system scale
-    row.Add(MakePolicyBox("ENABLED\n(scales!)", UiColor(C_GREEN), UiScalePolicy::ENABLED, BOX_SIZE));
+    row.Add(MakePolicyBox("ENABLED\n(scales!)", UiColor(C_GREEN), Ui::Extension::UiScalePolicy::ENABLED, BOX_SIZE));
 
     // Box 3: ENABLED → same as Box 2
-    row.Add(MakePolicyBox("ENABLED\n(scales!)", UiColor(C_BLUE), UiScalePolicy::ENABLED, BOX_SIZE));
+    row.Add(MakePolicyBox("ENABLED\n(scales!)", UiColor(C_BLUE), Ui::Extension::UiScalePolicy::ENABLED, BOX_SIZE));
 
     zone.Add(row);
     zone.Add(MakeDesc(
@@ -733,7 +733,7 @@ private:
     StackLayout outerRow = MakeHStack();
 
     // Left: normal INHERIT box — scales with the zone
-    outerRow.Add(MakePolicyBox("INHERIT\n(scales)", UiColor(C_ORANGE), UiScalePolicy::INHERIT, BOX_SIZE));
+    outerRow.Add(MakePolicyBox("INHERIT\n(scales)", UiColor(C_ORANGE), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE));
 
     // Right: DISABLED sub-container (purple tint) — creates isolated island
     StackLayout disabledSub = StackLayout::New(StackOrientation::VERTICAL);
@@ -743,7 +743,7 @@ private:
     disabledSub.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     disabledSub.SetSpacing(6.0f);
     disabledSub.SetCornerRadius(Vector4(ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS));
-    Ui::Extension::View::SetUiScalePolicy(disabledSub, UiScalePolicy::DISABLED); // ★ isolated island
+    Ui::Extension::View::SetUiScalePolicy(disabledSub, Ui::Extension::UiScalePolicy::DISABLED); // ★ isolated island
 
     Label disabledSubLabel = Label::New("DISABLED sub-container");
     disabledSubLabel.SetRequestedWidth(WRAP_CONTENT);
@@ -754,9 +754,9 @@ private:
 
     StackLayout subRow = MakeHStack();
     // INHERIT under DISABLED → fixed size (1.0)
-    subRow.Add(MakePolicyBox("INHERIT\n→ 1.0", UiColor(C_PURPLE), UiScalePolicy::INHERIT, BOX_SIZE - 10.0f));
+    subRow.Add(MakePolicyBox("INHERIT\n→ 1.0", UiColor(C_PURPLE), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE - 10.0f));
     // ENABLED inside DISABLED → still scales
-    subRow.Add(MakePolicyBox("ENABLED\n→ sys", UiColor(C_DEEP_ORG), UiScalePolicy::ENABLED, BOX_SIZE - 10.0f));
+    subRow.Add(MakePolicyBox("ENABLED\n→ sys", UiColor(C_DEEP_ORG), Ui::Extension::UiScalePolicy::ENABLED, BOX_SIZE - 10.0f));
     disabledSub.Add(subRow);
 
     outerRow.Add(disabledSub);
@@ -1544,7 +1544,7 @@ private:
     mDisabledSlot.SetPadding(Insets(8.0f, 8.0f, 8.0f, 8.0f));
     mDisabledSlot.SetSpacing(6.0f);
     mDisabledSlot.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
-    Ui::Extension::View::SetUiScalePolicy(mDisabledSlot, UiScalePolicy::DISABLED); // ★ blocks scale
+    Ui::Extension::View::SetUiScalePolicy(mDisabledSlot, Ui::Extension::UiScalePolicy::DISABLED); // ★ blocks scale
     mDisabledSlot.Add(MakeSmallLabel("DISABLED parent", 0xB71C1C));
 
     // Right slot: INHERIT parent (teal tint)
@@ -1560,7 +1560,7 @@ private:
 
     // The box that moves between parents — INHERIT policy, so its effective scale
     // depends entirely on which parent it is attached to.
-    mReparentBox   = MakePolicyBox("INHERIT", UiColor(0x00897B), UiScalePolicy::INHERIT, BOX_SIZE);
+    mReparentBox   = MakePolicyBox("INHERIT", UiColor(0x00897B), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE);
     mBoxInDisabled = true;
     mDisabledSlot.Add(mReparentBox); // starts in the DISABLED parent
 
@@ -1648,7 +1648,7 @@ private:
     // INHERIT (default) — normal scale propagation
     mHContainer.Add(MakeSmallLabel("INHERIT parent container", 0x1A237E));
 
-    mScaleChangeBox = MakePolicyBox("INHERIT", UiColor(0x3949AB), UiScalePolicy::INHERIT, BOX_SIZE);
+    mScaleChangeBox = MakePolicyBox("INHERIT", UiColor(0x3949AB), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE);
     mHContainer.Add(mScaleChangeBox);
     mIsParented = true;
 
@@ -1778,9 +1778,9 @@ private:
     // everywhere else in this sample; DISABLED is the interesting one, because the
     // window scale still applies to it.
     StackLayout policyRow = MakeHStack();
-    policyRow.Add(MakePolicyBox("INHERIT", UiColor(C_BLUE), UiScalePolicy::INHERIT, BOX_SIZE));
-    policyRow.Add(MakePolicyBox("ENABLED", UiColor(C_GREEN), UiScalePolicy::ENABLED, BOX_SIZE));
-    policyRow.Add(MakePolicyBox("DISABLED", UiColor(C_RED), UiScalePolicy::DISABLED, BOX_SIZE));
+    policyRow.Add(MakePolicyBox("INHERIT", UiColor(C_BLUE), Ui::Extension::UiScalePolicy::INHERIT, BOX_SIZE));
+    policyRow.Add(MakePolicyBox("ENABLED", UiColor(C_GREEN), Ui::Extension::UiScalePolicy::ENABLED, BOX_SIZE));
+    policyRow.Add(MakePolicyBox("DISABLED", UiColor(C_RED), Ui::Extension::UiScalePolicy::DISABLED, BOX_SIZE));
     card.Add(policyRow);
 
     // Decoration is stored in natural pixels and multiplied by the final scale, so
@@ -1929,7 +1929,7 @@ private:
   }
 
   // Colored box with centered policy label and explicit UiScalePolicy
-  View MakePolicyBox(const char* text, const UiColor& color, UiScalePolicy policy, float size)
+  View MakePolicyBox(const char* text, const UiColor& color, Ui::Extension::UiScalePolicy policy, float size)
   {
     Label lbl = Label::New(text);
     lbl.SetRequestedWidth(MATCH_PARENT);

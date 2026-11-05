@@ -529,15 +529,15 @@ inline float GetWindowScale(const ViewImpl& viewImpl)
 // cost the DISABLED and ENABLED branches had before WindowScalePolicy existed.
 float ResolveSystemScaleTerm(const ViewDataImpl& viewData)
 {
-  UiScalePolicy policy = viewData.GetUiScalePolicy();
-  if(policy != UiScalePolicy::INHERIT)
+  Ui::Extension::UiScalePolicy policy = viewData.GetUiScalePolicy();
+  if(policy != Ui::Extension::UiScalePolicy::INHERIT)
   {
-    return (policy == UiScalePolicy::ENABLED) ? GetSystemScale() : 1.0f;
+    return (policy == Ui::Extension::UiScalePolicy::ENABLED) ? GetSystemScale() : 1.0f;
   }
 
   const ViewDataImpl* node = &viewData;
   Ui::View            ancestor; // keeps the node being read alive across the ascent
-  while(policy == UiScalePolicy::INHERIT)
+  while(policy == Ui::Extension::UiScalePolicy::INHERIT)
   {
     ancestor = node->GetParentView();
     if(!ancestor)
@@ -547,7 +547,7 @@ float ResolveSystemScaleTerm(const ViewDataImpl& viewData)
     node   = &ViewDataImpl::Get(GetImpl(ancestor));
     policy = node->GetUiScalePolicy();
   }
-  return (policy == UiScalePolicy::ENABLED) ? GetSystemScale() : 1.0f;
+  return (policy == Ui::Extension::UiScalePolicy::ENABLED) ? GetSystemScale() : 1.0f;
 }
 
 // Whether the SYSTEM term of a node is fixed at 1.0f by a DISABLED policy -- its own
@@ -565,15 +565,15 @@ float ResolveSystemScaleTerm(const ViewDataImpl& viewData)
 // non-View parent), O(depth).
 bool SystemScaleTermIsConstant(const ViewDataImpl& viewData)
 {
-  UiScalePolicy policy = viewData.GetUiScalePolicy();
-  if(policy != UiScalePolicy::INHERIT)
+  Ui::Extension::UiScalePolicy policy = viewData.GetUiScalePolicy();
+  if(policy != Ui::Extension::UiScalePolicy::INHERIT)
   {
-    return policy == UiScalePolicy::DISABLED;
+    return policy == Ui::Extension::UiScalePolicy::DISABLED;
   }
 
   const ViewDataImpl* node = &viewData;
   Ui::View            ancestor; // keeps the node being read alive across the ascent
-  while(policy == UiScalePolicy::INHERIT)
+  while(policy == Ui::Extension::UiScalePolicy::INHERIT)
   {
     ancestor = node->GetParentView();
     if(!ancestor)
@@ -583,7 +583,7 @@ bool SystemScaleTermIsConstant(const ViewDataImpl& viewData)
     node   = &ViewDataImpl::Get(GetImpl(ancestor));
     policy = node->GetUiScalePolicy();
   }
-  return policy == UiScalePolicy::DISABLED;
+  return policy == Ui::Extension::UiScalePolicy::DISABLED;
 }
 
 // The PER-WINDOW term of a node that left ComputeEffectiveScale()'s fast path: its own
@@ -2606,7 +2606,7 @@ float ViewDataImpl::GetRequestedY() const
   return mRequestedY;
 }
 
-void ViewDataImpl::SetUiScalePolicy(UiScalePolicy policy)
+void ViewDataImpl::SetUiScalePolicy(Ui::Extension::UiScalePolicy policy)
 {
   if(mScalePolicy != policy)
   {
@@ -2616,7 +2616,7 @@ void ViewDataImpl::SetUiScalePolicy(UiScalePolicy policy)
   }
 }
 
-UiScalePolicy ViewDataImpl::GetUiScalePolicy() const
+Ui::Extension::UiScalePolicy ViewDataImpl::GetUiScalePolicy() const
 {
   return mScalePolicy;
 }
@@ -6259,7 +6259,7 @@ float ViewDataImpl::ComputeEffectiveScale() const
   // may take this shortcut: a node that overrides either term cannot recover the OTHER
   // term from the parent's product without a division, and the measure cache compares its
   // scale key exactly (MeasureKeyOrPropagation::scaleKey).
-  if(mScalePolicy == UiScalePolicy::INHERIT && mWindowScalePolicy == WindowScalePolicy::INHERIT)
+  if(mScalePolicy == Ui::Extension::UiScalePolicy::INHERIT && mWindowScalePolicy == WindowScalePolicy::INHERIT)
   {
     Ui::View parentView = GetParentView();
     if(parentView)

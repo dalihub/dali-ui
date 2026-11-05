@@ -12,7 +12,7 @@ dali-ui provides three independent scaling mechanisms that together produce the 
 
 This document covers the **dynamic scale** system (`UiScale`) and the **per-window scale**, which is an independent multiplier on top of it.
 
-The runtime scale APIs — `Extension::LayoutScaleManager` (`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()` and `Extension::View::GetEffectiveLayoutScale()` (`dali-ui-foundation/extension-api/view.h`) — are extension APIs for platform integrators and module providers: the system or accessibility handler that applies the display scale, or a module that scales one window's content. They are not part of the application-facing public API, but they are installed with it and remain usable. In this page `LayoutScaleManager` means `Dali::Ui::Extension::LayoutScaleManager`.
+The runtime scale APIs — `Extension::LayoutScaleManager` (`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()` and `Extension::View::GetEffectiveLayoutScale()` (`dali-ui-foundation/extension-api/view.h`), with the policy type `Extension::UiScalePolicy` (`dali-ui-foundation/extension-api/ui-scale-policy.h`) — are extension APIs for platform integrators and module providers: the system or accessibility handler that applies the display scale, or a module that scales one window's content. They are not part of the application-facing public API, but they are installed with it and remain usable. In this page `LayoutScaleManager` means `Dali::Ui::Extension::LayoutScaleManager` and `UiScalePolicy` means `Dali::Ui::Extension::UiScalePolicy`; the public `Dali::Ui::UiScalePolicy` is deprecated.
 
 <br/>
 
@@ -146,14 +146,14 @@ The window scale applies to a view only while the view is in that window. A view
 
 ## UiScalePolicy
 
-Each `View` can override how it participates in the scale propagation via `Extension::View::SetUiScalePolicy()`; `Extension::View::GetUiScalePolicy()` reads it back. The `View` and `ViewImpl` members `SetUiScalePolicy()` / `GetUiScalePolicy()` are deprecated and still work.
+Each `View` can override how it participates in the scale propagation via `Extension::View::SetUiScalePolicy()`; `Extension::View::GetUiScalePolicy()` reads it back. Both take and return `Extension::UiScalePolicy`. The `View` and `ViewImpl` members `SetUiScalePolicy()` / `GetUiScalePolicy()` are deprecated and still work; they take and return the deprecated `Dali::Ui::UiScalePolicy`, a distinct type with the same enumerators and values, so convert between the two with `static_cast`.
 
 ```cpp
 #include <dali-ui-foundation/extension-api/view.h>
 
-Extension::View::SetUiScalePolicy(view, UiScalePolicy::INHERIT);   // default
-Extension::View::SetUiScalePolicy(view, UiScalePolicy::ENABLED);
-Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED);
+Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::INHERIT);   // default
+Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::ENABLED);
+Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::DISABLED);
 ```
 
 | Policy | `uiScale` term | Description |
@@ -173,7 +173,7 @@ The view inherits the effective scale from its parent. Since all views default t
 ```cpp
 // No explicit policy needed — INHERIT is the default.
 Label label = Label::New("Hello");
-// Extension::View::SetUiScalePolicy(label, UiScalePolicy::INHERIT); // implicit
+// Extension::View::SetUiScalePolicy(label, Extension::UiScalePolicy::INHERIT); // implicit
 ```
 
 <br/>
@@ -185,7 +185,7 @@ Typical use cases: fixed-size HUD elements, overlays that must not be rescaled b
 
 ```cpp
 // This panel and all its children ignore the system scale.
-Extension::View::SetUiScalePolicy(panel, UiScalePolicy::DISABLED);
+Extension::View::SetUiScalePolicy(panel, Extension::UiScalePolicy::DISABLED);
 ```
 
 Because children inherit the `1.0` term from a `DISABLED` ancestor, only the subtree under `panel` stops following the system scale. Sibling views continue to scale normally.
@@ -208,8 +208,8 @@ LayoutScaleManager UI scale = 2.0, no window scale
 Use `ENABLED` when a specific view inside a `DISABLED` subtree must still track the system scale. `ENABLED` bypasses parent inheritance and always reads directly from `LayoutScaleManager`.
 
 ```cpp
-Extension::View::SetUiScalePolicy(panel, UiScalePolicy::DISABLED);
-Extension::View::SetUiScalePolicy(badge, UiScalePolicy::ENABLED);  // scales even inside DISABLED panel
+Extension::View::SetUiScalePolicy(panel, Extension::UiScalePolicy::DISABLED);
+Extension::View::SetUiScalePolicy(badge, Extension::UiScalePolicy::ENABLED);  // scales even inside DISABLED panel
 ```
 
 ```
@@ -269,9 +269,9 @@ For views that cache values outside the layout pass, subscribe to property chang
 | Apply an additional scale to one window | `LayoutScaleManager::Get().SetWindowScale(window, scale)` |
 | Read a window's scale | `LayoutScaleManager::Get().GetWindowScale(window)` |
 | Reset a window to the default scale | `LayoutScaleManager::Get().SetWindowScale(window, 1.0f)` |
-| Opt a subtree out of the system scale | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED)` |
-| Force a view to always track system scale | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::ENABLED)` |
-| Reset to default inherited behavior | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::INHERIT)` |
+| Opt a subtree out of the system scale | `Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::DISABLED)` |
+| Force a view to always track system scale | `Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::ENABLED)` |
+| Reset to default inherited behavior | `Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::INHERIT)` |
 | Query a view's effective scale (framework use) | `Extension::View::GetEffectiveLayoutScale(viewImpl)` |
 
 <br/>

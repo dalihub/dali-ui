@@ -39,11 +39,15 @@ namespace Ui
  * resulting effective scale. (Both terms are 1.0 while
  * Extension::LayoutScaleManager::SetScalable(false) is in force.)
  *
- * A view's policy is set and read through Extension::View::SetUiScalePolicy() and
- * Extension::View::GetUiScalePolicy() (dali-ui-foundation/extension-api/view.h), extension
- * APIs for platform integrators and module providers; View::SetUiScalePolicy() and
- * View::GetUiScalePolicy() are deprecated. The enumeration stays in the public API because
- * those deprecated members take and return it.
+ * @deprecated Use Extension::UiScalePolicy instead, an extension API for platform integrators
+ * and module providers (dali-ui-foundation/extension-api/ui-scale-policy.h). This enumeration
+ * is used only by the deprecated View::SetUiScalePolicy(), View::GetUiScalePolicy(),
+ * ViewImpl::SetUiScalePolicy() and ViewImpl::GetUiScalePolicy(), which take and return it,
+ * and is removed together with them. Extension::View::SetUiScalePolicy() and
+ * Extension::View::GetUiScalePolicy() take and return Extension::UiScalePolicy, a distinct
+ * type with the same enumerators and values: an enumerator of the same name selects the same
+ * policy, and static_cast<Extension::UiScalePolicy>(policy) converts a value read through the
+ * deprecated members.
  */
 enum class UiScalePolicy : uint8_t
 {

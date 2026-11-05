@@ -603,7 +603,7 @@ Do not pass `GetPreviewLocalPosition()` or an actor's `SIZE` to requested
 values; they already include the effective scale, which the layout would apply a second
 time. Like any child, the preview takes its effective scale from the container it is
 added to, so it appears as large as the source when the two resolve the same
-scale. If the source sits in a subtree with `UiScalePolicy::DISABLED`, set the
+scale. If the source sits in a subtree with `Extension::UiScalePolicy::DISABLED`, set the
 same policy on the preview in the factory with `Extension::View::SetUiScalePolicy()`. If the effective scale changes during a drag,
 the next drag update converts the pointer with the new scale.
 
@@ -627,7 +627,7 @@ inside the source. Using them keeps the preview attached to the pointer even whe
 the source and overlay have different scale or rotation.
 
 Keep the overlay an ordinary View. A preview inherits its effective scale from the
-overlay like any other child, so with `UiScalePolicy::DISABLED` on the overlay (`Extension::View::SetUiScalePolicy()`)
+overlay like any other child, so with `Extension::UiScalePolicy::DISABLED` on the overlay (`Extension::View::SetUiScalePolicy()`)
 an inheriting preview stops following the system scale while its source still
 follows it. If you size the overlay, use `MATCH_PARENT`: a requested size is
 multiplied by the effective scale, so an overlay given the window's pixel size would be
@@ -649,9 +649,9 @@ preview in the same units as the rest of the UI, and it and its children are
 laid out at the scale of the container it is added to. Earlier releases set
 `UiScalePolicy::DISABLED` on the preview while positioning it. A preview
 positioned this way that relied on it -- sized in pixels, or copying a source
-that sits in a `UiScalePolicy::DISABLED` subtree, whether reusable or created
+that sits in an `Extension::UiScalePolicy::DISABLED` subtree, whether reusable or created
 by a factory without an updater -- keeps its earlier geometry when it sets
-`UiScalePolicy::DISABLED` itself with `Extension::View::SetUiScalePolicy()`; without a window scale the result is the same
+`Extension::UiScalePolicy::DISABLED` itself with `Extension::View::SetUiScalePolicy()`; without a window scale the result is the same
 as before.
 
 Leave all preview APIs unset for a headless drag session.

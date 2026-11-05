@@ -22,6 +22,7 @@
 
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/shadow.h>
+#include <dali-ui-foundation/extension-api/ui-scale-policy.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
@@ -41,6 +42,7 @@
 #include <functional>
 #include <iostream>
 #include <limits>
+#include <type_traits>
 #include <vector>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 
@@ -5037,25 +5039,25 @@ MeasuredSize ExtensionPolicyCountingMeasure(View, float, float)
 int UtcDaliViewExtensionSetUiScalePolicyP(void)
 {
   UiTestApplication application;
-  tet_infoline("UtcDaliViewExtensionSetUiScalePolicyP - Extension::View sets and reads back every UiScalePolicy");
+  tet_infoline("UtcDaliViewExtensionSetUiScalePolicyP - Extension::View sets and reads back every Extension::UiScalePolicy");
 
   View view = View::New();
-  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::INHERIT);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == Ui::Extension::UiScalePolicy::INHERIT);
 
-  Ui::Extension::View::SetUiScalePolicy(view, UiScalePolicy::ENABLED);
-  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::ENABLED);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == Ui::Extension::UiScalePolicy::ENABLED);
 
-  Ui::Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED);
-  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::DISABLED);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == Ui::Extension::UiScalePolicy::DISABLED);
 
-  Ui::Extension::View::SetUiScalePolicy(view, UiScalePolicy::INHERIT);
-  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::INHERIT);
+  Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::INHERIT);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == Ui::Extension::UiScalePolicy::INHERIT);
 
   END_TEST;
 }
 
 // The extension accessors and the deprecated View and ViewImpl members read and write the
-// same policy, in both directions.
+// same policy, in both directions, each in its own enumeration.
 int UtcDaliViewExtensionUiScalePolicyMatchesDeprecatedP(void)
 {
   UiTestApplication application;
@@ -5063,15 +5065,79 @@ int UtcDaliViewExtensionUiScalePolicyMatchesDeprecatedP(void)
 
   View view = View::New();
 
-  Ui::Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::DISABLED);
   DALI_TEST_CHECK(view.GetUiScalePolicy() == UiScalePolicy::DISABLED);
   DALI_TEST_CHECK(GetImpl(view).GetUiScalePolicy() == UiScalePolicy::DISABLED);
 
   view.SetUiScalePolicy(UiScalePolicy::ENABLED);
-  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::ENABLED);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == Ui::Extension::UiScalePolicy::ENABLED);
 
   GetImpl(view).SetUiScalePolicy(UiScalePolicy::INHERIT);
-  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == UiScalePolicy::INHERIT);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == Ui::Extension::UiScalePolicy::INHERIT);
+
+  END_TEST;
+}
+
+// Extension::UiScalePolicy replaces the deprecated UiScalePolicy: a distinct type with the same
+// underlying type and the same value for every enumerator.
+static_assert(!std::is_same<Ui::Extension::UiScalePolicy, Ui::UiScalePolicy>::value, "Extension::UiScalePolicy must be a distinct type");
+static_assert(std::is_same<std::underlying_type<Ui::Extension::UiScalePolicy>::type, std::underlying_type<Ui::UiScalePolicy>::type>::value,
+              "Extension::UiScalePolicy and UiScalePolicy must have the same underlying type");
+
+int UtcDaliViewExtensionUiScalePolicyValuesMatchDeprecatedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionUiScalePolicyValuesMatchDeprecatedP - Extension::UiScalePolicy has the size and values of the deprecated UiScalePolicy");
+
+  DALI_TEST_EQUALS(sizeof(Ui::Extension::UiScalePolicy), sizeof(Ui::UiScalePolicy), TEST_LOCATION);
+
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::INHERIT), static_cast<int>(Ui::UiScalePolicy::INHERIT), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::ENABLED), static_cast<int>(Ui::UiScalePolicy::ENABLED), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::DISABLED), static_cast<int>(Ui::UiScalePolicy::DISABLED), TEST_LOCATION);
+
+  // The released values themselves.
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::INHERIT), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::ENABLED), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::DISABLED), 2, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Every policy converts both ways: set through the extension accessor it reads back through the
+// deprecated View and ViewImpl getters as the enumerator of the same name, and set through either
+// deprecated setter it reads back through the extension accessor. The order moves every view off
+// its previous policy at each step, so no check passes on the INHERIT default alone.
+int UtcDaliViewExtensionUiScalePolicyConvertsEveryValueP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionUiScalePolicyConvertsEveryValueP - every policy converts both ways between the deprecated members and Extension::View");
+
+  struct PolicyPair
+  {
+    Ui::UiScalePolicy            deprecated;
+    Ui::Extension::UiScalePolicy extension;
+  };
+  const PolicyPair pairs[] = {
+    {Ui::UiScalePolicy::ENABLED, Ui::Extension::UiScalePolicy::ENABLED},
+    {Ui::UiScalePolicy::DISABLED, Ui::Extension::UiScalePolicy::DISABLED},
+    {Ui::UiScalePolicy::INHERIT, Ui::Extension::UiScalePolicy::INHERIT},
+  };
+
+  View viaExtension = View::New();
+  View viaView      = View::New();
+  View viaImpl      = View::New();
+  for(const PolicyPair& pair : pairs)
+  {
+    Ui::Extension::View::SetUiScalePolicy(viaExtension, pair.extension);
+    DALI_TEST_CHECK(viaExtension.GetUiScalePolicy() == pair.deprecated);
+    DALI_TEST_CHECK(GetImpl(viaExtension).GetUiScalePolicy() == pair.deprecated);
+
+    viaView.SetUiScalePolicy(pair.deprecated);
+    DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(viaView) == pair.extension);
+
+    GetImpl(viaImpl).SetUiScalePolicy(pair.deprecated);
+    DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(viaImpl) == pair.extension);
+  }
 
   END_TEST;
 }
@@ -5102,12 +5168,12 @@ int UtcDaliViewExtensionSetUiScalePolicyRelayoutsP(void)
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
 
-  Ui::Extension::View::SetUiScalePolicy(child, UiScalePolicy::DISABLED); // scale 1
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::DISABLED); // scale 1
   SettleLayout(application);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
 
-  Ui::Extension::View::SetUiScalePolicy(child, UiScalePolicy::INHERIT); // scale 2 again
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::INHERIT); // scale 2 again
   SettleLayout(application);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 60.0f, TEST_LOCATION);
@@ -5133,7 +5199,7 @@ int UtcDaliViewExtensionSetUiScalePolicySameValueIsNoOpP(void)
   gExtensionPolicyMeasureCount = 0;
   View root                    = View::New();
   root.SetMeasureCallback(MeasureCallback::New(&ExtensionPolicyCountingMeasure));
-  Ui::Extension::View::SetUiScalePolicy(root, UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(root, Ui::Extension::UiScalePolicy::DISABLED);
   application.GetWindow().Add(root);
   SettleLayout(application);
   DALI_TEST_CHECK(gExtensionPolicyMeasureCount > 0);
@@ -5145,13 +5211,13 @@ int UtcDaliViewExtensionSetUiScalePolicySameValueIsNoOpP(void)
   const int idleDelta = gExtensionPolicyMeasureCount - before;
 
   before = gExtensionPolicyMeasureCount;
-  Ui::Extension::View::SetUiScalePolicy(root, UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(root, Ui::Extension::UiScalePolicy::DISABLED);
   application.SendNotification();
   application.Render();
   DALI_TEST_EQUALS(gExtensionPolicyMeasureCount - before, idleDelta, TEST_LOCATION);
 
   before = gExtensionPolicyMeasureCount;
-  Ui::Extension::View::SetUiScalePolicy(root, UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(root, Ui::Extension::UiScalePolicy::ENABLED);
   application.SendNotification();
   application.Render();
   DALI_TEST_CHECK(gExtensionPolicyMeasureCount - before > idleDelta);
@@ -5166,7 +5232,7 @@ int UtcDaliViewExtensionSetUiScalePolicyEmptyHandleN(void)
   UiTestApplication application;
   tet_infoline("UtcDaliViewExtensionSetUiScalePolicyEmptyHandleN - an empty View asserts");
 
-  DALI_TEST_ASSERTION(Ui::Extension::View::SetUiScalePolicy(View(), UiScalePolicy::DISABLED), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::SetUiScalePolicy(View(), Ui::Extension::UiScalePolicy::DISABLED), "view");
 
   END_TEST;
 }
@@ -5244,8 +5310,8 @@ int UtcDaliViewExtensionGetEffectiveLayoutScaleP(void)
   View disabled = View::New();
   View enabled  = View::New();
   View inherit  = View::New(); // INHERIT, under the DISABLED view
-  Ui::Extension::View::SetUiScalePolicy(disabled, UiScalePolicy::DISABLED);
-  Ui::Extension::View::SetUiScalePolicy(enabled, UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(disabled, Ui::Extension::UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(enabled, Ui::Extension::UiScalePolicy::ENABLED);
   disabled.Add(enabled);
   disabled.Add(inherit);
   root.Add(disabled);
@@ -5294,7 +5360,7 @@ int UtcDaliViewExtensionGetEffectiveLayoutScaleMatchesDeprecatedP(void)
   View detached = View::New();
   View root     = View::New();
   View child    = View::New();
-  Ui::Extension::View::SetUiScalePolicy(child, UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::DISABLED);
   root.Add(child);
   application.GetWindow().Add(root);
   SettleLayout(application);

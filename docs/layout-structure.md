@@ -146,7 +146,7 @@ The **measure cache** is unconditional. `View::Measure()` serves a stored
 *Measure modes* below) are unchanged and nothing has invalidated the view's layout,
 and the measure implementation — `OnMeasure()`, an attached `LayoutManager::Measure()`,
 or a `MeasureCallback` — is simply not called. There is no opt-out. One exception applies
-off a scene only: a view with View children whose UI-scale term a `UiScalePolicy::DISABLED`
+off a scene only: a view with View children whose UI-scale term an `Extension::UiScalePolicy::DISABLED`
 policy fixes is measured again on every call (see the effective-scale paragraphs below). A
 measure implementation is therefore **required** to be a pure function of:
 
@@ -176,7 +176,7 @@ The effective scale is part of the measure cache key, so a scale change alone
 forces a re-measure. The effective scale is still resolved in exactly one place,
 `ViewDataImpl::ComputeEffectiveScale()`, and it is the product of two independent
 terms: the per-window scale (`Extension::LayoutScaleManager::SetWindowScale()`) and the UI-scale
-term the view's `UiScalePolicy` selects. When the process-wide scaling master
+term the view's `Extension::UiScalePolicy` selects. When the process-wide scaling master
 switch (`Extension::LayoutScaleManager::SetScalable(false)`) is off, both terms are `1.0` for
 every view regardless of its policies, so the whole tree behaves as unscaled.
 A view that inherits both terms and has a parent returns its parent's memoized
@@ -189,7 +189,7 @@ compounds to `scale^depth` down an inheritance chain. The window term has a
 framework-internal policy too, `WindowScalePolicy` (view-data-impl.h): the views
 that are handed already-scaled geometry -- the text cursor, handles and markers,
 and the editable inline replacement layer -- set it to `DISABLED` next to
-`UiScalePolicy::DISABLED`; application code cannot set it.
+`Extension::UiScalePolicy::DISABLED`; application code cannot set it.
 
 The window term applies only while a view is in a Window: a view in no Window --
 never added, or removed from its window -- resolves it to `1.0`, so its effective
@@ -208,7 +208,7 @@ that window's scale again. `View::Measure()` does so for a container too. Off a 
 view's window term is `1.0`, so a view's effective scale is either the UI term or a `1.0` that
 a `DISABLED` policy fixes, and only the UI term moves without an invalidation. A view whose
 term is the UI term misses its measure entry through the cache key whenever that term moves.
-A view whose term is fixed keeps its key while a `UiScalePolicy::ENABLED` descendant follows
+A view whose term is fixed keeps its key while an `Extension::UiScalePolicy::ENABLED` descendant follows
 the UI term, so a view with View children whose term is fixed never serves its measure entry
 off a scene and re-runs its producer; a childless view still hits while its own scale is
 unchanged. The check walks the policies only off a scene, only for a view with View children

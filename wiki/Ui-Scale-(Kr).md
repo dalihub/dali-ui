@@ -10,7 +10,7 @@ dali-ui는 세 가지 독립적인 스케일 메커니즘을 제공하며, 이�
 
 이 문서는 **동적 스케일** 시스템(`UiScale`)과, 그 위에 독립적으로 곱해지는 **윈도우별 스케일**을 다룹니다.
 
-런타임 스케일 API인 `Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()`, `Extension::View::GetEffectiveLayoutScale()`(`dali-ui-foundation/extension-api/view.h`)는 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API입니다. 디스플레이 스케일을 적용하는 시스템·접근성 핸들러나 한 윈도우의 콘텐츠 스케일을 정하는 모듈이 사용합니다. 앱 개발자용 공개 API 목록에는 포함되지 않지만 공개 API와 함께 설치되며 그대로 사용할 수 있습니다. 이 문서의 `LayoutScaleManager`는 `Dali::Ui::Extension::LayoutScaleManager`입니다.
+런타임 스케일 API인 `Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()`, `Extension::View::GetEffectiveLayoutScale()`(`dali-ui-foundation/extension-api/view.h`)와 정책 타입 `Extension::UiScalePolicy`(`dali-ui-foundation/extension-api/ui-scale-policy.h`)는 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API입니다. 디스플레이 스케일을 적용하는 시스템·접근성 핸들러나 한 윈도우의 콘텐츠 스케일을 정하는 모듈이 사용합니다. 앱 개발자용 공개 API 목록에는 포함되지 않지만 공개 API와 함께 설치되며 그대로 사용할 수 있습니다. 이 문서의 `LayoutScaleManager`는 `Dali::Ui::Extension::LayoutScaleManager`, `UiScalePolicy`는 `Dali::Ui::Extension::UiScalePolicy`입니다. 공개 API의 `Dali::Ui::UiScalePolicy`는 deprecated되었습니다.
 
 <br/>
 
@@ -144,14 +144,14 @@ LayoutScaleManager::Get().SetWindowScale(window, 1.0f);   // 기본값으로 복
 
 ## UiScalePolicy
 
-각 `View`는 `Extension::View::SetUiScalePolicy()`로 스케일 전파에 참여하는 방식을 지정하고, `Extension::View::GetUiScalePolicy()`로 읽습니다. `View`와 `ViewImpl`의 `SetUiScalePolicy()` / `GetUiScalePolicy()`는 deprecated되었으며 계속 동작합니다.
+각 `View`는 `Extension::View::SetUiScalePolicy()`로 스케일 전파에 참여하는 방식을 지정하고, `Extension::View::GetUiScalePolicy()`로 읽습니다. 두 함수는 `Extension::UiScalePolicy`를 받고 반환합니다. `View`와 `ViewImpl`의 `SetUiScalePolicy()` / `GetUiScalePolicy()`는 deprecated되었으며 계속 동작합니다. 이 멤버들은 deprecated된 `Dali::Ui::UiScalePolicy`를 받고 반환하며, 두 타입은 열거자 이름과 값이 같은 별개의 타입이므로 `static_cast`로 변환합니다.
 
 ```cpp
 #include <dali-ui-foundation/extension-api/view.h>
 
-Extension::View::SetUiScalePolicy(view, UiScalePolicy::INHERIT);   // 기본값
-Extension::View::SetUiScalePolicy(view, UiScalePolicy::ENABLED);
-Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED);
+Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::INHERIT);   // 기본값
+Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::ENABLED);
+Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::DISABLED);
 ```
 
 | 정책 | `uiScale` 항 | 설명 |
@@ -171,7 +171,7 @@ Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED);
 ```cpp
 // 별도 정책 설정 불필요 — INHERIT이 기본값입니다.
 Label label = Label::New("Hello");
-// Extension::View::SetUiScalePolicy(label, UiScalePolicy::INHERIT); // 묵시적
+// Extension::View::SetUiScalePolicy(label, Extension::UiScalePolicy::INHERIT); // 묵시적
 ```
 
 <br/>
@@ -183,7 +183,7 @@ Label label = Label::New("Hello");
 
 ```cpp
 // 이 패널과 모든 자식이 시스템 스케일을 무시합니다.
-Extension::View::SetUiScalePolicy(panel, UiScalePolicy::DISABLED);
+Extension::View::SetUiScalePolicy(panel, Extension::UiScalePolicy::DISABLED);
 ```
 
 `DISABLED` 뷰의 자식들은 그 `1.0` 항을 상속하므로, `panel` 하위 서브트리만 시스템 스케일 추적을 멈춥니다. 형제 뷰들은 정상적으로 스케일링됩니다.
@@ -206,8 +206,8 @@ LayoutScaleManager 시스템 스케일 = 2.0, 윈도우 스케일 없음
 `DISABLED` 서브트리 안에서도 특정 뷰만 시스템 스케일을 추적해야 할 때 사용합니다. `ENABLED`는 부모 상속을 무시하고 항상 `LayoutScaleManager`에서 직접 값을 읽습니다.
 
 ```cpp
-Extension::View::SetUiScalePolicy(panel, UiScalePolicy::DISABLED);
-Extension::View::SetUiScalePolicy(badge, UiScalePolicy::ENABLED);  // DISABLED 패널 안에서도 스케일 적용
+Extension::View::SetUiScalePolicy(panel, Extension::UiScalePolicy::DISABLED);
+Extension::View::SetUiScalePolicy(badge, Extension::UiScalePolicy::ENABLED);  // DISABLED 패널 안에서도 스케일 적용
 ```
 
 ```
@@ -267,9 +267,9 @@ effectiveScale = windowScale × uiScale = 1.25 × 2.0 = 2.5
 | 한 윈도우에 추가 스케일 적용 | `LayoutScaleManager::Get().SetWindowScale(window, scale)` |
 | 윈도우의 스케일 조회 | `LayoutScaleManager::Get().GetWindowScale(window)` |
 | 윈도우를 기본 스케일로 되돌리기 | `LayoutScaleManager::Get().SetWindowScale(window, 1.0f)` |
-| 서브트리를 시스템 스케일에서 제외 | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::DISABLED)` |
-| 특정 뷰를 항상 시스템 스케일에 추적 | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::ENABLED)` |
-| 기본 상속 동작으로 초기화 | `Extension::View::SetUiScalePolicy(view, UiScalePolicy::INHERIT)` |
+| 서브트리를 시스템 스케일에서 제외 | `Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::DISABLED)` |
+| 특정 뷰를 항상 시스템 스케일에 추적 | `Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::ENABLED)` |
+| 기본 상속 동작으로 초기화 | `Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::INHERIT)` |
 | 뷰의 유효 스케일 조회 (프레임워크용) | `Extension::View::GetEffectiveLayoutScale(viewImpl)` |
 
 <br/>

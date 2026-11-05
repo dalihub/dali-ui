@@ -589,7 +589,7 @@ factory는 activation 때 preview가 만들어지기 전에 한 번 호출되므
 `GetPreviewLocalPosition()`이나 actor의 `SIZE`는 유효 스케일이 이미 적용된 값이므로
 requested 값에 넘기면 layout이 scale을 한 번 더 곱합니다. preview는 다른 자식처럼
 추가된 container의 유효 스케일을 따르므로, source와 container의 scale이 같을 때 source와
-같은 크기로 보입니다. source가 `UiScalePolicy::DISABLED` 서브트리 안에 있으면
+같은 크기로 보입니다. source가 `Extension::UiScalePolicy::DISABLED` 서브트리 안에 있으면
 factory에서 `Extension::View::SetUiScalePolicy()`로 preview에도 같은 정책을 지정합니다. drag 중에 유효 스케일이 바뀌면 다음 drag
 update부터 새 scale로 pointer를 변환합니다.
 
@@ -613,7 +613,7 @@ source와 overlay의 scale/rotation이 달라도 preview의 grab point가 pointe
 있습니다.
 
 overlay는 일반 View로 유지합니다. preview는 다른 자식처럼 overlay의 유효 스케일을
-상속하므로, overlay에 `Extension::View::SetUiScalePolicy()`로 `UiScalePolicy::DISABLED`를 지정하면 scale을 상속하는 preview는
+상속하므로, overlay에 `Extension::View::SetUiScalePolicy()`로 `Extension::UiScalePolicy::DISABLED`를 지정하면 scale을 상속하는 preview는
 시스템 스케일을 따르지 않지만 source는 계속 따릅니다. overlay 크기를 지정한다면
 `MATCH_PARENT`를 사용합니다. requested 크기에는 유효 스케일이 곱해지므로 window의 pixel
 크기를 그대로 지정하면 유효 스케일이 1.0보다 클 때 overlay가 window보다 커집니다.
@@ -632,9 +632,9 @@ reusable View의 원래 layout 속성을 복구합니다. detector는 preview의
 바꾸지 않으므로, reusable preview를 나머지 UI와 같은 단위로 만들면 preview와 자식은
 추가된 container의 scale로 배치됩니다. 이전 릴리스는 배치하는 동안 preview에
 `UiScalePolicy::DISABLED`를 설정했습니다. 이 방식으로 배치되면서 그 동작을 전제로 한
-preview(pixel 크기로 만들었거나 `UiScalePolicy::DISABLED` 서브트리 안의 source를
+preview(pixel 크기로 만들었거나 `Extension::UiScalePolicy::DISABLED` 서브트리 안의 source를
 복사한 preview로, reusable preview와 updater 없는 factory preview 모두 해당)는
-preview에 `Extension::View::SetUiScalePolicy()`로 직접 `UiScalePolicy::DISABLED`를 지정하면 이전 배치를 유지하며, 윈도우
+preview에 `Extension::View::SetUiScalePolicy()`로 직접 `Extension::UiScalePolicy::DISABLED`를 지정하면 이전 배치를 유지하며, 윈도우
 스케일이 없으면 결과가 이전과 같습니다.
 
 preview API를 모두 설정하지 않으면 preview가 없는 headless session으로 동작합니다.

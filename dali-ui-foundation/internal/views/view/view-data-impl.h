@@ -32,6 +32,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/ui-scale-policy.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
@@ -93,10 +94,10 @@ enum class TriStateProperty
 /**
  * @brief Framework-internal policy for the PER-WINDOW term of a view's effective scale.
  *
- * The window-term counterpart of UiScalePolicy, which selects the SYSTEM term, value for value:
- * INHERIT takes the term from the parent (a root takes the scale of its window), ENABLED always
- * takes the scale of the view's window whatever the parent says, and DISABLED takes 1.0 -- with
- * descendant INHERIT views following it.
+ * The window-term counterpart of Extension::UiScalePolicy, which selects the SYSTEM term, value
+ * for value: INHERIT takes the term from the parent (a root takes the scale of its window),
+ * ENABLED always takes the scale of the view's window whatever the parent says, and DISABLED
+ * takes 1.0 -- with descendant INHERIT views following it.
  *
  * Internal on purpose: no installed header declares it and View/ViewImpl expose no setter for it,
  * so application code cannot move a view off INHERIT here, and the public contract "the window scale
@@ -366,13 +367,13 @@ public:
   View::FocusChangedSignalType& FocusChangedSignal();
   bool                          NotifyKeyEvent(const KeyEvent& event);
 
-  void          SetRequestedX(float x);
-  void          SetRequestedY(float y);
-  float         GetRequestedX() const;
-  float         GetRequestedY() const;
-  void          SetUiScalePolicy(UiScalePolicy policy);
-  UiScalePolicy GetUiScalePolicy() const;
-  float         GetEffectiveLayoutScale() const;
+  void                         SetRequestedX(float x);
+  void                         SetRequestedY(float y);
+  float                        GetRequestedX() const;
+  float                        GetRequestedY() const;
+  void                         SetUiScalePolicy(Ui::Extension::UiScalePolicy policy);
+  Ui::Extension::UiScalePolicy GetUiScalePolicy() const;
+  float                        GetEffectiveLayoutScale() const;
 
   /**
    * @brief Returns the effective layout scale of @p viewImpl; see GetEffectiveLayoutScale().
@@ -2002,7 +2003,7 @@ private:
 
   ViewImpl&                            mViewImpl;
   ViewState                            mState;
-  UiScalePolicy                        mScalePolicy{UiScalePolicy::INHERIT};
+  Ui::Extension::UiScalePolicy         mScalePolicy{Ui::Extension::UiScalePolicy::INHERIT};
   LayoutMode                           mLayoutMode;                                    ///< Layout mode of the view. PACKING: parked here, next to the other one-byte policy enum, because it fills the pad mScalePolicy would otherwise leave; its logical home is the layout group further down, which cross-references it.
   WindowScalePolicy                    mWindowScalePolicy{WindowScalePolicy::INHERIT}; ///< Framework-internal policy for the PER-WINDOW term of the effective scale; see WindowScalePolicy. PACKING: the third one-byte policy enum parked beside mScalePolicy and mLayoutMode: the three sit in the pad between the 4-byte mState and the 4-aligned mEffectiveScale, where two bytes were free, so it costs no byte on a 32- or a 64-bit build.
   mutable float                        mEffectiveScale{1.0f};                          ///< Cached effective scale, written only on scene, together with mEffectiveScaleValid. Carries NO validity sentinel of its own; whether this value is usable is recorded by mEffectiveScaleValid. Mutable because the lazy (re)compute happens inside the const GetEffectiveLayoutScale().
