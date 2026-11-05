@@ -315,6 +315,12 @@ parent의 local actor 좌표)는 바뀌지 않는다.
 앱 레시피는 preview에 `UiScalePolicy::DISABLED`를 주지 않고 네 값을
 `SetRequestedX/Y/Width/Height`에 그대로 넣는다.
 
+기본 배치(updater와 `DragPreviewPositionSignal`이 없을 때)도 preview의
+`UiScalePolicy`를 바꾸지 않고 `GetPreviewRequestedX()`/`GetPreviewRequestedY()`로 배치한다. 이전
+동작(배치하는 동안 `UiScalePolicy::DISABLED`)을 전제로 pixel 크기로 만든
+preview는 preview에 직접 `UiScalePolicy::DISABLED`를 지정하면 윈도우 스케일이
+없을 때 이전과 같다.
+
 ## ScrollView child drag 조정 API
 
 `ScrollView` 안의 child가 drag gesture를 소유하는 동안 일반 pan scrolling을

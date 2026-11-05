@@ -195,14 +195,12 @@ public:
    * view, so both layout and rendering happen at that scale.
    *
    * The window scale is INDEPENDENT of UiScalePolicy: it is applied to every view in
-   * the window, including views whose policy is UiScalePolicy::DISABLED (the one
-   * exception is a drag preview while DragAndDropDetector positions it itself; see
-   * DragAndDropDetector::DragPreviewPositionSignal()). It is NOT independent of
-   * SetScalable(): while scaling is disabled every view's effective scale is 1.0,
-   * this term included. A window scale set while scaling is disabled is stored --
-   * GetWindowScale() reports it -- and takes effect when scaling is enabled again, exactly
-   * like a value set through SetUiScale(). It does not change the window's own pixel
-   * size -- it changes how much logical content fits in it.
+   * the window, including views whose policy is UiScalePolicy::DISABLED. It is NOT
+   * independent of SetScalable(): while scaling is disabled every view's effective
+   * scale is 1.0, this term included. A window scale set while scaling is disabled is
+   * stored -- GetWindowScale() reports it -- and takes effect when scaling is enabled
+   * again, exactly like a value set through SetUiScale(). It does not change the
+   * window's own pixel size -- it changes how much logical content fits in it.
    *
    * Passing 1.0 restores the default and drops the window's record. Setting a scale
    * invalidates only the layout roots registered in @p window and triggers a re-layout

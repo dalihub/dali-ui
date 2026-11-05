@@ -31,7 +31,6 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture.h>
@@ -300,7 +299,7 @@ private:
   void                       UpdateDragPreview();
   void                       UpdateCoordinateSnapshots(const Vector2& screenPosition);
   Vector2                    ComputePreviewRequestedPosition() const;
-  void                       ApplyDefaultDragPreviewPosition();
+  void                       ApplyDefaultDragPreviewPosition(const Vector2& requestedPosition);
   void                       RestoreDragPreviewPositioningProperties(Dali::Ui::View visual);
   void                       FinalizeDragPreview(Dali::Ui::View visual, const Dali::Ui::DragAndDropEvent& event);
   void                       ResolveTarget(const Vector2& screenPosition, bool emitMoved);
@@ -384,8 +383,6 @@ private:
   Vector3                      mOriginalDragPreviewPivot;
   Vector3                      mOriginalDragPreviewParentOrigin;
   LayoutMode                   mOriginalDragPreviewLayoutMode;
-  UiScalePolicy                mOriginalDragPreviewUiScalePolicy;
-  WindowScalePolicy            mOriginalDragPreviewWindowScalePolicy{WindowScalePolicy::INHERIT};
   float                        mOriginalDragPreviewRequestedX;
   float                        mOriginalDragPreviewRequestedY;
   bool                         mOriginalDragPreviewPositionUsesPivot;

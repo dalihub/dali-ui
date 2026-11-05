@@ -106,7 +106,7 @@ LayoutScaleManager::Get().SetWindowScale(window, 1.0f);   // back to the default
 
 The window scale is **independent** of `UiScalePolicy`, but not of the master switch:
 
-- It applies to every view in the window, including views whose policy is `UiScalePolicy::DISABLED` (the one exception is a drag preview while `DragAndDropDetector` positions it itself; see `DragPreviewPositionSignal()`).
+- It applies to every view in the window, including views whose policy is `UiScalePolicy::DISABLED`.
 - Like the system scale, it is turned off by `SetScalable(false)` and re-applied by `SetScalable(true)`; a value set while scaling is disabled takes effect on re-enable.
 - It is scoped to one window: setting it invalidates only the layout roots currently in that window, and other windows are untouched.
 
@@ -186,7 +186,7 @@ panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
 
 Because children inherit the `1.0` term from a `DISABLED` ancestor, only the subtree under `panel` stops following the system scale. Sibling views continue to scale normally.
 
-> **Note:** This is not an opt-out of *all* scaling. If the view's `Window` carries a window scale, it still applies, so the subtree renders at the window scale rather than at natural pixel size. No public policy opts out of the window scale as well; only the master switch turns it off, for every view. (The framework itself opts out only the views it manages in physical pixels: the text cursor and handles, the inline replacement layer, and a drag preview while `DragAndDropDetector` positions it.)
+> **Note:** This is not an opt-out of *all* scaling. If the view's `Window` carries a window scale, it still applies, so the subtree renders at the window scale rather than at natural pixel size. No public policy opts out of the window scale as well; only the master switch turns it off, for every view. (The framework itself opts out only the views it manages in physical pixels: the text cursor and handles, and the inline replacement layer.)
 
 ```
 LayoutScaleManager UI scale = 2.0, no window scale

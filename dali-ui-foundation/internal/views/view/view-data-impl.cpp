@@ -483,8 +483,7 @@ inline float GetSystemScale()
 // UiScalePolicy selects, and the windowScale term whichever of 1.0f / this function its
 // framework-internal WindowScalePolicy selects. For an application view that is this
 // function -- application code cannot set its WindowScalePolicy, so it is INHERIT --
-// unless the framework opted it, or an ancestor, out of the window term (a drag preview
-// while DragAndDropDetector positions it, and that preview's subtree). That is why it is
+// unless the framework opted an ancestor out of the window term. That is why it is
 // a term of its own and not folded into GetSystemScale(): a view that opts out of the
 // system term (UiScalePolicy::DISABLED) must still receive this one.
 //
@@ -606,8 +605,7 @@ bool SystemScaleTermIsConstant(const ViewDataImpl& viewData)
 // memoized scale, so a view re-measured along a dirty path resolves again on every layout
 // pass. Application code cannot set this policy, so an application view that leaves the
 // fast path (its UiScalePolicy is ENABLED or DISABLED) is INHERIT here and its ascent
-// reaches the root -- unless the framework opted an ancestor out of the window term (a
-// drag preview while DragAndDropDetector positions it, with its application subtree),
+// reaches the root -- unless the framework opted an ancestor out of the window term,
 // which is exactly the case the ascent exists for.
 //
 // The final GetWindowScale() re-tests the gate (one more static load) on purpose: it

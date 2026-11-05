@@ -612,6 +612,12 @@ detector.SetDragPreviewContainer(dragOverlay);
 source와 overlay의 scale/rotation이 달라도 preview의 grab point가 pointer에 붙어
 있습니다.
 
+overlay는 일반 View로 유지합니다. preview는 다른 자식처럼 overlay의 유효 스케일을
+상속하므로, overlay에 `UiScalePolicy::DISABLED`를 지정하면 scale을 상속하는 preview는
+시스템 스케일을 따르지 않지만 source는 계속 따릅니다. overlay 크기를 지정한다면
+`MATCH_PARENT`를 사용합니다. requested 크기에는 유효 스케일이 곱해지므로 window의 pixel
+크기를 그대로 지정하면 유효 스케일이 1.0보다 클 때 overlay가 window보다 커집니다.
+
 ### 5.3 단순한 방법
 
 하나의 detached View를 반복 사용하려면 다음 API를 사용합니다.
@@ -620,8 +626,16 @@ source와 overlay의 scale/rotation이 달라도 preview의 grab point가 pointe
 detector.SetDragPreview(reusablePreview);
 ```
 
-updater나 `DragPreviewPositionSignal`이 없으면 detector가 anchor-aware 기본 위치를
-적용하고 session 종료 시 reusable View의 원래 layout 속성을 복구합니다.
+updater나 `DragPreviewPositionSignal`이 없으면 detector가
+`previewRequestedX`/`previewRequestedY`로 anchor-aware 기본 위치를 적용하고 session 종료 시
+reusable View의 원래 layout 속성을 복구합니다. detector는 preview의 `UiScalePolicy`를
+바꾸지 않으므로, reusable preview를 나머지 UI와 같은 단위로 만들면 preview와 자식은
+추가된 container의 scale로 배치됩니다. 이전 릴리스는 배치하는 동안 preview에
+`UiScalePolicy::DISABLED`를 설정했습니다. 이 방식으로 배치되면서 그 동작을 전제로 한
+preview(pixel 크기로 만들었거나 `UiScalePolicy::DISABLED` 서브트리 안의 source를
+복사한 preview로, reusable preview와 updater 없는 factory preview 모두 해당)는
+preview에 직접 `UiScalePolicy::DISABLED`를 지정하면 이전 배치를 유지하며, 윈도우
+스케일이 없으면 결과가 이전과 같습니다.
 
 preview API를 모두 설정하지 않으면 preview가 없는 headless session으로 동작합니다.
 

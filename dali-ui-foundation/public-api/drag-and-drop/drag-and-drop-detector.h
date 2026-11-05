@@ -587,9 +587,14 @@ public:
   /**
    * @brief Sets an optional application-provided View used as the drag preview.
    *
-   * The View must not have a parent. The detector adds it to the source
-   * View's parent for the active drag and removes it when the drag ends.
+   * The View must not have a parent. The detector adds it to the configured drag
+   * preview container, or to the source View's parent when no container is
+   * configured, for the active drag and removes it when the drag ends.
    * Pass an empty View to disable the drag preview.
+   *
+   * Build the preview like any other View. Unless a DragPreviewPositionSignal
+   * callback positions it, the detector positions it without changing its
+   * UiScalePolicy; see DragPreviewPositionSignal().
    *
    * This may be called from Dropped, Cancelled, or Ended callbacks to configure
    * the reusable preview for a subsequent session.
@@ -605,6 +610,11 @@ public:
    * instead of the source View's parent. This is useful for a scene-level
    * overlay that must not be clipped by a ScrollView or another source
    * ancestor. Pass an empty View to restore source-parent placement.
+   *
+   * Like any other child, a preview inherits its effective scale from the View it is
+   * added to, so keep the container an ordinary View: in a container whose
+   * UiScalePolicy is DISABLED, a preview that inherits its scale stops following
+   * the system scale while its source may still follow it.
    *
    * The application remains responsible for positioning a custom preview
    * through DragPreviewUpdater or DragPreviewPositionSignal. Their event exposes
@@ -696,13 +706,12 @@ public:
    * UiScalePolicy of its own: those values are converted with the preview's own
    * effective scale, whatever policy the preview has.
    *
-   * If no callback is connected, the detector applies that policy itself. It
-   * temporarily changes the preview's layout mode, UiScale policy, requested
-   * position, PARENT_ORIGIN, PIVOT, and POSITION_USES_PIVOT, then restores
-   * them before the finalizer is invoked. While it does, the preview is laid out
-   * at scale 1.0 -- it follows neither the system scale nor a per-window scale set
-   * through LayoutScaleManager::SetWindowScale() -- because previewLocalPosition is
-   * already in the container's local actor coordinates.
+   * If no callback is connected, the detector positions the preview the same
+   * way. It temporarily changes the preview's layout mode, requested position,
+   * PARENT_ORIGIN, PIVOT, and POSITION_USES_PIVOT, then restores them before the
+   * finalizer is invoked. It does not change the preview's UiScalePolicy: the
+   * preview and its children are laid out at their own effective scale, like any
+   * other View added to the same container.
    */
   DragPreviewPositionSignalType& DragPreviewPositionSignal();
 

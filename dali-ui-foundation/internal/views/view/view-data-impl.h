@@ -102,9 +102,8 @@ enum class TriStateProperty
  * so application code cannot move a view off INHERIT here, and the public contract "the window scale
  * applies to UiScalePolicy::DISABLED views too" stays true for application code. It exists for the
  * views the framework hands geometry that is ALREADY scaled -- the text cursor, the grab and
- * selection handles and their markers, the editable inline replacement layer, and an
- * application-supplied drag preview while the detector positions it (saved and restored around the
- * drag). UiScalePolicy::DISABLED takes them out of the system term; DISABLED here takes them out of
+ * selection handles and their markers, and the editable inline replacement layer.
+ * UiScalePolicy::DISABLED takes them out of the system term; DISABLED here takes them out of
  * the window term, which would otherwise multiply those values a second time.
  */
 enum class WindowScalePolicy : uint8_t

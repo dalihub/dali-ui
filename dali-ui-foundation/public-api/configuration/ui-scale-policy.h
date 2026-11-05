@@ -35,8 +35,7 @@ namespace Ui
  * The policy selects the SYSTEM-scale term of a view's effective scale only. The
  * per-window scale set through LayoutScaleManager::SetWindowScale() is an independent
  * multiplier on top of whichever term the policy selects, so it applies to DISABLED
- * views as well (the one exception is a drag preview while DragAndDropDetector
- * positions it itself); the comments below name the term the policy chooses, not the
+ * views as well; the comments below name the term the policy chooses, not the
  * resulting effective scale. (Both terms are 1.0 while
  * LayoutScaleManager::SetScalable(false) is in force.)
  */
