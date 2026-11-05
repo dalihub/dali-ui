@@ -835,7 +835,7 @@ void VisualBaseImpl::Process(bool postProcessor)
       Vector2 viewSize(owner.GetSize());
       auto&   viewImpl       = GetImpl(owner);
       Insets  viewPadding    = viewImpl.GetPadding();
-      float   effectiveScale = viewImpl.GetEffectiveScale();
+      float   effectiveScale = viewImpl.GetEffectiveLayoutScale();
       ApplyFittingModeInternal(viewSize, viewPadding, effectiveScale);
     }
   }

@@ -27,7 +27,7 @@
 #include <dali.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 #include <dali/integration-api/rendering/visual-renderer.h>
@@ -1343,12 +1343,12 @@ namespace
 {
 struct GradientScaleRestore
 {
-  float scale{UiScaleManager::Get().GetScale()};
-  bool scalable{UiScaleManager::Get().IsScalable()};
+  float scale{LayoutScaleManager::Get().GetUiScale()};
+  bool scalable{LayoutScaleManager::Get().IsScalable()};
   ~GradientScaleRestore()
   {
-    UiScaleManager::Get().SetScale(scale);
-    UiScaleManager::Get().SetScalable(scalable);
+    LayoutScaleManager::Get().SetUiScale(scale);
+    LayoutScaleManager::Get().SetScalable(scalable);
   }
 };
 
@@ -1441,7 +1441,7 @@ int UtcDaliLabelTextGradientUiScaleGeometryP(void)
 {
   UiTestApplication application;
   GradientScaleRestore restore;
-  UiScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetScalable(true);
   for(bool bbox : {false, true})
   {
     for(int type = 0; type != 3; ++type)
@@ -1458,7 +1458,7 @@ int UtcDaliLabelTextGradientUiScaleGeometryP(void)
       application.GetScene().Add(label);
       for(float scale : {0.5f, 1.0f, 1.25f, 2.0f, 1.0f})
       {
-        UiScaleManager::Get().SetScale(scale);
+        LayoutScaleManager::Get().SetUiScale(scale);
         // Same display size: a scale change cannot hide behind a size change.
         label.SetRequestedWidth(320.0f / scale);
         label.SetRequestedHeight(100.0f / scale);
@@ -1468,7 +1468,7 @@ int UtcDaliLabelTextGradientUiScaleGeometryP(void)
         CheckDisplayedGradient(renderer, type, scale, bbox, true);
       }
       label.SetUiScalePolicy(UiScalePolicy::DISABLED);
-      UiScaleManager::Get().SetScale(2.0f);
+      LayoutScaleManager::Get().SetUiScale(2.0f);
       SettleGradient(application);
       CheckDisplayedGradient(FindGradientRenderer(label, "uTextGradientEndPosition"), type, 1.0f, bbox);
       application.GetScene().Remove(label);
@@ -1481,7 +1481,7 @@ int UtcDaliEditableTextGradientUiScaleGeometryP(void)
 {
   UiTestApplication application;
   GradientScaleRestore restore;
-  UiScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetScalable(true);
   auto verify = [&](auto control)
   {
     control.SetUiScalePolicy(UiScalePolicy::ENABLED);
@@ -1496,7 +1496,7 @@ int UtcDaliEditableTextGradientUiScaleGeometryP(void)
         control.SetTextGradient(MakeScaleGradient(type, bbox));
         for(float scale : {0.5f, 1.0f, 1.25f, 2.0f, 1.0f})
         {
-          UiScaleManager::Get().SetScale(scale);
+          LayoutScaleManager::Get().SetUiScale(scale);
           control.SetRequestedWidth(320.0f / scale);
           control.SetRequestedHeight(100.0f / scale);
           SettleGradient(application);
@@ -1507,7 +1507,7 @@ int UtcDaliEditableTextGradientUiScaleGeometryP(void)
     control.SetText("");
     control.SetPlaceholder("Placeholder gradient");
     control.SetPlaceholderTextGradient(MakeScaleGradient(1, false));
-    UiScaleManager::Get().SetScale(2.0f);
+    LayoutScaleManager::Get().SetUiScale(2.0f);
     SettleGradient(application);
     CheckDisplayedGradient(FindGradientRenderer(control, "uTextGradientEndPosition"), 1, 2.0f, false);
     application.GetScene().Remove(control);
@@ -1546,12 +1546,12 @@ int UtcDaliLabelTextGradientUiScaleAsyncPublicationP(void)
 {
   UiTestApplication application;
   GradientScaleRestore restore;
-  UiScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetScalable(true);
   for(int variant = 0; variant != 6; ++variant)
   {
     const bool overlay = variant >= 3;
     const int type = variant % 3;
-    UiScaleManager::Get().SetScale(1.0f);
+    LayoutScaleManager::Get().SetUiScale(1.0f);
     Label label = Label::New();
     label.SetUiScalePolicy(UiScalePolicy::ENABLED);
     label.SetRequestedWidth(240.0f);
@@ -1577,7 +1577,7 @@ int UtcDaliLabelTextGradientUiScaleAsyncPublicationP(void)
     Texture previousTexture = previous.GetTextures().GetTexture(0u);
 
     impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
-    UiScaleManager::Get().SetScale(2.0f);
+    LayoutScaleManager::Get().SetUiScale(2.0f);
     // Deliver the old completion before Measure observes the new scale.
     DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
     DALI_TEST_EQUALS(observer.count, 1u, TEST_LOCATION);
@@ -1593,11 +1593,11 @@ int UtcDaliLabelTextGradientUiScaleAsyncPublicationP(void)
     CheckDisplayedGradient(FindGradientRenderer(label, overlay ? "uTextGradientOverlayEndPosition" : "uTextGradientEndPosition"), type, 2.0f, false, overlay);
 
     impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
-    UiScaleManager::Get().SetScale(1.0f);
-    UiScaleManager::Get().SetScale(2.0f);
+    LayoutScaleManager::Get().SetUiScale(1.0f);
+    LayoutScaleManager::Get().SetUiScale(2.0f);
     DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 4u));
     impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
-    UiScaleManager::Get().SetScale(2.00001f);
+    LayoutScaleManager::Get().SetUiScale(2.00001f);
     DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 5u));
 
     impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
@@ -1610,7 +1610,7 @@ int UtcDaliLabelTextGradientUiScaleAsyncPublicationP(void)
 
     impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
     application.GetScene().Remove(label);
-    UiScaleManager::Get().SetScale(1.25f);
+    LayoutScaleManager::Get().SetUiScale(1.25f);
     label.SetUiScalePolicy(UiScalePolicy::ENABLED);
     Test::WaitForEventThreadTrigger(1, 0); // A cancelled task need not deliver a trigger.
     DALI_TEST_EQUALS(observer.count, 6u, TEST_LOCATION);
@@ -1621,7 +1621,7 @@ int UtcDaliLabelTextGradientUiScaleAsyncPublicationP(void)
 
     impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
     label.SetProperty(Actor::Property::VISIBLE, false);
-    UiScaleManager::Get().SetScale(0.5f);
+    LayoutScaleManager::Get().SetUiScale(0.5f);
     DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
     DALI_TEST_EQUALS(observer.count, 7u, TEST_LOCATION);
     SettleGradient(application);
@@ -1638,8 +1638,8 @@ int UtcDaliLabelTextGradientUiScaleLifecycleP(void)
 {
   UiTestApplication application;
   GradientScaleRestore restore;
-  UiScaleManager::Get().SetScalable(true);
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   View disabled = View::New();
   disabled.SetUiScalePolicy(UiScalePolicy::DISABLED);
   disabled.SetRequestedWidth(400.0f);
@@ -1668,7 +1668,7 @@ int UtcDaliLabelTextGradientUiScaleLifecycleP(void)
   label.Animate(animation).TextGradientStartOffset(0.75f, Duration(2.0f));
   animation.Play();
   SettleGradient(application);
-  UiScaleManager::Get().SetScale(1.25f);
+  LayoutScaleManager::Get().SetUiScale(1.25f);
   SettleGradient(application);
   CheckDisplayedGradient(FindGradientRenderer(label, "uTextGradientEndPosition"), 0, 1.25f, false);
   animation.Stop();
@@ -1677,7 +1677,7 @@ int UtcDaliLabelTextGradientUiScaleLifecycleP(void)
   CheckDisplayedGradient(FindGradientRenderer(label, "uTextGradientEndPosition"), 0, 1.25f, false);
   animation.Stop();
   enabled.Remove(label);
-  UiScaleManager::Get().SetScale(0.5f);
+  LayoutScaleManager::Get().SetUiScale(0.5f);
   label.SetTextGradient(MakeScaleGradient(2, false));
   enabled.Add(label);
   SettleGradient(application);
@@ -1696,12 +1696,12 @@ int UtcDaliLabelGradientSpanUiScaleAsyncPublicationP(void)
 {
   UiTestApplication    application;
   GradientScaleRestore restore;
-  UiScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetScalable(true);
   for(int type = 0; type < 3; ++type)
   {
     for(float renderScale : {1.0f, 1.5f, 2.0f})
     {
-      UiScaleManager::Get().SetScale(1.0f);
+      LayoutScaleManager::Get().SetUiScale(1.0f);
       auto label = Label::New();
       label.SetUiScalePolicy(UiScalePolicy::ENABLED);
       label.SetRequestedWidth(240.5f);
@@ -1719,7 +1719,7 @@ int UtcDaliLabelGradientSpanUiScaleAsyncPublicationP(void)
       auto&      impl    = static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation());
       const auto texture = label.GetRendererAt(0u).GetTextures().GetTexture(0u);
       impl.RequestAsyncRenderWithFixedSize(240.5f, 80.25f);
-      UiScaleManager::Get().SetScale(2.0f);
+      LayoutScaleManager::Get().SetUiScale(2.0f);
       DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
       DALI_TEST_EQUALS(observer.count, 1u, TEST_LOCATION);
       DALI_TEST_CHECK(label.GetRendererAt(0u).GetTextures().GetTexture(0u) == texture);
@@ -1749,14 +1749,14 @@ int UtcDaliLabelGradientUiScaleAsyncStyleTransitionsP(void)
 {
   UiTestApplication application;
   GradientScaleRestore restore;
-  UiScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetScalable(true);
   for(int source = 0; source < 3; ++source)
   {
     for(int transition = 0; transition < 3; ++transition)
     {
       for(bool completeBeforeMeasure : {false, true})
       {
-        UiScaleManager::Get().SetScale(1.0f);
+        LayoutScaleManager::Get().SetUiScale(1.0f);
         Label label = Label::New();
         label.SetUiScalePolicy(UiScalePolicy::ENABLED);
         label.SetRequestedWidth(240.0f);
@@ -1797,7 +1797,7 @@ int UtcDaliLabelGradientUiScaleAsyncStyleTransitionsP(void)
 
         impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
         setGradient(transition == 2);
-        UiScaleManager::Get().SetScale(2.0f);
+        LayoutScaleManager::Get().SetUiScale(2.0f);
         if(completeBeforeMeasure)
         {
           // Explicitly deliver the old result before the scale-change Measure.

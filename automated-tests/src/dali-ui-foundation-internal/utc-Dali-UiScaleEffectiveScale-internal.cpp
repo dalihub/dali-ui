@@ -20,7 +20,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -53,7 +53,7 @@ void utc_dali_ui_scale_effective_scale_internal_cleanup(void)
 // producer-level, geometry-observable side is covered by the arrange cache suites
 // (utc-Dali-ArrangeCacheHit-internal.cpp and the black-box cases in utc-Dali-View.cpp).
 //
-// UiScaleManagerImpl keeps the scale in a process-wide singleton, so every test
+// LayoutScaleManagerImpl keeps the scale in a process-wide singleton, so every test
 // here records the incoming scale and restores it before returning.
 
 namespace
@@ -86,8 +86,8 @@ int UtcDaliUiScaleArrangeCacheInvalidatedByScaleChangeP(void)
   UiTestApplication application;
   tet_infoline("Arrange cache of a settled subtree is dropped by a UI scale change");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -106,12 +106,12 @@ int UtcDaliUiScaleArrangeCacheInvalidatedByScaleChangeP(void)
 
   // No layout pass is run after the scale change: the invalidation itself, not a
   // subsequent pass, is what must clear the caches.
-  UiScaleManager::Get().SetScale(1.5f);
+  LayoutScaleManager::Get().SetUiScale(1.5f);
 
   DALI_TEST_CHECK(!DataOf(root).IsArrangeCacheValid());
   DALI_TEST_CHECK(!DataOf(child).IsArrangeCacheValid());
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -123,8 +123,8 @@ int UtcDaliUiScaleArrangeCachePublishedAfterCleanPassP(void)
   UiTestApplication application;
   tet_infoline("A clean arrange pass publishes the arrange cache");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -146,20 +146,20 @@ int UtcDaliUiScaleArrangeCachePublishedAfterCleanPassP(void)
   DALI_TEST_CHECK(!DataOf(root).IsArrangeDirty());
   DALI_TEST_CHECK(!DataOf(child).IsArrangeDirty());
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
 // mEffectiveScaleValid is the sync bit for mEffectiveScale: false until the first
-// GetEffectiveScale() computes a value, true afterwards, and false again after
+// GetEffectiveLayoutScale() computes a value, true afterwards, and false again after
 // anything that can move the effective scale.
 int UtcDaliUiScaleEffectiveScaleSyncBitP(void)
 {
   UiTestApplication application;
   tet_infoline("mEffectiveScaleValid tracks whether the cached effective scale is usable");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View view = View::New();
   view.SetRequestedWidth(100.0f);
@@ -168,7 +168,7 @@ int UtcDaliUiScaleEffectiveScaleSyncBitP(void)
   // Nothing has asked for the effective scale yet.
   DALI_TEST_CHECK(!DataOf(view).IsEffectiveScaleValid());
 
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleValid());
 
   // On-scene so the view is a registered layout root and a global scale change
@@ -177,20 +177,20 @@ int UtcDaliUiScaleEffectiveScaleSyncBitP(void)
   Settle(application);
   DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleValid());
 
-  UiScaleManager::Get().SetScale(1.5f);
+  LayoutScaleManager::Get().SetUiScale(1.5f);
   DALI_TEST_CHECK(!DataOf(view).IsEffectiveScaleValid());
 
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 1.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.5f, 0.001f, TEST_LOCATION);
   DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleValid());
 
   // A policy change re-roots this view's scale derivation.
   view.SetUiScalePolicy(UiScalePolicy::DISABLED);
   DALI_TEST_CHECK(!DataOf(view).IsEffectiveScaleValid());
 
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleValid());
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -200,15 +200,15 @@ int UtcDaliUiScaleEffectiveScaleSyncBitP(void)
 // ArrangeDefault's only read sits behind its child loop -- so without the read at
 // pass entry an arrange-only visit leaves the sync bit false.
 //
-// Non-vacuity (verified by mutation): removing the `mViewImpl.GetEffectiveScale()`
+// Non-vacuity (verified by mutation): removing the `mViewImpl.GetEffectiveLayoutScale()`
 // at the top of ViewDataImpl::Arrange makes the first check below fail.
 int UtcDaliUiScaleArrangeEntryEstablishesEffectiveScaleP(void)
 {
   UiTestApplication application;
   tet_infoline("Arrange() establishes the cached effective scale for a childless view");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View leaf = View::New();
   leaf.SetRequestedWidth(50.0f);
@@ -229,7 +229,7 @@ int UtcDaliUiScaleArrangeEntryEstablishesEffectiveScaleP(void)
   DALI_TEST_CHECK(DataOf(leaf).IsEffectiveScaleValid());
   DALI_TEST_CHECK(DataOf(leaf).IsArrangeCacheValid());
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -249,8 +249,8 @@ int UtcDaliUiScaleResetKeepsDescendantMeasureDirtyP(void)
   UiTestApplication application;
   tet_infoline("An ancestor scale reset preserves a descendant's unconsumed measure dirty");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -290,7 +290,7 @@ int UtcDaliUiScaleResetKeepsDescendantMeasureDirtyP(void)
   Settle(application);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 80.0f, 0.001f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -305,8 +305,8 @@ int UtcDaliUiScaleResetClearsWholeSubtreeEffectiveScaleP(void)
   UiTestApplication application;
   tet_infoline("A scale reset clears the cached effective scale of the whole subtree");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -338,7 +338,7 @@ int UtcDaliUiScaleResetClearsWholeSubtreeEffectiveScaleP(void)
   DALI_TEST_CHECK(!DataOf(child).IsEffectiveScaleValid());
   DALI_TEST_CHECK(!DataOf(grandChild).IsEffectiveScaleValid());
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -365,8 +365,8 @@ int UtcDaliUiScaleEffectiveScaleActorSyncBitP(void)
   UiTestApplication application;
   tet_infoline("mEffectiveScaleActorSynced tracks whether the actor already holds the effective scale");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View view = View::New();
   view.SetRequestedWidth(100.0f);
@@ -383,7 +383,7 @@ int UtcDaliUiScaleEffectiveScaleActorSyncBitP(void)
 
   // No layout pass in between: the scale invalidation itself, not a later pass,
   // is what must retract the actor-side claim.
-  UiScaleManager::Get().SetScale(1.5f);
+  LayoutScaleManager::Get().SetUiScale(1.5f);
   DALI_TEST_CHECK(!DataOf(view).IsEffectiveScaleActorSynced());
 
   // ...and the next pass re-establishes it with the NEW scale.
@@ -392,7 +392,7 @@ int UtcDaliUiScaleEffectiveScaleActorSyncBitP(void)
   DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleActorSynced());
   DALI_TEST_EQUALS(view.GetProperty<float>(Dali::Ui::Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), 1.5f, 0.001f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -425,8 +425,8 @@ int UtcDaliUiScaleEffectiveScaleActorSyncRepairedOnMeasureCacheHitP(void)
   UiTestApplication application;
   tet_infoline("An external write of the effective-scale property is repaired by the next Measure, cache HIT included");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View view                   = View::New();
   gActorScaleSyncMeasureCount = 0;
@@ -449,7 +449,7 @@ int UtcDaliUiScaleEffectiveScaleActorSyncRepairedOnMeasureCacheHitP(void)
   DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleActorSynced());
   DALI_TEST_EQUALS(view.GetProperty<float>(Dali::Ui::Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), 1.0f, 0.001f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -493,8 +493,8 @@ int UtcDaliUiScaleMeasureCacheKeyRecordsEffectiveScaleP(void)
   UiTestApplication application;
   tet_infoline("A measure publish records the effective scale it ran at, and the term keeps the hit");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View view               = View::New();
   gMeasureKeyMeasureCount = 0;
@@ -507,7 +507,7 @@ int UtcDaliUiScaleMeasureCacheKeyRecordsEffectiveScaleP(void)
   view.Measure(200.0f, 200.0f);
   DALI_TEST_EQUALS(gMeasureKeyMeasureCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(DataOf(view).IsMeasureCacheValid());
-  // Exact: the recorded key is a copy of the same GetEffectiveScale() value the
+  // Exact: the recorded key is a copy of the same GetEffectiveLayoutScale() value the
   // predicate compares against, so an epsilon comparison here would say less.
   DALI_TEST_CHECK(DataOf(view).GetLastMeasureScale() == 1.0f);
 
@@ -516,7 +516,7 @@ int UtcDaliUiScaleMeasureCacheKeyRecordsEffectiveScaleP(void)
   DALI_TEST_EQUALS(gMeasureKeyMeasureCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(DataOf(view).GetLastMeasureScale() == 1.0f);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -528,8 +528,8 @@ int UtcDaliUiScaleMeasureCacheKeyRepublishedAtNewScaleP(void)
   UiTestApplication application;
   tet_infoline("A scale change re-runs the measure producer and re-publishes the key at the new scale");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View view               = View::New();
   gMeasureKeyMeasureCount = 0;
@@ -547,19 +547,19 @@ int UtcDaliUiScaleMeasureCacheKeyRepublishedAtNewScaleP(void)
   const int countAtUnitScale = gMeasureKeyMeasureCount;
   DALI_TEST_CHECK(countAtUnitScale > 0);
 
-  UiScaleManager::Get().SetScale(1.5f);
+  LayoutScaleManager::Get().SetUiScale(1.5f);
   Settle(application);
 
   DALI_TEST_CHECK(DataOf(view).IsMeasureCacheValid());
   DALI_TEST_CHECK(DataOf(view).GetLastMeasureScale() == 1.5f);
   DALI_TEST_CHECK(gMeasureKeyMeasureCount > countAtUnitScale);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
 // ---------------------------------------------------------------------------
-// The global master switch: UiScaleManager::IsScalable / SetScalable.
+// The global master switch: LayoutScaleManager::IsScalable / SetScalable.
 //
 // ComputeEffectiveScale is the single choke point that reads the switch, so when
 // scaling is off every view resolves to 1.0 regardless of its UiScalePolicy. The
@@ -576,7 +576,7 @@ int UtcDaliUiScaleScalableFlagDefaultTrueP(void)
   UiTestApplication application;
   tet_infoline("UI scaling is enabled by default");
 
-  DALI_TEST_CHECK(UiScaleManager::Get().IsScalable());
+  DALI_TEST_CHECK(LayoutScaleManager::Get().IsScalable());
   END_TEST;
 }
 
@@ -587,10 +587,10 @@ int UtcDaliUiScaleSetScalableFalseCollapsesEffectiveScaleP(void)
   UiTestApplication application;
   tet_infoline("SetScalable(false) collapses every view's effective scale to 1.0 regardless of policy");
 
-  const float originalScale    = UiScaleManager::Get().GetScale();
-  const bool  originalScalable = UiScaleManager::Get().IsScalable();
-  UiScaleManager::Get().SetScalable(true);
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale    = LayoutScaleManager::Get().GetUiScale();
+  const bool  originalScalable = LayoutScaleManager::Get().IsScalable();
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   View inheritView = View::New(); // INHERIT (default): a root inherits the global scale
   inheritView.SetRequestedWidth(100.0f);
@@ -606,21 +606,21 @@ int UtcDaliUiScaleSetScalableFalseCollapsesEffectiveScaleP(void)
   Settle(application);
 
   // Baseline: the switch is on, so the stored 2.0 reaches both.
-  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
 
   // Switch off: both collapse to 1.0 even though the stored scale is still 2.0.
-  UiScaleManager::Get().SetScalable(false);
-  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+  LayoutScaleManager::Get().SetScalable(false);
+  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
 
   // Switch back on: the preserved 2.0 is re-applied.
-  UiScaleManager::Get().SetScalable(true);
-  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
+  LayoutScaleManager::Get().SetScalable(true);
+  DALI_TEST_EQUALS(GetImpl(inheritView).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(enabledView).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
-  UiScaleManager::Get().SetScalable(originalScalable);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 
@@ -632,10 +632,10 @@ int UtcDaliUiScaleSetScalableInvalidatesSubtreeCachesP(void)
   UiTestApplication application;
   tet_infoline("SetScalable(false) alone drops the arrange cache of the whole subtree");
 
-  const float originalScale    = UiScaleManager::Get().GetScale();
-  const bool  originalScalable = UiScaleManager::Get().IsScalable();
-  UiScaleManager::Get().SetScalable(true);
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale    = LayoutScaleManager::Get().GetUiScale();
+  const bool  originalScalable = LayoutScaleManager::Get().IsScalable();
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -653,13 +653,13 @@ int UtcDaliUiScaleSetScalableInvalidatesSubtreeCachesP(void)
   DALI_TEST_CHECK(DataOf(child).IsArrangeCacheValid());
 
   // No layout pass afterwards: flipping the switch itself must clear the caches.
-  UiScaleManager::Get().SetScalable(false);
+  LayoutScaleManager::Get().SetScalable(false);
 
   DALI_TEST_CHECK(!DataOf(root).IsArrangeCacheValid());
   DALI_TEST_CHECK(!DataOf(child).IsArrangeCacheValid());
 
-  UiScaleManager::Get().SetScale(originalScale);
-  UiScaleManager::Get().SetScalable(originalScalable);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 
@@ -670,10 +670,10 @@ int UtcDaliUiScaleSetScalableNoOpWhenUnchangedP(void)
   UiTestApplication application;
   tet_infoline("SetScalable with the current value is a no-op and preserves the layout caches");
 
-  const float originalScale    = UiScaleManager::Get().GetScale();
-  const bool  originalScalable = UiScaleManager::Get().IsScalable();
-  UiScaleManager::Get().SetScalable(true);
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale    = LayoutScaleManager::Get().GetUiScale();
+  const bool  originalScalable = LayoutScaleManager::Get().IsScalable();
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -691,14 +691,14 @@ int UtcDaliUiScaleSetScalableNoOpWhenUnchangedP(void)
   DALI_TEST_CHECK(DataOf(child).IsArrangeCacheValid());
 
   // Re-asserting the value the switch already holds invalidates nothing.
-  DALI_TEST_CHECK(UiScaleManager::Get().IsScalable());
-  UiScaleManager::Get().SetScalable(true);
+  DALI_TEST_CHECK(LayoutScaleManager::Get().IsScalable());
+  LayoutScaleManager::Get().SetScalable(true);
 
   DALI_TEST_CHECK(DataOf(root).IsArrangeCacheValid());
   DALI_TEST_CHECK(DataOf(child).IsArrangeCacheValid());
 
-  UiScaleManager::Get().SetScale(originalScale);
-  UiScaleManager::Get().SetScalable(originalScalable);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 
@@ -710,10 +710,10 @@ int UtcDaliUiScaleSetScaleWhileDisabledStoresButDefersP(void)
   UiTestApplication application;
   tet_infoline("SetScale while disabled stores the value but defers effect and relayout until re-enabled");
 
-  const float originalScale    = UiScaleManager::Get().GetScale();
-  const bool  originalScalable = UiScaleManager::Get().IsScalable();
-  UiScaleManager::Get().SetScalable(true);
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale    = LayoutScaleManager::Get().GetUiScale();
+  const bool  originalScalable = LayoutScaleManager::Get().IsScalable();
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View view = View::New(); // INHERIT root
   view.SetRequestedWidth(100.0f);
@@ -722,51 +722,51 @@ int UtcDaliUiScaleSetScaleWhileDisabledStoresButDefersP(void)
   application.GetScene().Add(view);
   Settle(application);
 
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
 
   // Disabling drops the cache; re-settling re-publishes it at the unscaled result.
-  UiScaleManager::Get().SetScalable(false);
+  LayoutScaleManager::Get().SetScalable(false);
   DALI_TEST_CHECK(!DataOf(view).IsArrangeCacheValid());
   Settle(application);
   DALI_TEST_CHECK(DataOf(view).IsArrangeCacheValid());
 
   // Change the stored scale while disabled: the value is recorded (I5)...
-  UiScaleManager::Get().SetScale(2.0f);
-  DALI_TEST_EQUALS(UiScaleManager::Get().GetScale(), 2.0f, 0.001f, TEST_LOCATION);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+  DALI_TEST_EQUALS(LayoutScaleManager::Get().GetUiScale(), 2.0f, 0.001f, TEST_LOCATION);
   // ...but with the switch off the view stays unscaled and its cache is untouched.
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 1.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_CHECK(DataOf(view).IsArrangeCacheValid());
 
   // Re-enabling applies the deferred 2.0.
-  UiScaleManager::Get().SetScalable(true);
-  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveScale(), 2.0f, 0.001f, TEST_LOCATION);
+  LayoutScaleManager::Get().SetScalable(true);
+  DALI_TEST_EQUALS(GetImpl(view).GetEffectiveLayoutScale(), 2.0f, 0.001f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
-  UiScaleManager::Get().SetScalable(originalScalable);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 
 // A STANDALONE view with a View parent that becomes DEFAULT stops being a scale root: its
-// UiScaleManager registration is withdrawn with its layout-root registration, so a later
+// LayoutScaleManager registration is withdrawn with its layout-root registration, so a later
 // scale change reaches it only through the root it now belongs to.
 //
-// Trace: the child registers as a root (with the controller and with UiScaleManager) while it
+// Trace: the child registers as a root (with the controller and with LayoutScaleManager) while it
 // is STANDALONE. The switch withdraws both registrations and the next pass measures it as a
 // regular child of `parent`, publishing its measure entry. Removing `root` from the scene
 // unregisters root (a parentless view) but not the child (a DEFAULT view with a View parent),
 // so the scale change below finds no registered root that covers the child, and its entry
 // survives.
 //
-// Non-vacuity (by mutation): dropping the UiScaleManager unregistration from the LAYOUT_MODE
+// Non-vacuity (by mutation): dropping the LayoutScaleManager unregistration from the LAYOUT_MODE
 // setter leaves the child registered, the scale change resets its subtree caches
 // (InvalidateAllLayoutRoots), and the second check fails.
 int UtcDaliUiScaleStandaloneToDefaultSwitchLeavesScaleRootSetP(void)
 {
   UiTestApplication application;
-  tet_infoline("A standalone view switched to DEFAULT under a View parent is no longer a UiScaleManager root");
+  tet_infoline("A standalone view switched to DEFAULT under a View parent is no longer a LayoutScaleManager root");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -791,9 +791,9 @@ int UtcDaliUiScaleStandaloneToDefaultSwitchLeavesScaleRootSetP(void)
   DALI_TEST_CHECK(DataOf(child).IsMeasureCacheValid());
 
   application.GetScene().Remove(root);
-  UiScaleManager::Get().SetScale(1.5f);
+  LayoutScaleManager::Get().SetUiScale(1.5f);
   DALI_TEST_CHECK(DataOf(child).IsMeasureCacheValid());
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }

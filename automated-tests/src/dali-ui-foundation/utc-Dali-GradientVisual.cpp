@@ -16,7 +16,7 @@
  */
 
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
@@ -520,16 +520,16 @@ namespace
 struct GradientUiScaleScope
 {
   GradientUiScaleScope()
-  : scale(UiScaleManager::Get().GetScale()),
-    scalable(UiScaleManager::Get().IsScalable())
+  : scale(LayoutScaleManager::Get().GetUiScale()),
+    scalable(LayoutScaleManager::Get().IsScalable())
   {
-    UiScaleManager::Get().SetScalable(true);
-    UiScaleManager::Get().SetScale(1.0f);
+    LayoutScaleManager::Get().SetScalable(true);
+    LayoutScaleManager::Get().SetUiScale(1.0f);
   }
   ~GradientUiScaleScope()
   {
-    UiScaleManager::Get().SetScale(scale);
-    UiScaleManager::Get().SetScalable(scalable);
+    LayoutScaleManager::Get().SetUiScale(scale);
+    LayoutScaleManager::Get().SetScalable(scalable);
   }
   float scale;
   bool  scalable;
@@ -631,7 +631,7 @@ int UtcDaliGradientVisualUiScaleGeometryAndResources(void)
       view.SetBackgroundGradient(authored);
       parent.Add(view);
       application.GetWindow().Add(parent);
-      UiScaleManager::Get().SetScale(1.0f);
+      LayoutScaleManager::Get().SetUiScale(1.0f);
       SettleGradient(application);
       const Matrix3 original = GradientMatrix(view);
       auto          renderer = GradientRenderer(view);
@@ -649,7 +649,7 @@ int UtcDaliGradientVisualUiScaleGeometryAndResources(void)
         gl.GetBufferTrace().Enable(true);
         gl.GetBufferTrace().Reset();
         // Only the scale changes. MATCH_PARENT keeps actual and requested sizes unchanged.
-        UiScaleManager::Get().SetScale(scale);
+        LayoutScaleManager::Get().SetUiScale(scale);
         SettleGradient(application);
         DALI_TEST_EQUALS(view.GetCurrentProperty<Vector3>(Actor::Property::SIZE), Vector3(240.0f, 90.0f, 0.0f), TEST_LOCATION);
         ExpectGradientMapping(GradientMatrix(view), type, units == Gradient::Units::USER_SPACE ? scale : 1.0f);
@@ -680,7 +680,7 @@ int UtcDaliGradientVisualUiScaleLifecycle(void)
 {
   UiTestApplication    application;
   GradientUiScaleScope scaleScope;
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   View enabled  = View::New();
   View disabled = View::New();
   enabled.SetUiScalePolicy(UiScalePolicy::ENABLED);
@@ -706,14 +706,14 @@ int UtcDaliGradientVisualUiScaleLifecycle(void)
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(child), 1, 2.0f);
   enabled.Remove(child);
-  UiScaleManager::Get().SetScale(1.25f);
+  LayoutScaleManager::Get().SetUiScale(1.25f);
   enabled.Add(child);
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(child), 1, 1.25f);
-  UiScaleManager::Get().SetScalable(false);
+  LayoutScaleManager::Get().SetScalable(false);
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(child), 1, 1.0f);
-  UiScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetScalable(true);
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(child), 1, 1.25f);
   END_TEST;
@@ -723,7 +723,7 @@ int UtcDaliGradientVisualUiScaleUnitsAndTransform(void)
 {
   UiTestApplication    application;
   GradientUiScaleScope scaleScope;
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   View view = View::New();
   view.SetRequestedWidth(240.0f);
   view.SetRequestedHeight(90.0f);
@@ -756,7 +756,7 @@ int UtcDaliGradientVisualUiScaleUnitsAndTransform(void)
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(view), 2, 2.0f);
   visual.Detach();
-  UiScaleManager::Get().SetScale(0.5f);
+  LayoutScaleManager::Get().SetUiScale(0.5f);
   view.AddVisual(visual, Visual::DepthLayer::BACKGROUND);
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(view), 2, 0.5f);
@@ -783,7 +783,7 @@ int UtcDaliGradientVisualUiScaleAnimation(void)
   animation.Play();
   SettleGradient(application);
   const float before = renderer.GetCurrentProperty<float>(offsetIndex);
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(view), 0, 2.0f);
   DALI_TEST_CHECK(renderer.GetCurrentProperty<float>(offsetIndex) > before);
@@ -825,7 +825,7 @@ int UtcDaliGradientVisualUiScaleUniformStability(void)
   {
     for(float scale : {1.0f, 2.0f, 2.0f, 1.0f})
     {
-      UiScaleManager::Get().SetScale(scale);
+      LayoutScaleManager::Get().SetUiScale(scale);
       SettleGradient(application);
       ExpectGradientMapping(GradientMatrix(view), 1, scale);
       DALI_TEST_EQUALS(renderer.GetPropertyIndex("uAlignmentMatrix"), index, TEST_LOCATION);
@@ -900,7 +900,7 @@ int UtcDaliGradientVisualUiScalePropertyTransitions(void)
 {
   UiTestApplication    application;
   GradientUiScaleScope scaleScope;
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   View view = View::New();
   view.SetRequestedWidth(240.0f);
   view.SetRequestedHeight(90.0f);
@@ -927,7 +927,7 @@ int UtcDaliGradientVisualUiScalePropertyTransitions(void)
       SettleGradient(application);
       for(float scale : {0.5f, 2.0f})
       {
-        UiScaleManager::Get().SetScale(scale);
+        LayoutScaleManager::Get().SetUiScale(scale);
         SettleGradient(application);
         ExpectGradientMapping(GradientMatrix(view), type, units == Gradient::Units::USER_SPACE ? scale : 1.0f);
         DALI_TEST_EQUALS(renderer.GetPropertyCount(), count, TEST_LOCATION);
@@ -935,14 +935,14 @@ int UtcDaliGradientVisualUiScalePropertyTransitions(void)
       }
     }
   }
-  UiScaleManager::Get().SetScale(1.0f);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
   auto precise = Gradient::Linear(Vector2::ZERO, Vector2(100000.0f, 0.0f));
   precise.SetUnits(Gradient::Units::USER_SPACE);
   precise.SetStopNodes({{0.0f, UiColor(Color::RED)}, {1.0f, UiColor(Color::BLUE)}});
   visual.SetGradient(precise);
   SettleGradient(application);
   const auto before = renderer.GetProperty<Matrix3>(index);
-  UiScaleManager::Get().SetScale(1.0001f);
+  LayoutScaleManager::Get().SetUiScale(1.0001f);
   SettleGradient(application);
   const auto after = renderer.GetProperty<Matrix3>(index);
   DALI_TEST_CHECK(before.AsFloat()[1] != after.AsFloat()[1]);
@@ -1123,7 +1123,7 @@ int UtcDaliGradientVisualUiScaleRejectedPropertyTransitions(void)
     }
   }
   // Finite authored geometry can overflow after a type change at a valid scale.
-  UiScaleManager::Get().SetScale(std::numeric_limits<float>::min());
+  LayoutScaleManager::Get().SetUiScale(std::numeric_limits<float>::min());
   SettleGradient(application);
   const auto beforeOverflow = GradientMatrix(view);
   auto       small          = Gradient::Radial(Vector2::ZERO, 0.125f);
@@ -1144,10 +1144,10 @@ int UtcDaliGradientVisualUiScaleRejectedPropertyTransitions(void)
   internal.DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY, properties);
   SettleGradient(application);
   DALI_TEST_EQUALS(GradientMatrix(view), bbox, TEST_LOCATION);
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   SettleGradient(application);
   DALI_TEST_EQUALS((GradientMatrix(view) * Vector3(0.25f, 0.0f, 1.0f)).x, 1.0f, TEST_LOCATION);
-  UiScaleManager::Get().SetScale(1.0f);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
   // Reject an invalid authored alignment before the first renderer registration.
   GradientVisual initial = GradientVisual::New();
   auto           invalid = Gradient::Conic(Vector2(std::numeric_limits<float>::quiet_NaN(), 0.0f), Radian(0.4f));
@@ -1176,7 +1176,7 @@ int UtcDaliGradientVisualUiScaleSharedGradient(void)
 {
   UiTestApplication    application;
   GradientUiScaleScope scaleScope;
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   for(int type = 0; type < 3; ++type)
   {
     const auto authored = ScaleTestGradient(type, Gradient::Units::USER_SPACE);

@@ -222,7 +222,7 @@ void RadioButtonImpl::OnSceneConnection(int depth)
 
 MeasuredSize RadioButtonImpl::OnMeasure(float /*widthConstraint*/, float heightConstraint)
 {
-  const float s = GetEffectiveScale();
+  const float s = GetEffectiveLayoutScale();
 
   const Insets padding   = GetPadding();
   const float  padWidth  = static_cast<float>(padding.start + padding.end) * s;
@@ -287,7 +287,7 @@ MeasuredSize RadioButtonImpl::OnMeasure(float /*widthConstraint*/, float heightC
 
 LayoutRect RadioButtonImpl::OnArrange(const LayoutRect& bounds)
 {
-  const float  s       = GetEffectiveScale();
+  const float  s       = GetEffectiveLayoutScale();
   const Insets padding = GetPadding();
 
   const float contentX      = static_cast<float>(padding.start) * s;

@@ -849,7 +849,7 @@ private:
     }
     DisableAutoTest();
     mUiScaleIndex = index;
-    UiScaleManager::Get().SetScale(UI_SCALES[index]);
+    LayoutScaleManager::Get().SetUiScale(UI_SCALES[index]);
     RefreshPanel();
   }
 

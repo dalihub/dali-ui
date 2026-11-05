@@ -22,7 +22,7 @@
 
 #include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/extension-api/view.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -6523,8 +6523,8 @@ int UtcDaliViewStandaloneFixedAtScaleWithMarginAndMaximumP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   ResetFillMeasureProducer();
 
@@ -6559,7 +6559,7 @@ int UtcDaliViewStandaloneFixedAtScaleWithMarginAndMaximumP(void)
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 30.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 60.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -6668,8 +6668,8 @@ int UtcDaliViewStandaloneReconnectAfterOffSceneScaleChangeRelayoutsCleanChildP(v
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   ResetFillMeasureProducer();
 
@@ -6709,9 +6709,9 @@ int UtcDaliViewStandaloneReconnectAfterOffSceneScaleChangeRelayoutsCleanChildP(v
   DALI_TEST_EQUALS(matchChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(matchChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 10.0f, TEST_LOCATION);
 
-  // Off scene, nothing is registered with UiScaleManager, so the scale change reaches no view.
+  // Off scene, nothing is registered with LayoutScaleManager, so the scale change reaches no view.
   window.Remove(root);
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   window.Add(root);
 
   // Trace at scale 2: the reconnecting root drops the subtree's caches and scales without
@@ -6724,7 +6724,7 @@ int UtcDaliViewStandaloneReconnectAfterOffSceneScaleChangeRelayoutsCleanChildP(v
   DALI_TEST_EQUALS(matchChild.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(matchChild.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 20.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -6742,8 +6742,8 @@ int UtcDaliViewStandaloneReconnectAfterScalePolicyChangeAndDirectMeasureRelayout
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   ResetFillMeasureProducer();
 
@@ -6801,7 +6801,7 @@ int UtcDaliViewStandaloneReconnectAfterScalePolicyChangeAndDirectMeasureRelayout
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 30.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -7400,8 +7400,8 @@ int UtcDaliViewRemoveInvalidatesSubtreeEffectiveScaleP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -7426,18 +7426,18 @@ int UtcDaliViewRemoveInvalidatesSubtreeEffectiveScaleP(void)
   // Warm every node's cached effective scale.
   application.SendNotification();
   application.SendNotification();
-  DALI_TEST_EQUALS(GetImpl(d).GetEffectiveScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(d).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
 
   // Sever C from the DISABLED parent. C, now parentless, re-roots at the global
   // scale (2.0); D, still C's child, inherits it.
   p.Remove(c);
 
-  DALI_TEST_EQUALS(GetImpl(c).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(c).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
   // The fix: D's cached scale was invalidated too, so it recomputes to 2.0.
   // Without the recursive invalidation D would report the stale 1.0.
-  DALI_TEST_EQUALS(GetImpl(d).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(d).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -7450,8 +7450,8 @@ int UtcDaliViewRemoveThenWindowAddRelayoutsSubtreeAtNewScaleP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -7489,13 +7489,13 @@ int UtcDaliViewRemoveThenWindowAddRelayoutsSubtreeAtNewScaleP(void)
   // subtree (stale scale 1.0) would leave it at 50.
   DALI_TEST_EQUALS(d.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
 // Phase 3d (off-scene root gap). A layout ROOT removed from the Window -- not from
 // a View parent, so no ViewDataImpl::OnChildRemoved fires -- is no longer tracked
-// by UiScaleManager, so a global SetScale() made while it is detached never reaches
+// by LayoutScaleManager, so a global SetUiScale() made while it is detached never reaches
 // it. On re-connection the root must re-derive its (stale) effective scale, which
 // OnViewSceneConnection now does. Without it the root arranges at the scale in force
 // before it was detached.
@@ -7504,8 +7504,8 @@ int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View root = View::New(); // INHERIT -> global scale
   root.SetRequestedWidth(50.0f);
@@ -7514,23 +7514,23 @@ int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
 
   application.SendNotification();
   application.SendNotification();
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
 
   // Detach, change the global scale while detached (the root, untracked, misses
   // it), then re-attach.
   window.Remove(root);
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
   window.Add(root);
 
   application.SendNotification();
   application.SendNotification();
 
   // Re-connection re-derived the scale (2.0) and re-measured: 50 x 2.0 = 100.
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -7544,10 +7544,10 @@ int UtcDaliViewUnscaledWhenNotScalableP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale    = UiScaleManager::Get().GetScale();
-  const bool  originalScalable = UiScaleManager::Get().IsScalable();
-  UiScaleManager::Get().SetScalable(true);
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale    = LayoutScaleManager::Get().GetUiScale();
+  const bool  originalScalable = LayoutScaleManager::Get().IsScalable();
+  LayoutScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   View root = View::New(); // INHERIT -> global scale
   root.SetRequestedWidth(50.0f);
@@ -7562,21 +7562,21 @@ int UtcDaliViewUnscaledWhenNotScalableP(void)
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 100.0f, TEST_LOCATION);
 
   // Master switch off: the tree re-arranges unscaled despite the stored 2.0.
-  UiScaleManager::Get().SetScalable(false);
+  LayoutScaleManager::Get().SetScalable(false);
   application.SendNotification();
   application.SendNotification();
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 50.0f, TEST_LOCATION);
 
   // Master switch back on: the preserved 2.0 is re-applied.
-  UiScaleManager::Get().SetScalable(true);
+  LayoutScaleManager::Get().SetScalable(true);
   application.SendNotification();
   application.SendNotification();
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 100.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
-  UiScaleManager::Get().SetScalable(originalScalable);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 
@@ -8056,7 +8056,7 @@ int UtcDaliViewArrangeCacheMissOnDirectionChangeP(void)
 // The leaf is arranged directly, without an intervening Measure, so the only thing
 // that can have invalidated its cache is the scale reset itself (a re-Measure would
 // clear the arrange cache through MeasurePassGuard and hide the mechanism). It is a
-// CHILD rather than the layout root, so UiScaleManager's InvalidateMeasure() lands on
+// CHILD rather than the layout root, so LayoutScaleManager's InvalidateMeasure() lands on
 // the root and never raises the leaf's own dirty bit.
 //
 // Non-vacuity (verified by mutation): removing `mArrangeCacheValid = false` from
@@ -8069,8 +8069,8 @@ int UtcDaliViewArrangeCacheMissOnScaleChangeP(void)
 
   gCountingArrangeProducerCount = 0;
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -8095,13 +8095,13 @@ int UtcDaliViewArrangeCacheMissOnScaleChangeP(void)
   leaf.Arrange(leafSlot);
   DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(2.0f);
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   // Same slot, same direction, no dirty bit on the leaf -- and it must still miss.
   leaf.Arrange(leafSlot);
   DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount + 1, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 

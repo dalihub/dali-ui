@@ -42,6 +42,13 @@ class UiScaleManagerImpl;
  * UiScaleManager is a handle-based singleton that exposes the current system
  * scale factor and propagates scale changes to all registered layout roots.
  *
+ * It shares one state with LayoutScaleManager: a value set through either class is
+ * read back through both, and the last call wins. The two handles refer to different
+ * objects, so DownCast() of a LayoutScaleManager handle returns an uninitialized handle.
+ * Do not use it from the destructor of an object with static storage duration.
+ *
+ * @deprecated Use LayoutScaleManager instead. This is kept for legacy apps.
+ *
  * @code
  *   float scale = UiScaleManager::Get().GetScale();
  * @endcode
@@ -92,6 +99,8 @@ public:
   /**
    * @brief Returns the singleton UiScaleManager instance.
    *
+   * @deprecated Use LayoutScaleManager::Get() instead.
+   *
    * Creates the instance on first call.
    *
    * @return A handle to the UiScaleManager singleton
@@ -101,6 +110,8 @@ public:
   /**
    * @brief Downcasts a handle to a UiScaleManager handle.
    *
+   * @deprecated Use LayoutScaleManager::DownCast() instead.
+   *
    * @param[in] handle Handle to an object
    * @return A handle to a UiScaleManager or an uninitialized handle
    */
@@ -109,12 +120,16 @@ public:
   /**
    * @brief Returns the current system scale factor.
    *
+   * @deprecated Use LayoutScaleManager::GetUiScale() instead.
+   *
    * @return The current scale value (1.0 by default)
    */
   float GetScale() const;
 
   /**
    * @brief Sets the system scale factor.
+   *
+   * @deprecated Use LayoutScaleManager::SetUiScale() instead.
    *
    * Called by system/vconf handlers when the display scale changes.
    * Invalidates all registered layout roots and triggers re-layout.
@@ -128,12 +143,16 @@ public:
   /**
    * @brief Returns whether UI scaling is currently enabled.
    *
+   * @deprecated Use LayoutScaleManager::IsScalable() instead.
+   *
    * @return true if scaling is enabled (default), false if globally disabled
    */
   bool IsScalable() const;
 
   /**
    * @brief Enables or disables UI scaling globally.
+   *
+   * @deprecated Use LayoutScaleManager::SetScalable() instead.
    *
    * A process-wide master switch. When disabled, every view's effective scale
    * resolves to 1.0 regardless of its UiScalePolicy or the value set via
@@ -152,7 +171,7 @@ public: // Not intended for Application developers
   /**
    * @brief Registers a layout root to be invalidated when the system scale changes.
    *
-   * Called automatically by ViewImpl when a view becomes a layout root.
+   * No longer called by the library; kept for binary compatibility.
    *
    * @param[in] root The root view to register
    */
@@ -161,7 +180,7 @@ public: // Not intended for Application developers
   /**
    * @brief Unregisters a layout root.
    *
-   * Called automatically by ViewImpl when a root view leaves the scene.
+   * No longer called by the library; kept for binary compatibility.
    *
    * @param[in] root The root view to unregister
    */

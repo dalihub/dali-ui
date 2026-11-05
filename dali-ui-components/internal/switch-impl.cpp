@@ -135,7 +135,7 @@ void SwitchImpl::ApplyInitialStyle(SwitchStyle style)
 
 MeasuredSize SwitchImpl::OnMeasure(float /*widthConstraint*/, float /*heightConstraint*/)
 {
-  const float  scale   = GetEffectiveScale();
+  const float  scale   = GetEffectiveLayoutScale();
   const Insets padding = GetPadding();
 
   const float naturalWidth  = (mStyle.GetTrackWidth() + padding.start + padding.end) * scale;
@@ -168,7 +168,7 @@ LayoutRect SwitchImpl::OnArrange(const LayoutRect& bounds)
     transitionRebased = true;
   }
 
-  const float  scale        = GetEffectiveScale();
+  const float  scale        = GetEffectiveLayoutScale();
   const Insets padding      = GetPadding();
   const Insets thumbPadding = mStyle.GetThumbPadding();
 
@@ -310,7 +310,7 @@ bool SwitchImpl::OnInterceptTouch(Actor /*actor*/, TouchEvent event)
   // on the Switch even when it lives inside a horizontal scroll container.
   if(!mDragging && event.GetPointCount() > 0u && event.GetState(0u) == PointState::MOTION)
   {
-    const float scale     = std::max(POSITION_EPSILON, GetEffectiveScale());
+    const float scale     = std::max(POSITION_EPSILON, GetEffectiveLayoutScale());
     const float x         = event.GetLocalPosition(0u).x;
     const float direction = IsRightToLeft() ? -1.0f : 1.0f;
     const float candidate = Clamp(mThumbPosition + direction * (x - mLastTouchX) / scale, 0.0f, GetTravelDistance());
@@ -361,7 +361,7 @@ bool SwitchImpl::OnTouch(Actor /*actor*/, TouchEvent event)
       return false;
     }
 
-    const float scale     = std::max(POSITION_EPSILON, GetEffectiveScale());
+    const float scale     = std::max(POSITION_EPSILON, GetEffectiveLayoutScale());
     const float direction = IsRightToLeft() ? -1.0f : 1.0f;
     const float candidate = Clamp(mThumbPosition + direction * (x - mLastTouchX) / scale, 0.0f, GetTravelDistance());
     mLastTouchX           = x;
@@ -568,7 +568,7 @@ float SwitchImpl::GetTravelDistance() const
 
 float SwitchImpl::GetCurrentLogicalPosition() const
 {
-  const float scale = GetEffectiveScale();
+  const float scale = GetEffectiveLayoutScale();
   if(!mThumbEffectTarget || scale <= POSITION_EPSILON)
   {
     return mThumbPosition;
@@ -580,7 +580,7 @@ float SwitchImpl::GetCurrentLogicalPosition() const
 
 float SwitchImpl::LogicalPositionToActorX(float position) const
 {
-  const float logicalX = mThumbEffectTargetBaseX + position * GetEffectiveScale();
+  const float logicalX = mThumbEffectTargetBaseX + position * GetEffectiveLayoutScale();
   return IsRightToLeft() ? mArrangedWidth - logicalX - mThumbEffectTargetWidth : logicalX;
 }
 

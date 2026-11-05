@@ -67,6 +67,7 @@
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/input-event-impl.h>
+#include <dali-ui-foundation/internal/layout-scale-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
@@ -89,10 +90,10 @@
 #include <dali-ui-foundation/internal/views/view/view-gradient-color-binding.h>
 #include <dali-ui-foundation/internal/views/view/view-internal-depth-slots.h>
 #include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
@@ -451,10 +452,10 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 // enters the layout system does so through one of the two calls to this function
 // in ComputeEffectiveScale() -- every other Measure/Arrange site, every
 // measure-cache scale key and the actor-side VIEW_EFFECTIVE_SCALE
-// push obtain the scale via GetEffectiveScale(), which memoizes what
+// push obtain the scale via GetEffectiveLayoutScale(), which memoizes what
 // ComputeEffectiveScale() returns. So collapsing the system scale to 1.0f here
 // is what makes the whole system behave as unscaled, with no change at any call
-// site. The scale stored in UiScaleManager is left untouched and is re-applied
+// site. The scale stored in LayoutScaleManager is left untouched and is re-applied
 // as soon as scaling is re-enabled.
 //
 // Reading the switch HERE rather than at the top of ComputeEffectiveScale() is
@@ -463,8 +464,8 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 // they were before the switch existed.
 inline float GetSystemScale()
 {
-  UiScaleManager manager = UiScaleManager::Get();
-  return manager.IsScalable() ? manager.GetScale() : 1.0f;
+  LayoutScaleManager manager = LayoutScaleManager::Get();
+  return manager.IsScalable() ? manager.GetUiScale() : 1.0f;
 }
 
 // Sanitize size property inputs. RequestedWidth/Height accept any
@@ -1280,7 +1281,7 @@ ViewDataImpl::VisualData& ViewDataImpl::EnsureVisualData()
 
 MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightConstraint)
 {
-  float s    = mViewImpl.GetEffectiveScale();
+  float s    = mViewImpl.GetEffectiveLayoutScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
@@ -1402,7 +1403,7 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
         continue;
       }
 
-      float  childScale            = childImpl.GetEffectiveScale();
+      float  childScale            = childImpl.GetEffectiveLayoutScale();
       Insets margin                = childImpl.GetMargin();
       float  marginW               = static_cast<float>(margin.start + margin.end) * childScale;
       float  marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
@@ -1646,7 +1647,7 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
   // the default arrange only places regular children and echoes the input bounds.
   if(!mChildren.Empty())
   {
-    float s            = mViewImpl.GetEffectiveScale();
+    float s            = mViewImpl.GetEffectiveLayoutScale();
     float visPadLeft   = static_cast<float>(mPadding.start) * s;
     float visPadRight  = static_cast<float>(mPadding.end) * s;
     float visPadTop    = static_cast<float>(mPadding.top) * s;
@@ -1667,7 +1668,7 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
         continue;
       }
 
-      float        childScale      = childImpl.GetEffectiveScale();
+      float        childScale      = childImpl.GetEffectiveLayoutScale();
       Insets       margin          = childImpl.GetMargin();
       float        visMarginStart  = static_cast<float>(margin.start) * childScale;
       float        visMarginEnd    = static_cast<float>(margin.end) * childScale;
@@ -2450,7 +2451,7 @@ UiScalePolicy ViewDataImpl::GetUiScalePolicy() const
   return mScalePolicy;
 }
 
-float ViewDataImpl::GetEffectiveScale() const
+float ViewDataImpl::GetEffectiveLayoutScale() const
 {
   // mEffectiveScaleValid -- not a value sentinel on mEffectiveScale itself -- is
   // what says whether the cached scale is usable. Every scale-context
@@ -2491,7 +2492,7 @@ void ViewDataImpl::InvalidateMeasure()
   //
   // Drop the cached effective scale: whatever changed may have moved this view's
   // effective scale (a reparent re-roots the INHERIT chain), so the next
-  // GetEffectiveScale() must recompute rather than serve the cached value.
+  // GetEffectiveLayoutScale() must recompute rather than serve the cached value.
   DropCachedEffectiveScale();
 
   // Both caches go with it: a cached measured size or arranged bounds produced
@@ -3850,7 +3851,7 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // ResetSubtreeScaleAndLayoutCaches() clears the effective-scale sync bit
     // (mEffectiveScaleValid) and both layout caches (mMeasureCacheValid and
     // mArrangeCacheValid) for every node in the subtree, guaranteeing:
-    //   (a) scale is recomputed from the new parent chain on next GetEffectiveScale(), and
+    //   (a) scale is recomputed from the new parent chain on next GetEffectiveLayoutScale(), and
     //   (b) the invalid measure cache forces a cache miss in Measure() so all
     //       nodes fully re-measure with the new scale.
     //
@@ -4013,7 +4014,7 @@ void ViewDataImpl::OnChildRemoved(Actor& child)
 
       // Removal re-roots the removed subtree's effective-scale chain: an INHERIT
       // node's ComputeEffectiveScale walks its parent chain, and severing this
-      // link re-roots that chain (ultimately at UiScaleManager's global scale).
+      // link re-roots that chain (ultimately at LayoutScaleManager's global scale).
       // So the whole removed subtree's cached effective scale is now stale. The
       // InvalidateMeasure() below drops it on the direct child ONLY and
       // propagates upward, never into the subtree -- the mirror of OnChildAdded's
@@ -4082,7 +4083,7 @@ void ViewDataImpl::OnViewSceneConnection()
   // reach the view: a standalone view whose parent is never arranged -- one inside a
   // regular child of a producer that never arranges its children (a Label:
   // LabelImpl::OnArrange returns its bounds), or under a parent whose own parent
-  // ignores it -- is placed by no parent pass, and UiScaleManager's root registration
+  // ignores it -- is placed by no parent pass, and LayoutScaleManager's root registration
   // is only a map insert that schedules nothing. Its own self pass is therefore the
   // only route that brings it to the current scale and window, and keeps a window
   // resize reaching it (the controller invalidates its tracked roots and nothing
@@ -4090,12 +4091,12 @@ void ViewDataImpl::OnViewSceneConnection()
   // self pass after the parent's pass is a measure + arrange cache hit:
   // ArrangeStandaloneChild and LayoutController::ProcessLayoutRoot derive the same
   // constraint and slot from the same parent layout target.
-  // RegisterWithLayoutController() also registers the view with UiScaleManager, so
+  // RegisterWithLayoutController() also registers the view with LayoutScaleManager, so
   // future scale changes reach it.
   const bool isLayoutRoot = !GetParentView();
 
   // Off-scene scale gap. While this view is a detached layout root it is not in
-  // UiScaleManager's root set, so a global SetScale() cannot reach it -- its
+  // LayoutScaleManager's root set, so a global SetUiScale() cannot reach it -- its
   // cached effective scale, and the whole subtree's for INHERIT chains, may be
   // stale (computed against the scale in force before it was detached). On
   // (re)connection re-derive the subtree's effective scale so the layout pass
@@ -4149,14 +4150,15 @@ void ViewDataImpl::OnViewSceneDisconnection()
 
   OnSceneDisconnection();
 
-  // Remove from UiScaleManager if this view was registered as a layout root.
+  // Remove from LayoutScaleManager if this view was registered as a layout root.
   // Two cases match the registration paths in RegisterWithLayoutController:
   //   (a) tree root: no parent view -- which also means no parent LAYOUT, since
   //       Ui::Layout derives from Ui::View and View::DownCast matches both
   //   (b) standalone: boundary views self-register regardless of their parent
   if(!GetParentView() || IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
-    UiScaleManager::Get().UnregisterLayoutRoot(View::DownCast(mViewImpl.Self()));
+    LayoutScaleManager layoutScaleManager = LayoutScaleManager::Get();
+    GetImpl(layoutScaleManager).UnregisterLayoutRoot(View::DownCast(mViewImpl.Self()));
   }
 }
 
@@ -4974,7 +4976,7 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
     return mMeasuredSize; // {0,0} until a pass completes
   }
 
-  float s = mViewImpl.GetEffectiveScale();
+  float s = mViewImpl.GetEffectiveLayoutScale();
 
   // Push effective scale to the actor animatable property so that decoration
   // constraints (corner radius, borderline width) can read it as a scale input.
@@ -5348,7 +5350,7 @@ void ViewDataImpl::ReplayArrangeSubtreeFromCache(bool mirrorUnderParentRtl, floa
   // Corollary C, checked live and per node: a valid arrange cache implies a valid
   // cached effective scale, because every scale-context reset clears both for the WHOLE
   // subtree (ResetSubtreeScaleAndLayoutCaches). The replay skips the
-  // GetEffectiveScale() the MISS path performs at every level, so this assert is
+  // GetEffectiveLayoutScale() the MISS path performs at every level, so this assert is
   // what makes the reliance visible. DEBUG-only, like every other first-party layout
   // invariant on this hot path. It runs BEFORE the node scope below on purpose: it
   // reads nothing the scope owns, and throwing out of it leaves no flag to restore.
@@ -5667,7 +5669,7 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // publish gate below and a settled leaf could never cache. Amortised O(1):
   // the walk stops at the first ancestor whose bit is already live. Return value
   // intentionally discarded -- called for its side effect of establishing the bit.
-  (void)mViewImpl.GetEffectiveScale();
+  (void)mViewImpl.GetEffectiveLayoutScale();
 
   // This view is never laid out outside its own minimum/maximum: the size of the slot is clamped
   // here (ClampToOwnSizeBounds, max wins) and its start edge -- the logical x/y -- is kept. The
@@ -5751,13 +5753,13 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // not be frozen into the cache (plan34 11).
   //
   // The cached effective scale is READ here, never written: mEffectiveScaleValid is the
-  // effective-scale sync bit, owned solely by GetEffectiveScale() and the
+  // effective-scale sync bit, owned solely by GetEffectiveLayoutScale() and the
   // invalidation paths. Both logical terms are required and neither implies the
   // other. mEffectiveScaleValid alone would accept a pass whose context was
-  // reset mid-flight and then re-validated by a later GetEffectiveScale() -- the
+  // reset mid-flight and then re-validated by a later GetEffectiveLayoutScale() -- the
   // work done before that reset used the OLD scale. mEffectiveScaleInvalidatedDuringPass
   // alone would accept a pass that simply never established a context (the bit
-  // still false at entry), which is what the GetEffectiveScale() at pass entry
+  // still false at entry), which is what the GetEffectiveLayoutScale() at pass entry
   // rules out for the childless-default case.
   //
   // What this block writes is LIVE: mArrangeCacheValid / the arrange input key /
@@ -5954,17 +5956,17 @@ float ViewDataImpl::ComputeEffectiveScale() const
   // INHERIT: walk up the parent chain. ONE parent lookup, the same collapse
   // InvalidateMeasure makes: Ui::Layout derives from Ui::View and LayoutImpl from
   // ViewImpl, so Ui::View::DownCast also matches a Layout parent and GetImpl reaches
-  // the very same ViewImpl -- and GetEffectiveScale is a non-virtual ViewImpl member,
+  // the very same ViewImpl -- and GetEffectiveLayoutScale is a non-virtual ViewImpl member,
   // so the Layout branch resolved to this exact call. The dropped branch cost a second
   // Actor::GetParent() plus a Layout::DownCast that FAILS for the common plain-View
   // parent, once per node on every effective-scale cache miss.
   Ui::View parentView = GetParentView();
   if(parentView)
   {
-    return GetImpl(parentView).GetEffectiveScale();
+    return GetImpl(parentView).GetEffectiveLayoutScale();
   }
 
-  // Root: inherit from UiScaleManager. Every INHERIT chain terminates either
+  // Root: inherit from LayoutScaleManager. Every INHERIT chain terminates either
   // here or at a DISABLED/ENABLED ancestor, so the switch read inside
   // GetSystemScale() reaches every node in the tree exactly as a gate at the top
   // of this function would -- an INHERIT node just resolves to 1.0f through its
@@ -5975,7 +5977,7 @@ float ViewDataImpl::ComputeEffectiveScale() const
 void ViewDataImpl::DropCachedEffectiveScale()
 {
   // Clearing mEffectiveScaleValid IS the scale drop: it is the sync bit for
-  // mEffectiveScale, so the next GetEffectiveScale() on this node recomputes
+  // mEffectiveScale, so the next GetEffectiveLayoutScale() on this node recomputes
   // from the (possibly re-rooted) parent chain.
   mEffectiveScaleValid = false;
 
@@ -6006,7 +6008,7 @@ void ViewDataImpl::DropCachedEffectiveScale()
   {
     // The running pass has already arranged part of this view against the OLD
     // scale, so its result must not be published even if a later
-    // GetEffectiveScale() re-validates the bit before the pass ends.
+    // GetEffectiveLayoutScale() re-validates the bit before the pass ends.
     mEffectiveScaleInvalidatedDuringPass = true;
   }
 }
@@ -6209,16 +6211,17 @@ void ViewDataImpl::RegisterWithLayoutController()
     // layout root, not an application asking for a layout.
     controller.RequestLayoutInternal(&mViewImpl);
 
-    // Register as a layout root in UiScaleManager so it gets invalidated when
+    // Register as a layout root in LayoutScaleManager so it gets invalidated when
     // the system scale changes. Duplicate registration is silently ignored.
-    UiScaleManager::Get().RegisterLayoutRoot(Ui::View::DownCast(self));
+    LayoutScaleManager layoutScaleManager = LayoutScaleManager::Get();
+    GetImpl(layoutScaleManager).RegisterLayoutRoot(Ui::View::DownCast(self));
   }
 }
 
 MeasuredSize ViewDataImpl::ApplyConstraints(const MeasuredSize& size) const
 {
   // size is in visual (scale-applied) units; scale min/max (natural) accordingly.
-  float        s           = mViewImpl.GetEffectiveScale();
+  float        s           = mViewImpl.GetEffectiveLayoutScale();
   MeasuredSize constrained = size;
   constrained.width        = std::max(constrained.width, GetMinimumWidth() * s);
   constrained.height       = std::max(constrained.height, GetMinimumHeight() * s);
@@ -6581,7 +6584,7 @@ MeasuredSize ViewDataImpl::GetMatchFollowerSize() const
 {
   // The same product the producers return, through the same clamp Measure() applies, hence
   // bit-identical to what a measurement would report.
-  const float s = mViewImpl.GetEffectiveScale();
+  const float s = mViewImpl.GetEffectiveLayoutScale();
   return ApplyConstraints(MeasuredSize(GetMinimumWidth() * s, GetMinimumHeight() * s));
 }
 
@@ -6728,7 +6731,7 @@ bool ViewDataImpl::CanSkipArrangeRemeasure(float visualW, float visualH, Measure
   {
     return false;
   }
-  const float s = mViewImpl.GetEffectiveScale();
+  const float s = mViewImpl.GetEffectiveLayoutScale();
   if(mMeasureKeyOrPropagation.scaleKey != s)
   {
     return false;
@@ -6784,7 +6787,7 @@ void ViewDataImpl::SetBackgroundColorInternal(const Vector4& color)
 
 MeasuredSize ViewDataImpl::DispatchMeasureWithLayoutManager(LayoutManager* manager, float widthConstraint, float heightConstraint)
 {
-  float s = mViewImpl.GetEffectiveScale();
+  float s = mViewImpl.GetEffectiveLayoutScale();
 
   Insets padding = mViewImpl.GetPadding();
   float  visPadW = static_cast<float>(padding.start + padding.end) * s;
@@ -6828,7 +6831,7 @@ void ViewDataImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, cons
 {
   // Self geometry is applied centrally in Arrange(); the manager arranges
   // children only within the padding-adjusted content bounds. Owner final == input.
-  float  s       = mViewImpl.GetEffectiveScale();
+  float  s       = mViewImpl.GetEffectiveLayoutScale();
   Insets padding = mViewImpl.GetPadding();
 
   LayoutRect visContentBounds;
@@ -8020,7 +8023,8 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
               // self turn that a batch already collected is skipped at its tracked check.
               // A view with no View parent stays a root and keeps both registrations.
               LayoutController::ReleaseLayoutRootInternal(&viewImpl);
-              UiScaleManager::Get().UnregisterLayoutRoot(Ui::View::DownCast(viewImpl.Self()));
+              LayoutScaleManager layoutScaleManager = LayoutScaleManager::Get();
+              GetImpl(layoutScaleManager).UnregisterLayoutRoot(Ui::View::DownCast(viewImpl.Self()));
             }
 
             // Both directions: a propagation record written while the view had its

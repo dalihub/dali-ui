@@ -46,7 +46,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
@@ -1933,10 +1933,10 @@ int UtcDaliTextDecorationScaleAsyncSupersedeP(void)
 int UtcDaliTextVisualUserSpaceScaleAllocationReentryP(void)
 {
   UiTestApplication application;
-  const auto originalScale = Ui::UiScaleManager::Get().GetScale();
-  const auto originalScalable = Ui::UiScaleManager::Get().IsScalable();
-  Ui::UiScaleManager::Get().SetScalable(true);
-  Ui::UiScaleManager::Get().SetScale(1.0f);
+  const auto originalScale = Ui::LayoutScaleManager::Get().GetUiScale();
+  const auto originalScalable = Ui::LayoutScaleManager::Get().IsScalable();
+  Ui::LayoutScaleManager::Get().SetScalable(true);
+  Ui::LayoutScaleManager::Get().SetUiScale(1.0f);
   auto rendered = CreateTextVisual(application);
   rendered.view.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
   Ui::Gradient::Linear gradient(Vector2::ZERO, Vector2(100.0f, 0.0f));
@@ -1967,7 +1967,7 @@ int UtcDaliTextVisualUserSpaceScaleAllocationReentryP(void)
     if(!fired && Shader::DownCast(object))
     {
       fired = true;
-      Ui::UiScaleManager::Get().SetScale(2.0f);
+      Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
   });
   PublishDirect(rendered, parameters, candidate);
@@ -1977,8 +1977,8 @@ int UtcDaliTextVisualUserSpaceScaleAllocationReentryP(void)
   DALI_TEST_CHECK(oldRenderer.GetTextures().GetTexture(0u) == oldTexture);
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
   rendered.view.Unparent();
-  Ui::UiScaleManager::Get().SetScale(originalScale);
-  Ui::UiScaleManager::Get().SetScalable(originalScalable);
+  Ui::LayoutScaleManager::Get().SetUiScale(originalScale);
+  Ui::LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 
@@ -2010,10 +2010,10 @@ namespace
 int CheckGradientStyleAllocationReentry(int source, int from, int to)
 {
   UiTestApplication application;
-  const auto        originalScale    = Ui::UiScaleManager::Get().GetScale();
-  const auto        originalScalable = Ui::UiScaleManager::Get().IsScalable();
-  Ui::UiScaleManager::Get().SetScalable(true);
-  Ui::UiScaleManager::Get().SetScale(1.0f);
+  const auto        originalScale    = Ui::LayoutScaleManager::Get().GetUiScale();
+  const auto        originalScalable = Ui::LayoutScaleManager::Get().IsScalable();
+  Ui::LayoutScaleManager::Get().SetScalable(true);
+  Ui::LayoutScaleManager::Get().SetUiScale(1.0f);
   auto rendered = CreateTextVisual(application);
   rendered.view.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
   auto controller             = UiInternal::TextVisual::GetController(rendered.visual);
@@ -2079,7 +2079,7 @@ int CheckGradientStyleAllocationReentry(int source, int from, int to)
       {
         setStyle(to, false);
       }
-      Ui::UiScaleManager::Get().SetScale(2.0f);
+      Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
   });
   PublishDirect(rendered, parameters, candidate);
@@ -2095,8 +2095,8 @@ int CheckGradientStyleAllocationReentry(int source, int from, int to)
   }
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
   rendered.view.Unparent();
-  Ui::UiScaleManager::Get().SetScale(originalScale);
-  Ui::UiScaleManager::Get().SetScalable(originalScalable);
+  Ui::LayoutScaleManager::Get().SetUiScale(originalScale);
+  Ui::LayoutScaleManager::Get().SetScalable(originalScalable);
   END_TEST;
 }
 

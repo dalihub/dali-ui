@@ -1620,7 +1620,7 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, FittingMode
     if(update == FittingModeUpdate::SIZE_OR_SCALE && visualImpl.GetType() == Ui::Integration::InternalVisualType::GRADIENT)
     {
       // Gradients need only their alignment uniform, not fitting or a new layout callback.
-      static_cast<Internal::GradientVisual&>(visualImpl).UpdateUiScale(mOuter.mViewImpl.GetEffectiveScale());
+      static_cast<Internal::GradientVisual&>(visualImpl).UpdateUiScale(mOuter.mViewImpl.GetEffectiveLayoutScale());
     }
 
     if(!visualImpl.IsFittingModeRequired() ||
@@ -1638,7 +1638,7 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, FittingMode
       {
         std::swap(padding.start, padding.end);
       }
-      effectiveScale = mOuter.mViewImpl.GetEffectiveScale();
+      effectiveScale = mOuter.mViewImpl.GetEffectiveLayoutScale();
       paddingFetched = true;
     }
 

@@ -10,7 +10,7 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali-ui/ui-event-thread-callback.h>
 
@@ -366,11 +366,11 @@ int UtcDaliIconButtonAsyncNaturalSizeInvalidatesCacheP(void)
 int UtcDaliIconButtonNaturalSizeScaleAndPaddingP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
-  auto scaleManager = UiScaleManager::Get();
-  const float originalScale = scaleManager.GetScale();
+  auto scaleManager = LayoutScaleManager::Get();
+  const float originalScale = scaleManager.GetUiScale();
   const bool originalScalable = scaleManager.IsScalable();
   scaleManager.SetScalable(true);
-  scaleManager.SetScale(2.0f);
+  scaleManager.SetUiScale(2.0f);
   Texture texture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 32, 16);
   ImageUrl url = ImageUrl::New(texture);
   IconButton button = IconButton::New(IconButtonStyle::Builder().SetIconUrl(url.GetUrl()).SetPadding(Insets(2.0f, 3.0f)).Build());
@@ -382,7 +382,7 @@ int UtcDaliIconButtonNaturalSizeScaleAndPaddingP(void)
   Actor icon = button.GetChildAt(0u);
   const float iconWidth = icon.GetProperty<float>(Actor::Property::SIZE_WIDTH);
   const float iconHeight = icon.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
-  scaleManager.SetScale(originalScale);
+  scaleManager.SetUiScale(originalScale);
   scaleManager.SetScalable(originalScalable);
   DALI_TEST_EQUALS(size.width, 72.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(size.height, 44.0f, TEST_LOCATION);

@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout-manager.h>
@@ -1138,7 +1138,7 @@ int UtcDaliArrangeCacheSubtreeHitEmitsLayoutFinishedForDescendantsP(void)
   END_TEST;
 }
 
-// Corollary C, per node. The replay skips the GetEffectiveScale() that the miss path
+// Corollary C, per node. The replay skips the GetEffectiveLayoutScale() that the miss path
 // performs at every level, so a whole SUBTREE now rests on "a valid arrange cache
 // implies a live effective-scale sync bit" rather than a single node doing so. The
 // asserts mEffectiveScaleValid at every node it visits (DEBUG); this states the same
@@ -1750,7 +1750,7 @@ int UtcDaliArrangeCacheStandaloneMatchParentMaximumConvergesP(void)
 // (x + margin) * scale and x * scale + margin * scale differ in float32:
 // (2 + 5) * 1.3 == 9.09999942 while 2 * 1.3 + 5 * 1.3 == 9.10000038.
 //
-// UiScaleManagerImpl keeps the scale in a process-wide singleton, so the incoming
+// LayoutScaleManagerImpl keeps the scale in a process-wide singleton, so the incoming
 // scale is recorded and restored.
 //
 // Non-vacuity (verified by mutation): splitting DeriveStandaloneRootBounds' position
@@ -1761,8 +1761,8 @@ int UtcDaliArrangeCacheStandaloneKeyConvergesAtNonUnitScaleP(void)
   UiTestApplication application;
   tet_infoline("Both boundary-slot derivations produce a bit-identical position at a non-unit scale");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.3f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.3f);
 
   View root = View::New();
   root.SetRequestedWidth(200.0f);
@@ -1806,7 +1806,7 @@ int UtcDaliArrangeCacheStandaloneKeyConvergesAtNonUnitScaleP(void)
   DALI_TEST_CHECK(standalone.GetProperty<float>(Actor::Property::POSITION_X) == settledX);
   DALI_TEST_CHECK(standalone.GetProperty<float>(Actor::Property::POSITION_Y) == settledY);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 

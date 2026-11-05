@@ -36,7 +36,7 @@
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
@@ -1771,14 +1771,14 @@ void FocusScaleOnly(UiTestApplication& app, int ancestry, float scale)
   const auto  completed = test.completed;
   const auto  natural   = test.label.GetNaturalSize();
   const auto  size      = test.label.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
-  const float effective = Ui::GetImpl(test.label).GetEffectiveScale();
+  const float effective = Ui::GetImpl(test.label).GetEffectiveLayoutScale();
   test.Focus(true);
   test.Advance(150u);
   DALI_TEST_CHECK(test.Take().empty());
   test.CheckScale(scale);
   DALI_TEST_EQUALS(test.label.GetCurrentProperty<Vector3>(Actor::Property::SIZE), size, 0.0001f, TEST_LOCATION);
   DALI_TEST_EQUALS(test.label.GetNaturalSize(), natural, 0.0001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(Ui::GetImpl(test.label).GetEffectiveScale(), effective, 0.0001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(Ui::GetImpl(test.label).GetEffectiveLayoutScale(), effective, 0.0001f, TEST_LOCATION);
   DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
   DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == texture);
   DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
@@ -3127,19 +3127,19 @@ namespace
 {
 struct MarqueeUiScaleGuard
 {
-  const float scale    = Ui::UiScaleManager::Get().GetScale();
-  const bool  scalable = Ui::UiScaleManager::Get().IsScalable();
+  const float scale    = Ui::LayoutScaleManager::Get().GetUiScale();
+  const bool  scalable = Ui::LayoutScaleManager::Get().IsScalable();
 
   MarqueeUiScaleGuard()
   {
-    Ui::UiScaleManager::Get().SetScalable(true);
-    Ui::UiScaleManager::Get().SetScale(1.0f);
+    Ui::LayoutScaleManager::Get().SetScalable(true);
+    Ui::LayoutScaleManager::Get().SetUiScale(1.0f);
   }
 
   ~MarqueeUiScaleGuard()
   {
-    Ui::UiScaleManager::Get().SetScale(scale);
-    Ui::UiScaleManager::Get().SetScalable(scalable);
+    Ui::LayoutScaleManager::Get().SetUiScale(scale);
+    Ui::LayoutScaleManager::Get().SetScalable(scalable);
   }
 };
 
@@ -3198,7 +3198,7 @@ void CheckMarqueeUiScaleMatrix(bool async, bool vertical)
     for(float renderScale : {1.0f, 1.5f, 2.0f})
       for(float actorScale : {1.0f, 1.5f})
       {
-        Ui::UiScaleManager::Get().SetScale(scale);
+        Ui::LayoutScaleManager::Get().SetUiScale(scale);
         Lifecycle test(app, async, vertical);
         test.label.SetMarqueeGap(20);
         test.label.SetRenderScale(renderScale);
@@ -3214,7 +3214,7 @@ void CheckMarqueeUiScalePolicy(bool async)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   Lifecycle test(app, async);
   auto      branch = Ui::View::New();
   auto      root   = Ui::View::New();
@@ -3237,7 +3237,7 @@ void CheckMarqueeUiScalePolicy(bool async)
       test.label.SetUiScalePolicy(Ui::UiScalePolicy::INHERIT);
       branch.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
     }
-    if(policy == 4u) Ui::UiScaleManager::Get().SetScalable(false);
+    if(policy == 4u) Ui::LayoutScaleManager::Get().SetScalable(false);
     test.Start();
     CheckScaledMarqueeMotion(test, policy == 1u || policy == 3u ? 2.0f : 1.0f);
     DALI_TEST_EQUALS(test.label.GetCurrentProperty<Vector3>(Actor::Property::WORLD_SCALE), Vector3::ONE * 2.25f, 0.0001f, TEST_LOCATION);
@@ -3256,7 +3256,7 @@ void CheckMarqueeUiScaleRuntime(bool async, bool vertical)
     auto       old       = test.Current();
     const auto oldBudget = old.GetLoopCount();
     DALI_TEST_EQUALS(old.GetCurrentLoop(), 1, TEST_LOCATION);
-    Ui::UiScaleManager::Get().SetScale(scale);
+    Ui::LayoutScaleManager::Get().SetUiScale(scale);
     DALI_TEST_CHECK(test.Current() == old);
     if(async)
     {
@@ -3292,13 +3292,13 @@ void CheckMarqueeUiScaleManualSnapshot(bool measure)
   pending->Process();
   DALI_TEST_EQUALS(pending->mParameters.decorationUiScale, 1.0f, TEST_LOCATION);
   const auto completed = test.completed;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   if(measure) test.Frame();
   test.Deliver(pending);
   DALI_TEST_EQUALS(test.completed, completed + (measure ? 0u : 1u), TEST_LOCATION);
   if(!measure)
   {
-    DALI_TEST_EQUALS(Ui::GetImpl(test.label).GetEffectiveScale(), 2.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Ui::GetImpl(test.label).GetEffectiveLayoutScale(), 2.0f, TEST_LOCATION);
     // Before measure the accepted geometry and controller still use scale 1.
     CheckScaledMarqueeMotion(test, 1.0f, false);
   }
@@ -3310,7 +3310,7 @@ void CheckMarqueeUiScaleOptions(bool async, bool vertical)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   for(int speed : {0, -20, 200, 1000000, (std::numeric_limits<int>::max)()})
   {
     Lifecycle test(app, async, vertical);
@@ -3349,13 +3349,13 @@ void CheckMarqueeUiScaleFocusStop(unsigned order)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   StopRace test(app);
   test.Focus(true);
   Task stale = test.Request(true);
   test.Raster(stale);
   test.Focus(false);
-  Ui::UiScaleManager::Get().SetScale(1.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(1.0f);
   const auto      completed = test.completed;
   StopPublication previous(test.label);
   if(order == 0u) test.Deliver(stale);
@@ -3464,7 +3464,7 @@ int UtcDaliMarqueeUiScaleDirectionP(void)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   for(bool async : {false, true})
     for(const char* text : {"مرحبا بالعالم هذا نص طويل لاختبار التمرير", "English مرحبا 123 mixed text with a long final section"})
     {
@@ -3481,7 +3481,7 @@ void CheckMarqueeUiScaleFinitePublication(int loops, bool vertical)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   FinitePublicationBudget(app, loops, vertical);
 }
 } // namespace
@@ -3550,7 +3550,7 @@ int UtcDaliMarqueeUiScaleFinishLoopP(void)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   for(bool async : {false, true})
     for(bool vertical : {false, true})
       for(unsigned phase = 0u; phase < 4u; ++phase) FinishLoopAt(app, phase, async, vertical, 3);
@@ -3560,7 +3560,7 @@ int UtcDaliMarqueeUiScaleFinishedPendingP(void)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   for(bool vertical : {false, true}) FinishedBeforePublication(app, vertical);
   END_TEST;
 }
@@ -3568,7 +3568,7 @@ int UtcDaliMarqueeUiScaleSessionRestartP(void)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   for(unsigned ending = 0u; ending < 5u; ++ending) ReducedBudgetSessionEnd(app, ending);
   END_TEST;
 }
@@ -3591,16 +3591,16 @@ int UtcDaliMarqueeUiScaleInvalidInputP(void)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   Lifecycle test(app);
   test.Start();
   auto original = test.Current();
   for(float invalid : {0.0f, -1.0f, std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::denorm_min()})
   {
-    Ui::UiScaleManager::Get().SetScale(invalid);
+    Ui::LayoutScaleManager::Get().SetUiScale(invalid);
     test.Drain();
     DALI_TEST_CHECK(test.Current() == original);
-    DALI_TEST_EQUALS(Ui::UiScaleManager::Get().GetScale(), 2.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(Ui::LayoutScaleManager::Get().GetUiScale(), 2.0f, TEST_LOCATION);
   }
   CheckScaledMarqueeMotion(test, 2.0f);
   END_TEST;
@@ -3616,7 +3616,7 @@ int UtcDaliMarqueeUiScaleFocusRapidP(void)
   for(bool focused : {true, false, true, false})
   {
     test.Focus(focused);
-    Ui::UiScaleManager::Get().SetScale(focused ? 2.0f : 1.0f);
+    Ui::LayoutScaleManager::Get().SetUiScale(focused ? 2.0f : 1.0f);
     tasks.push_back(test.Request(focused));
     test.Raster(tasks.back());
   }
@@ -3637,7 +3637,7 @@ int UtcDaliMarqueeUiScaleLocalScaleAndFontChangeP(void)
 {
   UiTestApplication   app;
   MarqueeUiScaleGuard guard;
-  Ui::UiScaleManager::Get().SetScale(2.0f);
+  Ui::LayoutScaleManager::Get().SetUiScale(2.0f);
   for(bool async : {false, true})
   {
     Lifecycle test(app, async);
@@ -3670,7 +3670,7 @@ int UtcDaliMarqueeUiScaleResourcesP(void)
   for(bool async : {false, true})
     for(float uiScale : {1.0f, 2.0f})
     {
-      Ui::UiScaleManager::Get().SetScale(uiScale);
+      Ui::LayoutScaleManager::Get().SetUiScale(uiScale);
       Lifecycle test(app, async);
       test.Start();
       const auto renderer = test.label.GetRendererAt(0u);

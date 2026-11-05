@@ -226,7 +226,7 @@ void TextButtonImpl::ApplyInitialStyle(TextButtonStyle style)
 
 MeasuredSize TextButtonImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  float s = GetEffectiveScale();
+  float s = GetEffectiveLayoutScale();
 
   Insets padding = GetPadding();
   float  visPadW = static_cast<float>(padding.start + padding.end) * s;
@@ -277,7 +277,7 @@ MeasuredSize TextButtonImpl::OnMeasure(float widthConstraint, float heightConstr
 
 LayoutRect TextButtonImpl::OnArrange(const LayoutRect& bounds)
 {
-  float  s       = GetEffectiveScale();
+  float  s       = GetEffectiveLayoutScale();
   Insets padding = GetPadding();
 
   LayoutRect contentBounds;

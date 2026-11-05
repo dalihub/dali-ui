@@ -351,9 +351,22 @@ public: // Non-virtual API (safe to reorder / extend)
   UiScalePolicy GetUiScalePolicy() const;
 
   /**
+   * @brief Gets the effective layout scale of this view.
+   *
+   * The factor the layout pass multiplies this view's natural lengths by, as
+   * LayoutScaleManager describes it; 1.0 while scaling is disabled through
+   * LayoutScaleManager::SetScalable(false). Lazily computed on first call after
+   * invalidation; valid after first Measure.
+   * @return The effective layout scale factor
+   */
+  float GetEffectiveLayoutScale() const;
+
+  /**
    * @brief Gets the effective scale for this view.
-   * Lazily computed on first call after invalidation; valid after first Measure.
-   * @return The effective scale factor
+   *
+   * @deprecated Use GetEffectiveLayoutScale() instead.
+   *
+   * @return The effective scale factor, always the value GetEffectiveLayoutScale() returns
    */
   float GetEffectiveScale() const;
 
