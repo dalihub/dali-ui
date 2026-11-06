@@ -49,7 +49,9 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, uint8_t index)
   return imageUrl;
 }
 
-Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMultiplied)
+namespace
+{
+Dali::Ui::ImageUrl GeneratePixelDataUrl(Dali::PixelData pixelData, bool preMultiplied)
 {
   Texture texture =
     Texture::New(TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
@@ -60,6 +62,17 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMultiplied)
   texture.Upload(pixelData);
 #endif
   return imageUrl;
+}
+} // unnamed namespace
+
+Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData)
+{
+  return GeneratePixelDataUrl(pixelData, pixelData.IsAlphaPreMultiplied());
+}
+
+Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMultiplied)
+{
+  return GeneratePixelDataUrl(pixelData, preMultiplied || pixelData.IsAlphaPreMultiplied());
 }
 
 Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)

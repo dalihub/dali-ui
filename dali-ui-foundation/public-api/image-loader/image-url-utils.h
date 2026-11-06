@@ -71,10 +71,24 @@ DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, uint8_
  * @note This method does not check for duplicates, If same pixel data is entered multiple times, a different URL is
  * returned each time.
  * @param[in] pixelData the pixel data to converted to Url
- * @param[in] preMultiplied Whether this pixel data preMultiplied or not. Default as false.
  * @return the ImageUrl representing this pixel data
  */
-DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMultiplied = false);
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData);
+
+/**
+ * @DEPRECATED_3_0.0 Use GenerateUrl(Dali::PixelData) instead, declaring pre-multiplied alpha
+ * on the pixel data itself (Dali::PixelData::New()).
+ * @brief Generate a Url from Pixel data.
+ * This Url can be used in visuals to render the pixel data.
+ * @note This method does not check for duplicates, If same pixel data is entered multiple times, a different URL is
+ * returned each time.
+ * @param[in] pixelData the pixel data to converted to Url
+ * @param[in] preMultiplied Whether this pixel data preMultiplied or not.
+ * A pixel data that reports pre-multiplied alpha itself (Dali::PixelData::IsAlphaPreMultiplied())
+ * is treated as pre-multiplied whatever this value is.
+ * @return the ImageUrl representing this pixel data
+ */
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMultiplied);
 
 /**
  * @brief Generate a Url from native image interface.
