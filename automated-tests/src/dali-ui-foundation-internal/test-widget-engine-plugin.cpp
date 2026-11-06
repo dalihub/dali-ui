@@ -190,9 +190,9 @@ extern "C" int GetWidgetTestWheelEventCount(int index)
 {
   return instances.at(index)->GetWheelEventCount();
 }
-extern "C" const Dali::String& GetWidgetTestLastKey(int index)
+extern "C" const char* GetWidgetTestLastKey(int index)
 {
-  return instances.at(index)->GetLastKey();
+  return instances.at(index)->GetLastKey().CStr();
 }
 extern "C" int GetWidgetTestLastWheelDelta(int index)
 {
