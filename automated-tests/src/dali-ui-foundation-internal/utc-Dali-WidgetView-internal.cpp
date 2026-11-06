@@ -61,7 +61,7 @@ int (*getTouchEventCount)(int);
 int (*getCancelledTouchCount)(int);
 int (*getKeyEventCount)(int);
 int (*getWheelEventCount)(int);
-const Dali::String& (*getLastKey)(int);
+const char* (*getLastKey)(int);
 int (*getLastWheelDelta)(int);
 std::array<int, 6> initialCounts;
 
@@ -153,7 +153,7 @@ void utc_dali_widget_view_internal_startup(void)
   getCancelledTouchCount = reinterpret_cast<int (*)(int)>(dlsym(library, "GetWidgetTestCancelledTouchCount"));
   getKeyEventCount       = reinterpret_cast<int (*)(int)>(dlsym(library, "GetWidgetTestKeyEventCount"));
   getWheelEventCount     = reinterpret_cast<int (*)(int)>(dlsym(library, "GetWidgetTestWheelEventCount"));
-  getLastKey             = reinterpret_cast<const Dali::String& (*)(int)>(dlsym(library, "GetWidgetTestLastKey"));
+  getLastKey             = reinterpret_cast<const char* (*)(int)>(dlsym(library, "GetWidgetTestLastKey"));
   getLastWheelDelta      = reinterpret_cast<int (*)(int)>(dlsym(library, "GetWidgetTestLastWheelDelta"));
   DALI_ASSERT_ALWAYS(getCount && emitEvent && emitFrame && isPaused && getDimension && getTouchEventCount);
   DALI_ASSERT_ALWAYS(getCancelledTouchCount && getKeyEventCount && getWheelEventCount && getLastKey && getLastWheelDelta);
@@ -375,7 +375,7 @@ int UtcDaliWidgetViewInputReachesProviderP(void)
   Dali::Integration::KeyEvent key("a", "a", "a", 38, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "keyboard", Device::Class::KEYBOARD, Device::Subclass::NONE);
   application.ProcessEvent(key);
   DALI_TEST_EQUALS(getKeyEventCount(0), 1, TEST_LOCATION);
-  DALI_TEST_EQUALS(getLastKey(0), Dali::String("a"), TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::String(getLastKey(0)), Dali::String("a"), TEST_LOCATION);
   Dali::Integration::WheelEvent wheel(Dali::Integration::WheelEvent::MOUSE_WHEEL, 0, 0, Vector2(32.0f, 32.0f), -2, 110);
   application.ProcessEvent(wheel);
   DALI_TEST_EQUALS(getWheelEventCount(0), 1, TEST_LOCATION);
