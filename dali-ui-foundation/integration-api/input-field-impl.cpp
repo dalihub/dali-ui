@@ -1740,7 +1740,14 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
   // If there is text changed, callback is called.
   if(mTextChanged)
   {
+    const bool hasListeners = !mTextChangedSignal.Empty();
     EmitTextChanged();
+
+    // Signal handlers may request another control's relayout and disconnect themselves.
+    if(hasListeners && Dali::Adaptor::IsAvailable())
+    {
+      Dali::Adaptor::Get().RequestProcessEventsOnIdle();
+    }
   }
 
   Ui::Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);

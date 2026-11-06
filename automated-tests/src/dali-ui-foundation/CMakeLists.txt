@@ -29,6 +29,7 @@ SET(TC_SOURCES
         utc-Dali-LabelTextGradient.cpp
         utc-Dali-InputField.cpp
         utc-Dali-InputEditor.cpp
+        utc-Dali-EditableTextChanged.cpp
         utc-Dali-TextValueTypes.cpp
         utc-Dali-StyledText.cpp
         utc-Dali-ImageView.cpp
