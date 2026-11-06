@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/public-api/views/video/video-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/adaptor-framework/video-player.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -36,6 +37,20 @@ void utc_dali_videoview_cleanup(void)
 
 namespace
 {
+struct VideoPlayerCalls
+{
+  uint32_t renderingTarget{0u};
+  uint32_t sceneConnection{0u};
+  uint32_t playback{0u};
+  uint32_t displayArea{0u};
+};
+
+VideoPlayerCalls& GetVideoPlayerCalls()
+{
+  static VideoPlayerCalls calls;
+  return calls;
+}
+
 // VideoSource::New() only forwards providerId/nativeSession opaquely to the adaptor
 // plugin (see VideoSource::ToAdaptorDescriptor); it never dereferences nativeSession
 // itself, and no platform video-player plugin is loaded in this test environment.
@@ -57,6 +72,46 @@ VideoSource CreateNativeImageSource()
   return CreateTestSource(VideoSourceOwnership::EXTERNAL, VideoRenderingMode::NATIVE_IMAGE);
 }
 } // namespace
+
+// The existing tests run without a platform plugin. Record the adaptor boundary
+// calls so reconnect tests also detect an otherwise invisible target reset.
+namespace DALI_NAMESPACE
+{
+void VideoPlayer::SetRenderingTarget(Any /* target */)
+{
+  ++GetVideoPlayerCalls().renderingTarget;
+}
+
+void VideoPlayer::SceneConnection()
+{
+  ++GetVideoPlayerCalls().sceneConnection;
+}
+
+void VideoPlayer::Play()
+{
+  ++GetVideoPlayerCalls().playback;
+}
+
+void VideoPlayer::Pause()
+{
+  ++GetVideoPlayerCalls().playback;
+}
+
+void VideoPlayer::Stop()
+{
+  ++GetVideoPlayerCalls().playback;
+}
+
+void VideoPlayer::SetPlayPosition(int /* millisecond */)
+{
+  ++GetVideoPlayerCalls().playback;
+}
+
+void VideoPlayer::SetDisplayArea(DisplayArea /* area */)
+{
+  ++GetVideoPlayerCalls().displayArea;
+}
+} // namespace DALI_NAMESPACE
 
 // =============================================================================
 // VideoSource - Construction
@@ -372,9 +427,7 @@ int UtcDaliVideoViewClearSourceP(void)
 // VideoView - Playback control and scene connection
 //
 // No platform video-player plugin is loaded in this test environment, so these
-// checks exercise the null-guarded forwarding path in dali-adaptor's VideoPlayer
-// rather than actual playback; they verify the calls are safe, not that video
-// is displayed.
+// checks record VideoPlayer calls without actual playback or display binding.
 // =============================================================================
 
 int UtcDaliVideoViewPlaybackControlNoCrashP(void)
@@ -407,5 +460,153 @@ int UtcDaliVideoViewSceneConnectionP(void)
   application.Render();
 
   DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliVideoViewSyncModeBeforeSourceP(void)
+{
+  UiTestApplication application;
+  VideoView         view = VideoView::New();
+  DALI_TEST_CHECK(view.GetSyncMode() == Ui::VideoSyncMode::DISABLED);
+  view.SetSyncMode(Ui::VideoSyncMode::ENABLED);
+  DALI_TEST_CHECK(view.GetSyncMode() == Ui::VideoSyncMode::ENABLED);
+  view.SetSource(CreateUnderlaySource());
+  view.SetSyncMode(Ui::VideoSyncMode::DISABLED);
+  DALI_TEST_CHECK(view.GetSyncMode() == Ui::VideoSyncMode::ENABLED);
+  view.ClearSource();
+  view.SetSyncMode(Ui::VideoSyncMode::DISABLED);
+  DALI_TEST_CHECK(view.GetSyncMode() == Ui::VideoSyncMode::DISABLED);
+  DALI_TEST_CHECK(view.SetSource(CreateUnderlaySource()));
+  DALI_TEST_CHECK(view.GetSyncMode() == Ui::VideoSyncMode::DISABLED);
+  END_TEST;
+}
+
+int UtcDaliVideoViewSyncModeWithSourcePreservesTargetP(void)
+{
+  UiTestApplication application;
+  GetVideoPlayerCalls() = {};
+  VideoSource source    = CreateUnderlaySource();
+  VideoView   view      = VideoView::New(source);
+  application.GetWindow().Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  Renderer renderer = view.GetRendererAt(0u);
+
+  view.SetSyncMode(Ui::VideoSyncMode::DISABLED);
+  view.SetSyncMode(Ui::VideoSyncMode::ENABLED);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetSyncMode() == Ui::VideoSyncMode::DISABLED);
+  DALI_TEST_CHECK(view.GetSource() == source);
+  DALI_TEST_CHECK(view.GetRendererAt(0u) == renderer);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().playback, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliVideoViewUnderlayAttachmentWithoutAdaptorN(void)
+{
+  UiTestApplication application;
+  GetVideoPlayerCalls() = {};
+  Window      window    = application.GetWindow();
+  VideoSource source    = CreateUnderlaySource();
+  VideoView   view      = VideoView::New(source);
+
+  Test::UiAdaptor::SetAdaptorAvailableForce(false);
+  window.Add(view);
+  Test::UiAdaptor::SetAdaptorAvailableForce(true);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().sceneConnection, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().displayArea, 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetSource() == source);
+
+  window.Remove(view);
+  window.Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().sceneConnection, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(GetVideoPlayerCalls().displayArea > 0u);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().playback, 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetSource() == source);
+  END_TEST;
+}
+
+int UtcDaliVideoViewSameWindowReconnectionPreservesTargetP(void)
+{
+  UiTestApplication application;
+  GetVideoPlayerCalls() = {};
+  Window    window      = application.GetWindow();
+  VideoView view        = VideoView::New(CreateUnderlaySource());
+  window.Add(view);
+  application.SendNotification();
+  application.Render();
+  const auto connections = window.ResizedSignal().GetConnectionCount();
+  for(uint32_t i = 0u; i < 3u; ++i)
+  {
+    window.Remove(view);
+    window.Add(view);
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().playback, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(window.ResizedSignal().GetConnectionCount(), connections, TEST_LOCATION);
+
+  view.ClearSource();
+  view.SetSource(CreateUnderlaySource());
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliVideoViewDifferentWindowReconnectionRejectedP(void)
+{
+  UiTestApplication application;
+  GetVideoPlayerCalls() = {};
+  Window    first       = application.GetWindow();
+  Window    second      = Window::New(PositionSize(0, 0, 100, 100), "video-second");
+  VideoView view        = VideoView::New(CreateUnderlaySource());
+  first.Add(view);
+  first.Remove(view);
+  const auto displayAreaCalls = GetVideoPlayerCalls().displayArea;
+  second.Add(view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().sceneConnection, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().playback, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().displayArea, displayAreaCalls, TEST_LOCATION);
+
+  second.Remove(view);
+  first.Add(view);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().sceneConnection, 2u, TEST_LOCATION);
+
+  first.Remove(view);
+  second.Add(view);
+  view.ClearSource();
+  DALI_TEST_CHECK(view.SetSource(CreateUnderlaySource()));
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().sceneConnection, 3u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliVideoViewNativeImageReconnectionPreservesTargetP(void)
+{
+  UiTestApplication application;
+  GetVideoPlayerCalls() = {};
+  Window    first       = application.GetWindow();
+  Window    second      = Window::New(PositionSize(0, 0, 100, 100), "native-second");
+  VideoView view        = VideoView::New(CreateNativeImageSource());
+  first.Add(view);
+  first.Remove(view);
+  second.Add(view);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().renderingTarget, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().sceneConnection, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetVideoPlayerCalls().playback, 0u, TEST_LOCATION);
   END_TEST;
 }

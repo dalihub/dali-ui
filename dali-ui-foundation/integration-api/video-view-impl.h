@@ -24,6 +24,7 @@
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/property-notification.h>
+#include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
@@ -131,13 +132,15 @@ private:
   Dali::NativeImagePtr                mNativeImagePtr;
   Dali::Ui::Integration::Visual::Base mNativeImageVisual;
 
-  Dali::Window               mWindow;
-  Dali::PropertyNotification mPositionNotification;
-  Dali::PropertyNotification mSizeNotification;
-  Dali::PropertyNotification mScaleNotification;
+  Dali::Window                   mWindow;
+  Dali::WeakHandle<Dali::Window> mRenderingTargetWindow;
+  Dali::PropertyNotification     mPositionNotification;
+  Dali::PropertyNotification     mSizeNotification;
+  Dali::PropertyNotification     mScaleNotification;
 
   Dali::VideoSyncMode mSyncMode;
   bool                mAttachedToScene;
+  bool                mRenderingTargetSet{false}; ///< A target was submitted; the plugin does not return a binding result.
 };
 
 } // namespace Integration

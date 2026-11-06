@@ -125,9 +125,14 @@ public:
   /**
    * @brief Sets the source to display.
    *
+   * A source set before the view is connected to a scene is attached later.
+   * For an external MMPlayer underlay source, connect the view while the player
+   * is IDLE, before preparing it. Clear and reset the source in IDLE to move
+   * an already bound underlay to another Window.
+   *
    * @SINCE_3_0.0
    * @param[in] source The source to attach
-   * @return True if the source was valid and attached
+   * @return True if the source was accepted. This does not confirm platform display binding.
    */
   bool SetSource(VideoSource source);
 
@@ -141,6 +146,13 @@ public:
 
   /**
    * @brief Clears the current source.
+   *
+   * For an external MMPlayer NativeImage source, stop the player and wait for
+   * READY before clearing the source or destroying the view. The view releases
+   * its callbacks and decoded packets; the application then unprepares or
+   * destroys the player. Keep the player valid until the view has released it.
+   * A player that is still IDLE can also be released without preparing it.
+   *
    * @SINCE_3_0.0
    */
   void ClearSource();
@@ -166,9 +178,9 @@ public:
   /**
    * @brief Sets the synchronization mode between the UI and the underlay video display.
    *
-   * Prefer calling this before SetSource()/New(source) attaches a source. If a source is
-   * already attached, the change still takes effect immediately, but the video player is
-   * recreated against the same source to do so.
+   * Call this before SetSource()/New(source). A different mode requested while
+   * a source is set is ignored; the current mode and player are preserved.
+   * ClearSource() allows the mode to be changed before setting a source again.
    *
    * @SINCE_3_0.0
    * @param[in] syncMode The synchronization mode. Default is DISABLED.
