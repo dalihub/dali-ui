@@ -15,6 +15,8 @@
  *
  */
 
+#include <string>
+
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/border-visual.h>
@@ -496,9 +498,9 @@ int UtcDaliImageVisualSvgPropertyMapAndFittingP(void)
   DALI_TEST_CHECK(internalVisual);
   Property::Map map;
   internalVisual.CreatePropertyMap(map);
-  const Property::Value* type = map.Find(Dali::Ui::Integration::Visual::Property::TYPE);
-  const Property::Value* url = map.Find(Dali::Ui::Integration::ImageVisual::Property::URL);
-  const Property::Value* width = map.Find(Dali::Ui::Integration::ImageVisual::Property::DESIRED_WIDTH);
+  const Property::Value* type    = map.Find(Dali::Ui::Integration::Visual::Property::TYPE);
+  const Property::Value* url     = map.Find(Dali::Ui::Integration::ImageVisual::Property::URL);
+  const Property::Value* width   = map.Find(Dali::Ui::Integration::ImageVisual::Property::DESIRED_WIDTH);
   const Property::Value* fitting = map.Find(Dali::Ui::Integration::ImageVisual::Property::FITTING_MODE);
   DALI_TEST_CHECK(type && url && width && fitting);
   DALI_TEST_EQUALS(type->Get<int>(), static_cast<int>(Dali::Ui::Integration::InternalVisualType::SVG), TEST_LOCATION);
@@ -507,4 +509,95 @@ int UtcDaliImageVisualSvgPropertyMapAndFittingP(void)
   DALI_TEST_EQUALS(fitting->Get<int>(), static_cast<int>(Image::FittingMode::CENTER), TEST_LOCATION);
   DALI_TEST_CHECK(view.GetRendererCount() > 0u);
   END_TEST;
+}
+
+namespace
+{
+int TestImageVisualReloadDuringCompletion(unsigned int reloadCount, bool reloadSelf)
+{
+  UiTestApplication  application;
+  ConnectionTracker  tracker;
+  View               views[3];
+  ImageVisual        visuals[3];
+  Texture            textures[3];
+  Texture            reloadedTexture;
+  unsigned int       counts[3] = {0u, 0u, 0u};
+  const unsigned int target    = reloadSelf ? 0u : 1u;
+  std::string        order;
+
+  for(unsigned int index = 0u; index < 3u; ++index)
+  {
+    views[index] = View::New();
+    views[index].SetRequestedWidth(100.0f);
+    views[index].SetRequestedHeight(100.0f);
+    visuals[index] = ImageVisual::New();
+    visuals[index].SetResourceUrl("../samples/image-view/res/sample.jpg");
+    visuals[index].SetSynchronousLoading(false);
+    visuals[index].SetFastTrackUploadEnabled(false);
+    DALI_TEST_CHECK(views[index].AddVisual(visuals[index], Visual::DepthLayer::CONTENT));
+    views[index].ResourceReadySignal().Connect(&tracker, [&, index](View)
+    {
+      ++counts[index];
+      order += static_cast<char>('A' + index);
+      const auto texture = views[index].GetRendererAt(0u).GetTextures().GetTexture(0u);
+      if(index == target && (counts[index] > 1u || !reloadSelf))
+      {
+        reloadedTexture = texture;
+      }
+      else
+      {
+        textures[index] = texture;
+      }
+      if(index == 0u && counts[index] == 1u)
+      {
+        order += '[';
+        for(unsigned int request = 0u; request < reloadCount; ++request)
+        {
+          visuals[target].Reload();
+        }
+        order += ']';
+      }
+    });
+    application.GetScene().Add(views[index]);
+  }
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5, true));
+  DALI_TEST_EQUALS(order, std::string(reloadSelf ? "A[]BC" : "A[]C"), TEST_LOCATION);
+  DALI_TEST_EQUALS(counts[1], reloadSelf ? 1u : 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!views[target].IsResourceReady());
+  DALI_TEST_CHECK(textures[0]);
+  DALI_TEST_EQUALS(textures[0], textures[2], TEST_LOCATION);
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5, true));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(order, std::string(reloadSelf ? "A[]BCA" : "A[]CB"), TEST_LOCATION);
+  DALI_TEST_CHECK(reloadedTexture);
+  DALI_TEST_CHECK(reloadedTexture != textures[0]);
+  for(unsigned int index = 0u; index < 3u; ++index)
+  {
+    DALI_TEST_EQUALS(counts[index], reloadSelf && index == 0u ? 2u : 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(views[index].IsResourceReady());
+    DALI_TEST_EQUALS(views[index].GetRendererCount(), 1u, TEST_LOCATION);
+  }
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(order, std::string(reloadSelf ? "A[]BCA" : "A[]CB"), TEST_LOCATION);
+  END_TEST;
+}
+} // namespace
+
+int UtcDaliImageVisualReloadPendingObserverFromLoadComplete(void)
+{
+  return TestImageVisualReloadDuringCompletion(1u, false);
+}
+
+int UtcDaliImageVisualReloadPendingObserverMultipleTimesFromLoadComplete(void)
+{
+  return TestImageVisualReloadDuringCompletion(3u, false);
+}
+
+int UtcDaliImageVisualReloadFromLoadCompleteSharedTexture(void)
+{
+  return TestImageVisualReloadDuringCompletion(1u, true);
 }
