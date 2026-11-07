@@ -149,7 +149,7 @@ int UtcDaliImageUrlUtilsGenerateUrlP(void)
   DALI_TEST_CHECK(pixelUrl);
 
   NativeImageInterfacePtr nativeImage = TestNativeImage::New(4u, 4u);
-  ImageUrl nativeUrl = ImageUrlUtils::GenerateUrl(nativeImage, false);
+  ImageUrl nativeUrl = ImageUrlUtils::GenerateUrl(nativeImage);
   DALI_TEST_CHECK(nativeUrl);
 
   EncodedImageBuffer::RawBufferType rawBuffer;
@@ -209,6 +209,91 @@ int UtcDaliImageUrlUtilsGenerateUrlPreMultiplied(void)
 
   DALI_TEST_CHECK(reportedView.GetRendererCount() > 0u);
   DALI_TEST_CHECK(reportedView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
+
+  // A native image that reports pre-multiplied alpha is treated as pre-multiplied too.
+  TestNativeImagePointer reportingNativeImage = TestNativeImage::New(1u, 1u);
+  reportingNativeImage->mAlphaPreMultiplied   = true;
+  ImageUrl nativeReportedUrl = ImageUrlUtils::GenerateUrl(NativeImageInterfacePtr(reportingNativeImage.Get()));
+  DALI_TEST_CHECK(nativeReportedUrl);
+
+  // The deprecated two-argument overload does not lose that declaration either.
+  ImageUrl nativeKeptUrl = ImageUrlUtils::GenerateUrl(NativeImageInterfacePtr(reportingNativeImage.Get()), false);
+  DALI_TEST_CHECK(nativeKeptUrl);
+
+  // And it still honors the caller's declaration on a native image that does not report it.
+  TestNativeImagePointer plainNativeImage = TestNativeImage::New(1u, 1u);
+  ImageUrl nativeDeclaredUrl = ImageUrlUtils::GenerateUrl(NativeImageInterfacePtr(plainNativeImage.Get()), true);
+  DALI_TEST_CHECK(nativeDeclaredUrl);
+
+  END_TEST;
+}
+
+int UtcDaliImageUrlNewPreMultiplied(void)
+{
+  UiTestApplication application;
+
+  // A texture that reports pre-multiplied alpha is treated as pre-multiplied,
+  // even though the caller does not say so.
+  auto*     premultipliedBytes = new uint8_t[4u]{0x80u, 0x80u, 0x80u, 0x80u};
+  PixelData premultipliedData  = PixelData::New(premultipliedBytes, 4u, 1u, 1u, 0u, Pixel::RGBA8888, PixelData::DELETE_ARRAY, true);
+  Texture   reportingTexture   = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 1u, 1u);
+  reportingTexture.Upload(premultipliedData);
+
+  ImageUrl  reportedUrl  = ImageUrl::New(reportingTexture);
+  ImageView reportedView = ImageView::New(reportedUrl);
+  application.GetScene().Add(reportedView);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(reportedView.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(reportedView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
+
+  // A texture that does not report it stays straight alpha unless the caller declares it.
+  auto*     straightBytes   = new uint8_t[4u]{0x80u, 0x80u, 0x80u, 0x80u};
+  PixelData straightData    = PixelData::New(straightBytes, 4u, 1u, 1u, Pixel::RGBA8888, PixelData::DELETE_ARRAY);
+  Texture   straightTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 1u, 1u);
+  straightTexture.Upload(straightData);
+
+  ImageUrl  straightUrl  = ImageUrl::New(straightTexture);
+  ImageView straightView = ImageView::New(straightUrl);
+  application.GetScene().Add(straightView);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(straightView.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(!straightView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
+
+  // The deprecated two-argument overload still honors the caller's declaration.
+  ImageUrl  declaredUrl  = ImageUrl::New(straightTexture, true);
+  ImageView declaredView = ImageView::New(declaredUrl);
+  application.GetScene().Add(declaredView);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(declaredView.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(declaredView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
+
+  // An undeclared straight texture stays straight.
+  ImageUrl  undeclaredUrl  = ImageUrl::New(straightTexture, false);
+  ImageView undeclaredView = ImageView::New(undeclaredUrl);
+  application.GetScene().Add(undeclaredView);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(undeclaredView.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(!undeclaredView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
+
+  // And it does not lose the texture's own declaration either.
+  ImageUrl  keptUrl  = ImageUrl::New(reportingTexture, false);
+  ImageView keptView = ImageView::New(keptUrl);
+  application.GetScene().Add(keptView);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(keptView.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(keptView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
+
+  // An empty texture handle is still accepted, as before.
+  Texture  emptyTexture;
+  ImageUrl emptyUrl = ImageUrl::New(emptyTexture);
+  DALI_TEST_CHECK(emptyUrl);
+  ImageUrl emptyDeclaredUrl = ImageUrl::New(emptyTexture, false);
+  DALI_TEST_CHECK(emptyDeclaredUrl);
 
   END_TEST;
 }

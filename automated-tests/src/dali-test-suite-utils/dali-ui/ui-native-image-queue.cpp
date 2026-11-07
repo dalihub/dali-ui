@@ -65,6 +65,7 @@ public:
   uint32_t                           mWidth;
   uint32_t                           mHeight;
   Dali::NativeImageQueue::ColorFormat mColorFormat;
+  bool                               mAlphaPreMultiplied{false};
 
   std::vector<std::vector<uint8_t>> mBuffers;
   uint32_t                          mNextBuffer{0u};
@@ -182,6 +183,11 @@ uint32_t NativeImageQueue::GetQueueCount() const
   return mImpl->mQueueCount;
 }
 
+void NativeImageQueue::SetAlphaPreMultiplied(bool preMultiplied)
+{
+  mImpl->mAlphaPreMultiplied = preMultiplied;
+}
+
 bool NativeImageQueue::CreateResource()
 {
   return true;
@@ -209,6 +215,11 @@ uint32_t NativeImageQueue::GetWidth() const
 uint32_t NativeImageQueue::GetHeight() const
 {
   return mImpl->mHeight;
+}
+
+bool NativeImageQueue::IsAlphaPreMultiplied() const
+{
+  return mImpl->mAlphaPreMultiplied;
 }
 
 bool NativeImageQueue::RequiresBlending() const

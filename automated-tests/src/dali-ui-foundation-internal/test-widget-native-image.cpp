@@ -37,6 +37,11 @@ NativeImage::~NativeImage()
   images.erase(this);
 }
 
+void NativeImage::SetAlphaPreMultiplied(bool preMultiplied)
+{
+  images.at(this)->mAlphaPreMultiplied = preMultiplied;
+}
+
 bool NativeImage::CreateResource()
 {
   return images.at(this)->CreateResource();
@@ -65,6 +70,11 @@ uint32_t NativeImage::GetWidth() const
 uint32_t NativeImage::GetHeight() const
 {
   return images.at(this)->GetHeight();
+}
+
+bool NativeImage::IsAlphaPreMultiplied() const
+{
+  return images.at(this)->IsAlphaPreMultiplied();
 }
 
 bool NativeImage::RequiresBlending() const

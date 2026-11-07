@@ -60,10 +60,22 @@ public:
    * @brief Create an initialized ImageUrl.
    *
    * @param[in] texture The texture url is got from external buffer.
-   * @param[in] preMultiplied Whether this external texture preMultiplied or not. Default as false.
    * @return A handle to a newly allocated Dali resource.
    */
-  static ImageUrl New(Texture& texture, bool preMultiplied = false);
+  static ImageUrl New(Texture& texture);
+
+  /**
+   * @DEPRECATED_3_0.0 Use New(Texture&) instead, declaring pre-multiplied alpha on the
+   * pixel data uploaded to the texture (Dali::PixelData::New()).
+   * @brief Create an initialized ImageUrl.
+   *
+   * @param[in] texture The texture url is got from external buffer.
+   * @param[in] preMultiplied Whether this external texture preMultiplied or not.
+   * A texture that reports pre-multiplied alpha itself (Dali::Texture::IsAlphaPreMultiplied())
+   * is treated as pre-multiplied whatever this value is.
+   * @return A handle to a newly allocated Dali resource.
+   */
+  static ImageUrl New(Texture& texture, bool preMultiplied);
 
   /**
    * @brief Create an initialized ImageUrl.
