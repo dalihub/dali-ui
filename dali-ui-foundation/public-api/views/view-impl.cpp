@@ -24,6 +24,7 @@
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
 #include <dali/public-api/animation/constraint.h>
+#include <dali/public-api/object/type-info-id.h>
 #include <type_traits>
 #include <utility>
 
@@ -129,6 +130,14 @@ void ViewImpl::OnDestroy()
 void ViewImpl::OnSceneConnection(int depth)
 {
   mImpl->OnViewSceneConnection();
+}
+
+Dali::TypeInfoId ViewImpl::GetTypeRegistrationFallback() const
+{
+  // A subclass need not register with the type registry: its TypeInfo then resolves
+  // as Ui::View, keeping the type-registered View properties, actions and signals
+  // available. A registered subclass's exact-type lookup still takes precedence.
+  return DALI_TYPE_ID(ViewImpl);
 }
 
 bool ViewImpl::FilterKeyEvent(const Dali::KeyEvent&)

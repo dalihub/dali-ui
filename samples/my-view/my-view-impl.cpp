@@ -1,5 +1,5 @@
 #include "my-view-impl.h"
-#include <dali/devel-api/object/type-registry-helper.h>
+#include <dali-ui-foundation/public-api/views/view-registration.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -15,9 +15,11 @@ BaseHandle Create()
   return MyView::New();
 }
 
-// Type Registration
-DALI_TYPE_REGISTRATION_BEGIN_FULL(MyView, MyViewImpl, Dali::Ui::View, Create)
-DALI_TYPE_REGISTRATION_END()
+// Type registration (optional): without it MyView still works as a plain View.
+// Registering makes the type discoverable and creatable by the name "MyView".
+// The type is registered under the handle class's name (MyView), while instances
+// are recognised through the implementation class's (MyViewImpl) RTTI.
+Dali::Ui::ViewRegistration myViewRegistration(DALI_TYPE_ID(MyView), DALI_TYPE_ID(MyViewImpl), DALI_TYPE_ID(Dali::Ui::ViewImpl), Create);
 
 } // namespace
 
@@ -25,11 +27,11 @@ IntrusivePtr<MyViewImpl> MyViewImpl::New()
 {
   IntrusivePtr<MyViewImpl> impl(new MyViewImpl());
 
-  // Arrange producer의 기본 정책은 ArrangePolicy::IF_CHANGED입니다. 이 클래스는
-  // OnArrange를 재정의하지 않으므로 별도 설정 없이 기본 배치를 캐시할 수 있습니다.
-  // OnArrange가 조상/월드 좌표(SCREEN_POSITION 등)를 읽거나 actor 트리 밖의
-  // 표면을 갱신한다면 생성자에서
-  // SetArrangePolicy(ArrangePolicy::ALWAYS)를 호출하십시오.
+  // The arrange producer's default policy is ArrangePolicy::IF_CHANGED. This class
+  // does not override OnArrange, so the default arrangement can be cached without
+  // any further setup. If OnArrange reads ancestor/world coordinates (such as
+  // SCREEN_POSITION) or updates a surface outside the actor tree, call
+  // SetArrangePolicy(ArrangePolicy::ALWAYS) in the constructor.
 
   return impl;
 }
@@ -37,7 +39,7 @@ IntrusivePtr<MyViewImpl> MyViewImpl::New()
 MyViewImpl::MyViewImpl()
 : ViewImpl()
 {
-  // [NOTE] 이 시점에는 핸들에 접근할 수 없습니다. OnInitialize 부터 가능합니다.
+  // [NOTE] The handle cannot be accessed at this point; it is available from OnInitialize onwards.
 }
 
 void MyViewImpl::OnInitialize()

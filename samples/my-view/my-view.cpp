@@ -20,7 +20,7 @@ inline MyViewImpl& GetImpl(MyView& myView)
 MyView MyView::New()
 {
   IntrusivePtr<MyViewImpl> impl = MyViewImpl::New();
-  MyView handle(*impl); // handle이 impl의 소유권을 획득
+  MyView handle(*impl); // The handle takes ownership of the impl
   impl->Initialize();
   return handle;
 }
@@ -44,12 +44,12 @@ MyView::MyView(MyView&& rhs) noexcept
 {
 }
 
-MyView::MyView(MyViewImpl& impl)  // New 수행시 필요
+MyView::MyView(MyViewImpl& impl)  // Required by New()
 : View(impl)
 {
 }
 
-MyView::MyView(Dali::Internal::CustomActor* customActor) // DownCast 수행시 필요
+MyView::MyView(Dali::Internal::CustomActor* customActor) // Required by DownCast()
 : View(customActor)
 {
   VerifyCustomActorPointer<MyViewImpl>(customActor);

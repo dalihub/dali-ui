@@ -30,7 +30,7 @@ public:
 
   void ChangeBackground();
 
-  // [IMPORTANT] 데이터 필드를 넣지 않아야 함
+  // [IMPORTANT] Do not add data fields to a handle class
 };
 
 }

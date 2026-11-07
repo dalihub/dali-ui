@@ -7904,16 +7904,18 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
   // handle and a reference-count round trip on every event-side property write, and
   // `custom` is all the CORNER_RADIUS / CORNER_SQUARENESS re-entries below need.
   //
-  // The IMPL cast stays a dynamic_cast in EVERY build. Registration makes it
+  // The IMPL cast stays a dynamic_cast in EVERY build. The resolution rules make it
   // near-certain to succeed -- these callbacks are registered only on the View type
   // (DALI_TYPE_REGISTRATION_BEGIN_FULL above), and dali-core resolves a CustomActor's
-  // TypeInfo from the RTTI of its own CustomActorImpl, so an impl that is not a
-  // registered View descendant falls back to the plain CustomActor type whose base
-  // chain never reaches here. But the type registry does NOT verify that a registered
-  // inheritance chain matches the actual C++ one, so an impl falsely registered as a
-  // View descendant is reachable. Under the old Ui::View::DownCast that was a silent
-  // no-op; a static_cast would make it release-build undefined behaviour. Failing
-  // silently, as before, is worth one dynamic_cast on the scripting / styling route.
+  // TypeInfo from the RTTI of its own CustomActorImpl: an impl that is neither a
+  // registered View descendant nor an unregistered ViewImpl subclass (those resolve
+  // as Ui::View through ViewImpl's GetTypeRegistrationFallback override) falls back to
+  // the plain CustomActor type whose base chain never reaches here. But the type
+  // registry does NOT verify that a registered inheritance chain matches the actual
+  // C++ one, so an impl falsely registered as a View descendant is reachable. Under
+  // the old Ui::View::DownCast that was a silent no-op; a static_cast would make it
+  // release-build undefined behaviour. Failing silently, as before, is worth one
+  // dynamic_cast on the scripting / styling route.
   Dali::CustomActor custom      = Dali::CustomActor::DownCast(BaseHandle(object));
   ViewImpl*         viewImplPtr = custom ? dynamic_cast<ViewImpl*>(&custom.GetImplementation()) : nullptr;
 

@@ -12016,3 +12016,147 @@ int UtcDaliViewImplOnInitializeSetBackgroundColorAppliedP(void)
 
   END_TEST;
 }
+
+// ─── Unregistered subclasses & the public ViewRegistration facade ──────────
+//
+// Deliberately NOT type-registered: covers the app-facing path where a custom view
+// subclasses ViewImpl without touching the type registry. The ViewImpl constructor
+// declares Ui::View as its type-registration fallback, so the instance must still
+// resolve and behave as a View.
+namespace
+{
+class UnregisteredCustomViewImpl : public ViewImpl
+{
+public:
+  static Ui::View New()
+  {
+    IntrusivePtr<UnregisteredCustomViewImpl> impl = new UnregisteredCustomViewImpl();
+    Ui::View                                 view(*impl);
+    impl->Initialize();
+    return view;
+  }
+};
+
+// Registered through the public Ui::ViewRegistration facade instead of the devel
+// TypeRegistration, with a create function for creation by type name.
+class FacadeRegisteredViewImpl : public ViewImpl
+{
+public:
+  static Ui::View New()
+  {
+    IntrusivePtr<FacadeRegisteredViewImpl> impl = new FacadeRegisteredViewImpl();
+    Ui::View                               view(*impl);
+    impl->Initialize();
+    return view;
+  }
+};
+
+BaseHandle CreateFacadeRegisteredView()
+{
+  return FacadeRegisteredViewImpl::New();
+}
+
+// The namespace-qualified base spelling exercises the facade's qualifier stripping.
+Ui::ViewRegistration facadeRegisteredViewRegistration(DALI_TYPE_ID(FacadeRegisteredViewImpl), DALI_TYPE_ID(Dali::Ui::ViewImpl), CreateFacadeRegisteredView);
+
+// The four-argument facade form: the handle class supplies the registered name,
+// the impl class the RTTI key instances resolve through.
+class FacadeNamedView : public Ui::View
+{
+};
+
+class FacadeNamedViewImpl : public ViewImpl
+{
+public:
+  static Ui::View New()
+  {
+    IntrusivePtr<FacadeNamedViewImpl> impl = new FacadeNamedViewImpl();
+    Ui::View                          view(*impl);
+    impl->Initialize();
+    return view;
+  }
+};
+
+Ui::ViewRegistration facadeNamedViewRegistration(DALI_TYPE_ID(FacadeNamedView), DALI_TYPE_ID(FacadeNamedViewImpl), DALI_TYPE_ID(ViewImpl), nullptr);
+} // namespace
+
+int UtcDaliViewUnregisteredSubclassTypeInfo(void)
+{
+  UiTestApplication application;
+
+  // TypeInfo resolves through ViewImpl's fallback: the instance is a View, not a CustomActor.
+  Ui::View view = UnregisteredCustomViewImpl::New();
+  DALI_TEST_EQUALS("View", view.GetTypeName(), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewUnregisteredSubclassProperties(void)
+{
+  UiTestApplication application;
+
+  Ui::View view = UnregisteredCustomViewImpl::New();
+  application.GetScene().Add(view);
+
+  // View's type-registered event-side properties dispatch: SetMargin routes through
+  // the property system, so the roundtrip only works when the TypeInfo chain does.
+  view.SetMargin(Insets(10.0f, 20.0f, 30.0f, 40.0f));
+  Insets gotMargin = view.GetMargin();
+  DALI_TEST_EQUALS(gotMargin.start, 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gotMargin.end, 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gotMargin.top, 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gotMargin.bottom, 40.0f, TEST_LOCATION);
+
+  // View's type-registered animatable properties can be created on the instance.
+  const Vector4 radius(5.0f, 6.0f, 7.0f, 8.0f);
+  view.SetCornerRadius(radius);
+  DALI_TEST_EQUALS(radius, view.GetCornerRadius(), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewRegistrationFacade(void)
+{
+  UiTestApplication application;
+
+  // The facade registers the type under the impl's class name.
+  DALI_TEST_EQUALS("FacadeRegisteredViewImpl", facadeRegisteredViewRegistration.RegisteredName(), TEST_LOCATION);
+
+  Dali::TypeInfo typeInfo = Dali::TypeRegistry::Get().GetTypeInfo("FacadeRegisteredViewImpl");
+  DALI_TEST_CHECK(typeInfo);
+
+  // Creation by type name goes through the registered create function.
+  BaseHandle handle = typeInfo.CreateInstance();
+  DALI_TEST_CHECK(handle);
+  Ui::View created = Ui::View::DownCast(handle);
+  DALI_TEST_CHECK(created);
+  DALI_TEST_EQUALS("FacadeRegisteredViewImpl", created.GetTypeName(), TEST_LOCATION);
+
+  // The registered chain reaches Ui::View's registered properties.
+  created.SetMargin(Insets(1.0f, 2.0f, 3.0f, 4.0f));
+  DALI_TEST_EQUALS(created.GetMargin().start, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(created.GetMargin().bottom, 4.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewRegistrationFacadeNamed(void)
+{
+  UiTestApplication application;
+
+  // The four-argument form registers under the handle type's name...
+  DALI_TEST_EQUALS("FacadeNamedView", facadeNamedViewRegistration.RegisteredName(), TEST_LOCATION);
+
+  Dali::TypeInfo typeInfo = Dali::TypeRegistry::Get().GetTypeInfo("FacadeNamedView");
+  DALI_TEST_CHECK(typeInfo);
+
+  // ...while instances resolve through the impl type's RTTI.
+  Ui::View view = FacadeNamedViewImpl::New();
+  DALI_TEST_EQUALS("FacadeNamedView", view.GetTypeName(), TEST_LOCATION);
+
+  // No create function was registered.
+  BaseHandle empty = typeInfo.CreateInstance();
+  DALI_TEST_CHECK(!empty);
+
+  END_TEST;
+}

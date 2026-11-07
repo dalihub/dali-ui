@@ -78,7 +78,14 @@ using ViewImplPtr = IntrusivePtr<ViewImpl>;
  * When a LayoutManager is set, the View can manage children and delegate
  * layout calculations to the LayoutManager.
  *
+ * A subclass does not need to register with the DALi type registry to
+ * function: an unregistered subclass resolves as Ui::View, so every View
+ * property, signal and action keeps working. Register it (see
+ * Ui::ViewRegistration) when it needs a type identity of its own, such as its
+ * own type name or creation by type name.
+ *
  * @see Dali::Ui::View
+ * @see Dali::Ui::ViewRegistration
  */
 class DALI_UI_API ViewImpl : public CustomActorImpl, public ConnectionTrackerInterface
 {
@@ -1109,6 +1116,15 @@ protected:
    * @copydoc Dali::CustomActorImpl::GetOffScreenRenderTasks()
    */
   void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::GetTypeRegistrationFallback()
+   *
+   * Returns ViewImpl, so an unregistered subclass resolves as Ui::View and keeps
+   * the type-registered View properties, actions and signals available. A
+   * registered subclass's exact-type lookup still takes precedence.
+   */
+  Dali::TypeInfoId GetTypeRegistrationFallback() const override;
 
   /**
    * @copydoc Dali::ConnectionTrackerInterface::SignalConnected()
