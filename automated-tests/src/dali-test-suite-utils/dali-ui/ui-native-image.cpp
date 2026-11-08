@@ -31,24 +31,24 @@ NativeImagePtr NativeImage::New(unsigned int width, unsigned int height, ColorDe
   return image;
 }
 
-Any NativeImage::GetNativeImage()
-{
-  Any source;
-  return source;
-}
-
 NativeImagePtr NativeImage::New(Any nativeImage)
 {
   NativeImagePtr image = new NativeImage(0, 0, COLOR_DEPTH_DEFAULT, nativeImage);
   return image;
 }
 
-bool NativeImage::GetPixels(Dali::Vector<unsigned char>& pixbuf, unsigned int& width, unsigned int& height, Pixel::Format& pixelFormat) const
+Any NativeImage::GetNativeImage()
+{
+  Any source;
+  return source;
+}
+
+bool NativeImage::GetPixels(Dali::Vector<uint8_t>& pixbuf, uint32_t& width, uint32_t& height, Pixel::Format& pixelFormat) const
 {
   return false;
 }
 
-bool NativeImage::EncodeToFile(const String& filename) const
+bool NativeImage::EncodeToFile(const Dali::String& filename) const
 {
   return false;
 }
@@ -57,9 +57,44 @@ void NativeImage::SetSource(Any source)
 {
 }
 
+void NativeImage::SetAlphaPreMultiplied(bool preMultiplied)
+{
+}
+
 bool NativeImage::IsColorDepthSupported(ColorDepth colorDepth)
 {
   return false;
+}
+
+uint32_t NativeImage::GetWidth() const
+{
+  return 64;
+}
+
+uint32_t NativeImage::GetHeight() const
+{
+  return 32;
+}
+
+bool NativeImage::IsAlphaPreMultiplied() const
+{
+  return false;
+}
+
+bool NativeImage::ApplyNativeFragmentShader(Dali::String& shader, int mask)
+{
+  shader = String("#extension GL_OES_EGL_image_external:require\n") + shader;
+  return true;
+}
+
+int NativeImage::GetTextureTarget() const
+{
+  return 0;
+}
+
+const char* NativeImage::GetCustomSamplerTypename() const
+{
+  return "";
 }
 
 bool NativeImage::CreateResource()
@@ -71,7 +106,7 @@ void NativeImage::DestroyResource()
 {
 }
 
-unsigned int NativeImage::TargetTexture()
+uint32_t NativeImage::TargetTexture()
 {
   return 0;
 }
@@ -81,35 +116,9 @@ Dali::NativeImageInterface::PrepareTextureResult NativeImage::PrepareTexture()
   return Dali::NativeImageInterface::PrepareTextureResult::NO_ERROR;
 }
 
-unsigned int NativeImage::GetWidth() const
-{
-  return 64;
-}
-
-unsigned int NativeImage::GetHeight() const
-{
-  return 32;
-}
-
 bool NativeImage::RequiresBlending() const
 {
   return false;
-}
-
-int NativeImage::GetTextureTarget() const
-{
-  return 0;
-}
-
-bool NativeImage::ApplyNativeFragmentShader(String& shader, int mask)
-{
-  shader = String("#extension GL_OES_EGL_image_external:require\n") + shader;
-  return true;
-}
-
-const char* NativeImage::GetCustomSamplerTypename() const
-{
-  return "";
 }
 
 Any NativeImage::GetNativeImageHandle() const
@@ -120,6 +129,15 @@ Any NativeImage::GetNativeImageHandle() const
 bool NativeImage::SourceChanged() const
 {
   return false;
+}
+
+Rect<uint32_t> NativeImage::GetUpdatedArea()
+{
+  return Rect<uint32_t>(0, 0, 0, 0);
+}
+
+void NativeImage::PostRender()
+{
 }
 
 NativeImageInterface::Extension* NativeImage::GetExtension()

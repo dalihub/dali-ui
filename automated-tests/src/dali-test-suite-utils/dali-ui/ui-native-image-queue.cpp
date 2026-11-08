@@ -94,16 +94,6 @@ NativeImageQueuePtr NativeImageQueue::New(Any nativeImageQueue)
   return NativeImageQueuePtr();
 }
 
-NativeImageQueue::NativeImageQueue(uint32_t queueCount, uint32_t width, uint32_t height, ColorFormat colorFormat, Any nativeImageQueue)
-: mImpl(new Internal::Adaptor::NativeImageQueue(queueCount, width, height, colorFormat))
-{
-}
-
-NativeImageQueue::~NativeImageQueue()
-{
-  delete mImpl;
-}
-
 Any NativeImageQueue::GetNativeImageQueue()
 {
   return Any();
@@ -182,43 +172,13 @@ uint32_t NativeImageQueue::GetQueueCount() const
   return mImpl->mQueueCount;
 }
 
-bool NativeImageQueue::CreateResource()
-{
-  return true;
-}
-
-void NativeImageQueue::DestroyResource()
+void NativeImageQueue::SetAlphaPreMultiplied(bool preMultiplied)
 {
 }
 
-uint32_t NativeImageQueue::TargetTexture()
+bool NativeImageQueue::IsAlphaPreMultiplied() const
 {
-  return 0u;
-}
-
-Dali::NativeImageInterface::PrepareTextureResult NativeImageQueue::PrepareTexture()
-{
-  return Dali::NativeImageInterface::PrepareTextureResult::IMAGE_CHANGED;
-}
-
-uint32_t NativeImageQueue::GetWidth() const
-{
-  return mImpl->mWidth;
-}
-
-uint32_t NativeImageQueue::GetHeight() const
-{
-  return mImpl->mHeight;
-}
-
-bool NativeImageQueue::RequiresBlending() const
-{
-  return mImpl->mColorFormat == ColorFormat::RGBA8888 || mImpl->mColorFormat == ColorFormat::BGRA8888;
-}
-
-int NativeImageQueue::GetTextureTarget() const
-{
-  return GL_TEXTURE_EXTERNAL_OES;
+  return false;
 }
 
 bool NativeImageQueue::ApplyNativeFragmentShader(Dali::String& shaderStr, int mask)
@@ -250,9 +210,48 @@ bool NativeImageQueue::ApplyNativeFragmentShader(Dali::String& shaderStr, int ma
   return true;
 }
 
+int NativeImageQueue::GetTextureTarget() const
+{
+  return GL_TEXTURE_EXTERNAL_OES;
+}
+
 const char* NativeImageQueue::GetCustomSamplerTypename() const
 {
   return "samplerExternalOES";
+}
+
+uint32_t NativeImageQueue::GetWidth() const
+{
+  return mImpl->mWidth;
+}
+
+uint32_t NativeImageQueue::GetHeight() const
+{
+  return mImpl->mHeight;
+}
+
+bool NativeImageQueue::CreateResource()
+{
+  return true;
+}
+
+void NativeImageQueue::DestroyResource()
+{
+}
+
+uint32_t NativeImageQueue::TargetTexture()
+{
+  return 0u;
+}
+
+Dali::NativeImageInterface::PrepareTextureResult NativeImageQueue::PrepareTexture()
+{
+  return Dali::NativeImageInterface::PrepareTextureResult::IMAGE_CHANGED;
+}
+
+bool NativeImageQueue::RequiresBlending() const
+{
+  return mImpl->mColorFormat == ColorFormat::RGBA8888 || mImpl->mColorFormat == ColorFormat::BGRA8888;
 }
 
 Any NativeImageQueue::GetNativeImageHandle() const
@@ -277,6 +276,16 @@ void NativeImageQueue::PostRender()
 NativeImageInterface::Extension* NativeImageQueue::GetExtension()
 {
   return nullptr;
+}
+
+NativeImageQueue::NativeImageQueue(uint32_t queueCount, uint32_t width, uint32_t height, ColorFormat colorFormat, Any nativeImageQueue)
+: mImpl(new Internal::Adaptor::NativeImageQueue(queueCount, width, height, colorFormat))
+{
+}
+
+NativeImageQueue::~NativeImageQueue()
+{
+  delete mImpl;
 }
 
 } // namespace Dali
