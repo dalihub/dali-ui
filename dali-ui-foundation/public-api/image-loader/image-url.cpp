@@ -32,9 +32,15 @@ ImageUrl::~ImageUrl()
 {
 }
 
+ImageUrl ImageUrl::New(Texture& texture)
+{
+  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(texture, texture && texture.IsAlphaPreMultiplied());
+  return ImageUrl(internal.Get());
+}
+
 ImageUrl ImageUrl::New(Texture& texture, bool preMultiplied)
 {
-  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(texture, preMultiplied);
+  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(texture, preMultiplied || (texture && texture.IsAlphaPreMultiplied()));
   return ImageUrl(internal.Get());
 }
 

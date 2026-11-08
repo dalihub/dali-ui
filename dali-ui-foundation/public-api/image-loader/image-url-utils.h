@@ -99,8 +99,19 @@ DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMu
  * @param[in] preMultiplied Whether this native image interface preMultiplied or not. Default as false.
  * @return the ImageUrl representing this native image interface
  */
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface);
+
+/**
+ * @brief Generate a Url from native image interface.
+ * This Url can be used in visuals to render the native image interface.
+ * @note This method does not check for duplicates, If same native image interface is entered multiple times, a
+ * different URL is returned each time.
+ * @param[in] nativeImageInterface the native image interface to converted to Url
+ * @param[in] preMultiplied Whether this native image interface preMultiplied or not. Default as false.
+ * @return the ImageUrl representing this native image interface
+ */
 DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface,
-                                           bool                          preMultiplied = false);
+                                           bool                          preMultiplied);
 
 /**
  * @brief Generate a Url from encoded image buffer.

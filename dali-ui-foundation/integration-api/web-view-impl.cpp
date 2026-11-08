@@ -25,6 +25,7 @@
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/adaptor-framework/native-image.h>
 #include <dali/public-api/object/property-conditions.h>
 #include <algorithm>
@@ -530,7 +531,7 @@ MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstrain
   float h = std::isinf(heightConstraint) ? mWebViewSize.height : heightConstraint;
 
   DALI_LOG_INFO(gWebViewLogFilter, Debug::Verbose, "[WebViewImpl] OnMeasure: constraint=(%.0f,%.0f) -> (%.0f,%.0f)\n",
-                      widthConstraint, heightConstraint, w, h);
+                widthConstraint, heightConstraint, w, h);
   return MeasuredSize(w, h);
 }
 
@@ -546,7 +547,7 @@ MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstrain
 LayoutRect WebViewImpl::OnArrange(const LayoutRect& bounds)
 {
   DALI_LOG_INFO(gWebViewLogFilter, Debug::Verbose, "[WebViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f)\n",
-                      bounds.x, bounds.y, bounds.width, bounds.height);
+                bounds.x, bounds.y, bounds.width, bounds.height);
 
   LayoutRect result = ViewImpl::OnArrange(bounds);
 
@@ -607,7 +608,9 @@ void WebViewImpl::OnFrameRendered()
   mLastRenderedNativeImageHeight = nativeImagePtr->GetHeight();
 
   // Convert the native image into a URL understood by the ImageVisual.
-  Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(nativeImagePtr, /*useNativeImage=*/true);
+  Dali::Texture nativeTexture = Texture::New(*nativeImagePtr);
+  Dali::Integration::SetTextureAlphaPreMultiplied(nativeTexture, true);
+  Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::ImageUrl::New(nativeTexture);
 
   Dali::Property::Map imageVisualMap;
   imageVisualMap.Insert(Dali::Ui::Integration::Visual::Property::TYPE, Dali::Ui::Integration::InternalVisualType::IMAGE);
@@ -663,8 +666,8 @@ void WebViewImpl::SetDisplayArea(const Dali::BoundsInteger& displayArea)
     mVisualChangeRequired = true;
 
     DALI_LOG_INFO(gWebViewLogFilter, Debug::General, "[WebViewImpl] SetDisplayArea: (%d,%d)%dx%d -> (%d,%d)%dx%d\n",
-                        mWebViewArea.x, mWebViewArea.y, mWebViewArea.width, mWebViewArea.height,
-                        displayArea.x, displayArea.y, displayArea.width, displayArea.height);
+                  mWebViewArea.x, mWebViewArea.y, mWebViewArea.width, mWebViewArea.height,
+                  displayArea.x, displayArea.y, displayArea.width, displayArea.height);
 
     // Until the new frame arrives, adjust the existing visual's pixel area to avoid
     // showing the wrong portion of the old texture.
@@ -1451,9 +1454,9 @@ bool WebViewImpl::OnTouchEvent(const Dali::TouchEvent& touch)
 #if defined(DEBUG_ENABLED)
     if(gWebViewLogFilter && gWebViewLogFilter->IsEnabledFor(Debug::Verbose))
     {
-      const Vector3 actorSize = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
-      const bool hasPoint = touch.GetPointCount() > 0;
-      const Vector2 localPosition = hasPoint ? touch.GetLocalPosition(0) : Vector2::ZERO;
+      const Vector3 actorSize      = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
+      const bool    hasPoint       = touch.GetPointCount() > 0;
+      const Vector2 localPosition  = hasPoint ? touch.GetLocalPosition(0) : Vector2::ZERO;
       const Vector2 screenPosition = hasPoint ? touch.GetScreenPosition(0) : Vector2::ZERO;
       DALI_LOG_INFO(gWebViewLogFilter, Debug::Verbose, "[WebViewImpl] touch actorSize=%.0fx%.0f local=(%.0f,%.0f) screen=(%.0f,%.0f) lastImage=%ux%u\n",
                     actorSize.width, actorSize.height, localPosition.x, localPosition.y, screenPosition.x, screenPosition.y,

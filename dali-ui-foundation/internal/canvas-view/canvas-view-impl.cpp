@@ -24,6 +24,7 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/texture-integ.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
@@ -338,7 +339,8 @@ void CanvasViewImpl::ApplyRasterizedImage(CanvasViewRasterizingTaskPtr task)
         viewData.UnregisterVisual(Property::CANVAS_CONTENT_VISUAL);
         mContentVisual.Reset();
 
-        mImageUrl = Dali::Ui::ImageUrl::New(rasterizedTexture, true);
+        Dali::Integration::SetTextureAlphaPreMultiplied(rasterizedTexture, true);
+        mImageUrl = Dali::Ui::ImageUrl::New(rasterizedTexture);
 
         Dali::Property::Map map;
         map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);

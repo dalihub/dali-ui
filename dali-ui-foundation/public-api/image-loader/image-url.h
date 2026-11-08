@@ -63,7 +63,16 @@ public:
    * @param[in] preMultiplied Whether this external texture preMultiplied or not. Default as false.
    * @return A handle to a newly allocated Dali resource.
    */
-  static ImageUrl New(Texture& texture, bool preMultiplied = false);
+  static ImageUrl New(Texture& texture);
+
+  /**
+   * @brief Create an initialized ImageUrl.
+   *
+   * @param[in] texture The texture url is got from external buffer.
+   * @param[in] preMultiplied Whether this external texture preMultiplied or not. Default as false.
+   * @return A handle to a newly allocated Dali resource.
+   */
+  static ImageUrl New(Texture& texture, bool preMultiplied);
 
   /**
    * @brief Create an initialized ImageUrl.

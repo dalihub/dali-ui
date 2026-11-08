@@ -37,7 +37,8 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, Pixel::Format pixe
   Texture texture = Texture::New(Dali::TextureType::TEXTURE_2D, pixelFormat, width, height);
   frameBuffer.AttachColorTexture(texture, 0u, 0u);
   // TODO : Need to check frameBuffer result use preMultiplied color or not. By default, we use premultiplied
-  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, true);
+  Dali::Integration::SetTextureAlphaPreMultiplied(texture, true);
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
   return imageUrl;
 }
 
@@ -45,7 +46,8 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, uint8_t index)
 {
   Texture texture = Dali::DevelFrameBuffer::GetColorTexture(frameBuffer, index);
   // TODO : Need to check frameBuffer result use preMultiplied color or not. By default, we use premultiplied
-  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, true);
+  Dali::Integration::SetTextureAlphaPreMultiplied(texture, true);
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
   return imageUrl;
 }
 
@@ -55,7 +57,11 @@ Dali::Ui::ImageUrl GeneratePixelDataUrl(Dali::PixelData pixelData, bool preMulti
 {
   Texture texture =
     Texture::New(TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
-  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, preMultiplied);
+  if(preMultiplied)
+  {
+    Dali::Integration::SetTextureAlphaPreMultiplied(texture, preMultiplied);
+  }
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
 #if defined(GPU_MEMORY_PROFILE_ENABLED)
   Dali::Integration::TextureUploadWithContent(texture, pixelData, imageUrl.GetUrl(), Dali::Integration::TextureContextTypeHint::EXTERNAL_IMAGE);
 #else
@@ -75,10 +81,21 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMultiplied)
   return GeneratePixelDataUrl(pixelData, preMultiplied || pixelData.IsAlphaPreMultiplied());
 }
 
-Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)
+Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface)
 {
   Texture            texture  = Dali::Texture::New(*nativeImageInterface);
-  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, preMultiplied);
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
+  return imageUrl;
+}
+
+Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)
+{
+  Texture texture = Dali::Texture::New(*nativeImageInterface);
+  if(preMultiplied)
+  {
+    Dali::Integration::SetTextureAlphaPreMultiplied(texture, preMultiplied);
+  }
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
   return imageUrl;
 }
 
