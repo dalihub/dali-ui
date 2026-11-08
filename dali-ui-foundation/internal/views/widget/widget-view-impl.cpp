@@ -41,6 +41,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/rendering/decorated-visual-renderer.h>
 #include <dali/integration-api/string-utils.h>
+#include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/animation/constraints.h>
@@ -363,7 +364,10 @@ void WidgetViewImpl::UpdateWidgetImage(Dali::NativeImagePtr image)
   // RegisterVisual can emit ResourceReadySignal and release the application's handles.
   Dali::Ui::WidgetView keepAlive(GetOwner());
 
-  auto          widgetImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(image, true);
+  Dali::Texture nativeTexture = Texture::New(*image);
+  Dali::Integration::SetTextureAlphaPreMultiplied(nativeTexture, true);
+  auto widgetImageUrl = Dali::Ui::ImageUrl::New(nativeTexture);
+
   Property::Map properties;
   properties.Insert(Dali::Ui::Integration::Visual::Property::TYPE, Dali::Ui::Integration::InternalVisualType::IMAGE);
   properties.Insert(Dali::Ui::Integration::ImageVisual::Property::URL, widgetImageUrl.GetUrl());

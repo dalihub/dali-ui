@@ -26,15 +26,34 @@ NativeImagePtr NativeImage::New(uint32_t width, uint32_t height, ColorDepth dept
   return new NativeImage(width, height, depth, Any());
 }
 
-NativeImage::NativeImage(uint32_t width, uint32_t height, ColorDepth, Any)
-: mImpl(nullptr)
+uint32_t NativeImage::GetWidth() const
 {
-  images.emplace(this, TestNativeImage::New(width, height));
+  return images.at(this)->GetWidth();
 }
 
-NativeImage::~NativeImage()
+uint32_t NativeImage::GetHeight() const
 {
-  images.erase(this);
+  return images.at(this)->GetHeight();
+}
+
+bool NativeImage::IsAlphaPreMultiplied() const
+{
+  return images.at(this)->IsAlphaPreMultiplied();
+}
+
+bool NativeImage::ApplyNativeFragmentShader(String& shader, int mask)
+{
+  return images.at(this)->ApplyNativeFragmentShader(shader, mask);
+}
+
+int NativeImage::GetTextureTarget() const
+{
+  return images.at(this)->GetTextureTarget();
+}
+
+const char* NativeImage::GetCustomSamplerTypename() const
+{
+  return images.at(this)->GetCustomSamplerTypename();
 }
 
 bool NativeImage::CreateResource()
@@ -57,34 +76,9 @@ NativeImageInterface::PrepareTextureResult NativeImage::PrepareTexture()
   return images.at(this)->PrepareTexture();
 }
 
-uint32_t NativeImage::GetWidth() const
-{
-  return images.at(this)->GetWidth();
-}
-
-uint32_t NativeImage::GetHeight() const
-{
-  return images.at(this)->GetHeight();
-}
-
 bool NativeImage::RequiresBlending() const
 {
   return images.at(this)->RequiresBlending();
-}
-
-int NativeImage::GetTextureTarget() const
-{
-  return images.at(this)->GetTextureTarget();
-}
-
-bool NativeImage::ApplyNativeFragmentShader(String& shader, int mask)
-{
-  return images.at(this)->ApplyNativeFragmentShader(shader, mask);
-}
-
-const char* NativeImage::GetCustomSamplerTypename() const
-{
-  return images.at(this)->GetCustomSamplerTypename();
 }
 
 Any NativeImage::GetNativeImageHandle() const
@@ -110,5 +104,16 @@ void NativeImage::PostRender()
 NativeImageInterface::Extension* NativeImage::GetExtension()
 {
   return images.at(this)->GetExtension();
+}
+
+NativeImage::NativeImage(uint32_t width, uint32_t height, ColorDepth, Any)
+: mImpl(nullptr)
+{
+  images.emplace(this, TestNativeImage::New(width, height));
+}
+
+NativeImage::~NativeImage()
+{
+  images.erase(this);
 }
 } // namespace DALI_NAMESPACE
