@@ -40,8 +40,8 @@ ChartAxis::~ChartAxis()
 
 ChartAxis ChartAxis::New()
 {
-  Integration::ChartAxis* impl = new Integration::ChartAxis();
-  return ChartAxis(impl);
+  auto impl = Integration::ChartAxis::New();
+  return ChartAxis(impl.Get());
 }
 
 ChartAxis::ChartAxis(const ChartAxis& rhs)

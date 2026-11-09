@@ -63,7 +63,7 @@ struct UiScaleRestore
 
 Ui::Internal::TextLoadingTaskPtr Run(Text::AsyncTextParameters parameters)
 {
-  Ui::Internal::TextLoadingTaskPtr task = new Ui::Internal::TextLoadingTask(1u, std::move(parameters), nullptr);
+  Ui::Internal::TextLoadingTaskPtr task = Ui::Internal::TextLoadingTask::New(1u, std::move(parameters), nullptr);
   task->mLoader                         = Text::AsyncTextLoader::New();
   task->Process();
   return task;

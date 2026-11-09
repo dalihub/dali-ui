@@ -777,12 +777,8 @@ private:
    * @brief Private constructor.
    */
   VisualModel();
-
-  // Undefined
-  VisualModel(const VisualModel& handle);
-
-  // Undefined
-  VisualModel& operator=(const VisualModel& handle);
+  VisualModel(const VisualModel& handle)            = delete;
+  VisualModel& operator=(const VisualModel& handle) = delete;
 
   struct ShadowData;
   ShadowData& GetOrCreateShadowData();

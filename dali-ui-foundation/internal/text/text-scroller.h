@@ -266,7 +266,7 @@ public:
    */
   bool IsGradientOverlayEnabled() const;
 
-private: // Implementation
+private:
   /**
    * Constructor
    */
@@ -276,12 +276,9 @@ private: // Implementation
    * Destructor
    */
   ~TextScroller();
-
-  // Undefined
-  TextScroller(const TextScroller& handle);
-
-  // Undefined
-  TextScroller& operator=(const TextScroller& handle);
+  // Implementation
+  TextScroller(const TextScroller& handle)            = delete;
+  TextScroller& operator=(const TextScroller& handle) = delete;
 
   /**
    * @brief Callback for end of animation

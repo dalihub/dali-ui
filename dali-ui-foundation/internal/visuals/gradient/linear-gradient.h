@@ -19,6 +19,7 @@
  */
 
 #include <dali-ui-foundation/internal/visuals/gradient/gradient.h>
+#include <utility>
 
 #include <dali/public-api/math/vector2.h>
 
@@ -41,12 +42,11 @@ public:
    * @param[in] endPosition The ending point r onto which the 100% gradient stops are mapped.
    * @param[in] oldGradient Previous gradient feature, to copy old variables.
    */
-  LinearGradient(const Vector2& startPosition, const Vector2& endPosition, IntrusivePtr<Gradient> oldGradient);
 
-  /**
-   * Destructor.
-   */
-  virtual ~LinearGradient();
+  static IntrusivePtr<LinearGradient> New(const Vector2& startPosition, const Vector2& endPosition, IntrusivePtr<Gradient> oldGradient)
+  {
+    return IntrusivePtr<LinearGradient>(new LinearGradient(startPosition, endPosition, std::move(oldGradient)));
+  }
 
   /**
    * Set the starting and ending points of the vector onto which the gradient stops are mapped.
@@ -66,6 +66,15 @@ public:
    * @return The ending point of the gradient vector.
    */
   const Vector2& GetEndPosition() const;
+
+protected:
+  LinearGradient(const Vector2& startPosition, const Vector2& endPosition, IntrusivePtr<Gradient> oldGradient);
+
+  /**
+   * Destructor.
+   */
+
+  ~LinearGradient() override;
 
 private:
   // Undefined

@@ -39,16 +39,6 @@ namespace Internal
 class GridLayoutParamsImpl : public TraitObject
 {
 public:
-  explicit GridLayoutParamsImpl(const GridLayoutParams& params)
-  : mRow(params.GetRow()),
-    mColumn(params.GetColumn()),
-    mRowSpan(params.GetRowSpan()),
-    mColumnSpan(params.GetColumnSpan()),
-    mHorizontalAlignment(params.GetHorizontalAlignment()),
-    mVerticalAlignment(params.GetVerticalAlignment())
-  {
-  }
-
   /**
    * @brief Gets the row index for this child in the grid.
    * @return The row index.
@@ -96,6 +86,14 @@ public:
   }
 
   /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<GridLayoutParamsImpl> New(const GridLayoutParams& params)
+  {
+    return IntrusivePtr<GridLayoutParamsImpl>(new GridLayoutParamsImpl(params));
+  }
+
+  /**
    * @brief Retrieves the GridLayoutParams trait attached to a view, if any.
    * @param[in] viewImpl The view implementation to query.
    * @return Pointer to the params, or nullptr if not attached.
@@ -108,6 +106,16 @@ public:
   }
 
 protected:
+  explicit GridLayoutParamsImpl(const GridLayoutParams& params)
+  : mRow(params.GetRow()),
+    mColumn(params.GetColumn()),
+    mRowSpan(params.GetRowSpan()),
+    mColumnSpan(params.GetColumnSpan()),
+    mHorizontalAlignment(params.GetHorizontalAlignment()),
+    mVerticalAlignment(params.GetVerticalAlignment())
+  {
+  }
+
   ~GridLayoutParamsImpl() override = default;
 
 private:

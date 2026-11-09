@@ -44,13 +44,13 @@ Internal::Text::StyledText* GetImplementation(const StyledText& styledText)
 
 StyledText StyledText::New(const Dali::String& text)
 {
-  return StyledText(new Internal::Text::StyledText(text));
+  return StyledText(Internal::Text::StyledText::NewForBaseHandle(text));
 }
 
 StyledText StyledText::FromMarkup(const Dali::String& markup)
 {
   Internal::Text::StyledTextMarkupResult result = Internal::Text::ParseStyledTextMarkup(markup, nullptr);
-  return StyledText(new Internal::Text::StyledText(result.text, std::move(result.attachments), result.utf32Length));
+  return StyledText(Internal::Text::StyledText::NewForBaseHandle(result.text, std::move(result.attachments), result.utf32Length));
 }
 
 Dali::String StyledText::GetText() const

@@ -31,8 +31,8 @@ namespace Ui
 
 BarSeries BarSeries::New()
 {
-  Integration::BarSeries* impl = new Integration::BarSeries();
-  return BarSeries(impl);
+  auto impl = Integration::BarSeries::New();
+  return BarSeries(impl.Get());
 }
 
 BarSeries::BarSeries()  = default;

@@ -43,7 +43,15 @@ class ChartSeries : public Dali::BaseObject
 public:
   using DataChangedSignalType = Signal<void()>;
 
-  ChartSeries();
+  /**
+   * @brief Creates a reference-counted ChartSeries implementation.
+   * @SINCE_3_0.0
+   * @return An intrusive pointer owning the implementation
+   */
+  static IntrusivePtr<ChartSeries> New()
+  {
+    return IntrusivePtr<ChartSeries>(new ChartSeries());
+  }
 
   void         SetName(const Dali::String& name);
   Dali::String GetName() const;
@@ -117,6 +125,8 @@ public:
   bool                        mHasFillGradient{false};
 
 protected:
+  ChartSeries();
+
   ~ChartSeries() override;
 
   void EmitDataChangedSignal();

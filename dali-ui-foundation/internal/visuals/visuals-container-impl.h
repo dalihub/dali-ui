@@ -117,7 +117,6 @@ protected:
    */
   VisualsContainer(Dali::Ui::View view, Dali::Ui::Visual::DepthLayer depthLayer);
 
-public:
   /**
    * @brief Destructor.
    */
@@ -128,8 +127,7 @@ private:
   Dali::WeakHandle<Dali::Ui::View>  mView;
 
   const Dali::Ui::Visual::DepthLayer mDepthLayer;
-
-  Dali::FreeList mVisualIndexConverter; ///< Convert from virtual visual index of VisualBase to actual visual index of mView.
+  Dali::FreeList                     mVisualIndexConverter;
 };
 } // namespace Internal
 

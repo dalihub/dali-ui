@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include "view-data-impl.h"
+#include <utility>
 #include "view-accessibility-data.h"
 #include "view-visual-data.h"
 #include "visual-constraint-functions.h"
@@ -179,9 +180,12 @@ template<typename Signature>
 class AccessibilityCallbackObject final : public TraitObject
 {
 public:
-  explicit AccessibilityCallbackObject(Callback<Signature> callback)
-  : mCallback(std::move(callback))
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<AccessibilityCallbackObject> New(Callback<Signature> callback)
   {
+    return IntrusivePtr<AccessibilityCallbackObject>(new AccessibilityCallbackObject(std::move(callback)));
   }
 
   template<typename... Args>
@@ -191,6 +195,11 @@ public:
   }
 
 protected:
+  explicit AccessibilityCallbackObject(Callback<Signature> callback)
+  : mCallback(std::move(callback))
+  {
+  }
+
   ~AccessibilityCallbackObject() override = default;
 
 private:
@@ -206,7 +215,7 @@ void SetAccessibilityCallback(ViewDataImpl& viewDataImpl, TraitId id, Callback<S
     return;
   }
 
-  IntrusivePtr<TraitObject> object(new AccessibilityCallbackObject<Signature>(std::move(callback)));
+  IntrusivePtr<TraitObject> object(AccessibilityCallbackObject<Signature>::New(std::move(callback)));
   viewDataImpl.SetTrait(id, object);
 }
 
@@ -273,7 +282,7 @@ LayoutCallbacksObject* EnsureLayoutCallbacksObject(ViewDataImpl& viewDataImpl)
   auto* object = GetLayoutCallbacksObject(viewDataImpl);
   if(!object)
   {
-    IntrusivePtr<TraitObject> newObject(new LayoutCallbacksObject());
+    IntrusivePtr<TraitObject> newObject(LayoutCallbacksObject::New());
     object = static_cast<LayoutCallbacksObject*>(newObject.Get());
     viewDataImpl.SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, newObject);
   }
@@ -2098,7 +2107,7 @@ Ui::InteractiveTrait ViewDataImpl::EnsureInteractiveTrait()
 
   if(!traitObject)
   {
-    IntrusivePtr<CoreInteractionObject> newTraitObject = new CoreInteractionObject();
+    IntrusivePtr<CoreInteractionObject> newTraitObject = CoreInteractionObject::New();
     traitObject                                        = newTraitObject.Get();
     SetTrait(Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
     AttachInteractiveStateEffect();
@@ -2223,7 +2232,7 @@ Ui::SelectableTrait ViewDataImpl::EnsureSelectableTrait()
 
   if(!traitObject)
   {
-    IntrusivePtr<CoreInteractionObject> newTraitObject = new CoreInteractionObject();
+    IntrusivePtr<CoreInteractionObject> newTraitObject = CoreInteractionObject::New();
     traitObject                                        = newTraitObject.Get();
     SetTrait(Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
     AttachInteractiveStateEffect();
@@ -2244,7 +2253,7 @@ Ui::GroupSelectableTrait ViewDataImpl::EnsureGroupSelectableTrait()
 
   if(!traitObject)
   {
-    IntrusivePtr<CoreInteractionObject> newTraitObject = new CoreInteractionObject();
+    IntrusivePtr<CoreInteractionObject> newTraitObject = CoreInteractionObject::New();
     traitObject                                        = newTraitObject.Get();
     SetTrait(Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
     AttachInteractiveStateEffect();
@@ -2382,7 +2391,7 @@ bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
 bool ViewDataImpl::ActivateAccessibilityDefault()
 {
   Ui::View   self = Ui::View::DownCast(mViewImpl.Self());
-  InputEvent event(InputEventImpl::New(InputEventType::ACCESSIBILITY_ACTIVATION).Get());
+  InputEvent event(InputEventImpl::NewForBaseHandle(InputEventType::ACCESSIBILITY_ACTIVATION));
 
   Ui::FocusManager focusManager = Ui::FocusManager::Get();
   const bool       focused      = focusManager && GetImpl(focusManager).SetCurrentFocusView(self, event);
@@ -4740,7 +4749,7 @@ void ViewDataImpl::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
   DALI_ASSERT_ALWAYS(manager && "AttachLayoutManager requires a non-null LayoutManager.");
   DALI_ASSERT_ALWAYS(!HasLayoutManager() && "LayoutManager already set. Cannot replace an existing LayoutManager.");
 
-  IntrusivePtr<TraitObject> object(new LayoutManagerObject(std::move(manager)));
+  IntrusivePtr<TraitObject> object(LayoutManagerObject::New(std::move(manager)));
   IntegrationView::SetTrait(mViewImpl, Integration::ReservedTraitId::LAYOUT_MANAGER, object);
 
   // Wire the back-pointer that lets the manager invalidate US from its own setters
@@ -4800,7 +4809,7 @@ void ViewDataImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
     return;
   }
 
-  IntrusivePtr<TraitObject> object(new AbsoluteLayoutParamsImpl(params));
+  IntrusivePtr<TraitObject> object(AbsoluteLayoutParamsImpl::New(params));
   SetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, object);
   InvalidateMeasure();
 }
@@ -4813,7 +4822,7 @@ void ViewDataImpl::SetLayoutParams(const FlexLayoutParams& params)
     return;
   }
 
-  IntrusivePtr<TraitObject> object(new FlexLayoutParamsImpl(params));
+  IntrusivePtr<TraitObject> object(FlexLayoutParamsImpl::New(params));
   SetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, object);
   InvalidateMeasure();
 }
@@ -4826,7 +4835,7 @@ void ViewDataImpl::SetLayoutParams(const GridLayoutParams& params)
     return;
   }
 
-  IntrusivePtr<TraitObject> object(new GridLayoutParamsImpl(params));
+  IntrusivePtr<TraitObject> object(GridLayoutParamsImpl::New(params));
   SetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, object);
   InvalidateMeasure();
 }
@@ -4839,7 +4848,7 @@ void ViewDataImpl::SetLayoutParams(const StackLayoutParams& params)
     return;
   }
 
-  IntrusivePtr<TraitObject> object(new StackLayoutParamsImpl(params));
+  IntrusivePtr<TraitObject> object(StackLayoutParamsImpl::New(params));
   SetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, object);
   InvalidateMeasure();
 }
@@ -7615,7 +7624,7 @@ void ViewDataImpl::SetNamedStateObserver(const Dali::String& id, Dali::Connectio
 
   if(!existing)
   {
-    IntrusivePtr<TraitObject> stateHandlerTrait(new StateHandlerTrait());
+    IntrusivePtr<TraitObject> stateHandlerTrait(StateHandlerTrait::New());
     existing = static_cast<StateHandlerTrait*>(stateHandlerTrait.Get());
     SetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT, stateHandlerTrait);
   }
@@ -9885,7 +9894,7 @@ void ViewDataImpl::SetOffscreenRenderingEnabled(bool enabled)
   }
 
   RenderEffectData& renderEffectData  = EnsureRenderEffectData();
-  renderEffectData.offscreenRendering = new OffscreenRenderingImpl(renderEffectData.offscreenRefreshRate);
+  renderEffectData.offscreenRendering = OffscreenRenderingImpl::New(renderEffectData.offscreenRefreshRate);
   renderEffectData.offscreenRendering->SetOwnerView(Dali::Ui::View(mViewImpl.GetOwner()));
 
   if(DALI_LIKELY(CanUseVisuals()))

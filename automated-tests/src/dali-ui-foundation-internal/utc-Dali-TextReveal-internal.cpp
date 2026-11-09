@@ -3155,7 +3155,7 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
   // The real task selects effective RenderScale 1 before loading and calls the
   // loader once. Reveal/placement expectations match the unscaled plan above.
   Ui::Internal::TextLoadingTaskPtr scaledTask =
-    new Ui::Internal::TextLoadingTask(1u, std::move(asyncParameters), nullptr);
+    Ui::Internal::TextLoadingTask::New(1u, std::move(asyncParameters), nullptr);
   scaledTask->mLoader = UiText::AsyncTextLoader::New();
   scaledTask->Process();
   DALI_TEST_EQUALS(scaledTask->mParameters.renderScale, 1.0f, TEST_LOCATION);

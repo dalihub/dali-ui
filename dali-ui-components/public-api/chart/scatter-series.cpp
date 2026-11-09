@@ -28,8 +28,8 @@ namespace Ui
 
 ScatterSeries ScatterSeries::New()
 {
-  Integration::ScatterSeries* impl = new Integration::ScatterSeries();
-  return ScatterSeries(impl);
+  auto impl = Integration::ScatterSeries::New();
+  return ScatterSeries(impl.Get());
 }
 
 ScatterSeries::ScatterSeries()  = default;

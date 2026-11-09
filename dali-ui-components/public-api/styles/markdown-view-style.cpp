@@ -74,7 +74,7 @@ MarkdownViewStyle MarkdownViewStyle::StaticDownCast(UiStyle style)
 
 MarkdownViewStyle::Builder MarkdownViewStyle::Configure() const
 {
-  IntrusivePtr<Internal::MarkdownViewStyleImpl> impl(new Internal::MarkdownViewStyleImpl(GetImpl(*this)));
+  IntrusivePtr<Internal::MarkdownViewStyleImpl> impl(Internal::MarkdownViewStyleImpl::New(GetImpl(*this)));
   return Builder(impl.Get());
 }
 
@@ -141,7 +141,7 @@ MarkdownViewStyle::MarkdownViewStyle(Internal::MarkdownViewStyleImpl* impl)
 }
 
 MarkdownViewStyle::Builder::Builder()
-: mImpl(new Internal::MarkdownViewStyleImpl())
+: mImpl(Internal::MarkdownViewStyleImpl::New())
 {
 }
 

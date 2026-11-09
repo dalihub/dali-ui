@@ -41,7 +41,8 @@ Builder::~Builder()
 
 Builder Builder::New(void)
 {
-  return Builder(new Dali::Ui::Internal::Builder());
+  auto implementation = Dali::Ui::Internal::Builder::New();
+  return Builder(implementation.Get());
 }
 
 Builder::Builder(Dali::Ui::Internal::Builder* impl)

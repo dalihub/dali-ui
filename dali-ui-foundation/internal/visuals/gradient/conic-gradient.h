@@ -19,6 +19,7 @@
  */
 
 #include <dali-ui-foundation/internal/visuals/gradient/gradient.h>
+#include <utility>
 
 #include <dali/public-api/math/vector2.h>
 
@@ -41,12 +42,11 @@ public:
    * @param[in] startAngle The initial angle from which the gradient begins.
    * @param[in] oldGradient Previous gradient feature, to copy old variables.
    */
-  ConicGradient(const Vector2& center, Dali::Radian startAngle, IntrusivePtr<Gradient> oldGradient);
 
-  /**
-   * Destructor.
-   */
-  virtual ~ConicGradient();
+  static IntrusivePtr<ConicGradient> New(const Vector2& center, Dali::Radian startAngle, IntrusivePtr<Gradient> oldGradient)
+  {
+    return IntrusivePtr<ConicGradient>(new ConicGradient(center, std::move(startAngle), std::move(oldGradient)));
+  }
 
   /**
    * Get the center of the conic gradient.
@@ -59,6 +59,15 @@ public:
    * @return The start angle of the conic gradient.
    */
   Dali::Radian GetStartAngle() const;
+
+protected:
+  ConicGradient(const Vector2& center, Dali::Radian startAngle, IntrusivePtr<Gradient> oldGradient);
+
+  /**
+   * Destructor.
+   */
+
+  ~ConicGradient() override;
 
 private:
   // Undefined

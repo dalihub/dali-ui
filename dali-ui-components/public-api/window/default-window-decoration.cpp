@@ -47,7 +47,7 @@ DefaultWindowDecoration DefaultWindowDecoration::New(WindowFrame windowFrame, co
     return DefaultWindowDecoration();
   }
 
-  DefaultWindowDecoration           defaultDecoration(new Internal::DefaultWindowDecorationImpl(windowFrame, options));
+  DefaultWindowDecoration           defaultDecoration(Internal::DefaultWindowDecorationImpl::NewForBaseHandle(windowFrame, options));
   const WindowFrameDecorationResult result = GetImplementation(defaultDecoration).Install();
   if(result != WindowFrameDecorationResult::INSTALLED)
   {

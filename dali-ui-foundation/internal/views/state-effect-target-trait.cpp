@@ -27,7 +27,7 @@ namespace Internal
 
 StateEffectTargetTrait StateEffectTargetTrait::New()
 {
-  IntrusivePtr<StateEffectTargetTraitImpl> impl(new StateEffectTargetTraitImpl());
+  IntrusivePtr<StateEffectTargetTraitImpl> impl(StateEffectTargetTraitImpl::New());
   return StateEffectTargetTrait(impl.Get());
 }
 

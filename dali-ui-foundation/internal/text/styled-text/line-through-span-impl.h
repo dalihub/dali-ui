@@ -36,10 +36,30 @@ namespace Text
 class LineThroughSpan : public Span
 {
 public:
-  explicit LineThroughSpan(const Dali::Ui::Text::LineThrough& lineThrough);
-  ~LineThroughSpan() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL LineThroughSpan* NewForBaseHandle(const Dali::Ui::Text::LineThrough& lineThrough)
+  {
+    return new LineThroughSpan(lineThrough);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<LineThroughSpan> New(const Dali::Ui::Text::LineThrough& lineThrough)
+  {
+    return IntrusivePtr<LineThroughSpan>(new LineThroughSpan(lineThrough));
+  }
 
   const Dali::Ui::Text::LineThrough& GetLineThrough() const;
+
+protected:
+  explicit LineThroughSpan(const Dali::Ui::Text::LineThrough& lineThrough);
+  ~LineThroughSpan() override;
 
 private:
   Dali::Ui::Text::LineThrough mLineThrough;

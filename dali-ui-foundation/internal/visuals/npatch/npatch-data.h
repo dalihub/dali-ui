@@ -42,8 +42,11 @@ class NPatchData : public ConnectionTracker, public Dali::Ui::TextureUploadObser
 {
 public:
   typedef int32_t
-                            NPatchDataId;                ///< The NPatchDataId type. This is used as a handle to refer to a particular Npatch Data.
-  static const NPatchDataId INVALID_NPATCH_DATA_ID = -1; ///< Used to represent a null TextureId or error
+    NPatchDataId;
+  ///< The NPatchDataId type. This is used as a handle to refer to a particular Npatch Data.
+  static const NPatchDataId INVALID_NPATCH_DATA_ID = -1;
+
+  ///< Used to represent a null TextureId or error
 
   /**
    * @brief Loading State of the NPatch image.
@@ -55,17 +58,14 @@ public:
     LOAD_COMPLETE,   ///< NPatch loading is completed successfully.
     LOAD_FAILED      ///< NPatch loading is failed.
   };
-
-public:
   /**
    * Constructor
    */
-  NPatchData();
 
-  /**
-   * Destructor, non-virtual as not a base class
-   */
-  ~NPatchData();
+  static IntrusivePtr<NPatchData> New()
+  {
+    return IntrusivePtr<NPatchData>(new NPatchData());
+  }
 
 public:
   /**
@@ -266,6 +266,15 @@ public:
    */
   void NotifyObserver(TextureUploadObserver* observer, const bool& loadSuccess);
 
+protected:
+  NPatchData();
+
+  /**
+   * Destructor, non-virtual as not a base class
+   */
+
+  ~NPatchData() override;
+
 private:
   /**
    * @copydoc TextureUploadObserver::LoadComplete
@@ -283,25 +292,39 @@ private:
   void ObserverDestroyed(TextureUploadObserver* observer);
 
 private:
-  using ObserverListType = Dali::Vector<TextureUploadObserver*>;
-
+  using ObserverListType                        = Dali::Vector<TextureUploadObserver*>;
+  NPatchData(const NPatchData&)                 = delete;
+  NPatchData&      operator=(const NPatchData&) = delete;
   NPatchDataId     mId;
-  ObserverListType mObserverList;    ///< Container used to store all observer clients of this Texture
-  ObserverListType mQueuedObservers; ///< Container observers when user try to add during notify observers
+  ObserverListType mObserverList;
+  ///< Container used to store all observer clients of this Texture
+  ObserverListType mQueuedObservers;
+  ///< Container observers when user try to add during notify observers
 
-  VisualUrl                                           mUrl;            ///< Url of the N-Patch
-  TextureSet                                          mTextureSet;     ///< Texture containing the cropped image
-  Dali::Ui::Integration::NPatchUtility::StretchRanges mStretchPixelsX; ///< X stretch pixels
-  Dali::Ui::Integration::NPatchUtility::StretchRanges mStretchPixelsY; ///< Y stretch pixels
-  std::size_t                                         mHash;           ///< Hash code for the Url
-  uint32_t                                            mCroppedWidth;   ///< Width of the cropped middle part of N-patch
-  uint32_t                                            mCroppedHeight;  ///< Height of the cropped middle part of N-patch
-  Dali::Insets                                        mBorder;         ///< The size of the border
-  LoadingState                                        mLoadingState;   ///< True if the data loading is completed
-  void*                                               mRenderingMap;   ///< NPatch rendering data
+  VisualUrl mUrl;
+  ///< Url of the N-Patch
+  TextureSet mTextureSet;
+  ///< Texture containing the cropped image
+  Dali::Ui::Integration::NPatchUtility::StretchRanges mStretchPixelsX;
+  ///< X stretch pixels
+  Dali::Ui::Integration::NPatchUtility::StretchRanges mStretchPixelsY;
+  ///< Y stretch pixels
+  std::size_t mHash;
+  ///< Hash code for the Url
+  uint32_t mCroppedWidth;
+  ///< Width of the cropped middle part of N-patch
+  uint32_t mCroppedHeight;
+  ///< Height of the cropped middle part of N-patch
+  Dali::Insets mBorder;
+  ///< The size of the border
+  LoadingState mLoadingState;
+  ///< True if the data loading is completed
+  void* mRenderingMap;
+  ///< NPatch rendering data
 
-  bool mPreMultiplyOnLoad : 1; ///< Whether to multiply alpha into color channels on load
-  bool mObserverNotifying : 1; ///< Whether this NPatchData notifying observers or not.
+  bool mPreMultiplyOnLoad : 1;
+  ///< Whether to multiply alpha into color channels on load
+  bool mObserverNotifying : 1;
 };
 
 } // namespace Internal

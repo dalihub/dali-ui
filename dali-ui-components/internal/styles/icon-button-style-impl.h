@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dali-ui-components/internal/styles/style-validation.h>
+#include <utility>
 
 #include <dali-ui-components/public-api/styles/icon-button-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
@@ -11,12 +12,31 @@ namespace DALI_NAMESPACE::Ui::Internal
 class IconButtonStyleImpl : public Extension::UiStyleImpl
 {
 public:
-  IconButtonStyleImpl() = default;
-  IconButtonStyleImpl(Dali::String iconUrl, float iconWidth, float iconHeight)
-  : mIconUrl(std::move(iconUrl)),
-    mIconWidth(iconWidth),
-    mIconHeight(iconHeight)
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL IconButtonStyleImpl* NewForBaseHandle(Dali::String iconUrl, float iconWidth, float iconHeight)
   {
+    return new IconButtonStyleImpl(std::move(iconUrl), iconWidth, iconHeight);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<IconButtonStyleImpl> New()
+  {
+    return IntrusivePtr<IconButtonStyleImpl>(new IconButtonStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<IconButtonStyleImpl> New(Dali::String iconUrl, float iconWidth, float iconHeight)
+  {
+    return IntrusivePtr<IconButtonStyleImpl>(new IconButtonStyleImpl(std::move(iconUrl), iconWidth, iconHeight));
   }
 
   void SetIconUrl(const Dali::String& iconUrl)
@@ -66,6 +86,14 @@ public:
   }
 
 protected:
+  IconButtonStyleImpl() = default;
+  IconButtonStyleImpl(Dali::String iconUrl, float iconWidth, float iconHeight)
+  : mIconUrl(std::move(iconUrl)),
+    mIconWidth(iconWidth),
+    mIconHeight(iconHeight)
+  {
+  }
+
   ~IconButtonStyleImpl() override = default;
 
 private:

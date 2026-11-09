@@ -50,11 +50,26 @@ class VisualFactory : public BaseObject, public ConnectionTracker
 {
 public:
   /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL VisualFactory* NewForBaseHandle(bool debugEnabled)
+  {
+    return new VisualFactory(debugEnabled);
+  }
+
+  /**
    * @brief Constructor
    *
    * @param[in] debugEnabled If true, use debug renderer to replace all the concrete renderer.
    */
-  VisualFactory(bool debugEnabled);
+
+  static IntrusivePtr<VisualFactory> New(bool debugEnabled)
+  {
+    return IntrusivePtr<VisualFactory>(new VisualFactory(debugEnabled));
+  }
 
   /**
    * @copydoc Ui::Integration::VisualFactory::CreateVisual( const Property::Map& )
@@ -146,6 +161,8 @@ public:
   Internal::VisualFactoryCache& GetFactoryCache();
 
 protected:
+  VisualFactory(bool debugEnabled);
+
   /**
    * A reference counted object may only be deleted by calling Unreference()
    */
@@ -225,7 +242,8 @@ private:
 
   bool mAdaptorInitialized : 1;
   bool mDebugEnabled : 1;
-  bool mPreMultiplyOnLoad : 1; ///< Local store for this flag
+  bool mPreMultiplyOnLoad : 1;
+  ///< Local store for this flag
   bool mPrecompiledShaderRequested : 1;
 };
 

@@ -36,7 +36,13 @@ NoneStateEffectImpl* gNoneStateEffectImpl = nullptr;
 
 class NoneStateEffectImpl : public Integration::StateEffectImpl
 {
+public:
+  // StateEffect::None() creates this sentinel directly before publishing its handle.
+  NoneStateEffectImpl() = default;
+
 protected:
+  ~NoneStateEffectImpl() override = default;
+
   void OnDestroy() override
   {
     gNoneStateEffectImpl = nullptr;

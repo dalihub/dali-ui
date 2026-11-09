@@ -68,9 +68,24 @@ public:
   static Ui::FocusManager Get();
 
   /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL FocusManager* NewForBaseHandle()
+  {
+    return new FocusManager();
+  }
+
+  /**
    * Construct a new FocusManager.
    */
-  FocusManager();
+
+  static IntrusivePtr<FocusManager> New()
+  {
+    return IntrusivePtr<FocusManager>(new FocusManager());
+  }
 
   /**
    * @copydoc Ui::FocusManager::SetCurrentFocusView
@@ -302,14 +317,20 @@ public:
   static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const Dali::String& signalName, FunctorDelegate* functor);
 
 protected:
+  FocusManager();
+
   /**
    * Destructor
    */
   ~FocusManager() override;
 
 private:
-  typedef std::vector<WeakHandle<View>> FocusStack;         ///< Focus history stack
-  typedef FocusStack::iterator          FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
+  typedef std::vector<WeakHandle<View>> FocusStack;
+
+  ///< Focus history stack
+  typedef FocusStack::iterator FocusStackIterator;
+
+  ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
 
   struct IndependentFocusState
   {
@@ -563,33 +584,43 @@ private:
    * @param[in] actor The actor removed from the scene.
    */
   void OnSceneDisconnection(Dali::Actor actor);
-
-private:
   // Undefined
   FocusManager(const FocusManager&);
 
   FocusManager& operator=(const FocusManager& rhs);
 
-private:
-  std::unique_ptr<FocusedActorProviderImpl> mFocusedActorProvider; ///< Bridge that exposes the focused View to dali-adaptor
+  std::unique_ptr<FocusedActorProviderImpl> mFocusedActorProvider;
+  ///< Bridge that exposes the focused View to dali-adaptor
 
-  Ui::FocusManager::FocusChangedSignalType                     mFocusChangedSignal; ///< The signal to notify the focus change
+  Ui::FocusManager::FocusChangedSignalType mFocusChangedSignal;
+  ///< The signal to notify the focus change
+
+private:
   Ui::FocusManager::WindowFocusChangedSignalType               mWindowFocusChangedSignal;
   std::vector<IndependentFocusState>                           mIndependentFocusStates;
   std::vector<std::pair<WeakHandle<View>, FocusChangeContext>> mFocusNotificationContexts;
-  WeakHandle<View>                                             mCurrentFocusView;    ///< A weak handle to the current focused view
-  WeakHandle<Window>                                           mCurrentFocusWindow;  ///< Weak owner used during View disconnection cleanup
-  WeakHandle<View>                                             mTouchFocusCandidate; ///< A weak handle to the view that may receive focus when touch is released
+  WeakHandle<View>                                             mCurrentFocusView;
+  ///< A weak handle to the current focused view
+  WeakHandle<Window> mCurrentFocusWindow;
+  ///< Weak owner used during View disconnection cleanup
+  WeakHandle<View> mTouchFocusCandidate;
+  ///< A weak handle to the view that may receive focus when touch is released
 
-  View mFocusIndicatorView; ///< The focus indicator view shared by all the keyboard focusable views for highlight
+  View mFocusIndicatorView;
+  ///< The focus indicator view shared by all the keyboard focusable views for highlight
 
-  FocusStack                                                          mFocusHistory; ///< Stack to contain pre-focused view history
+  FocusStack mFocusHistory;
+  ///< Stack to contain pre-focused view history
   SlotDelegate<FocusManager>                                          mSlotDelegate;
   typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<View>>> FocusViewContainer;
-  FocusViewContainer                                                  mCurrentFocusViews;    ///< A container of focused views per window
-  WeakHandle<Layer>                                                   mCurrentFocusedWindow; ///< A weak handle to the current focused window's root layer
+  FocusViewContainer                                                  mCurrentFocusViews;
+  ///< A container of focused views per window
+  WeakHandle<Layer> mCurrentFocusedWindow;
+  ///< A weak handle to the current focused window's root layer
 
-  FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
+  FocusChangeContext mLastFocusChangeContext;
+
+  ///< The last focus change context (device & name)
 
   enum class FocusIndicationPolicyMode
   {
@@ -599,20 +630,30 @@ private:
   };
 
   FocusIndicationPolicyMode                  mFocusIndicationPolicyMode{FocusIndicationPolicyMode::DEFAULT};
-  Extension::FocusIndicationPolicy::Function mFocusIndicationPolicy; ///< Extension policy for automatic focus indication changes.
+  Extension::FocusIndicationPolicy::Function mFocusIndicationPolicy;
+  ///< Extension policy for automatic focus indication changes.
 
-  FocusNavigationCallback mFocusNavigationFallback; ///< Application-wide policy invoked before FocusFinder.
+  FocusNavigationCallback mFocusNavigationFallback;
+  ///< Application-wide policy invoked before FocusFinder.
 
-  uint32_t mCurrentWindowId;      ///< The current native window id
-  int32_t  mTouchFocusDeviceId;   ///< The device id for the pending touch focus candidate
-  bool     mNavigationInProgress; ///< Prevents focus mutation and nested navigation from policy callbacks.
+  uint32_t mCurrentWindowId;
+  ///< The current native window id
+  int32_t mTouchFocusDeviceId;
+  ///< The device id for the pending touch focus candidate
+  bool mNavigationInProgress;
+  ///< Prevents focus mutation and nested navigation from policy callbacks.
 
-  bool mDefaultFocusIndicatorEnabled : 1; ///< Whether FocusManager's default focus indicator is enabled.
-  bool mClearFocusIndicationOnTouch : 1;  ///< Whether touch outside the focused view clears focus indication.
-  bool mClearFocusIndicationOnHover : 1;  ///< Whether hover outside the focused view clears focus indication.
-  bool mConfigurationLoaded : 1;          ///< Whether default configuration has been loaded from UiConfig.
-  bool mEnableDefaultAlgorithm : 1;       ///< Whether use default algorithm focus.
-  bool mClearFocusOnWindowFocusLost : 1;  ///< Whether clear focus when window loses focus.
+  bool mDefaultFocusIndicatorEnabled : 1;
+  ///< Whether FocusManager's default focus indicator is enabled.
+  bool mClearFocusIndicationOnTouch : 1;
+  ///< Whether touch outside the focused view clears focus indication.
+  bool mClearFocusIndicationOnHover : 1;
+  ///< Whether hover outside the focused view clears focus indication.
+  bool mConfigurationLoaded : 1;
+  ///< Whether default configuration has been loaded from UiConfig.
+  bool mEnableDefaultAlgorithm : 1;
+  ///< Whether use default algorithm focus.
+  bool mClearFocusOnWindowFocusLost : 1;
 };
 
 } // namespace Internal

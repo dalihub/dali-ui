@@ -31,8 +31,32 @@ namespace Internal
 class ProgressBarStyleImpl : public Extension::UiStyleImpl
 {
 public:
-  ProgressBarStyleImpl();
-  ProgressBarStyleImpl(const ProgressBarStyleImpl& rhs);
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL ProgressBarStyleImpl* NewForBaseHandle()
+  {
+    return new ProgressBarStyleImpl();
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<ProgressBarStyleImpl> New()
+  {
+    return IntrusivePtr<ProgressBarStyleImpl>(new ProgressBarStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<ProgressBarStyleImpl> New(const ProgressBarStyleImpl& rhs)
+  {
+    return IntrusivePtr<ProgressBarStyleImpl>(new ProgressBarStyleImpl(rhs));
+  }
 
   void    SetPadding(const Insets& padding);
   Insets  GetPadding() const;
@@ -46,6 +70,8 @@ public:
   UiColor GetDividerColor() const;
 
 protected:
+  ProgressBarStyleImpl();
+  ProgressBarStyleImpl(const ProgressBarStyleImpl& rhs);
   ~ProgressBarStyleImpl() override;
 
 private:

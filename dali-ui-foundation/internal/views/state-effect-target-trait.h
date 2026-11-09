@@ -49,13 +49,19 @@ class StateEffectTargetTraitImpl : public TraitObject
 {
 public:
   static constexpr int32_t INVALID_TARGET_ID = -1;
-
-  StateEffectTargetTraitImpl();
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StateEffectTargetTraitImpl> New()
+  {
+    return IntrusivePtr<StateEffectTargetTraitImpl>(new StateEffectTargetTraitImpl());
+  }
 
   void    SetTargetId(int32_t targetId);
   int32_t GetTargetId() const;
 
 protected:
+  StateEffectTargetTraitImpl();
   ~StateEffectTargetTraitImpl() override;
 
 private:

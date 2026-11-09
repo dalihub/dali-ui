@@ -35,7 +35,15 @@ namespace Integration
 class ScatterSeries : public ChartSeries
 {
 public:
-  ScatterSeries();
+  /**
+   * @brief Creates a reference-counted ScatterSeries implementation.
+   * @SINCE_3_0.0
+   * @return An intrusive pointer owning the implementation
+   */
+  static IntrusivePtr<ScatterSeries> New()
+  {
+    return IntrusivePtr<ScatterSeries>(new ScatterSeries());
+  }
 
 public: /// ChartSeries overrides
   Vector4 GetColor() const override
@@ -67,6 +75,8 @@ public:
   }
 
 protected:
+  ScatterSeries();
+
   ~ScatterSeries() override = default;
 
 private:

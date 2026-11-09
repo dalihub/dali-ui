@@ -249,7 +249,7 @@ WebViewImplPtr WebViewImpl::CreateWithEngine()
     DALI_LOG_RELEASE_INFO("[WebView] Using %s web engine.\n", webEngineName);
   });
 
-  auto* impl       = new WebViewImpl();
+  WebViewImplPtr impl(new WebViewImpl());
   impl->mWebEngine = Dali::WebEngine::New(static_cast<int32_t>(webEngineType));
   return impl;
 }

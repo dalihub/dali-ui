@@ -41,13 +41,13 @@ void utc_dali_property_bridge_internal_cleanup(void)
 int UtcDaliPropertyBridgeInternalP(void)
 {
   UiTestApplication application;
-  Dali::Ui::Internal::PropertyBridge directBridge;
-  DALI_TEST_CHECK(!directBridge.EnsureStringGetter());
-  DALI_TEST_EQUALS(directBridge.GetStringProperty(Actor(), "before"), std::string(), TEST_LOCATION);
+  auto              directBridge = Dali::Ui::Internal::PropertyBridge::New();
+  DALI_TEST_CHECK(!directBridge->EnsureStringGetter());
+  DALI_TEST_EQUALS(directBridge->GetStringProperty(Actor(), "before"), std::string(), TEST_LOCATION);
   Dali::Ui::Internal::PropertyBridge::RegisterStringGetter(nullptr);
   Dali::Ui::Integration::PropertyBridgeRegisterStringGetter(&GetTestString);
-  DALI_TEST_CHECK(directBridge.EnsureStringGetter());
-  DALI_TEST_EQUALS(directBridge.GetStringProperty(Actor(), "name"), std::string("name-empty"), TEST_LOCATION);
+  DALI_TEST_CHECK(directBridge->EnsureStringGetter());
+  DALI_TEST_EQUALS(directBridge->GetStringProperty(Actor(), "name"), std::string("name-empty"), TEST_LOCATION);
 
   Dali::Ui::Integration::PropertyBridge bridge = Dali::Ui::Integration::PropertyBridge::Get();
   DALI_TEST_CHECK(bridge);

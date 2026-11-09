@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/internal/visuals/text/text-reveal-runtime-blur.h>
+#include <utility>
 
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-data.h>
@@ -664,6 +665,7 @@ Geometry CreateBlurBatchGeometry(const Vertex* vertices, uint32_t lineCount)
  */
 class RuntimeBlurActor : public CustomActorImpl
 {
+private:
   struct ImageCapture
   {
     struct Binding
@@ -693,37 +695,27 @@ class RuntimeBlurActor : public CustomActorImpl
     RenderTask                                    task;
   };
 
-public:
-  RuntimeBlurActor(Actor owner, Renderer foreground, const Vector2& size,
-                   Property::Index progressIndex, uint32_t radius, float blurDuration,
-                   std::vector<RuntimeRevealBlurSequence> sequences, bool singleColor,
-                   std::unique_ptr<RuntimeRevealBlurDecorations> decorations,
-                   std::unique_ptr<RuntimeRevealBlurImages>      images,
-                   RuntimeRevealBlurSettings                     settings)
-  : mForeground(foreground),
-    mSourceTextures(foreground.GetTextures()),
-    mSourceShader(foreground.GetShader()),
-    mContentSize(size),
-    mTargetSize(std::ceil(size.x) + 2.0f * static_cast<float>(radius + 2u),
-                std::ceil(size.y) + 2.0f * static_cast<float>(radius + 2u)),
-    mRadius(radius),
-    mBlurDuration(blurDuration),
-    mSettings(settings),
-    mSingleColor(singleColor),
-    mProgressIndex(progressIndex),
-    mOwner(owner),
-    mSequences(std::move(sequences)),
-    mDecorations(decorations ? std::make_unique<DecorationComposition>(std::move(decorations)) : nullptr)
+  struct Pass
   {
-    if(images && !images->placements.empty())
-    {
-      mImages                 = std::make_unique<ImageCapture>();
-      mImages->sourceRevision = images->sourceRevision;
-      for(const auto& placement : images->placements)
-      {
-        mImages->bindings.push_back({placement});
-      }
-    }
+    Vector2                     size;
+    Actor                       source;
+    std::array<Actor, 2u>       blurActors;
+    std::array<FrameBuffer, 3u> buffers;
+    std::array<RenderTask, 3u>  tasks;
+  };
+
+public:
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<RuntimeBlurActor> New(Actor owner, Renderer foreground, const Vector2& size,
+                                            Property::Index progressIndex, uint32_t radius, float blurDuration,
+                                            std::vector<RuntimeRevealBlurSequence> sequences, bool singleColor,
+                                            std::unique_ptr<RuntimeRevealBlurDecorations> decorations,
+                                            std::unique_ptr<RuntimeRevealBlurImages>      images,
+                                            RuntimeRevealBlurSettings                     settings)
+  {
+    return IntrusivePtr<RuntimeBlurActor>(new RuntimeBlurActor(std::move(owner), std::move(foreground), size, progressIndex, radius, blurDuration, std::move(sequences), singleColor, std::move(decorations), std::move(images), std::move(settings)));
   }
 
   Renderer ReleaseForeground()
@@ -1690,6 +1682,40 @@ public:
   }
 
 protected:
+  ~RuntimeBlurActor() override = default;
+
+  RuntimeBlurActor(Actor owner, Renderer foreground, const Vector2& size,
+                   Property::Index progressIndex, uint32_t radius, float blurDuration,
+                   std::vector<RuntimeRevealBlurSequence> sequences, bool singleColor,
+                   std::unique_ptr<RuntimeRevealBlurDecorations> decorations,
+                   std::unique_ptr<RuntimeRevealBlurImages>      images,
+                   RuntimeRevealBlurSettings                     settings)
+  : mForeground(foreground),
+    mSourceTextures(foreground.GetTextures()),
+    mSourceShader(foreground.GetShader()),
+    mContentSize(size),
+    mTargetSize(std::ceil(size.x) + 2.0f * static_cast<float>(radius + 2u),
+                std::ceil(size.y) + 2.0f * static_cast<float>(radius + 2u)),
+    mRadius(radius),
+    mBlurDuration(blurDuration),
+    mSettings(settings),
+    mSingleColor(singleColor),
+    mProgressIndex(progressIndex),
+    mOwner(owner),
+    mSequences(std::move(sequences)),
+    mDecorations(decorations ? std::make_unique<DecorationComposition>(std::move(decorations)) : nullptr)
+  {
+    if(images && !images->placements.empty())
+    {
+      mImages                 = std::make_unique<ImageCapture>();
+      mImages->sourceRevision = images->sourceRevision;
+      for(const auto& placement : images->placements)
+      {
+        mImages->bindings.push_back({placement});
+      }
+    }
+  }
+
   void OnSceneConnection(int /*depth*/) override
   {
     auto sceneHolder = Dali::Integration::SceneHolder::Get(Self());
@@ -1775,31 +1801,23 @@ protected:
   }
 
 private:
-  Renderer                  mForeground;
-  TextureSet                mSourceTextures;
-  Shader                    mSourceShader;
-  Shader                    mForegroundShader;
-  Shader                    mCaptureShader;
-  bool                      mForegroundBorrowed{false};
-  bool                      mReleased{false};
-  bool                      mPerLine{false};
-  Vector2                   mContentSize;
-  Vector2                   mTargetSize;
-  uint32_t                  mRadius;
-  float                     mBlurDuration;
-  RuntimeRevealBlurSettings mSettings;
-  bool                      mSingleColor;
-  Property::Index           mProgressIndex;
-  WeakHandle<Actor>         mOwner;
-  Actor                     mForegroundActor;
-  struct Pass
-  {
-    Vector2                     size;
-    Actor                       source;
-    std::array<Actor, 2u>       blurActors;
-    std::array<FrameBuffer, 3u> buffers;
-    std::array<RenderTask, 3u>  tasks;
-  };
+  Renderer                               mForeground;
+  TextureSet                             mSourceTextures;
+  Shader                                 mSourceShader;
+  Shader                                 mForegroundShader;
+  Shader                                 mCaptureShader;
+  bool                                   mForegroundBorrowed{false};
+  bool                                   mReleased{false};
+  bool                                   mPerLine{false};
+  Vector2                                mContentSize;
+  Vector2                                mTargetSize;
+  uint32_t                               mRadius;
+  float                                  mBlurDuration;
+  RuntimeRevealBlurSettings              mSettings;
+  bool                                   mSingleColor;
+  Property::Index                        mProgressIndex;
+  WeakHandle<Actor>                      mOwner;
+  Actor                                  mForegroundActor;
   std::vector<RuntimeRevealBlurSequence> mSequences;
   std::vector<Pass>                      mPasses;
   RenderTaskList                         mTaskList;
@@ -2120,7 +2138,7 @@ Actor PrepareRuntimeRevealBlur(Actor owner, Renderer foreground, const Vector2& 
   {
     settings.authoredRadius = static_cast<float>(radius);
   }
-  auto*       impl = new RuntimeBlurActor(owner, foreground, size, progressIndex, radius, blurDuration, std::move(sequences), singleColor, std::move(decorations), std::move(images), settings);
+  auto        impl = RuntimeBlurActor::New(owner, foreground, size, progressIndex, radius, blurDuration, std::move(sequences), singleColor, std::move(decorations), std::move(images), settings);
   CustomActor companion(*impl);
   if(!Dali::Adaptor::IsAvailable() || !Dali::Integration::SceneHolder::Get(owner))
   {

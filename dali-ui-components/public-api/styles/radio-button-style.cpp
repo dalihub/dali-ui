@@ -121,7 +121,7 @@ RadioButtonStyle RadioButtonStyle::StaticDownCast(UiStyle style)
 
 RadioButtonStyle::Builder RadioButtonStyle::Configure() const
 {
-  IntrusivePtr<Internal::RadioButtonStyleImpl> impl(new Internal::RadioButtonStyleImpl(GetImpl(*this)));
+  IntrusivePtr<Internal::RadioButtonStyleImpl> impl(Internal::RadioButtonStyleImpl::New(GetImpl(*this)));
   return Builder(impl.Get());
 }
 
@@ -176,7 +176,7 @@ RadioButtonStyle::RadioButtonStyle(Internal::RadioButtonStyleImpl* impl)
 }
 
 RadioButtonStyle::Builder::Builder()
-: mImpl(new Internal::RadioButtonStyleImpl())
+: mImpl(Internal::RadioButtonStyleImpl::New())
 {
 }
 
