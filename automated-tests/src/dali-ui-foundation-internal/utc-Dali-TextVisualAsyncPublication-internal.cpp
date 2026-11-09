@@ -4015,3 +4015,285 @@ int UtcDaliLabelGateConstraintsFinishedDestroyP(void)
   CheckManualReadyLifetime(3u, 1u, false);
   END_TEST;
 }
+
+namespace
+{
+UiText::Internal::Gradient::Style MakeTilingGradientStyle(bool userSpace = false)
+{
+  Ui::Gradient::Linear gradient(Vector2(-0.3f, -0.4f), Vector2(0.2f, 0.3f));
+  gradient.SetUnits(userSpace ? Ui::Gradient::Units::USER_SPACE : Ui::Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  return UiText::Internal::Gradient::CreateStyle(gradient);
+}
+
+UiText::AsyncTextRenderInfo MakeTilingRenderInfo(uint32_t height, bool mixed = false)
+{
+  UiText::AsyncTextRenderInfo info;
+  info.size                  = Size(32.0f, static_cast<float>(height));
+  info.renderedSize          = info.size;
+  info.textLogicalBounds     = Vector4(0.1f, 0.2f, 0.7f, 0.6f);
+  info.textPixelData         = CreatePixelData(32u, height, mixed ? Pixel::RGBA8888 : Pixel::L8);
+  info.hasMultipleTextColors = mixed;
+  if(mixed)
+  {
+    info.textGradientPreservedPixelData = CreatePixelData(32u, height, Pixel::RGBA8888);
+    info.textGradientMaskPixelData      = CreatePixelData(32u, height, Pixel::L8);
+  }
+  return info;
+}
+
+UiText::AsyncTextParameters MakeTilingParameters(uint32_t height)
+{
+  auto parameters                    = MakeParameters("tiled gradient");
+  parameters.isMarqueeEnabled        = false;
+  parameters.textWidth               = 32.0f;
+  parameters.textHeight              = static_cast<float>(height);
+  parameters.isTextGradientRequested = true;
+  return parameters;
+}
+} // namespace
+
+int UtcDaliTextVisualGradientTilingBoundsAndLookupP(void)
+{
+  UiTestApplication application;
+  auto              rendered = CreateTextVisual(application);
+  const uint32_t    limit    = Dali::GetMaxTextureSize();
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, MakeTilingGradientStyle());
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.visual, MakeTilingGradientStyle());
+  UiInternal::TextVisual::SetTextGradientOverlayBoundsMode(rendered.visual, UiText::GradientBoundsMode::VIEW_BOUND);
+  for(uint32_t height : {limit, limit + 1u, 2u * limit + 1u})
+  {
+    auto info                                 = MakeTilingRenderInfo(height);
+    auto parameters                           = MakeTilingParameters(height);
+    parameters.isTextGradientOverlayRequested = true;
+    PublishDirect(rendered, parameters, info);
+    const uint32_t count = (height + limit - 1u) / limit;
+    DALI_TEST_EQUALS(rendered.view.GetRendererCount(), count, TEST_LOCATION);
+    auto first         = rendered.view.GetRendererAt(0u);
+    auto firstTextures = first.GetTextures();
+    DALI_TEST_EQUALS(firstTextures.GetTextureCount(), 3u, TEST_LOCATION);
+    const Vector4 fullOverlay = UiInternal::TextVisual::CalculateGradientViewBounds(rendered.visual, info.size);
+    for(uint32_t tile = 0u; tile < count; ++tile)
+    {
+      auto        renderer   = rendered.view.GetRendererAt(tile);
+      auto        textures   = renderer.GetTextures();
+      const float tileHeight = static_cast<float>(std::min(limit, height - tile * limit));
+      DALI_TEST_EQUALS(textures.GetTexture(0u).GetHeight(), static_cast<uint32_t>(tileHeight), TEST_LOCATION);
+      DALI_TEST_CHECK(textures.GetTexture(1u) == firstTextures.GetTexture(1u));
+      DALI_TEST_CHECK(textures.GetSampler(1u) == firstTextures.GetSampler(1u));
+      DALI_TEST_CHECK(textures.GetTexture(2u) == firstTextures.GetTexture(2u));
+      DALI_TEST_CHECK(textures.GetSampler(2u) == firstTextures.GetSampler(2u));
+      const Vector4 expected(0.1f, (0.2f * height - tile * limit) / tileHeight, 0.7f, 0.6f * height / tileHeight);
+      DALI_TEST_EQUALS(renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uTextGradientBounds")), expected, 0.002f, TEST_LOCATION);
+      const Vector4 expectedOverlay(fullOverlay.x, (fullOverlay.y * height - tile * limit) / tileHeight,
+                                    fullOverlay.z, fullOverlay.w * height / tileHeight);
+      DALI_TEST_EQUALS(renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uTextGradientOverlayBounds")), expectedOverlay, 0.002f, TEST_LOCATION);
+      DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientStartPosition")),
+                       first.GetProperty<Vector2>(first.GetPropertyIndex("uTextGradientStartPosition")), TEST_LOCATION);
+    }
+  }
+  // The shader clamps the full-text denominator before tile UV conversion.
+  const uint32_t thinHeight      = 2u * limit + 1u;
+  auto           thinBounds      = MakeTilingRenderInfo(thinHeight);
+  thinBounds.textLogicalBounds.w = 0.00000001f;
+  PublishDirect(rendered, MakeTilingParameters(thinHeight), thinBounds);
+  auto last = rendered.view.GetRendererAt(2u);
+  DALI_TEST_EQUALS(last.GetProperty<Vector4>(last.GetPropertyIndex("uTextGradientBounds")).w,
+                   0.000001f * thinHeight, 0.0000001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextVisualGradientTilingMixedSlotsP(void)
+{
+  UiTestApplication application;
+  auto              rendered = CreateTextVisual(application);
+  const uint32_t    height   = Dali::GetMaxTextureSize() + 1u;
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, MakeTilingGradientStyle());
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.visual, MakeTilingGradientStyle());
+  auto info               = MakeTilingRenderInfo(height, true);
+  info.containsColorGlyph = true;
+  info.styleEnabled = info.styleTextureEnabled = info.isOverlayStyle = true;
+  info.stylePixelData                                                = CreatePixelData(32u, height, Pixel::RGBA8888);
+  info.overlayStylePixelData                                         = CreatePixelData(32u, height, Pixel::RGBA8888);
+  info.maskPixelData                                                 = CreatePixelData(32u, height, Pixel::L8);
+  auto parameters                                                    = MakeTilingParameters(height);
+  parameters.isTextGradientOverlayRequested                          = true;
+  PublishDirect(rendered, parameters, info);
+  DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 2u, TEST_LOCATION);
+  auto first = rendered.view.GetRendererAt(0u).GetTextures();
+  for(uint32_t tile = 0u; tile < 2u; ++tile)
+  {
+    auto textures = rendered.view.GetRendererAt(tile).GetTextures();
+    DALI_TEST_EQUALS(textures.GetTextureCount(), 6u, TEST_LOCATION);
+    DALI_TEST_EQUALS(textures.GetTexture(0u).GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+    DALI_TEST_EQUALS(textures.GetTexture(1u).GetPixelFormat(), Pixel::L8, TEST_LOCATION);
+    DALI_TEST_CHECK(textures.GetTexture(2u) == first.GetTexture(2u));
+    DALI_TEST_CHECK(textures.GetTexture(3u) == first.GetTexture(3u));
+    DALI_TEST_EQUALS(textures.GetTexture(4u).GetHeight(), tile == 0u ? height - 1u : 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(textures.GetTexture(5u).GetHeight(), tile == 0u ? height - 1u : 1u, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualGradientTilingMissingMixedRecoveryP(void)
+{
+  UiTestApplication application;
+  auto              rendered = CreateTextVisual(application);
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, MakeTilingGradientStyle());
+  const uint32_t          height     = Dali::GetMaxTextureSize() + 1u;
+  auto                    parameters = MakeTilingParameters(height);
+  ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
+  for(bool missingMask : {false, true})
+  {
+    auto info = MakeTilingRenderInfo(height, true);
+    if(missingMask)
+    {
+      info.textGradientMaskPixelData.Reset();
+    }
+    else
+    {
+      info.textGradientPreservedPixelData.Reset();
+    }
+    PublishDirect(rendered, parameters, info);
+    DALI_TEST_CHECK(!HasValidTexture(rendered.view));
+    DALI_TEST_EQUALS(Ui::GetImplementation(rendered.visual).GetVisualObject().GetResourceStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+    PublishDirect(rendered, parameters, MakeTilingRenderInfo(height, true));
+    DALI_TEST_CHECK(HasValidTexture(rendered.view));
+    DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 2u, TEST_LOCATION);
+  }
+  DALI_TEST_EQUALS(observer.mCompletionCount, 4u, TEST_LOCATION);
+  auto retained = rendered.view.GetRendererAt(0u).GetTextures();
+  auto stale    = parameters;
+  ++stale.maximumNumberOfLinesRevision;
+  auto incomplete = MakeTilingRenderInfo(height, true);
+  incomplete.textGradientMaskPixelData.Reset();
+  PublishDirect(rendered, stale, incomplete);
+  DALI_TEST_EQUALS(observer.mCompletionCount, 4u, TEST_LOCATION);
+  DALI_TEST_CHECK(rendered.view.GetRendererAt(0u).GetTextures() == retained);
+  UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
+  END_TEST;
+}
+
+int UtcDaliTextVisualGradientTilingRebindAndRetirementP(void)
+{
+  UiTestApplication application;
+  auto              rendered = CreateTextVisual(application);
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, MakeTilingGradientStyle());
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.visual, MakeTilingGradientStyle());
+  const uint32_t height                     = 2u * Dali::GetMaxTextureSize() + 1u;
+  auto           parameters                 = MakeTilingParameters(height);
+  parameters.isTextGradientOverlayRequested = true;
+  PublishDirect(rendered, parameters, MakeTilingRenderInfo(height));
+  const auto firstSource = rendered.view.RegisterProperty("tilingOffsetA", 0.25f);
+  const auto nextSource  = rendered.view.RegisterProperty("tilingOffsetB", 0.75f);
+  for(auto source : {firstSource, nextSource})
+  {
+    UiInternal::TextVisual::SetGradientAnimProperties(rendered.visual, source);
+    UiInternal::TextVisual::SetGradientOverlayAnimProperties(rendered.visual, source);
+    UiInternal::TextVisual::SetGradientAnimApplyAlways(rendered.visual, true, true);
+    UiInternal::TextVisual::SetGradientOverlayAnimApplyAlways(rendered.visual, true, true);
+    application.SendNotification();
+    application.Render();
+    application.Render();
+    for(uint32_t tile = 0u; tile < rendered.view.GetRendererCount(); ++tile)
+    {
+      auto renderer = rendered.view.GetRendererAt(tile);
+      for(const char* name : {"uTextGradientStartOffset", "uTextGradientOverlayStartOffset"})
+      {
+        DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(renderer.GetPropertyIndex(name)),
+                         source == firstSource ? 0.25f : 0.75f, 0.001f, TEST_LOCATION);
+      }
+    }
+  }
+  auto                 retiredRenderer = rendered.view.GetRendererAt(2u);
+  WeakHandle<Renderer> retired(retiredRenderer);
+  retiredRenderer.Reset();
+  PublishDirect(rendered, MakeTilingParameters(32u), MakeTilingRenderInfo(32u));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!retired.GetHandle());
+  rendered.view.Unparent();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextVisualGradientTilingRevealSlotsP(void)
+{
+  UiTestApplication application;
+  auto              rendered = CreateTextVisual(application);
+  const uint32_t    limit    = Dali::GetMaxTextureSize();
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, MakeTilingGradientStyle());
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.visual, MakeTilingGradientStyle());
+  ConfigureReveal(rendered, UiText::Internal::Reveal::Unit::CHARACTER, 0.2f, 1u);
+  auto parameters                    = MakeRevealParameters("Tiled mixed reveal", 1u, UiText::Internal::Reveal::Unit::CHARACTER, 0.2f);
+  parameters.textWidth               = 32.0f;
+  parameters.textHeight              = static_cast<float>(limit + 1u);
+  parameters.isTextGradientRequested = parameters.isTextGradientOverlayRequested = true;
+  auto info                                                                      = MakeTilingRenderInfo(limit + 1u, true);
+  info.isTextRevealEnabled                                                       = true;
+  info.textRevealFadeDuration                                                    = 0.2f;
+  info.revealMetadataTiles.push_back(CreatePixelData(32u, limit, Pixel::RGBA8888));
+  info.revealMetadataTiles.push_back(CreatePixelData(32u, 1u, Pixel::RGBA8888));
+  PublishDirect(rendered, parameters, info);
+  DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 2u, TEST_LOCATION);
+  for(uint32_t tile = 0u; tile < 2u; ++tile)
+  {
+    auto renderer = rendered.view.GetRendererAt(tile);
+    auto textures = renderer.GetTextures();
+    DALI_TEST_EQUALS(textures.GetTextureCount(), 5u, TEST_LOCATION);
+    DALI_TEST_EQUALS(textures.GetTexture(4u).GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+    DALI_TEST_EQUALS(textures.GetTexture(4u).GetHeight(), tile == 0u ? limit : 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualGradientTilingTransformIsolationP(void)
+{
+  UiTestApplication application;
+  auto              rendered = CreateTextVisual(application);
+  const uint32_t    limit    = Dali::GetMaxTextureSize();
+  for(unsigned feature : {0u, 1u, 2u, 3u, 0u})
+  {
+    UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, (feature & 1u) ? MakeTilingGradientStyle() : UiText::Internal::Gradient::Style{});
+    UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.visual, (feature & 2u) ? MakeTilingGradientStyle() : UiText::Internal::Gradient::Style{});
+    for(uint32_t height : {limit, limit + 1u, 2u * limit + 1u, 32u})
+    {
+      auto parameters                           = MakeTilingParameters(height);
+      parameters.isTextGradientRequested        = (feature & 1u) != 0u;
+      parameters.isTextGradientOverlayRequested = (feature & 2u) != 0u;
+      PublishDirect(rendered, parameters, MakeTilingRenderInfo(height));
+      const uint32_t count = (height + limit - 1u) / limit;
+      DALI_TEST_EQUALS(rendered.view.GetRendererCount(), count, TEST_LOCATION);
+      for(uint32_t tile = 1u; tile < count; ++tile)
+      {
+        auto       renderer = rendered.view.GetRendererAt(tile);
+        const auto policy   = renderer.GetPropertyIndex("visualTransformUseEffectiveScale");
+        if(feature == 0u)
+        {
+          // Preserve HEAD's additional-tile transform contract, including its
+          // shader default. Global/overlay tiling must not change plain text.
+          DALI_TEST_EQUALS(policy, Property::INVALID_INDEX, TEST_LOCATION);
+          DALI_TEST_EQUALS(renderer.GetTextures().GetTextureCount(), 1u, TEST_LOCATION);
+        }
+        else
+        {
+          DALI_TEST_CHECK(policy != Property::INVALID_INDEX);
+          DALI_TEST_EQUALS(renderer.GetProperty<float>(policy), 0.0f, TEST_LOCATION);
+          const auto propertyCount = renderer.GetPropertyCount();
+          const auto source        = rendered.view.RegisterProperty("isolationOffset", 0.3f);
+          UiInternal::TextVisual::SetGradientAnimProperties(rendered.visual, source);
+          UiInternal::TextVisual::SetGradientOverlayAnimProperties(rendered.visual, source);
+          DALI_TEST_EQUALS(renderer.GetPropertyCount(), propertyCount, TEST_LOCATION);
+        }
+        const Vector2 size = renderer.GetProperty<Vector2>(VisualRenderer::Property::TRANSFORM_SIZE);
+        DALI_TEST_EQUALS(size.y, static_cast<float>(std::min(limit, height - tile * limit)), TEST_LOCATION);
+      }
+    }
+  }
+  END_TEST;
+}

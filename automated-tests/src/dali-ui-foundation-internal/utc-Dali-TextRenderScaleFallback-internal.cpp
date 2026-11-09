@@ -23,8 +23,11 @@
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/animation/duration.h>
+#include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-async-task-manager.h>
@@ -1030,6 +1033,355 @@ int UtcDaliLabelHeightTilesSurviveRasterRejectionP(void)
       DALI_TEST_CHECK(!texture.GetHandle());
     }
     DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelGradientHeightTilingLifecycleP(void)
+{
+  UiTestApplication application;
+  CapturedTasks     captured;
+  ConnectionTracker tracker;
+  const uint32_t    maximum = Dali::GetMaxTextureSize();
+  std::string       lines;
+  for(uint32_t i = 0u; i < maximum / 8u + 100u; ++i)
+  {
+    lines += "Tile\n";
+  }
+  Ui::Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  Ui::Label label = Ui::Label::New(lines.c_str());
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(static_cast<float>(maximum + 100u));
+  label.SetMultiLine(true);
+  label.SetTextGradient(gradient);
+  label.SetTextGradientOverlay(gradient);
+  label.SetTextColor(Ui::UiColor(Vector4(1.0f, 1.0f, 1.0f, 0.0f)));
+  unsigned completions = 0u;
+  label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View, float, float)
+  {
+    ++completions;
+  });
+  application.GetScene().Add(label);
+  for(bool async : {false, true, false, true})
+  {
+    label.SetAsyncRendering(async);
+    captured.Drain(application);
+    DALI_TEST_CHECK(label.GetRendererCount() > 1u);
+    CheckTiles(label, maximum);
+    auto firstTextures = label.GetRendererAt(0u).GetTextures();
+    for(uint32_t i = 0u; i < label.GetRendererCount(); ++i)
+    {
+      auto renderer = label.GetRendererAt(i);
+      DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextGradientBounds") != Property::INVALID_INDEX);
+      DALI_TEST_EQUALS(renderer.GetProperty<float>(renderer.GetPropertyIndex("visualTransformUseEffectiveScale")), 0.0f, TEST_LOCATION);
+      DALI_TEST_CHECK(renderer.GetTextures().GetTexture(1u) == firstTextures.GetTexture(1u));
+      DALI_TEST_CHECK(renderer.GetTextures().GetTexture(2u) == firstTextures.GetTexture(2u));
+    }
+  }
+  Animation animation = Animation::New(2.0f);
+  label.Animate(animation)
+    .TextGradientStartOffset(0.8f, Ui::Duration(2.0f))
+    .TextGradientOverlayStartOffset(0.6f, Ui::Duration(2.0f));
+  animation.Play();
+  auto       unchangedTextures = label.GetRendererAt(1u).GetTextures();
+  const auto beforeAnimation   = completions;
+  for(uint32_t frame = 0u; frame < 100u; ++frame)
+  {
+    application.SendNotification();
+    application.Render(16u);
+    for(uint32_t i = 1u; i < label.GetRendererCount(); ++i)
+    {
+      for(const char* name : {"uTextGradientStartOffset", "uTextGradientOverlayStartOffset"})
+      {
+        auto first = label.GetRendererAt(0u);
+        auto tile  = label.GetRendererAt(i);
+        DALI_TEST_EQUALS(tile.GetCurrentProperty<float>(tile.GetPropertyIndex(name)),
+                         first.GetCurrentProperty<float>(first.GetPropertyIndex(name)), 0.001f, TEST_LOCATION);
+      }
+    }
+  }
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetCurrentProperty<float>(label.GetRendererAt(0u).GetPropertyIndex("uTextGradientStartOffset")) > 0.1f);
+  DALI_TEST_CHECK(label.GetRendererAt(1u).GetTextures() == unchangedTextures);
+  DALI_TEST_EQUALS(completions, beforeAnimation, TEST_LOCATION);
+  DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+  // Automatic layout snaps the raster to complete lines. Leave room beyond
+  // each cap; exact one-pixel raster boundaries are covered by direct publication.
+  for(uint32_t height : {2u * maximum + 100u, maximum + 100u})
+  {
+    label.SetRequestedHeight(static_cast<float>(height));
+    captured.Drain(application);
+    application.SendNotification();
+    application.Render(16u);
+    DALI_TEST_CHECK(label.GetRendererCount() > 1u);
+    for(uint32_t tile = 1u; tile < label.GetRendererCount(); ++tile)
+    {
+      for(const char* name : {"uTextGradientStartOffset", "uTextGradientOverlayStartOffset"})
+      {
+        auto first = label.GetRendererAt(0u);
+        auto next  = label.GetRendererAt(tile);
+        DALI_TEST_EQUALS(next.GetCurrentProperty<float>(next.GetPropertyIndex(name)),
+                         first.GetCurrentProperty<float>(first.GetPropertyIndex(name)), 0.001f, TEST_LOCATION);
+      }
+    }
+  }
+  animation.Stop();
+  animation.Play();
+  application.SendNotification();
+  application.Render(16u);
+  animation.Stop();
+  animation.Clear();
+  animation.Reset();
+  unchangedTextures.Reset();
+  auto&      impl         = static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation());
+  const auto beforeManual = completions;
+  impl.RequestAsyncRenderWithFixedSize(120.0f, static_cast<float>(maximum + 100u));
+  captured.Drain(application);
+  DALI_TEST_EQUALS(completions, beforeManual + 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!impl.IsManualAsyncRenderInProgress());
+  label.SetRenderScale(2.0f);
+  label.SetText((lines + "Again").c_str());
+  captured.Drain(application);
+  DALI_TEST_EQUALS(label.GetRenderScale(), 2.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetRendererCount() > 1u);
+  CheckTiles(label, maximum);
+  label.SetRequestedHeight(40.0f);
+  label.SetText("short");
+  captured.Drain(application);
+  DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
+  label.SetTextGradient({});
+  label.SetTextGradientOverlay({});
+  captured.Drain(application);
+  DALI_TEST_EQUALS(label.GetRendererAt(0u).GetTextures().GetTextureCount(), 1u, TEST_LOCATION);
+  label.Unparent();
+  captured.Drain(application);
+  DALI_TEST_EQUALS(label.GetRendererCount(), 0u, TEST_LOCATION);
+  application.GetScene().Add(label);
+  captured.Drain(application);
+  DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
+  auto                 renderer = label.GetRendererAt(0u);
+  WeakHandle<Renderer> weak(renderer);
+  renderer.Reset();
+  label.Unparent();
+  label.Reset();
+  captured.Drain(application);
+  application.RunIdles();
+  DALI_TEST_CHECK(!weak.GetHandle());
+  DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+  END_TEST;
+}
+
+int UtcDaliLabelGradientHeightTilingMissingMixedCompletionP(void)
+{
+  UiTestApplication application;
+  CapturedTasks     captured;
+  ConnectionTracker tracker;
+  const uint32_t    maximum = Dali::GetMaxTextureSize();
+  std::string       lines   = "<color value='red'>Explicit foreground</color>\n";
+  for(uint32_t i = 0u; i < maximum / 8u + 100u; ++i)
+  {
+    lines += "Tile\n";
+  }
+  Ui::Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  Ui::Label label = Ui::Label::New();
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(static_cast<float>(maximum + 100u));
+  label.SetMultiLine(true);
+  label.SetAsyncRendering(true);
+  label.SetTextGradient(gradient);
+  label.SetStyledText(Text::StyledText::FromMarkup(lines.c_str()));
+  unsigned completions = 0u;
+  label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View, float, float)
+  {
+    ++completions;
+  });
+  application.GetScene().Add(label);
+  captured.Drain(application);
+  auto& impl   = static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation());
+  auto  visual = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(label)).GetVisual(Text::LabelPropertyIndex::TEXT);
+  for(bool manual : {false, true})
+  {
+    const auto before = completions;
+    if(manual)
+    {
+      impl.RequestAsyncRenderWithFixedSize(120.0f, static_cast<float>(maximum + 100u));
+    }
+    else
+    {
+      label.SetStyledText(Text::StyledText::FromMarkup((lines + "updated").c_str()));
+    }
+    application.SendNotification();
+    application.Render();
+    auto tasks = Test::AsyncTaskManager::TakeCapturedTasks();
+    DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
+    for(auto& task : tasks)
+    {
+      auto* loading = static_cast<Ui::Internal::TextLoadingTask*>(task.Get());
+      loading->Process();
+      DALI_TEST_CHECK(loading->mRenderInfo.textGradientPreservedPixelData);
+      DALI_TEST_CHECK(loading->mRenderInfo.textGradientMaskPixelData);
+      loading->mRenderInfo.textGradientMaskPixelData.Reset();
+      auto manager = Text::AsyncTextManager::Get();
+      Text::GetImplementation(manager).LoadComplete(Ui::Internal::TextLoadingTaskPtr(loading));
+    }
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(completions, before + 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(!impl.IsManualAsyncRenderInProgress());
+    DALI_TEST_CHECK(!Ui::Internal::TextVisual::IsAsyncRenderPending(visual));
+    DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+    DALI_TEST_EQUALS(label.GetRendererCount(), 0u, TEST_LOCATION);
+    label.SetStyledText(Text::StyledText::FromMarkup((lines + (manual ? "recovered manual" : "recovered auto")).c_str()));
+    captured.Drain(application);
+    DALI_TEST_EQUALS(completions, before + 2u, TEST_LOCATION);
+    DALI_TEST_CHECK(label.GetRendererCount() > 1u);
+    CheckTiles(label, maximum);
+  }
+  END_TEST;
+}
+
+int UtcDaliLabelGradientHeightTilingFailureReentryP(void)
+{
+  UiTestApplication application;
+  CapturedTasks     captured;
+  const uint32_t    maximum = Dali::GetMaxTextureSize();
+  std::string       lines   = "<color value='red'>Explicit</color>\n";
+  for(uint32_t i = 0u; i < maximum / 8u + 100u; ++i)
+  {
+    lines += "Tile\n";
+  }
+  Ui::Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  // Prior output: none, one renderer, or multiple height tiles.
+  // Completion action: no-op, new request, unparent, destroy, or synchronous.
+  for(unsigned prior = 0u; prior < 3u; ++prior)
+  {
+    for(bool manual : {false, true})
+    {
+      for(unsigned action = 0u; action < 5u; ++action)
+      {
+        ConnectionTracker tracker;
+        auto              label = Ui::Label::New();
+        label.SetRequestedWidth(120.0f);
+        label.SetRequestedHeight(prior == 1u ? 40.0f : static_cast<float>(maximum + 100u));
+        label.SetMultiLine(true);
+        label.SetAsyncRendering(true);
+        label.SetTextGradient(gradient);
+        label.SetStyledText(Text::StyledText::FromMarkup(lines.c_str()));
+        application.GetScene().Add(label);
+        if(prior != 0u)
+        {
+          captured.Drain(application);
+          DALI_TEST_EQUALS(label.GetRendererCount() > 1u, prior == 2u, TEST_LOCATION);
+        }
+        unsigned completions = 0u;
+        bool     armed       = true;
+        label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View owner, float, float)
+        {
+          ++completions;
+          if(!armed)
+          {
+            return;
+          }
+          armed = false;
+          DALI_TEST_EQUALS(owner.GetRendererCount(), 0u, TEST_LOCATION);
+          switch(action)
+          {
+            case 1u:
+            {
+              label.SetStyledText(Text::StyledText::FromMarkup((lines + "callback").c_str()));
+              break;
+            }
+            case 2u:
+            {
+              label.Unparent();
+              break;
+            }
+            case 3u:
+            {
+              label.Unparent();
+              label.Reset();
+              break;
+            }
+            case 4u:
+            {
+              label.SetAsyncRendering(false);
+              break;
+            }
+            default:
+            {
+              break;
+            }
+          }
+        });
+        auto              visual = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(label)).GetVisual(Text::LabelPropertyIndex::TEXT);
+        WeakHandle<Actor> weakOwner(label);
+        if(action == 3u)
+        {
+          // Do not keep the visual alive externally during the destroy callback.
+          visual.Reset();
+        }
+        if(manual)
+        {
+          static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation()).RequestAsyncRenderWithFixedSize(120.0f, static_cast<float>(maximum + 100u));
+        }
+        else
+        {
+          label.SetRequestedHeight(static_cast<float>(maximum + 100u));
+          label.SetStyledText(Text::StyledText::FromMarkup((lines + "failure").c_str()));
+        }
+        application.SendNotification();
+        application.Render();
+        auto tasks = Test::AsyncTaskManager::TakeCapturedTasks();
+        DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
+        for(auto& task : tasks)
+        {
+          auto* loading = static_cast<Ui::Internal::TextLoadingTask*>(task.Get());
+          loading->Process();
+          DALI_TEST_CHECK(loading->mRenderInfo.textGradientPreservedPixelData);
+          DALI_TEST_CHECK(loading->mRenderInfo.textGradientMaskPixelData);
+          DALI_TEST_EQUALS(loading->mRenderInfo.textGradientPreservedPixelData.GetWidth(), loading->mRenderInfo.textGradientMaskPixelData.GetWidth(), TEST_LOCATION);
+          DALI_TEST_EQUALS(loading->mRenderInfo.textGradientPreservedPixelData.GetHeight(), loading->mRenderInfo.textGradientMaskPixelData.GetHeight(), TEST_LOCATION);
+          loading->mRenderInfo.textGradientMaskPixelData.Reset();
+          auto manager = Text::AsyncTextManager::Get();
+          Text::GetImplementation(manager).LoadComplete(Ui::Internal::TextLoadingTaskPtr(loading));
+        }
+        tasks.clear();
+        DALI_TEST_EQUALS(completions, 1u, TEST_LOCATION);
+        if(label)
+        {
+          DALI_TEST_CHECK(!static_cast<Ui::Integration::LabelImpl&>(label.GetImplementation()).IsManualAsyncRenderInProgress());
+        }
+        if(action == 3u)
+        {
+          visual.Reset();
+          captured.Drain(application);
+          application.RunIdles();
+          DALI_TEST_CHECK(!weakOwner.GetHandle());
+        }
+        else
+        {
+          if(action == 2u)
+          {
+            application.GetScene().Add(label);
+          }
+          if(action != 1u)
+          {
+            label.SetStyledText(Text::StyledText::FromMarkup((lines + "recovery").c_str()));
+          }
+          captured.Drain(application);
+          DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+          CheckTiles(label, maximum);
+          DALI_TEST_CHECK(!Ui::Internal::TextVisual::IsAsyncRenderPending(visual));
+          label.Unparent();
+          label.Reset();
+          visual.Reset();
+          captured.Drain(application);
+        }
+        DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+      }
+    }
   }
   END_TEST;
 }

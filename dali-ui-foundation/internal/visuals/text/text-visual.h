@@ -866,13 +866,13 @@ private:
    */
   bool IsTextGradientMixedCompositionSupported(const Vector2& size, bool hasMultipleTextColors, bool containsColorGlyph,
                                                bool styleBlocksTextGradient, bool styleTextureEnabled,
-                                               bool isOverlayStyle, bool embossEnabled, bool isHeightTiling,
+                                               bool isOverlayStyle, bool embossEnabled,
                                                bool isMarqueeEnabled, bool isCutoutEnabled) const;
 
   /**
    * @brief Whether TextGradientOverlay shader composition is supported for the current render.
    */
-  bool IsTextGradientOverlayCompositionSupported(const Vector2& size, bool isHeightTiling,
+  bool IsTextGradientOverlayCompositionSupported(const Vector2& size,
                                                  bool isMarqueeEnabled, bool isCutoutEnabled) const;
 
   /**
@@ -915,6 +915,25 @@ private:
    * @param[in] uiScale The owner scale, or the scale captured by the async request.
    */
   void ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds, float uiScale);
+
+  /**
+   * @brief Prepares full-text gradient geometry and binds it to the height tiles.
+   *
+   * @param[in] textureSize The full-text layout size in UI-scaled local coordinates, before world transforms.
+   * @param[in] contentBounds The text content bounds normalized to textureSize.
+   * @param[in] uiScale The owning View's effective UI scale, or the scale captured by the async request.
+   */
+  void ApplyTiledGradientUniforms(const Vector2& textureSize, const Vector4& contentBounds, float uiScale);
+
+  /**
+   * @brief Distributes resolved gradient uniforms and constraints across height tiles.
+   *
+   * The first renderer supplies the full-text geometry. Cached bounds remain in
+   * full-text coordinates; sampling bounds use each tile's actual texture height.
+   *
+   * @param[in] overlay True for the overlay gradient; false for the base gradient.
+   */
+  void ApplyGradientTiling(bool overlay);
 
   /**
    * @brief Gets text textures using the cached shader features.
