@@ -42,6 +42,49 @@ namespace
 class ChartViewStyleImpl : public Extension::UiStyleImpl
 {
 public:
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL ChartViewStyleImpl* NewForBaseHandle()
+  {
+    return new ChartViewStyleImpl();
+  }
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL ChartViewStyleImpl* NewForBaseHandle(const ChartViewStyleImpl& rhs)
+  {
+    return new ChartViewStyleImpl(rhs);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<ChartViewStyleImpl> New()
+  {
+    return IntrusivePtr<ChartViewStyleImpl>(new ChartViewStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<ChartViewStyleImpl> New(const ChartViewStyleImpl& rhs)
+  {
+    return IntrusivePtr<ChartViewStyleImpl>(new ChartViewStyleImpl(rhs));
+  }
+
+  ChartViewStyleImpl& operator=(const ChartViewStyleImpl&) = delete;
+  ChartViewStyleImpl(ChartViewStyleImpl&&)                 = delete;
+  ChartViewStyleImpl& operator=(ChartViewStyleImpl&&)      = delete;
+
+protected:
   ChartViewStyleImpl() = default;
 
   ChartViewStyleImpl(const ChartViewStyleImpl& rhs)
@@ -55,10 +98,9 @@ public:
   {
   }
 
-  ChartViewStyleImpl& operator=(const ChartViewStyleImpl&) = delete;
-  ChartViewStyleImpl(ChartViewStyleImpl&&)                 = delete;
-  ChartViewStyleImpl& operator=(ChartViewStyleImpl&&)      = delete;
-  ~ChartViewStyleImpl() override                           = default;
+  ~ChartViewStyleImpl() override = default;
+
+public:
   UiColor mBackgroundColor{UiColor(1.0f, 1.0f, 1.0f, 1.0f)};
   UiColor mLabelColor{UiColor(0.0f, 0.0f, 0.0f, 1.0f)};
   UiColor mLegendTextColor{UiColor(0.0f, 0.0f, 0.0f, 1.0f)};
@@ -137,7 +179,7 @@ ChartViewStyle ChartViewStyle::StaticDownCast(UiStyle style)
 
 ChartViewStyle::Builder ChartViewStyle::Configure() const
 {
-  return Builder(ChartViewStyle(new ChartViewStyleImpl(GetStyleImpl(*this))));
+  return Builder(ChartViewStyle(ChartViewStyleImpl::NewForBaseHandle(GetStyleImpl(*this))));
 }
 
 UiColor ChartViewStyle::GetBackgroundColor() const
@@ -181,7 +223,7 @@ ChartViewStyle::ChartViewStyle(Extension::UiStyleImpl* impl)
 }
 
 ChartViewStyle::Builder::Builder()
-: mImpl(MakeUnique<Impl>(ChartViewStyle(new ChartViewStyleImpl())))
+: mImpl(MakeUnique<Impl>(ChartViewStyle(ChartViewStyleImpl::NewForBaseHandle())))
 {
 }
 

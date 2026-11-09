@@ -694,12 +694,8 @@ private:
    * @param[in] callbackInterface The text popup callback interface which receives the button click callbacks.
    */
   Decorator(ControllerInterface& controller, TextSelectionPopupCallbackInterface& callbackInterface);
-
-  // Undefined
-  Decorator(const Decorator& handle);
-
-  // Undefined
-  Decorator& operator=(const Decorator& handle);
+  Decorator(const Decorator& handle)            = delete;
+  Decorator& operator=(const Decorator& handle) = delete;
 
 private:
   struct Impl;

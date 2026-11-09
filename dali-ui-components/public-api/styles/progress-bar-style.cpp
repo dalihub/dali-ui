@@ -93,7 +93,7 @@ ProgressBarStyle ProgressBarStyle::StaticDownCast(UiStyle style)
 
 ProgressBarStyle::Builder ProgressBarStyle::Configure() const
 {
-  IntrusivePtr<Internal::ProgressBarStyleImpl> impl(new Internal::ProgressBarStyleImpl(GetStyleImpl(*this)));
+  IntrusivePtr<Internal::ProgressBarStyleImpl> impl(Internal::ProgressBarStyleImpl::New(GetStyleImpl(*this)));
   return Builder(ProgressBarStyle(impl.Get()));
 }
 
@@ -128,7 +128,7 @@ ProgressBarStyle::ProgressBarStyle(Extension::UiStyleImpl* impl)
 }
 
 ProgressBarStyle::Builder::Builder()
-: mStyle(ProgressBarStyle(new Internal::ProgressBarStyleImpl()))
+: mStyle(ProgressBarStyle(Internal::ProgressBarStyleImpl::NewForBaseHandle()))
 {
 }
 

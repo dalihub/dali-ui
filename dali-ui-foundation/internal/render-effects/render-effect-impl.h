@@ -125,7 +125,7 @@ protected:
   /**
    * @copydoc Dali::Ui::RenderEffect::~RenderEffect
    */
-  virtual ~RenderEffectImpl() override;
+  ~RenderEffectImpl() override;
 
   RenderEffectImpl(const RenderEffectImpl&)            = delete;
   RenderEffectImpl(RenderEffectImpl&&)                 = delete;

@@ -87,7 +87,7 @@ AlertDialogStyle AlertDialogStyle::StaticDownCast(UiStyle style)
 }
 AlertDialogStyle::Builder AlertDialogStyle::Configure() const
 {
-  return Builder(AlertDialogStyle(new Internal::AlertDialogStyleImpl(GetStyleImpl(*this))));
+  return Builder(AlertDialogStyle(Internal::AlertDialogStyleImpl::NewForBaseHandle(GetStyleImpl(*this))));
 }
 AlertDialogStyle::AlertDialogStyle(Extension::UiStyleImpl* impl)
 : UiStyle(impl)
@@ -140,7 +140,7 @@ float AlertDialogStyle::GetActionButtonSpacing() const
 }
 
 AlertDialogStyle::Builder::Builder()
-: mStyle(AlertDialogStyle(new Internal::AlertDialogStyleImpl()))
+: mStyle(AlertDialogStyle(Internal::AlertDialogStyleImpl::NewForBaseHandle()))
 {
 }
 AlertDialogStyle::Builder::Builder(UiStyle style)

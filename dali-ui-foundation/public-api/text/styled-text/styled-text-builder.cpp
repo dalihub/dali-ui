@@ -54,18 +54,18 @@ StyledTextBuilder StyledTextBuilder::New()
 
 StyledTextBuilder StyledTextBuilder::New(const Dali::String& text)
 {
-  return StyledTextBuilder(new Internal::Text::StyledTextBuilder(text));
+  return StyledTextBuilder(Internal::Text::StyledTextBuilder::NewForBaseHandle(text));
 }
 
 StyledTextBuilder StyledTextBuilder::FromStyledText(const StyledText& styledText)
 {
-  return styledText ? StyledTextBuilder(new Internal::Text::StyledTextBuilder(*GetImplementation(styledText))) : StyledTextBuilder::New();
+  return styledText ? StyledTextBuilder(Internal::Text::StyledTextBuilder::NewForBaseHandle(*GetImplementation(styledText))) : StyledTextBuilder::New();
 }
 
 StyledTextBuilder StyledTextBuilder::FromMarkup(const Dali::String& markup)
 {
   Internal::Text::StyledTextMarkupResult result = Internal::Text::ParseStyledTextMarkup(markup, nullptr);
-  return StyledTextBuilder(new Internal::Text::StyledTextBuilder(result.text, std::move(result.attachments), result.utf32Length));
+  return StyledTextBuilder(Internal::Text::StyledTextBuilder::NewForBaseHandle(result.text, std::move(result.attachments), result.utf32Length));
 }
 
 void StyledTextBuilder::SetText(const Dali::String& text)
@@ -182,10 +182,10 @@ StyledText StyledTextBuilder::Build() const
   auto* impl = GetImplementation(*this);
   if(impl->HasOpenSpans())
   {
-    return StyledText(new Internal::Text::StyledText(impl->GetText(), impl->CreateFinalizedAttachments(), impl->GetUtf32Length()));
+    return StyledText(Internal::Text::StyledText::NewForBaseHandle(impl->GetText(), impl->CreateFinalizedAttachments(), impl->GetUtf32Length()));
   }
 
-  return StyledText(new Internal::Text::StyledText(impl->GetText(), impl->GetAttachments(), impl->GetUtf32Length()));
+  return StyledText(Internal::Text::StyledText::NewForBaseHandle(impl->GetText(), impl->GetAttachments(), impl->GetUtf32Length()));
 }
 
 StyledTextBuilder::StyledTextBuilder(BaseObject* impl)

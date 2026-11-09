@@ -21,6 +21,7 @@
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/base-object.h>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -50,12 +51,78 @@ struct SpanAttachment
 class StyledText : public BaseObject
 {
 public:
-  StyledText();
-  explicit StyledText(const Dali::String& text);
-  StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments);
-  StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments, uint32_t utf32Length);
-  StyledText(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length);
-  ~StyledText() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL StyledText* NewForBaseHandle(const Dali::String& text)
+  {
+    return new StyledText(text);
+  }
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL StyledText* NewForBaseHandle(const Dali::String& text, const std::vector<SpanAttachment>& attachments, uint32_t utf32Length)
+  {
+    return new StyledText(text, attachments, utf32Length);
+  }
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL StyledText* NewForBaseHandle(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length)
+  {
+    return new StyledText(text, std::move(attachments), utf32Length);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StyledText> New()
+  {
+    return IntrusivePtr<StyledText>(new StyledText());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StyledText> New(const Dali::String& text)
+  {
+    return IntrusivePtr<StyledText>(new StyledText(text));
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StyledText> New(const Dali::String& text, const std::vector<SpanAttachment>& attachments)
+  {
+    return IntrusivePtr<StyledText>(new StyledText(text, attachments));
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StyledText> New(const Dali::String& text, const std::vector<SpanAttachment>& attachments, uint32_t utf32Length)
+  {
+    return IntrusivePtr<StyledText>(new StyledText(text, attachments, utf32Length));
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StyledText> New(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length)
+  {
+    return IntrusivePtr<StyledText>(new StyledText(text, std::move(attachments), utf32Length));
+  }
 
   const Dali::String&            GetText() const;
   uint32_t                       GetUtf32Length() const;
@@ -70,6 +137,14 @@ public:
   bool                           IsEmpty() const;
 
   const std::vector<SpanAttachment>& GetAttachments() const;
+
+protected:
+  StyledText();
+  explicit StyledText(const Dali::String& text);
+  StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments);
+  StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments, uint32_t utf32Length);
+  StyledText(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length);
+  ~StyledText() override;
 
 private:
   StyledText(const StyledText&)            = delete;

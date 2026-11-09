@@ -67,7 +67,7 @@ DialogStyle DialogStyle::StaticDownCast(UiStyle style)
 }
 DialogStyle::Builder DialogStyle::Configure() const
 {
-  return Builder(DialogStyle(new Internal::DialogStyleImpl(GetStyleImpl(*this))));
+  return Builder(DialogStyle(Internal::DialogStyleImpl::NewForBaseHandle(GetStyleImpl(*this))));
 }
 DialogStyle::DialogStyle(Extension::UiStyleImpl* impl)
 : UiStyle(impl)
@@ -124,7 +124,7 @@ float DialogStyle::GetBackgroundBlurRadius() const
 }
 
 DialogStyle::Builder::Builder()
-: mStyle(DialogStyle(new Internal::DialogStyleImpl()))
+: mStyle(DialogStyle(Internal::DialogStyleImpl::NewForBaseHandle()))
 {
 }
 DialogStyle::Builder::Builder(UiStyle style)

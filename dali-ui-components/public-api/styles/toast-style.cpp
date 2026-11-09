@@ -87,7 +87,7 @@ ToastStyle ToastStyle::StaticDownCast(UiStyle style)
 
 ToastStyle::Builder ToastStyle::Configure() const
 {
-  IntrusivePtr<Internal::ToastStyleImpl> impl(new Internal::ToastStyleImpl(Internal::GetImpl(*this)));
+  IntrusivePtr<Internal::ToastStyleImpl> impl(Internal::ToastStyleImpl::New(Internal::GetImpl(*this)));
   return Builder(impl.Get());
 }
 
@@ -123,7 +123,7 @@ ToastStyle::ToastStyle(Internal::ToastStyleImpl* impl)
 }
 
 ToastStyle::Builder::Builder()
-: mImpl(new Internal::ToastStyleImpl())
+: mImpl(Internal::ToastStyleImpl::New())
 {
 }
 

@@ -85,7 +85,7 @@ TextButtonStyle TextButtonStyle::StaticDownCast(UiStyle style)
 
 TextButtonStyle::Builder TextButtonStyle::Configure() const
 {
-  IntrusivePtr<Internal::TextButtonStyleImpl> impl(new Internal::TextButtonStyleImpl(GetImpl(*this)));
+  IntrusivePtr<Internal::TextButtonStyleImpl> impl(Internal::TextButtonStyleImpl::New(GetImpl(*this)));
   return Builder(impl.Get());
 }
 
@@ -170,7 +170,7 @@ TextButtonStyle::TextButtonStyle(Internal::TextButtonStyleImpl* impl)
 }
 
 TextButtonStyle::Builder::Builder()
-: mImpl(new Internal::TextButtonStyleImpl())
+: mImpl(Internal::TextButtonStyleImpl::New())
 {
 }
 

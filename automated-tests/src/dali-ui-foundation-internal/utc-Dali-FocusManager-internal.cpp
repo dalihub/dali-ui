@@ -62,7 +62,7 @@ int UtcDaliFocusManagerFocusLossAfterSingletonCleanupInternalP(void)
   View              view    = View::New();
   view.SetFocusable(true);
   application.GetWindow().Add(view);
-  IntrusivePtr<Dali::Ui::Internal::KeyInputFocusManagerImpl> keyManager(new Dali::Ui::Internal::KeyInputFocusManagerImpl());
+  IntrusivePtr<Dali::Ui::Internal::KeyInputFocusManagerImpl> keyManager(Dali::Ui::Internal::KeyInputFocusManagerImpl::New());
   ConnectionTracker                                          tracker;
   uint32_t                                                   focusLossCount = 0u;
   view.FocusChangedSignal().Connect(&tracker, [&focusLossCount](View, bool focused)

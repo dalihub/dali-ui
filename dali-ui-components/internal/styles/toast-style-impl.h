@@ -28,8 +28,21 @@ namespace Internal
 class ToastStyleImpl : public Extension::UiStyleImpl
 {
 public:
-  ToastStyleImpl();
-  ToastStyleImpl(const ToastStyleImpl& rhs);
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<ToastStyleImpl> New()
+  {
+    return IntrusivePtr<ToastStyleImpl>(new ToastStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<ToastStyleImpl> New(const ToastStyleImpl& rhs)
+  {
+    return IntrusivePtr<ToastStyleImpl>(new ToastStyleImpl(rhs));
+  }
 
   void SetMaximumWidthRatio(float value);
   void SetMaximumHeight(float value);
@@ -142,6 +155,8 @@ public:
   }
 
 protected:
+  ToastStyleImpl();
+  ToastStyleImpl(const ToastStyleImpl& rhs);
   ~ToastStyleImpl() override = default;
 
 private:

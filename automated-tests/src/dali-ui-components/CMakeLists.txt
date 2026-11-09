@@ -29,6 +29,7 @@ SET(TC_SOURCES
     utc-Dali-DialogContainer.cpp
     utc-Dali-AlertDialog.cpp
     utc-Dali-MarkdownView.cpp
+    utc-Dali-RefObjectOwnership.cpp
     utc-Dali-WindowFrame.cpp
     window/utc-Dali-WindowFrameDecorationValidator.cpp
     window/utc-Dali-WindowFrameStyleResolver.cpp

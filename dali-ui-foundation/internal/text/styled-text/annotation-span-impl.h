@@ -38,11 +38,31 @@ namespace Text
 class AnnotationSpan : public Span
 {
 public:
-  AnnotationSpan(const Dali::String& key, const Dali::String& value);
-  ~AnnotationSpan() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL AnnotationSpan* NewForBaseHandle(const Dali::String& key, const Dali::String& value)
+  {
+    return new AnnotationSpan(key, value);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<AnnotationSpan> New(const Dali::String& key, const Dali::String& value)
+  {
+    return IntrusivePtr<AnnotationSpan>(new AnnotationSpan(key, value));
+  }
 
   const Dali::String& GetKey() const;
   const Dali::String& GetValue() const;
+
+protected:
+  AnnotationSpan(const Dali::String& key, const Dali::String& value);
+  ~AnnotationSpan() override;
 
 private:
   Dali::String mKey;

@@ -22,6 +22,7 @@
 #include <dali/devel-api/adaptor-framework/event-thread-callback.h>
 #include <dali/devel-api/threading/mutex.h>
 #include <memory> ///< for std::unique_ptr
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
@@ -43,12 +44,11 @@ public:
    * @param [in] parameters The async text parameters whose ownership is transferred to the task.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  TextLoadingTask(const uint32_t id, Ui::Text::AsyncTextParameters&& parameters, CallbackBase* callback);
 
-  /**
-   * Destructor.
-   */
-  ~TextLoadingTask() override;
+  static IntrusivePtr<TextLoadingTask> New(const uint32_t id, Ui::Text::AsyncTextParameters&& parameters, CallbackBase* callback)
+  {
+    return IntrusivePtr<TextLoadingTask>(new TextLoadingTask(id, std::move(parameters), callback));
+  }
 
   /**
    * Returns the id assigned when creating a task.
@@ -100,13 +100,22 @@ private:
   void ReleaseLoader();
 
 public:
-  uint32_t                     mId;
+  uint32_t                      mId;
   Ui::Text::AsyncTextLoader     mLoader;
   Ui::Text::AsyncTextParameters mParameters;
   Ui::Text::AsyncTextRenderInfo mRenderInfo;
 
+protected:
+  TextLoadingTask(const uint32_t id, Ui::Text::AsyncTextParameters&& parameters, CallbackBase* callback);
+
+  /**
+   * Destructor.
+   */
+  ~TextLoadingTask() override;
+
 private:
-  bool  mIsReady : 1; ///< Whether this task ready to run
+  bool mIsReady : 1;
+  ///< Whether this task ready to run
   Mutex mMutex;
 };
 

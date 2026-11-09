@@ -28,6 +28,43 @@ namespace Internal
 class DialogContainerStyleImpl : public Extension::UiStyleImpl
 {
 public:
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL DialogContainerStyleImpl* NewForBaseHandle()
+  {
+    return new DialogContainerStyleImpl();
+  }
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL DialogContainerStyleImpl* NewForBaseHandle(const DialogContainerStyleImpl& rhs)
+  {
+    return new DialogContainerStyleImpl(rhs);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<DialogContainerStyleImpl> New()
+  {
+    return IntrusivePtr<DialogContainerStyleImpl>(new DialogContainerStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<DialogContainerStyleImpl> New(const DialogContainerStyleImpl& rhs)
+  {
+    return IntrusivePtr<DialogContainerStyleImpl>(new DialogContainerStyleImpl(rhs));
+  }
   struct Values
   {
     // OneUI fallback scrim; NoScrimPreset explicitly disables tint and blur.
@@ -35,6 +72,7 @@ public:
     float   mScrimBlurRadius{100.0f};
   } values;
 
+protected:
   DialogContainerStyleImpl() = default;
   DialogContainerStyleImpl(const DialogContainerStyleImpl& rhs)
   : Extension::UiStyleImpl(),
@@ -42,7 +80,6 @@ public:
   {
   }
 
-protected:
   ~DialogContainerStyleImpl() override = default;
 };
 } // namespace Internal

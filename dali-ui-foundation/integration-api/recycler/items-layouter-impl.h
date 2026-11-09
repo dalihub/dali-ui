@@ -69,8 +69,6 @@ class DALI_UI_API ItemsLayouterImpl : public Dali::BaseObject
 public:
   using Orientation = ItemsLayouter::Orientation;
 
-  ~ItemsLayouterImpl() override;
-
   // Full relayout: recycles all children and lays out from the current
   // scroll offset. Called when the viewport size changes or the adapter
   // is replaced.
@@ -123,6 +121,9 @@ public:
   void RequestLayout();
 
 protected:
+  ItemsLayouterImpl() = default;
+  ~ItemsLayouterImpl() override;
+
   void InvalidateLayout();
 
 private:

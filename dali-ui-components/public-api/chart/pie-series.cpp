@@ -35,8 +35,8 @@ PieSeries& PieSeries::operator=(PieSeries&& rhs)      = default;
 
 PieSeries PieSeries::New()
 {
-  Integration::PieSeries* impl = new Integration::PieSeries();
-  return PieSeries(impl);
+  auto impl = Integration::PieSeries::New();
+  return PieSeries(impl.Get());
 }
 
 PieSeries PieSeries::DownCast(BaseHandle handle)

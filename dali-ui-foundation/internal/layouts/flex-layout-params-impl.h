@@ -39,14 +39,6 @@ namespace Internal
 class FlexLayoutParamsImpl : public TraitObject
 {
 public:
-  explicit FlexLayoutParamsImpl(const FlexLayoutParams& params)
-  : mFlexGrow(params.GetFlexGrow()),
-    mFlexShrink(params.GetFlexShrink()),
-    mFlexBasis(params.GetFlexBasis()),
-    mAlignSelf(params.GetAlignSelf())
-  {
-  }
-
   /**
    * @brief Gets the flex grow factor.
    * @return The grow factor.
@@ -84,6 +76,14 @@ public:
   }
 
   /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<FlexLayoutParamsImpl> New(const FlexLayoutParams& params)
+  {
+    return IntrusivePtr<FlexLayoutParamsImpl>(new FlexLayoutParamsImpl(params));
+  }
+
+  /**
    * @brief Retrieves the FlexLayoutParams trait attached to a view, if any.
    * @param[in] viewImpl The view implementation to query.
    * @return Pointer to the params, or nullptr if not attached.
@@ -96,6 +96,14 @@ public:
   }
 
 protected:
+  explicit FlexLayoutParamsImpl(const FlexLayoutParams& params)
+  : mFlexGrow(params.GetFlexGrow()),
+    mFlexShrink(params.GetFlexShrink()),
+    mFlexBasis(params.GetFlexBasis()),
+    mAlignSelf(params.GetAlignSelf())
+  {
+  }
+
   ~FlexLayoutParamsImpl() override = default;
 
 private:

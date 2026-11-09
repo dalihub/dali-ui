@@ -19,6 +19,7 @@
  */
 
 #include <dali-ui-foundation/internal/visuals/gradient/gradient.h>
+#include <utility>
 
 #include <dali/public-api/math/vector2.h>
 
@@ -41,12 +42,11 @@ public:
    * @param[in] radius The radius of the outmost circle onto which the 100% gradient stop is mapped.
    * @param[in] oldGradient Previous gradient feature, to copy old variables.
    */
-  RadialGradient(const Vector2& center, float radius, IntrusivePtr<Gradient> oldGradient);
 
-  /**
-   * Destructor.
-   */
-  virtual ~RadialGradient();
+  static IntrusivePtr<RadialGradient> New(const Vector2& center, float radius, IntrusivePtr<Gradient> oldGradient)
+  {
+    return IntrusivePtr<RadialGradient>(new RadialGradient(center, radius, std::move(oldGradient)));
+  }
 
   /**
    * Set the center and radius of the outermost circle for the radial gradient.
@@ -66,6 +66,15 @@ public:
    * @return The radius of the outmost gradient circle.
    */
   float GetRadius() const;
+
+protected:
+  RadialGradient(const Vector2& center, float radius, IntrusivePtr<Gradient> oldGradient);
+
+  /**
+   * Destructor.
+   */
+
+  ~RadialGradient() override;
 
 private:
   // Undefined

@@ -44,39 +44,15 @@ class DALI_UI_API InputEventImpl : public BaseObject
 {
 public:
   /**
-   * @brief Create a new InputEvent without a concrete input payload.
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
    */
-  InputEventImpl(InputEventType type, bool cancellation);
-
-  InputEventImpl(const TouchEvent& originEvent);
-
-  /**
-   * @brief Create a new InputEvent.
-   *
-   * @param[in] originEvent The handle of originated event
-   * @return An InputEvent handle
-   */
-  InputEventImpl(const KeyEvent& originEvent);
-
-  /**
-   * @brief Create a new InputEvent.
-   *
-   * @param[in] originEvent The handle of originated event
-   * @return An InputEvent handle
-   */
-  InputEventImpl(const TapGesture& originEvent);
-
-  /**
-   * @brief Create a new InputEvent.
-   *
-   * @param[in] originEvent The handle of originated event
-   * @return An InputEvent handle
-   */
-  InputEventImpl(const LongPressGesture& originEvent);
-
-  InputEventImpl(const WheelEvent& originEvent);
-
-  InputEventImpl(const HoverEvent& originEvent);
+  static DALI_INTERNAL InputEventImpl* NewForBaseHandle(InputEventType type, bool cancellation = false)
+  {
+    return new InputEventImpl(type, cancellation);
+  }
 
   /**
    * @brief Create a new InputEvent without a concrete input payload.
@@ -154,16 +130,56 @@ public:
 
   const HoverEvent& GetHoverEvent() const;
 
+protected:
+  /**
+   * @brief Create a new InputEvent without a concrete input payload.
+   */
+  InputEventImpl(InputEventType type, bool cancellation);
+
+  InputEventImpl(const TouchEvent& originEvent);
+
+  /**
+   * @brief Create a new InputEvent.
+   *
+   * @param[in] originEvent The handle of originated event
+   * @return An InputEvent handle
+   */
+  InputEventImpl(const KeyEvent& originEvent);
+
+  /**
+   * @brief Create a new InputEvent.
+   *
+   * @param[in] originEvent The handle of originated event
+   * @return An InputEvent handle
+   */
+  InputEventImpl(const TapGesture& originEvent);
+
+  /**
+   * @brief Create a new InputEvent.
+   *
+   * @param[in] originEvent The handle of originated event
+   * @return An InputEvent handle
+   */
+  InputEventImpl(const LongPressGesture& originEvent);
+
+  InputEventImpl(const WheelEvent& originEvent);
+
+  InputEventImpl(const HoverEvent& originEvent);
+
 private:
   /**
    * @brief Destructor.
    */
-  virtual ~InputEventImpl() override;
+  ~InputEventImpl() override;
+  InputEventImpl(const InputEventImpl& rhs) = delete;
+  ///< Deleted copy constructor
+  InputEventImpl(InputEventImpl&& rhs) = delete;
+  ///< Deleted move constructor
+  InputEventImpl& operator=(const InputEventImpl& rhs) = delete;
+  ///< Deleted copy assignment operator
+  InputEventImpl& operator=(InputEventImpl&& rhs) = delete;
 
-  InputEventImpl(const InputEventImpl& rhs)            = delete; ///< Deleted copy constructor
-  InputEventImpl(InputEventImpl&& rhs)                 = delete; ///< Deleted move constructor
-  InputEventImpl& operator=(const InputEventImpl& rhs) = delete; ///< Deleted copy assignment operator
-  InputEventImpl& operator=(InputEventImpl&& rhs)      = delete; ///< Deleted move assignment operator
+  ///< Deleted move assignment operator
 
 private:
   InputEventType                                                                                           mEventType;

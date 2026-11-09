@@ -2808,7 +2808,7 @@ protected: // Inherit from Dali::Integration::Processor
     return "Text::Controller";
   }
 
-private: // Private contructors & copy operator.
+private:
   /**
    * @brief Private constructor.
    */
@@ -2832,11 +2832,12 @@ private: // Private contructors & copy operator.
              Ui::Integration::Text::EditableControlInterface*   editableControlInterface,
              Ui::Integration::Text::SelectableControlInterface* selectableControlInterface,
              Ui::Integration::Text::AnchorControlInterface*     anchorControlInterface);
-
+  // Private contructors & copy operator.
   Controller(const Controller& handle)            = delete;
   Controller& operator=(const Controller& handle) = delete;
 
-protected: // Destructor.
+protected:
+  // Destructor.
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
    */

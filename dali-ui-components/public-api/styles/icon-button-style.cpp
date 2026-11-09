@@ -12,7 +12,7 @@ namespace
 {
 IconButtonStyle CreateStyle(Dali::String iconUrl, float width, float height)
 {
-  return IconButtonStyle(new Internal::IconButtonStyleImpl(std::move(iconUrl), width, height));
+  return IconButtonStyle(Internal::IconButtonStyleImpl::NewForBaseHandle(std::move(iconUrl), width, height));
 }
 } //namespace
 
@@ -99,7 +99,7 @@ IconButtonStyle::IconButtonStyle(Internal::IconButtonStyleImpl* impl)
 }
 
 IconButtonStyle::Builder::Builder()
-: mImpl(new Internal::IconButtonStyleImpl())
+: mImpl(Internal::IconButtonStyleImpl::New())
 {
 }
 IconButtonStyle::Builder::Builder(Builder&& rhs) noexcept                             = default;

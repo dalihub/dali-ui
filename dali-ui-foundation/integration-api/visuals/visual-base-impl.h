@@ -559,7 +559,7 @@ protected:
     (inst->*setter)(color.GetRgba());
   }
 
-public:
+protected:
   /**
    * @brief Destructor.
    */

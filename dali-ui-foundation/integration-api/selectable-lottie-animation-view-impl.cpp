@@ -135,10 +135,10 @@ Dali::Property::Value OnBindingColor(int32_t id,
 
 } // namespace
 
-SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(const Dali::String& url,
-                                                                          const Int32Pair&    selectionPlaybackRange,
-                                                                          const Int32Pair&    deselectionPlaybackRange,
-                                                                          const Dali::String& keyPath)
+SelectableLottieAnimationViewImplPtr SelectableLottieAnimationViewImpl::New(const Dali::String& url,
+                                                                            const Int32Pair&    selectionPlaybackRange,
+                                                                            const Int32Pair&    deselectionPlaybackRange,
+                                                                            const Dali::String& keyPath)
 {
   SelectableLottieColorBindings colorBindings;
   colorBindings.PushBack(SelectableLottieColorBinding(
@@ -148,14 +148,14 @@ SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(const 
   return New(url, selectionPlaybackRange, deselectionPlaybackRange, colorBindings);
 }
 
-SelectableLottieAnimationViewImpl* SelectableLottieAnimationViewImpl::New(
+SelectableLottieAnimationViewImplPtr SelectableLottieAnimationViewImpl::New(
   const Dali::String&                  url,
   const Int32Pair&                     selectionPlaybackRange,
   const Int32Pair&                     deselectionPlaybackRange,
   const SelectableLottieColorBindings& colorBindings)
 {
   ValidateColorBindings(colorBindings);
-  auto* impl = new SelectableLottieAnimationViewImpl();
+  SelectableLottieAnimationViewImplPtr impl(new SelectableLottieAnimationViewImpl());
   impl->SetPlaybackRanges(selectionPlaybackRange, deselectionPlaybackRange);
   impl->SetColorBindings(colorBindings);
   if(!url.Empty())

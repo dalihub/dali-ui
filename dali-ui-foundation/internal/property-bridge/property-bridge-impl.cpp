@@ -64,7 +64,7 @@ Dali::Ui::Integration::PropertyBridge PropertyBridge::Get()
     }
     else // create and register the object
     {
-      bridgeHandle = Dali::Ui::Integration::PropertyBridge(new PropertyBridge);
+      bridgeHandle = Dali::Ui::Integration::PropertyBridge(PropertyBridge::NewForBaseHandle());
       service.Register(gSingletonTypeInfoId, bridgeHandle);
     }
   }

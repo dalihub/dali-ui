@@ -99,7 +99,7 @@ SwitchStyle SwitchStyle::StaticDownCast(UiStyle style)
 
 SwitchStyle::Builder SwitchStyle::Configure() const
 {
-  IntrusivePtr<Internal::SwitchStyleImpl> impl(new Internal::SwitchStyleImpl(GetImpl(*this)));
+  IntrusivePtr<Internal::SwitchStyleImpl> impl(Internal::SwitchStyleImpl::New(GetImpl(*this)));
   return Builder(impl.Get());
 }
 
@@ -129,7 +129,7 @@ SwitchStyle::SwitchStyle(Internal::SwitchStyleImpl* impl)
 }
 
 SwitchStyle::Builder::Builder()
-: mImpl(new Internal::SwitchStyleImpl())
+: mImpl(Internal::SwitchStyleImpl::New())
 {
 }
 

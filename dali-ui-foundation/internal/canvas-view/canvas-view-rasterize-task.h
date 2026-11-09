@@ -23,6 +23,7 @@
 #include <dali/public-api/object/ref-object.h>
 #include <dali/public-api/rendering/texture.h>
 #include <dali/public-api/signals/callback.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -58,12 +59,11 @@ public:
    *                           CanvasViewImpl owns the pointed-to object; it must remain
    *                           alive for the duration of the task.
    */
-  CanvasViewRasterizingTask(CanvasRenderer canvasRenderer, CallbackBase* callback);
 
-  /**
-   * @brief Destructor.
-   */
-  ~CanvasViewRasterizingTask() = default;
+  static IntrusivePtr<CanvasViewRasterizingTask> New(CanvasRenderer canvasRenderer, CallbackBase* callback)
+  {
+    return IntrusivePtr<CanvasViewRasterizingTask>(new CanvasViewRasterizingTask(std::move(canvasRenderer), callback));
+  }
 
   /**
    * @brief Returns true if rasterization completed successfully.
@@ -93,6 +93,15 @@ public: // AsyncTask interface
   {
     return "CanvasViewRasterizingTask";
   }
+
+protected:
+  CanvasViewRasterizingTask(CanvasRenderer canvasRenderer, CallbackBase* callback);
+
+  /**
+   * @brief Destructor.
+   */
+
+  ~CanvasViewRasterizingTask() override = default;
 
 private:
   CanvasViewRasterizingTask(const CanvasViewRasterizingTask&)            = delete;

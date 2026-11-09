@@ -44,6 +44,23 @@ void utc_dali_arc_wireframe_visual_internal_cleanup(void)
 
 namespace
 {
+class TestArcVisual : public ArcVisual
+{
+public:
+  static ArcVisualPtr New(VisualFactoryCache& cache)
+  {
+    return ArcVisualPtr(new TestArcVisual(cache));
+  }
+
+protected:
+  explicit TestArcVisual(VisualFactoryCache& cache)
+  : ArcVisual(cache)
+  {
+  }
+
+  ~TestArcVisual() override = default;
+};
+
 VisualFactoryCache& GetArcWireframeFactoryCache()
 {
   auto visualFactory = Ui::Integration::VisualFactory::Get();
@@ -99,7 +116,7 @@ int UtcDaliArcVisualPropertiesAndSceneP(void)
 int UtcDaliArcVisualDefaultsInvalidAndShaderCacheP(void)
 {
   UiTestApplication application;
-  ArcVisualPtr      visual(new ArcVisual(GetArcWireframeFactoryCache()));
+  ArcVisualPtr      visual(TestArcVisual::New(GetArcWireframeFactoryCache()));
   Property::Map     output;
   visual->DoCreatePropertyMap(output);
   DALI_TEST_EQUALS(output.Count(), 5u, TEST_LOCATION);

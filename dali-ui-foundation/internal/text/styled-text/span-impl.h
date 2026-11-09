@@ -34,7 +34,7 @@ namespace Text
  */
 class Span : public BaseObject
 {
-public:
+protected:
   Span();
   ~Span() override;
 

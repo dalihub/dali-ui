@@ -30,7 +30,7 @@ namespace Text
 
 FontSpan FontSpan::New(const Text::FontAttributes& attributes)
 {
-  return FontSpan(new Internal::Text::FontSpan(attributes));
+  return FontSpan(Internal::Text::FontSpan::NewForBaseHandle(attributes));
 }
 
 FontSpan FontSpan::DownCast(BaseHandle handle)

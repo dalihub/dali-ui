@@ -30,6 +30,43 @@ TextButtonStyle ResolveAlertActionButtonStyle(AlertDialogStyle style);
 class AlertDialogStyleImpl : public Extension::UiStyleImpl
 {
 public:
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL AlertDialogStyleImpl* NewForBaseHandle()
+  {
+    return new AlertDialogStyleImpl();
+  }
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL AlertDialogStyleImpl* NewForBaseHandle(const AlertDialogStyleImpl& rhs)
+  {
+    return new AlertDialogStyleImpl(rhs);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<AlertDialogStyleImpl> New()
+  {
+    return IntrusivePtr<AlertDialogStyleImpl>(new AlertDialogStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<AlertDialogStyleImpl> New(const AlertDialogStyleImpl& rhs)
+  {
+    return IntrusivePtr<AlertDialogStyleImpl>(new AlertDialogStyleImpl(rhs));
+  }
   struct Values
   {
     DialogStyle     mDialogStyle{DialogStyle()};
@@ -45,6 +82,7 @@ public:
     float           mActionButtonSpacing{32.0f};
   } values;
 
+protected:
   AlertDialogStyleImpl() = default;
   AlertDialogStyleImpl(const AlertDialogStyleImpl& rhs)
   : Extension::UiStyleImpl(),
@@ -52,7 +90,6 @@ public:
   {
   }
 
-protected:
   ~AlertDialogStyleImpl() override = default;
 };
 } // namespace Internal

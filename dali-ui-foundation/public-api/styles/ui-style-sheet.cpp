@@ -58,6 +58,11 @@ using StyleEntryContainer = std::vector<StyleEntry>;
 class UiStyleSheetImpl : public BaseObject
 {
 public:
+  static IntrusivePtr<UiStyleSheetImpl> New()
+  {
+    return IntrusivePtr<UiStyleSheetImpl>(new UiStyleSheetImpl());
+  }
+
   void SetStyle(uint32_t keyValue, UiStyleCreator creator)
   {
     DALI_ASSERT_ALWAYS(!mFrozen && "UiStyleSheet is frozen");
@@ -136,6 +141,7 @@ public:
   }
 
 protected:
+  UiStyleSheetImpl()           = default;
   ~UiStyleSheetImpl() override = default;
 
 private:
@@ -163,7 +169,7 @@ const Internal::UiStyleSheetImpl& GetStyleSheetImpl(const UiStyleSheet& styleShe
 
 UiStyleSheet UiStyleSheet::New()
 {
-  IntrusivePtr<Internal::UiStyleSheetImpl> impl(new Internal::UiStyleSheetImpl());
+  IntrusivePtr<Internal::UiStyleSheetImpl> impl(Internal::UiStyleSheetImpl::New());
   return UiStyleSheet(impl.Get());
 }
 

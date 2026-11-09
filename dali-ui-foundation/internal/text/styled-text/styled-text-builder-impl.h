@@ -22,6 +22,7 @@
 #include <dali/public-api/object/base-object.h>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -52,10 +53,62 @@ struct OpenSpanAttachment
 class StyledTextBuilder : public BaseObject
 {
 public:
-  explicit StyledTextBuilder(const Dali::String& text);
-  explicit StyledTextBuilder(const StyledText& styledText);
-  StyledTextBuilder(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length);
-  ~StyledTextBuilder() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL StyledTextBuilder* NewForBaseHandle(const Dali::String& text)
+  {
+    return new StyledTextBuilder(text);
+  }
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL StyledTextBuilder* NewForBaseHandle(const StyledText& styledText)
+  {
+    return new StyledTextBuilder(styledText);
+  }
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL StyledTextBuilder* NewForBaseHandle(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length)
+  {
+    return new StyledTextBuilder(text, std::move(attachments), utf32Length);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StyledTextBuilder> New(const Dali::String& text)
+  {
+    return IntrusivePtr<StyledTextBuilder>(new StyledTextBuilder(text));
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StyledTextBuilder> New(const StyledText& styledText)
+  {
+    return IntrusivePtr<StyledTextBuilder>(new StyledTextBuilder(styledText));
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StyledTextBuilder> New(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length)
+  {
+    return IntrusivePtr<StyledTextBuilder>(new StyledTextBuilder(text, std::move(attachments), utf32Length));
+  }
 
   void     SetText(const Dali::String& text);
   void     AppendText(const Dali::String& text);
@@ -81,6 +134,12 @@ public:
   const std::vector<SpanAttachment>& GetAttachments() const;
   bool                               HasOpenSpans() const;
   std::vector<SpanAttachment>        CreateFinalizedAttachments() const;
+
+protected:
+  explicit StyledTextBuilder(const Dali::String& text);
+  explicit StyledTextBuilder(const StyledText& styledText);
+  StyledTextBuilder(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length);
+  ~StyledTextBuilder() override;
 
 private:
   StyledTextBuilder(const StyledTextBuilder&)            = delete;

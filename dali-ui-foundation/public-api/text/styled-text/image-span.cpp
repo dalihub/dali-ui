@@ -26,7 +26,7 @@ namespace Text
 {
 ImageSpan ImageSpan::New(const ImageAttributes& attributes)
 {
-  return ImageSpan(new Internal::Text::ImageSpan(attributes));
+  return ImageSpan(Internal::Text::ImageSpan::NewForBaseHandle(attributes));
 }
 
 ImageSpan ImageSpan::DownCast(BaseHandle handle)

@@ -45,7 +45,7 @@ SelectableTrait::~SelectableTrait()
 
 SelectableTrait SelectableTrait::New()
 {
-  IntrusivePtr<Internal::CoreInteractionObject> traitObject = new Internal::CoreInteractionObject();
+  IntrusivePtr<Internal::CoreInteractionObject> traitObject = Internal::CoreInteractionObject::New();
   return New(traitObject.Get());
 }
 

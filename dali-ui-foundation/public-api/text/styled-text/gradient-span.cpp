@@ -35,7 +35,7 @@ GradientSpan GradientSpan::New(const Gradient::Base& gradient)
 
 GradientSpan GradientSpan::New(const Gradient::Base& gradient, BoundsMode boundsMode)
 {
-  return GradientSpan(new Internal::Text::GradientSpan(gradient, boundsMode));
+  return GradientSpan(Internal::Text::GradientSpan::NewForBaseHandle(gradient, boundsMode));
 }
 
 GradientSpan GradientSpan::DownCast(BaseHandle handle)

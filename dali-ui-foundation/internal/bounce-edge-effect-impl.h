@@ -48,11 +48,19 @@ using BounceEdgeEffectImplPtr = IntrusivePtr<BounceEdgeEffectImpl>;
 class DALI_UI_API BounceEdgeEffectImpl : public Integration::EdgeEffectImpl
 {
 public:
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL BounceEdgeEffectImpl* NewForBaseHandle(ScrollDirection axis)
+  {
+    return new BounceEdgeEffectImpl(axis);
+  }
+
   static BounceEdgeEffectImplPtr New(ScrollDirection axis);
-
-  ~BounceEdgeEffectImpl() override;
-
-  ScrollDirection GetAxis() const;
+  ScrollDirection                GetAxis() const;
 
   float GetPullResistance() const;
   void  SetPullResistance(float resistance);
@@ -61,6 +69,7 @@ public:
   void  SetBounceDuration(float durationSec);
 
 protected:
+  ~BounceEdgeEffectImpl() override;
   explicit BounceEdgeEffectImpl(ScrollDirection axis);
 
   void OnPullImpl(State prevState, float deltaDistance, float displacement) override;

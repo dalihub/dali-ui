@@ -98,7 +98,7 @@ CheckBoxStyle CheckBoxStyle::StaticDownCast(UiStyle style)
 
 CheckBoxStyle::Builder CheckBoxStyle::Configure() const
 {
-  IntrusivePtr<Internal::CheckBoxStyleImpl> impl(new Internal::CheckBoxStyleImpl(GetImpl(*this)));
+  IntrusivePtr<Internal::CheckBoxStyleImpl> impl(Internal::CheckBoxStyleImpl::New(GetImpl(*this)));
   return Builder(impl.Get());
 }
 
@@ -165,7 +165,7 @@ CheckBoxStyle::CheckBoxStyle(Internal::CheckBoxStyleImpl* impl)
 }
 
 CheckBoxStyle::Builder::Builder()
-: mImpl(new Internal::CheckBoxStyleImpl())
+: mImpl(Internal::CheckBoxStyleImpl::New())
 {
 }
 CheckBoxStyle::Builder::Builder(Builder&& rhs) noexcept                           = default;

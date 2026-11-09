@@ -65,7 +65,7 @@ int UtcDaliFastTrackLoadingTaskLoadP(void)
 {
   UiTestApplication application;
   const Dali::Ui::Internal::VisualUrl url(GetRepositoryResourcePath("dali-ui-components/images/border/close.png"));
-  Dali::Ui::Internal::FastTrackLoadingTaskPtr task = new Dali::Ui::Internal::FastTrackLoadingTask(
+  Dali::Ui::Internal::FastTrackLoadingTaskPtr task = Dali::Ui::Internal::FastTrackLoadingTask::New(
     url,
     ImageDimensions(),
     SamplingMode::BOX_THEN_LINEAR,
@@ -91,7 +91,7 @@ int UtcDaliFastTrackLoadingTaskPlanesAndFailureP(void)
 {
   UiTestApplication application;
   const Dali::Ui::Internal::VisualUrl url(GetRepositoryResourcePath("dali-ui-components/images/border/close.png"));
-  Dali::Ui::Internal::FastTrackLoadingTaskPtr planeTask = new Dali::Ui::Internal::FastTrackLoadingTask(
+  Dali::Ui::Internal::FastTrackLoadingTaskPtr planeTask = Dali::Ui::Internal::FastTrackLoadingTask::New(
     url,
     ImageDimensions(16u, 16u),
     SamplingMode::NEAREST,
@@ -106,7 +106,7 @@ int UtcDaliFastTrackLoadingTaskPlanesAndFailureP(void)
   CompleteTask(planeTask);
   DALI_TEST_EQUALS(planeTask->mTextures.size(), 1u, TEST_LOCATION);
 
-  Dali::Ui::Internal::FastTrackLoadingTaskPtr failedTask = new Dali::Ui::Internal::FastTrackLoadingTask(
+  Dali::Ui::Internal::FastTrackLoadingTaskPtr failedTask = Dali::Ui::Internal::FastTrackLoadingTask::New(
     Dali::Ui::Internal::VisualUrl(""),
     ImageDimensions(),
     SamplingMode::DEFAULT,

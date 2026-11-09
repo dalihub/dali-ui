@@ -60,10 +60,6 @@ public:
     float trailingCrossOffset{0.0f};
   };
   static LinearItemsLayouterImplPtr New(Orientation orientation);
-
-  explicit LinearItemsLayouterImpl(Orientation orientation);
-  ~LinearItemsLayouterImpl() override;
-
   // ItemsLayouterImpl overrides
   void  OnLayoutChildren(Integration::Recycler& recycler) override;
   float ScrollVerticallyBy(float dy, Integration::Recycler& recycler) override;
@@ -97,6 +93,10 @@ public:
    * margins without modifying LayoutChunk directly.
    */
   virtual ItemInset GetItemCrossInset(uint32_t position) const;
+
+protected:
+  explicit LinearItemsLayouterImpl(Orientation orientation);
+  ~LinearItemsLayouterImpl() override;
 
 private:
   struct LayoutState
@@ -150,7 +150,8 @@ private:
   float               mCacheBefore;
   float               mCacheAfter;
   uint32_t            mCachedItemCount;
-  Dali::Vector<float> mExtentCache; // 0.0f = not yet measured
+  Dali::Vector<float> mExtentCache;
+  // 0.0f = not yet measured
 
   // Active window tracking.
   uint32_t mFirstActive;
@@ -164,8 +165,9 @@ private:
   float mLastActiveEndOffset;
 
   // Running statistics for O(1) GetEstimatedContentExtent.
-  float    mTotalMeasuredExtent; // sum of extents for measured items
-  uint32_t mMeasuredItemCount;   // count of items measured so far
+  float mTotalMeasuredExtent;
+  // sum of extents for measured items
+  uint32_t mMeasuredItemCount;
 };
 
 } // namespace Internal

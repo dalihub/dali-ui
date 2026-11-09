@@ -36,10 +36,30 @@ namespace Text
 class FontSpan : public Span
 {
 public:
-  explicit FontSpan(const Dali::Ui::Text::FontAttributes& attributes);
-  ~FontSpan() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL FontSpan* NewForBaseHandle(const Dali::Ui::Text::FontAttributes& attributes)
+  {
+    return new FontSpan(attributes);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<FontSpan> New(const Dali::Ui::Text::FontAttributes& attributes)
+  {
+    return IntrusivePtr<FontSpan>(new FontSpan(attributes));
+  }
 
   const Dali::Ui::Text::FontAttributes& GetFontAttributes() const;
+
+protected:
+  explicit FontSpan(const Dali::Ui::Text::FontAttributes& attributes);
+  ~FontSpan() override;
 
 private:
   Dali::Ui::Text::FontAttributes mAttributes;

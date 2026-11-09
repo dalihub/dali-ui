@@ -32,6 +32,22 @@ using namespace Dali::Ui::Internal;
 
 namespace
 {
+class TestPrimitiveVisual : public PrimitiveVisual
+{
+public:
+  static PrimitiveVisualPtr New(VisualFactoryCache& cache)
+  {
+    return PrimitiveVisualPtr(new TestPrimitiveVisual(cache));
+  }
+
+protected:
+  explicit TestPrimitiveVisual(VisualFactoryCache& cache)
+  : PrimitiveVisual(cache)
+  {
+  }
+
+  ~TestPrimitiveVisual() override = default;
+};
 
 VisualFactoryCache& GetFactoryCache()
 {
@@ -41,7 +57,7 @@ VisualFactoryCache& GetFactoryCache()
 
 PrimitiveVisualPtr CreatePrimitiveVisual()
 {
-  return PrimitiveVisualPtr(new PrimitiveVisual(GetFactoryCache()));
+  return PrimitiveVisualPtr(TestPrimitiveVisual::New(GetFactoryCache()));
 }
 
 } // namespace

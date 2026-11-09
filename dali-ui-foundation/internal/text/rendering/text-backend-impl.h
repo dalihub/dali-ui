@@ -39,14 +39,24 @@ class Backend : public BaseObject
 {
 public:
   /**
-   * Constructor
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
    */
-  Backend();
+  static DALI_INTERNAL Backend* NewForBaseHandle()
+  {
+    return new Backend();
+  }
 
   /**
-   * Destructor
+   * Constructor
    */
-  ~Backend();
+
+  static IntrusivePtr<Backend> New()
+  {
+    return IntrusivePtr<Backend>(new Backend());
+  }
 
   /**
    * @copydoc Dali::Ui::Text::Backend::Get()
@@ -57,6 +67,15 @@ public:
    * @copydoc Dali::Ui::Text::Backend::NewRenderer()
    */
   RendererPtr NewRenderer();
+
+protected:
+  Backend();
+
+  /**
+   * Destructor
+   */
+
+  ~Backend() override;
 
 private:
   // Undefined copy constructor.

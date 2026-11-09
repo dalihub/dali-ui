@@ -38,7 +38,8 @@ ChartAnnotation& ChartAnnotation::operator=(ChartAnnotation&&) noexcept = defaul
 
 ChartAnnotation ChartAnnotation::New(Type type)
 {
-  return ChartAnnotation(new Integration::ChartAnnotation(type));
+  auto impl = Integration::ChartAnnotation::New(type);
+  return ChartAnnotation(impl.Get());
 }
 
 ChartAnnotation ChartAnnotation::DownCast(BaseHandle handle)

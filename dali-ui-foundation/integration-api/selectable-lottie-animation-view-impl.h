@@ -36,6 +36,9 @@ namespace Ui
 namespace Integration
 {
 
+class SelectableLottieAnimationViewImpl;
+using SelectableLottieAnimationViewImplPtr = IntrusivePtr<SelectableLottieAnimationViewImpl>;
+
 /**
  * @brief Internal implementation for SelectableLottieAnimationView.
  *
@@ -53,31 +56,33 @@ class SelectableLottieAnimationViewImpl : public SelectableImageInterfaceImpl
 public:
   /**
    * @brief Creates a new SelectableLottieAnimationViewImpl.
+   * @SINCE_3_0.0
    *
    * @param[in] url           The URL of the Lottie JSON file
    * @param[in] selectionPlaybackRange The segment played (or snapped to) when becoming selected
    * @param[in] deselectionPlaybackRange The segment played (or snapped to) when becoming deselected
    * @param[in] keyPath       The inner-fill recolour key path; empty keeps the generic default
-   * @return A raw pointer to the newly allocated implementation (reference count 0)
+   * @return An intrusive pointer owning the newly allocated implementation
    */
-  static SelectableLottieAnimationViewImpl* New(const Dali::String& url,
-                                                const Int32Pair&    selectionPlaybackRange,
-                                                const Int32Pair&    deselectionPlaybackRange,
-                                                const Dali::String& keyPath = Dali::String());
+  static SelectableLottieAnimationViewImplPtr New(const Dali::String& url,
+                                                  const Int32Pair&    selectionPlaybackRange,
+                                                  const Int32Pair&    deselectionPlaybackRange,
+                                                  const Dali::String& keyPath = Dali::String());
 
   /**
    * @brief Creates a new implementation with explicit color bindings.
+   * @SINCE_3_0.0
    *
    * @param[in] url The URL of the Lottie JSON file
    * @param[in] selectionPlaybackRange The segment used when becoming selected
    * @param[in] deselectionPlaybackRange The segment used when becoming deselected
    * @param[in] colorBindings The exact dynamic color bindings to register
-   * @return A raw pointer to the newly allocated implementation
+   * @return An intrusive pointer owning the newly allocated implementation
    */
-  static SelectableLottieAnimationViewImpl* New(const Dali::String&                  url,
-                                                const Int32Pair&                     selectionPlaybackRange,
-                                                const Int32Pair&                     deselectionPlaybackRange,
-                                                const SelectableLottieColorBindings& colorBindings);
+  static SelectableLottieAnimationViewImplPtr New(const Dali::String&                  url,
+                                                  const Int32Pair&                     selectionPlaybackRange,
+                                                  const Int32Pair&                     deselectionPlaybackRange,
+                                                  const SelectableLottieColorBindings& colorBindings);
 
 public: // From Integration::SelectableImageInterfaceImpl
   /**

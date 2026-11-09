@@ -31,8 +31,21 @@ namespace Internal
 class SwitchStyleImpl : public Extension::UiStyleImpl
 {
 public:
-  SwitchStyleImpl();
-  SwitchStyleImpl(const SwitchStyleImpl& rhs);
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<SwitchStyleImpl> New()
+  {
+    return IntrusivePtr<SwitchStyleImpl>(new SwitchStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<SwitchStyleImpl> New(const SwitchStyleImpl& rhs)
+  {
+    return IntrusivePtr<SwitchStyleImpl>(new SwitchStyleImpl(rhs));
+  }
 
   void   SetMinimumWidth(float width);
   float  GetMinimumWidth() const;
@@ -62,6 +75,8 @@ public:
   float GetDragThreshold() const;
 
 protected:
+  SwitchStyleImpl();
+  SwitchStyleImpl(const SwitchStyleImpl& rhs);
   ~SwitchStyleImpl() override;
 
 private:

@@ -130,7 +130,7 @@ InputEventImplPtr InputEventImpl::New(const HoverEvent& originEvent)
 
 InputEventImplPtr InputEventImpl::WithCancellation() const
 {
-  InputEventImplPtr clone(new InputEventImpl(InputEventType::NONE, true));
+  InputEventImplPtr clone(InputEventImpl::New(InputEventType::NONE, true));
   clone->mEventType = mEventType;
   clone->mEvent     = mEvent;
   return clone;

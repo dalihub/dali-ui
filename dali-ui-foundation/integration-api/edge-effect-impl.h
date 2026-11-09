@@ -59,8 +59,6 @@ public:
 public:
   static EdgeEffectImplPtr New();
 
-  virtual ~EdgeEffectImpl();
-
   void     SetSource(Ui::View source);
   Ui::View GetSource() const;
 
@@ -78,6 +76,7 @@ public:
 
 protected:
   EdgeEffectImpl();
+  ~EdgeEffectImpl() override;
 
   // Virtual hooks for subclasses — never reorder, add, or remove
   virtual void OnPullImpl(State prevState, float deltaDistance, float displacement);

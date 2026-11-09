@@ -74,7 +74,13 @@ class Replacement;
 class Builder : public Dali::BaseObject
 {
 public:
-  Builder();
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<Builder> New()
+  {
+    return IntrusivePtr<Builder>(new Builder());
+  }
 
   /**
    * @copydoc Ui::Integration::Builder::LoadFromString
@@ -235,6 +241,7 @@ public:
   void EmitQuitSignal();
 
 protected:
+  Builder();
   ~Builder() override;
 
 private:
@@ -253,8 +260,6 @@ private:
   } PathConstrainerEntry;
   typedef std::vector<PathConstrainerEntry> PathConstrainerLut;
   typedef std::map<const std::string, Path> PathLut;
-
-private:
   // Undefined
   Builder(const Builder&);
 
@@ -335,15 +340,16 @@ private:
   bool ConvertChildValue(const TreeNode& mappingRoot, KeyStack& keyStack, Property::Value& value);
 
 private:
-  Ui::Integration::JsonParser                 mParser;
-  PathLut                                     mPathLut;
-  PathConstrainerLut                          mPathConstrainerLut;
-  LinearConstrainerLut                        mLinearConstrainerLut;
-  SlotDelegate<Builder>                       mSlotDelegate;
-  Property::Map                               mReplacementMap;
-  Property::Map                               mConfigurationMap;
-  MappingsLut                                 mCompleteMappings;
-  Dictionary<StylePtr>                        mStyles; // State based styles
+  Ui::Integration::JsonParser mParser;
+  PathLut                     mPathLut;
+  PathConstrainerLut          mPathConstrainerLut;
+  LinearConstrainerLut        mLinearConstrainerLut;
+  SlotDelegate<Builder>       mSlotDelegate;
+  Property::Map               mReplacementMap;
+  Property::Map               mConfigurationMap;
+  MappingsLut                 mCompleteMappings;
+  Dictionary<StylePtr>        mStyles;
+  // State based styles
   Ui::Integration::Builder::BuilderSignalType mQuitSignal;
 };
 

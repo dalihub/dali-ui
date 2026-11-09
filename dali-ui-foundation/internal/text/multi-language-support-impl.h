@@ -151,16 +151,24 @@ class MultilanguageSupport : public BaseObject, public ConnectionTracker
 {
 public:
   /**
-   * Constructor
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
    */
-  MultilanguageSupport(bool connectLocaleChangedSignal = true);
+  static DALI_INTERNAL MultilanguageSupport* NewForBaseHandle(bool connectLocaleChangedSignal = true)
+  {
+    return new MultilanguageSupport(connectLocaleChangedSignal);
+  }
 
   /**
-   * Destructor
-   *
-   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * Constructor
    */
-  ~MultilanguageSupport();
+
+  static IntrusivePtr<MultilanguageSupport> New(bool connectLocaleChangedSignal = true)
+  {
+    return IntrusivePtr<MultilanguageSupport>(new MultilanguageSupport(connectLocaleChangedSignal));
+  }
 
   /**
    * @copydoc Dali::MultilanguageSupport::Get()
@@ -215,11 +223,26 @@ public:
   void UpdateICULineBreak(const std::string& text, TextAbstraction::Length numberOfCharacters,
                           TextAbstraction::LineBreakInfo* breakInfo);
 
+protected:
+  MultilanguageSupport(bool connectLocaleChangedSignal = true);
+
+  /**
+   * Destructor
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+
+  ~MultilanguageSupport() override;
+
 private:
-  TextAbstraction::ICU               mICU;                       ///< Handle to the dali ICU.
-  Vector<DefaultFonts*>              mDefaultFontPerScriptCache; ///< Caches default fonts for a script.
-  Vector<ValidateFontsPerScript*>    mValidFontsPerScriptCache;  ///< Caches valid fonts for a script.
-  std::vector<FontIdLookupCacheItem> mFontIdLookupCache;         ///< Caches font ids during this support object's lifetime.
+  TextAbstraction::ICU mICU;
+  ///< Handle to the dali ICU.
+  Vector<DefaultFonts*> mDefaultFontPerScriptCache;
+  ///< Caches default fonts for a script.
+  Vector<ValidateFontsPerScript*> mValidFontsPerScriptCache;
+  ///< Caches valid fonts for a script.
+  std::vector<FontIdLookupCacheItem> mFontIdLookupCache;
+  ///< Caches font ids during this support object's lifetime.
 
   std::string mLocale;
   bool        mIsICUEnabled : 1;

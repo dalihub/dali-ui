@@ -117,7 +117,7 @@ struct AdaptorUnavailableScope
 
 IntrusivePtr<Impl::Gradient> MakeGradient(float first = 0.f, float last = 1.f, Vector4 color = Color::RED)
 {
-  IntrusivePtr<Impl::Gradient> gradient = new Impl::LinearGradient(Vector2::ZERO, Vector2::ONE, nullptr);
+  IntrusivePtr<Impl::Gradient> gradient = Impl::LinearGradient::New(Vector2::ZERO, Vector2::ONE, nullptr);
   Vector<float>                offsets;
   offsets.PushBack(first);
   offsets.PushBack(last);
@@ -220,7 +220,7 @@ int UtcDaliGradientTextureCacheReferences(void)
   DALI_TEST_EQUALS(newId, id, TEST_LOCATION);
   DALI_TEST_CHECK(cache.GetTexture(newId) != original);
   cache.RequestRelease(newId);
-  IntrusivePtr<Impl::Gradient> empty = new Impl::LinearGradient(Vector2::ZERO, Vector2::ONE, nullptr);
+  IntrusivePtr<Impl::Gradient> empty = Impl::LinearGradient::New(Vector2::ZERO, Vector2::ONE, nullptr);
   DALI_TEST_EQUALS(cache.Acquire(*empty), Cache::INVALID_ID, TEST_LOCATION);
   DALI_TEST_CHECK(!empty->GenerateLookupTexture());
   END_TEST;
@@ -314,7 +314,7 @@ int UtcDaliGradientTextureCacheAutomaticAndPartialStops(void)
 {
   UiTestApplication            application;
   Cache                        cache;
-  IntrusivePtr<Impl::Gradient> gradient = new Impl::LinearGradient(Vector2::ZERO, Vector2::ONE, nullptr);
+  IntrusivePtr<Impl::Gradient> gradient = Impl::LinearGradient::New(Vector2::ZERO, Vector2::ONE, nullptr);
   Vector<float>                offsets;
   Vector<Vector4>              colors;
   colors.PushBack(Color::RED);
@@ -427,7 +427,7 @@ int UtcDaliGradientNormalizeStopsInvalidation(void)
   DALI_TEST_EQUALS(gradient->GetStops()[0].mOffset, 0.f, TEST_LOCATION);
   DALI_TEST_EQUALS(gradient->GetStops()[0].mStopColor, Color::RED, TEST_LOCATION);
 
-  IntrusivePtr<Impl::Gradient> copy = new Impl::LinearGradient(Vector2::ZERO, Vector2::ONE, gradient);
+  IntrusivePtr<Impl::Gradient> copy = Impl::LinearGradient::New(Vector2::ZERO, Vector2::ONE, gradient);
   copy->NormalizeStops();
   DALI_TEST_EQUALS(copy->GetStops()[0].mStopColor, Color::RED, TEST_LOCATION);
   copy->ClearStop();
