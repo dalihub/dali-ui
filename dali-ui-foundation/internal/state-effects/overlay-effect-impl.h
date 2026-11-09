@@ -53,10 +53,29 @@ class OverlayEffectImpl : public Integration::StateEffectImpl
 public:
   static constexpr uint32_t DEFAULT_OVERLAY_COLOR_RGB   = 0x000000u;
   static constexpr float    DEFAULT_OVERLAY_COLOR_ALPHA = 0.1f;
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<OverlayEffectImpl> New()
+  {
+    return IntrusivePtr<OverlayEffectImpl>(new OverlayEffectImpl());
+  }
 
-  OverlayEffectImpl();
-  OverlayEffectImpl(const UiColor& overlayColor, const Insets& overlayPadding, const Vector4& cornerRadius, CornerRadiusPolicy cornerRadiusPolicy, bool useTargetCornerRadius, RecoilScope recoilScope, float recoilScaleFactor);
-  OverlayEffectImpl(const OverlayEffectImpl& other);
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<OverlayEffectImpl> New(const UiColor& overlayColor, const Insets& overlayPadding, const Vector4& cornerRadius, CornerRadiusPolicy cornerRadiusPolicy, bool useTargetCornerRadius, RecoilScope recoilScope, float recoilScaleFactor)
+  {
+    return IntrusivePtr<OverlayEffectImpl>(new OverlayEffectImpl(overlayColor, overlayPadding, cornerRadius, cornerRadiusPolicy, useTargetCornerRadius, recoilScope, recoilScaleFactor));
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<OverlayEffectImpl> New(const OverlayEffectImpl& other)
+  {
+    return IntrusivePtr<OverlayEffectImpl>(new OverlayEffectImpl(other));
+  }
 
   void    SetOverlayColor(const UiColor& color);
   UiColor GetOverlayColor() const;
@@ -79,6 +98,9 @@ public:
   float       GetRecoilScaleFactor() const;
 
 protected:
+  OverlayEffectImpl();
+  OverlayEffectImpl(const UiColor& overlayColor, const Insets& overlayPadding, const Vector4& cornerRadius, CornerRadiusPolicy cornerRadiusPolicy, bool useTargetCornerRadius, RecoilScope recoilScope, float recoilScaleFactor);
+  OverlayEffectImpl(const OverlayEffectImpl& other);
   ~OverlayEffectImpl() override;
 
   void OnAttached(TraitId id, View& view) override;

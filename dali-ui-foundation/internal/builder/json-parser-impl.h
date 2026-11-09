@@ -45,16 +45,20 @@ public:
   /*
    * @copydoc Ui::Integration::JsonParser::JsonParser()
    */
-  JsonParser();
+
+  static IntrusivePtr<JsonParser> New()
+  {
+    return IntrusivePtr<JsonParser>(new JsonParser());
+  }
 
   /*
    * @copydoc Ui::Integration::JsonParser::JsonParser(const TreeNode& tree)
    */
-  explicit JsonParser(const TreeNode& tree);
 
-  /*
-   */
-  ~JsonParser() override;
+  static IntrusivePtr<JsonParser> New(const TreeNode& tree)
+  {
+    return IntrusivePtr<JsonParser>(new JsonParser(tree));
+  }
 
   /*
    * @copydoc Ui::Integration::JsonParser::Parse()
@@ -101,6 +105,14 @@ public:
    */
   void Write(std::ostream& output, int indent) const;
 
+protected:
+  JsonParser();
+  explicit JsonParser(const TreeNode& tree);
+
+  /*
+   */
+  ~JsonParser() override;
+
 private:
   /**
    * @brief Ensure to destroy and release all memory under tree root
@@ -117,17 +129,24 @@ private:
   JsonParser(JsonParser&);
   JsonParser& operator=(const JsonParser&);
 
-  SourceContainer mSources; ///< List of strings from Parse() merge operations
+  SourceContainer mSources;
+  ///< List of strings from Parse() merge operations
 
-  TreeNode* mRoot; ///< Tree root
+  TreeNode* mRoot;
+  ///< Tree root
 
-  const char* mErrorDescription; ///< Last parse error description
-  int         mErrorPosition;    ///< Last parse error position
-  int         mErrorLine;        ///< Last parse error line
-  int         mErrorColumn;      ///< Last parse error column
+  const char* mErrorDescription;
+  ///< Last parse error description
+  int mErrorPosition;
+  ///< Last parse error position
+  int mErrorLine;
+  ///< Last parse error line
+  int mErrorColumn;
+  ///< Last parse error column
 
-  int mNumberOfChars; ///< The size of string data for all nodes
-  int mNumberOfNodes; ///< Node count
+  int mNumberOfChars;
+  ///< The size of string data for all nodes
+  int mNumberOfNodes;
 };
 
 } // namespace Internal

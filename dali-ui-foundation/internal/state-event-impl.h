@@ -46,15 +46,6 @@ class DALI_UI_API StateEventImpl : public BaseObject
 public:
   /**
    * @brief Creates a new StateEventImpl.
-   *
-   * @param[in] prev    State before the transition
-   * @param[in] current State after the transition
-   * @param[in] cause   Input event that caused the transition (may be NONE)
-   */
-  StateEventImpl(ViewState prev, ViewState current, InputEvent cause);
-
-  /**
-   * @brief Creates a new StateEventImpl.
    */
   static StateEventImplPtr New(ViewState prev, ViewState current, InputEvent cause);
 
@@ -73,8 +64,18 @@ public:
    */
   const InputEvent& GetCause() const;
 
+protected:
+  /**
+   * @brief Creates a new StateEventImpl.
+   *
+   * @param[in] prev    State before the transition
+   * @param[in] current State after the transition
+   * @param[in] cause   Input event that caused the transition (may be NONE)
+   */
+  StateEventImpl(ViewState prev, ViewState current, InputEvent cause);
+
 private:
-  virtual ~StateEventImpl() override;
+  ~StateEventImpl() override;
 
   StateEventImpl(const StateEventImpl&)            = delete;
   StateEventImpl(StateEventImpl&&)                 = delete;

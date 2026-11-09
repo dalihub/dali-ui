@@ -1882,7 +1882,7 @@ private:
     RenderEffectImplPtr renderEffect;
 
     // Unlike renderEffect, this handleless effect is created by the offscreen rendering API or property.
-    std::unique_ptr<OffscreenRenderingImpl>    offscreenRendering;
+    IntrusivePtr<OffscreenRenderingImpl>       offscreenRendering;
     View::OffscreenRefreshRate                 offscreenRefreshRate{View::OffscreenRefreshRate::REFRESH_ALWAYS};
     View::OffscreenRenderingFinishedSignalType offscreenRenderingFinishedSignal;
   };

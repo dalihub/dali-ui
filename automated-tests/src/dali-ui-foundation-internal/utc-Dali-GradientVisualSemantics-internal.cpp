@@ -60,7 +60,7 @@ Vector<Vector4> MakeColors(std::initializer_list<Vector4> values)
 
 IntrusivePtr<InternalGradient> NewLinear()
 {
-  return new Dali::Ui::Internal::LinearGradient(Vector2::ZERO, Vector2::ONE, nullptr);
+  return Dali::Ui::Internal::LinearGradient::New(Vector2::ZERO, Vector2::ONE, nullptr);
 }
 
 void ExpectStop(const Vector<InternalGradient::GradientStop>& stops, uint32_t index, float offset, const Vector4& color)
@@ -208,47 +208,47 @@ int UtcDaliGradientInternalSpreadUnitsStartOffsetP(void)
 
 int UtcDaliGradientInternalGeometryStateAndTransformsP(void)
 {
-  Dali::Ui::Internal::LinearGradient linear(Vector2(0.0f, 0.0f), Vector2(2.0f, 0.0f), nullptr);
-  DALI_TEST_EQUALS(linear.GetStartPosition(), Vector2(0.0f, 0.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(linear.GetEndPosition(), Vector2(2.0f, 0.0f), TEST_LOCATION);
+  auto linear = Dali::Ui::Internal::LinearGradient::New(Vector2(0.0f, 0.0f), Vector2(2.0f, 0.0f), nullptr);
+  DALI_TEST_EQUALS(linear->GetStartPosition(), Vector2(0.0f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(linear->GetEndPosition(), Vector2(2.0f, 0.0f), TEST_LOCATION);
 
   Matrix3 expectedLinear(0.0f, -2.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
   expectedLinear.Invert();
-  ExpectMatrixNear(linear.GetAlignmentTransform(), expectedLinear);
+  ExpectMatrixNear(linear->GetAlignmentTransform(), expectedLinear);
 
-  Dali::Ui::Internal::RadialGradient radial(Vector2(2.0f, 3.0f), 4.0f, nullptr);
-  DALI_TEST_EQUALS(radial.GetCenter(), Vector2(2.0f, 3.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(radial.GetRadius(), 4.0f, EPSILON, TEST_LOCATION);
+  auto radial = Dali::Ui::Internal::RadialGradient::New(Vector2(2.0f, 3.0f), 4.0f, nullptr);
+  DALI_TEST_EQUALS(radial->GetCenter(), Vector2(2.0f, 3.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(radial->GetRadius(), 4.0f, EPSILON, TEST_LOCATION);
 
   Matrix3 expectedRadial(4.0f, 0.0f, 0.0f, 0.0f, 4.0f, 0.0f, 2.0f, 3.0f, 1.0f);
   expectedRadial.Invert();
-  ExpectMatrixNear(radial.GetAlignmentTransform(), expectedRadial);
+  ExpectMatrixNear(radial->GetAlignmentTransform(), expectedRadial);
 
-  Dali::Ui::Internal::ConicGradient conic(Vector2(2.0f, 3.0f), Radian(Math::PI * 2.5f), nullptr);
-  DALI_TEST_EQUALS(conic.GetCenter(), Vector2(2.0f, 3.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(conic.GetStartAngle(), Dali::ANGLE_90, TEST_LOCATION);
+  auto conic = Dali::Ui::Internal::ConicGradient::New(Vector2(2.0f, 3.0f), Radian(Math::PI * 2.5f), nullptr);
+  DALI_TEST_EQUALS(conic->GetCenter(), Vector2(2.0f, 3.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(conic->GetStartAngle(), Dali::ANGLE_90, TEST_LOCATION);
 
   Matrix3 expectedConic(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -2.0f, -3.0f, 1.0f);
-  ExpectMatrixNear(conic.GetAlignmentTransform(), expectedConic);
+  ExpectMatrixNear(conic->GetAlignmentTransform(), expectedConic);
   END_TEST;
 }
 
 int UtcDaliGradientInternalInvalidGeometryIsStoredP(void)
 {
-  Dali::Ui::Internal::LinearGradient linear(Vector2(1.0f, 1.0f), Vector2(1.0f, 1.0f), nullptr);
-  DALI_TEST_EQUALS(linear.GetStartPosition(), Vector2(1.0f, 1.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(linear.GetEndPosition(), Vector2(1.0f, 1.0f), TEST_LOCATION);
+  auto linear = Dali::Ui::Internal::LinearGradient::New(Vector2(1.0f, 1.0f), Vector2(1.0f, 1.0f), nullptr);
+  DALI_TEST_EQUALS(linear->GetStartPosition(), Vector2(1.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(linear->GetEndPosition(), Vector2(1.0f, 1.0f), TEST_LOCATION);
 
-  Dali::Ui::Internal::RadialGradient zeroRadius(Vector2(2.0f, 3.0f), 0.0f, nullptr);
-  DALI_TEST_EQUALS(zeroRadius.GetCenter(), Vector2(2.0f, 3.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(zeroRadius.GetRadius(), 0.0f, EPSILON, TEST_LOCATION);
+  auto zeroRadius = Dali::Ui::Internal::RadialGradient::New(Vector2(2.0f, 3.0f), 0.0f, nullptr);
+  DALI_TEST_EQUALS(zeroRadius->GetCenter(), Vector2(2.0f, 3.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(zeroRadius->GetRadius(), 0.0f, EPSILON, TEST_LOCATION);
 
-  Dali::Ui::Internal::RadialGradient negativeRadius(Vector2(-1.0f, -2.0f), -3.0f, nullptr);
-  DALI_TEST_EQUALS(negativeRadius.GetCenter(), Vector2(-1.0f, -2.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(negativeRadius.GetRadius(), -3.0f, EPSILON, TEST_LOCATION);
+  auto negativeRadius = Dali::Ui::Internal::RadialGradient::New(Vector2(-1.0f, -2.0f), -3.0f, nullptr);
+  DALI_TEST_EQUALS(negativeRadius->GetCenter(), Vector2(-1.0f, -2.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(negativeRadius->GetRadius(), -3.0f, EPSILON, TEST_LOCATION);
 
-  Dali::Ui::Internal::ConicGradient negativeAngle(Vector2::ZERO, Radian(-Math::PI_2), nullptr);
-  DALI_TEST_EQUALS(negativeAngle.GetStartAngle(), Dali::ANGLE_270, TEST_LOCATION);
+  auto negativeAngle = Dali::Ui::Internal::ConicGradient::New(Vector2::ZERO, Radian(-Math::PI_2), nullptr);
+  DALI_TEST_EQUALS(negativeAngle->GetStartAngle(), Dali::ANGLE_270, TEST_LOCATION);
   END_TEST;
 }
 
@@ -262,15 +262,15 @@ int UtcDaliGradientInternalOldGradientCopiesCommonStateP(void)
   linear->SetSpreadMethod(Dali::Ui::Gradient::SpreadMethod::REFLECT);
   linear->SetStartOffset(1.25f);
 
-  Dali::Ui::Internal::RadialGradient radial(Vector2(3.0f, 4.0f), 5.0f, linear);
+  auto radial = Dali::Ui::Internal::RadialGradient::New(Vector2(3.0f, 4.0f), 5.0f, linear);
 
-  DALI_TEST_EQUALS(radial.GetUnits(), Dali::Ui::Gradient::Units::USER_SPACE, TEST_LOCATION);
-  DALI_TEST_EQUALS(radial.GetSpreadMethod(), Dali::Ui::Gradient::SpreadMethod::REFLECT, TEST_LOCATION);
-  DALI_TEST_EQUALS(radial.GetStartOffset(), 1.25f, EPSILON, TEST_LOCATION);
-  DALI_TEST_EQUALS(radial.GetCenter(), Vector2(3.0f, 4.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(radial.GetRadius(), 5.0f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(radial->GetUnits(), Dali::Ui::Gradient::Units::USER_SPACE, TEST_LOCATION);
+  DALI_TEST_EQUALS(radial->GetSpreadMethod(), Dali::Ui::Gradient::SpreadMethod::REFLECT, TEST_LOCATION);
+  DALI_TEST_EQUALS(radial->GetStartOffset(), 1.25f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(radial->GetCenter(), Vector2(3.0f, 4.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(radial->GetRadius(), 5.0f, EPSILON, TEST_LOCATION);
 
-  const Vector<InternalGradient::GradientStop>& stops = radial.GetStops();
+  const Vector<InternalGradient::GradientStop>& stops = radial->GetStops();
   DALI_TEST_EQUALS(stops.Count(), 2u, TEST_LOCATION);
   ExpectStop(stops, 0u, 0.0f, Color::RED);
   ExpectStop(stops, 1u, 1.0f, Color::BLUE);

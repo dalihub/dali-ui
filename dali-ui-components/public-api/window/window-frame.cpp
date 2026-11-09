@@ -42,7 +42,7 @@ WindowFrame WindowFrame::New(Dali::Window window, CloseCallback closeCallback, c
     DALI_LOG_ERROR("[WindowFrame] cannot create a frame for an empty window handle\n");
     return WindowFrame();
   }
-  return WindowFrame(new Internal::WindowFrameImpl(window, std::move(closeCallback), options));
+  return WindowFrame(Internal::WindowFrameImpl::NewForBaseHandle(window, std::move(closeCallback), options));
 }
 
 WindowFrame WindowFrame::DownCast(Dali::BaseHandle handle)

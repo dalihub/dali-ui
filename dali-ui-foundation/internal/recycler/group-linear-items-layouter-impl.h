@@ -42,18 +42,18 @@ class DALI_UI_API GroupLinearItemsLayouterImpl : public LinearItemsLayouterImpl
 {
 public:
   static GroupLinearItemsLayouterImplPtr New(Orientation orientation);
-
-  explicit GroupLinearItemsLayouterImpl(Orientation orientation);
-  ~GroupLinearItemsLayouterImpl() override;
-
-  void  SetGroupAdapter(Integration::GroupAdapter adapter);
-  void  SetBodyHorizontalMargin(float left, float right);
-  float GetBodyMarginLeft() const;
-  float GetBodyMarginRight() const;
+  void                                   SetGroupAdapter(Integration::GroupAdapter adapter);
+  void                                   SetBodyHorizontalMargin(float left, float right);
+  float                                  GetBodyMarginLeft() const;
+  float                                  GetBodyMarginRight() const;
 
   // LinearItemsLayouterImpl overrides — apply body inset for grouped rows.
   LayoutRect GetItemBounds(uint32_t position, float crossExtent) const override;
   ItemInset  GetItemCrossInset(uint32_t position) const override;
+
+protected:
+  explicit GroupLinearItemsLayouterImpl(Orientation orientation);
+  ~GroupLinearItemsLayouterImpl() override;
 
 private:
   Integration::GroupAdapter mGroupAdapter;

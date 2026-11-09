@@ -32,7 +32,7 @@ namespace Text
  */
 class ReplacementSpan : public Span
 {
-public:
+protected:
   /**
    * @brief Creates a replacement span implementation.
    */

@@ -36,10 +36,30 @@ namespace Text
 class UnderlineSpan : public Span
 {
 public:
-  explicit UnderlineSpan(const Dali::Ui::Text::Underline& underline);
-  ~UnderlineSpan() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL UnderlineSpan* NewForBaseHandle(const Dali::Ui::Text::Underline& underline)
+  {
+    return new UnderlineSpan(underline);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<UnderlineSpan> New(const Dali::Ui::Text::Underline& underline)
+  {
+    return IntrusivePtr<UnderlineSpan>(new UnderlineSpan(underline));
+  }
 
   const Dali::Ui::Text::Underline& GetUnderline() const;
+
+protected:
+  explicit UnderlineSpan(const Dali::Ui::Text::Underline& underline);
+  ~UnderlineSpan() override;
 
 private:
   Dali::Ui::Text::Underline mUnderline;

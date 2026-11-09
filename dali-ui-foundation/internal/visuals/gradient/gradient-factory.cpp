@@ -101,21 +101,21 @@ Dali::IntrusivePtr<Gradient> Create(const Dali::Ui::Gradient::Base& gradient)
     case Dali::Ui::Gradient::Type::LINEAR:
     {
       auto linear      = Dali::Ui::Gradient::Linear::DownCast(gradient);
-      internalGradient = new LinearGradient(linear.GetStartPosition(), linear.GetEndPosition(), nullptr);
+      internalGradient = LinearGradient::New(linear.GetStartPosition(), linear.GetEndPosition(), nullptr);
       break;
     }
 
     case Dali::Ui::Gradient::Type::RADIAL:
     {
       auto radial      = Dali::Ui::Gradient::Radial::DownCast(gradient);
-      internalGradient = new RadialGradient(radial.GetCenter(), radial.GetRadius(), nullptr);
+      internalGradient = RadialGradient::New(radial.GetCenter(), radial.GetRadius(), nullptr);
       break;
     }
 
     case Dali::Ui::Gradient::Type::CONIC:
     {
       auto conic       = Dali::Ui::Gradient::Conic::DownCast(gradient);
-      internalGradient = new ConicGradient(conic.GetCenter(), conic.GetStartAngle(), nullptr);
+      internalGradient = ConicGradient::New(conic.GetCenter(), conic.GetStartAngle(), nullptr);
       break;
     }
 

@@ -39,12 +39,6 @@ namespace Internal
 class AbsoluteLayoutParamsImpl : public TraitObject
 {
 public:
-  explicit AbsoluteLayoutParamsImpl(const AbsoluteLayoutParams& params)
-  : mBounds(params.GetBounds()),
-    mFlags(params.GetFlags())
-  {
-  }
-
   /**
    * @brief Gets the absolute position and size of the child within the layout.
    * @return The layout bounds.
@@ -64,6 +58,14 @@ public:
   }
 
   /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<AbsoluteLayoutParamsImpl> New(const AbsoluteLayoutParams& params)
+  {
+    return IntrusivePtr<AbsoluteLayoutParamsImpl>(new AbsoluteLayoutParamsImpl(params));
+  }
+
+  /**
    * @brief Retrieves the AbsoluteLayoutParams trait attached to a view, if any.
    * @param[in] viewImpl The view implementation to query.
    * @return Pointer to the params, or nullptr if not attached.
@@ -76,6 +78,12 @@ public:
   }
 
 protected:
+  explicit AbsoluteLayoutParamsImpl(const AbsoluteLayoutParams& params)
+  : mBounds(params.GetBounds()),
+    mFlags(params.GetFlags())
+  {
+  }
+
   ~AbsoluteLayoutParamsImpl() override = default;
 
 private:

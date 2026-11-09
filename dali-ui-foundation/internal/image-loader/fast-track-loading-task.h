@@ -25,6 +25,7 @@
 #include <dali/public-api/images/pixel-buffer.h>
 #include <dali/public-api/rendering/texture.h>
 #include <memory>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
@@ -50,15 +51,14 @@ public:
   /**
    * @brief Constructor.
    */
-  FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions,
-                       SamplingMode::Type samplingMode, bool orientationCorrection,
-                       Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
-                       CallbackBase* callback);
 
-  /**
-   * @brief Destructor.
-   */
-  ~FastTrackLoadingTask() override;
+  static IntrusivePtr<FastTrackLoadingTask> New(const VisualUrl& url, ImageDimensions dimensions,
+                                                SamplingMode::Type samplingMode, bool orientationCorrection,
+                                                Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
+                                                CallbackBase* callback)
+  {
+    return IntrusivePtr<FastTrackLoadingTask>(new FastTrackLoadingTask(url, std::move(dimensions), samplingMode, orientationCorrection, std::move(preMultiplyOnLoad), loadPlanes, callback));
+  }
 
 public: // Implementation of AsyncTask
   /**
@@ -111,12 +111,17 @@ private:
   void OnComplete(AsyncTaskPtr task);
 
 public:
-  VisualUrl                  mUrl;      ///< url of the image to load.
-  std::vector<Dali::Texture> mTextures; ///< textures for regular image.
+  VisualUrl mUrl;
+  ///< url of the image to load.
+  std::vector<Dali::Texture> mTextures;
 
 private:
-  ImageDimensions                          mDimensions;   ///< dimensions to load
-  SamplingMode::Type                       mSamplingMode; ///< sampling options
+  ///< textures for regular image.
+
+  ImageDimensions mDimensions;
+  ///< dimensions to load
+  SamplingMode::Type mSamplingMode;
+  ///< sampling options
   Dali::Ui::Integration::PreMultiplyOnLoad mPreMultiplyOnLoad;
   std::unique_ptr<CallbackBase>            mCallback;
 
@@ -135,15 +140,31 @@ private:
   std::vector<ImageInformation> mImageInformations;
 
   std::vector<Dali::PixelData> mPixelData;
-
-  bool mOrientationCorrection : 1; ///< If orientation correction is needed
+  bool                         mOrientationCorrection : 1;
 
 public:
-  bool mLoadSuccess : 1;         ///< Whether image load successed or not.
-  bool mLoadPlanesAvailable : 1; ///< If image valid to load as planes or not.
-  bool mPremultiplied : 1;       ///< True if the image's color was multiplied by it's alpha
-  bool mPlanesLoaded : 1;        ///< True if the image load as planes.
+  ///< If orientation correction is needed
+
+  bool mLoadSuccess : 1;
+  ///< Whether image load successed or not.
+  bool mLoadPlanesAvailable : 1;
+  ///< If image valid to load as planes or not.
+  bool mPremultiplied : 1;
+  ///< True if the image's color was multiplied by it's alpha
+  bool mPlanesLoaded : 1;
+  ///< True if the image load as planes.
   bool mHasAlpha : 1;
+
+protected:
+  FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions,
+                       SamplingMode::Type samplingMode, bool orientationCorrection,
+                       Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
+                       CallbackBase* callback);
+
+  /**
+   * @brief Destructor.
+   */
+  ~FastTrackLoadingTask() override;
 };
 
 } // namespace Internal

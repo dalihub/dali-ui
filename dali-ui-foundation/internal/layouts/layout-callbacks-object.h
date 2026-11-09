@@ -39,7 +39,13 @@ namespace Internal
 class LayoutCallbacksObject : public TraitObject
 {
 public:
-  LayoutCallbacksObject();
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<LayoutCallbacksObject> New()
+  {
+    return IntrusivePtr<LayoutCallbacksObject>(new LayoutCallbacksObject());
+  }
 
   void SetMeasureCallback(MeasureCallback callback);
   void SetArrangeCallback(ArrangeCallback callback);
@@ -48,6 +54,7 @@ public:
   ArrangeCallback* GetArrangeCallback();
 
 protected:
+  LayoutCallbacksObject();
   ~LayoutCallbacksObject() override;
 
 private:

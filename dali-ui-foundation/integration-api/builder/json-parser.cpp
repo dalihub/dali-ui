@@ -36,14 +36,14 @@ namespace Integration
 {
 JsonParser JsonParser::New()
 {
-  Dali::Ui::Internal::JsonParser* internal = new Dali::Ui::Internal::JsonParser();
-  return JsonParser(internal);
+  auto internal = Dali::Ui::Internal::JsonParser::New();
+  return JsonParser(internal.Get());
 }
 
 JsonParser JsonParser::New(const TreeNode& tree)
 {
-  Dali::Ui::Internal::JsonParser* internal = new Dali::Ui::Internal::JsonParser(tree);
-  return JsonParser(internal);
+  auto internal = Dali::Ui::Internal::JsonParser::New(tree);
+  return JsonParser(internal.Get());
 }
 
 JsonParser::JsonParser()

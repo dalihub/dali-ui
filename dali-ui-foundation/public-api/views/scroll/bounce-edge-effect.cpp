@@ -40,7 +40,7 @@ const Internal::BounceEdgeEffectImpl& BounceEdgeEffect::GetBounceImpl() const
 
 BounceEdgeEffect BounceEdgeEffect::New(ScrollDirection axis)
 {
-  return BounceEdgeEffect(Internal::BounceEdgeEffectImpl::New(axis).Get());
+  return BounceEdgeEffect(Internal::BounceEdgeEffectImpl::NewForBaseHandle(axis));
 }
 
 BounceEdgeEffect::BounceEdgeEffect(Internal::BounceEdgeEffectImpl* impl)

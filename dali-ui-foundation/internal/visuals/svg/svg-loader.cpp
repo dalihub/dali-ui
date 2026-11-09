@@ -732,8 +732,8 @@ void SvgLoader::LoadRequest(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObserver*
   }
 
   loadInfo.mTask =
-    new SvgLoadingTask(loadInfo.mVectorImageRenderer, loadInfo.mId, loadInfo.mImageUrl, encodedImageBuffer,
-                       MakeCallback(this, &SvgLoader::AsyncLoadComplete));
+    SvgLoadingTask::New(loadInfo.mVectorImageRenderer, loadInfo.mId, loadInfo.mImageUrl, encodedImageBuffer,
+                        MakeCallback(this, &SvgLoader::AsyncLoadComplete));
 
   Dali::AsyncTaskManager::Get().AddTask(loadInfo.mTask);
 }
@@ -755,8 +755,8 @@ void SvgLoader::LoadSynchronously(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObs
   }
 
   // Note, we will not store this task after this API called.
-  SvgTaskPtr loadingTask = new SvgLoadingTask(loadInfo.mVectorImageRenderer, loadInfo.mId, loadInfo.mImageUrl,
-                                              encodedImageBuffer, nullptr);
+  SvgTaskPtr loadingTask = SvgLoadingTask::New(loadInfo.mVectorImageRenderer, loadInfo.mId, loadInfo.mImageUrl,
+                                               encodedImageBuffer, nullptr);
   loadingTask->Process();
   if(!loadingTask->HasSucceeded())
   {
@@ -967,8 +967,8 @@ void SvgLoader::RasterizeRequest(SvgLoader::SvgRasterizeInfo& rasterizeInfo, Svg
   auto vectorImageRenderer = mLoadCache[loadCacheIndex].mVectorImageRenderer;
 
   SvgRasterizingTaskPtr rasterizingTask =
-    new SvgRasterizingTask(vectorImageRenderer, rasterizeInfo.mId, rasterizeInfo.mWidth, rasterizeInfo.mHeight,
-                           MakeCallback(this, &SvgLoader::AsyncRasterizeComplete));
+    SvgRasterizingTask::New(vectorImageRenderer, rasterizeInfo.mId, rasterizeInfo.mWidth, rasterizeInfo.mHeight,
+                            MakeCallback(this, &SvgLoader::AsyncRasterizeComplete));
 #ifdef TRACE_ENABLED
   {
     rasterizingTask->SetUrl(mLoadCache[loadCacheIndex].mImageUrl);
@@ -996,8 +996,8 @@ void SvgLoader::RasterizeSynchronously(SvgLoader::SvgRasterizeInfo& rasterizeInf
   auto vectorImageRenderer = GetVectorImageRenderer(rasterizeInfo.mLoadId);
 
   // Note, we will not store this task after this API called.
-  SvgRasterizingTaskPtr rasterizingTask = new SvgRasterizingTask(vectorImageRenderer, rasterizeInfo.mId,
-                                                                 rasterizeInfo.mWidth, rasterizeInfo.mHeight, nullptr);
+  SvgRasterizingTaskPtr rasterizingTask = SvgRasterizingTask::New(vectorImageRenderer, rasterizeInfo.mId,
+                                                                  rasterizeInfo.mWidth, rasterizeInfo.mHeight, nullptr);
 #ifdef TRACE_ENABLED
   {
     auto loadCacheIndex = GetCacheIndexFromLoadCacheById(rasterizeInfo.mLoadId);

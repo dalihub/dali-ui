@@ -42,14 +42,24 @@ class PropertyBridge : public Dali::BaseObject
 {
 public:
   /**
-   * Construct a new PropertyBridge.
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
    */
-  PropertyBridge();
+  static DALI_INTERNAL PropertyBridge* NewForBaseHandle()
+  {
+    return new PropertyBridge();
+  }
 
   /**
-   * Destructor
+   * Construct a new PropertyBridge.
    */
-  ~PropertyBridge();
+
+  static IntrusivePtr<PropertyBridge> New()
+  {
+    return IntrusivePtr<PropertyBridge>(new PropertyBridge());
+  }
 
   /**
    * @copydoc Dali::Ui::Integration::PropertyBridge::Get()
@@ -71,6 +81,15 @@ public:
    * @brief EnsureStringGetter.
    */
   bool EnsureStringGetter();
+
+protected:
+  PropertyBridge();
+
+  /**
+   * Destructor
+   */
+
+  ~PropertyBridge() override;
 
 private:
   // Undefined

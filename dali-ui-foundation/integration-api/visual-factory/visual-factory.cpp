@@ -59,11 +59,11 @@ VisualFactory VisualFactory::Get()
       // Check whether debug rendering is required
       if(EnvironmentVariable::GetEnvironmentVariable(DALI_DEBUG_RENDERING))
       {
-        factory = VisualFactory(new Dali::Ui::Internal::VisualFactory(true));
+        factory = VisualFactory(Dali::Ui::Internal::VisualFactory::NewForBaseHandle(true));
       }
       else
       {
-        factory = VisualFactory(new Dali::Ui::Internal::VisualFactory(false));
+        factory = VisualFactory(Dali::Ui::Internal::VisualFactory::NewForBaseHandle(false));
       }
       singletonService.Register(gSingletonTypeInfoId, factory);
     }

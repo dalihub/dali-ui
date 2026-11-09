@@ -132,7 +132,7 @@ BaseHandle Create()
     SingletonService singletonService(SingletonService::Get());
     if(singletonService)
     {
-      Ui::FocusManager manager = Ui::FocusManager(new Internal::FocusManager());
+      Ui::FocusManager manager = Ui::FocusManager(Internal::FocusManager::NewForBaseHandle());
       singletonService.Register(gSingletonTypeInfoId, manager);
       handle = manager;
     }
@@ -1165,12 +1165,12 @@ FocusNavigationContext FocusManager::CreateFocusNavigationContext(View currentFo
     return FocusNavigationContext();
   }
 
-  FocusNavigationContextImplPtr impl(new FocusNavigationContextImpl(direction,
-                                                                    context.device,
-                                                                    context.deviceName,
-                                                                    context.inputEvent,
-                                                                    window,
-                                                                    GetFocusGroup(currentFocusView)));
+  FocusNavigationContextImplPtr impl(FocusNavigationContextImpl::New(direction,
+                                                                     context.device,
+                                                                     context.deviceName,
+                                                                     context.inputEvent,
+                                                                     window,
+                                                                     GetFocusGroup(currentFocusView)));
   return FocusNavigationContext(impl.Get());
 }
 

@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-components/public-api/window/default-window-decoration.h>
+#include <utility>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
@@ -32,7 +33,24 @@ namespace Internal
 class DefaultWindowDecorationImpl : public Dali::BaseObject, public Dali::ConnectionTracker
 {
 public:
-  DefaultWindowDecorationImpl(WindowFrame windowFrame, const DefaultWindowDecorationOptions& options);
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL DefaultWindowDecorationImpl* NewForBaseHandle(WindowFrame windowFrame, const DefaultWindowDecorationOptions& options)
+  {
+    return new DefaultWindowDecorationImpl(std::move(windowFrame), options);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<DefaultWindowDecorationImpl> New(WindowFrame windowFrame, const DefaultWindowDecorationOptions& options)
+  {
+    return IntrusivePtr<DefaultWindowDecorationImpl>(new DefaultWindowDecorationImpl(std::move(windowFrame), options));
+  }
 
   DefaultWindowDecorationImpl(const DefaultWindowDecorationImpl&)            = delete;
   DefaultWindowDecorationImpl(DefaultWindowDecorationImpl&&)                 = delete;
@@ -52,6 +70,7 @@ public:
   Dali::Vector2         GetMinimumFrameSize() const;
 
 protected:
+  DefaultWindowDecorationImpl(WindowFrame windowFrame, const DefaultWindowDecorationOptions& options);
   ~DefaultWindowDecorationImpl() override;
 
 private:

@@ -35,16 +35,26 @@ class ImageSpan : public ReplacementSpan
 {
 public:
   /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL ImageSpan* NewForBaseHandle(const Dali::Ui::Text::ImageAttributes& attributes)
+  {
+    return new ImageSpan(attributes);
+  }
+
+  /**
    * @brief Creates an image span implementation.
    *
    * @param[in] attributes The image attributes to copy.
    */
-  explicit ImageSpan(const Dali::Ui::Text::ImageAttributes& attributes);
 
-  /**
-   * @brief Destroys the image span implementation.
-   */
-  ~ImageSpan() override;
+  static IntrusivePtr<ImageSpan> New(const Dali::Ui::Text::ImageAttributes& attributes)
+  {
+    return IntrusivePtr<ImageSpan>(new ImageSpan(attributes));
+  }
 
   /**
    * @brief Gets the stored image attributes.
@@ -52,6 +62,14 @@ public:
    * @return The image attributes.
    */
   const Dali::Ui::Text::ImageAttributes& GetImageAttributes() const;
+
+protected:
+  explicit ImageSpan(const Dali::Ui::Text::ImageAttributes& attributes);
+
+  /**
+   * @brief Destroys the image span implementation.
+   */
+  ~ImageSpan() override;
 
 private:
   Dali::Ui::Text::ImageAttributes mAttributes;

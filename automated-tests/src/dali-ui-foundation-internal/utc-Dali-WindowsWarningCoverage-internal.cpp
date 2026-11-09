@@ -97,7 +97,7 @@ int UtcDaliWindowsWarningCoverageNPatchP(void)
   Shader   shader   = Shader::New("void main(){}", "void main(){}");
   Renderer renderer = Renderer::New(geometry, shader);
 
-  UiInternal::NPatchDataPtr data(new UiInternal::NPatchData());
+  UiInternal::NPatchDataPtr data(UiInternal::NPatchData::New());
   data->SetCroppedWidth(30u);
   data->SetCroppedHeight(40u);
   UiIntegration::NPatchUtility::StretchRanges stretchPixelsX;

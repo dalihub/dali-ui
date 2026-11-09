@@ -54,7 +54,13 @@ namespace Internal
 class StateHandlerTrait : public TraitObject, public SlotObserver, public ConnectionTracker
 {
 public:
-  StateHandlerTrait();
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StateHandlerTrait> New()
+  {
+    return IntrusivePtr<StateHandlerTrait>(new StateHandlerTrait());
+  }
 
   /**
    * @brief Registers a named state-change handler.
@@ -102,6 +108,7 @@ public: // SlotObserver
   void SlotDisconnected(CallbackBase* callback) override;
 
 protected:
+  StateHandlerTrait();
   ~StateHandlerTrait() override;
 
   void OnAttached(TraitId id, View& view) override;
@@ -127,10 +134,12 @@ private:
 
 private:
   WeakHandle<View>          mOwner;
-  std::vector<HandlerEntry> mHandlers; ///< Insertion-order-preserving handler list
-  std::vector<std::string>  mKeys;     ///< Reusable snapshot buffer for NotifyStateChanged
-  std::string               mProcessingId;
-  bool                      mNotifying{false}; ///< Re-entrancy guard for NotifyStateChanged
+  std::vector<HandlerEntry> mHandlers;
+  ///< Insertion-order-preserving handler list
+  std::vector<std::string> mKeys;
+  ///< Reusable snapshot buffer for NotifyStateChanged
+  std::string mProcessingId;
+  bool        mNotifying{false};
 };
 
 } // namespace Internal

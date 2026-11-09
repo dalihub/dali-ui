@@ -302,7 +302,7 @@ void CanvasViewImpl::AddRasterizationTask(bool forceProcess)
 
   if(mIsSynchronous)
   {
-    CanvasViewRasterizingTaskPtr task = new CanvasViewRasterizingTask(mCanvasRenderer, MakeCallback(this, &CanvasViewImpl::ApplyRasterizedImage));
+    CanvasViewRasterizingTaskPtr task = CanvasViewRasterizingTask::New(mCanvasRenderer, MakeCallback(this, &CanvasViewImpl::ApplyRasterizedImage));
     task->Process();
     ApplyRasterizedImage(task);
   }
@@ -313,7 +313,7 @@ void CanvasViewImpl::AddRasterizationTask(bool forceProcess)
       AsyncTaskManager::Get().RemoveTask(mRasterizingTask);
       mRasterizingTask.Reset();
     }
-    mRasterizingTask = new CanvasViewRasterizingTask(mCanvasRenderer, MakeCallback(this, &CanvasViewImpl::ApplyRasterizedImage));
+    mRasterizingTask = CanvasViewRasterizingTask::New(mCanvasRenderer, MakeCallback(this, &CanvasViewImpl::ApplyRasterizedImage));
     AsyncTaskManager::Get().AddTask(mRasterizingTask);
   }
 }

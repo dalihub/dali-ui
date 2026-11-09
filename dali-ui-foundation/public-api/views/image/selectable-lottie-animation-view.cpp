@@ -28,21 +28,21 @@ namespace Ui
 
 SelectableLottieAnimationView SelectableLottieAnimationView::New(const SelectableLottieImage& image)
 {
-  auto* impl = Integration::SelectableLottieAnimationViewImpl::New(image.GetUrl(),
-                                                                   image.GetSelectionPlaybackRange(),
-                                                                   image.GetDeselectionPlaybackRange(),
-                                                                   image.GetInnerFillKeyPath());
-  return SelectableLottieAnimationView(impl);
+  auto impl = Integration::SelectableLottieAnimationViewImpl::New(image.GetUrl(),
+                                                                  image.GetSelectionPlaybackRange(),
+                                                                  image.GetDeselectionPlaybackRange(),
+                                                                  image.GetInnerFillKeyPath());
+  return SelectableLottieAnimationView(impl.Get());
 }
 
 SelectableLottieAnimationView SelectableLottieAnimationView::New(const SelectableLottieImage&         image,
                                                                  const SelectableLottieColorBindings& colorBindings)
 {
-  auto* impl = Integration::SelectableLottieAnimationViewImpl::New(image.GetUrl(),
-                                                                   image.GetSelectionPlaybackRange(),
-                                                                   image.GetDeselectionPlaybackRange(),
-                                                                   colorBindings);
-  return SelectableLottieAnimationView(impl);
+  auto impl = Integration::SelectableLottieAnimationViewImpl::New(image.GetUrl(),
+                                                                  image.GetSelectionPlaybackRange(),
+                                                                  image.GetDeselectionPlaybackRange(),
+                                                                  colorBindings);
+  return SelectableLottieAnimationView(impl.Get());
 }
 
 SelectableLottieAnimationView SelectableLottieAnimationView::DownCast(BaseHandle handle)

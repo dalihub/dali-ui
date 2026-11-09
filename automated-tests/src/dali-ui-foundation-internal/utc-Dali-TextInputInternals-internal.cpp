@@ -507,7 +507,7 @@ int UtcDaliAsyncTextManagerWithoutAdaptorQueuesP(void)
     uint32_t completionCount{0u};
   };
 
-  Text::AsyncTextManager handle(new Text::Internal::AsyncTextManager);
+  Text::AsyncTextManager    handle(Text::Internal::AsyncTextManager::NewForBaseHandle());
   UiTestApplication application;
   auto& manager = Text::GetImplementation(handle);
   Text::AsyncTextParameters parameters;
@@ -520,7 +520,7 @@ int UtcDaliAsyncTextManagerWithoutAdaptorQueuesP(void)
   delete observer;
   manager.RequestCancel(destroyedTask);
   Dali::Ui::Internal::TextLoadingTaskPtr emptyTask(
-    new Dali::Ui::Internal::TextLoadingTask(0u, Text::AsyncTextParameters{}, nullptr));
+    Dali::Ui::Internal::TextLoadingTask::New(0u, Text::AsyncTextParameters{}, nullptr));
   manager.LoadComplete(emptyTask);
   END_TEST;
 }

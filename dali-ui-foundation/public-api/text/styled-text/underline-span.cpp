@@ -30,7 +30,7 @@ namespace Text
 
 UnderlineSpan UnderlineSpan::New(const Text::Underline& underline)
 {
-  return UnderlineSpan(new Internal::Text::UnderlineSpan(underline));
+  return UnderlineSpan(Internal::Text::UnderlineSpan::NewForBaseHandle(underline));
 }
 
 UnderlineSpan UnderlineSpan::DownCast(BaseHandle handle)

@@ -30,8 +30,8 @@ namespace Ui
 
 ChartSection ChartSection::New()
 {
-  Integration::ChartSection* impl = new Integration::ChartSection();
-  return ChartSection(impl);
+  auto impl = Integration::ChartSection::New();
+  return ChartSection(impl.Get());
 }
 
 ChartSection::ChartSection()  = default;

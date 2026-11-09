@@ -35,7 +35,7 @@ AnchorSpan AnchorSpan::New(const Text::AnchorAttributes& attributes)
     return AnchorSpan();
   }
 
-  return AnchorSpan(new Internal::Text::AnchorSpan(attributes));
+  return AnchorSpan(Internal::Text::AnchorSpan::NewForBaseHandle(attributes));
 }
 
 AnchorSpan AnchorSpan::DownCast(BaseHandle handle)

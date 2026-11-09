@@ -28,10 +28,47 @@ namespace Internal
 class DialogStyleImpl : public Extension::UiStyleImpl
 {
 public:
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL DialogStyleImpl* NewForBaseHandle()
+  {
+    return new DialogStyleImpl();
+  }
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL DialogStyleImpl* NewForBaseHandle(const DialogStyleImpl& rhs)
+  {
+    return new DialogStyleImpl(rhs);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<DialogStyleImpl> New()
+  {
+    return IntrusivePtr<DialogStyleImpl>(new DialogStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<DialogStyleImpl> New(const DialogStyleImpl& rhs)
+  {
+    return IntrusivePtr<DialogStyleImpl>(new DialogStyleImpl(rhs));
+  }
   struct Values
   {
-    float              mRequestedWidth{908.0f};
-    float              mRequestedHeight{WRAP_CONTENT};
+    float mRequestedWidth{908.0f};
+    float mRequestedHeight{WRAP_CONTENT};
     // Fold the common OneUI section insets into our own content padding.
     UiColor            mBackgroundColor{UiColor(0xFFFFFFu, 0.6f)};
     Insets             mPadding{44.0f, 44.0f, 36.0f, 32.0f};
@@ -41,12 +78,13 @@ public:
     ShadowStack        mShadow{
       Shadow(8.0f, Vector2::ZERO, UiColor(0x000000u, 0.05f), Vector2::ZERO, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
       Shadow(32.0f, Vector2(0.0f, 16.0f), UiColor(0x000000u, 0.1f), Vector2::ZERO, CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS)};
-    float              mBorderlineWidth{2.0f};
-    float              mBorderlineOffset{-1.0f};
-    UiColor            mBorderlineColor{UiColor(0xFCFCFFu, 0.05f)};
-    float              mBackgroundBlurRadius{0.0f};
+    float   mBorderlineWidth{2.0f};
+    float   mBorderlineOffset{-1.0f};
+    UiColor mBorderlineColor{UiColor(0xFCFCFFu, 0.05f)};
+    float   mBackgroundBlurRadius{0.0f};
   } values;
 
+protected:
   DialogStyleImpl() = default;
   DialogStyleImpl(const DialogStyleImpl& rhs)
   : Extension::UiStyleImpl(),
@@ -54,7 +92,6 @@ public:
   {
   }
 
-protected:
   ~DialogStyleImpl() override = default;
 };
 } // namespace Internal

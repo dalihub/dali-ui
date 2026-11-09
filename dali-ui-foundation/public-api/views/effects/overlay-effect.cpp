@@ -104,7 +104,7 @@ CornerRadiusPolicy OverlayEffect::GetCornerRadiusPolicy() const
 
 OverlayEffect::Builder OverlayEffect::Configure() const
 {
-  IntrusivePtr<Internal::OverlayEffectImpl> impl(new Internal::OverlayEffectImpl(GetImpl(*this)));
+  IntrusivePtr<Internal::OverlayEffectImpl> impl(Internal::OverlayEffectImpl::New(GetImpl(*this)));
   return Builder(impl.Get());
 }
 
@@ -129,7 +129,7 @@ OverlayEffect::OverlayEffect(Internal::OverlayEffectImpl* impl)
 }
 
 OverlayEffect::Builder::Builder()
-: mImpl(new Internal::OverlayEffectImpl())
+: mImpl(Internal::OverlayEffectImpl::New())
 {
 }
 

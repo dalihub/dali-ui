@@ -93,9 +93,26 @@ VisualFactoryCache& GetMeshFactoryCache()
   return GetImplementation(visualFactory).GetFactoryCache();
 }
 
+class TestMeshVisual : public MeshVisual
+{
+public:
+  static MeshVisualPtr New(VisualFactoryCache& cache)
+  {
+    return MeshVisualPtr(new TestMeshVisual(cache));
+  }
+
+protected:
+  explicit TestMeshVisual(VisualFactoryCache& cache)
+  : MeshVisual(cache)
+  {
+  }
+
+  ~TestMeshVisual() override = default;
+};
+
 MeshVisualPtr CreateMeshVisual()
 {
-  return MeshVisualPtr(new MeshVisual(GetMeshFactoryCache()));
+  return TestMeshVisual::New(GetMeshFactoryCache());
 }
 
 void WriteFile(const std::string& path, const char* contents)

@@ -41,7 +41,15 @@ class ChartAxis : public Dali::BaseObject
 public:
   using ConfigChangedSignalType = Signal<void()>;
 
-  ChartAxis();
+  /**
+   * @brief Creates a reference-counted ChartAxis implementation.
+   * @SINCE_3_0.0
+   * @return An intrusive pointer owning the implementation
+   */
+  static IntrusivePtr<ChartAxis> New()
+  {
+    return IntrusivePtr<ChartAxis>(new ChartAxis());
+  }
 
   void                      SetLabels(const std::vector<Dali::String>& labels);
   std::vector<Dali::String> GetLabels() const;
@@ -175,6 +183,8 @@ public:
   bool                                              mTickMarksVisible{true};
 
 protected:
+  ChartAxis();
+
   ~ChartAxis() override;
 
 private:

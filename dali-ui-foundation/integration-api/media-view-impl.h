@@ -35,8 +35,6 @@ namespace Integration
 class DALI_UI_API MediaViewImpl : public ViewImpl
 {
 public:
-  MediaViewImpl();
-  ~MediaViewImpl() override;
   static Ui::MediaView                 New();
   Dali::Integration::MediaViewBackend& Backend()
   {
@@ -47,6 +45,10 @@ public:
   {
     return *mBackend;
   }
+
+protected:
+  MediaViewImpl();
+  ~MediaViewImpl() override;
 
 private:
   /**

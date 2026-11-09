@@ -144,6 +144,7 @@ public:
   float GetStartOffset() const;
 
 private:
+  Gradient(const Gradient& gradient) = delete;
   friend class GradientTextureCache;
 
   /**
@@ -169,11 +170,8 @@ protected:
    */
   virtual ~Gradient();
 
-  // Undefined
-  Gradient(const Gradient& gradient);
-
-  // Undefined
-  Gradient& operator=(const Gradient& handle);
+private:
+  Gradient& operator=(const Gradient& handle) = delete;
 
 protected:
   Vector<GradientStop>       mGradientStops;

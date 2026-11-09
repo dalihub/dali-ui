@@ -33,8 +33,21 @@ namespace Internal
 class RadioButtonStyleImpl : public Extension::UiStyleImpl
 {
 public:
-  RadioButtonStyleImpl();
-  RadioButtonStyleImpl(const RadioButtonStyleImpl& rhs);
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<RadioButtonStyleImpl> New()
+  {
+    return IntrusivePtr<RadioButtonStyleImpl>(new RadioButtonStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<RadioButtonStyleImpl> New(const RadioButtonStyleImpl& rhs)
+  {
+    return IntrusivePtr<RadioButtonStyleImpl>(new RadioButtonStyleImpl(rhs));
+  }
 
   void   SetMinimumWidth(float width);
   float  GetMinimumWidth() const;
@@ -67,6 +80,8 @@ public:
   StateEffect GetStateEffect() const;
 
 protected:
+  RadioButtonStyleImpl();
+  RadioButtonStyleImpl(const RadioButtonStyleImpl& rhs);
   ~RadioButtonStyleImpl() override;
 
 private:

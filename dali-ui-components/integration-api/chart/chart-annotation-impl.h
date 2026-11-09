@@ -34,16 +34,16 @@ class ChartAnnotation : public BaseObject
 {
 public:
   /**
-   * @brief Creates annotation state with an immutable content type.
-   *
+   * @brief Creates reference-counted annotation state with an immutable type.
+   * @SINCE_3_0.0
    * @param[in] type The content type
+   * @return An intrusive pointer owning the implementation
    */
-  explicit ChartAnnotation(Ui::ChartAnnotation::Type type)
-  : mType(type)
+  static IntrusivePtr<ChartAnnotation> New(Ui::ChartAnnotation::Type type)
   {
+    return IntrusivePtr<ChartAnnotation>(new ChartAnnotation(type));
   }
 
-  ~ChartAnnotation() override                                 = default;
   ChartAnnotation(const ChartAnnotation&)                     = delete;
   ChartAnnotation(ChartAnnotation&&)                          = delete;
   ChartAnnotation&          operator=(ChartAnnotation&&)      = delete;
@@ -60,6 +60,18 @@ public:
   uint32_t                  mPointIndex{0u};
   float                     mTextMaximumWidth{0.0f};
   Text::OverflowMode        mTextOverflowMode{Text::OverflowMode::CLIP};
+
+protected:
+  explicit ChartAnnotation(Ui::ChartAnnotation::Type type)
+  : mType(type)
+  {
+  }
+
+  /**
+   * @brief Releases annotation state through reference counting.
+   * @SINCE_3_0.0
+   */
+  ~ChartAnnotation() override = default;
 };
 } // namespace Integration
 

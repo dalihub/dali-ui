@@ -46,11 +46,10 @@ namespace Internal
 class OffscreenRenderingImpl : public RenderEffectImpl
 {
 public:
-  /**
-   * @brief Constructor
-   * @param[in] refreshRate The offscreen rendering refresh rate
-   */
-  OffscreenRenderingImpl(Ui::View::OffscreenRefreshRate refreshRate);
+  static IntrusivePtr<OffscreenRenderingImpl> New(Ui::View::OffscreenRefreshRate refreshRate)
+  {
+    return IntrusivePtr<OffscreenRenderingImpl>(new OffscreenRenderingImpl(refreshRate));
+  }
 
   /**
    * @brief Sets the offscreen rendering refresh rate.
@@ -64,6 +63,10 @@ public:
   // @copydoc Dali::Ui::Internal::RenderEffectImpl::GetOffScreenRenderTasks
   void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
 
+protected:
+  ~OffscreenRenderingImpl() override = default;
+
+public:
   /**
    * @brief Get rendered output. Only valid when refresh rate is set to OffscreenRefreshRate::REFRESH_ONCE
    * @return mTexture, the output
@@ -71,6 +74,11 @@ public:
   Dali::Texture GetTexture() const;
 
 protected:
+  /**
+   * @brief Constructor
+   * @param[in] refreshRate The offscreen rendering refresh rate
+   */
+  OffscreenRenderingImpl(Ui::View::OffscreenRefreshRate refreshRate);
   // @copydoc Dali::Ui::Internal::RenderEffectImpl::OnInitialize
   void OnInitialize() override;
 
@@ -110,9 +118,10 @@ private:
   void OnRenderFinished(Dali::RenderTask task);
 
 private:
-  RenderTask                     mRenderTask;
-  FrameBuffer                    mFrameBuffer;
-  Dali::Texture                  mTexture; // saved when render once
+  RenderTask    mRenderTask;
+  FrameBuffer   mFrameBuffer;
+  Dali::Texture mTexture;
+  // saved when render once
   Ui::View::OffscreenRefreshRate mRefreshRate;
 };
 } // namespace Internal

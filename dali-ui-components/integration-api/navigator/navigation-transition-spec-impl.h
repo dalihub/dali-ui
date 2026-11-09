@@ -36,8 +36,15 @@ namespace Integration
 class NavigationTransitionSpecImpl : public Dali::BaseObject
 {
 public:
-  NavigationTransitionSpecImpl();
-  ~NavigationTransitionSpecImpl() override;
+  /**
+   * @brief Creates a reference-counted NavigationTransitionSpecImpl implementation.
+   * @SINCE_3_0.0
+   * @return An intrusive pointer owning the implementation
+   */
+  static IntrusivePtr<NavigationTransitionSpecImpl> New()
+  {
+    return IntrusivePtr<NavigationTransitionSpecImpl>(new NavigationTransitionSpecImpl());
+  }
 
   NavigationTransitionSpec::AnimatorSignalType& EnterSignal();
   NavigationTransitionSpec::AnimatorSignalType& ExitSignal();
@@ -48,6 +55,15 @@ public:
 
   void  SetDuration(float duration);
   float GetDuration() const;
+
+protected:
+  NavigationTransitionSpecImpl();
+
+  /**
+   * @brief Releases the implementation through reference counting.
+   * @SINCE_3_0.0
+   */
+  ~NavigationTransitionSpecImpl() override;
 
 private:
   NavigationTransitionSpecImpl(const NavigationTransitionSpecImpl&)            = delete;

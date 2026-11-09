@@ -20,6 +20,7 @@
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-context.h>
@@ -38,12 +39,18 @@ using FocusNavigationContextImplPtr = IntrusivePtr<FocusNavigationContextImpl>;
 class FocusNavigationContextImpl : public BaseObject
 {
 public:
-  FocusNavigationContextImpl(FocusDirection direction,
-                             FocusDevice    device,
-                             Dali::String   deviceName,
-                             InputEvent     inputEvent,
-                             Window         window,
-                             View           focusGroup);
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<FocusNavigationContextImpl> New(FocusDirection direction,
+                                                      FocusDevice    device,
+                                                      Dali::String   deviceName,
+                                                      InputEvent     inputEvent,
+                                                      Window         window,
+                                                      View           focusGroup)
+  {
+    return IntrusivePtr<FocusNavigationContextImpl>(new FocusNavigationContextImpl(std::move(direction), std::move(device), std::move(deviceName), std::move(inputEvent), std::move(window), std::move(focusGroup)));
+  }
 
   FocusDirection      GetDirection() const;
   FocusDevice         GetDevice() const;
@@ -51,6 +58,14 @@ public:
   InputEvent          GetInputEvent() const;
   Window              GetWindow() const;
   View                GetFocusGroup() const;
+
+protected:
+  FocusNavigationContextImpl(FocusDirection direction,
+                             FocusDevice    device,
+                             Dali::String   deviceName,
+                             InputEvent     inputEvent,
+                             Window         window,
+                             View           focusGroup);
 
 private:
   ~FocusNavigationContextImpl() override = default;
