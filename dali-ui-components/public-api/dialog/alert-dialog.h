@@ -48,43 +48,53 @@ class AlertDialogImpl;
  * Action buttons do not dismiss automatically; call Dismiss after handling an
  * action. For custom scrim composition, use a manually owned DialogContainer
  * instead and follow Dialog's prohibition on mixing the two ownership paths.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API AlertDialog : public Dialog
 {
 public:
   /**
    * @brief Creates an uninitialized AlertDialog handle.
+   * @SINCE_3_0.0
    */
   AlertDialog();
 
   /**
    * @brief Creates an initialized AlertDialog.
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource
    */
   static AlertDialog New();
 
-  /** @brief Creates an AlertDialog with the specified immutable style. Empty styles are not allowed. */
+  /**
+   * @brief Creates an AlertDialog with the specified immutable style. Empty styles are not allowed.
+   * @SINCE_3_0.0
+   */
   static AlertDialog New(AlertDialogStyle style);
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    * @param[in] alertDialog Handle to copy
    */
   AlertDialog(const AlertDialog& alertDialog);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   AlertDialog(AlertDialog&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~AlertDialog();
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -92,6 +102,7 @@ public:
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -101,6 +112,7 @@ public:
 
   /**
    * @brief Downcasts a handle to an AlertDialog handle.
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to an AlertDialog or an uninitialized handle
    */
@@ -109,20 +121,24 @@ public:
 public: // Convenience API
   /**
    * @brief Sets the title text (shown as the header). Empty clears the header.
+   * @SINCE_3_0.0
    * @param[in] title The title text
    */
   void SetTitle(const Dali::String& title);
 
   /// @brief Gets the title text.
+  /// @SINCE_3_0.0
   Dali::String GetTitle() const;
 
   /**
    * @brief Sets the message text (shown as the body). Empty clears the body.
+   * @SINCE_3_0.0
    * @param[in] message The message text
    */
   void SetMessage(const Dali::String& message);
 
   /// @brief Gets the message text.
+  /// @SINCE_3_0.0
   Dali::String GetMessage() const;
 
   /**
@@ -132,6 +148,7 @@ public: // Convenience API
    * Connect a handler to the returned button's ClickedSignal() to handle the
    * action; clicking a button does not dismiss the dialog automatically.
    *
+   * @SINCE_3_0.0
    * @param[in] text The button text
    * @return The newly added action button
    */
@@ -139,6 +156,7 @@ public: // Convenience API
 
   /**
    * @brief Removes all action buttons and clears the footer.
+   * @SINCE_3_0.0
    */
   void ClearActionButtons();
 

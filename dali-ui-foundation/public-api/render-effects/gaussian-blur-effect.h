@@ -44,23 +44,27 @@ class GaussianBlurEffectImpl;
  * effect.Activate();            // Turn back on
  * view.ClearRenderEffect();     // Remove from the view, deactivated automatically
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API GaussianBlurEffect : public RenderEffect
 {
 public:
   /**
    * @brief Typedef for finished signals sent by this class.
+   * @SINCE_3_0.0
    */
   typedef Signal<void()> FinishedSignalType;
 
   /**
    * @brief Creates an initialized GaussianBlurEffect, with default blur radius 40u.
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource
    */
   static GaussianBlurEffect New();
 
   /**
    * @brief Creates an initialized GaussianBlurEffect.
+   * @SINCE_3_0.0
    * @param[in] blurRadius The radius of Gaussian kernel.
    * @return A handle to a newly allocated Dali resource
    * @note Due to the downscale factor and kernel optimizations, the actual applied blur changes only in fixed
@@ -72,33 +76,39 @@ public:
 
   /**
    * @brief Creates an uninitialized blur effect.
+   * @SINCE_3_0.0
    */
   GaussianBlurEffect();
 
   /**
    * @brief Copy constructor
+   * @SINCE_3_0.0
    */
   GaussianBlurEffect(const GaussianBlurEffect& handle);
 
   /**
    * @brief Destructor
+   * @SINCE_3_0.0
    */
   ~GaussianBlurEffect();
 
   /**
    * @brief Set whether to refresh effect once or every frame.
+   * @SINCE_3_0.0
    * @param[in] blurOnce If true, renders effect once, else updates effect rendering every frame.
    */
   void SetBlurOnce(bool blurOnce);
 
   /**
    * @brief Retrieves whether effect rendering is done once(true) or every frame(false)
+   * @SINCE_3_0.0
    * @return Whether blur is rendered once or every frame.
    */
   bool GetBlurOnce() const;
 
   /**
    * @brief Set blur radius value.
+   * @SINCE_3_0.0
    * @param[in] blurRadius The radius of Gaussian kernel.
    * @note Due to the downscale factor and kernel optimizations, the actual applied blur changes only in fixed
    * increments.
@@ -109,18 +119,21 @@ public:
 
   /**
    * @brief Retrieves blur radius value.
+   * @SINCE_3_0.0
    * @return The blur radius.
    */
   uint32_t GetBlurRadius() const;
 
   /**
    * @brief Set blur downscale factor. The value is clamped to the range [0.25f, 1.0f].
+   * @SINCE_3_0.0
    * @param[in] downscaleFactor The downscale factor for input texture.
    */
   void SetBlurDownscaleFactor(float downscaleFactor);
 
   /**
    * @brief Retrieves blur downscale factor.
+   * @SINCE_3_0.0
    * @return The blur downscale factor.
    */
   float GetBlurDownscaleFactor() const;
@@ -132,6 +145,7 @@ public:
    * 0.0f disables dithering noise, while 1.0f applies the maximum noise strength.
    * The default value is 0.1f.
    *
+   * @SINCE_3_0.0
    * @param[in] strength The dithering noise strength.
    */
   void SetDitherNoiseStrength(float strength);
@@ -139,12 +153,14 @@ public:
   /**
    * @brief Gets the dithering noise strength of the final blur output.
    *
+   * @SINCE_3_0.0
    * @return The dithering noise strength.
    */
   float GetDitherNoiseStrength() const;
 
   /**
    * @brief Adds blur strength animation. Blurifies clear texture within given animation parameters.
+   * @SINCE_3_0.0
    * @param[in] animation Animation instance to which we add blur strength animation.
    * @param[in] alphaFunction AlphaFunction of blur strength animation.
    * @param[in] timePeriod TimePeriod of blur strength animation. Default value is animation's duration.
@@ -161,6 +177,7 @@ public:
 
   /**
    * @brief Adds blur opacity animation. Blurifies clear texture within given animation parameters.
+   * @SINCE_3_0.0
    * @param[in] animation Animation instance to which we add blur opacity animation.
    * @param[in] alphaFunction AlphaFunction of blur opacity animation.
    * @param[in] timePeriod TimePeriod of blur opacity animation. Default value is animation's duration.
@@ -180,6 +197,7 @@ public: // Signals
    * refreshes every frame never finishes. The offscreen resources are released right after the
    * signal is emitted.
    *
+   * @SINCE_3_0.0
    * @return The finished signal
    */
   FinishedSignalType& FinishedSignal();

@@ -121,6 +121,7 @@ class View;
  * VisualBase itself has no constructor. Construct one through a subclass,
  * e.g. ColorVisual::New().
  *
+ * @SINCE_3_0.0
  * @note VisualBase properties are applied before the LayoutController runs. A visual created or
  * changed during layout (e.g. ColorVisual::New() inside OnMeasure()) therefore has its properties
  * applied too late for that pass, which flickers.
@@ -135,6 +136,7 @@ public:
    * If handle points to a VisualBase, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a VisualBase or an uninitialized handle
    */
@@ -144,6 +146,7 @@ public: // Attachment and type
   /**
    * @brief Get attached view. Empty handle if this visual is not be attached.
    *
+   * @SINCE_3_0.0
    * @return The attached view, or empty handle if not be attached.
    */
   Dali::Ui::View GetOwner() const;
@@ -151,18 +154,21 @@ public: // Attachment and type
   /**
    * @brief Get the attached depth layer. NONE if this visual is not attached.
    *
+   * @SINCE_3_0.0
    * @return The attached depth layer, or NONE if not attached.
    */
   Dali::Ui::Visual::DepthLayer GetDepthLayer() const;
 
   /**
    * @brief Detach from the attached view.
+   * @SINCE_3_0.0
    */
   void Detach();
 
   /**
    * @brief Get the type of this VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The type of this VisualBase
    */
   Dali::Ui::VisualType GetVisualType() const;
@@ -171,6 +177,7 @@ public: // Accessors
   /**
    * @brief Gets the name of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The name of the VisualBase
    */
   const Dali::String& GetName() const;
@@ -178,6 +185,7 @@ public: // Accessors
   /**
    * @brief Sets the name of this VisualBase.
    *
+   * @SINCE_3_0.0
    * @param[in] name The name to set
    */
   void SetName(const Dali::String& name);
@@ -185,6 +193,7 @@ public: // Accessors
   /**
    * @brief Gets the color of this VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The color of this VisualBase
    */
   UiColor GetColor() const;
@@ -197,6 +206,7 @@ public: // Accessors
    * TextVisual, the red, green, blue and alpha components are multiplied with the
    * corresponding components of that content, tinting it.
    *
+   * @SINCE_3_0.0
    * @param[in] color The UiColor to apply
    * @note The default color is white, which leaves drawn content unchanged.
    */
@@ -206,6 +216,7 @@ public: // Accessors
   /**
    * @brief Gets the X offset of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The X offset of the VisualBase
    */
   float GetOffsetX() const;
@@ -213,6 +224,7 @@ public: // Accessors
   /**
    * @brief Sets the X offset of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @param[in] x The X offset to set
    */
   void SetOffsetX(float x);
@@ -220,6 +232,7 @@ public: // Accessors
   /**
    * @brief Gets the Y offset of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The Y offset of the VisualBase
    */
   float GetOffsetY() const;
@@ -227,6 +240,7 @@ public: // Accessors
   /**
    * @brief Sets the Y offset of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @param[in] y The Y offset to set
    */
   void SetOffsetY(float y);
@@ -234,6 +248,7 @@ public: // Accessors
   /**
    * @brief Gets the width of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The width of the VisualBase
    */
   float GetWidth() const;
@@ -241,6 +256,7 @@ public: // Accessors
   /**
    * @brief Sets the width of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @param[in] width The width to set
    */
   void SetWidth(float width);
@@ -248,6 +264,7 @@ public: // Accessors
   /**
    * @brief Gets the height of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The height of the VisualBase
    */
   float GetHeight() const;
@@ -255,6 +272,7 @@ public: // Accessors
   /**
    * @brief Sets the height of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @param[in] height The height to set
    */
   void SetHeight(float height);
@@ -262,6 +280,7 @@ public: // Accessors
   /**
    * @brief Gets the transform proportion flags of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The transform proportion flags of the VisualBase
    */
   Dali::Ui::Visual::Transform::ProportionFlags GetTransformProportionFlags() const;
@@ -273,6 +292,7 @@ public: // Accessors
    * the attached View's size, where 1.0f is the full size; a value whose flag is left unset is an
    * absolute length in pixels.
    *
+   * @SINCE_3_0.0
    * @note ExtraWidth and ExtraHeight are always absolute and are unaffected by these flags.
    *
    * @param[in] flags The transform proportion flags to set
@@ -282,6 +302,7 @@ public: // Accessors
   /**
    * @brief Gets the extra width of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The extra width of the VisualBase
    */
   float GetExtraWidth() const;
@@ -290,6 +311,7 @@ public: // Accessors
    * @brief Sets the extra width of the VisualBase.
    * This width is added to the final width absolutely, independent of the transform proportion flags.
    *
+   * @SINCE_3_0.0
    * @param[in] extraWidth The extra width to set
    */
   void SetExtraWidth(float extraWidth);
@@ -297,6 +319,7 @@ public: // Accessors
   /**
    * @brief Gets the extra height of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The extra height of the VisualBase
    */
   float GetExtraHeight() const;
@@ -305,6 +328,7 @@ public: // Accessors
    * @brief Sets the extra height of the VisualBase.
    * This height is added to the final height absolutely, independent of the transform proportion flags.
    *
+   * @SINCE_3_0.0
    * @param[in] extraHeight The extra height to set
    */
   void SetExtraHeight(float extraHeight);
@@ -312,6 +336,7 @@ public: // Accessors
   /**
    * @brief Gets the origin of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The origin of the VisualBase
    */
   VisualOrigin GetOrigin() const;
@@ -321,6 +346,7 @@ public: // Accessors
    *
    * The origin is the point on the attached View that this visual is positioned from.
    *
+   * @SINCE_3_0.0
    * @note The origin is absolute and is never mirrored: a LEFT origin stays on the left whatever
    * the effective layout direction.
    *
@@ -331,6 +357,7 @@ public: // Accessors
   /**
    * @brief Gets the pivot of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The pivot of the VisualBase
    */
   VisualPivot GetPivot() const;
@@ -340,6 +367,7 @@ public: // Accessors
    *
    * The pivot is the point on the visual itself that is placed at the origin.
    *
+   * @SINCE_3_0.0
    * @note Like the origin, the pivot is absolute and is never mirrored.
    * @note This takes a Ui::VisualPivot, unlike Actor::SetPivot() which takes a Vector3.
    *
@@ -351,12 +379,14 @@ public: // Accessors
   /**
    * @brief Gets the corner radius of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The corner radius as Vector4 (topLeft, topRight, bottomRight, bottomLeft)
    */
   Vector4 GetCornerRadius() const;
 
   /**
    * @brief Sets a uniform corner radius for all four corners.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -367,6 +397,7 @@ public: // Accessors
 
   /**
    * @brief Sets individual corner radii for all four corners.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -380,6 +411,7 @@ public: // Accessors
 
   /**
    * @brief Sets corner radii from a Vector4.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -391,6 +423,7 @@ public: // Accessors
   /**
    * @brief Gets the corner radius policy.
    *
+   * @SINCE_3_0.0
    * @return The corner radius policy
    */
   CornerRadiusPolicy GetCornerRadiusPolicy() const;
@@ -398,6 +431,7 @@ public: // Accessors
   /**
    * @brief Sets the corner radius policy.
    *
+   * @SINCE_3_0.0
    * @note The default is CornerRadiusPolicy::ABSOLUTE.
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
@@ -409,6 +443,7 @@ public: // Accessors
 
   /**
    * @brief Shortcut to set the corner radius policy to RELATIVE.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -420,6 +455,7 @@ public: // Accessors
   /**
    * @brief Returns true if the corner radius policy is RELATIVE.
    *
+   * @SINCE_3_0.0
    * @return True if the policy is RELATIVE, false if ABSOLUTE
    */
   bool IsCornerRadiusPolicyRelative() const;
@@ -427,12 +463,14 @@ public: // Accessors
   /**
    * @brief Gets the corner squareness of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The corner squareness as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
   Vector4 GetCornerSquareness() const;
 
   /**
    * @brief Sets a uniform corner squareness for all four corners.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -443,6 +481,7 @@ public: // Accessors
 
   /**
    * @brief Sets individual corner squareness values for all four corners.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -456,6 +495,7 @@ public: // Accessors
 
   /**
    * @brief Sets corner squareness from a Vector4.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -467,12 +507,14 @@ public: // Accessors
   /**
    * @brief Gets the borderline width of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The borderline width
    */
   float GetBorderlineWidth() const;
 
   /**
    * @brief Sets the borderline width of the VisualBase.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -484,12 +526,14 @@ public: // Accessors
   /**
    * @brief Gets the borderline color of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The borderline color
    */
   UiColor GetBorderlineColor() const;
 
   /**
    * @brief Sets the borderline color of the VisualBase.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -505,12 +549,14 @@ public: // Accessors
   /**
    * @brief Gets the borderline offset of the VisualBase.
    *
+   * @SINCE_3_0.0
    * @return The borderline offset
    */
   float GetBorderlineOffset() const;
 
   /**
    * @brief Sets the borderline offset of the VisualBase.
+   * @SINCE_3_0.0
    * @note Supported only by ColorVisual, GradientVisual, ImageVisual, AnimatedImageVisual and
    * LottieAnimationVisual. It has no effect on other visuals, including an ImageVisual that is
    * showing an n-patch image.
@@ -523,12 +569,14 @@ public: // Sibling order
   /**
    * @brief Get the sibling order of the visual object inside of the container.
    *
+   * @SINCE_3_0.0
    * @return The sibling order inside of the container. Or 0 if visual object is not in container.
    */
   uint32_t GetSiblingOrder() const;
 
   /**
    * @brief Set the sibling order of the visual object inside of the container.
+   * @SINCE_3_0.0
    * @note It will change other VisualBase's sibling order to keep the order.
    * @note If siblingOrder is not less than the number of visuals that the container
    * has, it is clamped to the topmost order.
@@ -540,6 +588,7 @@ public: // Sibling order
   /**
    * @brief Raise the visual object above the next sibling visual object.
    *
+   * @SINCE_3_0.0
    * @pre The VisualBase has been initialized.
    * @pre The VisualBase has been attached to a View.
    */
@@ -548,6 +597,7 @@ public: // Sibling order
   /**
    * @brief Lower the visual object below the previous sibling visual object.
    *
+   * @SINCE_3_0.0
    * @pre The VisualBase has been initialized.
    * @pre The VisualBase has been attached to a View.
    */
@@ -556,6 +606,7 @@ public: // Sibling order
   /**
    * @brief Raise visual object above all other sibling visual objects.
    *
+   * @SINCE_3_0.0
    * @pre The VisualBase has been initialized.
    * @pre The VisualBase has been attached to a View.
    */
@@ -564,6 +615,7 @@ public: // Sibling order
   /**
    * @brief Lower visual object to the bottom of all other sibling visual objects.
    *
+   * @SINCE_3_0.0
    * @pre The VisualBase has been initialized.
    * @pre The VisualBase has been attached to a View.
    */
@@ -572,6 +624,7 @@ public: // Sibling order
   /**
    * @brief Raises the visual object above the target visual object.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target visual object
    * @pre The VisualBase has been initialized.
    * @pre The VisualBase has been attached to a View.
@@ -582,6 +635,7 @@ public: // Sibling order
   /**
    * @brief Lower the visual object to below the target visual object.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target visual object
    * @pre The VisualBase has been initialized.
    * @pre The VisualBase has been attached to a View.

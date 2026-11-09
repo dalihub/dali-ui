@@ -40,6 +40,7 @@ namespace Ui
  *
  * Its visual type is VisualType::COLOR. On top of the CornerRadius, CornerSquareness and
  * Borderline features of VisualBase, it adds a blur radius and a cutout policy.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ColorVisual : public VisualBase
 {
@@ -47,6 +48,7 @@ public:
   /**
    * @brief Creates a ColorVisual object.
    *
+   * @SINCE_3_0.0
    * @return The newly created color visual object.
    */
   static ColorVisual New();
@@ -57,6 +59,7 @@ public:
    * If handle points to a ColorVisual, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a ColorVisual or an uninitialized handle
    */
@@ -66,6 +69,7 @@ public: // Properties
   /**
    * @brief Gets the blur radius of the ColorVisual.
    *
+   * @SINCE_3_0.0
    * @return The blur radius in pixels
    */
   float GetBlurRadius() const;
@@ -77,6 +81,7 @@ public: // Properties
    * blurred. The area drawn grows by the blur radius, so a blurred visual reaches beyond
    * the View it belongs to.
    *
+   * @SINCE_3_0.0
    * @param[in] blurRadius The blur radius in pixels
    * @note If the corner squareness is not zero, the blurred width may differ from this value.
    * @see SetCutoutPolicy()
@@ -86,6 +91,7 @@ public: // Properties
   /**
    * @brief Gets the cutout policy of the ColorVisual.
    *
+   * @SINCE_3_0.0
    * @return The cutout policy of the ColorVisual
    */
   CutoutPolicy GetCutoutPolicy() const;
@@ -96,6 +102,7 @@ public: // Properties
    * The default is CutoutPolicy::NONE, which draws the whole area. Cutting out the view is
    * how a visual enlarged by a blur radius is kept from drawing underneath its View.
    *
+   * @SINCE_3_0.0
    * @param[in] cutoutPolicy The cutout policy to set
    * @note CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS and
    *       CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS follow the corner radius of the

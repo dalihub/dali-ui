@@ -41,6 +41,7 @@ class CheckBoxStyleImpl;
 
 /**
  * @brief Style values used to initialize CheckBox appearance and layout.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API CheckBoxStyle : public UiStyle
 {
@@ -52,6 +53,7 @@ public:
    *
    * A stateless free function is the expected implementation, so the same generator can be
    * shared across style copies. Move-only (Dali::Callback is move-only).
+   * @SINCE_3_0.0
    */
   using IconGenerator = Dali::Callback<SelectableImageInterface()>;
 
@@ -99,6 +101,7 @@ public: // Not intended for application developers
  * A zero minimum size means no lower bound; zero padding/gap means no padding/spacing.
  * A zero icon size remains unset: the width follows the resolved height, and the height follows the content height.
  * A zero font size is passed unchanged to the internal Label, without substituting the default preset size.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API CheckBoxStyle::Builder
 {

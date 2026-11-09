@@ -36,6 +36,7 @@ class DummyComponentImpl;
  * DummyComponent has no dedicated behavior, style, or signals.
  * Use View::New() for a general-purpose visual element or child view container.
  * Its public header and creation and casting APIs are retained for compatibility with existing client code.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API DummyComponent : public View
 {
@@ -46,12 +47,14 @@ public: // Creation & Destruction
    *
    * Use New() to create the underlying object; no derived type is required.
    * Do not call member functions that access the underlying object on an uninitialized handle.
+   * @SINCE_3_0.0
    */
   DummyComponent();
 
   /**
    * @brief Creates an initialized DummyComponent.
    *
+   * @SINCE_3_0.0
    * @return A handle to the newly created object. Default behavior is inherited from View.
    */
   static DummyComponent New();
@@ -60,6 +63,7 @@ public: // Creation & Destruction
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    * @param[in] DummyComponent Handle to copy
    */
   DummyComponent(const DummyComponent& DummyComponent);
@@ -67,6 +71,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   DummyComponent(DummyComponent&& rhs) noexcept;
@@ -75,6 +80,7 @@ public: // Creation & Destruction
    * @brief Destroys the DummyComponent handle.
    *
    * This destructor is non-virtual. Do not add data or virtual functions to derived handle types.
+   * @SINCE_3_0.0
    */
   ~DummyComponent();
 
@@ -83,6 +89,7 @@ public: // Operators
    * @brief Copy assignment operator.
    *
    * Changes this handle to point to another real object.
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -91,6 +98,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -105,6 +113,7 @@ public: // Static Methods
    * If handle points to a DummyComponent, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a DummyComponent or an uninitialized handle
    */

@@ -57,21 +57,25 @@ class SelectableImageInterfaceImpl;
  * image.SetStateColors(deselectedRgba, selectedRgba);
  * image.SetSelected(true, true);   // animate to selected
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API SelectableImageInterface : public BaseHandle
 {
 public:
   /// @brief Transition-finished signal type. Emitted when the state transition completes.
+  /// @SINCE_3_0.0
   using TransitionFinishedSignalType = Signal<void(View)>;
 
   /**
    * @brief Creates an uninitialized SelectableImageInterface handle.
+   * @SINCE_3_0.0
    */
   SelectableImageInterface() = default;
 
   /**
    * @brief Downcasts a handle to SelectableImageInterface.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized SelectableImageInterface on success, otherwise empty
    */
@@ -83,6 +87,7 @@ public:
    * The returned View is created and owned by the implementation; place it into the
    * control's tree (e.g. Self().Add(image.GetView())).
    *
+   * @SINCE_3_0.0
    * @return The View that renders this image
    */
   Ui::View GetView() const;
@@ -90,6 +95,7 @@ public:
   /**
    * @brief Renders the selected/deselected state without animating the transition.
    *
+   * @SINCE_3_0.0
    * @param[in] selected True to render the selected state, false the deselected state
    */
   void SetSelected(bool selected);
@@ -97,6 +103,7 @@ public:
   /**
    * @brief Renders the selected/deselected state, optionally animating the transition.
    *
+   * @SINCE_3_0.0
    * @param[in] selected True to render the selected state, false the deselected state
    * @param[in] animated True to animate the transition, false to snap to the target state
    */
@@ -105,6 +112,7 @@ public:
   /**
    * @brief Sets the pre-resolved colours for the deselected and selected states.
    *
+   * @SINCE_3_0.0
    * @param[in] deselected The RGBA colour for the deselected state
    * @param[in] selected   The RGBA colour for the selected state
    */
@@ -113,6 +121,7 @@ public:
   /**
    * @brief Returns whether a state transition is currently playing.
    *
+   * @SINCE_3_0.0
    * @return True if the image is transitioning between states
    */
   bool IsTransitioning() const;
@@ -120,6 +129,7 @@ public:
   /**
    * @brief Returns the signal emitted when a state transition finishes.
    *
+   * @SINCE_3_0.0
    * @return A reference to the TransitionFinished signal
    */
   TransitionFinishedSignalType& TransitionFinishedSignal();
@@ -128,6 +138,7 @@ protected:
   /**
    * @brief Creates a SelectableImageInterface handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit SelectableImageInterface(Integration::SelectableImageInterfaceImpl* impl);

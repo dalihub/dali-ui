@@ -50,6 +50,7 @@ class LineSeries;
  *   series.SetValues({12.0f, 48.0f, 31.0f, 66.0f});
  *   chart.AddSeries(series);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API LineSeries : public ChartSeries
 {
@@ -57,29 +58,33 @@ public:
   /**
    * @brief The shape drawn at each data point when markers are visible.
    *
+   * @SINCE_3_0.0
    * @see SetMarkersVisible(), SetMarkerShape()
    */
   enum class MarkerShape
   {
-    CIRCLE,   ///< Circular marker. This is the default.
-    SQUARE,   ///< Square marker.
-    TRIANGLE, ///< Triangular marker.
-    DIAMOND   ///< Diamond-shaped marker.
+    CIRCLE,   ///< Circular marker. This is the default. @SINCE_3_0.0
+    SQUARE,   ///< Square marker. @SINCE_3_0.0
+    TRIANGLE, ///< Triangular marker. @SINCE_3_0.0
+    DIAMOND   ///< Diamond-shaped marker. @SINCE_3_0.0
   };
 
   /**
    * @brief Creates an uninitialized LineSeries handle.
+   * @SINCE_3_0.0
    */
   LineSeries();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~LineSeries();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   LineSeries(const LineSeries& rhs);
@@ -87,6 +92,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   LineSeries(LineSeries&& rhs);
@@ -94,6 +100,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -102,6 +109,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return A reference to this handle
    */
@@ -110,6 +118,7 @@ public:
   /**
    * @brief Creates a new LineSeries.
    *
+   * @SINCE_3_0.0
    * @return A handle to the new series
    */
   static LineSeries New();
@@ -117,6 +126,7 @@ public:
   /**
    * @brief Downcasts a handle to a LineSeries handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A LineSeries handle, or an uninitialized handle if the cast fails
    */
@@ -127,6 +137,7 @@ public:
    *
    * The default is 2.5.
    *
+   * @SINCE_3_0.0
    * @param[in] width The width of the line, in pixels
    */
   void SetLineWidth(float width);
@@ -134,6 +145,7 @@ public:
   /**
    * @brief Retrieves the width of the line, in pixels.
    *
+   * @SINCE_3_0.0
    * @return The width of the line, in pixels
    */
   float GetLineWidth() const;
@@ -144,6 +156,7 @@ public:
    * Clamped to [0, 1], where 0 draws straight segments and 1 is maximally
    * smoothed. The default is 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] value The smoothing amount
    */
   void SetSmoothness(float value);
@@ -151,6 +164,7 @@ public:
   /**
    * @brief Retrieves how much the line curves through its data points.
    *
+   * @SINCE_3_0.0
    * @return The smoothing amount
    */
   float GetSmoothness() const;
@@ -162,6 +176,7 @@ public:
    * (see SetMarkerColor()) and default fill color (see SetFillColor())
    * unless those are overridden explicitly. The default is black.
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the line
    */
   void SetColor(const Vector4& color);
@@ -169,6 +184,7 @@ public:
   /**
    * @brief Retrieves the color of the line.
    *
+   * @SINCE_3_0.0
    * @return The color of the line
    */
   Vector4 GetColor() const;
@@ -178,6 +194,7 @@ public:
    *
    * The default is true.
    *
+   * @SINCE_3_0.0
    * @param[in] visible True to draw markers
    */
   void SetMarkersVisible(bool visible);
@@ -185,6 +202,7 @@ public:
   /**
    * @brief Retrieves whether a marker is drawn at each data point.
    *
+   * @SINCE_3_0.0
    * @return True if markers are drawn
    */
   bool IsMarkersVisible() const;
@@ -194,6 +212,7 @@ public:
    *
    * The default is 4.0.
    *
+   * @SINCE_3_0.0
    * @param[in] radius The marker radius, in pixels
    */
   void SetMarkerRadius(float radius);
@@ -201,6 +220,7 @@ public:
   /**
    * @brief Retrieves the radius of each marker, in pixels.
    *
+   * @SINCE_3_0.0
    * @return The marker radius, in pixels
    */
   float GetMarkerRadius() const;
@@ -210,6 +230,7 @@ public:
    *
    * The default is MarkerShape::CIRCLE.
    *
+   * @SINCE_3_0.0
    * @param[in] shape The marker shape
    */
   void SetMarkerShape(MarkerShape shape);
@@ -217,6 +238,7 @@ public:
   /**
    * @brief Retrieves the shape drawn for each marker.
    *
+   * @SINCE_3_0.0
    * @return The marker shape
    */
   MarkerShape GetMarkerShape() const;
@@ -227,6 +249,7 @@ public:
    * Until this is called, markers are filled with the line color set by
    * SetColor().
    *
+   * @SINCE_3_0.0
    * @param[in] color The marker fill color
    */
   void SetMarkerColor(const Vector4& color);
@@ -234,6 +257,7 @@ public:
   /**
    * @brief Retrieves the fill color of each marker.
    *
+   * @SINCE_3_0.0
    * @return The marker fill color, either the color set by SetMarkerColor()
    *         or the line color if it was not called
    */
@@ -244,6 +268,7 @@ public:
    *
    * The default is fully transparent, meaning no border is visible.
    *
+   * @SINCE_3_0.0
    * @param[in] color The marker border color
    */
   void SetMarkerBorderColor(const Vector4& color);
@@ -251,6 +276,7 @@ public:
   /**
    * @brief Retrieves the border color of each marker.
    *
+   * @SINCE_3_0.0
    * @return The marker border color
    */
   Vector4 GetMarkerBorderColor() const;
@@ -260,6 +286,7 @@ public:
    *
    * The default is 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] width The marker border width, in pixels
    */
   void SetMarkerBorderWidth(float width);
@@ -267,6 +294,7 @@ public:
   /**
    * @brief Retrieves the border width of each marker, in pixels.
    *
+   * @SINCE_3_0.0
    * @return The marker border width, in pixels
    */
   float GetMarkerBorderWidth() const;
@@ -276,6 +304,7 @@ public:
    *
    * The default is false.
    *
+   * @SINCE_3_0.0
    * @param[in] visible True to draw data labels
    */
   void SetDataLabelsVisible(bool visible);
@@ -283,6 +312,7 @@ public:
   /**
    * @brief Retrieves whether a text label is drawn at each data point.
    *
+   * @SINCE_3_0.0
    * @return True if data labels are drawn
    */
   bool IsDataLabelsVisible() const;
@@ -293,6 +323,7 @@ public:
    * Ignored while a formatter set with SetDataLabelFormatter() is active.
    * The default is "%.1f".
    *
+   * @SINCE_3_0.0
    * @param[in] format The printf-style format string
    */
   void SetDataLabelFormat(const Dali::String& format);
@@ -300,6 +331,7 @@ public:
   /**
    * @brief Retrieves the printf-style format string used to render each data label's Y value.
    *
+   * @SINCE_3_0.0
    * @return The printf-style format string
    */
   Dali::String GetDataLabelFormat() const;
@@ -309,6 +341,7 @@ public:
    *
    * The default is (0.2, 0.2, 0.2, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the data label text
    */
   void SetDataLabelColor(const Vector4& color);
@@ -316,6 +349,7 @@ public:
   /**
    * @brief Retrieves the color of the data label text.
    *
+   * @SINCE_3_0.0
    * @return The color of the data label text
    */
   Vector4 GetDataLabelColor() const;
@@ -325,6 +359,7 @@ public:
    *
    * The default is 8.0.
    *
+   * @SINCE_3_0.0
    * @param[in] pointSize The point size of the data label text
    */
   void SetDataLabelSize(float pointSize);
@@ -332,6 +367,7 @@ public:
   /**
    * @brief Retrieves the point size of the data label text.
    *
+   * @SINCE_3_0.0
    * @return The point size of the data label text
    */
   float GetDataLabelSize() const;
@@ -341,6 +377,7 @@ public:
    *
    * Used to build AREA charts from a LINE-family series. The default is false.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to fill the area under the line
    */
   void SetFillEnabled(bool enabled);
@@ -348,6 +385,7 @@ public:
   /**
    * @brief Retrieves whether the area under the line is filled.
    *
+   * @SINCE_3_0.0
    * @return True if the area under the line is filled
    */
   bool IsFillEnabled() const;
@@ -358,6 +396,7 @@ public:
    * Until this is called, the fill uses the line color set by SetColor()
    * at 20% opacity.
    *
+   * @SINCE_3_0.0
    * @param[in] color The fill color
    */
   void SetFillColor(const Vector4& color);
@@ -365,6 +404,7 @@ public:
   /**
    * @brief Retrieves the fill color of the area under the line.
    *
+   * @SINCE_3_0.0
    * @return The fill color, either the color set by SetFillColor() or the
    *         line color at 20% opacity if it was not called
    */
@@ -373,6 +413,7 @@ public:
   /**
    * @brief Function pointer type for building the text of a data label.
    *
+   * @SINCE_3_0.0
    * @note This is a plain function pointer, not std::function.
    *       Capturing lambdas and non-static member functions are not accepted.
    *       Use a free function, a static function, or a captureless lambda.
@@ -387,6 +428,7 @@ public:
   /**
    * @brief Sets the formatter used to build the text of each data label.
    *
+   * @SINCE_3_0.0
    * @param[in] formatter The formatter, or nullptr to use the data label format
    */
   void SetDataLabelFormatter(DataLabelFormatterType formatter);
@@ -394,34 +436,40 @@ public:
   /**
    * @brief Retrieves the formatter used to build the text of each data label.
    *
+   * @SINCE_3_0.0
    * @return The formatter, or nullptr if the data label format is used
    */
   DataLabelFormatterType GetDataLabelFormatter() const;
 
   /**
    * @brief Sets a linear gradient for the filled area.
+   * @SINCE_3_0.0
    * @param[in] gradient The gradient in plot coordinates
    */
   void SetFillGradient(const Gradient::Linear& gradient);
 
   /**
    * @brief Restores the solid area fill.
+   * @SINCE_3_0.0
    */
   void ClearFillGradient();
 
   /**
    * @brief Sets a linear gradient for the line stroke.
+   * @SINCE_3_0.0
    * @param[in] gradient The gradient in plot coordinates
    */
   void SetStrokeGradient(const Gradient::Linear& gradient);
 
   /**
    * @brief Restores the solid line stroke.
+   * @SINCE_3_0.0
    */
   void ClearStrokeGradient();
 
   /**
    * @brief Sets the dash pattern; a zero gap produces a solid stroke.
+   * @SINCE_3_0.0
    * @param[in] dashLength Finite positive dash length in pixels
    * @param[in] gapLength Finite non-negative gap length in pixels
    */
@@ -431,6 +479,7 @@ public:
    * @brief Overrides edges [firstPoint, lastPoint) using original point indices.
    *
    * Later overlapping overrides win. NaN gaps remain disconnected.
+   * @SINCE_3_0.0
    * @param[in] firstPoint The first point index
    * @param[in] lastPoint The final point index
    * @param[in] color The stroke color; theme identifiers are retained
@@ -441,6 +490,7 @@ public:
 
   /**
    * @brief Removes all per-segment overrides.
+   * @SINCE_3_0.0
    */
   void ClearSegmentStyles();
 

@@ -32,18 +32,21 @@ namespace Ui
 
 /**
  * @brief Describes an ordered stack of View shadows.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ShadowStack
 {
 public:
   /**
    * @brief Creates an empty shadow stack.
+   * @SINCE_3_0.0
    */
   ShadowStack();
 
   /**
    * @brief Creates a shadow stack from a list of shadows.
    *
+   * @SINCE_3_0.0
    * @param[in] shadows The shadows to add in order
    */
   ShadowStack(std::initializer_list<Shadow> shadows)
@@ -65,6 +68,7 @@ public:
   /**
    * @brief Adds a shadow to the end of the stack.
    *
+   * @SINCE_3_0.0
    * @param[in] shadow The shadow to add
    * @return This shadow stack
    */
@@ -72,12 +76,14 @@ public:
 
   /**
    * @brief Clears all shadows from the stack.
+   * @SINCE_3_0.0
    */
   void Clear();
 
   /**
    * @brief Gets the number of shadows in the stack.
    *
+   * @SINCE_3_0.0
    * @return The number of shadows
    */
   uint32_t GetShadowCount() const;
@@ -87,6 +93,7 @@ public:
    *
    * The returned reference remains valid until the ShadowStack is modified or destroyed.
    *
+   * @SINCE_3_0.0
    * @param[in] index The shadow index
    * @return The shadow at @a index
    */

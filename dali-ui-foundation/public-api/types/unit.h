@@ -28,6 +28,7 @@ namespace Ui
 
 /**
  * @brief Converts an integer spx value to a float pixel value.
+ * @SINCE_3_0.0
  * @details The input value is multiplied by a scaling-factor configured via UiConfig.
  *
  * @pre UiConfig::Apply() must have been called before using this operator.
@@ -44,6 +45,7 @@ DALI_UI_API float operator"" _spx(unsigned long long int v);
 
 /**
  * @brief Converts a floating-point spx value to a float pixel value.
+ * @SINCE_3_0.0
  * @details The input value is multiplied by a scaling-factor configured via UiConfig.
  *
  * @pre UiConfig::Apply() must have been called before using this operator.
@@ -60,6 +62,7 @@ DALI_UI_API float operator"" _spx(long double v);
 
 /**
  * @brief Converts an integer dp value to a float pixel value.
+ * @SINCE_3_0.0
  * @details The input value is computed with dpi and baseline-dpi configured via UiConfig.
  *
  * @pre UiConfig::Apply() must have been called before using this operator.
@@ -76,6 +79,7 @@ DALI_UI_API float operator"" _dp(unsigned long long int v);
 
 /**
  * @brief Converts a floating-point dp value to a float pixel value.
+ * @SINCE_3_0.0
  * @details The input value is computed with dpi and baseline-dpi configured via UiConfig.
  *
  * @pre UiConfig::Apply() must have been called before using this operator.
@@ -92,6 +96,7 @@ DALI_UI_API float operator"" _dp(long double v);
 
 /**
  * @brief Converts an integer sdp value to a float pixel value.
+ * @SINCE_3_0.0
  * @details The input value is computed with dpi, baseline-dpi and scaling-factor
  *          configured via UiConfig.
  *
@@ -109,6 +114,7 @@ DALI_UI_API float operator"" _sdp(unsigned long long int v);
 
 /**
  * @brief Converts a floating-point sdp value to a float pixel value.
+ * @SINCE_3_0.0
  * @details The input value is computed with dpi, baseline-dpi and scaling-factor
  *          configured via UiConfig.
  *

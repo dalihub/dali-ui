@@ -66,6 +66,7 @@ namespace Ui
  * Registration is permanent for the lifetime of the process; destroying the
  * ViewRegistration object does not unregister the type.
  *
+ * @SINCE_3_0.0
  * @see Dali::Ui::ViewImpl
  */
 class DALI_UI_API ViewRegistration
@@ -76,12 +77,14 @@ public:
    *
    * Returns a handle to a newly created, initialized instance of the
    * registered view type.
+   * @SINCE_3_0.0
    */
   using CreateFunction = Dali::BaseHandle (*)();
 
   /**
    * @brief Registers a custom view type under its implementation class name.
    *
+   * @SINCE_3_0.0
    * @param[in] viewImplType Identifier of the view implementation class (a ViewImpl
    *            subclass), e.g. DALI_TYPE_ID(MyViewImpl)
    * @param[in] baseViewImplType Identifier of its nearest registered base implementation
@@ -101,6 +104,7 @@ public:
    * @p viewType, while instances keep being recognised through the RTTI of
    * @p viewImplType.
    *
+   * @SINCE_3_0.0
    * @param[in] viewType Identifier of the handle class whose name the type is registered under
    * @param[in] viewImplType Identifier of the view implementation class (a ViewImpl subclass)
    * @param[in] baseViewImplType Identifier of its nearest registered base implementation
@@ -116,6 +120,7 @@ public:
   /**
    * @brief The name the type is registered under.
    *
+   * @SINCE_3_0.0
    * @return The registered name
    */
   const Dali::String& RegisteredName() const;

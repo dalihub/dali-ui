@@ -57,6 +57,7 @@ struct Extension;
  *
  * By default, Reveal uses CHARACTER with WHOLE_TEXT sequencing, no sequence
  * stagger, and an automatically resolved fade duration.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Reveal
 {
@@ -66,11 +67,13 @@ public:
    *
    * GetFadeDurationRatio() returns this authored value rather than the
    * duration resolved for the current layout.
+   * @SINCE_3_0.0
    */
   static constexpr float AUTO_FADE_DURATION_RATIO = -1.0f;
 
   /**
    * @brief Selects the granularity of reveal progression.
+   * @SINCE_3_0.0
    */
   enum class Unit : uint8_t
   {
@@ -79,6 +82,7 @@ public:
      *
      * Progression follows logical text order. Characters that form one
      * indivisible shaped unit reveal together.
+     * @SINCE_3_0.0
      */
     CHARACTER,
 
@@ -86,6 +90,7 @@ public:
      * @brief Reveals visible text by word in logical text order.
      *
      * Whitespace does not create a reveal unit.
+     * @SINCE_3_0.0
      */
     WORD,
 
@@ -95,6 +100,7 @@ public:
      * Lines are determined after shaping, wrapping, maximum-line limiting,
      * ellipsis, bidirectional layout, and ImageSpan placement. Lines without
      * revealable visible content do not consume a reveal unit.
+     * @SINCE_3_0.0
      */
     LINE,
 
@@ -108,17 +114,20 @@ public:
      *
      * The progression is normalized and does not correspond one-to-one with
      * physical framebuffer pixels.
+     * @SINCE_3_0.0
      */
     PIXEL
   };
 
   /**
    * @brief Selects how reveal units share the normalized reveal timeline.
+   * @SINCE_3_0.0
    */
   enum class Sequence : uint8_t
   {
     /**
      * @brief Uses one reveal sequence across all final visible content.
+     * @SINCE_3_0.0
      */
     WHOLE_TEXT,
 
@@ -128,6 +137,7 @@ public:
      * Lines created by wrapping are separate sequences, while lines without
      * revealable content do not create a sequence. With Unit::LINE, each
      * sequence contains one whole-line reveal unit.
+     * @SINCE_3_0.0
      */
     PER_LINE
   };
@@ -135,12 +145,14 @@ public:
 public:
   /**
    * @brief Creates a CHARACTER reveal using WHOLE_TEXT sequencing and automatic fade duration.
+   * @SINCE_3_0.0
    */
   Reveal();
 
   /**
    * @brief Creates a reveal by copying another reveal.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The reveal to copy.
    */
   Reveal(const Reveal& rhs);
@@ -148,6 +160,7 @@ public:
   /**
    * @brief Creates a reveal by moving another reveal.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The reveal to move.
    */
   Reveal(Reveal&& rhs) noexcept;
@@ -155,6 +168,7 @@ public:
   /**
    * @brief Copies another reveal to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The reveal to copy.
    */
   Reveal& operator=(const Reveal& rhs);
@@ -162,12 +176,14 @@ public:
   /**
    * @brief Moves another reveal to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The reveal to move.
    */
   Reveal& operator=(Reveal&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Reveal();
 
@@ -176,6 +192,7 @@ public:
    *
    * Pass this value to Label::SetTextReveal() to remove reveal rendering.
    *
+   * @SINCE_3_0.0
    * @return A shared immutable none value.
    */
   static const Reveal& None();
@@ -183,6 +200,7 @@ public:
   /**
    * @brief Compares this reveal with another reveal.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The reveal to compare with.
    * @return true if both values are equal.
    */
@@ -191,6 +209,7 @@ public:
   /**
    * @brief Compares this reveal with another reveal.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The reveal to compare with.
    * @return true if both values are not equal.
    */
@@ -200,6 +219,7 @@ public:
   /**
    * @brief Sets the reveal unit.
    *
+   * @SINCE_3_0.0
    * @param[in] unit The reveal unit.
    */
   void SetUnit(Unit unit);
@@ -207,6 +227,7 @@ public:
   /**
    * @brief Gets the reveal unit.
    *
+   * @SINCE_3_0.0
    * @return The reveal unit.
    */
   Unit GetUnit() const;
@@ -214,6 +235,7 @@ public:
   /**
    * @brief Sets the reveal sequencing mode.
    *
+   * @SINCE_3_0.0
    * @param[in] sequence The reveal sequencing mode.
    */
   void SetSequence(Sequence sequence);
@@ -221,6 +243,7 @@ public:
   /**
    * @brief Gets the reveal sequencing mode.
    *
+   * @SINCE_3_0.0
    * @return The reveal sequencing mode.
    */
   Sequence GetSequence() const;
@@ -234,6 +257,7 @@ public:
    * Values outside [0.0, 1.0] are clamped, except AUTO_FADE_DURATION_RATIO.
    * NaN is normalized to 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] ratio AUTO_FADE_DURATION_RATIO or a value in [0.0, 1.0].
    */
   void SetFadeDurationRatio(float ratio);
@@ -244,6 +268,7 @@ public:
    * When automatic duration is selected, this returns
    * AUTO_FADE_DURATION_RATIO rather than the resolved duration.
    *
+   * @SINCE_3_0.0
    * @return AUTO_FADE_DURATION_RATIO or the authored ratio in [0.0, 1.0].
    */
   float GetFadeDurationRatio() const;
@@ -262,6 +287,7 @@ public:
    *
    * Values outside [0.0, 1.0] are clamped, and NaN is normalized to 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] ratio The sequence stagger ratio in [0.0, 1.0].
    */
   void SetSequenceStaggerRatio(float ratio);
@@ -269,6 +295,7 @@ public:
   /**
    * @brief Gets the authored sequence stagger ratio.
    *
+   * @SINCE_3_0.0
    * @return The authored ratio in [0.0, 1.0].
    */
   float GetSequenceStaggerRatio() const;

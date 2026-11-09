@@ -33,18 +33,21 @@ namespace Gradient
 
 /**
  * @brief Authored radial gradient value.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Radial : public Base
 {
 public:
   /**
    * @brief Creates a radial gradient value.
+   * @SINCE_3_0.0
    */
   Radial();
 
   /**
    * @brief Creates a radial gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] center The center position
    * @param[in] radius The radius
    */
@@ -53,6 +56,7 @@ public:
   /**
    * @brief Sets the radial gradient center and radius.
    *
+   * @SINCE_3_0.0
    * @param[in] center The center position
    * @param[in] radius The radius
    */
@@ -61,6 +65,7 @@ public:
   /**
    * @brief Gets the center position.
    *
+   * @SINCE_3_0.0
    * @return The center position
    */
   Vector2 GetCenter() const;
@@ -68,6 +73,7 @@ public:
   /**
    * @brief Gets the radius.
    *
+   * @SINCE_3_0.0
    * @return The radius
    */
   float GetRadius() const;
@@ -75,6 +81,7 @@ public:
   /**
    * @brief Returns a radial typed value from a base gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] base The source gradient value
    * @return A deep-copied radial value, or a value whose GetType() is Type::NONE if the source type does not match
    */

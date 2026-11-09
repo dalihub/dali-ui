@@ -48,6 +48,7 @@ class LayoutControllerImpl;
  * Each Window has its own LayoutController instance. The controller
  * batches layout requests and processes them once per frame to optimize
  * performance.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API LayoutController
 {
@@ -57,6 +58,7 @@ public:
    *
    * Creates the controller if it doesn't exist for the given window.
    *
+   * @SINCE_3_0.0
    * @param[in] window The window to get the controller for
    * @return Reference to the layout controller
    */
@@ -64,6 +66,7 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~LayoutController();
 
@@ -76,6 +79,7 @@ public:
    * coalesced outstanding ProcessEvents wake so they are processed during the next
    * frame.
    *
+   * @SINCE_3_0.0
    * @note Calling this DURING layout processing -- from inside any Measure/Arrange
    * implementation, or from a LayoutFinishedSignal slot (either this controller's or a
    * View's) -- is a contract violation and is logged once for the view. The request is
@@ -95,6 +99,7 @@ public:
   /**
    * @brief Schedules a view for layout processing on the framework's behalf.
    *
+   * @SINCE_3_0.0
    * @note For internal framework use only; applications must use RequestLayout().
    * This is the registration path taken by the invalidation walk itself. "Internal"
    * describes API visibility only: it is subject to the same processing-window wake
@@ -110,6 +115,7 @@ public:
    * Should be called when a window is being closed to release the
    * associated LayoutController and prevent stale entries.
    *
+   * @SINCE_3_0.0
    * @param[in] window The window whose controller should be removed
    */
   static void Remove(Window window);
@@ -120,6 +126,7 @@ public:
    * Should be called when a layout root is being destroyed to prevent
    * dangling pointer access.
    *
+   * @SINCE_3_0.0
    * @param[in] view The view to unregister
    */
   void UnregisterView(ViewImpl* view);
@@ -130,6 +137,7 @@ public:
    * Used when a view is being destroyed but its window cannot be
    * determined (e.g. the view is already off-scene).
    *
+   * @SINCE_3_0.0
    * @param[in] view The view to unregister
    */
   static void UnregisterFromAll(ViewImpl* view);
@@ -139,6 +147,7 @@ public:
    *
    * This invalidates all layout roots and triggers a layout pass.
    *
+   * @SINCE_3_0.0
    * @param[in] width The new window width
    * @param[in] height The new window height
    */
@@ -160,11 +169,13 @@ public:
    * on a quiescent application may be indefinitely later. When prompt delivery is
    * required, invalidate layout at event time, which requests a cycle, or call
    * ProcessLayouts() from an input event handler, whose cycle then delivers the pass.
+   * @SINCE_3_0.0
    */
   void ProcessLayouts();
 
   /**
    * @brief Signal type of LayoutFinishedSignal().
+   * @SINCE_3_0.0
    */
   using LayoutFinishedSignalType = Signal<void(Dali::Window)>;
 
@@ -230,6 +241,7 @@ public:
    *   still holds a processor pointer to it for the remainder of the current
    *   processing pass.
    *
+   * @SINCE_3_0.0
    * @return The layout-finished signal
    * @note The @c Dali::Window is passed (not the LayoutController) because the
    * controller is a non-copyable, per-window infrastructure object; the window
@@ -336,6 +348,7 @@ private:
    *
    * Use LayoutController::Get() to obtain an instance.
    *
+   * @SINCE_3_0.0
    * @param[in] window The window this controller manages
    */
   explicit DALI_INTERNAL LayoutController(Window window);
@@ -353,6 +366,7 @@ private: // Not be opened for application developer
    * Retrieves the window that this layout controller instance is associated with.
    * This is used internally to verify if the window has been replaced.
    *
+   * @SINCE_3_0.0
    * @return The current window handle
    */
   DALI_INTERNAL Dali::Window GetCurrentWindow() const;
@@ -366,6 +380,7 @@ private: // Not be opened for application developer
    * The method reconnects the window resize signal to ensure layout invalidation
    * continues to work correctly.
    *
+   * @SINCE_3_0.0
    * @param[in] window The new window to manage
    */
   DALI_INTERNAL void ReplaceCurrentWindow(Dali::Window window);

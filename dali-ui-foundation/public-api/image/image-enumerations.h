@@ -31,26 +31,29 @@ namespace Image
 {
 /**
  * @brief FittingMode configures how the image fits within the defined bounds.
+ * @SINCE_3_0.0
  */
 enum class FittingMode : uint8_t
 {
-  FIT_KEEP_ASPECT_RATIO,      ///< The visual should be scaled to fit, preserving aspect ratio
-  FILL,                       ///< The visual should be stretched to fill, not preserving aspect ratio
-  OVER_FIT_KEEP_ASPECT_RATIO, ///< The visual should be scaled to fit, preserving aspect ratio, outside is cropped away
-  CENTER,                     ///< Keeps the original image size when it fits on both axes; otherwise scales down preserving aspect ratio
+  FIT_KEEP_ASPECT_RATIO,      ///< The visual should be scaled to fit, preserving aspect ratio @SINCE_3_0.0
+  FILL,                       ///< The visual should be stretched to fill, not preserving aspect ratio @SINCE_3_0.0
+  OVER_FIT_KEEP_ASPECT_RATIO, ///< The visual should be scaled to fit, preserving aspect ratio, outside is cropped away @SINCE_3_0.0
+  CENTER,                     ///< Keeps the original image size when it fits on both axes; otherwise scales down preserving aspect ratio @SINCE_3_0.0
 };
 
 /**
  * @brief MaskingPolicy controls when the alpha mask is applied to the image.
+ * @SINCE_3_0.0
  */
 enum class MaskingPolicy : uint8_t
 {
-  ON_RENDERING, ///< The mask is combined with the image while it is drawn.
-  ON_LOADING    ///< The mask is applied to the image's pixel data while it loads.
+  ON_RENDERING, ///< The mask is combined with the image while it is drawn. @SINCE_3_0.0
+  ON_LOADING    ///< The mask is applied to the image's pixel data while it loads. @SINCE_3_0.0
 };
 
 /**
  * @brief SamplingMode is an alias for Dali::SamplingMode, configuring the filter applied when scaling the image.
+ * @SINCE_3_0.0
  */
 enum class SamplingMode : uint8_t
 {
@@ -69,22 +72,24 @@ enum class SamplingMode : uint8_t
 
 /**
  * @brief LoadPolicy controls when the image is loaded.
+ * @SINCE_3_0.0
  */
 enum class LoadPolicy : uint8_t
 {
-  IMMEDIATE = 0, ///< The image is loaded when the ImageView is created.
-  ATTACHED,      ///< The image is loaded when the ImageView is attached to the scene.
+  IMMEDIATE = 0, ///< The image is loaded when the ImageView is created. @SINCE_3_0.0
+  ATTACHED,      ///< The image is loaded when the ImageView is attached to the scene. @SINCE_3_0.0
 };
 
 /**
  * @brief ReleasePolicy controls when the image texture is released from the cache.
+ * @SINCE_3_0.0
  */
 enum class ReleasePolicy : uint8_t
 {
-  DETACHED = 0, ///< Image released from cache when the visual is detached from the scene.
-  DESTROYED,    ///< Image released from cache when the visual is destroyed.
+  DETACHED = 0, ///< Image released from cache when the visual is detached from the scene. @SINCE_3_0.0
+  DESTROYED,    ///< Image released from cache when the visual is destroyed. @SINCE_3_0.0
   NEVER,        ///< Image is not automatically released from cache. Unused resources may be explicitly released
-                ///< through Dali::Ui::ImageCacheUtils::ClearUnusedTextures().
+                ///< through Dali::Ui::ImageCacheUtils::ClearUnusedTextures(). @SINCE_3_0.0
 };
 
 } // namespace Image

@@ -95,6 +95,7 @@ class AsyncImageLoader;
  * myObject.mId2 = imageLoader.Load( "second_image_url.jpg" );
  *
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API AsyncImageLoader : public BaseHandle
 {
@@ -106,6 +107,7 @@ public:
    * @brief Constructor which creates an empty AsyncImageLoader handle.
    *
    * Use AsyncImageLoader::New() to create an initialised object.
+   * @SINCE_3_0.0
    */
   AsyncImageLoader();
 
@@ -113,12 +115,14 @@ public:
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~AsyncImageLoader();
 
   /**
    * @brief This copy constructor is required for (smart) pointer semantics.
    *
+   * @SINCE_3_0.0
    * @param[in] handle A reference to the copied handle
    */
   AsyncImageLoader(const AsyncImageLoader& handle);
@@ -126,6 +130,7 @@ public:
   /**
    * @brief Move constructor
    *
+   * @SINCE_3_0.0
    * @param[in] rhs A reference to the moved handle
    */
   AsyncImageLoader(AsyncImageLoader&& rhs) noexcept;
@@ -133,6 +138,7 @@ public:
   /**
    * @brief This assignment operator is required for (smart) pointer semantics.
    *
+   * @SINCE_3_0.0
    * @param[in] handle  A reference to the copied handle
    * @return A reference to this
    */
@@ -141,6 +147,7 @@ public:
   /**
    * @brief Move assignment
    *
+   * @SINCE_3_0.0
    * @param[in] rhs A reference to the moved handle
    */
   AsyncImageLoader& operator=(AsyncImageLoader&& rhs) noexcept;
@@ -148,6 +155,7 @@ public:
   /**
    * @brief Creates a new loader to load the image asynchronously in a worker thread.
    *
+   * @SINCE_3_0.0
    * @return The image loader
    */
   static AsyncImageLoader New();
@@ -158,6 +166,7 @@ public:
    * If the handle points to an AsyncImageLoader object, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle A handle to an object
    * @return A handle to a AsyncImageLoader object or an uninitialized handle
    */
@@ -171,6 +180,7 @@ public:
    *
    * @REMARK_INTERNET
    * @REMARK_STORAGE
+   * @SINCE_3_0.0
    * @param[in] url The URL of the image file to load
    * @return The loading task id
    */
@@ -184,6 +194,7 @@ public:
    *
    * @REMARK_INTERNET
    * @REMARK_STORAGE
+   * @SINCE_3_0.0
    * @param[in] url The URL of the image file to load
    * @param[in] dimensions The width and height to fit the loaded image to
    * @return The loading task id
@@ -194,6 +205,7 @@ public:
    * @brief Starts an image loading task.
    * @REMARK_INTERNET
    * @REMARK_STORAGE
+   * @SINCE_3_0.0
    * @param[in] url The URL of the image file to load
    * @param[in] dimensions The width and height to fit the loaded image to
    * @param[in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to desired size
@@ -206,6 +218,7 @@ public:
   /**
    * @brief Cancels an image loading task if it is still queueing in the work thread.
    *
+   * @SINCE_3_0.0
    * @param[in] loadingTaskId The task id returned when invoking the load call.
    * @return If true, the loading task is removed from the queue, otherwise the loading is already implemented and unable to cancel anymore
    */
@@ -213,6 +226,7 @@ public:
 
   /**
    * @brief Cancels all the loading tasks in the queue.
+   * @SINCE_3_0.0
    */
   void CancelAll();
 
@@ -223,6 +237,7 @@ public:
    * @code
    *   void YourCallbackName( uint32_t id, PixelBuffer pixelBuffer );
    * @endcode
+   * @SINCE_3_0.0
    * @note Every connected callback receives a handle to the same PixelBuffer object.
    * @return A reference to a signal object to Connect() with
    */

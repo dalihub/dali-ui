@@ -37,6 +37,7 @@ class TextButtonImpl;
 
 /**
  * @brief TextButton is a label-only interactive button.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API TextButton : public InteractiveView
 {
@@ -71,6 +72,7 @@ public:
 
   /**
    * @brief Sets the font size.
+   * @SINCE_3_0.0
    * @pre The size must be finite and non-negative; a violation triggers an assertion.
    * @note Zero is also passed unchanged to the internal Label, without substituting the default preset size.
    */

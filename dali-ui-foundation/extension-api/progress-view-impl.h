@@ -35,6 +35,7 @@ namespace Extension
  * Derived renderers receive normalized value and determinate-state changes through the two
  * protected virtual hooks. Range coercion, public signals and accessibility values remain
  * common non-virtual behavior.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ProgressViewImpl : public ViewImpl
 {

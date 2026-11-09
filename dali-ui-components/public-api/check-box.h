@@ -41,6 +41,7 @@ class CheckBoxImpl;
  * Selection state is inherited from SelectableView
  * (IsSelected/SetSelected/SelectionChangedSignal/IsToggleByClickEnabled/
  * SetToggleByClickEnabled) and is intentionally NOT redeclared here.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API CheckBox : public SelectableView
 {
@@ -63,12 +64,14 @@ public:
 
   /**
    * @brief Sets the trailing label text. An empty string yields a box-only checkbox.
+   * @SINCE_3_0.0
    */
   void         SetText(const Dali::String& text);
   Dali::String GetText() const;
 
   /**
    * @brief Sets/gets how a selection-state change animates (default AUTO).
+   * @SINCE_3_0.0
    */
   void                   SetSelectionAnimationMode(SelectionAnimationMode mode);
   SelectionAnimationMode GetSelectionAnimationMode() const;
@@ -79,6 +82,7 @@ public:
    * Runtime changes follow the same contract as CheckBoxStyle. Only finite, non-negative values are allowed;
    * a violation triggers an assertion. Zero means unset: the width follows the resolved icon height,
    * and the height follows the content height (square glyph). Getters return requested values, not actual arranged sizes.
+   * @SINCE_3_0.0
    */
   void  SetIconWidth(float width);
   float GetIconWidth() const;
@@ -88,12 +92,14 @@ public:
   /**
    * @brief Sets/gets the trailing label's text style — color, font size, font family, and
    * underline — mirroring CheckBoxStyle. An underline of Text::Underline::None() clears it.
+   * @SINCE_3_0.0
    */
   void    SetTextColor(const UiColor& color);
   UiColor GetTextColor() const;
 
   /**
    * @brief Sets the font size.
+   * @SINCE_3_0.0
    * @pre The size must be finite and non-negative; a violation triggers an assertion.
    * @note Zero is also passed unchanged to the internal Label, without substituting the default preset size.
    */

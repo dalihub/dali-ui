@@ -32,18 +32,21 @@ namespace Text
  * @brief Describes line-through styling for text.
  *
  * This is a value-type object used to configure line-through appearance.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API LineThrough
 {
 public:
   /**
    * @brief Creates a line-through with default values.
+   * @SINCE_3_0.0
    */
   LineThrough();
 
   /**
    * @brief Creates a line-through by copying another line-through.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The line-through to copy.
    */
   LineThrough(const LineThrough& rhs);
@@ -51,6 +54,7 @@ public:
   /**
    * @brief Creates a line-through by moving another line-through.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The line-through to move.
    */
   LineThrough(LineThrough&& rhs) noexcept;
@@ -58,6 +62,7 @@ public:
   /**
    * @brief Copies another line-through to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The line-through to copy.
    */
   LineThrough& operator=(const LineThrough& rhs);
@@ -65,12 +70,14 @@ public:
   /**
    * @brief Moves another line-through to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The line-through to move.
    */
   LineThrough& operator=(LineThrough&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~LineThrough();
 
@@ -79,6 +86,7 @@ public:
    *
    * This value can be passed to SetTextLineThrough() to clear the line-through style.
    *
+   * @SINCE_3_0.0
    * @return A shared immutable none value.
    */
   static const LineThrough& None();
@@ -86,6 +94,7 @@ public:
   /**
    * @brief Compares this line-through with another line-through.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The line-through to compare with.
    * @return true if both values are equal.
    */
@@ -94,6 +103,7 @@ public:
   /**
    * @brief Compares this line-through with another line-through.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The line-through to compare with.
    * @return true if both values are not equal.
    */
@@ -103,6 +113,7 @@ public:
   /**
    * @brief Sets the line-through color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The line-through color.
    */
   void SetColor(const UiColor& color);
@@ -110,6 +121,7 @@ public:
   /**
    * @brief Returns the line-through color.
    *
+   * @SINCE_3_0.0
    * @return The line-through color.
    */
   const UiColor& GetColor() const;
@@ -117,6 +129,7 @@ public:
   /**
    * @brief Sets the line-through thickness.
    *
+   * @SINCE_3_0.0
    * @param[in] thickness The line-through thickness in pixels.
    */
   void SetThickness(float thickness);
@@ -124,6 +137,7 @@ public:
   /**
    * @brief Returns the line-through thickness.
    *
+   * @SINCE_3_0.0
    * @return The line-through thickness in pixels.
    */
   float GetThickness() const;

@@ -36,12 +36,14 @@ namespace Accessibility
  * @brief Callback invoked when the direct-reading status changes.
  *
  * The status string reference is valid only for the duration of the callback.
+ * @SINCE_3_0.0
  */
 using ReadingStatusCallback = Callback<void(const Dali::String&)>;
 
 /**
  * @brief Sets whether screen-reader output is suppressed.
  *
+ * @SINCE_3_0.0
  * @param[in] suppressed True to suppress screen-reader output, false to allow it
  * @return True if the request was forwarded to an accessibility bridge
  */
@@ -50,6 +52,7 @@ DALI_UI_API bool SetScreenReaderSuppressed(bool suppressed);
 /**
  * @brief Requests direct reading of the supplied text.
  *
+ * @SINCE_3_0.0
  * @param[in] text The text to read
  * @param[in] discardable True if a later request may discard this reading
  * @param[in] callback Optional callback that receives direct-reading status strings

@@ -48,12 +48,13 @@ namespace Ui
  * type with the same enumerators and values: an enumerator of the same name selects the same
  * policy, and static_cast<Extension::UiScalePolicy>(policy) converts a value read through the
  * deprecated members.
+ * @SINCE_3_0.0
  */
 enum class UiScalePolicy : uint8_t
 {
-  INHERIT  = 0, ///< Inherit effective scale from parent; root takes the UI scale of Extension::LayoutScaleManager (default).
-  ENABLED  = 1, ///< Always apply the current Extension::LayoutScaleManager UI scale, ignoring parent policy.
-  DISABLED = 2, ///< Opt out of the system scale (its term is 1.0); descendant INHERIT views also opt out.
+  INHERIT  = 0, ///< Inherit effective scale from parent; root takes the UI scale of Extension::LayoutScaleManager (default). @SINCE_3_0.0
+  ENABLED  = 1, ///< Always apply the current Extension::LayoutScaleManager UI scale, ignoring parent policy. @SINCE_3_0.0
+  DISABLED = 2, ///< Opt out of the system scale (its term is 1.0); descendant INHERIT views also opt out. @SINCE_3_0.0
 };
 
 } // namespace Ui

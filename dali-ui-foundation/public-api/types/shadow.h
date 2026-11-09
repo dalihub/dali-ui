@@ -34,6 +34,7 @@ namespace Ui
  * @brief Describes a View shadow.
  *
  * The shadow follows the View bounds and corner properties.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Shadow
 {
@@ -43,12 +44,14 @@ public:
    *
    * The default color is semi-transparent black, and the default blur radius,
    * offset, and extents are zero.
+   * @SINCE_3_0.0
    */
   Shadow();
 
   /**
    * @brief Creates a shadow with custom values.
    *
+   * @SINCE_3_0.0
    * @param[in] blurRadius The blur radius in pixels
    * @param[in] offset The shadow offset in pixels
    * @param[in] color The shadow color
@@ -60,6 +63,7 @@ public:
   /**
    * @brief Creates a shadow with custom blur radius and color.
    *
+   * @SINCE_3_0.0
    * @param[in] blurRadius The blur radius in pixels
    * @param[in] color The shadow color
    */
@@ -70,6 +74,7 @@ public:
    *
    * Use this to clear a View shadow or to indicate that no shadow should be applied.
    *
+   * @SINCE_3_0.0
    * @return A Shadow that represents no shadow
    */
   static Shadow None();
@@ -84,6 +89,7 @@ public:
   /**
    * @brief Compares this shadow with another shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The shadow to compare with
    * @return True if both values are equal
    */
@@ -92,6 +98,7 @@ public:
   /**
    * @brief Compares this shadow with another shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The shadow to compare with
    * @return True if both values are not equal
    */
@@ -100,6 +107,7 @@ public:
   /**
    * @brief Sets the shadow color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The shadow color
    * @return This shadow
    */
@@ -108,6 +116,7 @@ public:
   /**
    * @brief Gets the shadow color.
    *
+   * @SINCE_3_0.0
    * @return The shadow color
    */
   const UiColor& GetColor() const;
@@ -117,6 +126,7 @@ public:
    *
    * Negative values are clamped to zero.
    *
+   * @SINCE_3_0.0
    * @param[in] blurRadius The blur radius in pixels
    * @return This shadow
    */
@@ -125,6 +135,7 @@ public:
   /**
    * @brief Gets the blur radius.
    *
+   * @SINCE_3_0.0
    * @return The blur radius in pixels
    */
   float GetBlurRadius() const;
@@ -135,6 +146,7 @@ public:
    * The cutout policy controls whether the area covered by the View bounds and
    * corner properties is removed from the shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] cutoutPolicy The cutout policy
    * @return This shadow
    */
@@ -143,6 +155,7 @@ public:
   /**
    * @brief Gets how the View bounds area is cut out from the shadow.
    *
+   * @SINCE_3_0.0
    * @return The cutout policy
    */
   CutoutPolicy GetCutoutPolicy() const;
@@ -150,6 +163,7 @@ public:
   /**
    * @brief Sets the shadow offset.
    *
+   * @SINCE_3_0.0
    * @param[in] offset The offset in pixels
    * @return This shadow
    */
@@ -158,6 +172,7 @@ public:
   /**
    * @brief Gets the shadow offset.
    *
+   * @SINCE_3_0.0
    * @return The offset in pixels
    */
   const Vector2& GetOffset() const;
@@ -165,6 +180,7 @@ public:
   /**
    * @brief Sets the extra shadow size.
    *
+   * @SINCE_3_0.0
    * @param[in] extents Extra size in pixels
    * @return This shadow
    */
@@ -173,6 +189,7 @@ public:
   /**
    * @brief Gets the extra shadow size.
    *
+   * @SINCE_3_0.0
    * @return Extra size in pixels
    */
   const Vector2& GetExtents() const;

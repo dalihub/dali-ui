@@ -45,24 +45,27 @@ class ScatterSeries;
  *   series.SetValues({Vector2(0.5f, 30.0f), Vector2(1.8f, 55.0f), Vector2(3.2f, 45.0f)});
  *   chart.AddSeries(series);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ScatterSeries : public ChartSeries
 {
 public:
   /**
    * @brief The shape drawn for each data point marker.
+   * @SINCE_3_0.0
    */
   enum class MarkerShape
   {
-    CIRCLE,   ///< Circular marker. This is the default.
-    SQUARE,   ///< Square marker.
-    TRIANGLE, ///< Triangular marker.
-    DIAMOND   ///< Diamond-shaped marker.
+    CIRCLE,   ///< Circular marker. This is the default. @SINCE_3_0.0
+    SQUARE,   ///< Square marker. @SINCE_3_0.0
+    TRIANGLE, ///< Triangular marker. @SINCE_3_0.0
+    DIAMOND   ///< Diamond-shaped marker. @SINCE_3_0.0
   };
 
   /**
    * @brief Creates a new ScatterSeries.
    *
+   * @SINCE_3_0.0
    * @return A handle to the new series
    */
   static ScatterSeries New();
@@ -70,6 +73,7 @@ public:
   /**
    * @brief Downcasts a handle to a ScatterSeries handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A ScatterSeries handle, or an uninitialized handle if the cast fails
    */
@@ -77,17 +81,20 @@ public:
 
   /**
    * @brief Creates an uninitialized ScatterSeries handle.
+   * @SINCE_3_0.0
    */
   ScatterSeries();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~ScatterSeries();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   ScatterSeries(const ScatterSeries&) = default;
@@ -95,6 +102,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -105,6 +113,7 @@ public:
    *
    * The default is (0.8, 0.3, 0.3, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the markers
    */
   void SetColor(const Vector4& color);
@@ -112,6 +121,7 @@ public:
   /**
    * @brief Retrieves the color of the markers.
    *
+   * @SINCE_3_0.0
    * @return The color of the markers
    */
   Vector4 GetColor() const;
@@ -121,6 +131,7 @@ public:
    *
    * Clamped to a minimum of 1.0. The default is 6.0.
    *
+   * @SINCE_3_0.0
    * @param[in] radius The marker radius, in pixels
    */
   void SetMarkerRadius(float radius);
@@ -128,6 +139,7 @@ public:
   /**
    * @brief Retrieves the radius of each marker, in pixels.
    *
+   * @SINCE_3_0.0
    * @return The marker radius, in pixels
    */
   float GetMarkerRadius() const;
@@ -137,6 +149,7 @@ public:
    *
    * The default is MarkerShape::CIRCLE.
    *
+   * @SINCE_3_0.0
    * @param[in] shape The marker shape
    */
   void SetMarkerShape(MarkerShape shape);
@@ -144,6 +157,7 @@ public:
   /**
    * @brief Retrieves the shape drawn for each marker.
    *
+   * @SINCE_3_0.0
    * @return The marker shape
    */
   MarkerShape GetMarkerShape() const;

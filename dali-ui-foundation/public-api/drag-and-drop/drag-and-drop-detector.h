@@ -97,6 +97,7 @@ class DragAndDropDetector;
  *  }
  *
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API DragAndDropDetector : public BaseHandle
 {
@@ -117,6 +118,7 @@ public:
   /**
    * @brief Create an initialized DragAndDropDetector.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali DragAndDropDetector
    */
   static DragAndDropDetector New();
@@ -125,6 +127,7 @@ public:
    * @brief Create an uninitialized handle.
    *
    * This can be initialized with DragAndDropDetector::New().
+   * @SINCE_3_0.0
    */
   DragAndDropDetector();
 
@@ -132,12 +135,14 @@ public:
    * @brief Destructor
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~DragAndDropDetector();
 
   /**
    * @brief Registers a View as both a drag source and a drop target.
    *
+   * @SINCE_3_0.0
    * @note You can attach several views to a DragAndDropDetector.
    * DragAndDropDetector will keep a handle to the view and keep it alive as long as
    * DragAndDropDetector is deleted or DetachSourceAndTarget() is called.
@@ -148,6 +153,7 @@ public:
   /**
    * @brief Registers a View that can start a drag gesture.
    *
+   * @SINCE_3_0.0
    * @pre Must not be called from DropProposalCallback.
    */
   void AttachSource(Dali::Ui::View view);
@@ -162,6 +168,7 @@ public:
    * temporary value, to transfer its hidden implementation without a deep
    * copy.
    *
+   * @SINCE_3_0.0
    * @param[in] source Registered source to configure.
    * @param[in] payload Static payload copied or moved into the detector.
    * @pre The source View must already be registered.
@@ -171,6 +178,7 @@ public:
   /**
    * @brief Clears the payload configured for a registered source.
    *
+   * @SINCE_3_0.0
    * @pre The source View must already be registered.
    */
   void ClearSourcePayload(Dali::Ui::View source);
@@ -183,6 +191,7 @@ public:
    * retained while application approval is pending and takes precedence over
    * the static source payload for that gesture session.
    *
+   * @SINCE_3_0.0
    * @pre The source View must already be registered.
    * @pre A drag must not be active or finishing.
    */
@@ -193,6 +202,7 @@ public:
    *
    * Future gesture sessions use the static source payload again.
    *
+   * @SINCE_3_0.0
    * @pre The source View must already be registered.
    * @pre A drag must not be active or finishing.
    */
@@ -209,6 +219,7 @@ public:
    * active target disconnects, ExitedSignal is emitted immediately and the
    * next eligible connected target under the pointer is entered.
    *
+   * @SINCE_3_0.0
    * @pre Must not be called from DropProposalCallback.
    */
   void AttachTarget(Dali::Ui::View view);
@@ -227,6 +238,7 @@ public:
    * are evaluated in scene hit-test order and stop after the first valid
    * accepted target, so callbacks behind it are not invoked.
    *
+   * @SINCE_3_0.0
    * @note An object bound to the callback must remain alive until the callback
    * is cleared, the target is detached, or the detector is destroyed.
    * @note Source or target registration must not be changed from inside the
@@ -242,6 +254,7 @@ public:
    *
    * The target accepts every geometrically eligible drag afterward.
    *
+   * @SINCE_3_0.0
    * @pre The target View must already be registered.
    * @pre A drag must not be active or finishing when clearing the callback.
    */
@@ -282,6 +295,7 @@ public:
    * }
    * @endcode
    *
+   * @SINCE_3_0.0
    * @note An object bound to the callback must remain alive until auto-scroll
    * is cleared or the detector is destroyed.
    *
@@ -295,6 +309,7 @@ public:
   /**
    * @brief Disables callback-driven drag auto-scroll.
    *
+   * @SINCE_3_0.0
    * @pre A drag must not be active or finishing.
    */
   void ClearAutoScrollCallback();
@@ -307,6 +322,7 @@ public:
    * The movement threshold and optional application activation callback are
    * evaluated after this prerequisite.
    *
+   * @SINCE_3_0.0
    * @pre No drag activation may be pending and no drag may be active or finishing.
    */
   void SetDragActivationMode(DragActivationMode mode);
@@ -314,6 +330,7 @@ public:
   /**
    * @brief Returns the built-in drag activation mode.
    *
+   * @SINCE_3_0.0
    * @return PAN by default, or the mode most recently configured.
    */
   DragActivationMode GetDragActivationMode() const;
@@ -326,6 +343,7 @@ public:
    * selected settings are frozen when activation begins and remain unchanged
    * for the pending or active session.
    *
+   * @SINCE_3_0.0
    * @param[in] deviceClass DALi input device class to override.
    * @param[in] configuration Mode and non-negative movement threshold.
    * @pre The device class and activation mode must be valid.
@@ -340,6 +358,7 @@ public:
    * Future gestures from the device use the detector's default activation
    * mode and movement threshold.
    *
+   * @SINCE_3_0.0
    * @pre The device class must be valid.
    * @pre No drag activation may be pending and no drag may be active or finishing.
    */
@@ -347,6 +366,7 @@ public:
 
   /**
    * @brief Returns whether one input device has an explicit override.
+   * @SINCE_3_0.0
    */
   bool HasDragActivationConfiguration(Device::Class::Type deviceClass) const;
 
@@ -355,6 +375,7 @@ public:
    *
    * The explicit override is returned when present; otherwise the current
    * default activation mode and movement threshold are returned.
+   * @SINCE_3_0.0
    */
   DragActivationConfiguration GetDragActivationConfiguration(Device::Class::Type deviceClass) const;
 
@@ -369,6 +390,7 @@ public:
    * The callback may call CancelDrag() or unregister its candidate source.
    * In that case activation is discarded even if the callback returns true.
    *
+   * @SINCE_3_0.0
    * @note An object bound to the callback must remain alive until the callback
    * is cleared or the detector is destroyed.
    * @pre The callback must be valid.
@@ -381,6 +403,7 @@ public:
    *
    * Built-in activation conditions approve future sessions automatically.
    *
+   * @SINCE_3_0.0
    * @pre No drag activation may be pending and no drag may be active or finishing.
    */
   void ClearCanStartDragCallback();
@@ -397,6 +420,7 @@ public:
    * A value of zero applies no additional movement requirement. The underlying
    * DALi recognizers can still apply their platform gesture conditions.
    *
+   * @SINCE_3_0.0
    * @param[in] threshold Non-negative distance in screen pixels.
    * @pre No drag activation may be pending and no drag may be active or finishing.
    */
@@ -405,6 +429,7 @@ public:
   /**
    * @brief Returns the additional movement required to activate a drag.
    *
+   * @SINCE_3_0.0
    * @return The non-negative threshold in screen pixels.
    */
   float GetDragStartThreshold() const;
@@ -415,12 +440,14 @@ public:
    * This includes waiting for the movement threshold or application callback
    * approval. It is false before the configured gesture prerequisite and
    * after the drag session has been created.
+   * @SINCE_3_0.0
    */
   bool IsDragActivationPending() const;
 
   /**
    * @brief Detaches the attached view from the detector.
    *
+   * @SINCE_3_0.0
    * @pre The specified view has been attached as both roles.
    * @pre Must not be called from DropProposalCallback.
    */
@@ -429,6 +456,7 @@ public:
   /**
    * @brief Unregisters a drag source View.
    *
+   * @SINCE_3_0.0
    * @pre Must not be called from DropProposalCallback.
    */
   void DetachSource(Dali::Ui::View view);
@@ -441,6 +469,7 @@ public:
    * pointer position. An explicit session clears the target
    * until the application calls MoveDragTo() again.
    *
+   * @SINCE_3_0.0
    * @pre Must not be called from DropProposalCallback.
    */
   void DetachTarget(Dali::Ui::View view);
@@ -450,6 +479,7 @@ public:
    *
    * An active drag is cancelled before the views are detached.
    *
+   * @SINCE_3_0.0
    * @pre Must not be called from DropProposalCallback.
    */
   void DetachAll();
@@ -463,6 +493,7 @@ public:
    * eligible. The session starts at the center of the source's transformed
    * screen bounds and bypasses gesture activation settings and callbacks.
    *
+   * @SINCE_3_0.0
    * @param[in] source Registered source used to create the session.
    * @param[in] deviceClass Input class represented by the controller, such as
    * KEYBOARD or USER.
@@ -480,6 +511,7 @@ public:
    * The supplied payload is captured for this session only and does not modify
    * the source's static payload or provider.
    *
+   * @SINCE_3_0.0
    * @param[in] source Registered source used to create the session.
    * @param[in] payload Data and operation captured for this session.
    * @param[in] deviceClass Input class represented by the controller.
@@ -500,6 +532,7 @@ public:
    * preview, and auto-scroll processing. A rejected target becomes feedback
    * only and is not the current drop target.
    *
+   * @SINCE_3_0.0
    * @return True if @p target is accepted and remains the current target.
    */
   bool MoveDragTo(Dali::Ui::View target);
@@ -507,6 +540,7 @@ public:
   /**
    * @brief Finishes an explicit drag session.
    *
+   * @SINCE_3_0.0
    * @return True when the session was dropped on an accepted target. An
    * active session without a target finishes with NO_TARGET and returns false.
    */
@@ -521,6 +555,7 @@ public:
    * when neither state exists or terminal callbacks are already running.
    * It is safe to call from Started, Entered, Moved, target feedback, or drag
    * preview callbacks.
+   * @SINCE_3_0.0
    */
   void CancelDrag();
 
@@ -529,12 +564,14 @@ public:
    *
    * This remains true through Dropped, Cancelled, target feedback cleanup, and
    * the drag preview finalizer. It is false in EndedSignal and outside a session.
+   * @SINCE_3_0.0
    */
   bool IsDragging() const;
 
   /**
    * @brief Returns how the active or finishing drag session was created.
    *
+   * @SINCE_3_0.0
    * @return GESTURE or EXPLICIT during a session, otherwise NONE.
    */
   DragSessionOrigin GetDragSessionOrigin() const;
@@ -542,6 +579,7 @@ public:
   /**
    * @brief Returns the active or finishing drag source.
    *
+   * @SINCE_3_0.0
    * @return The source, or an empty View outside a drag session.
    */
   Dali::Ui::View GetDragSource() const;
@@ -549,17 +587,20 @@ public:
   /**
    * @brief Returns the active or finishing accepted target.
    *
+   * @SINCE_3_0.0
    * @return The current or finishing target, or an empty View.
    */
   Dali::Ui::View GetDragTarget() const;
 
   /**
    * @brief Returns the number of registered drag sources.
+   * @SINCE_3_0.0
    */
   uint32_t GetAttachedSourceCount() const;
 
   /**
    * @brief Returns the number of registered drop targets.
+   * @SINCE_3_0.0
    */
   uint32_t GetAttachedTargetCount() const;
 
@@ -569,6 +610,7 @@ public:
    * Sources are indexed in registration order. Registering the same source
    * again does not change its index.
    *
+   * @SINCE_3_0.0
    * @return The source, or an empty View when the index is out of range.
    */
   Dali::Ui::View GetAttachedSource(uint32_t index) const;
@@ -580,6 +622,7 @@ public:
    * again does not change its index. Scene disconnection does not remove a
    * target registration.
    *
+   * @SINCE_3_0.0
    * @return The target, or an empty View when the index is out of range.
    */
   Dali::Ui::View GetAttachedTarget(uint32_t index) const;
@@ -599,6 +642,7 @@ public:
    * This may be called from Dropped, Cancelled, or Ended callbacks to configure
    * the reusable preview for a subsequent session.
    *
+   * @SINCE_3_0.0
    * @pre A drag must not be processing pointer or explicit movement updates.
    */
   void SetDragPreview(Dali::Ui::View preview);
@@ -642,6 +686,7 @@ public:
    * detector.SetDragPreviewCallbacks( factory, updater, finalizer );
    * @endcode
    *
+   * @SINCE_3_0.0
    * @pre A drag must not be active or finishing.
    */
   void SetDragPreviewContainer(Dali::Ui::View container);
@@ -672,6 +717,7 @@ public:
    * These callbacks take precedence over the reusable View configured by
    * SetDragPreview().
    *
+   * @SINCE_3_0.0
    * @note An object bound to a callback must remain alive until the callbacks
    * are cleared or the detector is destroyed.
    *
@@ -687,6 +733,7 @@ public:
    * The reusable preview configured with SetDragPreview(), if any, becomes
    * active again for subsequent drags.
    *
+   * @SINCE_3_0.0
    * @pre A drag must not be active or finishing.
    */
   void ClearDragPreviewCallbacks();
@@ -712,6 +759,7 @@ public:
    * finalizer is invoked. It does not change the preview's UiScalePolicy: the
    * preview and its children are laid out at their own effective scale, like any
    * other View added to the same container.
+   * @SINCE_3_0.0
    */
   DragPreviewPositionSignalType& DragPreviewPositionSignal();
 
@@ -722,6 +770,7 @@ public:
    * and preview finalizer callbacks. EndedSignal receives its terminal payload
    * in DragAndDropEvent after detector query state has been cleared. This
    * method returns an empty payload outside an active or finishing session.
+   * @SINCE_3_0.0
    */
   const DragPayload& GetDragPayload() const;
 
@@ -729,6 +778,7 @@ public:
    * @brief Returns the current position of the dragged object.
    *
    * This is the dropped position when an object is dropped.
+   * @SINCE_3_0.0
    * @return The current screen position.
    */
   const Vector2& GetCurrentScreenPosition() const;
@@ -742,6 +792,7 @@ public:
    *   void YourCallback( const DragAndDropEvent& event,
    *                      DragAndDropDetector detector );
    * @endcode
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   DragEventSignalType& StartedSignal();
@@ -754,6 +805,7 @@ public:
    *   void YourCallback( const DragAndDropEvent& event,
    *                      DragAndDropDetector detector );
    * @endcode
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   DragEventSignalType& EnteredSignal();
@@ -766,6 +818,7 @@ public:
    *   void YourCallback( const DragAndDropEvent& event,
    *                      DragAndDropDetector detector );
    * @endcode
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   DragEventSignalType& ExitedSignal();
@@ -778,6 +831,7 @@ public:
    *   void YourCallback( const DragAndDropEvent& event,
    *                      DragAndDropDetector detector );
    * @endcode
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   DragEventSignalType& MovedSignal();
@@ -790,6 +844,7 @@ public:
    *   void YourCallback( const DragAndDropEvent& event,
    *                      DragAndDropDetector detector );
    * @endcode
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   DragEventSignalType& DroppedSignal();
@@ -811,6 +866,7 @@ public:
    *
    * ExitedSignal is emitted first when a target is active, and EndedSignal is
    * emitted after this signal.
+   * @SINCE_3_0.0
    */
   DragEventSignalType& CancelledSignal();
 
@@ -826,6 +882,7 @@ public:
    * intersected target accepts the drag. The signal emits a final NONE event
    * when a session finishes so application feedback can be reset.
    *
+   * @SINCE_3_0.0
    * @return The target feedback changed signal.
    */
   TargetFeedbackChangedSignalType& TargetFeedbackChangedSignal();
@@ -842,6 +899,7 @@ public:
    * Detector query state has been cleared and IsDragging() is false while
    * this signal is emitted. Use the event argument for terminal data. Starting
    * another session is rejected until the callback returns.
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   DragEventSignalType& EndedSignal();
@@ -850,6 +908,7 @@ public: // Not intended for application developers
   /**
    * @brief This constructor is used by DragAndDropDetector::Get().
    *
+   * @SINCE_3_0.0
    * @param[in] detector A pointer to the drag and drop detector.
    */
   explicit DALI_INTERNAL DragAndDropDetector(Dali::Ui::Internal::DragAndDropDetector* detector);

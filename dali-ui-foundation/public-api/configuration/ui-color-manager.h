@@ -46,6 +46,7 @@ class UiColorManagerImpl;
  * returns @c true, the output color is used and the theme loader is
  * skipped. If it returns @c false, the normal theme lookup proceeds.
  *
+ * @SINCE_3_0.0
  * @param[in] colorId The color identifier being looked up
  * @param[out] outColor The overridden RGBA value (only used when returning true)
  * @return @c true if the color is overridden, @c false to fall through to the theme
@@ -60,6 +61,7 @@ using ColorOverrideFunc = bool (*)(StringView colorId, Vector4& outColor);
  * @code
  *   manager.UpdateBinding(color, view, ColorCallback::New(this, &MyImpl::SetColor));
  * @endcode
+ * @SINCE_3_0.0
  */
 using ColorCallback = Callback<void(const Vector4&)>;
 
@@ -74,6 +76,7 @@ using ColorCallback = Callback<void(const Vector4&)>;
  *   // Query a color
  *   Vector4 bg = UiColorManager::Get().GetColor("bg_primary");
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiColorManager : public BaseHandle
 {
@@ -82,17 +85,20 @@ public:
 
   /**
    * @brief Creates an uninitialized UiColorManager handle.
+   * @SINCE_3_0.0
    */
   UiColorManager();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~UiColorManager() = default;
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to copy
    */
   UiColorManager(const UiColorManager& handle) = default;
@@ -100,6 +106,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   UiColorManager(UiColorManager&& rhs) noexcept = default;
@@ -107,6 +114,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -115,6 +123,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -125,6 +134,7 @@ public:
    *
    * Creates the instance on first call.
    *
+   * @SINCE_3_0.0
    * @return A handle to the UiColorManager singleton
    */
   static UiColorManager Get();
@@ -132,6 +142,7 @@ public:
   /**
    * @brief Downcasts a handle to a UiColorManager handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a UiColorManager or an uninitialized handle
    */
@@ -140,6 +151,7 @@ public:
   /**
    * @brief Looks up a single color by its identifier.
    *
+   * @SINCE_3_0.0
    * @param[in] colorId The color identifier
    * @return The resolved RGBA value, or Vector4::ZERO if not found
    */
@@ -148,6 +160,7 @@ public:
   /**
    * @brief Looks up a color by its identifier.
    *
+   * @SINCE_3_0.0
    * @param[in] colorId The color identifier
    * @param[out] outColor The resolved RGBA value if found
    * @return True if the color was found
@@ -164,6 +177,7 @@ public:
    *
    * Ownership of @a callback is transferred to the manager.
    *
+   * @SINCE_3_0.0
    * @param[in] view      The target object
    * @param[in] bindingId A caller-defined identifier for this binding (e.g. "BackgroundColor")
    * @param[in] callback  A ColorCallback created via ColorCallback::New(),
@@ -178,6 +192,7 @@ public:
   /**
    * @brief Retrieves the UiColor associated with a named binding.
    *
+   * @SINCE_3_0.0
    * @param[in]  view      The target object
    * @param[in]  bindingId The binding identifier used in UpdateBinding
    * @param[out] outColor  The bound UiColor if found
@@ -188,6 +203,7 @@ public:
   /**
    * @brief Returns whether a named binding exists for an object.
    *
+   * @SINCE_3_0.0
    * @param[in] view      The target object
    * @param[in] bindingId The binding identifier
    * @return @c true if a binding with the given id is registered
@@ -200,6 +216,7 @@ public:
    * Stores @a color so the callback is invoked with the resolved value on theme change.
    * If no binding with @a bindingId exists, this call is a no-op.
    *
+   * @SINCE_3_0.0
    * @param[in] view      The target object
    * @param[in] bindingId The binding identifier used in RegisterBinding
    * @param[in] color     The new UiColor to store (must have a color ID)
@@ -209,6 +226,7 @@ public:
   /**
    * @brief Removes a named binding.
    *
+   * @SINCE_3_0.0
    * @param[in] view      The target object
    * @param[in] bindingId The binding identifier used in UpdateBinding
    */
@@ -217,6 +235,7 @@ public:
   /**
    * @brief Removes all bindings associated with a given object.
    *
+   * @SINCE_3_0.0
    * @param[in] view The target object to unbind completely
    */
   void ClearBindings(BaseHandle view);
@@ -232,6 +251,7 @@ public:
    * Setting the override immediately refreshes all existing View bindings
    * so that the overridden colors are applied without delay.
    *
+   * @SINCE_3_0.0
    * @note This parameter is a plain function pointer (ColorOverrideFunc).
    * Lambdas with captures and member function pointers are not accepted.
    * Only free functions or stateless lambdas may be used.
@@ -260,6 +280,7 @@ public:
    * @brief Clears the color override callback.
    *
    * All View bindings are immediately refreshed to use the theme values.
+   * @SINCE_3_0.0
    */
   void ClearColorOverride();
 
@@ -269,6 +290,7 @@ public:
    * Call this when a color override function changes its internal state
    * so that subsequent UiColor::GetRgba() calls re-resolve from the
    * theme/override.
+   * @SINCE_3_0.0
    */
   void InvalidateCache();
 
@@ -279,6 +301,7 @@ public:
    * the next GetRgba() call re-resolves from the theme/override.
    * No-op if the UiColor holds a direct RGBA value.
    *
+   * @SINCE_3_0.0
    * @param[in] color The UiColor whose cache entry should be invalidated
    */
   void InvalidateCache(const UiColor& color);
@@ -291,6 +314,7 @@ public:
    * compound color data, such as gradients, and need to re-resolve their own
    * UiColor values.
    *
+   * @SINCE_3_0.0
    * @return A reference to the color-table-changed signal
    */
   ColorTableChangedSignalType& ColorTableChangedSignal();

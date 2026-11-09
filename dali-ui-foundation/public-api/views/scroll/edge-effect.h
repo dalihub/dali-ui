@@ -59,6 +59,7 @@ class EdgeEffectImpl;
  * effect.SetSource(scrollContent);
  * scrollView.SetStartEdgeEffect(effect);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API EdgeEffect : public Dali::BaseHandle
 {
@@ -80,11 +81,13 @@ public:
 public:
   /**
    * @brief Creates an uninitialized EdgeEffect handle (evaluates to false).
+   * @SINCE_3_0.0
    */
   EdgeEffect() = default;
 
   /**
    * @brief Creates an initialized default EdgeEffect with no visual behaviour.
+   * @SINCE_3_0.0
    */
   static EdgeEffect New();
 
@@ -97,22 +100,26 @@ public:
 
   /**
    * @brief Sets the source view whose visual position this effect manipulates.
+   * @SINCE_3_0.0
    */
   void SetSource(View source);
 
   /**
    * @brief Gets the source view.
+   * @SINCE_3_0.0
    */
   View GetSource() const;
 
   /**
    * @brief Returns the current state.
+   * @SINCE_3_0.0
    */
   State GetState() const;
 
   /**
    * @brief Called while the user drags past the edge.
    *
+   * @SINCE_3_0.0
    * @param[in] deltaDistance  Incremental drag distance (px) since last call.
    * @param[in] displacement   Total displacement from the edge boundary (px).
    */
@@ -120,31 +127,46 @@ public:
 
   /**
    * @brief Called when the user lifts their finger after a drag.
+   * @SINCE_3_0.0
    */
   void OnRelease();
 
   /**
    * @brief Called when a fling reaches the edge.
    *
+   * @SINCE_3_0.0
    * @param[in] velocity  Velocity at impact (px/ms).
    */
   void OnAbsorb(float velocity);
 
   /**
    * @brief Forces the effect back to IDLE immediately.
+   * @SINCE_3_0.0
    */
   void Finish();
 
-  /** @brief Signal emitted each time OnPull() is processed. */
+  /**
+   * @brief Signal emitted each time OnPull() is processed.
+   * @SINCE_3_0.0
+   */
   PullSignalType& PullSignal();
 
-  /** @brief Signal emitted each time OnRelease() is processed. */
+  /**
+   * @brief Signal emitted each time OnRelease() is processed.
+   * @SINCE_3_0.0
+   */
   ReleaseSignalType& ReleaseSignal();
 
-  /** @brief Signal emitted each time OnAbsorb() is processed. */
+  /**
+   * @brief Signal emitted each time OnAbsorb() is processed.
+   * @SINCE_3_0.0
+   */
   AbsorbSignalType& AbsorbSignal();
 
-  /** @brief Signal emitted each time Finish() is called. */
+  /**
+   * @brief Signal emitted each time Finish() is called.
+   * @SINCE_3_0.0
+   */
   FinishedSignalType& FinishedSignal();
 
 public: // Not intended for application developers

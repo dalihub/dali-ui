@@ -34,12 +34,14 @@ namespace Ui
  *   Duration d1 = 300_ms;   // 0.3 seconds
  *   Duration d2 = 1.5_s;    // 1.5 seconds
  * @endcode
+ * @SINCE_3_0.0
  */
 class Duration
 {
 public:
   /**
    * @brief Constructs a Duration of zero seconds.
+   * @SINCE_3_0.0
    */
   constexpr Duration()
   : mSeconds(0.0f)
@@ -48,6 +50,7 @@ public:
 
   /**
    * @brief Constructs a Duration from seconds.
+   * @SINCE_3_0.0
    * @param[in] seconds The duration in seconds
    */
   constexpr explicit Duration(float seconds)
@@ -57,6 +60,7 @@ public:
 
   /**
    * @brief Returns the duration in seconds.
+   * @SINCE_3_0.0
    * @return The duration value in seconds
    */
   constexpr float InSeconds() const
@@ -66,6 +70,7 @@ public:
 
   /**
    * @brief Returns the duration in milliseconds.
+   * @SINCE_3_0.0
    * @return The duration value in milliseconds
    */
   constexpr float InMilliseconds() const
@@ -82,6 +87,7 @@ private:
  * @code
  *   Duration d = 300_ms;  // 0.3 seconds
  * @endcode
+ * @SINCE_3_0.0
  */
 constexpr Duration operator""_ms(unsigned long long value)
 {
@@ -93,6 +99,7 @@ constexpr Duration operator""_ms(unsigned long long value)
  * @code
  *   Duration d = 300.0_ms;  // 0.3 seconds
  * @endcode
+ * @SINCE_3_0.0
  */
 constexpr Duration operator""_ms(long double value)
 {
@@ -104,6 +111,7 @@ constexpr Duration operator""_ms(long double value)
  * @code
  *   Duration d = 2_s;  // 2.0 seconds
  * @endcode
+ * @SINCE_3_0.0
  */
 constexpr Duration operator""_s(unsigned long long value)
 {
@@ -115,6 +123,7 @@ constexpr Duration operator""_s(unsigned long long value)
  * @code
  *   Duration d = 1.5_s;  // 1.5 seconds
  * @endcode
+ * @SINCE_3_0.0
  */
 constexpr Duration operator""_s(long double value)
 {

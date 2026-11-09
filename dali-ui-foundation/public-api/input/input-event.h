@@ -43,23 +43,27 @@ class InputEventImpl;
 
 /**
  * @brief
+ * @SINCE_3_0.0
  */
 class DALI_UI_API InputEvent : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized InputEvent handle.
+   * @SINCE_3_0.0
    */
   InputEvent() = default;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~InputEvent() = default;
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to copy
    */
   InputEvent(const InputEvent& handle) = default;
@@ -67,6 +71,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   InputEvent(InputEvent&& rhs) noexcept = default;
@@ -74,6 +79,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -82,6 +88,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -93,6 +100,7 @@ public:
    * The returned event has InputEventType::NONE. Use this when emitting
    * signals for explicit API calls or framework initiated state changes.
    *
+   * @SINCE_3_0.0
    * @return A const reference to the shared programmatic InputEvent
    */
   static const InputEvent& Programmatic();
@@ -100,6 +108,7 @@ public:
   /**
    * @brief Creates a new InputEvent from a touch event.
    *
+   * @SINCE_3_0.0
    * @param[in] originEvent The originating touch event
    * @return A handle to the new InputEvent
    */
@@ -108,6 +117,7 @@ public:
   /**
    * @brief Creates a new InputEvent from a key event.
    *
+   * @SINCE_3_0.0
    * @param[in] originEvent The originating key event
    * @return A handle to the new InputEvent
    */
@@ -116,6 +126,7 @@ public:
   /**
    * @brief Creates a new InputEvent from a tap gesture.
    *
+   * @SINCE_3_0.0
    * @param[in] originEvent The originating tap gesture
    * @return A handle to the new InputEvent
    */
@@ -124,6 +135,7 @@ public:
   /**
    * @brief Creates a new InputEvent from a long-press gesture.
    *
+   * @SINCE_3_0.0
    * @param[in] originEvent The originating long-press gesture
    * @return A handle to the new InputEvent
    */
@@ -132,6 +144,7 @@ public:
   /**
    * @brief Creates a new InputEvent from a wheel event.
    *
+   * @SINCE_3_0.0
    * @param[in] originEvent The originating wheel event
    * @return A handle to the new InputEvent
    */
@@ -140,6 +153,7 @@ public:
   /**
    * @brief Creates a new InputEvent from a hover event.
    *
+   * @SINCE_3_0.0
    * @param[in] originEvent The originating hover event
    * @return A handle to the new InputEvent
    */
@@ -148,6 +162,7 @@ public:
   /**
    * @brief Get the type of this event.
    *
+   * @SINCE_3_0.0
    * @return The type of the input event
    */
   InputEventType GetInputEventType() const;
@@ -158,6 +173,7 @@ public:
    * Programmatic changes use InputEventType::NONE and are not caused by a
    * concrete input event. This can be true together with IsCancellation().
    *
+   * @SINCE_3_0.0
    * @return true if this event represents a programmatic change
    */
   bool IsProgrammatic() const;
@@ -169,6 +185,7 @@ public:
    * input event, and concrete input events whose sequence was interrupted. This
    * can be true together with IsProgrammatic().
    *
+   * @SINCE_3_0.0
    * @return true if this event represents a cancellation
    */
   bool IsCancellation() const;
@@ -178,37 +195,44 @@ public:
    *
    * The input event type and payload are preserved.
    *
+   * @SINCE_3_0.0
    * @return A copy of this event with the cancellation flag set
    */
   InputEvent WithCancellation() const;
 
   /**
    * @brief
+   * @SINCE_3_0.0
    */
   const TouchEvent& GetTouchEvent() const;
 
   /**
    * @brief
+   * @SINCE_3_0.0
    */
   const KeyEvent& GetKeyEvent() const;
 
   /**
    * @brief
+   * @SINCE_3_0.0
    */
   const TapGesture& GetTapGesture() const;
 
   /**
    * @brief
+   * @SINCE_3_0.0
    */
   const LongPressGesture& GetLongPressGesture() const;
 
   /**
    * @brief
+   * @SINCE_3_0.0
    */
   const WheelEvent& GetWheelEvent() const;
 
   /**
    * @brief
+   * @SINCE_3_0.0
    */
   const HoverEvent& GetHoverEvent() const;
 
@@ -216,6 +240,7 @@ public: // Not intended for Application developers
   /**
    * @brief This constructor is used by InputEvent factory methods.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation of the input event
    */
   explicit InputEvent(Internal::InputEventImpl* impl);

@@ -34,12 +34,14 @@ namespace Text
  * AnchorSpan stores only the anchor attribute payload. The text range is owned
  * by the StyledTextBuilder attachment that uses the span. The payload is
  * provided when the span is created and is not mutated through public setters.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API AnchorSpan : public Span
 {
 public:
   /**
    * @brief Creates an uninitialized AnchorSpan handle.
+   * @SINCE_3_0.0
    */
   AnchorSpan() = default;
 
@@ -49,6 +51,7 @@ public:
    * The HREF attribute is required. An explicitly set empty HREF is valid, but
    * an unset HREF returns an empty handle.
    *
+   * @SINCE_3_0.0
    * @param[in] attributes The anchor attribute payload
    * @return A new AnchorSpan, or an empty handle when HREF is unset
    */
@@ -57,6 +60,7 @@ public:
   /**
    * @brief Downcasts a handle to AnchorSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized AnchorSpan on success, otherwise empty
    */
@@ -65,6 +69,7 @@ public:
   /**
    * @brief Gets the anchor attribute payload.
    *
+   * @SINCE_3_0.0
    * @return The anchor attributes
    */
   Text::AnchorAttributes GetAnchorAttributes() const;
@@ -73,6 +78,7 @@ private:
   /**
    * @brief Creates an AnchorSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL AnchorSpan(BaseObject* impl);

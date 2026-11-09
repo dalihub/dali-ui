@@ -50,6 +50,7 @@ namespace Ui
  *   // Predefined color IDs
  *   view.SetBackgroundColor(UiColor::PRIMARY);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiColor
 {
@@ -62,6 +63,7 @@ public:
 
   /**
    * @brief Theme color for content displayed on the highest surface container.
+   * @SINCE_3_0.0
    */
   static const UiColor ON_SURFACE_CONTAINER_HIGHEST;
   static const UiColor OUTLINE;
@@ -72,12 +74,14 @@ public:
    * @brief Creates a UiColor with no color value.
    *
    * GetRgba() resolves this color to transparent black.
+   * @SINCE_3_0.0
    */
   UiColor();
 
   /**
    * @brief Creates a UiColor with explicit RGBA components.
    *
+   * @SINCE_3_0.0
    * @param[in] r Red component (0.0 ~ 1.0)
    * @param[in] g Green component (0.0 ~ 1.0)
    * @param[in] b Blue component (0.0 ~ 1.0)
@@ -88,6 +92,7 @@ public:
   /**
    * @brief Creates a UiColor from a Vector4.
    *
+   * @SINCE_3_0.0
    * @param[in] color The RGBA color as Vector4
    */
   UiColor(const Vector4& color);
@@ -98,6 +103,7 @@ public:
    * The actual RGBA value is resolved from the current theme when
    * GetRgba() is called.
    *
+   * @SINCE_3_0.0
    * @param[in] colorId The color identifier string
    */
   explicit UiColor(const String& colorId);
@@ -111,6 +117,7 @@ public:
    * This overload enables moving the string into the internal token registry
    * to avoid an extra copy when the caller provides an rvalue.
    *
+   * @SINCE_3_0.0
    * @param[in] colorId The color identifier string
    */
   explicit UiColor(String&& colorId);
@@ -118,6 +125,7 @@ public:
   /**
    * @brief Creates a UiColor from a hex RGB value.
    *
+   * @SINCE_3_0.0
    * @param[in] rgb 0xRRGGBB format hex color
    * @param[in] a Alpha component (0.0 ~ 1.0), defaults to 1.0
    */
@@ -136,6 +144,7 @@ public:
    * This compares the stored color representation, not the currently resolved
    * RGBA value from the theme.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The color to compare with
    * @return true if both colors have the same stored representation
    */
@@ -144,6 +153,7 @@ public:
   /**
    * @brief Compares this color with another color.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The color to compare with
    * @return true if both colors do not have the same stored representation
    */
@@ -152,6 +162,7 @@ public:
   /**
    * @brief Returns whether this UiColor holds a string color ID.
    *
+   * @SINCE_3_0.0
    * @return True if this UiColor was constructed with a color ID
    */
   bool HasColorId() const;
@@ -159,6 +170,7 @@ public:
   /**
    * @brief Returns the color ID string.
    *
+   * @SINCE_3_0.0
    * @return The color ID, or an empty string if this is a direct RGBA color
    */
   String GetColorId() const;
@@ -171,6 +183,7 @@ public:
    * mColor value (default transparent black).
    * If this UiColor has direct RGBA values, returns them as-is.
    *
+   * @SINCE_3_0.0
    * @return The resolved RGBA color
    */
   Vector4 GetRgba() const;
@@ -179,6 +192,7 @@ public:
    * @brief Implicit conversion to Vector4.
    *
    * Equivalent to calling GetRgba().
+   * @SINCE_3_0.0
    */
   operator Vector4() const;
 
@@ -188,6 +202,7 @@ public:
    * - RGBA: out.a = in.a * factor
    * - Token: the resolved alpha is scaled by factor
    * - None: remains none
+   * @SINCE_3_0.0
    */
   UiColor ScaleAlpha(float factor) const;
 
@@ -197,6 +212,7 @@ public:
    * - RGBA: out.a = alpha
    * - Token: the resolved alpha is replaced with alpha
    * - None: remains none
+   * @SINCE_3_0.0
    */
   UiColor WithAlpha(float alpha) const;
 
@@ -206,6 +222,7 @@ public:
    * Equivalent to the default constructor. GetRgba() resolves this color to
    * transparent black.
    *
+   * @SINCE_3_0.0
    * @return A UiColor with no color value
    */
   static UiColor None();
@@ -213,6 +230,7 @@ public:
   /**
    * @brief Returns whether this UiColor has no color value.
    *
+   * @SINCE_3_0.0
    * @return True if this UiColor has no color value
    */
   bool IsNone() const;

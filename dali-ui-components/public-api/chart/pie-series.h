@@ -48,23 +48,27 @@ class PieSeries;
  *   series.AddSlice("Other", 15.0f, Vector4(0.6f, 0.6f, 0.6f, 1.0f));
  *   chart.AddSeries(series);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API PieSeries : public ChartSeries
 {
 public:
   /**
    * @brief Creates an uninitialized PieSeries handle.
+   * @SINCE_3_0.0
    */
   PieSeries();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~PieSeries();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   PieSeries(const PieSeries& rhs);
@@ -72,6 +76,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   PieSeries(PieSeries&& rhs);
@@ -79,6 +84,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -87,6 +93,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return A reference to this handle
    */
@@ -95,6 +102,7 @@ public:
   /**
    * @brief Creates a new PieSeries.
    *
+   * @SINCE_3_0.0
    * @return A handle to the new series
    */
   static PieSeries New();
@@ -102,6 +110,7 @@ public:
   /**
    * @brief Downcasts a handle to a PieSeries handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A PieSeries handle, or an uninitialized handle if the cast fails
    */
@@ -113,6 +122,7 @@ public:
    * Slices with a value of 0 or less are ignored. Slices are drawn in the
    * order they were added.
    *
+   * @SINCE_3_0.0
    * @param[in] label The slice label, shown in the legend and tooltip
    * @param[in] value The slice value; each slice's share of the pie is its
    *                   value divided by the sum of all slice values
@@ -122,12 +132,14 @@ public:
 
   /**
    * @brief Removes all slices from the series.
+   * @SINCE_3_0.0
    */
   void ClearSlices();
 
   /**
    * @brief Retrieves the number of slices in the series.
    *
+   * @SINCE_3_0.0
    * @return The number of slices
    */
   int GetSliceCount() const;
@@ -138,6 +150,7 @@ public:
    * A value above 0 draws a donut chart with a hole of that relative size.
    * Clamped to [0, 0.95]. The default is 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] ratio The inner radius, as a fraction of the outer radius
    */
   void SetInnerRadiusRatio(float ratio);
@@ -145,6 +158,7 @@ public:
   /**
    * @brief Retrieves the inner radius of the pie, as a fraction of its outer radius.
    *
+   * @SINCE_3_0.0
    * @return The inner radius, as a fraction of the outer radius
    */
   float GetInnerRadiusRatio() const;
@@ -154,6 +168,7 @@ public:
    *
    * An empty label (the default) draws nothing.
    *
+   * @SINCE_3_0.0
    * @param[in] text The center label text
    */
   void SetCenterLabel(const Dali::String& text);
@@ -161,6 +176,7 @@ public:
   /**
    * @brief Retrieves the text shown at the center of a donut.
    *
+   * @SINCE_3_0.0
    * @return The center label text
    */
   Dali::String GetCenterLabel() const;
@@ -170,6 +186,7 @@ public:
    *
    * Clamped to [0, 10]. The default is 1.0.
    *
+   * @SINCE_3_0.0
    * @param[in] degrees The gap between slices, in degrees
    */
   void SetSliceGap(float degrees);
@@ -177,6 +194,7 @@ public:
   /**
    * @brief Retrieves the angular gap drawn between adjacent slices.
    *
+   * @SINCE_3_0.0
    * @return The gap between slices, in degrees
    */
   float GetSliceGap() const;
@@ -186,6 +204,7 @@ public:
    *
    * The default is false.
    *
+   * @SINCE_3_0.0
    * @param[in] visible True to draw data labels
    */
   void SetDataLabelsVisible(bool visible);
@@ -193,6 +212,7 @@ public:
   /**
    * @brief Retrieves whether a text label is drawn on each slice.
    *
+   * @SINCE_3_0.0
    * @return True if data labels are drawn
    */
   bool IsDataLabelsVisible() const;
@@ -203,6 +223,7 @@ public:
    * Slices narrower than this are skipped to avoid overlapping labels.
    * Negative values are clamped to 0. The default is 15.0.
    *
+   * @SINCE_3_0.0
    * @param[in] degrees The minimum slice angle, in degrees
    */
   void SetDataLabelMinAngle(float degrees);
@@ -210,6 +231,7 @@ public:
   /**
    * @brief Retrieves the minimum angular span a slice must have to draw its data label.
    *
+   * @SINCE_3_0.0
    * @return The minimum slice angle, in degrees
    */
   float GetDataLabelMinAngle() const;

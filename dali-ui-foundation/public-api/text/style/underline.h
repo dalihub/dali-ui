@@ -32,27 +32,32 @@ namespace Text
  * @brief Describes underline styling for text.
  *
  * This is a value-type object used to configure underline appearance.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Underline
 {
 public:
   /**
    * @brief The underline rendering type.
+   * @SINCE_3_0.0
    */
   enum class Type : uint8_t
   {
     /**
      * @brief Draws a solid underline.
+     * @SINCE_3_0.0
      */
     SOLID,
     /**
      * @brief Draws a dashed underline.
      *
      * Dash length and dash gap are applied when this type is used.
+     * @SINCE_3_0.0
      */
     DASHED,
     /**
      * @brief Draws a double underline.
+     * @SINCE_3_0.0
      */
     DOUBLE
   };
@@ -60,12 +65,14 @@ public:
 public:
   /**
    * @brief Creates an underline with default values.
+   * @SINCE_3_0.0
    */
   Underline();
 
   /**
    * @brief Creates an underline by copying another underline.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The underline to copy.
    */
   Underline(const Underline& rhs);
@@ -73,6 +80,7 @@ public:
   /**
    * @brief Creates an underline by moving another underline.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The underline to move.
    */
   Underline(Underline&& rhs) noexcept;
@@ -80,6 +88,7 @@ public:
   /**
    * @brief Copies another underline to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The underline to copy.
    */
   Underline& operator=(const Underline& rhs);
@@ -87,12 +96,14 @@ public:
   /**
    * @brief Moves another underline to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The underline to move.
    */
   Underline& operator=(Underline&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Underline();
 
@@ -101,6 +112,7 @@ public:
    *
    * This value can be passed to SetTextUnderline() to clear the underline style.
    *
+   * @SINCE_3_0.0
    * @return A shared immutable none value.
    */
   static const Underline& None();
@@ -108,6 +120,7 @@ public:
   /**
    * @brief Compares this underline with another underline.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The underline to compare with.
    * @return true if both values are equal.
    */
@@ -116,6 +129,7 @@ public:
   /**
    * @brief Compares this underline with another underline.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The underline to compare with.
    * @return true if both values are not equal.
    */
@@ -125,6 +139,7 @@ public:
   /**
    * @brief Sets the underline color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The underline color.
    */
   void SetColor(const UiColor& color);
@@ -132,6 +147,7 @@ public:
   /**
    * @brief Returns the underline color.
    *
+   * @SINCE_3_0.0
    * @return The underline color.
    */
   const UiColor& GetColor() const;
@@ -139,6 +155,7 @@ public:
   /**
    * @brief Sets the underline thickness.
    *
+   * @SINCE_3_0.0
    * @param[in] thickness The underline thickness in pixels.
    */
   void SetThickness(float thickness);
@@ -146,6 +163,7 @@ public:
   /**
    * @brief Returns the underline thickness.
    *
+   * @SINCE_3_0.0
    * @return The underline thickness in pixels.
    */
   float GetThickness() const;
@@ -153,6 +171,7 @@ public:
   /**
    * @brief Sets the underline type.
    *
+   * @SINCE_3_0.0
    * @param[in] type The underline type.
    */
   void SetType(Type type);
@@ -160,6 +179,7 @@ public:
   /**
    * @brief Returns the underline type.
    *
+   * @SINCE_3_0.0
    * @return The underline type.
    */
   Type GetType() const;
@@ -169,6 +189,7 @@ public:
    *
    * This value is used only when the underline type is DASHED.
    *
+   * @SINCE_3_0.0
    * @param[in] length The length of each dash in pixels.
    */
   void SetDashLength(float length);
@@ -176,6 +197,7 @@ public:
   /**
    * @brief Returns the dash length for a dashed underline.
    *
+   * @SINCE_3_0.0
    * @return The dash length in pixels.
    */
   float GetDashLength() const;
@@ -185,6 +207,7 @@ public:
    *
    * This value is used only when the underline type is DASHED.
    *
+   * @SINCE_3_0.0
    * @param[in] gap The gap between dashes in pixels.
    */
   void SetDashGap(float gap);
@@ -192,6 +215,7 @@ public:
   /**
    * @brief Returns the gap between dashes for a dashed underline.
    *
+   * @SINCE_3_0.0
    * @return The gap between dashes in pixels.
    */
   float GetDashGap() const;

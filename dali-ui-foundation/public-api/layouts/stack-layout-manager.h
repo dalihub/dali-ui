@@ -32,6 +32,7 @@ namespace Ui
  *
  * Stacks children along a single main axis (vertical or horizontal).
  * Per-child weight, alignment and spacing are read from StackLayoutParams.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API StackLayoutManager : public LayoutManager
 {
@@ -39,6 +40,7 @@ public:
   /**
    * @brief Creates a new StackLayoutManager.
    *
+   * @SINCE_3_0.0
    * @param[in] orientation Stack orientation (vertical or horizontal)
    * @param[in] spacing Spacing between children
    */
@@ -46,6 +48,7 @@ public:
 
   /**
    * @brief Virtual destructor.
+   * @SINCE_3_0.0
    */
   ~StackLayoutManager() override;
 

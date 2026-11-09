@@ -59,6 +59,7 @@ namespace Ui
  *                               Int32Pair(20, 38),
  *                               "check_box .inner_fill.color");
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API SelectableLottieImage
 {
@@ -69,6 +70,7 @@ public:
    * This is the ONLY construction path: a url can never be registered without both
    * the select and the deselect frame ranges.
    *
+   * @SINCE_3_0.0
    * @param[in] url              The Lottie animation url
    * @param[in] selectionPlaybackRange The frame segment played when the control becomes selected
    * @param[in] deselectionPlaybackRange The frame segment played when the control becomes deselected
@@ -82,27 +84,44 @@ public:
 
   /**
    * @brief Deleted default constructor: a url is inseparable from both frame ranges.
+   * @SINCE_3_0.0
    */
   SelectableLottieImage() = delete;
 
-  /** @brief Copies the image description. */
+  /**
+   * @brief Copies the image description.
+   * @SINCE_3_0.0
+   */
   SelectableLottieImage(const SelectableLottieImage& rhs);
 
-  /** @brief Transfers ownership of the image description. */
+  /**
+   * @brief Transfers ownership of the image description.
+   * @SINCE_3_0.0
+   */
   SelectableLottieImage(SelectableLottieImage&& rhs) noexcept;
 
-  /** @brief Copies the image description. */
+  /**
+   * @brief Copies the image description.
+   * @SINCE_3_0.0
+   */
   SelectableLottieImage& operator=(const SelectableLottieImage& rhs);
 
-  /** @brief Transfers ownership of the image description. */
+  /**
+   * @brief Transfers ownership of the image description.
+   * @SINCE_3_0.0
+   */
   SelectableLottieImage& operator=(SelectableLottieImage&& rhs) noexcept;
 
-  /** @brief Destroys the image description. */
+  /**
+   * @brief Destroys the image description.
+   * @SINCE_3_0.0
+   */
   ~SelectableLottieImage();
 
   /**
    * @brief Returns the Lottie animation url.
    *
+   * @SINCE_3_0.0
    * @return The url
    */
   const Dali::String& GetUrl() const;
@@ -110,6 +129,7 @@ public:
   /**
    * @brief Returns the frame segment played when the control becomes selected.
    *
+   * @SINCE_3_0.0
    * @return The select frame range
    * @deprecated Use GetSelectionPlaybackRange() instead.
    */
@@ -118,6 +138,7 @@ public:
   /**
    * @brief Returns the frame segment played when the control becomes deselected.
    *
+   * @SINCE_3_0.0
    * @return The deselect frame range
    * @deprecated Use GetDeselectionPlaybackRange() instead.
    */
@@ -126,6 +147,7 @@ public:
   /**
    * @brief Returns the asset key path of the inner fill recoloured with the state colours.
    *
+   * @SINCE_3_0.0
    * @return The inner-fill key path (empty when the renderer's generic default should apply)
    */
   const Dali::String& GetInnerFillKeyPath() const;
@@ -134,6 +156,7 @@ public: // Playback ranges
   /**
    * @brief Returns the frame segment played when the control becomes selected.
    *
+   * @SINCE_3_0.0
    * @return The select frame range
    */
   Int32Pair GetSelectionPlaybackRange() const;
@@ -141,6 +164,7 @@ public: // Playback ranges
   /**
    * @brief Returns the frame segment played when the control becomes deselected.
    *
+   * @SINCE_3_0.0
    * @return The deselect frame range
    */
   Int32Pair GetDeselectionPlaybackRange() const;

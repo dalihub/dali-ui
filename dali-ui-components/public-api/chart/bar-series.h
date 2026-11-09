@@ -51,6 +51,7 @@ class BarSeries;
  *   series.SetValues({120.0f, 190.0f, 150.0f, 250.0f});
  *   chart.AddSeries(series);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API BarSeries : public ChartSeries
 {
@@ -58,6 +59,7 @@ public:
   /**
    * @brief Creates a new BarSeries.
    *
+   * @SINCE_3_0.0
    * @return A handle to the new series
    */
   static BarSeries New();
@@ -65,6 +67,7 @@ public:
   /**
    * @brief Downcasts a handle to a BarSeries handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A BarSeries handle, or an uninitialized handle if the cast fails
    */
@@ -72,17 +75,20 @@ public:
 
   /**
    * @brief Creates an uninitialized BarSeries handle.
+   * @SINCE_3_0.0
    */
   BarSeries();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~BarSeries();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   BarSeries(const BarSeries&) = default;
@@ -90,6 +96,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -101,6 +108,7 @@ public:
    * Until this is called, bars are colored from the chart's color palette
    * instead, cycling by series index.
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the bars
    */
   void SetColor(const Vector4& color);
@@ -108,6 +116,7 @@ public:
   /**
    * @brief Retrieves the color of the bars.
    *
+   * @SINCE_3_0.0
    * @return The color of the bars, either the color set by SetColor() or a
    *         palette color if it was not called
    */
@@ -118,6 +127,7 @@ public:
    *
    * Clamped to [0.01, 1.0]. The default is 0.8.
    *
+   * @SINCE_3_0.0
    * @param[in] ratio The bar group width, as a fraction of the available space
    */
   void SetBarGroupWidth(float ratio);
@@ -125,6 +135,7 @@ public:
   /**
    * @brief Retrieves the width of each bar group, as a fraction of the space available per X position.
    *
+   * @SINCE_3_0.0
    * @return The bar group width, as a fraction of the available space
    */
   float GetBarGroupWidth() const;
@@ -134,6 +145,7 @@ public:
    *
    * The default is false.
    *
+   * @SINCE_3_0.0
    * @param[in] stacked True to stack this series
    */
   void SetStacked(bool stacked);
@@ -141,6 +153,7 @@ public:
   /**
    * @brief Retrieves whether this series stacks on top of other stacked BarSeries in the same chart.
    *
+   * @SINCE_3_0.0
    * @return True if this series stacks
    */
   bool IsStacked() const;
@@ -150,6 +163,7 @@ public:
    *
    * The default is false.
    *
+   * @SINCE_3_0.0
    * @param[in] visible True to draw data labels
    */
   void SetDataLabelsVisible(bool visible);
@@ -157,6 +171,7 @@ public:
   /**
    * @brief Retrieves whether a text label is drawn on each bar.
    *
+   * @SINCE_3_0.0
    * @return True if data labels are drawn
    */
   bool IsDataLabelsVisible() const;
@@ -166,6 +181,7 @@ public:
    *
    * The default is "%.0f".
    *
+   * @SINCE_3_0.0
    * @param[in] fmt The printf-style format string
    */
   void SetDataLabelFormat(const Dali::String& fmt);
@@ -173,6 +189,7 @@ public:
   /**
    * @brief Retrieves the printf-style format string used to render each bar's data label.
    *
+   * @SINCE_3_0.0
    * @return The printf-style format string
    */
   Dali::String GetDataLabelFormat() const;
@@ -182,6 +199,7 @@ public:
    *
    * The default is (0.2, 0.2, 0.2, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the data label text
    */
   void SetDataLabelColor(const Vector4& color);
@@ -189,6 +207,7 @@ public:
   /**
    * @brief Retrieves the color of the data label text.
    *
+   * @SINCE_3_0.0
    * @return The color of the data label text
    */
   Vector4 GetDataLabelColor() const;
@@ -198,6 +217,7 @@ public:
    *
    * The default is 9.0.
    *
+   * @SINCE_3_0.0
    * @param[in] pointSize The point size of the data label text
    */
   void SetDataLabelSize(float pointSize);
@@ -205,41 +225,48 @@ public:
   /**
    * @brief Retrieves the point size of the data label text.
    *
+   * @SINCE_3_0.0
    * @return The point size of the data label text
    */
   float GetDataLabelSize() const;
 
   /**
    * @brief Sets a finite non-negative corner radius in pixels, clamped to half the bar dimensions.
+   * @SINCE_3_0.0
    * @param[in] radius The radius; zero preserves rectangular bars
    */
   void SetCornerRadius(float radius);
 
   /**
    * @brief Returns the authored corner radius.
+   * @SINCE_3_0.0
    * @return The radius in pixels
    */
   float GetCornerRadius() const;
 
   /**
    * @brief Sets a linear fill gradient in bar-local coordinates.
+   * @SINCE_3_0.0
    * @param[in] gradient The gradient
    */
   void SetFillGradient(const Gradient::Linear& gradient);
 
   /**
    * @brief Restores solid fill colors.
+   * @SINCE_3_0.0
    */
   void ClearFillGradient();
 
   /**
    * @brief Replaces data with X/minimum/maximum triples. Range bars cannot be stacked.
+   * @SINCE_3_0.0
    * @param[in] values Triples (X, minimum Y, maximum Y); minimum must not exceed maximum and NaN marks a gap
    */
   void SetRangeValues(const Dali::Vector<Vector3>& values);
 
   /**
    * @brief Sets the finite non-negative bar border width and color.
+   * @SINCE_3_0.0
    * @param[in] width The border width
    * @param[in] color The border color; theme identifiers are retained
    */
@@ -249,6 +276,7 @@ public:
    * @brief Sets finite non-negative border dash and gap lengths in pixels.
    *
    * Both lengths must be positive to draw a dashed border. Otherwise it is solid.
+   * @SINCE_3_0.0
    * @param[in] dash The dash length
    * @param[in] gap The gap length
    */
@@ -256,6 +284,7 @@ public:
 
   /**
    * @brief Returns the border dash and gap lengths, initially zero.
+   * @SINCE_3_0.0
    * @return The dash and gap in pixels
    */
   Vector2 GetBorderDash() const;
@@ -265,6 +294,7 @@ public:
    *
    * The boundary uses the chart's Y scale and stays aligned with sections at the
    * same value. Replaces any fill gradient; point color overrides take priority.
+   * @SINCE_3_0.0
    * @param[in] value The threshold in data coordinates
    * @param[in] lowerColor The color below the threshold
    * @param[in] upperColor The color above the threshold
@@ -273,6 +303,7 @@ public:
 
   /**
    * @brief Restores solid fill after a threshold fill.
+   * @SINCE_3_0.0
    */
   void ClearFillThreshold();
 
@@ -283,6 +314,7 @@ public:
    * Width zero hides the border; both dash and gap must be positive to dash it.
    * Overrides stay at their indices after data replacement until cleared.
    * Indices beyond the current data can be configured for future points.
+   * @SINCE_3_0.0
    * @param[in] pointIndex The zero-based data index
    * @param[in] width The finite non-negative border width in pixels
    * @param[in] color The border color; theme identifiers are retained
@@ -293,12 +325,14 @@ public:
 
   /**
    * @brief Restores the current series border for one data index.
+   * @SINCE_3_0.0
    * @param[in] pointIndex The zero-based data index; an unset index is ignored
    */
   void ClearPointBorder(uint32_t pointIndex);
 
   /**
    * @brief Restores the current series border for all data indices.
+   * @SINCE_3_0.0
    */
   void ClearPointBorders();
 

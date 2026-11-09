@@ -62,6 +62,7 @@ struct GlViewRenderInfoImpl;
  * }
  * @endcode
  *
+ * @SINCE_3_0.0
  * @note Only valid for the duration of the callback, and deliberately not copyable so it
  *       cannot outlive it. It reads the rendering thread's own state rather than a copy,
  *       so touching it from another thread is a data race.
@@ -71,22 +72,26 @@ class DALI_UI_API GlViewRenderInfo
 public:
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~GlViewRenderInfo();
 
   /**
    * @brief Not copyable.
+   * @SINCE_3_0.0
    */
   GlViewRenderInfo(const GlViewRenderInfo&) = delete;
 
   /**
    * @brief Not copy assignable.
+   * @SINCE_3_0.0
    */
   GlViewRenderInfo& operator=(const GlViewRenderInfo&) = delete;
 
   /**
    * @brief Returns the model-view-projection matrix for the view.
    *
+   * @SINCE_3_0.0
    * @return The model-view-projection matrix
    */
   const Matrix& GetMvpMatrix() const;
@@ -94,6 +99,7 @@ public:
   /**
    * @brief Returns the view matrix of the render task drawing the view.
    *
+   * @SINCE_3_0.0
    * @return The view matrix
    */
   const Matrix& GetViewMatrix() const;
@@ -101,6 +107,7 @@ public:
   /**
    * @brief Returns the projection matrix of the render task drawing the view.
    *
+   * @SINCE_3_0.0
    * @return The projection matrix
    */
   const Matrix& GetProjectionMatrix() const;
@@ -111,6 +118,7 @@ public:
    * This is the size the layout gave the view, without the scale or rotation applied to
    * it. Vertices expressed in this space are placed on screen by GetMvpMatrix().
    *
+   * @SINCE_3_0.0
    * @return The size of the view
    *
    * @note For GlView::BackendMode::OFFSCREEN_RENDERING this is also the size of the
@@ -127,6 +135,7 @@ public:
    * actually visible, in the convention glScissor() expects. Unlike GetSize() it accounts
    * for the scale, rotation and parent transforms applied to the view.
    *
+   * @SINCE_3_0.0
    * @return The clipping region
    *
    * @note This is a scissor rectangle, not a viewport. Where the view sits on screen is
@@ -141,6 +150,7 @@ public:
    *
    * Use this to honour the opacity and color multiplier inherited from the actor hierarchy.
    *
+   * @SINCE_3_0.0
    * @return The inherited world color multiplier
    */
   const Vector4& GetWorldColorMultiplier() const;
@@ -152,6 +162,7 @@ public:
    * GlView::BindTextureResources(), so the position in this list is the only thing
    * identifying which texture a handle belongs to.
    *
+   * @SINCE_3_0.0
    * @return The native handles of the bound textures
    *
    * @note An entry is 0 until DALi has created the GL texture behind it, and keeps its

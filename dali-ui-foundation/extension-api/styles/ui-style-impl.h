@@ -41,17 +41,20 @@ class UiStylePrivate;
  *
  * Component style implementations should derive from UiStyleImpl and expose
  * lightweight public handle classes derived from UiStyle.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiStyleImpl : public BaseObject
 {
 protected:
   /**
    * @brief Constructor.
+   * @SINCE_3_0.0
    */
   UiStyleImpl();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~UiStyleImpl() override;
 

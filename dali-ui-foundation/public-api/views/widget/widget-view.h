@@ -53,6 +53,7 @@ class WidgetViewImpl;
  * view; releasing their last reference also removes the widget instance.
  * A view disconnected from the scene is paused and can be attached again.
  *
+ * @SINCE_3_0.0
  */
 class DALI_UI_API WidgetView : public View
 {
@@ -65,6 +66,7 @@ public:
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    */
   struct Property
   {
@@ -72,6 +74,7 @@ public:
      * @brief An enumeration of properties belonging to the WidgetView class.
      * @privlevel public
      * @privilege %http://tizen.org/privilege/widget.viewer
+     * @SINCE_3_0.0
      */
     enum
     {
@@ -79,30 +82,35 @@ public:
 
       /**
        * @brief name "widgetId", Get the id of the widget, type string, read-only
+       * @SINCE_3_0.0
        * @see GetWidgetId()
        */
       WIDGET_ID = WidgetViewPropertyIndex::WIDGET_ID,
 
       /**
        * @brief name "instanceId", type string, read-only
+       * @SINCE_3_0.0
        * @see GetInstanceId()
        */
       INSTANCE_ID = WidgetViewPropertyIndex::INSTANCE_ID,
 
       /**
        * @brief name "contentInfo", type string, read-only
+       * @SINCE_3_0.0
        * @see GetContentInfo()
        */
       CONTENT_INFO = WidgetViewPropertyIndex::CONTENT_INFO,
 
       /**
        * @brief name "title", type string, read-only
+       * @SINCE_3_0.0
        * @see GetTitle()
        */
       TITLE = WidgetViewPropertyIndex::TITLE,
 
       /**
        * @brief name "updatePeriod", type float, read-only
+       * @SINCE_3_0.0
        * @see GetUpdatePeriod()
        */
       UPDATE_PERIOD = WidgetViewPropertyIndex::UPDATE_PERIOD,
@@ -110,24 +118,28 @@ public:
       /**
        * @brief name "preview", type boolean, enables the preview during loading.
        * Reading returns the setting, not the preview's effective visibility.
+       * @SINCE_3_0.0
        * @see SetPreviewEnabled(), IsPreviewEnabled()
        */
       PREVIEW = WidgetViewPropertyIndex::PREVIEW,
 
       /**
        * @brief name "widgetStateFaulted", type boolean, read-only
+       * @SINCE_3_0.0
        * @see IsWidgetFaulted()
        */
       WIDGET_STATE_FAULTED = WidgetViewPropertyIndex::WIDGET_STATE_FAULTED,
 
       /**
        * @brief name "permanentDelete", type boolean
+       * @SINCE_3_0.0
        * @remarks We recommend not to use this enumeration directly because it was deprecated before.
        */
       PERMANENT_DELETE = WidgetViewPropertyIndex::PERMANENT_DELETE,
 
       /**
        * @brief name "keepWidgetSize", type boolean
+       * @SINCE_3_0.0
        * @see SetKeepWidgetSizeEnabled(), IsKeepWidgetSizeEnabled()
        */
       KEEP_WIDGET_SIZE = WidgetViewPropertyIndex::KEEP_WIDGET_SIZE
@@ -150,6 +162,7 @@ public:
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @note The library initializes its default loading/retry translation catalog
    * once per localization manager without changing the application default domain.
    * This first initialization binds the widget domain to the library catalog path.
@@ -180,6 +193,7 @@ public:
    * If the BaseHandle points is a WidgetView the downcast returns a valid handle.
    * If not the returned handle is left empty.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return handle to a WidgetView or an empty handle
    */
@@ -187,12 +201,14 @@ public:
 
   /**
    * @brief Creates an empty handle.
+   * @SINCE_3_0.0
    */
   WidgetView();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to copy from.
    */
   WidgetView(const WidgetView& handle);
@@ -200,6 +216,7 @@ public:
   /**
    * @brief Assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to copy from.
    * @return A reference to this.
    */
@@ -209,12 +226,14 @@ public:
    * @brief Destructor
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~WidgetView();
 
   /**
    * @brief Gets the ID of the widget being displayed.
    *
+   * @SINCE_3_0.0
    * @return The widget ID.
    */
   Dali::String GetWidgetId() const;
@@ -222,6 +241,7 @@ public:
   /**
    * @brief Gets the ID of this widget instance.
    *
+   * @SINCE_3_0.0
    * @return The instance ID.
    */
   Dali::String GetInstanceId() const;
@@ -229,6 +249,7 @@ public:
   /**
    * @brief Gets the latest available content information from the widget.
    *
+   * @SINCE_3_0.0
    * @return The content information, or the previously stored value if querying fails.
    */
   Dali::String GetContentInfo() const;
@@ -236,6 +257,7 @@ public:
   /**
    * @brief Gets the widget title.
    *
+   * @SINCE_3_0.0
    * @return The widget title, or an empty string if unavailable.
    */
   Dali::String GetTitle() const;
@@ -246,6 +268,7 @@ public:
    * The value is initialized from New() and refreshed before
    * WidgetUpdatePeriodChangedSignal() is emitted.
    *
+   * @SINCE_3_0.0
    * @return The latest successfully queried update period.
    */
   float GetUpdatePeriod() const;
@@ -253,6 +276,7 @@ public:
   /**
    * @brief Queries whether the widget provider is in a faulted state.
    *
+   * @SINCE_3_0.0
    * @return True if the instance reports a faulted state.
    */
   bool IsWidgetFaulted() const;
@@ -263,6 +287,7 @@ public:
    * After a widget frame is received, enabling the preview keeps it hidden
    * until the widget enters the loading state again.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to show the preview while loading.
    */
   void SetPreviewEnabled(bool enabled);
@@ -270,6 +295,7 @@ public:
   /**
    * @brief Gets whether the preview is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if the preview is enabled. This is the setting, not effective visibility.
    */
   bool IsPreviewEnabled() const;
@@ -277,6 +303,7 @@ public:
   /**
    * @brief Sets loading text visibility immediately and for subsequent loading states.
    *
+   * @SINCE_3_0.0
    * @param[in] visible True to show the loading text.
    */
   void SetLoadingTextVisible(bool visible);
@@ -284,6 +311,7 @@ public:
   /**
    * @brief Gets the loading label's current visibility property.
    *
+   * @SINCE_3_0.0
    * @return True if the label is visible locally; ancestor visibility is not included.
    */
   bool IsLoadingTextVisible() const;
@@ -291,6 +319,7 @@ public:
   /**
    * @brief Sets retry text visibility immediately and for subsequent retry states.
    *
+   * @SINCE_3_0.0
    * @param[in] visible True to show the retry text.
    */
   void SetRetryTextVisible(bool visible);
@@ -298,6 +327,7 @@ public:
   /**
    * @brief Gets the retry label's current visibility property.
    *
+   * @SINCE_3_0.0
    * @return True if the label is visible locally; ancestor visibility is not included.
    */
   bool IsRetryTextVisible() const;
@@ -305,6 +335,7 @@ public:
   /**
    * @brief Sets whether layout changes preserve the provider's current size.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to keep the provider size.
    * @note Setting false does not resize immediately; a subsequent layout or size
    * change applies the new size.
@@ -314,42 +345,49 @@ public:
   /**
    * @brief Gets whether the provider size is kept across layout changes.
    *
+   * @SINCE_3_0.0
    * @return True if the provider size is kept.
    */
   bool IsKeepWidgetSizeEnabled() const;
 
   /**
    * @brief Sets loading text. An empty string restores the translated default.
+   * @SINCE_3_0.0
    * @param[in] text The loading message.
    */
   void SetLoadingText(const Dali::String& text);
 
   /**
    * @brief Sets retry text. An empty string restores the translated default.
+   * @SINCE_3_0.0
    * @param[in] text The retry message.
    */
   void SetRetryText(const Dali::String& text);
 
   /**
    * @brief Applies explicitly set font attributes to the loading label.
+   * @SINCE_3_0.0
    * @param[in] font Partial font overrides. Omitted attributes are unchanged.
    */
   void SetLoadingTextFont(const Text::FontAttributes& font);
 
   /**
    * @brief Applies explicitly set font attributes to the retry label.
+   * @SINCE_3_0.0
    * @param[in] font Partial font overrides. Omitted attributes are unchanged.
    */
   void SetRetryTextFont(const Text::FontAttributes& font);
 
   /**
    * @brief Sets the loading text color, including a theme color binding.
+   * @SINCE_3_0.0
    * @param[in] color The loading text color.
    */
   void SetLoadingTextColor(const UiColor& color);
 
   /**
    * @brief Sets the retry text color, including a theme color binding.
+   * @SINCE_3_0.0
    * @param[in] color The retry text color.
    */
   void SetRetryTextColor(const UiColor& color);
@@ -360,6 +398,7 @@ public:
    * An empty source uses that stage of the standard image shader. Native-image
    * adaptation is still performed by the image visual. Two empty sources clear
    * the override. This is distinct from the View's RenderEffect API.
+   * @SINCE_3_0.0
    * @param[in] vertexSource Vertex shader source, or empty to use the default.
    * @param[in] fragmentSource Fragment shader source, or empty to use the default.
    */
@@ -367,6 +406,7 @@ public:
 
   /**
    * @brief Restores the standard native-image shader and corner handling.
+   * @SINCE_3_0.0
    */
   void ClearCustomShader();
 
@@ -377,6 +417,7 @@ public:
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return true on success, false otherwise.
    */
   bool PauseWidget();
@@ -390,6 +431,7 @@ public:
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return true on success, false otherwise.
    */
   bool ResumeWidget();
@@ -401,6 +443,7 @@ public:
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return true on success, false otherwise.
    */
   bool CancelTouchEvent();
@@ -413,6 +456,7 @@ public:
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    */
   void ActivateFaultedWidget();
 
@@ -426,6 +470,7 @@ public:                                                  //Signals
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   WidgetViewSignalType& WidgetAddedSignal();
@@ -440,6 +485,7 @@ public:                                                  //Signals
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   WidgetViewSignalType& WidgetDeletedSignal();
@@ -449,6 +495,7 @@ public:                                                  //Signals
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   WidgetViewSignalType& WidgetCreationAbortedSignal();
@@ -458,6 +505,7 @@ public:                                                  //Signals
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   WidgetViewSignalType& WidgetContentUpdatedSignal();
@@ -467,6 +515,7 @@ public:                                                  //Signals
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   WidgetViewSignalType& WidgetUpdatePeriodChangedSignal();
@@ -478,6 +527,7 @@ public:                                                  //Signals
    *
    * @privlevel public
    * @privilege %http://tizen.org/privilege/widget.viewer
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   WidgetViewSignalType& WidgetFaultedSignal();

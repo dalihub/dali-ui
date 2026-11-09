@@ -37,6 +37,7 @@ namespace Shadow
 /**
  * @brief Creates a ColorVisual configured with a shadow value.
  *
+ * @SINCE_3_0.0
  * @param[in] shadow The shadow value
  * @return A color visual that can be added as a shadow visual
  */
@@ -45,6 +46,7 @@ DALI_UI_API ColorVisual CreateVisual(const Ui::Shadow& shadow);
 /**
  * @brief Creates a shadow from a property map.
  *
+ * @SINCE_3_0.0
  * @param[in] map The color visual property map describing the shadow
  * @return A Shadow value, or Shadow::None() if the map is empty
  */
@@ -53,6 +55,7 @@ DALI_UI_API Ui::Shadow CreateShadow(const Property::Map& map);
 /**
  * @brief Creates a property map describing the View's shadow.
  *
+ * @SINCE_3_0.0
  * @param[in] shadow The shadow value
  * @return A color visual property map describing the shadow
  */

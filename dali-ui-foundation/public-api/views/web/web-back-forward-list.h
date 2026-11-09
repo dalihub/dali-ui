@@ -37,65 +37,77 @@ class WebBackForwardListImpl;
  *
  * Each query reads the latest history state from the associated web engine.
  * Items returned by a query are independent snapshots.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API WebBackForwardList : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized handle.
+   * @SINCE_3_0.0
    */
   WebBackForwardList();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~WebBackForwardList();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   WebBackForwardList(const WebBackForwardList& list);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   WebBackForwardList(WebBackForwardList&& list) noexcept;
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   WebBackForwardList& operator=(const WebBackForwardList& list);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   WebBackForwardList& operator=(WebBackForwardList&& list) noexcept;
 
   /**
    * @brief Downcasts a handle to WebBackForwardList.
+   * @SINCE_3_0.0
    */
   static WebBackForwardList DownCast(BaseHandle handle);
 
   /**
    * @brief Gets the current history item.
+   * @SINCE_3_0.0
    * @return A snapshot of the item, or an invalid item when unavailable
    */
   WebBackForwardListItem GetCurrentItem() const;
 
   /**
    * @brief Gets the item immediately preceding the current item.
+   * @SINCE_3_0.0
    * @return A snapshot of the item, or an invalid item when unavailable
    */
   WebBackForwardListItem GetPreviousItem() const;
 
   /**
    * @brief Gets the item immediately following the current item.
+   * @SINCE_3_0.0
    * @return A snapshot of the item, or an invalid item when unavailable
    */
   WebBackForwardListItem GetNextItem() const;
 
   /**
    * @brief Gets an item at the backend-defined history index.
+   * @SINCE_3_0.0
    * @param[in] index The item index
    * @return A snapshot of the item, or an invalid item when unavailable
    */
@@ -103,17 +115,20 @@ public:
 
   /**
    * @brief Gets the number of history items, including the current item.
+   * @SINCE_3_0.0
    */
   uint32_t GetItemCount() const;
 
   /**
    * @brief Gets items preceding the current item, oldest first.
+   * @SINCE_3_0.0
    * @param[in] limit Maximum number of items, or -1 for all items
    */
   Dali::Vector<WebBackForwardListItem> GetBackwardItems(int32_t limit = -1) const;
 
   /**
    * @brief Gets items following the current item, oldest first.
+   * @SINCE_3_0.0
    * @param[in] limit Maximum number of items, or -1 for all items
    */
   Dali::Vector<WebBackForwardListItem> GetForwardItems(int32_t limit = -1) const;

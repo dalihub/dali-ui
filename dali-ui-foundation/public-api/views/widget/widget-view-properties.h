@@ -26,6 +26,7 @@ namespace Ui
 {
 /**
  * @brief Public property indices for WidgetView and its implementation.
+ * @SINCE_3_0.0
  */
 struct WidgetViewPropertyIndex
 {

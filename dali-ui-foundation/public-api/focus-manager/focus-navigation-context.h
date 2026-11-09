@@ -44,37 +44,44 @@ class FocusNavigationContextImpl;
  *
  * Instances are created by FocusManager and are valid for the callback and
  * virtual-policy invocations made for that request.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API FocusNavigationContext : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized context handle.
+   * @SINCE_3_0.0
    */
   FocusNavigationContext() = default;
 
   /**
    * @brief Gets the requested navigation direction.
+   * @SINCE_3_0.0
    */
   FocusDirection GetDirection() const;
 
   /**
    * @brief Gets the device category that initiated navigation.
+   * @SINCE_3_0.0
    */
   FocusDevice GetDevice() const;
 
   /**
    * @brief Gets the input device name, if available.
+   * @SINCE_3_0.0
    */
   const Dali::String& GetDeviceName() const;
 
   /**
    * @brief Gets the originating input event.
+   * @SINCE_3_0.0
    */
   InputEvent GetInputEvent() const;
 
   /**
    * @brief Gets the Window in which this navigation request is resolved.
+   * @SINCE_3_0.0
    */
   Window GetWindow() const;
 
@@ -82,6 +89,7 @@ public:
    * @brief Gets the closest Focus Group containing the current focus.
    *
    * An empty View means that navigation is scoped only to GetWindow().
+   * @SINCE_3_0.0
    */
   View GetFocusGroup() const;
 

@@ -84,6 +84,7 @@ using ViewImplPtr = IntrusivePtr<ViewImpl>;
  * Ui::ViewRegistration) when it needs a type identity of its own, such as its
  * own type name or creation by type name.
  *
+ * @SINCE_3_0.0
  * @see Dali::Ui::View
  * @see Dali::Ui::ViewRegistration
  */
@@ -98,11 +99,12 @@ public:
 
   /**
    * @brief Flags for the constructor.
+   * @SINCE_3_0.0
    */
   enum ViewBehaviour
   {
-    VIEW_BEHAVIOUR_DEFAULT = 0,      ///< Default behaviour: Visuals are enabled.
-    DISABLE_VISUALS        = 1 << 0, ///< True if view should not use visuals
+    VIEW_BEHAVIOUR_DEFAULT = 0,      ///< Default behaviour: Visuals are enabled. @SINCE_3_0.0
+    DISABLE_VISUALS        = 1 << 0, ///< True if view should not use visuals @SINCE_3_0.0
 
     LAST_VIEW_BEHAVIOUR_FLAG
   };
@@ -127,12 +129,14 @@ public:
 
   /**
    * @brief Retrieves SourceActor of the OffScreenRenderable.
+   * @SINCE_3_0.0
    * @return SourceActor of the OffScreenRenderable.
    */
   virtual Dali::Actor GetOffScreenRenderableSourceActor();
 
   /**
    * @brief Retrieves whether the OffScreen RenderTasks is exclusive or not.
+   * @SINCE_3_0.0
    * @return True if the RenderTask is exclusive.
    */
   virtual bool IsOffScreenRenderTaskExclusive();
@@ -141,18 +145,21 @@ public:
 
   /**
    * @brief Called when accessibility activation is requested for this View.
+   * @SINCE_3_0.0
    * @return true if this view can perform accessibility activation
    */
   virtual bool OnAccessibilityActivate();
 
   /**
    * @brief Called when accessibility requests that the current context be dismissed.
+   * @SINCE_3_0.0
    * @return true if the escape action has been consumed by this view
    */
   virtual bool OnAccessibilityEscape();
 
   /**
    * @brief Called when accessibility pan gesture is received.
+   * @SINCE_3_0.0
    * @param[in] gesture The pan gesture
    * @return true if the pan gesture has been consumed by this view
    */
@@ -160,6 +167,7 @@ public:
 
   /**
    * @brief Called for accessibility value change (e.g. slider up/down).
+   * @SINCE_3_0.0
    * @param[in] isIncreased Whether the value should be increased or decreased
    * @return true if the value changed action has been consumed by this view
    */
@@ -167,6 +175,7 @@ public:
 
   /**
    * @brief Called when a scrollable view should reveal one of its children.
+   * @SINCE_3_0.0
    * @param[in] child The child View that should be brought into view
    * @return true if this view scrolled to the child
    */
@@ -174,6 +183,7 @@ public:
 
   /**
    * @brief Called for accessibility zoom action.
+   * @SINCE_3_0.0
    * @return true if the zoom action has been consumed by this view
    */
   virtual bool OnAccessibilityZoom();
@@ -185,6 +195,7 @@ public:
    * hook is called only when the explicit accessibility name is empty.
    * Use View::SetAccessibilityName() to set an explicit name.
    * This hook retains precedence over the explicit name when it returns true.
+   * @SINCE_3_0.0
    * @param[out] value The requested name, including an intentionally empty value
    * @return true if this view supplied the value
    */
@@ -199,6 +210,7 @@ public:
    * intentionally empty value. Returning false continues with framework
    * fallback naming.
    *
+   * @SINCE_3_0.0
    * @param[out] value The default name
    * @return true if this view supplied the default, false to continue fallback
    */
@@ -211,6 +223,7 @@ public:
    * hook is called only when the explicit accessibility description is empty.
    * Use View::SetAccessibilityDescription() to set an explicit description.
    * This hook retains precedence over the explicit description when it returns true.
+   * @SINCE_3_0.0
    * @param[out] value The requested description, including an intentionally empty value
    * @return true if this view supplied the value
    */
@@ -225,6 +238,7 @@ public:
    * intentionally empty value. Returning false continues with framework
    * fallback description handling.
    *
+   * @SINCE_3_0.0
    * @param[out] value The default description
    * @return true if this view supplied the default, false to continue fallback
    */
@@ -237,6 +251,7 @@ public:
    * hook is called only when the explicit accessibility value is empty.
    * Use View::SetAccessibilityValue() to set an explicit value.
    * This hook retains precedence over the explicit value when it returns true.
+   * @SINCE_3_0.0
    * @param[out] value The requested value, including an intentionally empty value
    * @return true if this view supplied the value
    */
@@ -247,11 +262,13 @@ public: // Non-virtual API (safe to reorder / extend)
 
   /**
    * @brief Creates a new View.
+   * @SINCE_3_0.0
    */
   static ViewImplPtr New();
 
   /**
    * @brief Second phase initialization.
+   * @SINCE_3_0.0
    */
   void Initialize();
 
@@ -339,6 +356,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * pre/post bounds for the CHANGE slot. Returns a zero rect if the view
    * has never been arranged.
    *
+   * @SINCE_3_0.0
    * @return The most recent arranged bounds
    */
   LayoutRect GetArrangedBounds() const;
@@ -354,6 +372,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * Ui::Extension::View::SetUiScalePolicy(Ui::View::DownCast(Self()), Ui::Extension::UiScalePolicy::DISABLED).
    * Write the Ui:: qualifier: an unqualified Extension:: names CustomActorImpl::Extension there.
    *
+   * @SINCE_3_0.0
    * @param[in] policy The UiScalePolicy to apply
    */
   void SetUiScalePolicy(UiScalePolicy policy);
@@ -366,6 +385,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * Ui::Extension::View::GetUiScalePolicy(Ui::View::DownCast(Self())), which returns the same
    * policy as a Ui::Extension::UiScalePolicy.
    *
+   * @SINCE_3_0.0
    * @return The current UiScalePolicy
    */
   UiScalePolicy GetUiScalePolicy() const;
@@ -377,6 +397,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * subclass replace GetEffectiveScale() with Ui::Extension::View::GetEffectiveLayoutScale(*this).
    * Write the Ui:: qualifier: an unqualified Extension:: names CustomActorImpl::Extension there.
    *
+   * @SINCE_3_0.0
    * @return The effective scale factor, always the value
    * Ui::Extension::View::GetEffectiveLayoutScale() returns
    */
@@ -509,6 +530,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * virtual method. The focus manager calls RequestFocusNavigation() which
    * dispatches to the callback if set, otherwise to the virtual method.
    *
+   * @SINCE_3_0.0
    * @param[in] callback The focus navigation callback (move-only, ownership transferred)
    */
   void SetFocusNavigationCallback(FocusNavigationCallback callback);
@@ -550,6 +572,7 @@ public: // Non-virtual API (safe to reorder / extend)
 
   /**
    * @brief Clears all shadows from this View.
+   * @SINCE_3_0.0
    */
   void ClearShadow();
 
@@ -661,6 +684,7 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Gets a raw attachment.
    *
+   * @SINCE_3_0.0
    * @param[in] id The key to identify the attachment
    * @return Pointer to the attachment, or nullptr if missing
    */
@@ -669,6 +693,7 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Gets a const raw attachment.
    *
+   * @SINCE_3_0.0
    * @param[in] id The key to identify the attachment
    * @return Pointer to the attachment, or nullptr if missing
    */
@@ -677,6 +702,7 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Detaches a raw attachment.
    *
+   * @SINCE_3_0.0
    * @param[in] id The key to identify the attachment
    * @return The stored attachment, or an empty UniqueAny if missing
    */
@@ -721,6 +747,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * Ui::LayoutOrderPolicy::PRESERVE apply the rules of Ui::View::Raise(LayoutOrderPolicy)
    * to Self().
    *
+   * @SINCE_3_0.0
    * @param[in] policy See Ui::View::Raise(LayoutOrderPolicy).
    */
   void Raise(Ui::LayoutOrderPolicy policy);
@@ -734,6 +761,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * Ui::LayoutOrderPolicy::PRESERVE apply the rules of Ui::View::Lower(LayoutOrderPolicy)
    * to Self().
    *
+   * @SINCE_3_0.0
    * @param[in] policy See Ui::View::Lower(LayoutOrderPolicy).
    */
   void Lower(Ui::LayoutOrderPolicy policy);
@@ -747,6 +775,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
    * Ui::View::RaiseToTop(LayoutOrderPolicy) to Self().
    *
+   * @SINCE_3_0.0
    * @param[in] policy See Ui::View::RaiseToTop(LayoutOrderPolicy).
    */
   void RaiseToTop(Ui::LayoutOrderPolicy policy);
@@ -760,6 +789,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
    * Ui::View::LowerToBottom(LayoutOrderPolicy) to Self().
    *
+   * @SINCE_3_0.0
    * @param[in] policy See Ui::View::LowerToBottom(LayoutOrderPolicy).
    */
   void LowerToBottom(Ui::LayoutOrderPolicy policy);
@@ -774,6 +804,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
    * Ui::View::RaiseAbove(View, LayoutOrderPolicy) to Self().
    *
+   * @SINCE_3_0.0
    * @param[in] target See Ui::View::RaiseAbove(View, LayoutOrderPolicy).
    * @param[in] policy See Ui::View::RaiseAbove(View, LayoutOrderPolicy).
    */
@@ -789,6 +820,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
    * Ui::View::LowerBelow(View, LayoutOrderPolicy) to Self().
    *
+   * @SINCE_3_0.0
    * @param[in] target See Ui::View::LowerBelow(View, LayoutOrderPolicy).
    * @param[in] policy See Ui::View::LowerBelow(View, LayoutOrderPolicy).
    */
@@ -825,6 +857,7 @@ public: // Non-virtual API (safe to reorder / extend)
 
   /**
    * @brief Ensures this View has an interaction trait and returns it.
+   * @SINCE_3_0.0
    */
   Ui::InteractiveTrait EnsureInteractiveTrait();
 
@@ -835,6 +868,7 @@ public: // Non-virtual API (safe to reorder / extend)
 
   /**
    * @brief Ensures this View has a selectable trait and returns it.
+   * @SINCE_3_0.0
    */
   Ui::SelectableTrait EnsureSelectableTrait();
 
@@ -845,6 +879,7 @@ public: // Non-virtual API (safe to reorder / extend)
 
   /**
    * @brief Ensures this View has a group-selectable trait and returns it.
+   * @SINCE_3_0.0
    */
   Ui::GroupSelectableTrait EnsureGroupSelectableTrait();
 
@@ -909,17 +944,20 @@ protected:
 
   /**
    * @brief Destructor. A reference counted object may only be deleted by calling Unreference().
+   * @SINCE_3_0.0
    */
   virtual ~ViewImpl();
 
   /**
    * @brief Called after the actor has been initialized.
+   * @SINCE_3_0.0
    */
   virtual void OnInitialize();
 
   /**
    * @brief Called during measure pass. Override to implement custom measurement.
    *
+   * @SINCE_3_0.0
    * @note This method is NOT guaranteed to run on every measure pass. Measure()
    * caches its result and serves that cache when the view is re-measured with the
    * same normalised constraint and nothing has invalidated its layout, skipping
@@ -963,6 +1001,7 @@ protected:
    * the view out inside its own bounds; a returned rect outside the
    * minimum/maximum is applied as is.
    *
+   * @SINCE_3_0.0
    * @note This method is NOT guaranteed to run on every arrange pass.
    * ArrangePolicy::IF_CHANGED is the default, so the framework may serve a
    * cached result and skip this call when all tracked inputs are unchanged. Select
@@ -978,6 +1017,7 @@ protected:
    * Override this to consume key events that must be handled before
    * application key-event listeners and the default key-event handler.
    *
+   * @SINCE_3_0.0
    * @param[in] event The key event.
    * @return True if the event is consumed.
    */
@@ -985,6 +1025,7 @@ protected:
 
   /**
    * @brief Called when a key event is received.
+   * @SINCE_3_0.0
    * @param[in] event The key event
    * @return True if the event is consumed
    */
@@ -992,6 +1033,7 @@ protected:
 
   /**
    * @brief Called after KeyEventSignal() has been emitted for a key event.
+   * @SINCE_3_0.0
    * @param[in] event The key event
    */
   virtual void OnFinalizeKeyEventDispatch(const Dali::KeyEvent& event);
@@ -1000,6 +1042,7 @@ protected:
    * @brief Called when the view's focus state changes. Override to add
    *        custom focus handling. Call the base class at the end of the
    *        override to preserve default state management.
+   * @SINCE_3_0.0
    * @param[in] focused True if the view gained focus, false if lost
    */
   virtual void OnFocusChanged(bool focused);
@@ -1010,6 +1053,7 @@ protected:
    * Override to provide custom focus navigation logic. If a callback is set via
    * SetFocusNavigationCallback(), the callback takes priority and this method is not called.
    *
+   * @SINCE_3_0.0
    * @param[in] currentFocusedView The current focused view
    * Leave result unchanged or call result.NotHandled() to continue with the outer container or lower-priority
    * navigation policy, result.MoveTo() to select a candidate, or result.Stay() to consume the
@@ -1029,6 +1073,7 @@ protected:
    * to the first focusable child, falling back to Self(). For all other views it
    * returns Self() if this view is focusable, enabled, and visible.
    *
+   * @SINCE_3_0.0
    * @return The view that should receive focus, or an empty handle if focus cannot be accepted
    */
   virtual View OnFocusRequested();
@@ -1143,6 +1188,7 @@ public:
    * The overrides above fill dali-core base-class slots and introduce none.
    * New virtual hooks are appended after this existing extension slot.
    *
+   * @SINCE_3_0.0
    * @return The extension if available, nullptr otherwise
    */
   virtual Extension* GetViewExtension()
@@ -1158,6 +1204,7 @@ public:
    * Returning true accepts @p value as the final default, including an
    * intentionally empty value. Returning false leaves the accessible value empty.
    *
+   * @SINCE_3_0.0
    * @param[out] value The default value
    * @return true if this view supplied the default, false to leave the value empty
    */
@@ -1170,11 +1217,13 @@ protected:
 
   /**
    * @brief Default constructor.
+   * @SINCE_3_0.0
    */
   ViewImpl();
 
   /**
    * @brief Constructor with behaviour flags.
+   * @SINCE_3_0.0
    * @param[in] behaviourFlags Behavioural flags from ViewBehaviour enum
    */
   ViewImpl(ViewBehaviour behaviourFlags);
@@ -1187,6 +1236,7 @@ protected:
    * replace the existing callback. Call ClearBinding() before reusing an ID with
    * a different target object or setter.
    *
+   * @SINCE_3_0.0
    * @tparam T        Type of the instance (ViewImpl or a derived class)
    * @param[in] bindingId  Caller-defined identifier for this binding
    * @param[in] color      The UiColor to apply
@@ -1211,6 +1261,7 @@ protected:
    * replace the existing callback. Call ClearGradientColorBinding() before
    * reusing an ID with a different target object or setter.
    *
+   * @SINCE_3_0.0
    * @tparam T        Type of the instance (ViewImpl or a derived class)
    * @param[in] bindingId  Caller-defined identifier for this gradient binding
    * @param[in] gradient   The gradient to apply
@@ -1232,6 +1283,7 @@ protected:
    *
    * Returned pointer is non-owning. Ownership remains with the View's trait.
    *
+   * @SINCE_3_0.0
    * @return Pointer to the LayoutManager, or nullptr if not attached
    */
   LayoutManager* GetLayoutManager() const;
@@ -1249,6 +1301,7 @@ protected:
    * the base constructor completes. The policy may also be changed after construction;
    * an existing arrange cache entry is invalidated when necessary.
    *
+   * @SINCE_3_0.0
    * @note This policy describes OnArrange() only. An ArrangeCallback replaces
    * OnArrange() as the active arrange implementation and carries its own policy.
    *
@@ -1262,6 +1315,7 @@ protected:
    * Returns the policy last set through SetArrangePolicy(), or the default
    * ArrangePolicy::IF_CHANGED when none was set.
    *
+   * @SINCE_3_0.0
    * @note This policy describes OnArrange() only, so the returned value mirrors
    * SetArrangePolicy() exactly. It is NOT changed by an attached LayoutManager or an
    * ArrangeCallback: each is a separate arrange implementation that carries its own
@@ -1273,6 +1327,7 @@ protected:
 
   /**
    * @brief Gets texture output of offscreen rendering.
+   * @SINCE_3_0.0
    * @return The offscreen rendering output texture
    * @note Valid only inside OffscreenRenderingFinishedSignal() with REFRESH_ONCE type.
    */
@@ -1295,6 +1350,7 @@ private:
 
   /**
    * @brief Updates or clears an existing color binding.
+   * @SINCE_3_0.0
    * @return True when no callback registration is needed; false when the caller should register a new callback.
    */
   bool UpdateColorBindingInternal(StringView bindingId, const UiColor& color);
@@ -1302,6 +1358,7 @@ private:
 
   /**
    * @brief Updates or clears an existing gradient color binding.
+   * @SINCE_3_0.0
    * @return True when no callback registration is needed; false when the caller should register a new callback.
    */
   bool UpdateColorBindingInternal(StringView bindingId, const Gradient::Base& gradient);

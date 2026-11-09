@@ -48,6 +48,7 @@ class GroupSelectableViewImpl;
  * programmatically with SetSelected(false), by SelectionGroup::ClearSelection(), or
  * when another member of the same group is selected.
  *
+ * @SINCE_3_0.0
  * @see GroupSelectableTrait
  * @see SelectableView
  * @see SelectionGroup
@@ -57,12 +58,14 @@ class DALI_UI_API GroupSelectableView : public SelectableView
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized GroupSelectableView handle.
+   * @SINCE_3_0.0
    */
   GroupSelectableView();
 
   /**
    * @brief Creates an initialized GroupSelectableView.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated GroupSelectableView
    */
   static GroupSelectableView New();
@@ -73,6 +76,7 @@ public: // Creation & Destruction
    * If the handle refers to a GroupSelectableView, the downcast produces a valid handle.
    * Otherwise the returned handle is uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a GroupSelectableView or an uninitialized handle
    */
@@ -81,6 +85,7 @@ public: // Creation & Destruction
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] view Handle to copy
    */
   GroupSelectableView(const GroupSelectableView& view);
@@ -88,6 +93,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   GroupSelectableView(GroupSelectableView&& rhs) noexcept;
@@ -96,6 +102,7 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~GroupSelectableView();
 
@@ -103,6 +110,7 @@ public: // Operators
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -111,6 +119,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -132,6 +141,7 @@ public: // API
    * parent auto-grouping; when off-scene it auto-joins on the next scene
    * connection.
    *
+   * @SINCE_3_0.0
    * @param[in] name The group name, or an empty string to clear it
    * @see GroupSelectableTrait::SetGroupName
    */
@@ -140,6 +150,7 @@ public: // API
   /**
    * @brief Returns this member's explicit group name.
    *
+   * @SINCE_3_0.0
    * @return The group name, or an empty string if no explicit name is set (the
    * member then participates in parent auto-grouping when on-scene)
    * @see GroupSelectableTrait::GetGroupName
@@ -152,6 +163,7 @@ public: // API
    * The bound group is the named group when a name is set, otherwise the parent
    * auto-group when on-scene under a View parent, otherwise an empty handle.
    *
+   * @SINCE_3_0.0
    * @return The bound SelectionGroup, or an uninitialized handle if unbound
    * @see GroupSelectableTrait::GetGroup
    */

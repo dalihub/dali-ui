@@ -52,18 +52,21 @@ class StackLayoutImpl;
  *   RequestedWidth/RequestedHeight is ignored — the size is determined entirely
  *   by the weight ratio. Only children with weight 0 are measured normally
  *   using their RequestedWidth/RequestedHeight.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API StackLayout : public Layout
 {
 public:
   /**
    * @brief Creates an uninitialized StackLayout handle.
+   * @SINCE_3_0.0
    */
   StackLayout();
 
   /**
    * @brief Creates a new StackLayout with the specified orientation.
    *
+   * @SINCE_3_0.0
    * @param[in] orientation The orientation of the stack (default: Vertical)
    * @return A handle to a newly allocated StackLayout
    */
@@ -72,6 +75,7 @@ public:
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] layout Handle to copy
    */
   StackLayout(const StackLayout& layout);
@@ -79,18 +83,21 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   StackLayout(StackLayout&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~StackLayout();
 
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -99,6 +106,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -109,6 +117,7 @@ public:
   /**
    * @brief Downcasts a handle to StackLayout handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a StackLayout or an uninitialized handle
    */
@@ -118,6 +127,7 @@ public: // API
   /**
    * @brief Sets the orientation of the stack layout.
    *
+   * @SINCE_3_0.0
    * @param[in] orientation The orientation to set
    */
   void SetOrientation(StackOrientation orientation);
@@ -125,6 +135,7 @@ public: // API
   /**
    * @brief Gets the orientation of the stack layout.
    *
+   * @SINCE_3_0.0
    * @return The current orientation
    */
   StackOrientation GetOrientation() const;
@@ -132,6 +143,7 @@ public: // API
   /**
    * @brief Sets the spacing between children in the stack.
    *
+   * @SINCE_3_0.0
    * @param[in] spacing The spacing to set (in pixels)
    */
   void SetSpacing(float spacing);
@@ -139,6 +151,7 @@ public: // API
   /**
    * @brief Gets the spacing between children in the stack.
    *
+   * @SINCE_3_0.0
    * @return The current spacing
    */
   float GetSpacing() const;

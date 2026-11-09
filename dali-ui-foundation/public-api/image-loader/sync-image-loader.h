@@ -54,6 +54,7 @@ namespace SyncImageLoader
  * }
  *
  * @endcode
+ * @SINCE_3_0.0
  */
 
 /**
@@ -66,6 +67,7 @@ namespace SyncImageLoader
  *
  * @REMARK_INTERNET
  * @REMARK_STORAGE
+ * @SINCE_3_0.0
  * @param[in] url The URL of the image file to load
  * @return A PixelData object containing the image, or an invalid object on failure
  */
@@ -81,6 +83,7 @@ DALI_UI_API PixelData Load(const Dali::String& url);
  *
  * @REMARK_INTERNET
  * @REMARK_STORAGE
+ * @SINCE_3_0.0
  * @param[in] url The URL of the image file to load
  * @param[in] dimensions The width and height to fit the loaded image to
  * @return A PixelData object containing the image, or an invalid object on failure
@@ -93,6 +96,7 @@ DALI_UI_API PixelData Load(const Dali::String& url, ImageDimensions dimensions);
  * @brief Loads an image synchronously by specifying the target dimensions and options.
  * @REMARK_INTERNET
  * @REMARK_STORAGE
+ * @SINCE_3_0.0
  * @param[in] url The URL of the image file to load
  * @param[in] dimensions The width and height to fit the loaded image to
  * @param[in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to desired size

@@ -41,6 +41,7 @@ class MarkdownViewStyleImpl;
 
 /**
  * @brief Defines the style used by MarkdownView.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API MarkdownViewStyle : public UiStyle
 {
@@ -54,6 +55,7 @@ public:
   /**
    * @brief Gets the built-in default style.
    *
+   * @SINCE_3_0.0
    * @return The built-in default style.
    */
   static MarkdownViewStyle DefaultPreset();
@@ -61,6 +63,7 @@ public:
   /**
    * @brief Gets the default MarkdownView style.
    *
+   * @SINCE_3_0.0
    * @return The default MarkdownView style.
    */
   static MarkdownViewStyle Default();
@@ -108,6 +111,7 @@ public: // Not intended for application developers
 
 /**
  * @brief Builds a MarkdownViewStyle.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API MarkdownViewStyle::Builder
 {

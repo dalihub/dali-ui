@@ -48,6 +48,7 @@ class ViewAnimationSpecImpl;
  *     .Opacity(1.0f, 300_ms);
  *   spec.ApplyTo(anim, view);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ViewAnimationSpec : public BaseHandle
 {
@@ -69,6 +70,7 @@ public:
   /**
    * @brief Animates the corner radius.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -78,6 +80,7 @@ public:
   /**
    * @brief Animates the corner radius by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -88,6 +91,7 @@ public:
   /**
    * @brief Animates the corner squareness.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -97,6 +101,7 @@ public:
   /**
    * @brief Animates the corner squareness by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -107,6 +112,7 @@ public:
   /**
    * @brief Animates the borderline width.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -116,6 +122,7 @@ public:
   /**
    * @brief Animates the borderline width by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -126,6 +133,7 @@ public:
   /**
    * @brief Animates the borderline color.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -135,6 +143,7 @@ public:
   /**
    * @brief Animates the borderline color by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -145,6 +154,7 @@ public:
   /**
    * @brief Animates the borderline offset.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -154,6 +164,7 @@ public:
   /**
    * @brief Animates the borderline offset by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -164,6 +175,7 @@ public:
   /**
    * @brief Animates the background color.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -173,6 +185,7 @@ public:
   /**
    * @brief Animates the background color by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -183,6 +196,7 @@ public:
   /**
    * @brief Animates the background gradient start offset.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -192,6 +206,7 @@ public:
   /**
    * @brief Animates the background gradient start offset by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -202,6 +217,7 @@ public:
   /**
    * @brief Animates the first shadow blur radius.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -211,6 +227,7 @@ public:
   /**
    * @brief Animates the first shadow blur radius by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -221,6 +238,7 @@ public:
   /**
    * @brief Animates the first shadow opacity.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -230,6 +248,7 @@ public:
   /**
    * @brief Animates the first shadow opacity by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -240,6 +259,7 @@ public:
   /**
    * @brief Animates the size.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -249,6 +269,7 @@ public:
   /**
    * @brief Animates the size by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -259,6 +280,7 @@ public:
   /**
    * @brief Animates the size width.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -268,6 +290,7 @@ public:
   /**
    * @brief Animates the size width by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -278,6 +301,7 @@ public:
   /**
    * @brief Animates the size height.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -287,6 +311,7 @@ public:
   /**
    * @brief Animates the size height by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -297,6 +322,7 @@ public:
   /**
    * @brief Animates the position.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -306,6 +332,7 @@ public:
   /**
    * @brief Animates the position by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -316,6 +343,7 @@ public:
   /**
    * @brief Animates the position x.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -325,6 +353,7 @@ public:
   /**
    * @brief Animates the position x by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -335,6 +364,7 @@ public:
   /**
    * @brief Animates the position y.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -344,6 +374,7 @@ public:
   /**
    * @brief Animates the position y by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -354,6 +385,7 @@ public:
   /**
    * @brief Animates the scale.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -363,6 +395,7 @@ public:
   /**
    * @brief Animates the scale by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -373,6 +406,7 @@ public:
   /**
    * @brief Animates the scale x.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -382,6 +416,7 @@ public:
   /**
    * @brief Animates the scale x by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -392,6 +427,7 @@ public:
   /**
    * @brief Animates the scale y.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -401,6 +437,7 @@ public:
   /**
    * @brief Animates the scale y by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -411,6 +448,7 @@ public:
   /**
    * @brief Animates the color multiplier.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -420,6 +458,7 @@ public:
   /**
    * @brief Animates the color multiplier by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -430,6 +469,7 @@ public:
   /**
    * @brief Animates the color.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -439,6 +479,7 @@ public:
   /**
    * @brief Animates the color by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -449,6 +490,7 @@ public:
   /**
    * @brief Animates the opacity.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -458,6 +500,7 @@ public:
   /**
    * @brief Animates the opacity by a relative amount.
    *
+   * @SINCE_3_0.0
    * @param[in] relative The relative value
    * @param[in] duration The animation duration
    * @param[in] alpha The alpha function (default: linear)
@@ -469,6 +512,7 @@ public:
   /**
    * @brief Applies all stored entries to the given Animation and View.
    *
+   * @SINCE_3_0.0
    * @param[in] animation The Animation to apply to
    * @param[in] view The target View
    */

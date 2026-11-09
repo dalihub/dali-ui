@@ -36,18 +36,21 @@ namespace Text
  *
  * Span only represents the payload. Text range attachment is managed by
  * StyledTextBuilder and StyledText.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Span : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized Span handle.
+   * @SINCE_3_0.0
    */
   Span() = default;
 
   /**
    * @brief Downcasts a handle to Span.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized Span on success, otherwise empty
    */
@@ -57,6 +60,7 @@ protected:
   /**
    * @brief Creates a Span handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL Span(BaseObject* impl);

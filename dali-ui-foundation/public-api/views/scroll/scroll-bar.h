@@ -37,37 +37,44 @@ class ScrollBarImpl;
 
 /**
  * @brief A class representing a scroll bar that can be used to control the scrolling of a view.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ScrollBar : public AbsoluteLayout, public ScrollBarInterface
 {
 public:
   /**
    * @brief Creates an uninitialized ScrollBar handle.
+   * @SINCE_3_0.0
    */
   ScrollBar();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   ScrollBar(const ScrollBar& scrollBar);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   ScrollBar(ScrollBar&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~ScrollBar();
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   ScrollBar& operator=(const ScrollBar& handle);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   ScrollBar& operator=(ScrollBar&& rhs) noexcept;
 
@@ -76,12 +83,14 @@ public:
 public: // Creation & Destruction
   /**
    * @brief Creates an initialized ScrollBar.
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource.
    */
   static ScrollBar New();
 
   /**
    * @brief Downcasts a handle to ScrollBar handle.
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object.
    * @return A handle to a ScrollBar or an uninitialized handle.
    */
@@ -131,6 +140,7 @@ public: // ScrollBarInterface implementation
 public: // Properties
   /**
    * @brief Gets or sets the thickness of the scroll bar.
+   * @SINCE_3_0.0
    * @return The thickness of the scroll bar.
    */
   float GetBarThickness() const;
@@ -138,6 +148,7 @@ public: // Properties
 
   /**
    * @brief Gets or sets the color of the scroll bar.
+   * @SINCE_3_0.0
    * @return The color of the scroll bar.
    */
   Vector4 GetBarColor() const;
@@ -145,6 +156,7 @@ public: // Properties
 
   /**
    * @brief Gets or sets the minimum size of the scroll bar.
+   * @SINCE_3_0.0
    * @return The minimum size of the scroll bar.
    */
   float GetBarMinSize() const;
@@ -152,6 +164,7 @@ public: // Properties
 
   /**
    * @brief Gets or sets the current scroll position of the target view.
+   * @SINCE_3_0.0
    * @return The current scroll position.
    */
   Vector2 GetScrollPosition() const;
@@ -161,6 +174,7 @@ public: // Properties
    * @brief Gets or sets the offset of bars from the edges.
    * This creates a small gap between the bar and the scroll bar container edges.
    * Padding can be set using View::SetPadding() which is inherited by ScrollBar.
+   * @SINCE_3_0.0
    * @return The bar offset.
    */
   float GetBarOffset() const;
@@ -168,18 +182,21 @@ public: // Properties
 
   /**
    * @brief Gets the corner radius of the scroll bar.
+   * @SINCE_3_0.0
    * @return The corner radius for each corner (topLeft, topRight, bottomRight, bottomLeft).
    */
   Vector4 GetBarCornerRadius() const;
 
   /**
    * @brief Sets the corner radius of the scroll bar (same for all corners).
+   * @SINCE_3_0.0
    * @param[in] radius The corner radius to apply to all corners.
    */
   void SetBarCornerRadius(float radius);
 
   /**
    * @brief Sets the corner radius of the scroll bar for each corner individually.
+   * @SINCE_3_0.0
    * @param[in] radius The corner radius (topLeft, topRight, bottomRight, bottomLeft).
    */
   void SetBarCornerRadius(const Vector4& radius);

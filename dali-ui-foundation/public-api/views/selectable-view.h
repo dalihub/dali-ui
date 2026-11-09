@@ -41,6 +41,7 @@ class SelectableViewImpl;
  * SelectableView is intended as a base class for selectable UI components such
  * as Switch and Checkbox.
  *
+ * @SINCE_3_0.0
  * @see SelectableTrait
  * @see InteractiveView
  */
@@ -49,12 +50,14 @@ class DALI_UI_API SelectableView : public InteractiveView
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized SelectableView handle.
+   * @SINCE_3_0.0
    */
   SelectableView();
 
   /**
    * @brief Creates an initialized SelectableView.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated SelectableView
    */
   static SelectableView New();
@@ -65,6 +68,7 @@ public: // Creation & Destruction
    * If the handle refers to a SelectableView, the downcast produces a valid handle.
    * Otherwise the returned handle is uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a SelectableView or an uninitialized handle
    */
@@ -73,6 +77,7 @@ public: // Creation & Destruction
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] view Handle to copy
    */
   SelectableView(const SelectableView& view);
@@ -80,6 +85,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   SelectableView(SelectableView&& rhs) noexcept;
@@ -88,6 +94,7 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~SelectableView();
 
@@ -95,6 +102,7 @@ public: // Operators
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -103,6 +111,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -114,6 +123,7 @@ public: // Signals
   /**
    * @brief Emitted when the selection state changes.
    *
+   * @SINCE_3_0.0
    * @return The selection changed signal
    * @see SelectableTrait::SelectionChangedSignal
    */
@@ -123,6 +133,7 @@ public: // API
   /**
    * @brief Returns whether the view is currently selected.
    *
+   * @SINCE_3_0.0
    * @return True if selected
    * @see SelectableTrait::IsSelected
    */
@@ -131,6 +142,7 @@ public: // API
   /**
    * @brief Sets the selection state.
    *
+   * @SINCE_3_0.0
    * @param[in] selected True to select, false to unselect
    * @see SelectableTrait::SetSelected
    */
@@ -139,6 +151,7 @@ public: // API
   /**
    * @brief Returns whether toggle-by-click is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if toggle-by-click is enabled
    * @see SelectableTrait::IsToggleByClickEnabled
    */
@@ -147,6 +160,7 @@ public: // API
   /**
    * @brief Enables or disables toggle-by-click.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable toggle-by-click, false to disable
    * @see SelectableTrait::SetToggleByClickEnabled
    */

@@ -33,6 +33,7 @@ namespace Ui
  *
  * Shared between ChartView::Property (public-api) and ChartViewImpl
  * (integration-api, for DALI_PROPERTY_REGISTRATION_EXTERNAL).
+ * @SINCE_3_0.0
  */
 struct ChartViewPropertyIndex
 {

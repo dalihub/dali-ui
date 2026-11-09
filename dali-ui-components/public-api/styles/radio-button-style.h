@@ -44,6 +44,7 @@ class RadioButtonStyleImpl;
  *
  * RadioButtonStyle is an immutable handle. Use Configure() or Builder to create a modified
  * style, then pass that style to RadioButton::New().
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API RadioButtonStyle : public UiStyle
 {
@@ -58,33 +59,39 @@ public:
    * initialized; a live selectable image or View must not be shared by multiple controls. A
    * stateless free function is the preferred callback target because Dali::Callback is move-only
    * and the callback is shared by style copies.
+   * @SINCE_3_0.0
    */
   using IconGenerator = Dali::Callback<SelectableImageInterface()>;
 
   /**
    * @brief Creates an uninitialized style handle.
+   * @SINCE_3_0.0
    */
   RadioButtonStyle();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~RadioButtonStyle();
 
   /**
    * @brief Creates a style handle that shares the implementation of @p rhs.
+   * @SINCE_3_0.0
    * @param[in] rhs The style handle to copy
    */
   RadioButtonStyle(const RadioButtonStyle& rhs);
 
   /**
    * @brief Moves a style handle.
+   * @SINCE_3_0.0
    * @param[in] rhs The style handle to move
    */
   RadioButtonStyle(RadioButtonStyle&& rhs) noexcept;
 
   /**
    * @brief Assigns another style handle to this handle.
+   * @SINCE_3_0.0
    * @param[in] rhs The style handle to copy
    * @return A reference to this handle
    */
@@ -92,6 +99,7 @@ public:
 
   /**
    * @brief Moves another style handle into this handle.
+   * @SINCE_3_0.0
    * @param[in] rhs The style handle to move
    * @return A reference to this handle
    */
@@ -99,12 +107,14 @@ public:
 
   /**
    * @brief Returns the theme key for the default RadioButton style.
+   * @SINCE_3_0.0
    * @return The RadioButton style key
    */
   static UiStyleKey<RadioButtonStyle> DefaultKey();
 
   /**
    * @brief Returns the built-in RadioButton style preset.
+   * @SINCE_3_0.0
    * @return An initialized built-in style
    */
   static RadioButtonStyle DefaultPreset();
@@ -114,12 +124,14 @@ public:
    *
    * The built-in preset is returned when the current theme has no override for DefaultKey().
    *
+   * @SINCE_3_0.0
    * @return An initialized themed or built-in style
    */
   static RadioButtonStyle Default();
 
   /**
    * @brief Downcasts a base handle to RadioButtonStyle.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A RadioButtonStyle handle, or an uninitialized handle if the types do not match
    */
@@ -127,6 +139,7 @@ public:
 
   /**
    * @brief Statically downcasts a UiStyle known to contain RadioButtonStyle.
+   * @SINCE_3_0.0
    * @param[in] style The RadioButtonStyle-compatible handle to downcast
    * @return A RadioButtonStyle handle sharing the same implementation
    * @pre @p style must be initialized and must contain a RadioButtonStyle implementation.
@@ -135,6 +148,7 @@ public:
 
   /**
    * @brief Creates a builder initialized with a copy of this style's values.
+   * @SINCE_3_0.0
    * @return A mutable builder independent of this style
    * @pre This style handle must be initialized.
    */
@@ -142,6 +156,7 @@ public:
 
   /**
    * @brief Returns the minimum width in logical pixels.
+   * @SINCE_3_0.0
    * @return The minimum width
    * @pre This style handle must be initialized.
    */
@@ -149,6 +164,7 @@ public:
 
   /**
    * @brief Returns the minimum height in logical pixels.
+   * @SINCE_3_0.0
    * @return The minimum height
    * @pre This style handle must be initialized.
    */
@@ -156,6 +172,7 @@ public:
 
   /**
    * @brief Returns the padding around the icon.
+   * @SINCE_3_0.0
    * @return The content padding in logical pixels
    * @pre This style handle must be initialized.
    */
@@ -163,6 +180,7 @@ public:
 
   /**
    * @brief Returns the requested icon width.
+   * @SINCE_3_0.0
    * @return The width in logical pixels, or zero when unset
    * @pre This style handle must be initialized.
    */
@@ -170,6 +188,7 @@ public:
 
   /**
    * @brief Returns the requested icon height.
+   * @SINCE_3_0.0
    * @return The height in logical pixels, or zero when unset
    * @pre This style handle must be initialized.
    */
@@ -177,6 +196,7 @@ public:
 
   /**
    * @brief Invokes the configured generator to create a selectable icon.
+   * @SINCE_3_0.0
    * @return The generated icon, or an uninitialized handle when no generator is configured
    * @pre This style handle must be initialized.
    * @note RadioButton::New(RadioButtonStyle) requires this function to return an initialized
@@ -186,6 +206,7 @@ public:
 
   /**
    * @brief Returns the deselected icon color.
+   * @SINCE_3_0.0
    * @return The deselected-state color
    * @pre This style handle must be initialized.
    */
@@ -193,6 +214,7 @@ public:
 
   /**
    * @brief Returns the selected icon color.
+   * @SINCE_3_0.0
    * @return The selected-state color
    * @pre This style handle must be initialized.
    */
@@ -200,6 +222,7 @@ public:
 
   /**
    * @brief Returns the interaction state effect.
+   * @SINCE_3_0.0
    * @return The effect applied to the RadioButton root
    * @pre This style handle must be initialized.
    */
@@ -217,23 +240,27 @@ public: // Not intended for application developers
  * Minimum sizes and each padding component must be finite and non-negative; a violation triggers an assertion in the setter.
  * A zero minimum size means no lower bound; zero padding means no padding.
  * Icon sizes retain a separate compatibility contract: non-positive or non-finite values are normalized to zero (unset), without an assertion.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API RadioButtonStyle::Builder
 {
 public:
   /**
    * @brief Creates a builder initialized with the built-in RadioButton defaults.
+   * @SINCE_3_0.0
    */
   Builder();
 
   /**
    * @brief Moves a builder.
+   * @SINCE_3_0.0
    * @param[in] rhs The builder to move
    */
   Builder(Builder&& rhs) noexcept;
 
   /**
    * @brief Moves another builder into this builder.
+   * @SINCE_3_0.0
    * @param[in] rhs The builder to move
    * @return A reference to this builder
    */
@@ -241,23 +268,27 @@ public:
 
   /**
    * @brief Copy construction is not supported.
+   * @SINCE_3_0.0
    * @param[in] rhs The builder that would be copied
    */
   Builder(const Builder& rhs) = delete;
 
   /**
    * @brief Copy assignment is not supported.
+   * @SINCE_3_0.0
    * @param[in] rhs The builder that would be copied
    */
   Builder& operator=(const Builder& rhs) = delete;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Builder();
 
   /**
    * @brief Sets the minimum width.
+   * @SINCE_3_0.0
    * @param[in] width The minimum width in logical pixels
    * @return A reference to this builder
    */
@@ -265,6 +296,7 @@ public:
 
   /**
    * @brief Sets the minimum width on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] width The minimum width in logical pixels
    * @return An rvalue reference to this builder
    */
@@ -272,6 +304,7 @@ public:
 
   /**
    * @brief Sets the minimum height.
+   * @SINCE_3_0.0
    * @param[in] height The minimum height in logical pixels
    * @return A reference to this builder
    */
@@ -279,6 +312,7 @@ public:
 
   /**
    * @brief Sets the minimum height on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] height The minimum height in logical pixels
    * @return An rvalue reference to this builder
    */
@@ -286,6 +320,7 @@ public:
 
   /**
    * @brief Sets the padding around the icon.
+   * @SINCE_3_0.0
    * @param[in] padding The content padding in logical pixels
    * @return A reference to this builder
    */
@@ -293,6 +328,7 @@ public:
 
   /**
    * @brief Sets the padding around the icon on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] padding The content padding in logical pixels
    * @return An rvalue reference to this builder
    */
@@ -304,6 +340,7 @@ public:
    * A non-positive or non-finite value is normalized to zero, which unsets the explicit
    * width. An unset width follows the effective icon height.
    *
+   * @SINCE_3_0.0
    * @param[in] width The requested width in logical pixels
    * @return A reference to this builder
    */
@@ -315,6 +352,7 @@ public:
    * A non-positive or non-finite value is normalized to zero, which unsets the explicit
    * width. An unset width follows the effective icon height.
    *
+   * @SINCE_3_0.0
    * @param[in] width The requested width in logical pixels
    * @return An rvalue reference to this builder
    */
@@ -327,6 +365,7 @@ public:
    * height. An unset height follows a definite content height, or the minimum height when
    * wrapping content.
    *
+   * @SINCE_3_0.0
    * @param[in] height The requested height in logical pixels
    * @return A reference to this builder
    */
@@ -339,6 +378,7 @@ public:
    * height. An unset height follows a definite content height, or the minimum height when
    * wrapping content.
    *
+   * @SINCE_3_0.0
    * @param[in] height The requested height in logical pixels
    * @return An rvalue reference to this builder
    */
@@ -346,6 +386,7 @@ public:
 
   /**
    * @brief Sets the selectable icon generator.
+   * @SINCE_3_0.0
    * @param[in] generator The generator to move into this builder
    * @return A reference to this builder
    * @note A RadioButton cannot be created from a style whose generator is empty or returns
@@ -355,6 +396,7 @@ public:
 
   /**
    * @brief Sets the selectable icon generator on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] generator The generator to move into this builder
    * @return An rvalue reference to this builder
    * @note A RadioButton cannot be created from a style whose generator is empty or returns
@@ -364,6 +406,7 @@ public:
 
   /**
    * @brief Sets the deselected icon color.
+   * @SINCE_3_0.0
    * @param[in] color The deselected-state color
    * @return A reference to this builder
    */
@@ -371,6 +414,7 @@ public:
 
   /**
    * @brief Sets the deselected icon color on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] color The deselected-state color
    * @return An rvalue reference to this builder
    */
@@ -378,6 +422,7 @@ public:
 
   /**
    * @brief Sets the selected icon color.
+   * @SINCE_3_0.0
    * @param[in] color The selected-state color
    * @return A reference to this builder
    */
@@ -385,6 +430,7 @@ public:
 
   /**
    * @brief Sets the selected icon color on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] color The selected-state color
    * @return An rvalue reference to this builder
    */
@@ -392,6 +438,7 @@ public:
 
   /**
    * @brief Sets the interaction state effect.
+   * @SINCE_3_0.0
    * @param[in] effect The effect to apply, or an uninitialized handle to use StateEffect::None()
    * @return A reference to this builder
    */
@@ -399,6 +446,7 @@ public:
 
   /**
    * @brief Sets the interaction state effect on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] effect The effect to apply, or an uninitialized handle to use StateEffect::None()
    * @return An rvalue reference to this builder
    */
@@ -406,6 +454,7 @@ public:
 
   /**
    * @brief Consumes this builder and returns an immutable style handle.
+   * @SINCE_3_0.0
    * @return An initialized RadioButtonStyle
    * @pre This builder must not have been moved from or consumed by an earlier Build() call.
    */

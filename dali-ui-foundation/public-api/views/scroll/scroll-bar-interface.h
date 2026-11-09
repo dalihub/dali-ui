@@ -34,47 +34,55 @@ namespace Ui
 
 /**
  * @brief Defines the interface for a scroll bar, which is responsible for displaying and controlling the scrolling of a target view.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ScrollBarInterface
 {
 public:
   /**
    * @brief Virtual destructor.
+   * @SINCE_3_0.0
    */
   virtual ~ScrollBarInterface() = default;
 
   /**
    * @brief Gets the target view for which the scroll bar is responsible.
+   * @SINCE_3_0.0
    * @return The target view.
    */
   virtual View GetTarget() const = 0;
 
   /**
    * @brief Gets the visibility of the vertical scroll bar.
+   * @SINCE_3_0.0
    * @return The vertical scroll bar visibility.
    */
   virtual ScrollBarVisibility GetVerticalScrollBarVisibility() const = 0;
 
   /**
    * @brief Sets the visibility of the vertical scroll bar.
+   * @SINCE_3_0.0
    * @param[in] visibility The vertical scroll bar visibility.
    */
   virtual void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) = 0;
 
   /**
    * @brief Gets the visibility of the horizontal scroll bar.
+   * @SINCE_3_0.0
    * @return The horizontal scroll bar visibility.
    */
   virtual ScrollBarVisibility GetHorizontalScrollBarVisibility() const = 0;
 
   /**
    * @brief Sets the visibility of the horizontal scroll bar.
+   * @SINCE_3_0.0
    * @param[in] visibility The horizontal scroll bar visibility.
    */
   virtual void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) = 0;
 
   /**
    * @brief Updates the size of the scroll bar based on the given scroll area and viewport size.
+   * @SINCE_3_0.0
    * @param[in] scrollWidth The width of the scrollable area.
    * @param[in] scrollHeight The height of the scrollable area.
    * @param[in] viewportWidth The width of the visible area.
@@ -84,6 +92,7 @@ public:
 
   /**
    * @brief Updates the scroll position of the scroll bar based on the given position.
+   * @SINCE_3_0.0
    * @param[in] position The new scroll position.
    */
   virtual void UpdateScrollPosition(const Vector2& position) = 0;
@@ -92,6 +101,7 @@ public:
    * @brief Hides the scroll bar (fade out).
    *
    * Called when scrolling ends. Only affects bars with Auto visibility.
+   * @SINCE_3_0.0
    */
   virtual void HideBar() = 0;
 };

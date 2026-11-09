@@ -47,6 +47,7 @@ namespace Text
  * required for an ImageSpan to replace its underlying text. The vertical
  * offset must also be finite. ImageAttributes does not load or own a rendered
  * image resource.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ImageAttributes
 {
@@ -58,27 +59,30 @@ public:
    * Alignment is not recalculated from the final line box expanded by the
    * reserved image box. A replacement-only line uses the consuming control's
    * default font metrics. The vertical offset is applied after alignment.
+   * @SINCE_3_0.0
    */
   enum class InlineAlignment : uint8_t
   {
-    TEXT_BOTTOM = 0, ///< Aligns the box bottom with the bottom of the surrounding text.
-    TEXT_BASELINE,   ///< Aligns the box bottom with the surrounding text baseline.
-    TEXT_CENTER      ///< Aligns the box center with the center of the surrounding text.
+    TEXT_BOTTOM = 0, ///< Aligns the box bottom with the bottom of the surrounding text. @SINCE_3_0.0
+    TEXT_BASELINE,   ///< Aligns the box bottom with the surrounding text baseline. @SINCE_3_0.0
+    TEXT_CENTER      ///< Aligns the box center with the center of the surrounding text. @SINCE_3_0.0
   };
 
   /**
    * @brief Identifies an attribute for Has() and Unset().
+   * @SINCE_3_0.0
    */
   enum class Attribute : uint32_t
   {
-    SOURCE,         ///< The image resource identifier.
-    RESERVED_SIZE,  ///< The reserved image box size in logical pixels.
-    ALIGNMENT,      ///< The vertical alignment relative to the surrounding text metrics.
-    VERTICAL_OFFSET ///< The vertical offset applied after alignment, in logical pixels.
+    SOURCE,         ///< The image resource identifier. @SINCE_3_0.0
+    RESERVED_SIZE,  ///< The reserved image box size in logical pixels. @SINCE_3_0.0
+    ALIGNMENT,      ///< The vertical alignment relative to the surrounding text metrics. @SINCE_3_0.0
+    VERTICAL_OFFSET ///< The vertical offset applied after alignment, in logical pixels. @SINCE_3_0.0
   };
 
   /**
    * @brief Creates image attributes with every attribute unset.
+   * @SINCE_3_0.0
    */
   ImageAttributes();
 
@@ -89,6 +93,7 @@ public:
    * remain unset and return their documented default values. The supplied
    * values are stored without validation.
    *
+   * @SINCE_3_0.0
    * @param[in] source The image resource identifier
    * @param[in] reservedSize The width and height of the reserved image box in logical pixels
    */
@@ -99,6 +104,7 @@ public:
    *
    * All values and their explicitly set or unset state are copied.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The image attributes to copy
    */
   ImageAttributes(const ImageAttributes& rhs);
@@ -106,6 +112,7 @@ public:
   /**
    * @brief Creates image attributes by moving another ImageAttributes object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The image attributes to move from
    */
   ImageAttributes(ImageAttributes&& rhs) noexcept;
@@ -115,6 +122,7 @@ public:
    *
    * All values and their explicitly set or unset state are copied.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The image attributes to copy
    * @return A reference to this object
    */
@@ -123,6 +131,7 @@ public:
   /**
    * @brief Moves another ImageAttributes object to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The image attributes to move from
    * @return A reference to this object
    */
@@ -130,6 +139,7 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~ImageAttributes();
 
@@ -141,6 +151,7 @@ public:
    * non-empty identifier does not change the reserved image box or text
    * layout.
    *
+   * @SINCE_3_0.0
    * @param[in] source The image resource identifier
    */
   void SetSource(const Dali::String& source);
@@ -151,6 +162,7 @@ public:
    * A default-constructed object returns an empty string. Use Has(SOURCE) to
    * determine whether the identifier is explicitly set.
    *
+   * @SINCE_3_0.0
    * @return The image resource identifier
    */
   Dali::String GetSource() const;
@@ -168,6 +180,7 @@ public:
    * A text control applies its effective text scale during layout without
    * changing this authored value.
    *
+   * @SINCE_3_0.0
    * @param[in] size The width and height of the reserved image box in logical pixels
    */
   void SetReservedSize(const Vector2& size);
@@ -178,6 +191,7 @@ public:
    * A default-constructed object returns Vector2::ZERO. Use Has(RESERVED_SIZE)
    * to determine whether the size is explicitly set.
    *
+   * @SINCE_3_0.0
    * @return The width and height of the reserved image box in logical pixels
    */
   Vector2 GetReservedSize() const;
@@ -187,6 +201,7 @@ public:
    *
    * The vertical offset is applied after this alignment.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment The vertical alignment relative to the surrounding text metrics
    */
   void SetAlignment(InlineAlignment alignment);
@@ -197,6 +212,7 @@ public:
    * A default-constructed object returns TEXT_BOTTOM. Use Has(ALIGNMENT) to
    * distinguish that default from an explicitly set TEXT_BOTTOM value.
    *
+   * @SINCE_3_0.0
    * @return The vertical alignment
    */
   InlineAlignment GetAlignment() const;
@@ -209,6 +225,7 @@ public:
    * negative values move it upward in control-local coordinates. A non-finite
    * offset makes an ImageSpan replacement invalid.
    *
+   * @SINCE_3_0.0
    * @param[in] offset The vertical offset in logical pixels
    */
   void SetVerticalOffset(float offset);
@@ -219,6 +236,7 @@ public:
    * A default-constructed object returns 0.0f. Use Has(VERTICAL_OFFSET) to
    * distinguish that default from an explicitly set zero value.
    *
+   * @SINCE_3_0.0
    * @return The vertical offset in logical pixels
    */
   float GetVerticalOffset() const;
@@ -229,6 +247,7 @@ public:
    * This check distinguishes an unset attribute from an explicitly set value
    * that equals its documented default.
    *
+   * @SINCE_3_0.0
    * @param[in] attribute The attribute to check
    * @return true if the attribute is explicitly set
    */
@@ -237,6 +256,7 @@ public:
   /**
    * @brief Checks whether any attribute is explicitly set.
    *
+   * @SINCE_3_0.0
    * @return true if one or more attributes are explicitly set
    */
   bool HasAttributes() const;
@@ -248,6 +268,7 @@ public:
    * getter. Consumers use Has() to determine whether the value was authored
    * and ignore a value whose attribute is unset.
    *
+   * @SINCE_3_0.0
    * @param[in] attribute The attribute to unset
    */
   void Unset(Attribute attribute);
@@ -259,6 +280,7 @@ public:
    * attributes that are explicitly set. Therefore, an unset default value is
    * not equal to the same value when it is explicitly set.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The image attributes to compare with
    * @return true if both image attribute sets are equal
    */
@@ -267,6 +289,7 @@ public:
   /**
    * @brief Compares two ImageAttributes objects for inequality.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The image attributes to compare with
    * @return true if the image attribute sets are not equal
    */

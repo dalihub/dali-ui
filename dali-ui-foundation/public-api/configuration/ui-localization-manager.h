@@ -55,6 +55,7 @@ class UiLocalizationManagerImpl;
  * an image URL, placeholder text, tooltip text, or any other
  * locale-dependent string value.
  *
+ * @SINCE_3_0.0
  * @note This is a plain function pointer, not std::function.
  *       Capturing lambdas and non-static member functions are not accepted.
  *       Use a free function or a static function. If state is required,
@@ -83,6 +84,7 @@ using LocalizedStringOverrideFunc = bool (*)(StringView    resourceId,
  * SetBindingResource(). The handle is obtained from the manager's weak target
  * reference immediately before invocation.
  *
+ * @SINCE_3_0.0
  * @note The target handle passed to the callback is intended for use during
  *       the callback. Do not store it unless you intentionally want to keep
  *       the target alive.
@@ -132,23 +134,27 @@ using LocalizedStringCallback = Callback<void(BaseHandle, const Dali::String&)>;
  *
  *   // Callback signature: void(BaseHandle target, const Dali::String& text)
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiLocalizationManager : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized UiLocalizationManager handle.
+   * @SINCE_3_0.0
    */
   UiLocalizationManager();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~UiLocalizationManager() = default;
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to copy
    */
   UiLocalizationManager(const UiLocalizationManager& handle) = default;
@@ -156,6 +162,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   UiLocalizationManager(UiLocalizationManager&& rhs) noexcept = default;
@@ -163,6 +170,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -171,6 +179,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -181,6 +190,7 @@ public:
    *
    * Creates the instance on first call.
    *
+   * @SINCE_3_0.0
    * @return A handle to the UiLocalizationManager singleton
    */
   static UiLocalizationManager Get();
@@ -188,6 +198,7 @@ public:
   /**
    * @brief Downcasts a handle to a UiLocalizationManager handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to UiLocalizationManager or an uninitialized handle
    */
@@ -202,6 +213,7 @@ public:
    * Re-registering the same domain updates the locale path and refreshes
    * existing bindings.
    *
+   * @SINCE_3_0.0
    * @note This does not automatically set the default domain.
    *       Applications should explicitly call SetDefaultDomain().
    *       Dali UI internal/framework domains should generally be used
@@ -219,6 +231,7 @@ public:
    * Bindings created without explicit domain use the current default domain.
    * Changing the default domain refreshes all existing bindings.
    *
+   * @SINCE_3_0.0
    * @param[in] domain The default gettext domain
    */
   void SetDefaultDomain(StringView domain);
@@ -226,6 +239,7 @@ public:
   /**
    * @brief Gets the current default domain.
    *
+   * @SINCE_3_0.0
    * @return The default domain, or an empty string if not set
    */
   Dali::String GetDefaultDomain() const;
@@ -241,6 +255,7 @@ public:
    *   - dgettext result -> translated string
    *   - dgettext null result -> resourceId
    *
+   * @SINCE_3_0.0
    * @param[in] resourceId The localization resource id / msgid
    * @return The localized string or fallback resourceId
    */
@@ -249,6 +264,7 @@ public:
   /**
    * @brief Gets a localized string using an explicit domain.
    *
+   * @SINCE_3_0.0
    * @param[in] resourceId The localization resource id / msgid
    * @param[in] domain The gettext domain
    * @return The localized string or fallback resourceId
@@ -270,6 +286,7 @@ public:
    *   - dngettext result -> selected string
    *   - dngettext null result -> resourceId
    *
+   * @SINCE_3_0.0
    * @note The @a quantity is used to select the plural form. It is not
    *       substituted into the returned string.
    * @note LocalizedStringOverrideFunc is not applied to plural lookup.
@@ -296,6 +313,7 @@ public:
    * Empty-id, bypass, dngettext-result, and null-result handling are the same
    * as for the default-domain overload.
    *
+   * @SINCE_3_0.0
    * @note The @a quantity is used to select the plural form. It is not
    *       substituted into the returned string.
    * @note LocalizedStringOverrideFunc is not applied to plural lookup.
@@ -326,6 +344,7 @@ public:
    * the callback because localized string bindings are commonly created
    * in one step.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target object
    * @param[in] bindingId Caller-defined binding id, e.g. "Text", "ImageUrl"
    * @param[in] resourceId The localization resource id / msgid
@@ -351,6 +370,7 @@ public:
    * the callback because localized string bindings are commonly created
    * in one step.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target object
    * @param[in] bindingId Caller-defined binding id, e.g. "Text", "ImageUrl"
    * @param[in] resourceId The localization resource id / msgid
@@ -366,6 +386,7 @@ public:
   /**
    * @brief Returns whether a named binding exists for an object.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target object
    * @param[in] bindingId Binding id
    * @return true if the binding exists
@@ -378,6 +399,7 @@ public:
    *
    * The current applied property value is not changed.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target object
    * @param[in] bindingId Binding id
    */
@@ -387,6 +409,7 @@ public:
   /**
    * @brief Removes all bindings associated with a target object.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target object
    */
   void ClearBindings(BaseHandle target);
@@ -396,6 +419,7 @@ public:
    *
    * Setting the override refreshes all existing bindings immediately.
    *
+   * @SINCE_3_0.0
    * @note This is a plain function pointer. Capturing lambdas and member
    *       functions are not accepted.
    *
@@ -413,6 +437,7 @@ public:
    * @brief Clears the localized string override.
    *
    * All bindings are refreshed to use gettext/dgettext values.
+   * @SINCE_3_0.0
    */
   void ClearLocalizedStringOverride();
 
@@ -424,6 +449,7 @@ public:
    *
    * Changing this value refreshes all bindings.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled true to enable bypass
    */
   void SetBypassEnabled(bool enabled);
@@ -431,6 +457,7 @@ public:
   /**
    * @brief Returns whether localization bypass is enabled.
    *
+   * @SINCE_3_0.0
    * @return true if bypass is enabled
    */
   bool IsBypassEnabled() const;
@@ -442,6 +469,7 @@ public:
    * function changed.
    *
    * Locale changed signal should also call this internally.
+   * @SINCE_3_0.0
    */
   void RefreshBindings();
 

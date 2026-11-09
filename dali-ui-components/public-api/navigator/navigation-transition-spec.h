@@ -56,6 +56,7 @@ class NavigationTransitionSpecImpl;
  * Before removing modal content, Navigator restores its pre-exit position,
  * scale and opacity so it can be presented again. Other animated properties
  * remain the responsibility of the application.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API NavigationTransitionSpec : public BaseHandle
 {
@@ -64,21 +65,25 @@ public:
    * @brief Signal used to append animation steps for one view.
    *
    * Parameters are the animation created by Navigator and the view to animate.
+   * @SINCE_3_0.0
    */
   using AnimatorSignalType = Signal<void(Dali::Animation&, Ui::View)>;
 
   /**
    * @brief Signal used to restore one view to its final resting state.
+   * @SINCE_3_0.0
    */
   using SnapSignalType = Signal<void(Ui::View)>;
 
   /**
    * @brief Creates an uninitialized handle.
+   * @SINCE_3_0.0
    */
   NavigationTransitionSpec();
 
   /**
    * @brief Creates an initialized transition specification.
+   * @SINCE_3_0.0
    * @return A new transition specification
    */
   static NavigationTransitionSpec New();
@@ -91,24 +96,30 @@ public:
 
   /**
    * @brief Downcasts a handle to NavigationTransitionSpec.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A transition specification, or an uninitialized handle
    */
   static NavigationTransitionSpec DownCast(BaseHandle handle);
 
   /// @brief Incoming view for Push or PushModal.
+  /// @SINCE_3_0.0
   AnimatorSignalType& EnterSignal();
   /// @brief Outgoing view for Push or PushModal.
+  /// @SINCE_3_0.0
   AnimatorSignalType& ExitSignal();
   /// @brief Incoming/revealed view for Pop or PopModal.
+  /// @SINCE_3_0.0
   AnimatorSignalType& PopEnterSignal();
   /// @brief Outgoing/removed view for Pop or PopModal.
+  /// @SINCE_3_0.0
   AnimatorSignalType& PopExitSignal();
 
   /**
    * @brief Snaps an incoming view to its visible final state.
    *
    * If no callback is connected, Navigator sets opacity to 1.0f.
+   * @SINCE_3_0.0
    */
   SnapSignalType& SnapIncomingSignal();
 
@@ -116,6 +127,7 @@ public:
    * @brief Snaps an outgoing view that remains in the stack to its resting state.
    *
    * If no callback is connected, Navigator leaves the outgoing view untouched.
+   * @SINCE_3_0.0
    */
   SnapSignalType& SnapOutgoingSignal();
 
@@ -123,12 +135,14 @@ public:
    * @brief Sets the transition duration in seconds.
    *
    * A value less than or equal to 0.0f uses Navigator's default duration.
+   * @SINCE_3_0.0
    * @param[in] duration The duration in seconds
    */
   void SetDuration(float duration);
 
   /**
    * @brief Gets the transition duration in seconds.
+   * @SINCE_3_0.0
    * @return The configured duration, or 0.0f when Navigator's default is used
    */
   float GetDuration() const;

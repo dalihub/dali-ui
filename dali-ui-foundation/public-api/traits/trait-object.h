@@ -37,22 +37,26 @@ class ViewImpl;
  * It is a BaseObject so public trait handles can keep the usual DALi
  * handle/body shape while View stores only objects that explicitly opt into
  * trait semantics.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API TraitObject : public BaseObject
 {
 public:
   /**
    * @brief Called after this trait is attached to a View.
+   * @SINCE_3_0.0
    */
   virtual void OnAttached(TraitId id, View& view);
 
   /**
    * @brief Called before this trait is detached from a View.
+   * @SINCE_3_0.0
    */
   virtual void OnDetaching(TraitId id, View& view);
 
   /**
    * @brief Called when the attached View is being destroyed.
+   * @SINCE_3_0.0
    */
   virtual void OnViewDestroying(ViewImpl* viewImpl);
 

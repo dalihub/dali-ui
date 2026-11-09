@@ -33,15 +33,17 @@ struct InputEditorPropertyIndex
 {
   /**
    * @brief Enumeration for the start and end property ranges for this control.
+   * @SINCE_3_0.0
    */
   enum PropertyRange
   {
     PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_END_INDEX + 1,
-    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000 ///< Reserve property indices.
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000 ///< Reserve property indices. @SINCE_3_0.0
   };
 
   /**
    * @brief Enumeration for the instance of properties belonging to the InputEditor class.
+   * @SINCE_3_0.0
    */
   enum
   {
@@ -51,6 +53,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The text to display in UTF-8 format.
+     * @SINCE_3_0.0
      * @details Name "text", type Property::STRING.
      * @see InputEditor::SetText(), InputEditor::GetText().
      */
@@ -58,6 +61,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font family of the text.
+     * @SINCE_3_0.0
      * @details Name "fontFamily", type Property::STRING.
      * @see InputEditor::SetFontFamily(), InputEditor::GetFontFamily().
      */
@@ -65,6 +69,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The size of font in pixels.
+     * @SINCE_3_0.0
      * @details Name "fontSize", type Property::FLOAT.
      * @see InputEditor::SetFontSize(), InputEditor::GetFontSize().
      */
@@ -72,6 +77,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The color of the text.
+     * @SINCE_3_0.0
      * @details Name "textColor", type Property::VECTOR4.
      * @see InputEditor::SetTextColor(), InputEditor::GetTextColor().
      */
@@ -79,6 +85,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief Line wrap mode when text lines are greater than the layout width.
+     * @SINCE_3_0.0
      * @details Name "lineWrapMode", type Text::LineWrapMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::LineWrapMode (Property::INTEGER).
      * @see InputEditor::SetLineWrapMode(), InputEditor::GetLineWrapMode().
@@ -87,6 +94,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The horizontal alignment.
+     * @SINCE_3_0.0
      * @details Name "horizontalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::Alignment (Property::INTEGER).
      * @see InputEditor::SetHorizontalTextAlignment(), InputEditor::GetHorizontalTextAlignment().
@@ -95,6 +103,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The vertical alignment.
+     * @SINCE_3_0.0
      * @details Name "verticalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::Alignment (Property::INTEGER).
      * @see InputEditor::SetVerticalTextAlignment(), InputEditor::GetVerticalTextAlignment().
@@ -103,6 +112,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The overflow mode.
+     * @SINCE_3_0.0
      * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::OverflowMode (Property::INTEGER).
      * @see InputEditor::SetTextOverflowMode(), InputEditor::GetTextOverflowMode().
@@ -111,6 +121,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The line height.
+     * @SINCE_3_0.0
      * @details Name "lineHeight", type Property::FLOAT.
      * @see InputEditor::SetLineHeight(), InputEditor::GetLineHeight().
      */
@@ -118,6 +129,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The line height mode.
+     * @SINCE_3_0.0
      * @details Name "lineHeightMode", type Text::LineHeightMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::LineHeightMode (Property::INTEGER).
      * @see InputEditor::SetLineHeightMode(), InputEditor::GetLineHeightMode().
@@ -126,6 +138,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The placeholder text displayed when the input editor is empty.
+     * @SINCE_3_0.0
      * @details Name "placeholder", type Property::STRING.
      * @see InputEditor::SetPlaceholder(), InputEditor::GetPlaceholder().
      */
@@ -133,6 +146,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The color of the placeholder text.
+     * @SINCE_3_0.0
      * @details Name "placeholderColor", type Property::VECTOR4.
      * @see InputEditor::SetPlaceholderColor(), InputEditor::GetPlaceholderColor().
      */
@@ -140,6 +154,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief Whether the placeholder text is shown when the input editor has focus.
+     * @SINCE_3_0.0
      * @details Name "showPlaceholderOnFocus", type Property::BOOLEAN.
      * @see InputEditor::SetShowPlaceholderOnFocus(), InputEditor::IsPlaceholderShownOnFocus().
      */
@@ -147,6 +162,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The width of the text cursor in pixels.
+     * @SINCE_3_0.0
      * @details Name "cursorWidth", type Property::INTEGER.
      * @see InputEditor::SetCursorWidth(), InputEditor::GetCursorWidth().
      */
@@ -154,6 +170,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The color of the text cursor.
+     * @SINCE_3_0.0
      * @details Name "cursorColor", type Property::VECTOR4.
      * @see InputEditor::SetCursorColor(), InputEditor::GetCursorColor().
      */
@@ -161,6 +178,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief Whether the cursor should blink.
+     * @SINCE_3_0.0
      * @details Name "cursorBlinkEnabled", type Property::BOOLEAN.
      * @see InputEditor::SetCursorBlinkEnabled(), InputEditor::IsCursorBlinkEnabled().
      */
@@ -168,6 +186,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The time interval in seconds between cursor on and off states.
+     * @SINCE_3_0.0
      * @details Name "cursorBlinkInterval", type Property::FLOAT.
      * @see InputEditor::SetCursorBlinkInterval(), InputEditor::GetCursorBlinkInterval().
      */
@@ -175,6 +194,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The current cursor position.
+     * @SINCE_3_0.0
      * @details Name "cursorPosition", type Property::INTEGER.
      * @see InputEditor::SetCursorPosition(), InputEditor::GetCursorPosition().
      */
@@ -182,6 +202,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief Whether text selection is enabled.
+     * @SINCE_3_0.0
      * @details Name "selectionEnabled", type Property::BOOLEAN.
      * @see InputEditor::SetSelectionEnabled(), InputEditor::IsSelectionEnabled().
      */
@@ -189,6 +210,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The highlight color of the selected text region.
+     * @SINCE_3_0.0
      * @details Name "selectionColor", type Property::VECTOR4.
      * @see InputEditor::SetSelectionColor(), InputEditor::GetSelectionColor().
      */
@@ -196,6 +218,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The currently selected text.
+     * @SINCE_3_0.0
      * @details Name "selectedText", type Property::STRING.
      * @note This property is read-only.
      * @see InputEditor::GetSelectedText().
@@ -204,6 +227,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The start position of the selected text range.
+     * @SINCE_3_0.0
      * @details Name "selectedTextStart", type Property::INTEGER.
      * @note This property is read-only.
      * @see InputEditor::GetSelectedTextStart().
@@ -212,6 +236,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The end position of the selected text range.
+     * @SINCE_3_0.0
      * @details Name "selectedTextEnd", type Property::INTEGER.
      * @note This property is read-only.
      * @see InputEditor::GetSelectedTextEnd().
@@ -220,6 +245,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief Whether text editing handles are enabled.
+     * @SINCE_3_0.0
      * @details Name "textHandleEnabled", type Property::BOOLEAN.
      * @see InputEditor::SetTextHandleEnabled(), InputEditor::IsTextHandleEnabled().
      */
@@ -227,6 +253,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The color of the text editing handles.
+     * @SINCE_3_0.0
      * @details Name "textHandleColor", type Property::VECTOR4.
      * @see InputEditor::SetTextHandleColor(), InputEditor::GetTextHandleColor().
      */
@@ -234,6 +261,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The cursor handle image.
+     * @SINCE_3_0.0
      * @details Name "cursorHandleImage", type Property::STRING.
      * @see InputEditor::SetCursorHandleImage(), InputEditor::GetCursorHandleImage().
      */
@@ -241,6 +269,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The pressed cursor handle image.
+     * @SINCE_3_0.0
      * @details Name "cursorHandlePressedImage", type Property::STRING.
      * @see InputEditor::SetCursorHandlePressedImage(), InputEditor::GetCursorHandlePressedImage().
      */
@@ -248,6 +277,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The left selection handle image.
+     * @SINCE_3_0.0
      * @details Name "selectionHandleImageLeft", type Property::STRING.
      * @see InputEditor::SetSelectionHandleImageLeft(), InputEditor::GetSelectionHandleImageLeft().
      */
@@ -255,6 +285,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The right selection handle image.
+     * @SINCE_3_0.0
      * @details Name "selectionHandleImageRight", type Property::STRING.
      * @see InputEditor::SetSelectionHandleImageRight(), InputEditor::GetSelectionHandleImageRight().
      */
@@ -262,6 +293,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The pressed left selection handle image.
+     * @SINCE_3_0.0
      * @details Name "selectionHandlePressedImageLeft", type Property::STRING.
      * @see InputEditor::SetSelectionHandlePressedImageLeft(), InputEditor::GetSelectionHandlePressedImageLeft().
      */
@@ -269,6 +301,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The pressed right selection handle image.
+     * @SINCE_3_0.0
      * @details Name "selectionHandlePressedImageRight", type Property::STRING.
      * @see InputEditor::SetSelectionHandlePressedImageRight(), InputEditor::GetSelectionHandlePressedImageRight().
      */
@@ -276,6 +309,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The maximum number of characters that can be entered.
+     * @SINCE_3_0.0
      * @details Name "maximumLength", type Property::INTEGER.
      * @see InputEditor::SetMaximumLength(), InputEditor::GetMaximumLength().
      */
@@ -283,6 +317,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief Whether the input editor can be edited by user interaction.
+     * @SINCE_3_0.0
      * @details Name "editable", type Property::BOOLEAN.
      * @see InputEditor::SetEditable(), InputEditor::IsEditable().
      */
@@ -290,6 +325,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The layout direction mode.
+     * @SINCE_3_0.0
      * @details Name "layoutDirectionMode", type Text::LayoutDirectionMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::LayoutDirectionMode (Property::INTEGER).
      * @see InputEditor::SetLayoutDirectionMode(), InputEditor::GetLayoutDirectionMode().
@@ -298,6 +334,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font weight.
+     * @SINCE_3_0.0
      * @details Name "fontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontWeight (Property::INTEGER).
      * @see InputEditor::SetFontWeight(), InputEditor::GetFontWeight().
@@ -306,6 +343,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font width.
+     * @SINCE_3_0.0
      * @details Name "fontWidth", type Text::FontWidth (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontWidth (Property::INTEGER).
      * @see InputEditor::SetFontWidth(), InputEditor::GetFontWidth().
@@ -314,6 +352,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font slant.
+     * @SINCE_3_0.0
      * @details Name "fontSlant", type Text::FontSlant (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontSlant (Property::INTEGER).
      * @see InputEditor::SetFontSlant(), InputEditor::GetFontSlant().
@@ -322,6 +361,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The background color behind the text.
+     * @SINCE_3_0.0
      * @details Name "textBackgroundColor", type Property::VECTOR4.
      * @note The background is rendered behind the text glyphs.
      * @see InputEditor::SetTextBackgroundColor(), InputEditor::GetTextBackgroundColor(), InputEditor::ClearTextBackgroundColor().
@@ -330,6 +370,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The minimum font size scale.
+     * @SINCE_3_0.0
      * @details Name "minimumFontSizeScale", type Property::FLOAT.
      * @see InputEditor::SetMinimumFontSizeScale(), InputEditor::GetMinimumFontSizeScale().
      */
@@ -337,6 +378,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The maximum font size scale.
+     * @SINCE_3_0.0
      * @details Name "maximumFontSizeScale", type Property::FLOAT.
      * @see InputEditor::SetMaximumFontSizeScale(), InputEditor::GetMaximumFontSizeScale().
      */
@@ -344,6 +386,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief Whether the system font size scale is applied.
+     * @SINCE_3_0.0
      * @details Name "systemFontSizeScaleEnabled", type Property::BOOLEAN.
      * @see InputEditor::SetSystemFontSizeScaleEnabled(), InputEditor::IsSystemFontSizeScaleEnabled().
      */
@@ -351,6 +394,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief Whether auto grow behavior is enabled.
+     * @SINCE_3_0.0
      * @details Name "autoGrowEnabled", type Property::BOOLEAN.
      * @see InputEditor::SetAutoGrowEnabled(), InputEditor::IsAutoGrowEnabled().
      */
@@ -358,6 +402,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The text color used for typing.
+     * @SINCE_3_0.0
      * @details Name "typingTextColor", type Property::VECTOR4.
      * @see InputEditor::SetTypingTextColor(), InputEditor::GetTypingTextColor().
      */
@@ -365,6 +410,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font family used for typing.
+     * @SINCE_3_0.0
      * @details Name "typingFontFamily", type Property::STRING.
      * @see InputEditor::SetTypingFontFamily(), InputEditor::GetTypingFontFamily().
      */
@@ -372,6 +418,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font size in pixels used for typing.
+     * @SINCE_3_0.0
      * @details Name "typingFontSize", type Property::FLOAT.
      * @see InputEditor::SetTypingFontSize(), InputEditor::GetTypingFontSize().
      */
@@ -379,6 +426,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font weight used for typing.
+     * @SINCE_3_0.0
      * @details Name "typingFontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontWeight (Property::INTEGER).
      * @see InputEditor::SetTypingFontWeight(), InputEditor::GetTypingFontWeight().
@@ -387,6 +435,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font width used for typing.
+     * @SINCE_3_0.0
      * @details Name "typingFontWidth", type Text::FontWidth (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontWidth (Property::INTEGER).
      * @see InputEditor::SetTypingFontWidth(), InputEditor::GetTypingFontWidth().
@@ -395,6 +444,7 @@ struct InputEditorPropertyIndex
 
     /**
      * @brief The font slant used for typing.
+     * @SINCE_3_0.0
      * @details Name "typingFontSlant", type Text::FontSlant (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontSlant (Property::INTEGER).
      * @see InputEditor::SetTypingFontSlant(), InputEditor::GetTypingFontSlant().

@@ -49,17 +49,20 @@ class StateEventImpl;
  *   if(e.Removed(ViewState::PRESSED)) { ... } // released
  * });
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API StateEvent : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized StateEvent handle.
+   * @SINCE_3_0.0
    */
   StateEvent() = default;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~StateEvent() = default;
 
@@ -70,11 +73,13 @@ public:
 
   /**
    * @brief Returns the state before this transition.
+   * @SINCE_3_0.0
    */
   const ViewState& GetPrev() const;
 
   /**
    * @brief Returns the state after this transition (the current state).
+   * @SINCE_3_0.0
    */
   const ViewState& GetCurrent() const;
 
@@ -82,6 +87,7 @@ public:
    * @brief Returns true if @a state was newly added in this transition.
    *
    * Equivalent to: !GetPrev().Contains(state) && GetCurrent().Contains(state)
+   * @SINCE_3_0.0
    */
   bool Added(const ViewState& state) const
   {
@@ -92,6 +98,7 @@ public:
    * @brief Returns true if @a state was removed in this transition.
    *
    * Equivalent to: GetPrev().Contains(state) && !GetCurrent().Contains(state)
+   * @SINCE_3_0.0
    */
   bool Removed(const ViewState& state) const
   {
@@ -100,6 +107,7 @@ public:
 
   /**
    * @brief Returns true if @a state was either added or removed in this transition.
+   * @SINCE_3_0.0
    */
   bool Changed(const ViewState& state) const
   {
@@ -112,6 +120,7 @@ public:
    * Always returns a valid InputEvent. Its type identifies the origin, including
    * origins without a concrete input payload such as InputEventType::NONE and
    * InputEventType::ACCESSIBILITY_ACTIVATION.
+   * @SINCE_3_0.0
    */
   const InputEvent& GetCause() const;
 
@@ -119,12 +128,14 @@ public:
    * @brief Returns the type of the input event that caused this transition.
    *
    * Convenience shortcut for GetCause().GetInputEventType().
+   * @SINCE_3_0.0
    */
   InputEventType GetInputEventType() const;
 
   /**
    * @brief Returns the touch event that caused this transition.
    *
+   * @SINCE_3_0.0
    * @pre GetInputEventType() == InputEventType::TOUCH_EVENT
    */
   const TouchEvent& GetTouchEvent() const;
@@ -132,6 +143,7 @@ public:
   /**
    * @brief Returns the key event that caused this transition.
    *
+   * @SINCE_3_0.0
    * @pre GetInputEventType() == InputEventType::KEY_EVENT
    */
   const KeyEvent& GetKeyEvent() const;
@@ -139,6 +151,7 @@ public:
   /**
    * @brief Returns the tap gesture that caused this transition.
    *
+   * @SINCE_3_0.0
    * @pre GetInputEventType() == InputEventType::TAP_GESTURE
    */
   const TapGesture& GetTapGesture() const;
@@ -146,6 +159,7 @@ public:
   /**
    * @brief Returns the long-press gesture that caused this transition.
    *
+   * @SINCE_3_0.0
    * @pre GetInputEventType() == InputEventType::LONG_PRESS_GESTURE
    */
   const LongPressGesture& GetLongPressGesture() const;
@@ -153,6 +167,7 @@ public:
   /**
    * @brief Returns the wheel event that caused this transition.
    *
+   * @SINCE_3_0.0
    * @pre GetInputEventType() == InputEventType::WHEEL_EVENT
    */
   const WheelEvent& GetWheelEvent() const;
@@ -161,6 +176,7 @@ public: // Not intended for application developers
   /**
    * @brief Creates a handle using the Internal implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] implementation The implementation
    */
   explicit StateEvent(Internal::StateEventImpl* implementation);

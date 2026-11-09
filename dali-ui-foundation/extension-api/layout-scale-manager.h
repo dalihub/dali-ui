@@ -61,23 +61,27 @@ namespace Extension
  *   Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
  *   Extension::LayoutScaleManager::Get().SetWindowScale(window, 2.0f); // views in window: 2.0 * 1.5
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API LayoutScaleManager : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized LayoutScaleManager handle.
+   * @SINCE_3_0.0
    */
   LayoutScaleManager();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~LayoutScaleManager() = default;
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to copy
    */
   LayoutScaleManager(const LayoutScaleManager& handle) = default;
@@ -85,6 +89,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   LayoutScaleManager(LayoutScaleManager&& rhs) noexcept = default;
@@ -92,6 +97,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -100,6 +106,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -111,6 +118,7 @@ public:
    * Creates the instance on first call. The returned handle is never empty, also when it
    * is requested before the application is initialized.
    *
+   * @SINCE_3_0.0
    * @return A handle to the LayoutScaleManager singleton
    */
   static LayoutScaleManager Get();
@@ -118,6 +126,7 @@ public:
   /**
    * @brief Downcasts a handle to a LayoutScaleManager handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a LayoutScaleManager or an uninitialized handle
    */
@@ -130,6 +139,7 @@ public:
    * Extension::View::GetEffectiveLayoutScale() returns a view's effective scale. The stored value is
    * reported while scaling is disabled through SetScalable(false) as well.
    *
+   * @SINCE_3_0.0
    * @return The current UI scale (1.0 by default)
    */
   float GetUiScale() const;
@@ -147,6 +157,7 @@ public:
    * Ui::View::Measure() on it use the new value at once, and it is laid out at that value when
    * it is added to a scene.
    *
+   * @SINCE_3_0.0
    * @param[in] scale The new UI scale. It must be positive, finite and normal (>= FLT_MIN),
    *            because the layout also divides by it; other values are ignored and logged,
    *            leaving the current UI scale in place.
@@ -156,6 +167,7 @@ public:
   /**
    * @brief Returns whether scaling is enabled.
    *
+   * @SINCE_3_0.0
    * @return true if scaling is enabled (the default), false if it is disabled process-wide
    */
   bool IsScalable() const;
@@ -171,6 +183,7 @@ public:
    * re-layout; setting the current state again does nothing. A view that is not on a scene
    * follows the switch at once, as it follows SetUiScale().
    *
+   * @SINCE_3_0.0
    * @param[in] enable true to enable scaling, false to disable it
    */
   void SetScalable(bool enable);
@@ -182,6 +195,7 @@ public:
    * the STORED value: like GetUiScale(), it keeps reporting it while scaling is disabled
    * through SetScalable(false), although no view is scaled by it then.
    *
+   * @SINCE_3_0.0
    * @param[in] window The window to query
    * @return The window's scale, or 1.0 when none was set, when it was reset, or when
    *         @p window is empty. A scale recorded for a window that has since been
@@ -224,6 +238,7 @@ public:
    * the UI-scale term alone, the current one: they follow SetUiScale() and SetScalable()
    * while the view is detached.
    *
+   * @SINCE_3_0.0
    * @param[in] window The window whose views are affected. An empty window is ignored
    *            and logged.
    * @param[in] scale The window scale. It must be positive, finite and normal

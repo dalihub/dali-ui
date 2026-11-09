@@ -31,6 +31,7 @@ namespace Ui
 {
 /**
  * @brief Immutable construction defaults for ChartView. Runtime properties remain independently mutable.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ChartViewStyle : public UiStyle
 {
@@ -38,17 +39,20 @@ public:
   class Builder;
   /**
    * @brief Creates an uninitialized handle; initialize it before accessing properties.
+   * @SINCE_3_0.0
    */
   ChartViewStyle();
 
   /**
    * @brief Releases this handle without invalidating other shared handles.
+   * @SINCE_3_0.0
    */
   ~ChartViewStyle();
 
   /**
    * @brief Shares the object referenced by another handle.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   ChartViewStyle(const ChartViewStyle& rhs);
@@ -56,6 +60,7 @@ public:
   /**
    * @brief Transfers a handle, leaving the source uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   ChartViewStyle(ChartViewStyle&& rhs) noexcept;
@@ -63,6 +68,7 @@ public:
   /**
    * @brief Shares the object referenced by another handle.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return This handle
    */
@@ -71,6 +77,7 @@ public:
   /**
    * @brief Transfers a handle, leaving the source uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return This handle
    */
@@ -78,24 +85,28 @@ public:
 
   /**
    * @brief Returns the configuration key for the default style.
+   * @SINCE_3_0.0
    * @return The typed key
    */
   static UiStyleKey<ChartViewStyle> DefaultKey();
 
   /**
    * @brief Returns the cached built-in style after UiConfig::Apply().
+   * @SINCE_3_0.0
    * @return The built-in style
    */
   static ChartViewStyle DefaultPreset();
 
   /**
    * @brief Resolves the configured style, falling back to DefaultPreset().
+   * @SINCE_3_0.0
    * @return The resolved style
    */
   static ChartViewStyle Default();
 
   /**
    * @brief Performs a checked cast.
+   * @SINCE_3_0.0
    * @param[in] handle The source handle
    * @return The style, or an uninitialized handle
    */
@@ -103,6 +114,7 @@ public:
 
   /**
    * @brief Casts a style whose concrete type is known to be ChartViewStyle.
+   * @SINCE_3_0.0
    * @param[in] style The source style
    * @return The typed style
    */
@@ -110,48 +122,56 @@ public:
 
   /**
    * @brief Clones this style into an independent builder.
+   * @SINCE_3_0.0
    * @return The builder
    */
   Builder Configure() const;
 
   /**
    * @brief Returns the authored background color, including any theme identifier.
+   * @SINCE_3_0.0
    * @return The authored value
    */
   UiColor GetBackgroundColor() const;
 
   /**
    * @brief Returns the authored label color, including any theme identifier.
+   * @SINCE_3_0.0
    * @return The authored value
    */
   UiColor GetLabelColor() const;
 
   /**
    * @brief Returns the authored legend text color, including any theme identifier.
+   * @SINCE_3_0.0
    * @return The authored value
    */
   UiColor GetLegendTextColor() const;
 
   /**
    * @brief Returns the authored tooltip background color, including any theme identifier.
+   * @SINCE_3_0.0
    * @return The authored value
    */
   UiColor GetTooltipBackgroundColor() const;
 
   /**
    * @brief Returns the authored tooltip text color, including any theme identifier.
+   * @SINCE_3_0.0
    * @return The authored value
    */
   UiColor GetTooltipTextColor() const;
 
   /**
    * @brief Returns the Padding construction default.
+   * @SINCE_3_0.0
    * @return The authored value
    */
   float GetPadding() const;
 
   /**
    * @brief Returns the TooltipPadding construction default.
+   * @SINCE_3_0.0
    * @return The authored value
    */
   float GetTooltipPadding() const;
@@ -160,6 +180,7 @@ public: // Not intended for application developers
   /**
    * @brief Wraps an existing implementation object.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation whose ownership is shared
    */
   explicit DALI_INTERNAL ChartViewStyle(Extension::UiStyleImpl* impl);
@@ -170,22 +191,26 @@ public: // Not intended for application developers
  *
  * Move-construct or move-assign to transfer ownership of the mutable configuration.
  * Setters and Build() require a builder that has not been moved from or consumed.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ChartViewStyle::Builder
 {
 public:
   /**
    * @brief Creates a builder with complete built-in construction defaults.
+   * @SINCE_3_0.0
    */
   Builder();
 
   /**
    * @brief Releases the builder and any unbuilt configuration.
+   * @SINCE_3_0.0
    */
   ~Builder();
 
   /**
    * @brief Disables copying; use Configure() to clone a built style.
+   * @SINCE_3_0.0
    * @param[in] rhs The builder that cannot be copied
    */
   Builder(const Builder& rhs) = delete;
@@ -193,6 +218,7 @@ public:
   /**
    * @brief Disables copy assignment.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The builder that cannot be copied
    * @return This builder; the operation is deleted
    */
@@ -201,6 +227,7 @@ public:
   /**
    * @brief Transfers the mutable configuration.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The builder to move
    */
   Builder(Builder&& rhs) noexcept;
@@ -208,6 +235,7 @@ public:
   /**
    * @brief Transfers the mutable configuration.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The builder to move
    * @return This builder
    */
@@ -215,6 +243,7 @@ public:
 
   /**
    * @brief Sets the background color used when constructing a chart.
+   * @SINCE_3_0.0
    * @param[in] color The authored color, retaining any theme color identifier
    * @return This builder
    */
@@ -222,6 +251,7 @@ public:
 
   /**
    * @brief Sets the BackgroundColor construction default on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] color The color, retaining any theme color identifier
    * @return This builder
    */
@@ -229,6 +259,7 @@ public:
 
   /**
    * @brief Sets the label color used when constructing a chart.
+   * @SINCE_3_0.0
    * @param[in] color The authored color, retaining any theme color identifier
    * @return This builder
    */
@@ -236,6 +267,7 @@ public:
 
   /**
    * @brief Sets the LabelColor construction default on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] color The color, retaining any theme color identifier
    * @return This builder
    */
@@ -243,6 +275,7 @@ public:
 
   /**
    * @brief Sets the legend text color used when constructing a chart.
+   * @SINCE_3_0.0
    * @param[in] color The authored color, retaining any theme color identifier
    * @return This builder
    */
@@ -250,6 +283,7 @@ public:
 
   /**
    * @brief Sets the LegendTextColor construction default on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] color The color, retaining any theme color identifier
    * @return This builder
    */
@@ -257,6 +291,7 @@ public:
 
   /**
    * @brief Sets the tooltip background color used when constructing a chart.
+   * @SINCE_3_0.0
    * @param[in] color The authored color, retaining any theme color identifier
    * @return This builder
    */
@@ -264,6 +299,7 @@ public:
 
   /**
    * @brief Sets the TooltipBackgroundColor construction default on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] color The color, retaining any theme color identifier
    * @return This builder
    */
@@ -271,6 +307,7 @@ public:
 
   /**
    * @brief Sets the tooltip text color used when constructing a chart.
+   * @SINCE_3_0.0
    * @param[in] color The authored color, retaining any theme color identifier
    * @return This builder
    */
@@ -278,6 +315,7 @@ public:
 
   /**
    * @brief Sets the TooltipTextColor construction default on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] color The color, retaining any theme color identifier
    * @return This builder
    */
@@ -285,6 +323,7 @@ public:
 
   /**
    * @brief Sets the Padding construction default.
+   * @SINCE_3_0.0
    * @param[in] value The finite non-negative chart padding in pixels
    * @return This builder
    */
@@ -292,6 +331,7 @@ public:
 
   /**
    * @brief Sets the Padding construction default on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] value The authored value
    * @return This builder
    */
@@ -299,6 +339,7 @@ public:
 
   /**
    * @brief Sets the TooltipPadding construction default.
+   * @SINCE_3_0.0
    * @param[in] value The finite non-negative tooltip padding in pixels
    * @return This builder
    */
@@ -306,6 +347,7 @@ public:
 
   /**
    * @brief Sets the TooltipPadding construction default on a temporary builder.
+   * @SINCE_3_0.0
    * @param[in] value The authored value
    * @return This builder
    */
@@ -313,6 +355,7 @@ public:
 
   /**
    * @brief Consumes the builder and creates an immutable style.
+   * @SINCE_3_0.0
    * @return The style
    */
   ChartViewStyle Build() &&;
@@ -321,6 +364,7 @@ private:
   /**
    * @brief Owns an independent mutable clone of a style.
    *
+   * @SINCE_3_0.0
    * @param[in] style The configuration to consume
    */
   explicit Builder(UiStyle style);

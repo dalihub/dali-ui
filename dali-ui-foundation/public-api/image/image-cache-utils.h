@@ -26,6 +26,7 @@ namespace Ui
 {
 /**
  * @brief Utilities for managing image resources cached by visuals.
+ * @SINCE_3_0.0
  */
 namespace ImageCacheUtils
 {
@@ -39,6 +40,7 @@ namespace ImageCacheUtils
  * Removal is processed after pending visual resource releases. The underlying graphics allocator may retain released
  * memory, so process or GPU memory usage is not guaranteed to decrease immediately.
  *
+ * @SINCE_3_0.0
  * @note Call this function only when eviction of all unused resources retained by Image::ReleasePolicy::NEVER is
  * intended.
  */

@@ -33,18 +33,21 @@ namespace Gradient
 
 /**
  * @brief Authored linear gradient value.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Linear : public Base
 {
 public:
   /**
    * @brief Creates a linear gradient value.
+   * @SINCE_3_0.0
    */
   Linear();
 
   /**
    * @brief Creates a linear gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] startPosition The start position
    * @param[in] endPosition The end position
    */
@@ -53,6 +56,7 @@ public:
   /**
    * @brief Sets the linear gradient start and end positions.
    *
+   * @SINCE_3_0.0
    * @param[in] startPosition The start position
    * @param[in] endPosition The end position
    */
@@ -61,6 +65,7 @@ public:
   /**
    * @brief Gets the start position.
    *
+   * @SINCE_3_0.0
    * @return The start position
    */
   Vector2 GetStartPosition() const;
@@ -68,6 +73,7 @@ public:
   /**
    * @brief Gets the end position.
    *
+   * @SINCE_3_0.0
    * @return The end position
    */
   Vector2 GetEndPosition() const;
@@ -75,6 +81,7 @@ public:
   /**
    * @brief Returns a linear typed value from a base gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] base The source gradient value
    * @return A deep-copied linear value, or a value whose GetType() is Type::NONE if the source type does not match
    */

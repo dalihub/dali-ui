@@ -44,6 +44,7 @@ namespace Ui
  *  - keep GetCurrentPage() and GetPageCount() accurate at all times.
  *  - clamp the @p page argument of ScrollToPage() to [0, GetPageCount()-1].
  *
+ * @SINCE_3_0.0
  * @note ABI stability: once this interface is published, no methods may be
  * added, removed, or reordered in a binary-compatible release.
  */
@@ -55,6 +56,7 @@ public:
    *
    * First argument:  new current page index (0-based).
    * Second argument: total number of pages.
+   * @SINCE_3_0.0
    */
   using PageChangedSignalType = Dali::Signal<void(int /*currentPage*/, int /*pageCount*/)>;
 
@@ -62,11 +64,13 @@ public:
    * @brief Signal type emitted from the destructor body, before any members
    * are torn down.  Observers (e.g. PageIndicator) connect here to null their
    * raw pointer before the object is freed.
+   * @SINCE_3_0.0
    */
   using DestroyingSignalType = Dali::Signal<void()>;
 
   /**
    * @brief Virtual destructor.
+   * @SINCE_3_0.0
    */
   virtual ~PageScrollableInterface() = default;
 
@@ -74,6 +78,7 @@ public:
    * @brief Returns the zero-based index of the currently visible page.
    *
    * Returns -1 when GetPageCount() == 0 (no pages present).
+   * @SINCE_3_0.0
    */
   virtual int GetCurrentPage() const = 0;
 
@@ -81,12 +86,14 @@ public:
    * @brief Returns the total number of pages.
    *
    * Returns 0 when the view has no content pages (empty state).
+   * @SINCE_3_0.0
    */
   virtual int GetPageCount() const = 0;
 
   /**
    * @brief Scrolls to the given page index.
    *
+   * @SINCE_3_0.0
    * @param[in] page    Target page index, clamped to [0, GetPageCount()-1].
    * @param[in] animate True to animate the transition, false for an instant jump.
    */
@@ -94,6 +101,7 @@ public:
 
   /**
    * @brief Signal emitted when the active page changes.
+   * @SINCE_3_0.0
    */
   virtual PageChangedSignalType& PageChangedSignal() = 0;
 
@@ -103,6 +111,7 @@ public:
    * Connect here (rather than storing a raw pointer) to null any observer
    * references before this object's memory is reclaimed.  The signal fires
    * with no arguments so observers must not call back into the sender.
+   * @SINCE_3_0.0
    */
   virtual DestroyingSignalType& DestroyingSignal() = 0;
 };

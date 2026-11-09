@@ -28,28 +28,31 @@ namespace Ui
 
 /**
  * @brief Enumeration for the scroll edge.
+ * @SINCE_3_0.0
  */
 enum class WebViewScrollEdge
 {
-  LEFT,   ///< Left edge reached.
-  RIGHT,  ///< Right edge reached.
-  TOP,    ///< Top edge reached.
-  BOTTOM, ///< Bottom edge reached.
+  LEFT,   ///< Left edge reached. @SINCE_3_0.0
+  RIGHT,  ///< Right edge reached. @SINCE_3_0.0
+  TOP,    ///< Top edge reached. @SINCE_3_0.0
+  BOTTOM, ///< Bottom edge reached. @SINCE_3_0.0
 };
 
 /**
  * @brief Enumeration for the over-scroll direction.
+ * @SINCE_3_0.0
  */
 enum class WebViewOverScrolled
 {
-  LEFT,   ///< Left over-scrolled.
-  RIGHT,  ///< Right over-scrolled.
-  TOP,    ///< Top over-scrolled.
-  BOTTOM, ///< Bottom over-scrolled.
+  LEFT,   ///< Left over-scrolled. @SINCE_3_0.0
+  RIGHT,  ///< Right over-scrolled. @SINCE_3_0.0
+  TOP,    ///< Top over-scrolled. @SINCE_3_0.0
+  BOTTOM, ///< Bottom over-scrolled. @SINCE_3_0.0
 };
 
 /**
  * @brief Enumeration for the find-text options (can be combined with bitwise OR).
+ * @SINCE_3_0.0
  */
 enum class WebViewFindOption : uint32_t
 {
@@ -66,6 +69,7 @@ enum class WebViewFindOption : uint32_t
 
 /**
  * @brief Bitwise OR operator for WebViewFindOption.
+ * @SINCE_3_0.0
  */
 inline WebViewFindOption operator|(WebViewFindOption lhs, WebViewFindOption rhs)
 {
@@ -74,6 +78,7 @@ inline WebViewFindOption operator|(WebViewFindOption lhs, WebViewFindOption rhs)
 
 /**
  * @brief Bitwise OR assignment operator for WebViewFindOption.
+ * @SINCE_3_0.0
  */
 inline WebViewFindOption& operator|=(WebViewFindOption& lhs, WebViewFindOption rhs)
 {
@@ -83,6 +88,7 @@ inline WebViewFindOption& operator|=(WebViewFindOption& lhs, WebViewFindOption r
 
 /**
  * @brief Bitwise AND operator for WebViewFindOption.
+ * @SINCE_3_0.0
  */
 inline WebViewFindOption operator&(WebViewFindOption lhs, WebViewFindOption rhs)
 {
@@ -91,6 +97,7 @@ inline WebViewFindOption operator&(WebViewFindOption lhs, WebViewFindOption rhs)
 
 /**
  * @brief Bitwise NOT operator for WebViewFindOption.
+ * @SINCE_3_0.0
  */
 inline WebViewFindOption operator~(WebViewFindOption option)
 {
@@ -101,39 +108,41 @@ inline WebViewFindOption operator~(WebViewFindOption option)
  * @brief Enumeration for the error code of a page load failure.
  *
  * The values mirror the underlying web engine's load-error codes.
+ * @SINCE_3_0.0
  */
 enum class WebViewPageLoadErrorCode
 {
-  UNKNOWN = 0,           ///< Unknown error.
-  CANCELED,              ///< User canceled.
-  CANT_SUPPORT_MIMETYPE, ///< Can't show the page for this MIME type.
-  FAILED_FILE_IO,        ///< File IO error.
-  CANT_CONNECT,          ///< Cannot connect to the network.
-  CANT_LOOKUP_HOST,      ///< Failed to look up the host from the DNS.
-  FAILED_TLS_HANDSHAKE,  ///< Failed the SSL/TLS handshake.
-  INVALID_CERTIFICATE,   ///< The received certificate is invalid.
-  REQUEST_TIMEOUT,       ///< Connection timeout.
-  TOO_MANY_REDIRECTS,    ///< Too many redirects.
-  TOO_MANY_REQUESTS,     ///< Too many requests during this load.
-  BAD_URL,               ///< Malformed URL.
-  UNSUPPORTED_SCHEME,    ///< Unsupported scheme.
-  AUTHENTICATION,        ///< User authentication failed on the server.
-  INTERNAL_SERVER,       ///< The web server reported an internal error.
-  OTHER,                 ///< Other error.
+  UNKNOWN = 0,           ///< Unknown error. @SINCE_3_0.0
+  CANCELED,              ///< User canceled. @SINCE_3_0.0
+  CANT_SUPPORT_MIMETYPE, ///< Can't show the page for this MIME type. @SINCE_3_0.0
+  FAILED_FILE_IO,        ///< File IO error. @SINCE_3_0.0
+  CANT_CONNECT,          ///< Cannot connect to the network. @SINCE_3_0.0
+  CANT_LOOKUP_HOST,      ///< Failed to look up the host from the DNS. @SINCE_3_0.0
+  FAILED_TLS_HANDSHAKE,  ///< Failed the SSL/TLS handshake. @SINCE_3_0.0
+  INVALID_CERTIFICATE,   ///< The received certificate is invalid. @SINCE_3_0.0
+  REQUEST_TIMEOUT,       ///< Connection timeout. @SINCE_3_0.0
+  TOO_MANY_REDIRECTS,    ///< Too many redirects. @SINCE_3_0.0
+  TOO_MANY_REQUESTS,     ///< Too many requests during this load. @SINCE_3_0.0
+  BAD_URL,               ///< Malformed URL. @SINCE_3_0.0
+  UNSUPPORTED_SCHEME,    ///< Unsupported scheme. @SINCE_3_0.0
+  AUTHENTICATION,        ///< User authentication failed on the server. @SINCE_3_0.0
+  INTERNAL_SERVER,       ///< The web server reported an internal error. @SINCE_3_0.0
+  OTHER,                 ///< Other error. @SINCE_3_0.0
 };
 
 /**
  * @brief Enumeration for the type of a page load failure.
+ * @SINCE_3_0.0
  */
 enum class WebViewPageLoadErrorType
 {
-  NONE,     ///< No error type.
-  INTERNAL, ///< Internal error.
-  NETWORK,  ///< Network error.
-  POLICY,   ///< Policy error.
-  PLUGIN,   ///< Plugin error.
-  DOWNLOAD, ///< Download error.
-  PRINT,    ///< Print error.
+  NONE,     ///< No error type. @SINCE_3_0.0
+  INTERNAL, ///< Internal error. @SINCE_3_0.0
+  NETWORK,  ///< Network error. @SINCE_3_0.0
+  POLICY,   ///< Policy error. @SINCE_3_0.0
+  PLUGIN,   ///< Plugin error. @SINCE_3_0.0
+  DOWNLOAD, ///< Download error. @SINCE_3_0.0
+  PRINT,    ///< Print error. @SINCE_3_0.0
 };
 
 } // namespace Ui

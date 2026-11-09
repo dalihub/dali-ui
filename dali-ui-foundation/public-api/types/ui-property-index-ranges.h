@@ -32,22 +32,24 @@ namespace Ui
 
 /**
  * @brief Enumeration for the start and end property ranges.
+ * @SINCE_3_0.0
  */
 enum PropertyRanges
 {
   /**
    * @brief Enumeration for the start and end property ranges for View.
+   * @SINCE_3_0.0
    */
-  VIEW_PROPERTY_START_INDEX = Dali::PropertyRanges::PROPERTY_REGISTRATION_START_INDEX,                                     ///< Start index of View properties.
-  VIEW_PROPERTY_END_INDEX   = VIEW_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION, ///< Reserving 1000 property indices.
+  VIEW_PROPERTY_START_INDEX = Dali::PropertyRanges::PROPERTY_REGISTRATION_START_INDEX,                                     ///< Start index of View properties. @SINCE_3_0.0
+  VIEW_PROPERTY_END_INDEX   = VIEW_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION, ///< Reserving 1000 property indices. @SINCE_3_0.0
 
-  VIEW_ANIMATABLE_PROPERTY_START_INDEX = Dali::PropertyRanges::ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX,                                     ///< Start index of View animatable properties without uniforms.
-  VIEW_ANIMATABLE_PROPERTY_END_INDEX   = VIEW_ANIMATABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION, ///< Reserving 1000 property indices.
+  VIEW_ANIMATABLE_PROPERTY_START_INDEX = Dali::PropertyRanges::ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX,                                     ///< Start index of View animatable properties without uniforms. @SINCE_3_0.0
+  VIEW_ANIMATABLE_PROPERTY_END_INDEX   = VIEW_ANIMATABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION, ///< Reserving 1000 property indices. @SINCE_3_0.0
 
-  VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX = Dali::PropertyRanges::ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX,                                     ///< Start index of View animatable properties without uniforms.
-  VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX   = VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION, ///< Reserving 1000 property indices.
+  VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX = Dali::PropertyRanges::ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX,                                     ///< Start index of View animatable properties without uniforms. @SINCE_3_0.0
+  VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX   = VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION, ///< Reserving 1000 property indices. @SINCE_3_0.0
 
-  UI_FOUNDATION_PROPERTY_MAX = Dali::PropertyRanges::CORE_PROPERTY_MAX_INDEX + 10000000, ///< The maximum index that ui-foundation properties can go up to
+  UI_FOUNDATION_PROPERTY_MAX = Dali::PropertyRanges::CORE_PROPERTY_MAX_INDEX + 10000000, ///< The maximum index that ui-foundation properties can go up to @SINCE_3_0.0
 };
 
 /**

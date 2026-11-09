@@ -58,12 +58,14 @@ class SelectableLottieAnimationViewImpl;
  * image.SetStateColors(deselectedRgba, selectedRgba);
  * image.SetSelected(true, true); // animate to selected
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API SelectableLottieAnimationView : public SelectableImageInterface
 {
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized SelectableLottieAnimationView handle.
+   * @SINCE_3_0.0
    */
   SelectableLottieAnimationView() = default;
 
@@ -75,6 +77,7 @@ public: // Creation & Destruction
    * default selectable inner-fill path is used. The binding follows the logical selection
    * state.
    *
+   * @SINCE_3_0.0
    * @param[in] image The Lottie url bundled with the select/deselect frame ranges
    * @return A handle to a newly allocated Dali resource
    */
@@ -86,6 +89,7 @@ public: // Creation & Destruction
    * The supplied list is copied and used exactly. An empty list disables dynamic recoloring,
    * and this overload does not use SelectableLottieImage::GetInnerFillKeyPath().
    *
+   * @SINCE_3_0.0
    * @param[in] image The Lottie url bundled with the select/deselect frame ranges
    * @param[in] colorBindings The dynamic color bindings
    * @return A handle to a newly allocated Dali resource
@@ -98,6 +102,7 @@ public: // Static Methods
   /**
    * @brief Downcasts a handle to SelectableLottieAnimationView handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a SelectableLottieAnimationView or an uninitialized handle
    */
@@ -107,6 +112,7 @@ protected:
   /**
    * @brief Creates a SelectableLottieAnimationView handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit SelectableLottieAnimationView(Integration::SelectableLottieAnimationViewImpl* impl);

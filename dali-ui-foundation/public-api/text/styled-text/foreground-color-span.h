@@ -34,18 +34,21 @@ namespace Text
  *
  * Monochrome glyphs use the span RGBA independently of the default TextColor.
  * For Label color glyphs, native RGB is preserved and the span alpha applies.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ForegroundColorSpan : public Span
 {
 public:
   /**
    * @brief Creates an uninitialized ForegroundColorSpan handle.
+   * @SINCE_3_0.0
    */
   ForegroundColorSpan() = default;
 
   /**
    * @brief Creates a ForegroundColorSpan with the given color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The foreground color
    * @return A new ForegroundColorSpan
    */
@@ -54,6 +57,7 @@ public:
   /**
    * @brief Downcasts a handle to ForegroundColorSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized ForegroundColorSpan on success, otherwise empty
    */
@@ -62,6 +66,7 @@ public:
   /**
    * @brief Gets the foreground color payload.
    *
+   * @SINCE_3_0.0
    * @return The foreground color
    */
   UiColor GetColor() const;
@@ -70,6 +75,7 @@ private:
   /**
    * @brief Creates a ForegroundColorSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL ForegroundColorSpan(BaseObject* impl);

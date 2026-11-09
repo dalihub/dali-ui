@@ -27,12 +27,13 @@ namespace DALI_NAMESPACE::Ui
 
 /**
  * @brief Policy used to resolve the native state at application launch.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameInitialStatePolicy
 {
-  AUTO             = 0, ///< Treats an initial target-sized window as maximized
-  USE_CURRENT      = 1, ///< Uses the state already reported by Dali::Window
-  REQUEST_MAXIMIZE = 2  ///< Requests maximize during initial attachment
+  AUTO             = 0, ///< Treats an initial target-sized window as maximized @SINCE_3_0.0
+  USE_CURRENT      = 1, ///< Uses the state already reported by Dali::Window @SINCE_3_0.0
+  REQUEST_MAXIMIZE = 2  ///< Requests maximize during initial attachment @SINCE_3_0.0
 };
 
 /**
@@ -43,13 +44,14 @@ enum class WindowFrameInitialStatePolicy
  * corresponding request; the window system may still ignore it. Launch state,
  * decoration, shadow, and signal observation use their dedicated APIs rather
  * than feature gates.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameFeature
 {
-  MOVE             = 0, ///< Interactive move requests
-  RESIZE           = 1, ///< Interactive resize requests
-  MINIMIZE         = 2, ///< Minimize requests
-  MAXIMIZE_RESTORE = 3  ///< Maximize and restore requests
+  MOVE             = 0, ///< Interactive move requests @SINCE_3_0.0
+  RESIZE           = 1, ///< Interactive resize requests @SINCE_3_0.0
+  MINIMIZE         = 2, ///< Minimize requests @SINCE_3_0.0
+  MAXIMIZE_RESTORE = 3  ///< Maximize and restore requests @SINCE_3_0.0
 };
 
 /**
@@ -59,6 +61,7 @@ enum class WindowFrameFeature
  * resolved while WindowFrame is created. Mutable presentation and
  * interaction settings are configured on the created WindowFrame handle.
  * The value can be copied and extended without exposing its storage layout.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API WindowFrameOptions
 {
@@ -72,12 +75,14 @@ public:
 
   /**
    * @brief Sets launch-state resolution policy.
+   * @SINCE_3_0.0
    * @param[in] policy Launch policy
    */
   void SetInitialStatePolicy(WindowFrameInitialStatePolicy policy);
 
   /**
    * @brief Returns launch-state resolution policy.
+   * @SINCE_3_0.0
    * @return Current policy
    */
   WindowFrameInitialStatePolicy GetInitialStatePolicy() const;
@@ -85,12 +90,14 @@ public:
   /**
    * @brief Sets normal frame size used for the first restore after an initial
    *        full-size launch.
+   * @SINCE_3_0.0
    * @param[in] size Restore frame size
    */
   void SetInitialRestoreFrameSize(const Dali::Vector2& size);
 
   /**
    * @brief Removes the configured initial restore frame size.
+   * @SINCE_3_0.0
    */
   void ClearInitialRestoreFrameSize();
 
@@ -98,6 +105,7 @@ public:
    * @brief Reads the configured initial restore frame size.
    *
    * The output is not modified when no size is configured.
+   * @SINCE_3_0.0
    * @param[out] size Configured restore size
    * @return true when configured
    */
@@ -111,6 +119,7 @@ public:
    * The configured value is applied when a WindowFrame is created with these
    * options.
    *
+   * @SINCE_3_0.0
    * @param[in] feature Feature to configure
    * @param[in] enabled Whether the feature is offered
    */
@@ -118,6 +127,7 @@ public:
 
   /**
    * @brief Returns the configured value for a feature.
+   * @SINCE_3_0.0
    * @param[in] feature Feature to query
    * @return true when the feature is enabled
    */

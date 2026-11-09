@@ -35,23 +35,26 @@ namespace Ui
  * It is shared between:
  *   - ImageView::Property  (public-api, for application code)
  *   - ImageViewImpl         (integration-api, for DALI_PROPERTY_REGISTRATION_EXTERNAL)
+ * @SINCE_3_0.0
  */
 struct ImageViewPropertyIndex
 {
   /**
    * @brief Enumeration for the start and end property ranges for this control.
+   * @SINCE_3_0.0
    */
   enum PropertyRange
   {
     PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_END_INDEX + 1,
-    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices. @SINCE_3_0.0
 
     ANIMATABLE_PROPERTY_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_END_INDEX + 1,
-    ANIMATABLE_PROPERTY_END_INDEX   = ANIMATABLE_PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+    ANIMATABLE_PROPERTY_END_INDEX   = ANIMATABLE_PROPERTY_START_INDEX + 1000, ///< Reserve property indices. @SINCE_3_0.0
   };
 
   /**
    * @brief Enumeration for the instance of properties belonging to the ImageView class.
+   * @SINCE_3_0.0
    */
   enum
   {
@@ -61,6 +64,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The URL of the image resource.
+     * @SINCE_3_0.0
      * @details Name "image", type Property::STRING.
      * @note See also: ImageView::SetResourceUrl(), ImageView::GetResourceUrl().
      */
@@ -72,6 +76,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The fitting mode used when scaling the image.
+     * @SINCE_3_0.0
      * @details Name "fittingMode", type Ui::Image::FittingMode (Property::INTEGER).
      * @note See also: ImageView::SetFittingMode(), ImageView::GetFittingMode().
      */
@@ -79,6 +84,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The sampling mode used when scaling the image.
+     * @SINCE_3_0.0
      * @details Name "samplingMode", type Ui::Image::SamplingMode (Property::INTEGER).
      * @note See also: ImageView::SetSamplingMode(), ImageView::GetSamplingMode().
      */
@@ -90,6 +96,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The color multiplier applied to the image.
+     * @SINCE_3_0.0
      * @details Name "imageColor", type Property::VECTOR4.
      * @note See also: ImageView::SetImageColor(), ImageView::GetImageColor().
      */
@@ -97,6 +104,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief Whether to multiply the colour channels of the image by its alpha channel as it is loaded.
+     * @SINCE_3_0.0
      * @details Name "preMultiplyAlphaOnLoad", type Property::BOOLEAN.
      * @note See also: ImageView::SetPreMultiplyAlphaOnLoadEnabled(), ImageView::IsPreMultiplyAlphaOnLoadEnabled().
      */
@@ -108,6 +116,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The URL of the placeholder image shown when the resource URL is empty or while loading.
+     * @SINCE_3_0.0
      * @details Name "placeholderImage", type Property::STRING.
      * @note See also: ImageView::SetPlaceholderUrl(), ImageView::GetPlaceholderUrl().
      */
@@ -119,6 +128,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The URL of the alpha mask image.
+     * @SINCE_3_0.0
      * @details Name "alphaMaskUrl", type Property::STRING.
      * @note See also: ImageView::SetAlphaMaskUrl(), ImageView::GetAlphaMaskUrl().
      */
@@ -126,6 +136,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief Whether the image is cropped to the mask bounds.
+     * @SINCE_3_0.0
      * @details Name "cropToMask", type Property::BOOLEAN.
      * @note See also: ImageView::SetCropToMask(), ImageView::IsCropToMask().
      */
@@ -133,6 +144,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The masking mode.
+     * @SINCE_3_0.0
      * @details Name "maskingPolicy", type Ui::Image::MaskingPolicy (Property::INTEGER).
      * @note See also: ImageView::SetMaskingPolicy(), ImageView::GetMaskingPolicy().
      */
@@ -144,6 +156,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The desired image width hint for the image loader, in pixels.
+     * @SINCE_3_0.0
      * @details Name "desiredWidth", type Property::INTEGER.
      * @note See also: ImageView::SetDesiredWidth(), ImageView::GetDesiredWidth().
      */
@@ -151,6 +164,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The desired image height hint for the image loader, in pixels.
+     * @SINCE_3_0.0
      * @details Name "desiredHeight", type Property::INTEGER.
      * @note See also: ImageView::SetDesiredHeight(), ImageView::GetDesiredHeight().
      */
@@ -158,6 +172,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The load policy for the image resource.
+     * @SINCE_3_0.0
      * @details Name "loadPolicy", type Ui::Image::LoadPolicy (Property::INTEGER).
      * @note See also: ImageView::SetLoadPolicy(), ImageView::GetLoadPolicy().
      */
@@ -165,6 +180,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The release policy for the image resource.
+     * @SINCE_3_0.0
      * @details Name "releasePolicy", type Ui::Image::ReleasePolicy (Property::INTEGER).
      * @note See also: ImageView::SetReleasePolicy(), ImageView::GetReleasePolicy().
      */
@@ -172,6 +188,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief Whether the image is loaded synchronously on the main thread.
+     * @SINCE_3_0.0
      * @details Name "synchronousLoading", type Property::BOOLEAN.
      * @note See also: ImageView::SetSynchronousLoading(), ImageView::IsSynchronousLoading().
      */
@@ -179,6 +196,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief Whether the view size is used as the image load size.
+     * @SINCE_3_0.0
      * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
      * @note See also: ImageView::SetImageLoadWithViewSizeEnabled(), ImageView::IsImageLoadWithViewSizeEnabled().
      */
@@ -186,6 +204,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief Whether fast-track GPU uploading is enabled.
+     * @SINCE_3_0.0
      * @details Name "fastTrackUploading", type Property::BOOLEAN.
      * @note See also: ImageView::SetFastTrackUploadEnabled(), ImageView::IsFastTrackUploadEnabled().
      */
@@ -193,6 +212,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief Whether EXIF orientation metadata is applied automatically.
+     * @SINCE_3_0.0
      * @details Name "orientationCorrection", type Property::BOOLEAN.
      * @note See also: ImageView::SetOrientationCorrectionEnabled(), ImageView::IsOrientationCorrectionEnabled().
      */
@@ -204,6 +224,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The widths of the fixed n-patch frame as (left, right, top, bottom).
+     * @SINCE_3_0.0
      * @details Name "nPatchBorder", type Property::VECTOR4.
      * @note See also: ImageView::SetNPatchBorder(), ImageView::GetNPatchBorder().
      */
@@ -211,6 +232,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief Whether only the N-patch border regions are rendered.
+     * @SINCE_3_0.0
      * @details Name "nPatchBorderOnly", type Property::BOOLEAN.
      * @note See also: ImageView::SetNPatchBorderOnly(), ImageView::IsNPatchBorderOnly().
      */
@@ -222,6 +244,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The normalized sub-region of the image to display.
+     * @SINCE_3_0.0
      * @details Name "pixelArea", type Property::VECTOR4 (animatable).
      * @note See also: ImageView::SetPixelArea(), ImageView::GetPixelArea().
      */

@@ -39,42 +39,62 @@ class ToastImpl;
  * confirmation. It disappears automatically after its finite duration.
  * Message text wraps without a fixed line-count limit; the ToastStyle maximum
  * height constrains visible content and overflowing text is ellipsized.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API Toast : public View
 {
 public:
-  /** @brief Predefined display durations in milliseconds. */
+  /**
+   * @brief Predefined display durations in milliseconds.
+   * @SINCE_3_0.0
+   */
   struct Duration
   {
-    /** @brief Displays the Toast for 1,500 milliseconds. */
+    /**
+     * @brief Displays the Toast for 1,500 milliseconds.
+     * @SINCE_3_0.0
+     */
     static constexpr uint32_t SHORT = 1500u;
-    /** @brief Displays the Toast for 2,500 milliseconds. */
+    /**
+     * @brief Displays the Toast for 2,500 milliseconds.
+     * @SINCE_3_0.0
+     */
     static constexpr uint32_t LONG = 2500u;
   };
 
-  /** @brief Signal emitted after the Toast is shown. */
+  /**
+   * @brief Signal emitted after the Toast is shown.
+   * @SINCE_3_0.0
+   */
   using ShownSignalType = Signal<void(Toast)>;
-  /** @brief Signal emitted after the Toast is hidden. */
+  /**
+   * @brief Signal emitted after the Toast is hidden.
+   * @SINCE_3_0.0
+   */
   using HiddenSignalType = Signal<void(Toast)>;
 
   /**
    * @brief Creates an uninitialized Toast handle.
+   * @SINCE_3_0.0
    */
   Toast();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Toast();
 
   /**
    * @brief Creates a Toast using the current default style and short duration.
+   * @SINCE_3_0.0
    * @return The initialized Toast
    */
   static Toast New();
 
   /**
    * @brief Creates a Toast using @p style and short duration.
+   * @SINCE_3_0.0
    * @param[in] style The initialized style to apply
    * @return The initialized Toast
    * @pre @p style must be initialized.
@@ -83,6 +103,7 @@ public:
 
   /**
    * @brief Creates a Toast with @p text and short duration.
+   * @SINCE_3_0.0
    * @param[in] text The message to display
    * @return The initialized Toast
    */
@@ -90,6 +111,7 @@ public:
 
   /**
    * @brief Creates a Toast with @p text, @p style, and short duration.
+   * @SINCE_3_0.0
    * @param[in] text The message to display
    * @param[in] style The initialized style to apply
    * @return The initialized Toast
@@ -99,6 +121,7 @@ public:
 
   /**
    * @brief Creates a Toast with @p text and @p duration.
+   * @SINCE_3_0.0
    * @param[in] text The message to display
    * @param[in] duration The finite display duration in milliseconds
    * @return The initialized Toast
@@ -108,6 +131,7 @@ public:
 
   /**
    * @brief Creates a Toast with @p text, @p duration, and @p style.
+   * @SINCE_3_0.0
    * @param[in] text The message to display
    * @param[in] duration The finite display duration in milliseconds
    * @param[in] style The initialized style to apply
@@ -118,6 +142,7 @@ public:
 
   /**
    * @brief Downcasts a base handle to Toast.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A valid Toast on success, or an uninitialized handle
    */
@@ -125,18 +150,21 @@ public:
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    * @param[in] handle The Toast handle to copy
    */
   Toast(const Toast& handle);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    * @param[in] rhs The Toast handle to move from
    */
   Toast(Toast&& rhs) noexcept;
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    * @param[in] handle The Toast handle to copy
    * @return A reference to this handle
    */
@@ -144,6 +172,7 @@ public:
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    * @param[in] rhs The Toast handle to move from
    * @return A reference to this handle
    */
@@ -156,12 +185,14 @@ public:
    *
    * The message wraps without a fixed line-count limit and remains constrained
    * by the maximum Toast height.
+   * @SINCE_3_0.0
    * @param[in] text The message to display
    */
   void SetText(const Dali::String& text);
 
   /**
    * @brief Returns the message text.
+   * @SINCE_3_0.0
    * @return The current message
    */
   Dali::String GetText() const;
@@ -171,36 +202,42 @@ public:
    *
    * Setting an empty URL hides the icon and lets the message use the full
    * content width.
+   * @SINCE_3_0.0
    * @param[in] url The image resource URL, or an empty string for no icon
    */
   void SetIconResourceUrl(const Dali::String& url);
 
   /**
    * @brief Returns the optional icon image URL.
+   * @SINCE_3_0.0
    * @return The image resource URL, or an empty string when no icon is set
    */
   Dali::String GetIconResourceUrl() const;
 
   /**
    * @brief Sets the color multiplier applied to the optional icon.
+   * @SINCE_3_0.0
    * @param[in] color The icon color
    */
   void SetIconColor(const UiColor& color);
 
   /**
    * @brief Returns the color multiplier applied to the optional icon.
+   * @SINCE_3_0.0
    * @return The current icon color
    */
   UiColor GetIconColor() const;
 
   /**
    * @brief Sets whether the optional icon is loaded synchronously.
+   * @SINCE_3_0.0
    * @param[in] synchronous True to load the image synchronously
    */
   void SetIconSynchronousLoading(bool synchronous);
 
   /**
    * @brief Returns whether synchronous icon loading is enabled.
+   * @SINCE_3_0.0
    * @return True when the icon is loaded synchronously
    */
   bool IsIconSynchronousLoading() const;
@@ -209,6 +246,7 @@ public:
    * @brief Sets the finite display duration in milliseconds.
    *
    * Changing the duration while the Toast is posted restarts its timeout.
+   * @SINCE_3_0.0
    * @param[in] duration A value greater than zero
    * @pre @p duration must be greater than zero.
    */
@@ -216,6 +254,7 @@ public:
 
   /**
    * @brief Returns the display duration in milliseconds.
+   * @SINCE_3_0.0
    * @return The finite display duration
    */
   uint32_t GetDuration() const;
@@ -225,6 +264,7 @@ public:
    *
    * Reposting the same Toast replaces its active presentation without
    * emitting HiddenSignal() for the superseded presentation.
+   * @SINCE_3_0.0
    * @param[in] window The initialized Window that owns the presentation
    * @pre @p window must be initialized and provide an overlay layer.
    */
@@ -232,17 +272,20 @@ public:
 
   /**
    * @brief Dismisses this Toast if it is currently posted.
+   * @SINCE_3_0.0
    */
   void Dismiss();
 
   /**
    * @brief Returns the signal emitted after the Toast is shown.
+   * @SINCE_3_0.0
    * @return The shown signal
    */
   ShownSignalType& ShownSignal();
 
   /**
    * @brief Returns the signal emitted after the Toast is hidden.
+   * @SINCE_3_0.0
    * @return The hidden signal
    */
   HiddenSignalType& HiddenSignal();

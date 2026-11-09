@@ -32,13 +32,14 @@ namespace Gradient
 
 /**
  * @brief The gradient authored value type.
+ * @SINCE_3_0.0
  */
 enum class Type : uint8_t
 {
-  NONE   = 0u, ///< No gradient type has been authored.
-  LINEAR = 1u, ///< Linear gradient.
-  RADIAL = 2u, ///< Radial gradient.
-  CONIC  = 3u, ///< Conic gradient.
+  NONE   = 0u, ///< No gradient type has been authored. @SINCE_3_0.0
+  LINEAR = 1u, ///< Linear gradient. @SINCE_3_0.0
+  RADIAL = 2u, ///< Radial gradient. @SINCE_3_0.0
+  CONIC  = 3u, ///< Conic gradient. @SINCE_3_0.0
 };
 
 /**
@@ -48,23 +49,25 @@ enum class Type : uint8_t
  * - Start (x1, y1) and End (x2 and y2) points of a line if using a linear gradient.
  * - Center point (cx, cy) and radius (r) of a circle if using a radial gradient.
  * - Center point (cx, cy) of a circle if using a conic gradient.
+ * @SINCE_3_0.0
  */
 enum class Units : uint8_t
 {
   OBJECT_BOUNDING_BOX, ///< Uses normalized coordinates for the start, end & center points, i.e. top-left is (-0.5, -0.5) and
-                       ///< bottom-right is (0.5, 0.5).
+                       ///< bottom-right is (0.5, 0.5). @SINCE_3_0.0
   USER_SPACE           ///< Uses the user coordinates for the start, end & center points, i.e. in a 200 by 200 view, top-left
-                       ///< is (0, 0) and bottom-right is (200, 200).
+                       ///< is (0, 0) and bottom-right is (200, 200). @SINCE_3_0.0
 };
 
 /**
  * @brief Policies that define what happens if the gradient starts or ends inside the bounds of the target rectangle.
+ * @SINCE_3_0.0
  */
 enum class SpreadMethod : uint8_t
 {
-  PAD,     ///< Uses the terminal colors of the gradient to fill the remainder of the quad.
-  REFLECT, ///< Reflect the gradient pattern start-to-end, end-to-start, start-to-end etc. until the quad is filled.
-  REPEAT   ///< Repeat the gradient pattern start-to-end, start-to-end, start-to-end etc. until the quad is filled.
+  PAD,     ///< Uses the terminal colors of the gradient to fill the remainder of the quad. @SINCE_3_0.0
+  REFLECT, ///< Reflect the gradient pattern start-to-end, end-to-start, start-to-end etc. until the quad is filled. @SINCE_3_0.0
+  REPEAT   ///< Repeat the gradient pattern start-to-end, start-to-end, start-to-end etc. until the quad is filled. @SINCE_3_0.0
 };
 
 } //namespace Gradient

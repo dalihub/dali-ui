@@ -41,6 +41,7 @@ using InteractiveViewImplPtr = IntrusivePtr<InteractiveViewImpl>;
  * is attached for the lifetime of the view. Component implementations such as
  * ButtonImpl and CheckboxImpl should subclass this instead of ViewImpl.
  *
+ * @SINCE_3_0.0
  * @see Dali::Ui::InteractiveView
  */
 class DALI_UI_API InteractiveViewImpl : public ViewImpl
@@ -49,6 +50,7 @@ public:
   /**
    * @brief Creates a new InteractiveViewImpl.
    *
+   * @SINCE_3_0.0
    * @return An intrusive pointer to a newly allocated InteractiveViewImpl
    */
   static InteractiveViewImplPtr New();
@@ -140,17 +142,20 @@ protected:
   /**
    * @brief Gets the guaranteed InteractiveTrait.
    *
+   * @SINCE_3_0.0
    * @return The InteractiveTrait attached to this view
    */
   InteractiveTrait GetInteractiveTrait() const;
 
   /**
    * @brief Constructor.
+   * @SINCE_3_0.0
    */
   InteractiveViewImpl();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~InteractiveViewImpl() override;
 };

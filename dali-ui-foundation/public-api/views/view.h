@@ -72,7 +72,7 @@ class ViewAnimationSpec;
 
 class ViewImpl;
 
-// @ANIMATION_CONFIG(View)
+// @ANIMATION_CONFIG(View, 3_0.0)
 /**
  * @brief View is a base UI component class that extends CustomActor.
  *
@@ -80,12 +80,14 @@ class ViewImpl;
  * for creating custom UI components. It inherits all the capabilities
  *
  * View implements the layout system with Measure/Arrange passes.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API View : public CustomActor
 {
 public: // Property & enumeration declarations
   /**
    * @brief Enumeration for the start and end property ranges for this control.
+   * @SINCE_3_0.0
    */
   enum PropertyRange
   {
@@ -101,16 +103,19 @@ public: // Property & enumeration declarations
 
   /**
    * @brief Enumeration for the instance of properties belonging to the View class.
+   * @SINCE_3_0.0
    */
   struct Property
   {
     /**
      * @brief Enumeration for the instance of properties belonging to the View class.
+     * @SINCE_3_0.0
      */
     enum
     {
       /**
        * @brief The outer space around the View.
+       * @SINCE_3_0.0
        * @details Name "margin", type Property::VECTOR4, ordered as start, end, top, bottom.
        * @note Margin property is to be supported by Layout algorithms and containers in future.
        */
@@ -118,12 +123,14 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The inner space of the View.
+       * @SINCE_3_0.0
        * @details Name "padding", type Property::VECTOR4, ordered as start, end, top, bottom.
        */
       PADDING,
 
       /**
        * @brief The width requested by the View for measurement.
+       * @SINCE_3_0.0
        * @details Name "requestedWidth", type Property::FLOAT.
        * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
        */
@@ -131,6 +138,7 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The height requested by the View for measurement.
+       * @SINCE_3_0.0
        * @details Name "requestedHeight", type Property::FLOAT.
        * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
        */
@@ -138,18 +146,21 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The minimum width of the View, applied when it is measured and when it is laid out (see SetMinimumWidth()).
+       * @SINCE_3_0.0
        * @details Name "minimumWidth", type Property::FLOAT.
        */
       MINIMUM_WIDTH,
 
       /**
        * @brief The minimum height of the View, applied when it is measured and when it is laid out (see SetMinimumHeight()).
+       * @SINCE_3_0.0
        * @details Name "minimumHeight", type Property::FLOAT.
        */
       MINIMUM_HEIGHT,
 
       /**
        * @brief The maximum width of the View, applied when it is measured and when it is laid out (see SetMaximumWidth()).
+       * @SINCE_3_0.0
        * @details Name "maximumWidth", type Property::FLOAT.
        * @note max-wins: if the minimum exceeds the maximum, the MAXIMUM wins
        * (measurement floors to the minimum then ceils to the maximum).
@@ -159,72 +170,84 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The maximum height of the View, applied when it is measured and when it is laid out (see SetMaximumHeight()).
+       * @SINCE_3_0.0
        * @details Name "maximumHeight", type Property::FLOAT.
        */
       MAXIMUM_HEIGHT,
 
       /**
        * @brief The layout mode that controls how the View participates in its parent's layout.
+       * @SINCE_3_0.0
        * @details Name "layoutMode", type Property::INTEGER (Ui::LayoutMode enum).
        */
       LAYOUT_MODE,
 
       /**
        * @brief The ID of the left focusable View.
+       * @SINCE_3_0.0
        * @details Name "leftFocusableViewId", type Property::INTEGER.
        */
       LEFT_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The ID of the right focusable View.
+       * @SINCE_3_0.0
        * @details Name "rightFocusableViewId", type Property::INTEGER.
        */
       RIGHT_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The ID of the up focusable View.
+       * @SINCE_3_0.0
        * @details Name "upFocusableViewId", type Property::INTEGER.
        */
       UP_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The ID of the down focusable View.
+       * @SINCE_3_0.0
        * @details Name "downFocusableViewId", type Property::INTEGER.
        */
       DOWN_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The ID of the clockwise focusable View.
+       * @SINCE_3_0.0
        * @details Name "clockwiseFocusableViewId", type Property::INTEGER.
        */
       CLOCKWISE_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The ID of the counter-clockwise focusable View.
+       * @SINCE_3_0.0
        * @details Name "counterClockwiseFocusableViewId", type Property::INTEGER.
        */
       COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The ID of the forward focusable View (used for Tab key navigation).
+       * @SINCE_3_0.0
        * @details Name "forwardFocusableViewId", type Property::INTEGER.
        */
       FORWARD_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The ID of the backward focusable View (used for Shift+Tab key navigation).
+       * @SINCE_3_0.0
        * @details Name "backwardFocusableViewId", type Property::INTEGER.
        */
       BACKWARD_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief Whether the View acts as a focus group boundary.
+       * @SINCE_3_0.0
        * @details Name "focusGroup", type Property::BOOLEAN.
        */
       FOCUS_GROUP,
 
       /**
        * @brief Whether a View and its descendants can emit key signals.
+       * @SINCE_3_0.0
        * @details Name "dispatchKeyEvents", type Property::BOOLEAN
        * @note If a View's dispatchKeyEvents is set to false, then it's children will not emit a key event signal
        * either.
@@ -233,6 +256,7 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The radius for the rounded corners of the View.
+       * @SINCE_3_0.0
        * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.
        * @note Applies to specific visuals inside the View.
@@ -244,6 +268,7 @@ public: // Property & enumeration declarations
       /**
        * @brief Whether the corner radius value is relative (percentage [0.0f to 0.5f] of the visual size) or absolute
        * (in world units).
+       * @SINCE_3_0.0
        * @details Name "viewCornerRadiusPolicy", type Property::INTEGER.
        * @see Policy::Type
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
@@ -252,6 +277,7 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The squareness for the rounded corners of the View.
+       * @SINCE_3_0.0
        * @details Name "viewCornerSquareness", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.
        * @note Applies to specific visuals inside the View.
@@ -262,6 +288,7 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The width for the borderline of the View. It will update borderline visual
+       * @SINCE_3_0.0
        * @details Name "viewBorderlineWidth", type Property::FLOAT.
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
@@ -269,6 +296,7 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The color for the borderline of the View. It will update borderline visual
+       * @SINCE_3_0.0
        * @details Name "viewBorderlineColor", type Property::VECTOR4
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
@@ -276,6 +304,7 @@ public: // Property & enumeration declarations
 
       /**
        * @brief The offset for the borderline of the View. It will update borderline visual
+       * @SINCE_3_0.0
        * @details Name "viewBorderlineOffset", type Property::FLOAT.
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
@@ -285,6 +314,7 @@ public: // Property & enumeration declarations
 
   /**
    * @brief Enumeration for the offscreen rendering refresh rate.
+   * @SINCE_3_0.0
    */
   enum class OffscreenRefreshRate
   {
@@ -298,12 +328,14 @@ public: // Creation & Destruction
    *
    * Only derived versions can be instantiated. Calling member
    * functions with an uninitialized Dali::Object is not allowed.
+   * @SINCE_3_0.0
    */
   View();
 
   /**
    * @brief Creates an initialized View.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource
    */
   static View New();
@@ -312,6 +344,7 @@ public: // Creation & Destruction
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    * @param[in] view Handle to copy
    */
   View(const View& view);
@@ -319,6 +352,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   View(View&& rhs) noexcept;
@@ -327,6 +361,7 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~View();
 
@@ -335,6 +370,7 @@ public: // Operators
    * @brief Copy assignment operator.
    *
    * Changes this handle to point to another real object.
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -343,6 +379,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -355,6 +392,7 @@ public: // Static Methods
    * If handle points to a View, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a View or an uninitialized handle
    */
@@ -402,6 +440,7 @@ public: // Measure / Arrange API
    * constraint is its size -- and under any other parent a MATCH_PARENT axis is assigned when
    * that parent's own size is determined (explicit, or itself assigned).
    *
+   * @SINCE_3_0.0
    * @param[in] widthConstraint The width constraint for measurement
    * @param[in] heightConstraint The height constraint for measurement
    * @return The measured size
@@ -441,6 +480,7 @@ public: // Measure / Arrange API
    * which case it is replayed rather than re-run. The cost is the ancestor PATH, not
    * every view beneath the ancestor.
    *
+   * @SINCE_3_0.0
    * @note An ArrangePolicy::IF_CHANGED arrange implementation must arrange the same set
    * of children for the same tracked inputs. If that set depends on untracked state,
    * use ArrangePolicy::ALWAYS or invalidate arrange whenever the state changes.
@@ -460,6 +500,7 @@ public: // Measure / Arrange API
    * This propagates to the parent layout while one exists,
    * until the layout root is reached (no parent Layout).
    *
+   * @SINCE_3_0.0
    * @note Calling this DURING layout processing -- from inside any Measure/Arrange
    * implementation (OnMeasure, OnArrange, a measure/arrange callback, a LayoutManager
    * producer), or from a LayoutFinishedSignal slot -- is a contract violation and is
@@ -483,6 +524,7 @@ public: // Measure / Arrange API
   /**
    * @brief Invalidates the arrange of this view.
    *
+   * @SINCE_3_0.0
    * @note Calling this DURING layout processing (any Measure/Arrange pass, or a
    * LayoutFinishedSignal slot) has the same retained-but-parked semantics as
    * InvalidateMeasure(): it is a contract violation and is logged once, the arrange
@@ -496,6 +538,7 @@ public: // Measure / Arrange API
   /**
    * @brief Gets the measured size from the last Measure() pass.
    *
+   * @SINCE_3_0.0
    * @return The measured size
    */
   MeasuredSize GetMeasuredSize() const;
@@ -506,6 +549,7 @@ public: // Measure / Arrange API
    * When set, the callback replaces the default measurement behavior
    * during the layout pass. Pass a default-constructed callback to remove.
    *
+   * @SINCE_3_0.0
    * @note The callback becomes this view's measure implementation, so the measure
    * contract documented on Measure() applies to it unchanged: it must be a pure function
    * of its constraints, the view's effective scale, the view's own layout-tracked state,
@@ -545,6 +589,7 @@ public: // Measure / Arrange API
    * The callback receives the bounds after the View's own minimum/maximum clamp
    * (see Arrange()).
    *
+   * @SINCE_3_0.0
    * @note The callback replaces OnArrange() as this view's arrange implementation. This
    * one-argument overload uses ArrangePolicy::IF_CHANGED, so the framework
    * may reuse an unchanged result without invoking the callback. Use the two-argument
@@ -581,6 +626,7 @@ public: // Measure / Arrange API
    * The callback receives the bounds after the View's own minimum/maximum clamp
    * (see Arrange()).
    *
+   * @SINCE_3_0.0
    * @param[in] callback The arrange callback (ownership transferred)
    * @param[in] policy   When the callback runs
    *
@@ -599,6 +645,7 @@ public: // Measure / Arrange API
    * EXIT slot finishes), CHANGE on bounds change. Pass an uninitialized
    * handle to detach.
    *
+   * @SINCE_3_0.0
    * @note Replacing the transition at runtime does not interrupt
    * in-flight transitions. Each in-flight ENTER / EXIT / CHANGE keeps the
    * transition handle that started it, finishes on its own timing, and
@@ -621,6 +668,7 @@ public: // Measure / Arrange API
    * @brief Returns the LayoutTransition currently attached, or an
    * uninitialized handle.
    *
+   * @SINCE_3_0.0
    * @return The attached LayoutTransition handle
    */
   LayoutTransition GetLayoutTransition() const;
@@ -645,6 +693,7 @@ public: // Measure / Arrange API
    *
    * A self transition works whether or not any ancestor carries one.
    *
+   * @SINCE_3_0.0
    * @note The two roles are independent and may coexist on one view: the handle
    * passed to @c SetLayoutTransition governs this view's children, the handle
    * passed here governs this view itself. @c LayoutTransition::SetReflowScope has
@@ -676,6 +725,7 @@ public: // Measure / Arrange API
    * Independent of @c GetLayoutTransition(), which returns the handle governing
    * this view's CHILDREN.
    *
+   * @SINCE_3_0.0
    * @return The attached self LayoutTransition handle
    */
   LayoutTransition GetSelfLayoutTransition() const;
@@ -703,6 +753,7 @@ public: // Measure / Arrange API
    * transition still animates it, and a descendant's children-role transition
    * still governs its own children.
    *
+   * @SINCE_3_0.0
    * @note Changing the mode does NOT interrupt in-flight transitions — the same
    * contract as replacing a transition handle. Each in-flight ENTER / EXIT /
    * CHANGE finishes on its own timing; the new policy applies from the next
@@ -720,6 +771,7 @@ public: // Measure / Arrange API
   /**
    * @brief Returns this view's layout transition policy.
    *
+   * @SINCE_3_0.0
    * @return The current LayoutTransitionMode (@c AUTO unless set)
    */
   LayoutTransitionMode GetLayoutTransitionMode() const;
@@ -737,6 +789,7 @@ public: // Measure / Arrange API
    * has been parented) is permitted; the next Measure pass picks up the
    * change because attach calls InvalidateMeasure internally.
    *
+   * @SINCE_3_0.0
    * @param[in] manager The LayoutManager to attach (ownership transferred)
    */
   void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
@@ -752,6 +805,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::DISABLED): the extension
    * function takes Extension::UiScalePolicy, which has the same enumerators and values.
    *
+   * @SINCE_3_0.0
    * @param[in] policy The UiScalePolicy to apply
    */
   void SetUiScalePolicy(UiScalePolicy policy);
@@ -763,6 +817,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * Replace view.GetUiScalePolicy() with Extension::View::GetUiScalePolicy(view), which returns
    * the same policy as an Extension::UiScalePolicy.
    *
+   * @SINCE_3_0.0
    * @return The current UiScalePolicy
    */
   UiScalePolicy GetUiScalePolicy() const;
@@ -779,6 +834,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * (e.g. for scrolling or animation that should not feed back into
    * layout), use Dali::Ui::Extension::View::SetPositionX(view, x).
    *
+   * @SINCE_3_0.0
    * @param[in] x The requested X position
    */
   void SetRequestedX(float x);
@@ -790,6 +846,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * SetRequestedX. To read the current rendered X position
    * (Actor::Property::POSITION_X) instead, use GetPositionX().
    *
+   * @SINCE_3_0.0
    * @return The requested X position
    */
   float GetRequestedX() const;
@@ -797,6 +854,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the Y position requested by the user.
    *
+   * @SINCE_3_0.0
    * @param[in] y The requested Y position
    * @see SetRequestedX
    */
@@ -805,6 +863,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Returns the user-requested Y position.
    *
+   * @SINCE_3_0.0
    * @return The requested Y position
    * @see GetRequestedX
    */
@@ -817,6 +876,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * WRAP_CONTENT (-1): sizes to content (default).
    * MATCH_PARENT (-2): fills the parent container.
    *
+   * @SINCE_3_0.0
    * @note The raw Dali::Actor size setters (SetSize/SetWidth/SetHeight) are
    * unavailable on View: a View's rendered geometry is owned by the layout
    * system and would be overwritten on the next Arrange. Use this and
@@ -831,6 +891,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Gets the requested width.
    *
+   * @SINCE_3_0.0
    * @return The requested width
    */
   float GetRequestedWidth() const;
@@ -842,6 +903,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * WRAP_CONTENT (-1): sizes to content (default).
    * MATCH_PARENT (-2): fills the parent container.
    *
+   * @SINCE_3_0.0
    * @param[in] height The requested height
    */
   void SetRequestedHeight(float height);
@@ -849,6 +911,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Gets the requested height.
    *
+   * @SINCE_3_0.0
    * @return The requested height
    */
   float GetRequestedHeight() const;
@@ -862,6 +925,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * RIGHT_TO_LEFT) and extends past the slot; the parent's placement of the View's siblings
    * is unaffected.
    *
+   * @SINCE_3_0.0
    * @param[in] width The minimum width
    */
   void SetMinimumWidth(float width);
@@ -869,6 +933,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Gets the minimum width.
    *
+   * @SINCE_3_0.0
    * @return The minimum width
    */
   float GetMinimumWidth() const;
@@ -881,6 +946,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * slot and extends past the slot; the parent's placement of the View's siblings is
    * unaffected.
    *
+   * @SINCE_3_0.0
    * @param[in] height The minimum height
    */
   void SetMinimumHeight(float height);
@@ -888,6 +954,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Gets the minimum height.
    *
+   * @SINCE_3_0.0
    * @return The minimum height
    */
   float GetMinimumHeight() const;
@@ -901,6 +968,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * its right edge when the parent's layout direction is RIGHT_TO_LEFT) and the rest of the
    * slot stays empty; the parent's placement of the View's siblings is unaffected.
    *
+   * @SINCE_3_0.0
    * @param[in] width The maximum width
    * @note max-wins: when the minimum width exceeds the maximum width, the
    * MAXIMUM wins. Constraints are applied by flooring to the minimum first and
@@ -911,6 +979,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Gets the maximum width.
    *
+   * @SINCE_3_0.0
    * @return The maximum width
    */
   float GetMaximumWidth() const;
@@ -923,6 +992,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * View is laid out at the maximum height from the top edge of that slot and the rest of the
    * slot stays empty; the parent's placement of the View's siblings is unaffected.
    *
+   * @SINCE_3_0.0
    * @param[in] height The maximum height
    * @note max-wins: when the minimum height exceeds the maximum height, the
    * MAXIMUM wins. Constraints are applied by flooring to the minimum first and
@@ -933,6 +1003,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Gets the maximum height.
    *
+   * @SINCE_3_0.0
    * @return The maximum height
    */
   float GetMaximumHeight() const;
@@ -940,6 +1011,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the view margin.
    *
+   * @SINCE_3_0.0
    * @param[in] margin The margin to set
    */
   void SetMargin(const Insets& margin);
@@ -947,6 +1019,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the view margin for each edge.
    *
+   * @SINCE_3_0.0
    * @param[in] start The start margin
    * @param[in] end The end margin
    * @param[in] top The top margin
@@ -957,6 +1030,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the horizontal and vertical view margin.
    *
+   * @SINCE_3_0.0
    * @param[in] horizontal The start and end margin
    * @param[in] vertical The top and bottom margin
    */
@@ -965,33 +1039,39 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the same view margin for all edges.
    *
+   * @SINCE_3_0.0
    * @param[in] uniform The margin for all edges
    */
   void SetMargin(float uniform);
 
   /**
    * @brief Sets the start view margin.
+   * @SINCE_3_0.0
    */
   void SetStartMargin(float margin);
 
   /**
    * @brief Sets the end view margin.
+   * @SINCE_3_0.0
    */
   void SetEndMargin(float margin);
 
   /**
    * @brief Sets the top view margin.
+   * @SINCE_3_0.0
    */
   void SetTopMargin(float margin);
 
   /**
    * @brief Sets the bottom view margin.
+   * @SINCE_3_0.0
    */
   void SetBottomMargin(float margin);
 
   /**
    * @brief Gets the view margin.
    *
+   * @SINCE_3_0.0
    * @return The view margin
    */
   Insets GetMargin() const;
@@ -999,6 +1079,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the view padding.
    *
+   * @SINCE_3_0.0
    * @param[in] padding The padding to set
    */
   void SetPadding(const Insets& padding);
@@ -1006,6 +1087,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the view padding for each edge.
    *
+   * @SINCE_3_0.0
    * @param[in] start The start padding
    * @param[in] end The end padding
    * @param[in] top The top padding
@@ -1016,6 +1098,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the horizontal and vertical view padding.
    *
+   * @SINCE_3_0.0
    * @param[in] horizontal The start and end padding
    * @param[in] vertical The top and bottom padding
    */
@@ -1024,33 +1107,39 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Sets the same view padding for all edges.
    *
+   * @SINCE_3_0.0
    * @param[in] uniform The padding for all edges
    */
   void SetPadding(float uniform);
 
   /**
    * @brief Sets the start view padding.
+   * @SINCE_3_0.0
    */
   void SetStartPadding(float padding);
 
   /**
    * @brief Sets the end view padding.
+   * @SINCE_3_0.0
    */
   void SetEndPadding(float padding);
 
   /**
    * @brief Sets the top view padding.
+   * @SINCE_3_0.0
    */
   void SetTopPadding(float padding);
 
   /**
    * @brief Sets the bottom view padding.
+   * @SINCE_3_0.0
    */
   void SetBottomPadding(float padding);
 
   /**
    * @brief Gets the view padding.
    *
+   * @SINCE_3_0.0
    * @return The view padding
    */
   Insets GetPadding() const;
@@ -1084,6 +1173,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
    * MATCH_PARENT fills the parent edge to edge regardless of parent padding, and
    * any margin set on the child shifts it inward in both axes.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The layout mode to set
    */
   void SetLayoutMode(LayoutMode mode);
@@ -1091,6 +1181,7 @@ public: // View configuration (scale, size, layout, focus, appearance) & hierarc
   /**
    * @brief Gets the layout mode of this View.
    *
+   * @SINCE_3_0.0
    * @return The layout mode
    */
   LayoutMode GetLayoutMode() const;
@@ -1118,6 +1209,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the left focusable View for keyboard navigation.
    *
+   * @SINCE_3_0.0
    * @param[in] view The View to focus when navigating left
    */
   void SetLeftFocusableView(View view);
@@ -1125,6 +1217,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the right focusable View for keyboard navigation.
    *
+   * @SINCE_3_0.0
    * @param[in] view The View to focus when navigating right
    */
   void SetRightFocusableView(View view);
@@ -1132,6 +1225,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the up focusable View for keyboard navigation.
    *
+   * @SINCE_3_0.0
    * @param[in] view The View to focus when navigating up
    */
   void SetUpFocusableView(View view);
@@ -1139,6 +1233,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the down focusable View for keyboard navigation.
    *
+   * @SINCE_3_0.0
    * @param[in] view The View to focus when navigating down
    */
   void SetDownFocusableView(View view);
@@ -1146,6 +1241,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the clockwise focusable View for keyboard navigation.
    *
+   * @SINCE_3_0.0
    * @param[in] view The View to focus when navigating clockwise
    */
   void SetClockwiseFocusableView(View view);
@@ -1153,6 +1249,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the counter-clockwise focusable View for keyboard navigation.
    *
+   * @SINCE_3_0.0
    * @param[in] view The View to focus when navigating counter-clockwise
    */
   void SetCounterClockwiseFocusableView(View view);
@@ -1160,6 +1257,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the forward focusable View for keyboard navigation.
    *
+   * @SINCE_3_0.0
    * @param[in] view The View to focus when navigating forward
    */
   void SetForwardFocusableView(View view);
@@ -1167,6 +1265,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the backward focusable View for keyboard navigation.
    *
+   * @SINCE_3_0.0
    * @param[in] view The View to focus when navigating backward
    */
   void SetBackwardFocusableView(View view);
@@ -1183,6 +1282,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * The result is initially NOT_HANDLED and is valid only during the callback.
    * Do not retain its address or reference.
    *
+   * @SINCE_3_0.0
    * @param[in] callback The focus navigation callback (move-only, ownership transferred)
    */
   void SetFocusNavigationCallback(FocusNavigationCallback callback);
@@ -1199,6 +1299,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * If the UiColor has direct RGBA values, it is applied immediately
    * and any previous ID-based binding for this property is removed.
    *
+   * @SINCE_3_0.0
    * @param[in] color The UiColor to apply
    */
   void SetBackgroundColor(const UiColor& color);
@@ -1209,6 +1310,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * If the background color was set from a token UiColor, the original token
    * color is returned.
    *
+   * @SINCE_3_0.0
    * @return The background color
    */
   UiColor GetBackgroundColor();
@@ -1218,6 +1320,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *
    * This replaces any color or gradient background previously set on this View.
    *
+   * @SINCE_3_0.0
    * @param[in] url The image resource URL
    */
   void SetBackgroundImage(const Dali::String& url);
@@ -1227,12 +1330,14 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *
    * This replaces any color or image background previously set on this View.
    *
+   * @SINCE_3_0.0
    * @param[in] gradient The gradient value used to configure the background
    */
   void SetBackgroundGradient(const Gradient::Base& gradient);
 
   /**
    * @brief Clears the background.
+   * @SINCE_3_0.0
    */
   void ClearBackground();
 
@@ -1242,6 +1347,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * This replaces all shadows previously set by SetShadow(). Pass
    * Shadow::None() to clear all shadows from this View.
    *
+   * @SINCE_3_0.0
    * @param[in] shadow The shadow value to apply
    */
   void SetShadow(const Shadow& shadow);
@@ -1249,6 +1355,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Replaces all shadows for this View.
    *
+   * @SINCE_3_0.0
    * @param[in] shadowStack The ordered shadow stack to apply
    */
   void SetShadow(const ShadowStack& shadowStack);
@@ -1258,6 +1365,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *
    * Pass InnerShadow::None() to clear the inner shadow from this View.
    *
+   * @SINCE_3_0.0
    * @param[in] innerShadow The inner shadow value to apply
    */
   void SetInnerShadow(const InnerShadow& innerShadow);
@@ -1265,6 +1373,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets RenderEffect to this View.
    *
+   * @SINCE_3_0.0
    * @param[in] effect RenderEffect to add.
    *
    * @note Every effect inherits RenderEffect.
@@ -1273,18 +1382,21 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
 
   /**
    * @brief Retrieves View's render effect
+   * @SINCE_3_0.0
    * @return RenderEffect set on this View
    */
   Ui::RenderEffect GetRenderEffect() const;
 
   /**
    * @brief Clears RenderEffect of this View, if exists.
+   * @SINCE_3_0.0
    */
   void ClearRenderEffect();
 
   /**
    * @brief Gets the target component-wise color multiplier of this View.
    *
+   * @SINCE_3_0.0
    * @return The target color multiplier
    */
   UiColor GetColorMultiplier() const;
@@ -1306,6 +1418,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * UiColor values created from hexadecimal RGB values are resolved to components in
    * the range [0, 1] before multiplication.
    *
+   * @SINCE_3_0.0
    * @param[in] multiplier The color multiplier to set
    * @see SetBackgroundColor()
    */
@@ -1314,6 +1427,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Gets the current component-wise color multiplier from the previous update.
    *
+   * @SINCE_3_0.0
    * @return The current color multiplier
    */
   UiColor GetCurrentColorMultiplier() const;
@@ -1321,6 +1435,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Gets the corner radius of the view.
    *
+   * @SINCE_3_0.0
    * @return The corner radius as Vector4 (topLeft, topRight, bottomRight, bottomLeft)
    */
   Vector4 GetCornerRadius() const;
@@ -1328,6 +1443,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets a uniform corner radius for all four corners.
    *
+   * @SINCE_3_0.0
    * @param[in] radius The corner radius to apply to all corners
    */
   void SetCornerRadius(float radius);
@@ -1335,6 +1451,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets individual corner radii for all four corners.
    *
+   * @SINCE_3_0.0
    * @param[in] topLeft     The radius for the top-left corner
    * @param[in] topRight    The radius for the top-right corner
    * @param[in] bottomRight The radius for the bottom-right corner
@@ -1346,6 +1463,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets corner radii from a Vector4.
    *
+   * @SINCE_3_0.0
    * @param[in] radius Corner radii as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
   void SetCornerRadius(const Vector4& radius);
@@ -1353,6 +1471,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Gets the corner radius policy.
    *
+   * @SINCE_3_0.0
    * @return The corner radius policy
    */
   CornerRadiusPolicy GetCornerRadiusPolicy() const;
@@ -1360,6 +1479,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the corner radius policy.
    *
+   * @SINCE_3_0.0
    * @param[in] policy ABSOLUTE for world-unit values (default), RELATIVE for percentage [0.0, 0.5] of the shorter side
    */
   void SetCornerRadiusPolicy(CornerRadiusPolicy policy);
@@ -1368,12 +1488,14 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * @brief Shortcut to set the corner radius policy to RELATIVE.
    *
    * Equivalent to SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE).
+   * @SINCE_3_0.0
    */
   void SetCornerRadiusPolicyRelative();
 
   /**
    * @brief Returns true if the corner radius policy is RELATIVE.
    *
+   * @SINCE_3_0.0
    * @return True if the policy is RELATIVE, false if ABSOLUTE
    */
   bool IsCornerRadiusPolicyRelative() const;
@@ -1381,6 +1503,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Gets the corner squareness of the view.
    *
+   * @SINCE_3_0.0
    * @return The corner squareness as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
   Vector4 GetCornerSquareness() const;
@@ -1388,6 +1511,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets a uniform corner squareness for all four corners.
    *
+   * @SINCE_3_0.0
    * @param[in] squareness The squareness value to apply to all corners
    */
   void SetCornerSquareness(float squareness);
@@ -1395,6 +1519,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets individual corner squareness values for all four corners.
    *
+   * @SINCE_3_0.0
    * @param[in] topLeft     The squareness for the top-left corner
    * @param[in] topRight    The squareness for the top-right corner
    * @param[in] bottomRight The squareness for the bottom-right corner
@@ -1406,6 +1531,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets corner squareness from a Vector4.
    *
+   * @SINCE_3_0.0
    * @param[in] squareness Squareness values as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
   void SetCornerSquareness(const Vector4& squareness);
@@ -1413,6 +1539,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Gets the borderline width of the view.
    *
+   * @SINCE_3_0.0
    * @return The borderline width
    */
   float GetBorderlineWidth() const;
@@ -1421,6 +1548,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the borderline width of the view.
    *
+   * @SINCE_3_0.0
    * @param[in] width The borderline width to set
    */
   void SetBorderlineWidth(float width);
@@ -1428,6 +1556,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Gets the borderline color of the view.
    *
+   * @SINCE_3_0.0
    * @return The borderline color
    */
   UiColor GetBorderlineColor();
@@ -1440,6 +1569,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * theme and a binding is registered so the color is automatically
    * refreshed when the theme changes.
    *
+   * @SINCE_3_0.0
    * @param[in] color The UiColor to apply
    */
   void SetBorderlineColor(const UiColor& color);
@@ -1447,6 +1577,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Gets the borderline offset of the view.
    *
+   * @SINCE_3_0.0
    * @return The borderline offset
    */
   float GetBorderlineOffset() const;
@@ -1455,28 +1586,29 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets the borderline offset of the view.
    *
+   * @SINCE_3_0.0
    * @param[in] offset The borderline offset to set
    */
   void SetBorderlineOffset(float offset);
 
   // Manually implemented animatable entries (no setter to bind to; see the
   // @ANIMATABLE tags on the corner/borderline setters above for the bound form).
-  // @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
-  // @ANIMATABLE_MANUAL(BackgroundGradientStartOffset, float)
-  // @ANIMATABLE_MANUAL(ShadowBlurRadius, float)
-  // @ANIMATABLE_MANUAL(ShadowOpacity, float)
-  // @ANIMATABLE_MANUAL(Size, Vector3)
-  // @ANIMATABLE_MANUAL(SizeWidth, float)
-  // @ANIMATABLE_MANUAL(SizeHeight, float)
-  // @ANIMATABLE_MANUAL(Position, Vector3)
-  // @ANIMATABLE_MANUAL(PositionX, float)
-  // @ANIMATABLE_MANUAL(PositionY, float)
-  // @ANIMATABLE_MANUAL(Scale, Vector3)
-  // @ANIMATABLE_MANUAL(ScaleX, float)
-  // @ANIMATABLE_MANUAL(ScaleY, float)
-  // @ANIMATABLE_MANUAL(ColorMultiplier, Vector4)
-  // @ANIMATABLE_MANUAL(Color, Vector4)
-  // @ANIMATABLE_MANUAL(Opacity, float)
+  // @ANIMATABLE_MANUAL(BackgroundColor, UiColor, 3_0.0)
+  // @ANIMATABLE_MANUAL(BackgroundGradientStartOffset, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(ShadowBlurRadius, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(ShadowOpacity, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(Size, Vector3, 3_0.0)
+  // @ANIMATABLE_MANUAL(SizeWidth, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(SizeHeight, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(Position, Vector3, 3_0.0)
+  // @ANIMATABLE_MANUAL(PositionX, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(PositionY, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(Scale, Vector3, 3_0.0)
+  // @ANIMATABLE_MANUAL(ScaleX, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(ScaleY, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(ColorMultiplier, Vector4, 3_0.0)
+  // @ANIMATABLE_MANUAL(Color, Vector4, 3_0.0)
+  // @ANIMATABLE_MANUAL(Opacity, float, 3_0.0)
 
   DALI_UI_VIEW_WITH(View)
 
@@ -1492,6 +1624,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * The comparison is exact, so a change too small to see is still a change -- a weight
    * of 0 and a weight of 0.0005 are different states, not the same one.
    *
+   * @SINCE_3_0.0
    * @param[in] params The layout parameters to attach to this View
    *
    * @code
@@ -1509,6 +1642,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Copies the attached layout parameters into @p params.
    *
+   * @SINCE_3_0.0
    * @param[out] params Receives an independent copy of the attached parameters;
    *                    left unchanged if none of the requested type are attached
    * @return true if parameters of the requested type are attached; otherwise
@@ -1527,6 +1661,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * stored attachment is destroyed when it is removed, replaced, or when the
    * View implementation is destroyed.
    *
+   * @SINCE_3_0.0
    * @note This typed attachment API stores Dali::UniquePtr<T> with its default
    * deleter. UniquePtr types with custom deleters are not supported by this
    * overload.
@@ -1549,6 +1684,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief Sets an attachment internally.
    *
+   * @SINCE_3_0.0
    * @param[in] id The key to identify the attachment
    * @param[in] attachment The attachment whose ownership is transferred to this View
    */
@@ -1559,6 +1695,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *
    * Removing an attachment destroys the stored UniqueAny and its owned value.
    *
+   * @SINCE_3_0.0
    * @param[in] id The key to identify the attachment
    * @return True if an attachment was removed
    */
@@ -1571,6 +1708,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * and must not use it after the attachment is removed, replaced, or the View
    * implementation is destroyed.
    *
+   * @SINCE_3_0.0
    * @param[in] id The key to identify the attachment
    * @return Pointer to the stored value, or nullptr if missing or type mismatched
    */
@@ -1591,6 +1729,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * and must not use it after the attachment is removed, replaced, or the View
    * implementation is destroyed.
    *
+   * @SINCE_3_0.0
    * @param[in] id The key to identify the attachment
    * @return Pointer to the stored value, or nullptr if missing or type mismatched
    */
@@ -1612,6 +1751,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * If the attachment is missing or the type does not match, this View is left
    * unchanged and nullptr is returned.
    *
+   * @SINCE_3_0.0
    * @note This typed attachment API detaches Dali::UniquePtr<T> with its
    * default deleter. UniquePtr types with custom deleters are not supported by
    * this overload.
@@ -1651,6 +1791,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * This is distinct from the inherited actor-tree @c Dali::Actor::GetChildCount,
    * which counts every attached actor including EXIT ghosts and non-View actors.
    *
+   * @SINCE_3_0.0
    * @return The number of logical View children
    */
   uint32_t GetChildViewCount() const;
@@ -1665,6 +1806,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * inherited actor-tree @c Dali::Actor::GetChildAt, whose index space includes
    * ghosts and non-View actors.
    *
+   * @SINCE_3_0.0
    * @param[in] index The logical index, in [0, GetChildViewCount())
    * @return The logical View child at @p index, or an empty handle if out of range
    */
@@ -1673,6 +1815,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   /**
    * @brief The logical index of @p childView in this view's LOGICAL child list.
    *
+   * @SINCE_3_0.0
    * @param[in] childView The child to locate
    * @return The logical index of @p childView, or -1 if it is not a (logical)
    * child of this view (e.g. it is an in-flight EXIT ghost, a non-View actor,
@@ -1704,6 +1847,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * immediately. @c RemovePolicy::IMMEDIATE always unparents now, skipping both
    * the own and inherited EXIT effects (see @c RemovePolicy).
    *
+   * @SINCE_3_0.0
    * @note During the EXIT animation the child is still attached to the
    * actor tree (so the inherited @c Dali::Actor::GetChildCount /
    * @c Dali::Actor::GetChildAt still count and return it) but is logically
@@ -1754,6 +1898,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * children with no EXIT slot are unparented immediately.
    * @c RemovePolicy::IMMEDIATE unparents now.
    *
+   * @SINCE_3_0.0
    * @note Non-View actor children (which can only be attached via the
    * integration API @c Dali::Ui::Integration::View::AddActorChild) are always
    * unparented immediately, regardless of @p policy.
@@ -1796,6 +1941,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *   SetDepthIndex(), whose value would apply at the next Add().
    * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
+   * @SINCE_3_0.0
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1823,6 +1969,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *   SetDepthIndex(), whose value would apply at the next Add().
    * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
+   * @SINCE_3_0.0
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1848,6 +1995,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *   SetDepthIndex(), whose value would apply at the next Add().
    * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
+   * @SINCE_3_0.0
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1874,6 +2022,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *   SetDepthIndex(), whose value would apply at the next Add().
    * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
+   * @SINCE_3_0.0
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
    * @pre The View has been parented.
@@ -1904,6 +2053,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *   SetDepthIndex(), whose value would apply at the next Add().
    * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target sibling view to raise above.
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
@@ -1936,6 +2086,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *   SetDepthIndex(), whose value would apply at the next Add().
    * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
    *
+   * @SINCE_3_0.0
    * @param[in] target The target sibling view to lower below.
    * @param[in] policy UPDATE also reorders the parent layout's children;
    *                   PRESERVE keeps layout order unchanged and affects only visual z-order.
@@ -1948,6 +2099,7 @@ public: // State API
   /**
    * @brief Gets the current state of this View.
    *
+   * @SINCE_3_0.0
    * @return The current ViewState (may contain multiple combined states)
    */
   const ViewState& GetState() const;
@@ -1958,6 +2110,7 @@ public: // State API
    * Unlike the Focused bit in GetState(), this method walks up the scene
    * hierarchy and returns true if any ancestor View carries ViewState::FOCUSED.
    *
+   * @SINCE_3_0.0
    * @return True if the view itself or at least one ancestor is focused
    */
   bool IsEffectivelyFocused() const;
@@ -1966,6 +2119,7 @@ public: // State API
    * @brief Query if all resources required by a View are loaded and ready.
    *
    * Most resources are only loaded when the View is placed on stage.
+   * @SINCE_3_0.0
    * @return true if the resources are loaded and ready, false otherwise
    */
   bool IsResourceReady() const;
@@ -1988,6 +2142,7 @@ public: // State API
    *
    * Pass StateEffect::None() to explicitly disable state effects for this View.
    *
+   * @SINCE_3_0.0
    * @param[in] effect A StateEffect, or StateEffect::None() to disable state effects
    */
   void SetStateEffect(StateEffect effect);
@@ -2002,6 +2157,7 @@ public: // State API
    * Pass an empty View to clear the target. If no target is set, the owner View
    * is used.
    *
+   * @SINCE_3_0.0
    * @param[in] target The state effect target View, or an empty View to clear
    */
   void SetStateEffectTarget(View target);
@@ -2011,6 +2167,7 @@ public: // State API
    *
    * If no target has been set, this View is returned.
    *
+   * @SINCE_3_0.0
    * @return The state effect target View
    */
   View GetStateEffectTarget() const;
@@ -2021,6 +2178,7 @@ public: // Traits (attach & query)
    *
    * If this View already has an InteractiveTrait, the existing trait is reused.
    *
+   * @SINCE_3_0.0
    * @return InteractiveTrait handle
    */
   InteractiveTrait AsInteractive();
@@ -2028,6 +2186,7 @@ public: // Traits (attach & query)
   /**
    * @brief Returns whether this View has an interaction trait attached.
    *
+   * @SINCE_3_0.0
    * @return True if this View has an InteractiveTrait
    */
   bool IsInteractive() const;
@@ -2043,6 +2202,7 @@ public: // Traits (attach & query)
    * A View can have at most one selectable trait. If the View already has a
    * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused.
    *
+   * @SINCE_3_0.0
    * @return SelectableTrait handle
    */
   SelectableTrait AsSelectable();
@@ -2050,6 +2210,7 @@ public: // Traits (attach & query)
   /**
    * @brief Returns whether this View has a selectable trait attached.
    *
+   * @SINCE_3_0.0
    * @return True if this View has a SelectableTrait
    */
   bool IsSelectable() const;
@@ -2067,6 +2228,7 @@ public: // Traits (attach & query)
    * is declarative: an on-scene View with no group name auto-joins its parent View's
    * group, or GroupSelectableTrait::SetGroupName(name) joins a named group.
    *
+   * @SINCE_3_0.0
    * @return GroupSelectableTrait handle
    */
   GroupSelectableTrait AsGroupSelectable();
@@ -2074,6 +2236,7 @@ public: // Traits (attach & query)
   /**
    * @brief Returns whether this View has a group-selectable trait attached.
    *
+   * @SINCE_3_0.0
    * @return True if this View has a GroupSelectableTrait
    */
   bool IsGroupSelectable() const;
@@ -2090,6 +2253,7 @@ public: // VisualBase
    * If input visual already added to another view,
    * visual will be detached from old view and added to this view.
    *
+   * @SINCE_3_0.0
    * @param[in] visualBase The visual to add.
    * @param[in] depthLayer The layer to add the visual to.
    * @return True if the visual was added successfully, false otherwise.
@@ -2104,6 +2268,7 @@ public: // VisualBase
    * Assert if too many visuals are added, or duplicated VisualBase added.
    * Please use AddVisual() API if you need to control error cases.
    *
+   * @SINCE_3_0.0
    * @param[in] depthLayer The layer to add the visual to.
    * @param[in] visuals The initializer list containing VisualBase handles to be added.
    */
@@ -2119,6 +2284,7 @@ public: // VisualBase
   /**
    * @brief Remove a Dali::Ui::VisualBase from the view.
    *
+   * @SINCE_3_0.0
    * @note The VisualBase's SiblingOrder value of all other Dali::Ui::VisualBase
    * who were added at same container with removed visual will be changed automatically.
    *
@@ -2129,6 +2295,7 @@ public: // VisualBase
   /**
    * @brief Get total number of Dali::Ui::VisualBase which we added using AddVisual().
    *
+   * @SINCE_3_0.0
    * @param[in] depthLayer The layer to get the visual from.
    * @return Get the number of visual base.
    */
@@ -2137,6 +2304,7 @@ public: // VisualBase
   /**
    * @brief Get a Dali::Ui::VisualBase by sibling order.
    *
+   * @SINCE_3_0.0
    * @param[in] depthLayer The layer to get the visual from.
    * @param[in] siblingOrder The sibling order to get.
    * @return Get visual base by sibling order. Empty handle if not exist.
@@ -2156,6 +2324,7 @@ public: // Animation
    *   anim.Play();
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] animation The Animation to apply to
    * @return A ViewAnimationBridge
    */
@@ -2170,6 +2339,7 @@ public: // Animation
    *   spec.ApplyTo(anim, view);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @return A new ViewAnimationSpec
    */
   static ViewAnimationSpec NewAnimationSpec();
@@ -2181,6 +2351,7 @@ public: // Offscreen rendering
    * Enabling uses the refresh rate set by SetOffscreenRenderingRefreshRate().
    * Disabling preserves the refresh rate for the next time offscreen rendering is enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable offscreen rendering, false to disable it
    */
   void SetOffscreenRenderingEnabled(bool enabled);
@@ -2188,6 +2359,7 @@ public: // Offscreen rendering
   /**
    * @brief Returns whether offscreen rendering is enabled for this View.
    *
+   * @SINCE_3_0.0
    * @return True if offscreen rendering is enabled, false otherwise
    */
   bool IsOffscreenRenderingEnabled() const;
@@ -2198,6 +2370,7 @@ public: // Offscreen rendering
    * Setting the refresh rate does not enable offscreen rendering.
    * The default refresh rate is REFRESH_ALWAYS.
    *
+   * @SINCE_3_0.0
    * @param[in] refreshRate The offscreen rendering refresh rate
    */
   void SetOffscreenRenderingRefreshRate(OffscreenRefreshRate refreshRate);
@@ -2205,6 +2378,7 @@ public: // Offscreen rendering
   /**
    * @brief Gets the offscreen rendering refresh rate for this View.
    *
+   * @SINCE_3_0.0
    * @return The current offscreen rendering refresh rate
    */
   OffscreenRefreshRate GetOffscreenRenderingRefreshRate() const;
@@ -2213,6 +2387,7 @@ public: // Accessibility
   /**
    * @brief Sets the explicit accessibility name.
    *
+   * @SINCE_3_0.0
    * @param[in] name The accessibility name
    */
   void SetAccessibilityName(StringView name);
@@ -2220,6 +2395,7 @@ public: // Accessibility
   /**
    * @brief Returns the explicit or resolved accessibility name.
    *
+   * @SINCE_3_0.0
    * @return The accessibility name
    */
   Dali::String GetAccessibilityName() const;
@@ -2227,6 +2403,7 @@ public: // Accessibility
   /**
    * @brief Sets the explicit accessibility description.
    *
+   * @SINCE_3_0.0
    * @param[in] description The accessibility description
    */
   void SetAccessibilityDescription(StringView description);
@@ -2234,6 +2411,7 @@ public: // Accessibility
   /**
    * @brief Returns the explicit or resolved accessibility description.
    *
+   * @SINCE_3_0.0
    * @return The accessibility description
    */
   Dali::String GetAccessibilityDescription() const;
@@ -2241,6 +2419,7 @@ public: // Accessibility
   /**
    * @brief Sets the accessibility value.
    *
+   * @SINCE_3_0.0
    * @param[in] value The accessibility value
    */
   void SetAccessibilityValue(StringView value);
@@ -2248,6 +2427,7 @@ public: // Accessibility
   /**
    * @brief Returns the accessibility value.
    *
+   * @SINCE_3_0.0
    * @return The accessibility value
    */
   Dali::String GetAccessibilityValue() const;
@@ -2255,6 +2435,7 @@ public: // Accessibility
   /**
    * @brief Sets the accessibility role.
    *
+   * @SINCE_3_0.0
    * @param[in] role The accessibility role
    */
   void SetAccessibilityRole(Accessibility::Role role);
@@ -2262,6 +2443,7 @@ public: // Accessibility
   /**
    * @brief Returns the accessibility role.
    *
+   * @SINCE_3_0.0
    * @return The accessibility role
    */
   Accessibility::Role GetAccessibilityRole() const;
@@ -2269,6 +2451,7 @@ public: // Accessibility
   /**
    * @brief Sets whether this View is hidden from accessibility clients.
    *
+   * @SINCE_3_0.0
    * @param[in] hidden Whether this View is hidden from accessibility clients
    */
   void SetAccessibilityHidden(bool hidden);
@@ -2276,6 +2459,7 @@ public: // Accessibility
   /**
    * @brief Returns whether this View is hidden from accessibility clients.
    *
+   * @SINCE_3_0.0
    * @return True if this View is hidden from accessibility clients, false otherwise
    */
   bool IsAccessibilityHidden() const;
@@ -2283,18 +2467,21 @@ public: // Accessibility
   /**
    * @brief Overrides whether this View can receive accessibility highlight.
    *
+   * @SINCE_3_0.0
    * @param[in] highlightable Whether this View can receive accessibility highlight
    */
   void SetAccessibilityHighlightable(bool highlightable);
 
   /**
    * @brief Restores role-based accessibility highlight behavior.
+   * @SINCE_3_0.0
    */
   void ResetAccessibilityHighlightable();
 
   /**
    * @brief Returns the effective accessibility highlightable state.
    *
+   * @SINCE_3_0.0
    * @return True if this View can receive accessibility highlight, false otherwise
    */
   bool IsAccessibilityHighlightable() const;
@@ -2302,6 +2489,7 @@ public: // Accessibility
   /**
    * @brief Sets whether this View exposes accessibility scrolling behavior.
    *
+   * @SINCE_3_0.0
    * @param[in] scrollable Whether this View exposes accessibility scrolling behavior
    */
   void SetAccessibilityScrollable(bool scrollable);
@@ -2309,6 +2497,7 @@ public: // Accessibility
   /**
    * @brief Returns whether accessibility scrolling behavior is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if accessibility scrolling behavior is enabled, false otherwise
    */
   bool IsAccessibilityScrollable() const;
@@ -2316,6 +2505,7 @@ public: // Accessibility
   /**
    * @brief Sets whether this View is accessibility-modal.
    *
+   * @SINCE_3_0.0
    * @param[in] modal Whether this View is accessibility-modal
    */
   void SetAccessibilityModal(bool modal);
@@ -2323,6 +2513,7 @@ public: // Accessibility
   /**
    * @brief Returns whether this View is accessibility-modal.
    *
+   * @SINCE_3_0.0
    * @return True if this View is accessibility-modal, false otherwise
    */
   bool IsAccessibilityModal() const;
@@ -2330,6 +2521,7 @@ public: // Accessibility
   /**
    * @brief Sets application automation metadata for this View.
    *
+   * @SINCE_3_0.0
    * @param[in] automationId The application automation identifier
    */
   void SetAutomationId(StringView automationId);
@@ -2337,6 +2529,7 @@ public: // Accessibility
   /**
    * @brief Returns application automation metadata for this View.
    *
+   * @SINCE_3_0.0
    * @return The application automation identifier
    */
   Dali::String GetAutomationId() const;
@@ -2344,6 +2537,7 @@ public: // Accessibility
   /**
    * @brief Binds the accessibility name to a resource in the default domain.
    *
+   * @SINCE_3_0.0
    * @param[in] resourceId The localization resource identifier
    */
   void SetTranslatableAccessibilityName(StringView resourceId);
@@ -2351,6 +2545,7 @@ public: // Accessibility
   /**
    * @brief Binds the accessibility name to a resource and domain.
    *
+   * @SINCE_3_0.0
    * @param[in] resourceId The localization resource identifier
    * @param[in] domain The localization domain
    */
@@ -2359,18 +2554,21 @@ public: // Accessibility
   /**
    * @brief Returns the resource id bound to the accessibility name.
    *
+   * @SINCE_3_0.0
    * @return The localization resource identifier, or an empty string if no binding exists
    */
   Dali::String GetTranslatableAccessibilityName() const;
 
   /**
    * @brief Removes the accessibility name localization binding.
+   * @SINCE_3_0.0
    */
   void ClearTranslatableAccessibilityName();
 
   /**
    * @brief Binds the accessibility description to a resource in the default domain.
    *
+   * @SINCE_3_0.0
    * @param[in] resourceId The localization resource identifier
    */
   void SetTranslatableAccessibilityDescription(StringView resourceId);
@@ -2378,6 +2576,7 @@ public: // Accessibility
   /**
    * @brief Binds the accessibility description to a resource and domain.
    *
+   * @SINCE_3_0.0
    * @param[in] resourceId The localization resource identifier
    * @param[in] domain The localization domain
    */
@@ -2386,18 +2585,21 @@ public: // Accessibility
   /**
    * @brief Returns the resource id bound to the accessibility description.
    *
+   * @SINCE_3_0.0
    * @return The localization resource identifier, or an empty string if no binding exists
    */
   Dali::String GetTranslatableAccessibilityDescription() const;
 
   /**
    * @brief Removes the accessibility description localization binding.
+   * @SINCE_3_0.0
    */
   void ClearTranslatableAccessibilityDescription();
 
   /**
    * @brief Adds an accessibility relation to another View.
    *
+   * @SINCE_3_0.0
    * @param[in] type The accessibility relation type
    * @param[in] target The target View
    */
@@ -2406,6 +2608,7 @@ public: // Accessibility
   /**
    * @brief Removes an accessibility relation to another View.
    *
+   * @SINCE_3_0.0
    * @param[in] type The accessibility relation type
    * @param[in] target The target View
    */
@@ -2413,12 +2616,14 @@ public: // Accessibility
 
   /**
    * @brief Removes all accessibility relations.
+   * @SINCE_3_0.0
    */
   void ClearAccessibilityRelations();
 
   /**
    * @brief Returns whether the specified accessibility relation exists.
    *
+   * @SINCE_3_0.0
    * @param[in] type The accessibility relation type
    * @param[in] target The target View
    * @return True if the relation exists, false otherwise
@@ -2428,6 +2633,7 @@ public: // Accessibility
   /**
    * @brief Adds information to be announced when this View is read.
    *
+   * @SINCE_3_0.0
    * @param[in] info The accessibility reading information to add
    */
   void AddAccessibilityReadingInfo(Accessibility::ReadingInfo info);
@@ -2435,18 +2641,21 @@ public: // Accessibility
   /**
    * @brief Removes information from the set announced for this View.
    *
+   * @SINCE_3_0.0
    * @param[in] info The accessibility reading information to remove
    */
   void RemoveAccessibilityReadingInfo(Accessibility::ReadingInfo info);
 
   /**
    * @brief Clears all information announced for this View.
+   * @SINCE_3_0.0
    */
   void ClearAccessibilityReadingInfo();
 
   /**
    * @brief Returns whether the specified information is announced.
    *
+   * @SINCE_3_0.0
    * @param[in] info The accessibility reading information to query
    * @return True if the information is announced, false otherwise
    */
@@ -2455,6 +2664,7 @@ public: // Accessibility
   /**
    * @brief Adds a code-point-based language span to the accessibility name.
    *
+   * @SINCE_3_0.0
    * @param[in] start The zero-based code-point start index
    * @param[in] length The number of code points in the span
    * @param[in] locale The locale associated with the span
@@ -2464,12 +2674,14 @@ public: // Accessibility
 
   /**
    * @brief Clears all language spans from the accessibility name.
+   * @SINCE_3_0.0
    */
   void ClearAccessibilityNameLanguageSpans();
 
   /**
    * @brief Adds a code-point-based language span to the accessibility description.
    *
+   * @SINCE_3_0.0
    * @param[in] start The zero-based code-point start index
    * @param[in] length The number of code points in the span
    * @param[in] locale The locale associated with the span
@@ -2479,12 +2691,14 @@ public: // Accessibility
 
   /**
    * @brief Clears all language spans from the accessibility description.
+   * @SINCE_3_0.0
    */
   void ClearAccessibilityDescriptionLanguageSpans();
 
   /**
    * @brief Sets whether initial accessibility highlight is requested.
    *
+   * @SINCE_3_0.0
    * @param[in] request Whether initial accessibility highlight is requested
    */
   void SetRequestInitialAccessibilityHighlight(bool request);
@@ -2492,6 +2706,7 @@ public: // Accessibility
   /**
    * @brief Returns whether initial accessibility highlight is requested.
    *
+   * @SINCE_3_0.0
    * @return True if initial accessibility highlight is requested, false otherwise
    */
   bool IsInitialAccessibilityHighlightRequested() const;
@@ -2499,6 +2714,7 @@ public: // Accessibility
   /**
    * @brief Sets whether this View is an accessibility collection container.
    *
+   * @SINCE_3_0.0
    * @param[in] container Whether this View is an accessibility collection container
    */
   void SetAccessibilityCollectionContainer(bool container);
@@ -2506,6 +2722,7 @@ public: // Accessibility
   /**
    * @brief Returns whether this View is an accessibility collection container.
    *
+   * @SINCE_3_0.0
    * @return True if this View is an accessibility collection container, false otherwise
    */
   bool IsAccessibilityCollectionContainer() const;
@@ -2513,6 +2730,7 @@ public: // Accessibility
   /**
    * @brief Sets this View's zero-based index in an accessibility collection.
    *
+   * @SINCE_3_0.0
    * @param[in] index The zero-based collection index, or -1 to clear it
    */
   void SetAccessibilityCollectionIndex(int32_t index);
@@ -2520,18 +2738,21 @@ public: // Accessibility
   /**
    * @brief Returns the collection index, or -1 when it is not set.
    *
+   * @SINCE_3_0.0
    * @return The zero-based collection index, or -1 when it is not set
    */
   int32_t GetAccessibilityCollectionIndex() const;
 
   /**
    * @brief Clears this View's accessibility collection index.
+   * @SINCE_3_0.0
    */
   void ClearAccessibilityCollectionIndex();
 
   /**
    * @brief Adds or replaces a raw accessibility attribute.
    *
+   * @SINCE_3_0.0
    * @param[in] key The accessibility attribute key
    * @param[in] value The accessibility attribute value
    */
@@ -2540,18 +2761,21 @@ public: // Accessibility
   /**
    * @brief Removes a raw accessibility attribute.
    *
+   * @SINCE_3_0.0
    * @param[in] key The accessibility attribute key
    */
   void RemoveAccessibilityAttribute(StringView key);
 
   /**
    * @brief Removes all raw and typed accessibility attributes.
+   * @SINCE_3_0.0
    */
   void ClearAccessibilityAttributes();
 
   /**
    * @brief Adds the given accessibility state to this View.
    *
+   * @SINCE_3_0.0
    * @param[in] state The accessibility state to enable
    * @see Dali::Ui::Accessibility::State
    */
@@ -2560,6 +2784,7 @@ public: // Accessibility
   /**
    * @brief Removes the given accessibility state from this View.
    *
+   * @SINCE_3_0.0
    * @param[in] state The accessibility state to disable
    * @see Dali::Ui::Accessibility::State
    */
@@ -2568,6 +2793,7 @@ public: // Accessibility
   /**
    * @brief Clears all accessibility states from this View.
    *
+   * @SINCE_3_0.0
    */
   void ClearAccessibilityStates();
 
@@ -2582,6 +2808,7 @@ public: // Accessibility
    * recommended so that assistive technologies can correctly identify the
    * relationship.
    *
+   * @SINCE_3_0.0
    * @param[in] descendant The active descendant View, which should be a child
    *                       of this View. An empty handle is allowed and clears
    *                       the current active descendant.
@@ -2591,6 +2818,7 @@ public: // Accessibility
   /**
    * @brief Returns whether the given accessibility state is set on this View.
    *
+   * @SINCE_3_0.0
    * @param[in] state The accessibility state to query
    * @return True if the state is set
    * @see Dali::Ui::Accessibility::State
@@ -2610,6 +2838,7 @@ public: // Signals
    * });
    * @endcode
    *
+   * @SINCE_3_0.0
    * @return The StateChangedSignal
    */
   StateChangedSignalType& StateChangedSignal();
@@ -2668,6 +2897,7 @@ public: // Signals
    * is not an exemption. Defer layout-affecting work to event time when a prompt follow-up
    * is required.
    *
+   * @SINCE_3_0.0
    * @warning This signal fires whenever the View is (re-)arranged in a completed pass,
    * INCLUDING when its bounds did NOT change (e.g. it was re-arranged only because a
    * sibling or ancestor changed) -- do NOT assume "signal fired" means "this View's
@@ -2692,6 +2922,7 @@ public: // Signals
   LayoutFinishedSignalType& LayoutFinishedSignal();
 
   /// @brief Key Event signal type.
+  /// @SINCE_3_0.0
   typedef Signal<bool(View, KeyEvent)> KeyEventSignalType;
   /**
    * @brief This signal is emitted when key event is received.
@@ -2702,12 +2933,14 @@ public: // Signals
    * @endcode
    * The return value of True, indicates that the event should be consumed.
    * Otherwise the signal will be emitted on the next parent of the actor.
+   * @SINCE_3_0.0
    * @return The signal to connect to
    * @pre The View has been initialized.
    */
   KeyEventSignalType& KeyEventSignal();
 
   /// @brief Focus changed signal type.
+  /// @SINCE_3_0.0
   typedef Signal<void(View, bool)> FocusChangedSignalType;
   /**
    * @brief This signal is emitted when the view gets or loses focus.
@@ -2716,12 +2949,14 @@ public: // Signals
    * @code
    *   bool YourCallbackName(View view, bool focused);
    * @endcode
+   * @SINCE_3_0.0
    * @return The signal to connect to
    * @pre The View has been initialized.
    */
   FocusChangedSignalType& FocusChangedSignal();
 
   /// @brief ResourceReady signal type.
+  /// @SINCE_3_0.0
   typedef Signal<void(View)> ResourceReadySignalType;
   /**
    * @brief This signal is emitted after all resources required by a View are loaded and ready.
@@ -2750,16 +2985,19 @@ public: // Signals
    *   void YourCallbackName( View view );
    * @endcode
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to
    * @note A RelayoutRequest is queued by View before this signal is emitted
    */
   ResourceReadySignalType& ResourceReadySignal();
 
   /// @brief Offscreen rendering finished signal type.
+  /// @SINCE_3_0.0
   using OffscreenRenderingFinishedSignalType = Signal<void(View)>;
   /**
    * @brief This signal is emitted when offscreen rendering is finished.
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to
    * @pre The View has been initialized.
    * @note This signal is emitted when the offscreen rendering task is completed.
@@ -2768,24 +3006,29 @@ public: // Signals
   OffscreenRenderingFinishedSignalType& OffscreenRenderingFinishedSignal();
 
   /// @brief Accessibility reading lifecycle signal type.
+  /// @SINCE_3_0.0
   using AccessibilityReadingStatusChangedSignalType = Signal<void(View, Accessibility::ReadingStatus)>;
   /**
    * @brief Returns the signal emitted when this View's reading lifecycle changes.
    *
+   * @SINCE_3_0.0
    * @return The accessibility reading status changed signal
    */
   AccessibilityReadingStatusChangedSignalType& AccessibilityReadingStatusChangedSignal();
 
   /// @brief Accessibility highlight state signal type.
+  /// @SINCE_3_0.0
   using AccessibilityHighlightedSignalType = Signal<void(View, bool)>;
   /**
    * @brief Returns the signal emitted when accessibility highlight changes.
    *
+   * @SINCE_3_0.0
    * @return The accessibility highlighted signal
    */
   AccessibilityHighlightedSignalType& AccessibilityHighlightedSignal();
 
   /// @brief Visual Event signal type.
+  /// @SINCE_3_0.0
   typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
 
 public: // Not intended for application developers
@@ -2809,6 +3052,7 @@ public: // Templates for Deriving Classes
   /**
    * @brief Template to allow deriving Views to DownCast handles to deriving handle classes.
    *
+   * @SINCE_3_0.0
    * @tparam     T      The handle class
    * @tparam     I      The implementation class
    * @param[in] handle Handle to an object
@@ -2840,6 +3084,7 @@ public: // Templates for Deriving Classes
    * @brief Template to allow deriving Views to verify whether the Internal::CustomActor* is actually an
    * implementation of their class.
    *
+   * @SINCE_3_0.0
    * @tparam     I       The implementation class
    * @param[in] internal Pointer to the Internal::CustomActor
    */

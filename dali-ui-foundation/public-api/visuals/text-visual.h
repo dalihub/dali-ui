@@ -40,6 +40,7 @@ namespace Ui
  *
  * Its visual type is VisualType::TEXT. It cannot use the CornerRadius, CornerSquareness
  * or Borderline features of VisualBase.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API TextVisual : public VisualBase
 {
@@ -47,6 +48,7 @@ public:
   /**
    * @brief Creates a TextVisual object.
    *
+   * @SINCE_3_0.0
    * @return The newly created color visual object.
    */
   static TextVisual New();
@@ -57,6 +59,7 @@ public:
    * If handle points to a TextVisual, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a TextVisual or an uninitialized handle
    */
@@ -66,6 +69,7 @@ public: // Properties
   /**
    * @brief Gets the text.
    *
+   * @SINCE_3_0.0
    * @return The text currently set on the TextVisual in UTF-8 format
    */
   Dali::String GetText() const;
@@ -73,6 +77,7 @@ public: // Properties
   /**
    * @brief Sets the text to display.
    *
+   * @SINCE_3_0.0
    * @param[in] text The text to display in UTF-8 format.
    */
   void SetText(const Dali::String& text);
@@ -80,6 +85,7 @@ public: // Properties
   /**
    * @brief Gets the font family.
    *
+   * @SINCE_3_0.0
    * @return The font family currently set on the TextVisual
    */
   Dali::String GetFontFamily() const;
@@ -87,6 +93,7 @@ public: // Properties
   /**
    * @brief Sets the font family to use.
    *
+   * @SINCE_3_0.0
    * @param[in] fontFamily The requested font family to use
    */
   void SetFontFamily(const Dali::String& fontFamily);
@@ -94,6 +101,7 @@ public: // Properties
   /**
    * @brief Gets the font size in pixels.
    *
+   * @SINCE_3_0.0
    * @return The font size in pixels
    */
   float GetFontSize() const;
@@ -101,6 +109,7 @@ public: // Properties
   /**
    * @brief Sets the size of font in pixels.
    *
+   * @SINCE_3_0.0
    * @param[in] fontSize The size of font in pixels
    */
   void SetFontSize(float fontSize);
@@ -108,6 +117,7 @@ public: // Properties
   /**
    * @brief Gets the font weight.
    *
+   * @SINCE_3_0.0
    * @return The font weight
    */
   Dali::Ui::Text::FontWeight GetFontWeight() const;
@@ -115,6 +125,7 @@ public: // Properties
   /**
    * @brief Sets the font weight.
    *
+   * @SINCE_3_0.0
    * @param[in] fontWeight The font weight to set
    */
   void SetFontWeight(Dali::Ui::Text::FontWeight fontWeight);
@@ -122,6 +133,7 @@ public: // Properties
   /**
    * @brief Gets the font width.
    *
+   * @SINCE_3_0.0
    * @return The font width
    */
   Dali::Ui::Text::FontWidth GetFontWidth() const;
@@ -129,6 +141,7 @@ public: // Properties
   /**
    * @brief Sets the font width.
    *
+   * @SINCE_3_0.0
    * @param[in] fontWidth The font width to set
    */
   void SetFontWidth(Dali::Ui::Text::FontWidth fontWidth);
@@ -136,6 +149,7 @@ public: // Properties
   /**
    * @brief Gets the font slant.
    *
+   * @SINCE_3_0.0
    * @return The font slant
    */
   Dali::Ui::Text::FontSlant GetFontSlant() const;
@@ -143,6 +157,7 @@ public: // Properties
   /**
    * @brief Sets the font slant.
    *
+   * @SINCE_3_0.0
    * @param[in] fontSlant The font slant to set
    */
   void SetFontSlant(Dali::Ui::Text::FontSlant fontSlant);
@@ -150,6 +165,7 @@ public: // Properties
   /**
    * @brief Gets whether multi-line layout is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if multi-line layout is enabled
    */
   bool IsMultiLine() const;
@@ -157,6 +173,7 @@ public: // Properties
   /**
    * @brief Sets the single-line or multi-line layout option.
    *
+   * @SINCE_3_0.0
    * @param[in] multiLine True to enable multi-line layout, false for single-line
    */
   void SetMultiLine(bool multiLine);
@@ -164,6 +181,7 @@ public: // Properties
   /**
    * @brief Gets the line wrap mode.
    *
+   * @SINCE_3_0.0
    * @return The line wrap mode
    */
   Dali::Ui::Text::LineWrapMode GetLineWrapMode() const;
@@ -171,6 +189,7 @@ public: // Properties
   /**
    * @brief Sets the line wrap mode.
    *
+   * @SINCE_3_0.0
    * @param[in] lineWrapMode The line wrap mode to set
    */
   void SetLineWrapMode(Dali::Ui::Text::LineWrapMode lineWrapMode);
@@ -178,6 +197,7 @@ public: // Properties
   /**
    * @brief Gets the horizontal alignment.
    *
+   * @SINCE_3_0.0
    * @return The horizontal alignment
    */
   Dali::Ui::Text::Alignment GetHorizontalAlignment() const;
@@ -185,6 +205,7 @@ public: // Properties
   /**
    * @brief Sets the horizontal alignment.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment The horizontal alignment to set
    */
   void SetHorizontalAlignment(Dali::Ui::Text::Alignment alignment);
@@ -192,6 +213,7 @@ public: // Properties
   /**
    * @brief Gets the vertical alignment.
    *
+   * @SINCE_3_0.0
    * @return The vertical alignment
    */
   Dali::Ui::Text::Alignment GetVerticalAlignment() const;
@@ -199,6 +221,7 @@ public: // Properties
   /**
    * @brief Sets the vertical alignment.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment The vertical alignment to set
    */
   void SetVerticalAlignment(Dali::Ui::Text::Alignment alignment);
@@ -206,6 +229,7 @@ public: // Properties
   /**
    * @brief Gets the overflow mode.
    *
+   * @SINCE_3_0.0
    * @return The overflow mode
    */
   Dali::Ui::Text::OverflowMode GetTextOverflowMode() const;
@@ -213,6 +237,7 @@ public: // Properties
   /**
    * @brief Sets the overflow mode.
    *
+   * @SINCE_3_0.0
    * @param[in] overflowMode The overflow mode to set
    */
   void SetTextOverflowMode(Dali::Ui::Text::OverflowMode overflowMode);
@@ -220,6 +245,7 @@ public: // Properties
   /**
    * @brief Gets the line height.
    *
+   * @SINCE_3_0.0
    * @return The line height
    */
   float GetLineHeight() const;
@@ -227,6 +253,7 @@ public: // Properties
   /**
    * @brief Sets the line height.
    *
+   * @SINCE_3_0.0
    * @param[in] lineHeight The line height to set
    */
   void SetLineHeight(float lineHeight);
@@ -234,6 +261,7 @@ public: // Properties
   /**
    * @brief Gets the line height mode.
    *
+   * @SINCE_3_0.0
    * @return The line height mode
    */
   Dali::Ui::Text::LineHeightMode GetLineHeightMode() const;
@@ -241,6 +269,7 @@ public: // Properties
   /**
    * @brief Sets the line height mode.
    *
+   * @SINCE_3_0.0
    * @param[in] lineHeightMode The line height mode to set
    */
   void SetLineHeightMode(Dali::Ui::Text::LineHeightMode lineHeightMode);
@@ -248,6 +277,7 @@ public: // Properties
   /**
    * @brief Gets the text color.
    *
+   * @SINCE_3_0.0
    * @return The text color
    */
   UiColor GetTextColor() const;
@@ -255,6 +285,7 @@ public: // Properties
   /**
    * @brief Sets the color of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] textColor The color of the text
    */
   void SetTextColor(const UiColor& textColor);

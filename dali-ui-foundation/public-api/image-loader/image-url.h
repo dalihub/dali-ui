@@ -40,6 +40,7 @@ class ImageUrl;
  * Application can get url from ImageUrl.
  * When application does not use this anymore, the destructor of the ImageUrl is called.
  * At this time, the buffer is deleted from the texture manager.
+ * @SINCE_3_0.0
  * @note Visual also have reference of the buffer. In this case, buffer will be deleted after visual is deleted.
  */
 class DALI_UI_API ImageUrl : public BaseHandle
@@ -48,17 +49,20 @@ public:
   /**
    * Default Constructor.
    * Resulting URL is not valid
+   * @SINCE_3_0.0
    */
   ImageUrl();
 
   /**
    * Destructor
+   * @SINCE_3_0.0
    */
   ~ImageUrl();
 
   /**
    * @brief Create an initialized ImageUrl.
    *
+   * @SINCE_3_0.0
    * @param[in] texture The texture url is got from external buffer.
    * @return A handle to a newly allocated Dali resource.
    */
@@ -69,6 +73,7 @@ public:
    * pixel data uploaded to the texture (Dali::PixelData::New()).
    * @brief Create an initialized ImageUrl.
    *
+   * @SINCE_3_0.0
    * @param[in] texture The texture url is got from external buffer.
    * @param[in] preMultiplied Whether this external texture preMultiplied or not.
    * A texture that reports pre-multiplied alpha itself (Dali::Texture::IsAlphaPreMultiplied())
@@ -80,6 +85,7 @@ public:
   /**
    * @brief Create an initialized ImageUrl.
    *
+   * @SINCE_3_0.0
    * @param[in] encodedImageBuffer The encoded image buffer url is got from external buffer.
    * @return A handle to a newly allocated Dali resource.
    */
@@ -91,6 +97,7 @@ public:
    * If handle points to a ImageUrl object the downcast produces valid
    * handle. If not the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle to An object.
    * @return handle to a ImageUrl object or an uninitialized handle.
    */
@@ -98,24 +105,28 @@ public:
 
   /**
    * Copy constructor
+   * @SINCE_3_0.0
    * @param[in] url The url to copy
    */
   ImageUrl(const ImageUrl& url);
 
   /**
    * Assignment operator
+   * @SINCE_3_0.0
    * @param[in] url The url to copy
    */
   ImageUrl& operator=(const ImageUrl& url);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    * @param[in] rhs A reference to the moved handle
    */
   ImageUrl(ImageUrl&& rhs) noexcept;
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    * @param[in] rhs A reference to the moved handle
    * @return A reference to this handle
    */
@@ -123,6 +134,7 @@ public:
 
   /**
    * Get the url
+   * @SINCE_3_0.0
    * @return Returns url's string
    */
   const Dali::String& GetUrl() const;

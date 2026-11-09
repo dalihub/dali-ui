@@ -48,18 +48,21 @@ class ChartViewImpl;
  *   ... e.GetSeriesIndex(), e.GetDataY(), e.GetXLabel() ...
  * });
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ChartPointEventArgs
 {
 public:
   /**
    * @brief Creates empty event data.
+   * @SINCE_3_0.0
    */
   ChartPointEventArgs();
 
   /**
    * @brief Creates event data describing a single chart point.
    *
+   * @SINCE_3_0.0
    * @param[in] seriesIndex The index of the series the point belongs to
    * @param[in] pointIndex The index of the point within the series
    * @param[in] dataX The X value of the point in data coordinates
@@ -77,6 +80,7 @@ public:
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The object to copy
    */
   ChartPointEventArgs(const ChartPointEventArgs& rhs);
@@ -84,6 +88,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The object to move
    */
   ChartPointEventArgs(ChartPointEventArgs&& rhs) noexcept;
@@ -91,6 +96,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The object to copy
    * @return A reference to this object
    */
@@ -99,6 +105,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The object to move
    * @return A reference to this object
    */
@@ -106,41 +113,48 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~ChartPointEventArgs();
 
   /**
    * @brief Retrieves the index of the series the point belongs to.
+   * @SINCE_3_0.0
    * @return The series index, or -1 if not set
    */
   int GetSeriesIndex() const;
 
   /**
    * @brief Retrieves the index of the point within the series.
+   * @SINCE_3_0.0
    * @return The point index, or -1 if not set
    */
   int GetPointIndex() const;
 
   /**
    * @brief Retrieves the X value of the point in data coordinates.
+   * @SINCE_3_0.0
    * @return The X value
    */
   float GetDataX() const;
 
   /**
    * @brief Retrieves the Y value of the point in data coordinates.
+   * @SINCE_3_0.0
    * @return The Y value
    */
   float GetDataY() const;
 
   /**
    * @brief Retrieves the name of the series the point belongs to.
+   * @SINCE_3_0.0
    * @return The series name
    */
   const Dali::String& GetSeriesName() const;
 
   /**
    * @brief Retrieves the X axis label matching the point.
+   * @SINCE_3_0.0
    * @return The X axis label
    */
   const Dali::String& GetXLabel() const;
@@ -161,68 +175,74 @@ private:
  *   chart.AddSeries(lineSeries);
  *   parent.Add(chart);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ChartView : public View
 {
 public:
   /**
    * @brief The kind of chart drawn, chosen when the ChartView is created.
+   * @SINCE_3_0.0
    */
   enum class Type
   {
-    LINE,    ///< Line chart, built from LineSeries.
-    BAR,     ///< Bar chart, built from BarSeries.
-    PIE,     ///< Pie or donut chart, built from PieSeries.
-    AREA,    ///< Area chart — equivalent to LINE with FillEnabled on each LineSeries.
-    SCATTER, ///< Scatter chart, built from ScatterSeries.
-    GAUGE    ///< Gauge chart, configured with the SetGauge*() family of methods.
+    LINE,    ///< Line chart, built from LineSeries. @SINCE_3_0.0
+    BAR,     ///< Bar chart, built from BarSeries. @SINCE_3_0.0
+    PIE,     ///< Pie or donut chart, built from PieSeries. @SINCE_3_0.0
+    AREA,    ///< Area chart — equivalent to LINE with FillEnabled on each LineSeries. @SINCE_3_0.0
+    SCATTER, ///< Scatter chart, built from ScatterSeries. @SINCE_3_0.0
+    GAUGE    ///< Gauge chart, configured with the SetGauge*() family of methods. @SINCE_3_0.0
   };
 
   /**
    * @brief Where the legend is drawn relative to the plot area.
+   * @SINCE_3_0.0
    */
   enum class LegendPosition
   {
-    NONE   = 0, ///< No legend is drawn.
-    TOP    = 1, ///< Legend is drawn above the plot area. This is the default.
-    BOTTOM = 2, ///< Legend is drawn below the plot area.
-    LEFT   = 3, ///< Legend is drawn to the left of the plot area.
-    RIGHT  = 4  ///< Legend is drawn to the right of the plot area.
+    NONE   = 0, ///< No legend is drawn. @SINCE_3_0.0
+    TOP    = 1, ///< Legend is drawn above the plot area. This is the default. @SINCE_3_0.0
+    BOTTOM = 2, ///< Legend is drawn below the plot area. @SINCE_3_0.0
+    LEFT   = 3, ///< Legend is drawn to the left of the plot area. @SINCE_3_0.0
+    RIGHT  = 4  ///< Legend is drawn to the right of the plot area. @SINCE_3_0.0
   };
 
   /**
    * @brief Where the title is drawn relative to the plot area.
+   * @SINCE_3_0.0
    */
   enum class TitlePosition
   {
-    TOP_CENTER    = 0, ///< Centered above the plot area. This is the default.
-    TOP_LEFT      = 1, ///< Left-aligned above the plot area.
-    TOP_RIGHT     = 2, ///< Right-aligned above the plot area.
-    BOTTOM_CENTER = 3, ///< Centered below the plot area.
+    TOP_CENTER    = 0, ///< Centered above the plot area. This is the default. @SINCE_3_0.0
+    TOP_LEFT      = 1, ///< Left-aligned above the plot area. @SINCE_3_0.0
+    TOP_RIGHT     = 2, ///< Right-aligned above the plot area. @SINCE_3_0.0
+    BOTTOM_CENTER = 3, ///< Centered below the plot area. @SINCE_3_0.0
   };
 
   /**
    * @brief The easing curve used by data update animations.
    *
+   * @SINCE_3_0.0
    * @see SetAnimationDuration()
    */
   enum class EasingType
   {
-    LINEAR      = 0, ///< Constant rate of change.
-    EASE_OUT    = 1, ///< Starts fast, decelerates towards the end. This is the default.
-    EASE_IN_OUT = 2, ///< Accelerates at the start, decelerates towards the end.
+    LINEAR      = 0, ///< Constant rate of change. @SINCE_3_0.0
+    EASE_OUT    = 1, ///< Starts fast, decelerates towards the end. This is the default. @SINCE_3_0.0
+    EASE_IN_OUT = 2, ///< Accelerates at the start, decelerates towards the end. @SINCE_3_0.0
   };
 
   /**
    * @brief How touch/hover input is matched to a data point.
    *
+   * @SINCE_3_0.0
    * @see SetFindingStrategy()
    */
   enum class FindingStrategy
   {
-    NEAREST,          ///< Selects the single nearest point across all series. This is the default.
-    SAME_X,           ///< Selects one point per series that shares the nearest X value.
-    SAME_X_NEAREST_Y, ///< Same as SAME_X, but only for series whose Y value is also close to the touch position.
+    NEAREST,          ///< Selects the single nearest point across all series. This is the default. @SINCE_3_0.0
+    SAME_X,           ///< Selects one point per series that shares the nearest X value. @SINCE_3_0.0
+    SAME_X_NEAREST_Y, ///< Same as SAME_X, but only for series whose Y value is also close to the touch position. @SINCE_3_0.0
   };
 
   /**
@@ -231,14 +251,15 @@ public:
    * Combine with bitwise OR and pass to SetZoomMode(). For example
    * `SetZoomMode(static_cast<int>(ZoomMode::PAN_X) | static_cast<int>(ZoomMode::ZOOM_X))`
    * enables horizontal panning and zooming only.
+   * @SINCE_3_0.0
    */
   enum class ZoomMode : int
   {
-    NONE   = 0,      ///< No zoom or pan gestures are enabled. This is the default.
-    PAN_X  = 1 << 0, ///< Enables horizontal panning by dragging.
-    PAN_Y  = 1 << 1, ///< Enables vertical panning by dragging.
-    ZOOM_X = 1 << 2, ///< Enables horizontal zooming by pinch or mouse wheel.
-    ZOOM_Y = 1 << 3, ///< Enables vertical zooming by pinch or mouse wheel.
+    NONE   = 0,      ///< No zoom or pan gestures are enabled. This is the default. @SINCE_3_0.0
+    PAN_X  = 1 << 0, ///< Enables horizontal panning by dragging. @SINCE_3_0.0
+    PAN_Y  = 1 << 1, ///< Enables vertical panning by dragging. @SINCE_3_0.0
+    ZOOM_X = 1 << 2, ///< Enables horizontal zooming by pinch or mouse wheel. @SINCE_3_0.0
+    ZOOM_Y = 1 << 3, ///< Enables vertical zooming by pinch or mouse wheel. @SINCE_3_0.0
   };
 
   /**
@@ -246,6 +267,7 @@ public:
    *
    * These mirror several of the SetXxx()/GetXxx() methods below as properties,
    * for use with Animation and property notifications.
+   * @SINCE_3_0.0
    */
   struct Property
   {
@@ -271,17 +293,20 @@ public:
 
   /**
    * @brief Creates an uninitialized ChartView handle.
+   * @SINCE_3_0.0
    */
   ChartView();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~ChartView();
 
   /**
    * @brief Creates a new ChartView.
    *
+   * @SINCE_3_0.0
    * @param[in] type The kind of chart to draw
    * @param[in] size The initial size of the chart, in pixels
    * @return A handle to the new ChartView
@@ -290,6 +315,7 @@ public:
 
   /**
    * @brief Creates a chart with immutable construction defaults.
+   * @SINCE_3_0.0
    * @param[in] type The chart type
    * @param[in] size The initial pixel size
    * @param[in] style The initialized style
@@ -299,18 +325,21 @@ public:
 
   /**
    * @brief Sets the viewport as (xMinimum, yMinimum, xMaximum, yMaximum).
+   * @SINCE_3_0.0
    * @param[in] range Finite increasing ranges, positive on logarithmic axes
    */
   void SetViewport(const Vector4& range);
 
   /**
    * @brief Returns the current viewport as (xMinimum, yMinimum, xMaximum, yMaximum).
+   * @SINCE_3_0.0
    * @return The current data-space viewport
    */
   Vector4 GetViewport() const;
 
   /**
    * @brief Selects an existing visible data point, emitting the selection signal.
+   * @SINCE_3_0.0
    * @param[in] seriesIndex The series index
    * @param[in] pointIndex The point index
    * @return True if the point is visible and can be selected
@@ -320,6 +349,7 @@ public:
   /**
    * @brief Downcasts a handle to a ChartView handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A ChartView handle, or an uninitialized handle if the cast fails
    */
@@ -328,6 +358,7 @@ public:
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   ChartView(const ChartView& rhs);
@@ -335,6 +366,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   ChartView(ChartView&& rhs) noexcept;
@@ -342,6 +374,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -350,6 +383,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return A reference to this handle
    */
@@ -364,6 +398,7 @@ public:
    * it (color, markers, and so on). Adding a series recomputes the
    * auto-ranged axis limits if either axis has IsAutoRange() enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] series The series to add
    */
   void AddSeries(Ui::ChartSeries series);
@@ -374,6 +409,7 @@ public:
    * Recomputes the auto-ranged axis limits if either axis has IsAutoRange()
    * enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] axis The axis to use as the X axis
    */
   void SetXAxis(Ui::ChartAxis axis);
@@ -384,6 +420,7 @@ public:
    * Recomputes the auto-ranged axis limits if either axis has IsAutoRange()
    * enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] axis The axis to use as the Y axis
    */
   void SetYAxis(Ui::ChartAxis axis);
@@ -391,6 +428,7 @@ public:
   /**
    * @brief Removes the first series with a matching name.
    *
+   * @SINCE_3_0.0
    * @param[in] name The name of the series to remove, as set with ChartSeries::SetName()
    * @return True if a series with a matching name was found and removed
    */
@@ -398,6 +436,7 @@ public:
 
   /**
    * @brief Removes all series from the chart.
+   * @SINCE_3_0.0
    */
   void RemoveAllSeries();
 
@@ -406,6 +445,7 @@ public:
    *
    * An empty title (the default) draws nothing.
    *
+   * @SINCE_3_0.0
    * @param[in] title The chart title
    */
   void SetTitle(const Dali::String& title);
@@ -413,6 +453,7 @@ public:
   /**
    * @brief Retrieves the chart title text.
    *
+   * @SINCE_3_0.0
    * @return The chart title
    */
   Dali::String GetTitle() const;
@@ -422,6 +463,7 @@ public:
    *
    * The default is TitlePosition::TOP_CENTER.
    *
+   * @SINCE_3_0.0
    * @param[in] position Where to draw the title
    */
   void SetTitlePosition(TitlePosition position);
@@ -429,6 +471,7 @@ public:
   /**
    * @brief Retrieves where the title is drawn relative to the plot area.
    *
+   * @SINCE_3_0.0
    * @return Where the title is drawn
    */
   TitlePosition GetTitlePosition() const;
@@ -438,6 +481,7 @@ public:
    *
    * The default is (0.1, 0.1, 0.1, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the title text
    */
   void SetTitleColor(const Vector4& color);
@@ -445,6 +489,7 @@ public:
   /**
    * @brief Retrieves the color of the title text.
    *
+   * @SINCE_3_0.0
    * @return The color of the title text
    */
   Vector4 GetTitleColor() const;
@@ -452,6 +497,7 @@ public:
   /**
    * @brief Function pointer type for building tooltip text.
    *
+   * @SINCE_3_0.0
    * @note This is a plain function pointer, not std::function.
    *       Capturing lambdas and non-static member functions are not accepted.
    *       Use a free function, a static function, or a captureless lambda.
@@ -469,6 +515,7 @@ public:
   /**
    * @brief Sets the formatter used to build tooltip text.
    *
+   * @SINCE_3_0.0
    * @param[in] formatter The formatter, or nullptr to restore the default text
    */
   void SetTooltipFormatter(TooltipFormatterType formatter);
@@ -479,6 +526,7 @@ public:
    * Negative values are clamped to 0. A duration of 0 (the default) disables
    * the animation; data updates apply instantly.
    *
+   * @SINCE_3_0.0
    * @param[in] milliseconds The animation duration, in milliseconds
    */
   void SetAnimationDuration(float milliseconds);
@@ -486,6 +534,7 @@ public:
   /**
    * @brief Retrieves the duration of the animation played when series data changes.
    *
+   * @SINCE_3_0.0
    * @return The animation duration, in milliseconds
    */
   float GetAnimationDuration() const;
@@ -495,6 +544,7 @@ public:
    *
    * The default is EasingType::EASE_OUT.
    *
+   * @SINCE_3_0.0
    * @param[in] easing The easing curve
    */
   void SetAnimationEasing(EasingType easing);
@@ -502,6 +552,7 @@ public:
   /**
    * @brief Retrieves the easing curve used by data update animations.
    *
+   * @SINCE_3_0.0
    * @return The easing curve
    */
   EasingType GetAnimationEasing() const;
@@ -512,6 +563,7 @@ public:
    * Negative values are clamped to 0. Values below 1.0 (the default, 0.0)
    * disable throttling, so every update rebuilds immediately.
    *
+   * @SINCE_3_0.0
    * @param[in] milliseconds The minimum time between rebuilds, in milliseconds
    */
   void SetUpdateThrottle(float milliseconds);
@@ -519,6 +571,7 @@ public:
   /**
    * @brief Retrieves the minimum time between layout/data rebuilds triggered by rapid updates.
    *
+   * @SINCE_3_0.0
    * @return The minimum time between rebuilds, in milliseconds
    */
   float GetUpdateThrottle() const;
@@ -528,6 +581,7 @@ public:
    *
    * The default is 30.0.
    *
+   * @SINCE_3_0.0
    * @param[in] pixels The maximum hit distance, in pixels
    */
   void SetHitThreshold(float pixels);
@@ -535,6 +589,7 @@ public:
   /**
    * @brief Retrieves the maximum distance from a touch/hover position to a data point still counted as a hit.
    *
+   * @SINCE_3_0.0
    * @return The maximum hit distance, in pixels
    */
   float GetHitThreshold() const;
@@ -544,6 +599,7 @@ public:
    *
    * The default is FindingStrategy::NEAREST.
    *
+   * @SINCE_3_0.0
    * @param[in] strategy The hit-testing strategy
    */
   void SetFindingStrategy(FindingStrategy strategy);
@@ -551,6 +607,7 @@ public:
   /**
    * @brief Retrieves how touch/hover input is matched to a data point.
    *
+   * @SINCE_3_0.0
    * @return The hit-testing strategy
    */
   FindingStrategy GetFindingStrategy() const;
@@ -560,6 +617,7 @@ public:
    *
    * The default is true.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to toggle series visibility on legend tap
    */
   void SetLegendToggleEnabled(bool enabled);
@@ -567,6 +625,7 @@ public:
   /**
    * @brief Retrieves whether tapping a legend item toggles that series' visibility.
    *
+   * @SINCE_3_0.0
    * @return True if series visibility is toggled on legend tap
    */
   bool IsLegendToggleEnabled() const;
@@ -577,6 +636,7 @@ public:
    * Pass a bitwise OR combination of ZoomMode values, cast to int. The
    * default is ZoomMode::NONE (all gestures disabled).
    *
+   * @SINCE_3_0.0
    * @param[in] zoomModeFlags The enabled gestures, as a combination of ZoomMode flags
    */
   void SetZoomMode(int zoomModeFlags);
@@ -584,6 +644,7 @@ public:
   /**
    * @brief Retrieves which zoom/pan gestures are enabled on the chart.
    *
+   * @SINCE_3_0.0
    * @return The enabled gestures, as a combination of ZoomMode flags
    */
   int GetZoomMode() const;
@@ -592,6 +653,7 @@ public:
    * @brief Resets the viewport to the full auto-ranged data extents.
    *
    * Also re-enables auto-range on both axes.
+   * @SINCE_3_0.0
    */
   void ResetZoom();
 
@@ -601,6 +663,7 @@ public:
    * When enabled, the viewport cannot pan or zoom out past the extents of the
    * series data. The default is true.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to clamp the viewport to the data range
    */
   void SetZoomClampEnabled(bool enabled);
@@ -608,6 +671,7 @@ public:
   /**
    * @brief Retrieves whether panning/zooming is clamped to the full data range.
    *
+   * @SINCE_3_0.0
    * @return True if the viewport is clamped to the data range
    */
   bool IsZoomClampEnabled() const;
@@ -617,6 +681,7 @@ public:
    *
    * The default is false.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to refit the Y range to the visible data
    */
   void SetAutoFitYOnPanEnabled(bool enabled);
@@ -624,6 +689,7 @@ public:
   /**
    * @brief Retrieves whether the Y axis range is refit to the visible data while panning/zooming on X.
    *
+   * @SINCE_3_0.0
    * @return True if the Y range is refit to the visible data
    */
   bool IsAutoFitYOnPanEnabled() const;
@@ -631,6 +697,7 @@ public:
   /**
    * @brief Adds a highlighted region to the chart.
    *
+   * @SINCE_3_0.0
    * @param[in] section The section to add
    * @see ChartSection
    */
@@ -639,29 +706,34 @@ public:
   /**
    * @brief Removes a previously added section.
    *
+   * @SINCE_3_0.0
    * @param[in] section The section to remove
    */
   void RemoveSection(ChartSection section);
 
   /**
    * @brief Removes all sections from the chart.
+   * @SINCE_3_0.0
    */
   void ClearSections();
 
   /**
    * @brief Attaches an annotation and observes its changes. Duplicate attachments are ignored.
+   * @SINCE_3_0.0
    * @param[in] annotation The initialized annotation
    */
   void AddAnnotation(ChartAnnotation annotation);
 
   /**
    * @brief Detaches an annotation.
+   * @SINCE_3_0.0
    * @param[in] annotation The annotation
    */
   void RemoveAnnotation(ChartAnnotation annotation);
 
   /**
    * @brief Detaches all annotations.
+   * @SINCE_3_0.0
    */
   void ClearAnnotations();
 
@@ -670,17 +742,20 @@ public:
    *
    * Pass an uninitialized View to restore the built-in tooltip. The content is
    * measured after TooltipUpdatedSignal so handlers can update its labels.
+   * @SINCE_3_0.0
    * @param[in] content The tooltip view
    */
   void SetTooltipContent(View content);
 
   /**
    * @brief Emitted before measuring tooltip content for the currently selected points.
+   * @SINCE_3_0.0
    */
   using TooltipUpdatedSignalType = Signal<void(ChartView, const Dali::Vector<ChartPointEventArgs>&)>;
 
   /**
    * @brief Returns the tooltip update signal.
+   * @SINCE_3_0.0
    * @return The signal
    */
   TooltipUpdatedSignalType& TooltipUpdatedSignal();
@@ -691,11 +766,13 @@ public:
    * This event is delivered outside layout traversal, after the final animated
    * update when applicable. It does not indicate GPU presentation completion.
    * Changes made by a handler schedule a subsequent update.
+   * @SINCE_3_0.0
    */
   using ContentUpdatedSignalType = Signal<void(ChartView)>;
 
   /**
    * @brief Returns the content update signal.
+   * @SINCE_3_0.0
    * @return The signal
    */
   ContentUpdatedSignalType& ContentUpdatedSignal();
@@ -711,6 +788,7 @@ public:
    * Emitted only while FindingStrategy is NEAREST, or for a pie/donut slice tap.
    * The first argument is the chart that emitted the signal.
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to
    */
   DataPointSelectedSignalType& DataPointSelectedSignal();
@@ -722,6 +800,7 @@ public:
    * the index of the tapped series; the third is the series' new visibility
    * state.
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to
    */
   LegendItemTappedSignalType& LegendItemTappedSignal();
@@ -732,6 +811,7 @@ public:
    * Emitted only while FindingStrategy is SAME_X or SAME_X_NEAREST_Y. The
    * first argument is the chart that emitted the signal.
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to
    */
   MultiPointSelectedSignalType& MultiPointSelectedSignal();
@@ -744,6 +824,7 @@ public:
    * value, Bounds::y is the minimum Y value, and Bounds::Right()/Bounds::Bottom()
    * give the maximum X/Y values.
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to
    */
   ZoomedSignalType& ZoomedSignal();
@@ -754,6 +835,7 @@ public:
    * Not clamped to [GetGaugeMinimumValue(), GetGaugeMaximumValue()] by this call; the
    * progress arc rendering clamps it. The default is 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] value The current gauge value
    */
   void SetGaugeValue(float value);
@@ -761,6 +843,7 @@ public:
   /**
    * @brief Retrieves the current value shown by a GAUGE chart.
    *
+   * @SINCE_3_0.0
    * @return The current gauge value
    */
   float GetGaugeValue() const;
@@ -770,6 +853,7 @@ public:
    *
    * The default is 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] value The minimum gauge value
    */
   void SetGaugeMinimumValue(float value);
@@ -777,6 +861,7 @@ public:
   /**
    * @brief Retrieves the value at the start of a GAUGE chart's arc.
    *
+   * @SINCE_3_0.0
    * @return The minimum gauge value
    */
   float GetGaugeMinimumValue() const;
@@ -786,6 +871,7 @@ public:
    *
    * The default is 100.0.
    *
+   * @SINCE_3_0.0
    * @param[in] value The maximum gauge value
    */
   void SetGaugeMaximumValue(float value);
@@ -793,6 +879,7 @@ public:
   /**
    * @brief Retrieves the value at the end of a GAUGE chart's arc.
    *
+   * @SINCE_3_0.0
    * @return The maximum gauge value
    */
   float GetGaugeMaximumValue() const;
@@ -802,6 +889,7 @@ public:
    *
    * Clamped to (0.1, 360]. The default is 270.0.
    *
+   * @SINCE_3_0.0
    * @param[in] degrees The arc span, in degrees
    */
   void SetGaugeArcSpan(float degrees);
@@ -809,6 +897,7 @@ public:
   /**
    * @brief Retrieves the angular span of a GAUGE chart's arc.
    *
+   * @SINCE_3_0.0
    * @return The arc span, in degrees
    */
   float GetGaugeArcSpan() const;
@@ -818,6 +907,7 @@ public:
    *
    * 0 degrees points right, increasing clockwise. The default is 135.0.
    *
+   * @SINCE_3_0.0
    * @param[in] degrees The starting angle, in degrees
    */
   void SetGaugeStartAngle(float degrees);
@@ -825,6 +915,7 @@ public:
   /**
    * @brief Retrieves the starting angle of a GAUGE chart's arc.
    *
+   * @SINCE_3_0.0
    * @return The starting angle, in degrees
    */
   float GetGaugeStartAngle() const;
@@ -834,6 +925,7 @@ public:
    *
    * Clamped to [0.01, 0.5]. The default is 0.18.
    *
+   * @SINCE_3_0.0
    * @param[in] ratio The arc thickness, as a fraction of the outer radius
    */
   void SetGaugeArcWidth(float ratio);
@@ -841,6 +933,7 @@ public:
   /**
    * @brief Retrieves the thickness of a GAUGE chart's arc, as a fraction of its outer radius.
    *
+   * @SINCE_3_0.0
    * @return The arc thickness, as a fraction of the outer radius
    */
   float GetGaugeArcWidth() const;
@@ -850,6 +943,7 @@ public:
    *
    * The default is (0.85, 0.85, 0.85, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the background track
    */
   void SetGaugeTrackColor(const Vector4& color);
@@ -857,6 +951,7 @@ public:
   /**
    * @brief Retrieves the color of a GAUGE chart's background track.
    *
+   * @SINCE_3_0.0
    * @return The color of the background track
    */
   Vector4 GetGaugeTrackColor() const;
@@ -866,6 +961,7 @@ public:
    *
    * The default is (0.27, 0.51, 0.71, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the progress arc
    */
   void SetGaugeProgressColor(const Vector4& color);
@@ -873,6 +969,7 @@ public:
   /**
    * @brief Retrieves the color of a GAUGE chart's progress arc.
    *
+   * @SINCE_3_0.0
    * @return The color of the progress arc
    */
   Vector4 GetGaugeProgressColor() const;
@@ -883,6 +980,7 @@ public:
    * An empty label (the default) shows the current value formatted as a
    * percentage of the min/max range instead.
    *
+   * @SINCE_3_0.0
    * @param[in] text The center label text
    */
   void SetGaugeCenterLabel(const Dali::String& text);
@@ -890,6 +988,7 @@ public:
   /**
    * @brief Retrieves the text shown at the center of a GAUGE chart.
    *
+   * @SINCE_3_0.0
    * @return The center label text
    */
   Dali::String GetGaugeCenterLabel() const;
@@ -901,6 +1000,7 @@ public:
    * when drawn. Zones are drawn in the order they were added, so a later zone
    * overlaps an earlier one where their ranges intersect.
    *
+   * @SINCE_3_0.0
    * @param[in] fromValue The start of the zone, in gauge value units
    * @param[in] toValue The end of the zone, in gauge value units
    * @param[in] color The color of the zone
@@ -909,6 +1009,7 @@ public:
 
   /**
    * @brief Removes all colored zones added with AddGaugeRange().
+   * @SINCE_3_0.0
    */
   void ClearGaugeRanges();
 

@@ -31,53 +31,63 @@ class WebCookieManagerImpl;
 
 /**
  * @brief Manages cookies belonging to a WebProfile.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API WebCookieManager : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized WebCookieManager handle.
+   * @SINCE_3_0.0
    */
   WebCookieManager();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~WebCookieManager();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   WebCookieManager(const WebCookieManager& manager);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   WebCookieManager(WebCookieManager&& manager) noexcept;
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   WebCookieManager& operator=(const WebCookieManager& manager);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   WebCookieManager& operator=(WebCookieManager&& manager) noexcept;
 
   /**
    * @brief Compares the underlying cookie store identity.
+   * @SINCE_3_0.0
    */
   bool operator==(const WebCookieManager& rhs) const;
 
   /**
    * @brief Compares the underlying cookie store identity.
+   * @SINCE_3_0.0
    */
   bool operator!=(const WebCookieManager& rhs) const;
 
   /**
    * @brief Downcasts a handle to WebCookieManager.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized WebCookieManager on success, otherwise an empty handle
    */
@@ -88,6 +98,7 @@ public:
    *
    * This method does nothing when the web engine does not provide a cookie
    * manager.
+   * @SINCE_3_0.0
    */
   void ClearAllCookies();
 

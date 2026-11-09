@@ -40,6 +40,7 @@ class UiConfigImpl;
  * the foundation configuration, so applications should apply only this config
  * and should not apply a separate Dali::Ui::UiConfig as well. Applications may
  * call StyleSheet() before Apply() to override individual style entries.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API UiConfig : public Dali::Ui::UiConfig
 {
@@ -47,12 +48,14 @@ public:
   /**
    * @brief Creates an initialized components UiConfig.
    *
+   * @SINCE_3_0.0
    * @return A components UiConfig
    */
   static UiConfig New();
 
   /**
    * @brief Creates an uninitialized UiConfig handle.
+   * @SINCE_3_0.0
    */
   UiConfig() = default;
 

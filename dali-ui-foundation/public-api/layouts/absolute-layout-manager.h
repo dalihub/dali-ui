@@ -31,6 +31,7 @@ namespace Ui
  *
  * AbsoluteLayoutManager arranges each child at an explicit position and
  * size described by its AbsoluteLayoutParams.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API AbsoluteLayoutManager : public LayoutManager
 {

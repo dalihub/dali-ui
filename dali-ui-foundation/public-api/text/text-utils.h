@@ -44,6 +44,7 @@ namespace Text
  * Invalid or truncated UTF-8 is handled defensively without asserting. This
  * helper is intended for range calculation and is not a UTF-8 validator.
  *
+ * @SINCE_3_0.0
  * @param[in] utf8Text The UTF-8 text view
  * @return The decoded UTF-32 length
  */
@@ -55,6 +56,7 @@ DALI_UI_API uint32_t Utf8ToUtf32Length(Dali::StringView utf8Text);
  * The UTF-8 index is a byte offset in utf8Text. The UTF-32 index is an index
  * in the decoded UTF-32 sequence.
  *
+ * @SINCE_3_0.0
  * @param[in] utf8Text The UTF-8 text view
  * @param[in] utf8Index The UTF-8 byte offset to convert
  * @param[out] utf32Index The converted UTF-32 index
@@ -76,6 +78,7 @@ DALI_UI_API bool Utf8ToUtf32Index(
  *
  * The converted output range can be passed to StyledTextBuilder::SetSpan().
  *
+ * @SINCE_3_0.0
  * @param[in] utf8Text The UTF-8 text view
  * @param[in] utf8StartIndex The inclusive UTF-8 byte start offset
  * @param[in] utf8EndIndex The exclusive UTF-8 byte end offset
@@ -98,6 +101,7 @@ DALI_UI_API bool Utf8ToUtf32Range(
  * The UTF-32 index is an index in the decoded UTF-32 sequence of utf8Text.
  * The UTF-8 index is a byte offset in utf8Text.
  *
+ * @SINCE_3_0.0
  * @param[in] utf8Text The UTF-8 text view
  * @param[in] utf32Index The UTF-32 index to convert
  * @param[out] utf8Index The converted UTF-8 byte offset
@@ -116,6 +120,7 @@ DALI_UI_API bool Utf32ToUtf8Index(
  * sequence. The output range is [utf8StartIndex, utf8EndIndex) in UTF-8 byte
  * offsets.
  *
+ * @SINCE_3_0.0
  * @param[in] utf8Text The UTF-8 text view
  * @param[in] utf32StartIndex The inclusive UTF-32 start index
  * @param[in] utf32EndIndex The exclusive UTF-32 end index

@@ -48,6 +48,7 @@ class LayoutTransitionImpl;
  * callback should set the view's animatable properties from
  * @c ctx.GetFromBounds() / @c ctx.GetToBounds() and @c ctx.GetProgress().
  *
+ * @SINCE_3_0.0
  * @warning Do NOT capture the target View by value inside the callback
  * closure. The dispatcher holds a strong reference to the LayoutTransition
  * (which owns the callback), and the View holds a strong reference to the
@@ -74,6 +75,7 @@ using LayoutAnimatorCallback = Callback<void(const LayoutAnimatorContext&)>;
  *
  * Fired on the event thread; safe to mutate the view tree from inside.
  *
+ * @SINCE_3_0.0
  * @warning As with @c LayoutAnimatorCallback, do not capture the View by
  * value inside the closure (cycle risk). Use @c WeakHandle<View>.
  *
@@ -154,6 +156,7 @@ using LayoutLifecycleCallback = Callback<void(View, LayoutTransitionSlot)>;
  * @c SetChangeOnWindowResize(false) skips window-resize CHANGE even if a
  * CHANGE animator is set.
  *
+ * @SINCE_3_0.0
  * @note A LayoutTransition handle is reference-counted and may be attached
  * to multiple Views simultaneously; each View runs its own per-pass state
  * but shares the spec/animator/timing configuration. Modifying the handle
@@ -209,12 +212,14 @@ class DALI_UI_API LayoutTransition : public BaseHandle
 public:
   /**
    * @brief Creates an uninitialized handle.
+   * @SINCE_3_0.0
    */
   LayoutTransition();
 
   /**
    * @brief Creates an initialized LayoutTransition with default-constructed slots.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated LayoutTransition
    */
   static LayoutTransition New();
@@ -228,6 +233,7 @@ public:
   /**
    * @brief Downcasts a handle to LayoutTransition.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a LayoutTransition or an uninitialized handle
    */
@@ -247,6 +253,7 @@ public:
   /**
    * @brief Sets the ENTER slot visual property animation spec.
    *
+   * @SINCE_3_0.0
    * @param[in] spec Declarative visual property animation spec
    *                 (POSITION/SIZE entries are rejected)
    * @return Reference to this for chaining
@@ -256,6 +263,7 @@ public:
   /**
    * @brief Sets the EXIT slot visual property animation spec.
    *
+   * @SINCE_3_0.0
    * @param[in] spec Declarative visual property animation spec
    *                 (POSITION/SIZE entries are rejected)
    * @return Reference to this for chaining
@@ -264,12 +272,14 @@ public:
 
   /**
    * @brief Clears the ENTER slot visual property animation spec.
+   * @SINCE_3_0.0
    * @return Reference to this for chaining
    */
   LayoutTransition& ClearEnterVisualSpec();
 
   /**
    * @brief Clears the EXIT slot visual property animation spec.
+   * @SINCE_3_0.0
    * @return Reference to this for chaining
    */
   LayoutTransition& ClearExitVisualSpec();
@@ -288,6 +298,7 @@ public:
   /**
    * @brief Sets the ENTER slot bounds effect.
    *
+   * @SINCE_3_0.0
    * @param[in] effect Bounds-effect descriptor (translation, scale, anchor,
    *                   clip mode, timing). Invalid alpha / size factor /
    *                   anchor values are rejected with @c DALI_ABORT.
@@ -298,6 +309,7 @@ public:
   /**
    * @brief Sets the EXIT slot bounds effect.
    *
+   * @SINCE_3_0.0
    * @param[in] effect Bounds-effect descriptor
    * @return Reference to this for chaining
    */
@@ -305,12 +317,14 @@ public:
 
   /**
    * @brief Clears the ENTER slot bounds effect.
+   * @SINCE_3_0.0
    * @return Reference to this for chaining
    */
   LayoutTransition& ClearEnterBoundsEffect();
 
   /**
    * @brief Clears the EXIT slot bounds effect.
+   * @SINCE_3_0.0
    * @return Reference to this for chaining
    */
   LayoutTransition& ClearExitBoundsEffect();
@@ -340,6 +354,7 @@ public:
   /**
    * @brief Sets the default CHANGE slot timing and enables it.
    *
+   * @SINCE_3_0.0
    * @param[in] timing Timing parameters
    * @return Reference to this for chaining
    */
@@ -351,6 +366,7 @@ public:
    * Overrides default CHANGE timing for the specific cause. Cause-specific
    * timing is active independent of the default's enabled state.
    *
+   * @SINCE_3_0.0
    * @param[in] cause  CHANGE cause to override
    * @param[in] timing Timing parameters
    * @return Reference to this for chaining
@@ -364,6 +380,7 @@ public:
    * After this call, CHANGE causes without a cause-specific timing are
    * not animated. Cause-specific timings remain active.
    *
+   * @SINCE_3_0.0
    * @note The stored default timing value is preserved; subsequent
    * @c SetChangeTiming() call re-enables with the new value.
    *
@@ -374,6 +391,7 @@ public:
   /**
    * @brief Clears a cause-specific CHANGE slot timing override.
    *
+   * @SINCE_3_0.0
    * @param[in] cause CHANGE cause whose override is cleared
    * @return Reference to this for chaining
    */
@@ -389,6 +407,7 @@ public:
 
   /**
    * @brief Sets the ENTER slot animator callback and its progress timing.
+   * @SINCE_3_0.0
    * @param[in] callback Animator callback (ownership transferred)
    * @param[in] timing   Progress driver timing
    * @return Reference to this for chaining
@@ -397,6 +416,7 @@ public:
 
   /**
    * @brief Sets the EXIT slot animator callback and its progress timing.
+   * @SINCE_3_0.0
    * @param[in] callback Animator callback (ownership transferred)
    * @param[in] timing   Progress driver timing
    * @return Reference to this for chaining
@@ -405,6 +425,7 @@ public:
 
   /**
    * @brief Sets the CHANGE slot animator callback and its progress timing.
+   * @SINCE_3_0.0
    * @param[in] callback Animator callback (ownership transferred)
    * @param[in] timing   Progress driver timing
    * @return Reference to this for chaining
@@ -413,18 +434,21 @@ public:
 
   /**
    * @brief Clears the ENTER slot animator callback.
+   * @SINCE_3_0.0
    * @return Reference to this for chaining
    */
   LayoutTransition& ClearEnterAnimator();
 
   /**
    * @brief Clears the EXIT slot animator callback.
+   * @SINCE_3_0.0
    * @return Reference to this for chaining
    */
   LayoutTransition& ClearExitAnimator();
 
   /**
    * @brief Clears the CHANGE slot animator callback.
+   * @SINCE_3_0.0
    * @return Reference to this for chaining
    */
   LayoutTransition& ClearChangeAnimator();
@@ -440,6 +464,7 @@ public:
    * Default is @c false: window resize updates bounds without animation
    * to avoid mass-spike on rotation / window restore.
    *
+   * @SINCE_3_0.0
    * @note This option takes precedence over a CHANGE animator. If set to
    * @c false, window-resize CHANGE is skipped even when a CHANGE animator
    * is configured (the slot opt-out is the user's explicit intent that
@@ -472,6 +497,7 @@ public:
    * animation and accepts that the effect may be partially or fully
    * elapsed by the time the surface becomes visible.
    *
+   * @SINCE_3_0.0
    * @param[in] enable @c true to fire ENTER on initial mount
    * @return Reference to this for chaining
    */
@@ -489,6 +515,7 @@ public:
    * every intermediate container. A descendant that has its own transition
    * stops the scope at that boundary (it governs its own children).
    *
+   * @SINCE_3_0.0
    * @note Applies to CHANGE, and to ENTER / EXIT when the owner carries the
    * corresponding slot effect: a child added under a no-transition descendant
    * fires the owner's ENTER, and a child removed via
@@ -518,6 +545,7 @@ public:
 
   /**
    * @brief Sets a callback fired when a per-(view, slot) transition starts.
+   * @SINCE_3_0.0
    * @param[in] callback Lifecycle callback (ownership transferred)
    * @return Reference to this for chaining
    */
@@ -527,6 +555,7 @@ public:
    * @brief Sets a callback fired when a per-(view, slot) transition reaches
    * normal completion (configured timing fully elapsed).
    *
+   * @SINCE_3_0.0
    * @note Cancelled transitions DROP the in-flight callback silently —
    * @c OnFinished is NOT fired for any of these cancellation paths:
    *   - Re-add of the same child to a different parent (reparent).

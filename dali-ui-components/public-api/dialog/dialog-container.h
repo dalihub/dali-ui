@@ -57,6 +57,7 @@ class DialogContainerImpl;
  * reparent or remove a posted Dialog or its internal container. After a manual
  * container is removed from Navigator, clear its content before posting that
  * Dialog; after a managed presentation, wait for Dialog::HiddenSignal.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API DialogContainer : public View
 {
@@ -64,7 +65,10 @@ public:
   DialogContainer();
   static DialogContainer New();
 
-  /** @brief Creates a DialogContainer with the specified immutable style. Empty styles are not allowed. */
+  /**
+   * @brief Creates a DialogContainer with the specified immutable style. Empty styles are not allowed.
+   * @SINCE_3_0.0
+   */
   static DialogContainer New(DialogContainerStyle style);
   DialogContainer(const DialogContainer& dialogContainer);
   DialogContainer(DialogContainer&& rhs) noexcept;
@@ -82,6 +86,7 @@ public: // Content
    *
    * The content's position and size follow its own layout parameters; set
    * AbsoluteLayoutParams with POSITION_PROPORTIONAL to center it.
+   * @SINCE_3_0.0
    * @note Enables accessibility modality while held and restores the original explicit value on removal, transfer, or container destruction.
    * The role is unchanged. Setting the same handle again has no effect.
    * If called again from a synchronous scene callback on the content, the latest request takes precedence.
@@ -94,12 +99,14 @@ public: // Content
 
   /**
    * @brief Gets the modal content.
+   * @SINCE_3_0.0
    * @return The modal content, or an empty handle if none is set
    */
   View GetModalContent() const;
 
   /**
    * @brief Replaces the built-in scrim with a custom view.
+   * @SINCE_3_0.0
    * @note Use this on an application-owned container, not the internal container
    * of a posted Dialog. The supplied view's color and effects are preserved;
    * its requested size is set to fill the container. Clicks are forwarded to
@@ -110,6 +117,7 @@ public: // Content
 
   /**
    * @brief Gets the scrim view.
+   * @SINCE_3_0.0
    * @return The scrim view
    */
   View GetScrim() const;
@@ -119,6 +127,7 @@ public: // Signals
 
   /**
    * @brief Emitted when the scrim is tapped (used for tap-to-dismiss).
+   * @SINCE_3_0.0
    * @return The signal to connect to
    */
   ScrimClickedSignalType& ScrimClickedSignal();

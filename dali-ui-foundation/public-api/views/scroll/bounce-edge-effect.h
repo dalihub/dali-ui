@@ -56,6 +56,7 @@ class BounceEdgeEffectImpl;
  *       .SetPullResistance(0.3f)
  *       .SetBounceDuration(0.4f);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API BounceEdgeEffect : public EdgeEffect
 {
@@ -70,6 +71,7 @@ public:
   /**
    * @brief Creates an initialized BounceEdgeEffect.
    *
+   * @SINCE_3_0.0
    * @param[in] axis The scroll axis this effect operates on.
    */
   static BounceEdgeEffect New(ScrollDirection axis = ScrollDirection::Vertical);
@@ -77,6 +79,7 @@ public:
   /**
    * @brief Downcasts an EdgeEffect handle to BounceEdgeEffect.
    *
+   * @SINCE_3_0.0
    * @return A valid BounceEdgeEffect if the underlying impl is BounceEdgeEffectImpl,
    *         otherwise an uninitialized handle.
    */
@@ -84,6 +87,7 @@ public:
 
   /**
    * @brief Returns the axis this effect operates on.
+   * @SINCE_3_0.0
    */
   ScrollDirection GetAxis() const;
 
@@ -93,24 +97,28 @@ public:
    * A value of 1.0 moves the content 1:1 with the finger.
    * Lower values (< 1.0) create the rubber-band feel. Default: 0.4.
    *
+   * @SINCE_3_0.0
    * @param[in] resistance Factor in [0.0, 1.0].
    */
   BounceEdgeEffect& SetPullResistance(float resistance);
 
   /**
    * @brief Gets the pull resistance factor.
+   * @SINCE_3_0.0
    */
   float GetPullResistance() const;
 
   /**
    * @brief Sets the duration of the spring-back animation.
    *
+   * @SINCE_3_0.0
    * @param[in] durationSec Duration in seconds. Default: 0.35.
    */
   BounceEdgeEffect& SetBounceDuration(float durationSec);
 
   /**
    * @brief Gets the duration of the spring-back animation (seconds).
+   * @SINCE_3_0.0
    */
   float GetBounceDuration() const;
 

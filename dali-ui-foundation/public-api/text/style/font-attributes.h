@@ -39,12 +39,14 @@ namespace Text
  * complete default font style. Only attributes explicitly set with SetXXX()
  * are applied by FontSpan. Use Has() to distinguish an explicitly set value
  * from a stored value that simply looks empty or default.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API FontAttributes
 {
 public:
   /**
    * @brief Font attribute identifiers used by Has() and Unset().
+   * @SINCE_3_0.0
    */
   enum class Attribute : uint32_t
   {
@@ -58,12 +60,14 @@ public:
 public:
   /**
    * @brief Creates an empty font override set.
+   * @SINCE_3_0.0
    */
   FontAttributes();
 
   /**
    * @brief Creates a copy of another font override set.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font attributes to copy
    */
   FontAttributes(const FontAttributes& rhs);
@@ -71,6 +75,7 @@ public:
   /**
    * @brief Creates font attributes by moving another font override set.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font attributes to move
    */
   FontAttributes(FontAttributes&& rhs) noexcept;
@@ -78,6 +83,7 @@ public:
   /**
    * @brief Copies another font override set to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font attributes to copy
    * @return This object
    */
@@ -86,6 +92,7 @@ public:
   /**
    * @brief Moves another font override set to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font attributes to move
    * @return This object
    */
@@ -93,6 +100,7 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~FontAttributes();
 
@@ -102,6 +110,7 @@ public:
    * Passing an empty string still defines the FAMILY attribute. Use Unset() to
    * remove the override.
    *
+   * @SINCE_3_0.0
    * @param[in] family The font family name
    */
   void SetFamily(const Dali::String& family);
@@ -112,6 +121,7 @@ public:
    * Use Has(Attribute::FAMILY) to check whether this value is applied as an
    * override.
    *
+   * @SINCE_3_0.0
    * @return The stored font family value
    */
   Dali::String GetFamily() const;
@@ -119,6 +129,7 @@ public:
   /**
    * @brief Sets an explicit font size override in pixels.
    *
+   * @SINCE_3_0.0
    * @param[in] size The font size in pixels
    */
   void SetSize(float size);
@@ -129,6 +140,7 @@ public:
    * Use Has(Attribute::SIZE) to check whether this value is applied as an
    * override.
    *
+   * @SINCE_3_0.0
    * @return The stored font size value
    */
   float GetSize() const;
@@ -136,6 +148,7 @@ public:
   /**
    * @brief Sets an explicit font weight override.
    *
+   * @SINCE_3_0.0
    * @param[in] weight The font weight
    */
   void SetWeight(FontWeight weight);
@@ -143,6 +156,7 @@ public:
   /**
    * @brief Gets the stored font weight value.
    *
+   * @SINCE_3_0.0
    * @return The stored font weight value
    */
   FontWeight GetWeight() const;
@@ -150,6 +164,7 @@ public:
   /**
    * @brief Sets an explicit font width override.
    *
+   * @SINCE_3_0.0
    * @param[in] width The font width
    */
   void SetWidth(FontWidth width);
@@ -157,6 +172,7 @@ public:
   /**
    * @brief Gets the stored font width value.
    *
+   * @SINCE_3_0.0
    * @return The stored font width value
    */
   FontWidth GetWidth() const;
@@ -164,6 +180,7 @@ public:
   /**
    * @brief Sets an explicit font slant override.
    *
+   * @SINCE_3_0.0
    * @param[in] slant The font slant
    */
   void SetSlant(FontSlant slant);
@@ -171,6 +188,7 @@ public:
   /**
    * @brief Gets the stored font slant value.
    *
+   * @SINCE_3_0.0
    * @return The stored font slant value
    */
   FontSlant GetSlant() const;
@@ -178,6 +196,7 @@ public:
   /**
    * @brief Checks whether a specific attribute is explicitly set.
    *
+   * @SINCE_3_0.0
    * @param[in] attribute The attribute to check
    * @return true if the attribute is explicitly set
    */
@@ -189,6 +208,7 @@ public:
    * This does not inspect whether stored values look empty or default. For
    * example, SetFamily("") makes FAMILY explicitly set.
    *
+   * @SINCE_3_0.0
    * @return true if one or more attributes are explicitly set
    */
   bool HasAttributes() const;
@@ -199,6 +219,7 @@ public:
    * This does not reset the stored value to a default font value; it only
    * removes the attribute from the override set.
    *
+   * @SINCE_3_0.0
    * @param[in] attribute The attribute to unset
    */
   void Unset(Attribute attribute);
@@ -209,6 +230,7 @@ public:
    * The explicitly defined attribute set must match. Values are compared only
    * for attributes that are explicitly defined.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font attributes to compare with
    * @return true if both font override sets are equal
    */
@@ -217,6 +239,7 @@ public:
   /**
    * @brief Compares two font override sets.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font attributes to compare with
    * @return true if both font override sets are not equal
    */

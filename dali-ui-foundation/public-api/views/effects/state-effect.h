@@ -33,18 +33,21 @@ class StateEffectImpl;
 
 /**
  * @brief Base handle for effects that react to ViewState changes.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API StateEffect : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized StateEffect handle.
+   * @SINCE_3_0.0
    */
   StateEffect() = default;
 
   /**
    * @brief Downcasts a handle to StateEffect.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized StateEffect on success, otherwise empty
    */
@@ -56,6 +59,7 @@ public:
    * Use this to explicitly disable state effects on a View or to indicate that
    * no default state effect should be applied.
    *
+   * @SINCE_3_0.0
    * @return A StateEffect that does not react to state changes
    */
   static StateEffect None();
@@ -66,6 +70,7 @@ public:
    * This returns UiConfig::GetDefaultStateEffectForInteractive() from the
    * current UiConfig.
    *
+   * @SINCE_3_0.0
    * @pre UiConfig::Apply() must have been called.
    * @return The default StateEffect for interactive Views
    */
@@ -74,6 +79,7 @@ public:
   /**
    * @brief Returns whether this effect is a no-op effect created by StateEffect::None().
    *
+   * @SINCE_3_0.0
    * @return True if this effect is StateEffect::None(), otherwise false
    */
   bool IsNone() const;
@@ -82,6 +88,7 @@ protected:
   /**
    * @brief Creates a StateEffect handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit StateEffect(Integration::StateEffectImpl* impl);

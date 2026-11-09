@@ -40,11 +40,12 @@ class OverlayEffectImpl;
 
 /**
  * @brief Specifies which View receives the overlay effect recoil feedback.
+ * @SINCE_3_0.0
  */
 enum class RecoilScope
 {
-  OVERLAY_TARGET          = 0, ///< Recoil the overlay target itself
-  OVERLAY_TARGET_CHILDREN = 1, ///< Recoil the overlay target's direct children when it has one to three direct children
+  OVERLAY_TARGET          = 0, ///< Recoil the overlay target itself @SINCE_3_0.0
+  OVERLAY_TARGET_CHILDREN = 1, ///< Recoil the overlay target's direct children when it has one to three direct children @SINCE_3_0.0
 };
 
 /**
@@ -66,6 +67,7 @@ enum class RecoilScope
  * Pressed recoil captures the target scale at press time and restores that
  * captured scale when recoil is stopped or released. Application scale changes
  * made directly to the same target while recoil is active are not preserved.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API OverlayEffect : public StateEffect
 {
@@ -78,6 +80,7 @@ public:
    * Uses UiColor(0x000000, 0.1f), follows the target View corner radius, and
    * applies 0.96-scale recoil feedback to the overlay target itself.
    *
+   * @SINCE_3_0.0
    * @return A shared plain overlay effect preset
    */
   static const OverlayEffect& Plain();
@@ -87,6 +90,7 @@ public:
    *
    * Uses UiColor(0x000000, 0.1f) and relative 0.5 corner radius.
    *
+   * @SINCE_3_0.0
    * @return A shared round overlay effect preset
    */
   static const OverlayEffect& Round();
@@ -99,18 +103,21 @@ public:
    * Child recoil is skipped when the resolved overlay target has no direct
    * children or more than three direct children.
    *
+   * @SINCE_3_0.0
    * @return A shared list item overlay effect preset
    */
   static const OverlayEffect& ListItem();
 
   /**
    * @brief Creates an uninitialized OverlayEffect handle.
+   * @SINCE_3_0.0
    */
   OverlayEffect() = default;
 
   /**
    * @brief Downcasts a handle to OverlayEffect.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized OverlayEffect on success, otherwise empty
    */
@@ -119,6 +126,7 @@ public:
   /**
    * @brief Gets the overlay visual color.
    *
+   * @SINCE_3_0.0
    * @return The overlay color
    */
   UiColor GetOverlayColor() const;
@@ -129,6 +137,7 @@ public:
    * The padding affects only the overlay visual. It does not change the target
    * View's measured size, layout bounds, hit area, or recoil target.
    *
+   * @SINCE_3_0.0
    * @return The overlay padding
    */
   Insets GetOverlayPadding() const;
@@ -140,6 +149,7 @@ public:
    * fallback radius value. Use IsUsingTargetCornerRadius() to check whether
    * the target View corner radius is used at runtime.
    *
+   * @SINCE_3_0.0
    * @return The configured corner radius
    */
   Vector4 GetCornerRadius() const;
@@ -151,6 +161,7 @@ public:
    * fallback policy value. Use IsUsingTargetCornerRadius() to check whether
    * the target View corner radius policy is used at runtime.
    *
+   * @SINCE_3_0.0
    * @return The configured corner radius policy
    */
   CornerRadiusPolicy GetCornerRadiusPolicy() const;
@@ -158,6 +169,7 @@ public:
   /**
    * @brief Creates a mutable builder copied from this effect.
    *
+   * @SINCE_3_0.0
    * @return A builder object
    */
   Builder Configure() const;
@@ -165,6 +177,7 @@ public:
   /**
    * @brief Gets whether this effect follows the target View corner radius and policy.
    *
+   * @SINCE_3_0.0
    * @return True if the target View corner radius and policy are used at runtime
    */
   bool IsUsingTargetCornerRadius() const;
@@ -172,6 +185,7 @@ public:
   /**
    * @brief Gets the recoil feedback scope.
    *
+   * @SINCE_3_0.0
    * @return The recoil feedback scope
    */
   RecoilScope GetRecoilScope() const;
@@ -179,6 +193,7 @@ public:
   /**
    * @brief Gets the scale multiplier applied to each recoil target while pressed.
    *
+   * @SINCE_3_0.0
    * @return The recoil scale factor
    */
   float GetRecoilScaleFactor() const;
@@ -191,12 +206,14 @@ private:
 
 /**
  * @brief Mutable builder used to create OverlayEffect handles.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API OverlayEffect::Builder
 {
 public:
   /**
    * @brief Creates a builder with default overlay effect values.
+   * @SINCE_3_0.0
    */
   Builder();
 
@@ -211,6 +228,7 @@ public:
   /**
    * @brief Sets the overlay visual color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The overlay color
    * @return Reference to this builder
    */
@@ -219,6 +237,7 @@ public:
   /**
    * @brief Sets the overlay visual color on a temporary builder.
    *
+   * @SINCE_3_0.0
    * @param[in] color The overlay color
    * @return Rvalue reference to this builder
    */
@@ -230,6 +249,7 @@ public:
    * All values must be finite and non-negative. The default is zero on every
    * side. Start and end follow the target View's effective layout direction.
    *
+   * @SINCE_3_0.0
    * @param[in] padding The overlay padding
    * @return Reference to this builder
    */
@@ -238,6 +258,7 @@ public:
   /**
    * @brief Sets the overlay padding on a temporary builder.
    *
+   * @SINCE_3_0.0
    * @param[in] padding The overlay padding
    * @return Rvalue reference to this builder
    */
@@ -246,6 +267,7 @@ public:
   /**
    * @brief Sets a uniform explicit corner radius.
    *
+   * @SINCE_3_0.0
    * @param[in] radius The radius for all corners
    * @return Reference to this builder
    */
@@ -254,6 +276,7 @@ public:
   /**
    * @brief Sets a uniform explicit corner radius on a temporary builder.
    *
+   * @SINCE_3_0.0
    * @param[in] radius The radius for all corners
    * @return Rvalue reference to this builder
    */
@@ -262,6 +285,7 @@ public:
   /**
    * @brief Sets explicit corner radii.
    *
+   * @SINCE_3_0.0
    * @param[in] topLeft The top-left radius
    * @param[in] topRight The top-right radius
    * @param[in] bottomRight The bottom-right radius
@@ -273,6 +297,7 @@ public:
   /**
    * @brief Sets explicit corner radii on a temporary builder.
    *
+   * @SINCE_3_0.0
    * @param[in] topLeft The top-left radius
    * @param[in] topRight The top-right radius
    * @param[in] bottomRight The bottom-right radius
@@ -284,6 +309,7 @@ public:
   /**
    * @brief Sets explicit corner radii.
    *
+   * @SINCE_3_0.0
    * @param[in] radius The corner radii
    * @return Reference to this builder
    */
@@ -292,6 +318,7 @@ public:
   /**
    * @brief Sets explicit corner radii on a temporary builder.
    *
+   * @SINCE_3_0.0
    * @param[in] radius The corner radii
    * @return Rvalue reference to this builder
    */
@@ -300,6 +327,7 @@ public:
   /**
    * @brief Sets an explicit corner radius policy.
    *
+   * @SINCE_3_0.0
    * @param[in] policy The corner radius policy
    * @return Reference to this builder
    */
@@ -308,6 +336,7 @@ public:
   /**
    * @brief Sets an explicit corner radius policy on a temporary builder.
    *
+   * @SINCE_3_0.0
    * @param[in] policy The corner radius policy
    * @return Rvalue reference to this builder
    */
@@ -316,6 +345,7 @@ public:
   /**
    * @brief Sets the corner radius policy to relative.
    *
+   * @SINCE_3_0.0
    * @return Reference to this builder
    */
   Builder& SetCornerRadiusPolicyRelative() &;
@@ -323,6 +353,7 @@ public:
   /**
    * @brief Sets the corner radius policy to relative on a temporary builder.
    *
+   * @SINCE_3_0.0
    * @return Rvalue reference to this builder
    */
   Builder&& SetCornerRadiusPolicyRelative() &&;
@@ -334,6 +365,7 @@ public:
    * Call this on a temporary builder, or use std::move(builder).Build().
    * Do not use this builder after calling Build().
    *
+   * @SINCE_3_0.0
    * @return A new OverlayEffect
    */
   OverlayEffect Build() &&;
@@ -346,6 +378,7 @@ public:
    * radius and policy. SetCornerRadius() and SetCornerRadiusPolicy() disable
    * this mode because they configure explicit overlay corner values.
    *
+   * @SINCE_3_0.0
    * @param[in] useTargetCornerRadius True to follow the target View corner radius and policy
    * @return Reference to this builder
    */
@@ -359,6 +392,7 @@ public:
    * radius and policy. SetCornerRadius() and SetCornerRadiusPolicy() disable
    * this mode because they configure explicit overlay corner values.
    *
+   * @SINCE_3_0.0
    * @param[in] useTargetCornerRadius True to follow the target View corner radius and policy
    * @return Rvalue reference to this builder
    */
@@ -371,6 +405,7 @@ public:
    * target has one to three direct children. If it has no direct children or
    * more than three direct children, recoil feedback is skipped.
    *
+   * @SINCE_3_0.0
    * @param[in] scope The recoil feedback scope
    * @return Reference to this builder
    */
@@ -383,6 +418,7 @@ public:
    * target has one to three direct children. If it has no direct children or
    * more than three direct children, recoil feedback is skipped.
    *
+   * @SINCE_3_0.0
    * @param[in] scope The recoil feedback scope
    * @return Rvalue reference to this builder
    */
@@ -394,6 +430,7 @@ public:
    * The value must be finite and non-negative. A value of 1.0 keeps the
    * target at its original size.
    *
+   * @SINCE_3_0.0
    * @param[in] factor The recoil target scale multiplier
    * @return Reference to this builder
    */
@@ -402,6 +439,7 @@ public:
   /**
    * @brief Sets the recoil target scale multiplier on a temporary builder.
    *
+   * @SINCE_3_0.0
    * @param[in] factor The recoil target scale multiplier
    * @return Rvalue reference to this builder
    */

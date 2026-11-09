@@ -30,6 +30,7 @@ namespace Gradient
 {
 /**
  * The stop node tells the gradient what color it should be at certain position.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API StopNode
 {

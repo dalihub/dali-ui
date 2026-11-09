@@ -39,6 +39,7 @@ namespace Ui
  *
  * Its visual type is VisualType::BORDER. It cannot use the CornerRadius, CornerSquareness
  * or Borderline features of VisualBase.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API BorderVisual : public VisualBase
 {
@@ -46,6 +47,7 @@ public:
   /**
    * @brief Creates a BorderVisual object.
    *
+   * @SINCE_3_0.0
    * @return The newly created color visual object.
    */
   static BorderVisual New();
@@ -56,6 +58,7 @@ public:
    * If handle points to a BorderVisual, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a BorderVisual or an uninitialized handle
    */
@@ -65,6 +68,7 @@ public: // Properties
   /**
    * @brief Gets the size of border of the BorderVisual.
    *
+   * @SINCE_3_0.0
    * @return The size of border of the BorderVisual
    */
   float GetBorderSize() const;
@@ -72,6 +76,7 @@ public: // Properties
   /**
    * @brief Sets the size of border of the BorderVisual.
    *
+   * @SINCE_3_0.0
    * @param[in] borderSize The size of border to set
    */
   void SetBorderSize(float borderSize);
@@ -79,6 +84,7 @@ public: // Properties
   /**
    * @brief Gets the soft anti-aliasing enabled of the BorderVisual.
    *
+   * @SINCE_3_0.0
    * @return Whether soft anti-aliasing enabled of the BorderVisual or not
    */
   bool IsAntiAliasingEnabled() const;
@@ -86,6 +92,7 @@ public: // Properties
   /**
    * @brief Sets the soft anti-aliasing enable of the BorderVisual.
    *
+   * @SINCE_3_0.0
    * @param[in] enable True if soft anti-aliasing enabled
    */
   void SetAntiAliasingEnabled(bool enable);

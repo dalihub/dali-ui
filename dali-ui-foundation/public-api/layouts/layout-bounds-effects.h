@@ -37,6 +37,7 @@ namespace Ui
  * that the factory's geometry semantics stay easy to test and document.
  * @c VisualBoundsOf already mirrors @c x on RTL parents, so a physical
  * @c LEFT slide still appears on the visual left for an RTL layout.
+ * @SINCE_3_0.0
  */
 enum class LayoutBoundsEdge : uint8_t
 {
@@ -64,6 +65,7 @@ enum class LayoutBoundsEdge : uint8_t
  *                                     AlphaFunction(AlphaFunction::EASE_OUT),
  *                                     Duration()}));
  * @endcode
+ * @SINCE_3_0.0
  */
 namespace LayoutBoundsEffects
 {
@@ -71,6 +73,7 @@ namespace LayoutBoundsEffects
 /**
  * @brief Slide a view in from / out toward @p edge using the default
  * distance of one child width (LEFT/RIGHT) or one child height (TOP/BOTTOM).
+ * @SINCE_3_0.0
  */
 DALI_UI_API LayoutBoundsEffect SlideFrom(LayoutBoundsEdge              edge,
                                          const LayoutTransitionTiming& timing);
@@ -89,6 +92,7 @@ DALI_UI_API LayoutBoundsEffect SlideTo(LayoutBoundsEdge              edge,
  * @brief Slide using a custom distance. The @c value of @p distance is
  * treated as a signed magnitude; negative values reverse the direction
  * implied by @p edge.
+ * @SINCE_3_0.0
  */
 DALI_UI_API LayoutBoundsEffect SlideFrom(LayoutBoundsEdge              edge,
                                          LayoutBoundsLength            distance,
@@ -106,6 +110,7 @@ DALI_UI_API LayoutBoundsEffect SlideTo(LayoutBoundsEdge              edge,
  *
  * @c LEFT / @c RIGHT anchors collapse along the x-axis and animate the
  * width; @c TOP / @c BOTTOM anchors collapse along the y-axis.
+ * @SINCE_3_0.0
  */
 DALI_UI_API LayoutBoundsEffect ExpandFrom(LayoutBoundsEdge              anchor,
                                           const LayoutTransitionTiming& timing);

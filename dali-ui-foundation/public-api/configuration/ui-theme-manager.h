@@ -45,6 +45,7 @@ class UiThemeManagerImpl;
  * The ThemeLoaderInterface instance is created via UiConfigImpl::CreateThemeLoader()
  * after UiConfig::Apply(). If CreateThemeLoader() returns nullptr,
  * a built-in default loader is used.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiThemeManager : public BaseHandle
 {
@@ -61,6 +62,7 @@ public:
   /**
    * @brief Returns the singleton UiThemeManager instance.
    *
+   * @SINCE_3_0.0
    * @return A handle to the UiThemeManager singleton
    */
   static UiThemeManager Get();
@@ -68,6 +70,7 @@ public:
   /**
    * @brief Downcasts a handle to a UiThemeManager handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a UiThemeManager or an uninitialized handle
    */
@@ -76,6 +79,7 @@ public:
   /**
    * @brief Returns the identifier of the current theme.
    *
+   * @SINCE_3_0.0
    * @return The theme identifier, or an empty string if no theme is active
    */
   String GetCurrentThemeId() const;
@@ -83,6 +87,7 @@ public:
   /**
    * @brief Returns a signal that is emitted when the theme changes.
    *
+   * @SINCE_3_0.0
    * @return A reference to the theme-changed signal
    */
   ThemeChangedSignalType& ThemeChangedSignal();
@@ -91,6 +96,7 @@ public: // Not intended for application developers
   /**
    * @brief This constructor is used internally to wrap an implementation object.
    *
+   * @SINCE_3_0.0
    * @param[in] impl A pointer to the internal UiThemeManager implementation
    */
   explicit UiThemeManager(Integration::UiThemeManagerImpl* impl);

@@ -32,6 +32,7 @@ namespace Ui
  * Arranges children in a single-direction flow that may wrap onto multiple
  * lines. Per-child flex-grow, flex-shrink, flex-basis, and align-self are
  * read from FlexLayoutParams.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API FlexLayoutManager : public LayoutManager
 {

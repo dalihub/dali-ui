@@ -51,76 +51,100 @@ class WebViewImpl;
  * WebView view = WebView::New();
  * view.LoadUrl("https://www.example.com");
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API WebView : public View
 {
 public: // Callback types
   /// @brief Callback for JavaScript result or message.
+  /// @SINCE_3_0.0
   using JavaScriptCallback = Callback<void(const Dali::String&)>;
 
   /// @brief Callback for JavaScript alert dialog.
+  /// @SINCE_3_0.0
   using JavaScriptAlertCallback = Callback<bool(const Dali::String&)>;
 
   /// @brief Callback for JavaScript confirm dialog.
+  /// @SINCE_3_0.0
   using JavaScriptConfirmCallback = Callback<bool(const Dali::String&)>;
 
   /// @brief Callback for JavaScript prompt dialog.
+  /// @SINCE_3_0.0
   using JavaScriptPromptCallback = Callback<bool(const Dali::String&, const Dali::String&)>;
   /// @brief Callback for screenshot captured asynchronously.
+  /// @SINCE_3_0.0
   using ScreenshotCapturedCallback = Callback<void(Dali::Ui::ImageView)>;
 
   /// @brief Callback for plain text retrieval.
+  /// @SINCE_3_0.0
   using PlainTextCallback = Callback<void(const Dali::String&)>;
 
   /// @brief Callback for video playing status check.
+  /// @SINCE_3_0.0
   using VideoPlayingCallback = Callback<void(bool)>;
 
 public: // Signal types
   /// @brief Signal type for page load started events.
+  /// @SINCE_3_0.0
   using PageLoadStartedSignalType = Signal<void(WebView, const Dali::String&)>;
 
   /// @brief Signal type for page load in progress events.
+  /// @SINCE_3_0.0
   using PageLoadInProgressSignalType = Signal<void(WebView, const Dali::String&)>;
 
   /// @brief Signal type for page load finished events.
+  /// @SINCE_3_0.0
   using PageLoadFinishedSignalType = Signal<void(WebView, const Dali::String&)>;
   /// @brief Signal type for page load error events.
+  /// @SINCE_3_0.0
   using PageLoadErrorSignalType = Signal<void(WebView, const WebViewPageLoadError&)>;
   /// @brief Signal type for URL changes.
+  /// @SINCE_3_0.0
   using UrlChangedSignalType = Signal<void(WebView, const Dali::String&)>;
   /// @brief Signal type for frame rendered events.
+  /// @SINCE_3_0.0
   using FrameRenderedSignalType = Signal<void(WebView)>;
   /// @brief Signal type for scroll edge reached events.
+  /// @SINCE_3_0.0
   using ScrollEdgeReachedSignalType = Signal<void(WebView, WebViewScrollEdge)>;
 
   /// @brief Signal type for over-scroll events.
+  /// @SINCE_3_0.0
   using OverScrolledSignalType = Signal<void(WebView, WebViewOverScrolled)>;
   /// @brief Signal type for fullscreen enter events.
+  /// @SINCE_3_0.0
   using FullscreenEnteredSignalType = Signal<void(WebView)>;
 
   /// @brief Signal type for fullscreen exit events.
+  /// @SINCE_3_0.0
   using FullscreenExitedSignalType = Signal<void(WebView)>;
   /// @brief Signal type for text search results.
+  /// @SINCE_3_0.0
   using TextFoundSignalType = Signal<void(WebView, uint32_t)>;
   /// @brief Signal type for geolocation permission requests.
+  /// @SINCE_3_0.0
   using GeolocationPermissionSignalType = Signal<bool(WebView, const Dali::String&, const Dali::String&)>;
   /// @brief Signal type for web process crash events.
+  /// @SINCE_3_0.0
   using WebProcessCrashedSignalType = Signal<void(WebView)>;
 
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized WebView handle.
+   * @SINCE_3_0.0
    */
   WebView();
 
   /**
    * @brief Creates an initialized WebView.
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource
    */
   static WebView New();
 
   /**
    * @brief Creates an initialized WebView and immediately loads the given URL.
+   * @SINCE_3_0.0
    * @param[in] url The URL to load
    * @return A handle to a newly allocated Dali resource
    */
@@ -135,6 +159,7 @@ public: // Creation & Destruction
    * @deprecated Passing engine startup arguments during WebView creation is deprecated
    * because it couples engine configuration to view creation.
    *
+   * @SINCE_3_0.0
    * @note In the Chromium backend, engine command-line arguments are process-wide.
    * Only the first argument-setting call is applied; later calls do not reconfigure
    * the engine. This overload does not provide independent per-view engine arguments.
@@ -147,27 +172,32 @@ public: // Creation & Destruction
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~WebView();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   WebView(const WebView& webView);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   WebView(WebView&& rhs) noexcept;
 
 public: // Operators
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   WebView& operator=(const WebView& webView);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   WebView& operator=(WebView&& rhs) noexcept;
 
@@ -176,6 +206,7 @@ public: // Operators
 public: // Static Methods
   /**
    * @brief Downcasts a handle to WebView.
+   * @SINCE_3_0.0
    */
   static WebView DownCast(BaseHandle handle);
 
@@ -183,6 +214,7 @@ public: // Setters & actions
   /**
    * @brief Sets the user agent string.
    *
+   * @SINCE_3_0.0
    * @param[in] userAgent The user agent string
    */
   void SetUserAgent(const Dali::String& userAgent);
@@ -190,6 +222,7 @@ public: // Setters & actions
   /**
    * @brief Loads the specified URL.
    *
+   * @SINCE_3_0.0
    * @param[in] url The URL to load
    */
   void LoadUrl(const Dali::String& url);
@@ -197,6 +230,7 @@ public: // Setters & actions
   /**
    * @brief Loads the specified HTML string.
    *
+   * @SINCE_3_0.0
    * @param[in] htmlString The HTML string to load
    */
   void LoadHtmlString(const Dali::String& htmlString);
@@ -204,48 +238,56 @@ public: // Setters & actions
   /**
    * @brief Reloads the current page.
    *
+   * @SINCE_3_0.0
    */
   void Reload();
 
   /**
    * @brief Stops loading the current page.
    *
+   * @SINCE_3_0.0
    */
   void StopLoading();
 
   /**
    * @brief Suspends the web view.
    *
+   * @SINCE_3_0.0
    */
   void Suspend();
 
   /**
    * @brief Resumes the web view.
    *
+   * @SINCE_3_0.0
    */
   void Resume();
 
   /**
    * @brief Navigates forward in history.
    *
+   * @SINCE_3_0.0
    */
   void GoForward();
 
   /**
    * @brief Navigates backward in history.
    *
+   * @SINCE_3_0.0
    */
   void GoBack();
 
   /**
    * @brief Clears the navigation history.
    *
+   * @SINCE_3_0.0
    */
   void ClearHistory();
 
   /**
    * @brief Sets the page zoom factor.
    *
+   * @SINCE_3_0.0
    * @param[in] zoomFactor The zoom factor
    */
   void SetPageZoomFactor(float zoomFactor);
@@ -253,6 +295,7 @@ public: // Setters & actions
   /**
    * @brief Sets the text zoom factor.
    *
+   * @SINCE_3_0.0
    * @param[in] zoomFactor The zoom factor
    */
   void SetTextZoomFactor(float zoomFactor);
@@ -260,6 +303,7 @@ public: // Setters & actions
   /**
    * @brief Sets whether mouse events are enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable mouse events
    */
   void SetMouseEventsEnabled(bool enabled);
@@ -267,6 +311,7 @@ public: // Setters & actions
   /**
    * @brief Sets whether key events are enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable key events
    */
   void SetKeyEventsEnabled(bool enabled);
@@ -274,6 +319,7 @@ public: // Setters & actions
   /**
    * @brief Sets whether video hole is enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable video hole
    */
   void SetVideoHoleEnabled(bool enabled);
@@ -281,6 +327,7 @@ public: // Setters & actions
   /**
    * @brief Sets the document background color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The background color
    */
   void SetDocumentBackgroundColor(const Dali::Vector4& color);
@@ -290,6 +337,7 @@ public: // Setters & actions
    *
    * @deprecated This API is deprecated.
    *
+   * @SINCE_3_0.0
    * @param[in] cleared True to clear tiles when hidden
    */
   void SetTilesClearedWhenHidden(bool cleared);
@@ -299,6 +347,7 @@ public: // Setters & actions
    *
    * @deprecated This API is deprecated.
    *
+   * @SINCE_3_0.0
    * @param[in] multiplier The multiplier value
    */
   void SetTileCoverAreaMultiplier(float multiplier);
@@ -306,6 +355,7 @@ public: // Setters & actions
   /**
    * @brief Sets whether cursor is enabled by client.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable cursor by client
    */
   void SetCursorEnabledByClient(bool enabled);
@@ -314,6 +364,7 @@ public: // Getters
   /**
    * @brief Gets the current URL.
    *
+   * @SINCE_3_0.0
    * @return The current URL
    */
   Dali::String GetUrl() const;
@@ -321,6 +372,7 @@ public: // Getters
   /**
    * @brief Gets the user agent string.
    *
+   * @SINCE_3_0.0
    * @return The user agent string
    */
   Dali::String GetUserAgent() const;
@@ -328,6 +380,7 @@ public: // Getters
   /**
    * @brief Gets the scroll position.
    *
+   * @SINCE_3_0.0
    * @return The current scroll position
    */
   Dali::Vector2 GetScrollPosition() const;
@@ -335,6 +388,7 @@ public: // Getters
   /**
    * @brief Gets the scroll size.
    *
+   * @SINCE_3_0.0
    * @return The scroll size
    */
   Dali::Vector2 GetScrollSize() const;
@@ -342,6 +396,7 @@ public: // Getters
   /**
    * @brief Gets the content size.
    *
+   * @SINCE_3_0.0
    * @return The content size
    */
   Dali::Vector2 GetContentSize() const;
@@ -349,6 +404,7 @@ public: // Getters
   /**
    * @brief Gets the page title.
    *
+   * @SINCE_3_0.0
    * @return The page title
    */
   Dali::String GetTitle() const;
@@ -356,6 +412,7 @@ public: // Getters
   /**
    * @brief Gets the load progress percentage.
    *
+   * @SINCE_3_0.0
    * @return The load progress percentage (0.0 - 100.0)
    */
   float GetLoadProgressPercentage() const;
@@ -363,6 +420,7 @@ public: // Getters
   /**
    * @brief Gets the page zoom factor.
    *
+   * @SINCE_3_0.0
    * @return The page zoom factor
    */
   float GetPageZoomFactor() const;
@@ -370,6 +428,7 @@ public: // Getters
   /**
    * @brief Gets the text zoom factor.
    *
+   * @SINCE_3_0.0
    * @return The text zoom factor
    */
   float GetTextZoomFactor() const;
@@ -377,6 +436,7 @@ public: // Getters
   /**
    * @brief Gets whether mouse events are enabled.
    *
+   * @SINCE_3_0.0
    * @return True if mouse events are enabled
    */
   bool IsMouseEventsEnabled() const;
@@ -384,6 +444,7 @@ public: // Getters
   /**
    * @brief Gets whether key events are enabled.
    *
+   * @SINCE_3_0.0
    * @return True if key events are enabled
    */
   bool IsKeyEventsEnabled() const;
@@ -391,6 +452,7 @@ public: // Getters
   /**
    * @brief Gets whether video hole is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if video hole is enabled
    */
   bool IsVideoHoleEnabled() const;
@@ -398,6 +460,7 @@ public: // Getters
   /**
    * @brief Gets the currently selected text.
    *
+   * @SINCE_3_0.0
    * @return The selected text
    */
   Dali::String GetSelectedText() const;
@@ -405,6 +468,7 @@ public: // Getters
   /**
    * @brief Gets the scale factor.
    *
+   * @SINCE_3_0.0
    * @return The scale factor
    */
   float GetScaleFactor() const;
@@ -416,6 +480,7 @@ public: // Getters
    * The returned handle remains initialized when the backend does not implement
    * a browsing context; its operations then do nothing.
    *
+   * @SINCE_3_0.0
    * @return The browsing profile associated with this WebView
    */
   WebProfile GetProfile() const;
@@ -423,6 +488,7 @@ public: // Getters
   /**
    * @brief Gets the settings associated with this WebView.
    *
+   * @SINCE_3_0.0
    * @return The settings for this WebView
    */
   WebSettings GetSettings() const;
@@ -431,6 +497,7 @@ public: // Query methods
   /**
    * @brief Checks if forward navigation is possible.
    *
+   * @SINCE_3_0.0
    * @return True if can go forward
    */
   bool CanGoForward() const;
@@ -438,6 +505,7 @@ public: // Query methods
   /**
    * @brief Checks if backward navigation is possible.
    *
+   * @SINCE_3_0.0
    * @return True if can go back
    */
   bool CanGoBack() const;
@@ -445,6 +513,7 @@ public: // Query methods
   /**
    * @brief Loads HTML string with override current entry.
    *
+   * @SINCE_3_0.0
    * @param[in] html The HTML string
    * @param[in] basicUri The base URI
    * @param[in] unreachableUrl The unreachable URL
@@ -455,6 +524,7 @@ public: // Query methods
   /**
    * @brief Loads contents.
    *
+   * @SINCE_3_0.0
    * @param[in] contents The content data
    * @param[in] contentSize The size of content data
    * @param[in] mimeType The MIME type
@@ -467,6 +537,7 @@ public: // Query methods
   /**
    * @brief Reloads without cache.
    *
+   * @SINCE_3_0.0
    * @return True on success
    */
   bool ReloadWithoutCache();
@@ -474,6 +545,7 @@ public: // Query methods
   /**
    * @brief Adds a custom header.
    *
+   * @SINCE_3_0.0
    * @param[in] name The header name
    * @param[in] value The header value
    * @return True on success
@@ -483,6 +555,7 @@ public: // Query methods
   /**
    * @brief Removes a custom header.
    *
+   * @SINCE_3_0.0
    * @param[in] name The header name
    * @return True on success
    */
@@ -492,6 +565,7 @@ public: // Actions
   /**
    * @brief Scrolls by the specified delta.
    *
+   * @SINCE_3_0.0
    * @param[in] deltaX The horizontal scroll delta
    * @param[in] deltaY The vertical scroll delta
    */
@@ -500,6 +574,7 @@ public: // Actions
   /**
    * @brief Scrolls by edge delta.
    *
+   * @SINCE_3_0.0
    * @param[in] deltaX The horizontal scroll delta
    * @param[in] deltaY The vertical scroll delta
    * @return True on success
@@ -508,11 +583,13 @@ public: // Actions
 
   /**
    * @brief Exits fullscreen mode.
+   * @SINCE_3_0.0
    */
   void ExitFullscreen();
 
   /**
    * @brief Clears all tiles resources.
+   * @SINCE_3_0.0
    */
   void ClearAllTilesResources();
 
@@ -522,6 +599,7 @@ public: // Actions
    * This is a convenience shortcut for @c GetProfile().ClearCache(). The cache
    * is shared by every WebView using the same profile, so those WebViews are
    * affected as well.
+   * @SINCE_3_0.0
    */
   void ClearCache();
 
@@ -531,22 +609,26 @@ public: // Actions
    * This is a convenience shortcut for
    * @c GetProfile().GetCookieManager().ClearAllCookies(). The cookie store is
    * shared by every WebView using the same profile.
+   * @SINCE_3_0.0
    */
   void ClearCookies();
 
   /**
    * @brief Suspends network loading.
+   * @SINCE_3_0.0
    */
   void SuspendNetworkLoading();
 
   /**
    * @brief Resumes network loading.
+   * @SINCE_3_0.0
    */
   void ResumeNetworkLoading();
 
   /**
    * @brief Sets the scale factor at a point.
    *
+   * @SINCE_3_0.0
    * @param[in] scaleFactor The scale factor
    * @param[in] point The point to scale around
    */
@@ -555,6 +637,7 @@ public: // Actions
   /**
    * @brief Feeds mouse wheel event.
    *
+   * @SINCE_3_0.0
    * @param[in] yDirection True for Y direction
    * @param[in] step The wheel step
    * @param[in] x The X coordinate
@@ -568,6 +651,7 @@ public: // Actions
    * Use this to forward key events to the web engine when automatic key event
    * forwarding is disabled (SetKeyEventsEnabled(false)).
    *
+   * @SINCE_3_0.0
    * @param[in] keyEvent The key event to feed
    * @return True if the event was consumed by the web engine
    */
@@ -579,6 +663,7 @@ public: // Actions
    * Use this to forward touch events to the web engine when automatic touch
    * forwarding is disabled (SetMouseEventsEnabled(false)).
    *
+   * @SINCE_3_0.0
    * @param[in] touchEvent The touch event to feed
    * @return True if the event was consumed by the web engine
    */
@@ -588,6 +673,7 @@ public: // Screenshot & Page Info
   /**
    * @brief Gets a screenshot.
    *
+   * @SINCE_3_0.0
    * @param[in] viewArea The view area
    * @param[in] scaleFactor The scale factor
    * @return An ImageView containing the screenshot
@@ -597,6 +683,7 @@ public: // Screenshot & Page Info
   /**
    * @brief Gets a screenshot asynchronously.
    *
+   * @SINCE_3_0.0
    * @param[in] viewArea The view area
    * @param[in] scaleFactor The scale factor
    * @param[in] callback The callback to receive the screenshot
@@ -607,6 +694,7 @@ public: // Screenshot & Page Info
   /**
    * @brief Gets the favicon.
    *
+   * @SINCE_3_0.0
    * @return An ImageView containing the favicon
    */
   Dali::Ui::ImageView GetFavicon() const;
@@ -614,6 +702,7 @@ public: // Screenshot & Page Info
   /**
    * @brief Gets plain text asynchronously.
    *
+   * @SINCE_3_0.0
    * @param[in] callback The callback to receive the plain text
    */
   void GetPlainTextAsynchronously(PlainTextCallback callback);
@@ -621,6 +710,7 @@ public: // Screenshot & Page Info
   /**
    * @brief Checks if video is playing asynchronously.
    *
+   * @SINCE_3_0.0
    * @param[in] callback The callback to receive the result
    * @return True if the operation started successfully
    */
@@ -630,6 +720,7 @@ public: // JavaScript
   /**
    * @brief Evaluates JavaScript code.
    *
+   * @SINCE_3_0.0
    * @param[in] script The JavaScript code to evaluate
    */
   void EvaluateJavaScript(const Dali::String& script);
@@ -637,6 +728,7 @@ public: // JavaScript
   /**
    * @brief Evaluates JavaScript code with callback.
    *
+   * @SINCE_3_0.0
    * @param[in] script The JavaScript code to evaluate
    * @param[in] callback The callback to receive the result
    */
@@ -645,6 +737,7 @@ public: // JavaScript
   /**
    * @brief Adds a JavaScript message handler.
    *
+   * @SINCE_3_0.0
    * @param[in] exposedObjectName The exposed object name
    * @param[in] callback The callback to handle messages
    */
@@ -661,6 +754,7 @@ public: // JavaScript
    * Only one message handler should be registered for a given exposed object
    * name.
    *
+   * @SINCE_3_0.0
    * @param[in] exposedObjectName The exposed object name
    * @param[in] callback The callback receiving the exposed object name and message body
    */
@@ -669,6 +763,7 @@ public: // JavaScript
   /**
    * @brief Removes a JavaScript message handler.
    *
+   * @SINCE_3_0.0
    * @param[in] exposedObjectName The exposed object name to remove
    */
   void RemoveJavaScriptMessageHandler(const Dali::String& exposedObjectName);
@@ -676,18 +771,21 @@ public: // JavaScript
   /**
    * @brief Registers a JavaScript alert callback.
    *
+   * @SINCE_3_0.0
    * @param[in] callback The callback for alert dialogs
    */
   void RegisterJavaScriptAlertCallback(JavaScriptAlertCallback callback);
 
   /**
    * @brief Replies to a JavaScript alert.
+   * @SINCE_3_0.0
    */
   void JavaScriptAlertReply();
 
   /**
    * @brief Registers a JavaScript confirm callback.
    *
+   * @SINCE_3_0.0
    * @param[in] callback The callback for confirm dialogs
    */
   void RegisterJavaScriptConfirmCallback(JavaScriptConfirmCallback callback);
@@ -695,6 +793,7 @@ public: // JavaScript
   /**
    * @brief Replies to a JavaScript confirm.
    *
+   * @SINCE_3_0.0
    * @param[in] confirmed The confirmation result
    */
   void JavaScriptConfirmReply(bool confirmed);
@@ -702,6 +801,7 @@ public: // JavaScript
   /**
    * @brief Registers a JavaScript prompt callback.
    *
+   * @SINCE_3_0.0
    * @param[in] callback The callback for prompt dialogs
    */
   void RegisterJavaScriptPromptCallback(JavaScriptPromptCallback callback);
@@ -709,6 +809,7 @@ public: // JavaScript
   /**
    * @brief Replies to a JavaScript prompt.
    *
+   * @SINCE_3_0.0
    * @param[in] result The prompt result
    */
   void JavaScriptPromptReply(const Dali::String& result);
@@ -719,6 +820,7 @@ public: // Text search
    *
    * The number of matches is reported asynchronously through TextFoundSignal().
    *
+   * @SINCE_3_0.0
    * @param[in] text The text to find
    * @param[in] options The find options (combine WebViewFindOption values with bitwise OR)
    * @param[in] maxMatchCount The maximum number of matches to highlight
@@ -729,16 +831,19 @@ public: // Text search
 public: // Signals
   /**
    * @brief Signal emitted when page load starts.
+   * @SINCE_3_0.0
    */
   PageLoadStartedSignalType& PageLoadStartedSignal();
 
   /**
    * @brief Signal emitted while page is loading.
+   * @SINCE_3_0.0
    */
   PageLoadInProgressSignalType& PageLoadInProgressSignal();
 
   /**
    * @brief Signal emitted when page load finishes.
+   * @SINCE_3_0.0
    */
   PageLoadFinishedSignalType& PageLoadFinishedSignal();
 
@@ -747,51 +852,61 @@ public: // Signals
    *
    * The error reference is valid only for the duration of the signal callback.
    * Copy the error to retain it after the callback returns.
+   * @SINCE_3_0.0
    */
   PageLoadErrorSignalType& PageLoadErrorSignal();
 
   /**
    * @brief Signal emitted when URL changes.
+   * @SINCE_3_0.0
    */
   UrlChangedSignalType& UrlChangedSignal();
 
   /**
    * @brief Signal emitted when scroll edge is reached.
+   * @SINCE_3_0.0
    */
   ScrollEdgeReachedSignalType& ScrollEdgeReachedSignal();
 
   /**
    * @brief Signal emitted when over-scroll occurs.
+   * @SINCE_3_0.0
    */
   OverScrolledSignalType& OverScrolledSignal();
 
   /**
    * @brief Signal emitted when a frame is rendered.
+   * @SINCE_3_0.0
    */
   FrameRenderedSignalType& FrameRenderedSignal();
 
   /**
    * @brief Signal emitted when entering fullscreen.
+   * @SINCE_3_0.0
    */
   FullscreenEnteredSignalType& FullscreenEnteredSignal();
 
   /**
    * @brief Signal emitted when exiting fullscreen.
+   * @SINCE_3_0.0
    */
   FullscreenExitedSignalType& FullscreenExitedSignal();
 
   /**
    * @brief Signal emitted when text is found.
+   * @SINCE_3_0.0
    */
   TextFoundSignalType& TextFoundSignal();
 
   /**
    * @brief Signal emitted for geolocation permission request.
+   * @SINCE_3_0.0
    */
   GeolocationPermissionSignalType& GeolocationPermissionSignal();
 
   /**
    * @brief Signal emitted when web process crashes.
+   * @SINCE_3_0.0
    */
   WebProcessCrashedSignalType& WebProcessCrashedSignal();
 
@@ -803,6 +918,7 @@ public: // Additional APIs
    * an immediate GetScrollPosition() call is not guaranteed to return the
    * requested value.
    *
+   * @SINCE_3_0.0
    * @param[in] position The horizontal and vertical scroll offsets
    */
   void SetScrollPosition(const Dali::Vector2& position);
@@ -813,6 +929,7 @@ public: // Additional APIs
    * The returned handle remains safe to retain after this WebView is destroyed.
    * Its queries then return empty results.
    *
+   * @SINCE_3_0.0
    * @return The back-forward list
    */
   WebBackForwardList GetBackForwardList() const;
@@ -824,6 +941,7 @@ public: // Additional APIs
    * created, selecting a different engine triggers an assertion, even if
    * that WebView has been destroyed.
    *
+   * @SINCE_3_0.0
    * @param[in] type The web engine type
    */
   static void SetWebEngineType(WebEngineType type);

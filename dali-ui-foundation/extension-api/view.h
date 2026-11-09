@@ -63,6 +63,7 @@ DALI_UI_API void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& i
 /**
  * @brief Updates a state bit in the view's ViewState and emits StateChangedSignal.
  *
+ * @SINCE_3_0.0
  * @param[in] viewImpl The view implementation
  * @param[in] stateToChange The state to set or clear
  * @param[in] on True to add the state, false to remove it
@@ -73,6 +74,7 @@ DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState stateToChange, bool on, 
 /**
  * @brief Clears and sets states as a single state change notification.
  *
+ * @SINCE_3_0.0
  * @param[in] viewImpl The view implementation
  * @param[in] statesToClear The states to clear
  * @param[in] statesToSet The states to set
@@ -83,6 +85,7 @@ DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState statesToClear, ViewState
 /**
  * @brief Registers or replaces a named state observer using a member function.
  *
+ * @SINCE_3_0.0
  * @param[in] viewImpl The view implementation
  * @param[in] id Unique identifier for this observer
  * @param[in] object Object whose member function will be called
@@ -102,6 +105,7 @@ void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, X* object
 /**
  * @brief Registers or replaces a named state observer using a callable.
  *
+ * @SINCE_3_0.0
  * @param[in] viewImpl The view implementation
  * @param[in] id Unique identifier for this observer
  * @param[in] tracker Connection tracker for automatic lifetime management
@@ -121,6 +125,7 @@ void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, Dali::Con
 /**
  * @brief Removes a named state observer.
  *
+ * @SINCE_3_0.0
  * @param[in] viewImpl The view implementation
  * @param[in] id The observer identifier to remove
  * @return True if the observer was found and removed
@@ -138,6 +143,7 @@ DALI_UI_API bool UnsetNamedStateObserver(ViewImpl& viewImpl, const Dali::String&
  * being dispatched. Only execution of the callback registered with the same
  * @a id prevents removal.
  *
+ * @SINCE_3_0.0
  * @param[in] viewImpl The view implementation
  * @param[in] id The observer identifier to remove
  * @return True if the observer was removed; false if it was not found or its
@@ -157,6 +163,7 @@ DALI_UI_API bool UnsetNamedStateObserverIfNotExecuting(ViewImpl& viewImpl, const
  * created from a member function does not extend the lifetime of its target
  * object, so the target must outlive the registration or clear it first.
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose activation behavior is customized
  * @param[in] callback Callback invoked with the View being activated. Return
  * true if the accessibility activation was handled successfully; return false
@@ -171,6 +178,7 @@ DALI_UI_API void SetAccessibilityActivateCallback(Ui::View view, Callback<bool(U
  * value is final. Pass an empty callback to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose escape behavior is customized
  * @param[in] callback Callback invoked with the View being dismissed
  */
@@ -184,6 +192,7 @@ DALI_UI_API void SetAccessibilityEscapeCallback(Ui::View view, Callback<bool(Ui:
  * callback to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose pan behavior is customized
  * @param[in] callback Callback invoked with the View and pan gesture
  */
@@ -196,6 +205,7 @@ DALI_UI_API void SetAccessibilityPanCallback(Ui::View view, Callback<bool(Ui::Vi
  * return value is final. Pass an empty callback to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose value-change behavior is customized
  * @param[in] callback Callback invoked with the View and increase flag
  */
@@ -208,6 +218,7 @@ DALI_UI_API void SetAccessibilityValueChangeCallback(Ui::View view, Callback<boo
  * return value is final. Pass an empty callback to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
+ * @SINCE_3_0.0
  * @param[in] view The scrollable View whose behavior is customized
  * @param[in] callback Callback invoked with the View and child to reveal
  */
@@ -221,6 +232,7 @@ DALI_UI_API void SetAccessibilityScrollToChildCallback(Ui::View view, Callback<b
  * callback to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose zoom behavior is customized
  * @param[in] callback Callback invoked with the View being zoomed
  */
@@ -234,6 +246,7 @@ DALI_UI_API void SetAccessibilityZoomCallback(Ui::View view, Callback<bool(Ui::V
  * empty callback to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose default accessibility name is customized
  * @param[in] callback Callback invoked with the View and output value
  */
@@ -248,6 +261,7 @@ DALI_UI_API void SetAccessibilityRequestDefaultNameCallback(Ui::View view, Callb
  * to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose default accessibility description is customized
  * @param[in] callback Callback invoked with the View and output value
  */
@@ -264,6 +278,7 @@ DALI_UI_API void SetAccessibilityRequestDefaultDescriptionCallback(Ui::View view
  * virtual hook. Pass an empty callback to restore virtual dispatch.
  * The callback follows the lifetime rules of SetAccessibilityActivateCallback().
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose default accessibility value is customized
  * @param[in] callback Callback invoked with the View and output value
  */
@@ -280,6 +295,7 @@ DALI_UI_API void SetAccessibilityRequestDefaultValueCallback(Ui::View view, Call
  * concurrent accessibility context change, such as a newly showing page or
  * modal, may cause an accessibility client to choose a different highlight.
  *
+ * @SINCE_3_0.0
  * @param[in] view The View to request accessibility highlight for
  * @return true if the View has the accessibility highlight, false otherwise
  */
@@ -288,6 +304,7 @@ DALI_UI_API bool GrabAccessibilityHighlight(Ui::View view);
 /**
  * @brief Clears accessibility highlight from the given View.
  *
+ * @SINCE_3_0.0
  * @param[in] view The View to clear accessibility highlight from
  * @return true if the accessibility highlight was cleared, false otherwise
  */
@@ -299,6 +316,7 @@ DALI_UI_API bool ClearAccessibilityHighlight(Ui::View view);
  * This can be used when the current value must be announced again without
  * changing the value stored on the View.
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose value-change event should be emitted
  * @return True if the View had an accessible object to notify
  */
@@ -307,6 +325,7 @@ DALI_UI_API bool NotifyAccessibilityValueChanged(Ui::View view);
 /**
  * @brief Explicitly notifies accessibility clients that a View's showing state changed.
  *
+ * @SINCE_3_0.0
  * @param[in] view The View whose showing-state event should be emitted
  * @param[in] showing The new showing state
  * @return True if the View had an accessible object to notify
@@ -323,6 +342,7 @@ DALI_UI_API bool NotifyAccessibilityShowingChanged(Ui::View view, bool showing);
  * sanctioned way to drive the rendered position and size of a View handle
  * directly.
  *
+ * @SINCE_3_0.0
  * @param[in] view The view to modify
  * @param[in] x The rendered X position
  * @warning Writes the Actor render property POSITION_X directly and bypasses the
@@ -335,6 +355,7 @@ DALI_UI_API void SetPositionX(Ui::View view, float x);
 /**
  * @brief Sets the rendered Y position of the view.
  *
+ * @SINCE_3_0.0
  * @param[in] view The view to modify
  * @param[in] y The rendered Y position
  * @warning Writes the Actor render property POSITION_Y directly and bypasses
@@ -346,6 +367,7 @@ DALI_UI_API void SetPositionY(Ui::View view, float y);
 /**
  * @brief Sets the rendered Z position of the view.
  *
+ * @SINCE_3_0.0
  * @param[in] view The view to modify
  * @param[in] z The rendered Z position
  * @warning Writes the Actor render property POSITION_Z directly and bypasses
@@ -357,6 +379,7 @@ DALI_UI_API void SetPositionZ(Ui::View view, float z);
 /**
  * @brief Sets the rendered width of the view.
  *
+ * @SINCE_3_0.0
  * @param[in] view The view to modify
  * @param[in] width The rendered width
  * @warning Writes the Actor render property SIZE_WIDTH directly and bypasses
@@ -368,6 +391,7 @@ DALI_UI_API void SetSizeWidth(Ui::View view, float width);
 /**
  * @brief Sets the rendered height of the view.
  *
+ * @SINCE_3_0.0
  * @param[in] view The view to modify
  * @param[in] height The rendered height
  * @warning Writes the Actor render property SIZE_HEIGHT directly and bypasses
@@ -379,6 +403,7 @@ DALI_UI_API void SetSizeHeight(Ui::View view, float height);
 /**
  * @brief Sets the rendered depth of the view.
  *
+ * @SINCE_3_0.0
  * @param[in] view The view to modify
  * @param[in] depth The rendered depth
  * @warning Writes the Actor render property SIZE_DEPTH directly and bypasses
@@ -404,6 +429,7 @@ DALI_UI_API void SetSizeDepth(Ui::View view, float depth);
  * configuration, it is an extension API for platform integrators and module providers, and
  * not part of the application-facing public API.
  *
+ * @SINCE_3_0.0
  * @param[in] view The view to configure; it must not be empty
  * @param[in] policy The policy to apply
  */
@@ -415,6 +441,7 @@ DALI_UI_API void SetUiScalePolicy(Ui::View view, Extension::UiScalePolicy policy
  * This replaces the deprecated Ui::View::GetUiScalePolicy() and ViewImpl::GetUiScalePolicy(),
  * which return the same policy as a deprecated Ui::UiScalePolicy.
  *
+ * @SINCE_3_0.0
  * @param[in] view The view to query; it must not be empty
  * @return The policy set through SetUiScalePolicy(); Extension::UiScalePolicy::INHERIT by default
  */
@@ -441,6 +468,7 @@ DALI_UI_API Extension::UiScalePolicy GetUiScalePolicy(Ui::View view);
  * platform integrators and module providers, and not part of the application-facing
  * public API.
  *
+ * @SINCE_3_0.0
  * @param[in] viewImpl The view implementation
  * @return The effective layout scale factor
  */

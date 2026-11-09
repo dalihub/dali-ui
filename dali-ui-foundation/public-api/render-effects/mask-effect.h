@@ -43,17 +43,19 @@ class MaskEffectImpl;
  * ...
  * view.ClearRenderEffect(); // Remove from the view, deactivated automatically
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API MaskEffect : public RenderEffect
 {
 public:
   /**
    * @brief Enumeration for selecting how the mask source interprets pixel data.
+   * @SINCE_3_0.0
    */
   enum MaskMode
   {
-    ALPHA,     ///< Uses the alpha channel of the mask texture. (Default)
-    LUMINANCE, ///< Converts RGB to grayscale and uses the luminance as mask value.
+    ALPHA,     ///< Uses the alpha channel of the mask texture. (Default) @SINCE_3_0.0
+    LUMINANCE, ///< Converts RGB to grayscale and uses the luminance as mask value. @SINCE_3_0.0
   };
 
   /**
@@ -63,6 +65,7 @@ public:
    * maskPosition = Vector2(0.f, 0.f)
    * maskScale = Vector2(1.f, 1.f)
    *
+   * @SINCE_3_0.0
    * @param[in] maskView The View used as the mask source.
    *
    * @return A handle to a newly allocated Dali resource
@@ -72,6 +75,7 @@ public:
   /**
    * @brief Creates an initialized MaskEffect.
    *
+   * @SINCE_3_0.0
    * @param[in] maskView The View used as the mask source.
    * @param[in] maskMode Defines pixel data type (alpha, luminance) used as the mask source.
    * @param[in] maskPosition The offset of the mask source against the owner View, in pixels.
@@ -85,21 +89,25 @@ public:
 
   /**
    * @brief Creates an uninitialized mask effect.
+   * @SINCE_3_0.0
    */
   MaskEffect();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   MaskEffect(const MaskEffect& handle);
 
   /**
    * @brief Destructor
+   * @SINCE_3_0.0
    */
   ~MaskEffect();
 
   /**
    * @brief Set whether the target, the owner View of this effect, is rendered once or every frame.
+   * @SINCE_3_0.0
    * @param[in] renderOnce If true, renders target once, else updates every frame.
    * @note The masking itself is still applied every frame. This only controls how often the target
    * is captured into the offscreen buffer used as the mask input.
@@ -108,12 +116,14 @@ public:
 
   /**
    * @brief Retrieves whether the target is rendered once(true) or every frame(false).
+   * @SINCE_3_0.0
    * @return Whether the target is rendered once or every frame.
    */
   bool IsTargetRenderOnce() const;
 
   /**
    * @brief Set whether the source, the mask View, is rendered once or every frame.
+   * @SINCE_3_0.0
    * @param[in] renderOnce If true, renders source once, else updates every frame.
    * @note The masking itself is still applied every frame. This only controls how often the source
    * is captured into the offscreen buffer used as the mask input.
@@ -122,6 +132,7 @@ public:
 
   /**
    * @brief Retrieves whether the source is rendered once(true) or every frame(false).
+   * @SINCE_3_0.0
    * @return Whether the source is rendered once or every frame.
    */
   bool IsSourceRenderOnce() const;

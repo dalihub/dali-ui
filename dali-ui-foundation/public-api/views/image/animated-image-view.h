@@ -49,6 +49,7 @@ class AnimatedImageViewImpl;
  * view.Play();
  * @endcode
  *
+ * @SINCE_3_0.0
  * @note Setters that change decoded or rendered content, including resource,
  * cache, timing, desired-size, sampling, masking, and loading options, recreate
  * the internal visual. Playback does not survive that rebuild; call Play() again
@@ -61,6 +62,7 @@ public:
    * @brief Property indices for AnimatedImageView.
    *
    * These can be used with Dali::Handle::GetProperty() and SetProperty().
+   * @SINCE_3_0.0
    */
   struct Property
   {
@@ -93,6 +95,7 @@ public:
   };
 
   /// @brief Animation finished signal type. Emitted when the animation completes all loops.
+  /// @SINCE_3_0.0
   typedef Signal<void(View)> AnimationFinishedSignalType;
 
 public: // Creation & Destruction
@@ -108,6 +111,7 @@ public: // Creation & Destruction
   /**
    * @brief Creates a new AnimatedImageView.
    *
+   * @SINCE_3_0.0
    * @param[in] url Optional URL of the animated image resource (e.g. GIF file)
    * @return A handle to the newly allocated AnimatedImageView
    */
@@ -116,6 +120,7 @@ public: // Creation & Destruction
   /**
    * @brief Downcasts a handle to AnimatedImageView.
    *
+   * @SINCE_3_0.0
    * @param[in] handle A handle to an object
    * @return A handle to AnimatedImageView, or an empty handle if not AnimatedImageView
    */
@@ -125,6 +130,7 @@ public: // Image
   /**
    * @brief Sets the URL of the animated image resource to display.
    *
+   * @SINCE_3_0.0
    * @param[in] url The URL of the image resource
    */
   void SetResourceUrl(const Dali::String& url);
@@ -132,6 +138,7 @@ public: // Image
   /**
    * @brief Gets the URL of the animated image resource.
    *
+   * @SINCE_3_0.0
    * @return The URL of the image resource
    */
   Dali::String GetResourceUrl() const;
@@ -140,6 +147,7 @@ public: // Image
    * @brief Reloads the animated image resource from its source.
    *
    * This forces the visual to reload the current URL instead of reusing the cached texture.
+   * @SINCE_3_0.0
    */
   void Reload();
 
@@ -149,6 +157,7 @@ public: // Image
    * Setting this overrides any single URL set via SetResourceUrl().
    * The images are played in sequence as animation frames.
    *
+   * @SINCE_3_0.0
    * @param[in] urls Array of image URLs
    */
   void SetResourceUrlList(const Dali::Vector<Dali::String>& urls);
@@ -159,6 +168,7 @@ public: // Image
    * Setting this overrides any single URL set via SetResourceUrl().
    * The images are played in sequence as animation frames.
    *
+   * @SINCE_3_0.0
    * @param[in] urls Array of image URLs
    */
   void SetResourceUrlList(std::initializer_list<Dali::String> urls)
@@ -176,6 +186,7 @@ public: // Image
   /**
    * @brief Gets the array of image URLs.
    *
+   * @SINCE_3_0.0
    * @return The current array of image URLs, or empty if not set
    */
   Dali::Vector<Dali::String> GetResourceUrlList() const;
@@ -183,6 +194,7 @@ public: // Image
   /**
    * @brief Sets whether the image is loaded synchronously at the current view size.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable loading image with view size
    */
   void SetImageLoadWithViewSizeEnabled(bool enabled);
@@ -190,6 +202,7 @@ public: // Image
   /**
    * @brief Gets whether the image is loaded with the view size.
    *
+   * @SINCE_3_0.0
    * @return True if loading image with view size is enabled
    */
   bool IsImageLoadWithViewSizeEnabled() const;
@@ -197,6 +210,7 @@ public: // Image
 public: // Playback Control
   /**
    * @brief Starts the animation, or resumes it if it was paused.
+   * @SINCE_3_0.0
    */
   void Play();
 
@@ -204,6 +218,7 @@ public: // Playback Control
    * @brief Pauses the animation on the frame being shown.
    *
    * The loop it is on is kept, so Play() carries on from here rather than starting over.
+   * @SINCE_3_0.0
    */
   void Pause();
 
@@ -214,6 +229,7 @@ public: // Playback Control
    * being shown, so a stopped animation does not necessarily look different from a paused
    * one.
    *
+   * @SINCE_3_0.0
    * @see SetStopBehavior()
    */
   void Stop();
@@ -224,6 +240,7 @@ public: // Playback Control
    * A value of -1 means infinite looping. A value of 0 means the animation
    * will not play. A positive value specifies an exact loop count.
    *
+   * @SINCE_3_0.0
    * @param[in] count The loop count (-1 for infinite)
    */
   void SetLoopCount(int count);
@@ -231,6 +248,7 @@ public: // Playback Control
   /**
    * @brief Gets the current loop count.
    *
+   * @SINCE_3_0.0
    * @return The loop count, or -1 for infinite looping
    */
   int GetLoopCount() const;
@@ -239,6 +257,7 @@ public: // Frame Control
   /**
    * @brief Jumps to the specified frame number.
    *
+   * @SINCE_3_0.0
    * @param[in] frame The frame index to jump to
    */
   void JumpToFrame(int frame);
@@ -246,6 +265,7 @@ public: // Frame Control
   /**
    * @brief Sets the behavior of the animation when it is stopped.
    *
+   * @SINCE_3_0.0
    * @param[in] behavior The stop behavior (CURRENT_FRAME, FIRST_FRAME, or LAST_FRAME)
    */
   void SetStopBehavior(AnimatedImage::StopBehavior behavior);
@@ -253,6 +273,7 @@ public: // Frame Control
   /**
    * @brief Gets the current stop behavior.
    *
+   * @SINCE_3_0.0
    * @return The current stop behavior
    */
   AnimatedImage::StopBehavior GetStopBehavior() const;
@@ -263,6 +284,7 @@ public: // Frame Control
    * Values between [0, 1] slow down the animation; values above 1 speed it up.
    * The actual clamping to [0.01, 100.0] is handled by the underlying animation renderer.
    *
+   * @SINCE_3_0.0
    * @param[in] factor The speed multiplier (default: 1.0)
    */
   void SetFrameSpeedFactor(float factor);
@@ -270,6 +292,7 @@ public: // Frame Control
   /**
    * @brief Gets the current frame speed factor.
    *
+   * @SINCE_3_0.0
    * @return The frame speed factor
    */
   float GetFrameSpeedFactor() const;
@@ -277,6 +300,7 @@ public: // Frame Control
   /**
    * @brief Sets the number of frames to pre-load in each batch.
    *
+   * @SINCE_3_0.0
    * @param[in] size The batch size (default: 1)
    */
   void SetBatchSize(int size);
@@ -284,6 +308,7 @@ public: // Frame Control
   /**
    * @brief Gets the current batch size.
    *
+   * @SINCE_3_0.0
    * @return The batch size
    */
   int GetBatchSize() const;
@@ -291,6 +316,7 @@ public: // Frame Control
   /**
    * @brief Sets the number of frames to keep in cache.
    *
+   * @SINCE_3_0.0
    * @param[in] size The cache size (default: 1)
    */
   void SetCacheSize(int size);
@@ -298,6 +324,7 @@ public: // Frame Control
   /**
    * @brief Gets the current cache size.
    *
+   * @SINCE_3_0.0
    * @return The cache size
    */
   int GetCacheSize() const;
@@ -307,6 +334,7 @@ public: // Frame Control
    *
    * Overrides the frame delay embedded in the image file.
    *
+   * @SINCE_3_0.0
    * @param[in] milliseconds The delay between frames in milliseconds
    */
   void SetFrameDelay(int milliseconds);
@@ -314,6 +342,7 @@ public: // Frame Control
   /**
    * @brief Gets the current frame delay override.
    *
+   * @SINCE_3_0.0
    * @return The frame delay in milliseconds, or -1 if not overridden
    */
   int GetFrameDelay() const;
@@ -321,6 +350,7 @@ public: // Frame Control
   /**
    * @brief Gets the current playback state of the animation.
    *
+   * @SINCE_3_0.0
    * @return The current PlayState
    */
   Ui::AnimatedImage::PlayState GetPlayState() const;
@@ -328,6 +358,7 @@ public: // Frame Control
   /**
    * @brief Gets the current frame number being displayed.
    *
+   * @SINCE_3_0.0
    * @return The current frame index
    */
   int GetCurrentFrameNumber() const;
@@ -335,6 +366,7 @@ public: // Frame Control
   /**
    * @brief Gets the total number of frames in the animation.
    *
+   * @SINCE_3_0.0
    * @return The total frame count
    */
   int GetTotalFrameCount() const;
@@ -343,6 +375,7 @@ public: // Visual Appearance
   /**
    * @brief Sets the color applied to the image.
    *
+   * @SINCE_3_0.0
    * @param[in] color The color to apply
    */
   void SetImageColor(const UiColor& color);
@@ -350,6 +383,7 @@ public: // Visual Appearance
   /**
    * @brief Gets the color applied to the image.
    *
+   * @SINCE_3_0.0
    * @return The current image color
    */
   UiColor GetImageColor() const;
@@ -359,6 +393,7 @@ public: // Visual Appearance
    *
    * The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill).
    *
+   * @SINCE_3_0.0
    * @param[in] fittingMode The fitting mode to use
    */
   void SetFittingMode(Ui::Image::FittingMode fittingMode);
@@ -366,6 +401,7 @@ public: // Visual Appearance
   /**
    * @brief Gets the fitting mode.
    *
+   * @SINCE_3_0.0
    * @return The current fitting mode (default: FILL)
    */
   Ui::Image::FittingMode GetFittingMode() const;
@@ -373,6 +409,7 @@ public: // Visual Appearance
   /**
    * @brief Sets the sampling mode used when scaling the image.
    *
+   * @SINCE_3_0.0
    * @param[in] samplingMode The sampling mode to use
    */
   void SetSamplingMode(Ui::Image::SamplingMode samplingMode);
@@ -380,6 +417,7 @@ public: // Visual Appearance
   /**
    * @brief Gets the sampling mode.
    *
+   * @SINCE_3_0.0
    * @return The current sampling mode
    */
   Ui::Image::SamplingMode GetSamplingMode() const;
@@ -393,6 +431,7 @@ public: // Visual Appearance
    * The request is not always honoured. It is ignored when a custom shader is set, and it is
    * dropped when the loaded image uses a compressed pixel format, which cannot be pre-multiplied.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to pre-multiply alpha while loading
    * @note Default is false.
    */
@@ -404,6 +443,7 @@ public: // Visual Appearance
    * This returns the requested value, which is not necessarily what happened to the loaded
    * image. See SetPreMultiplyAlphaOnLoadEnabled() for when a request is not honoured.
    *
+   * @SINCE_3_0.0
    * @return True if alpha is requested to be pre-multiplied while loading
    * @see SetPreMultiplyAlphaOnLoadEnabled()
    */
@@ -416,6 +456,7 @@ public: // Size & Loading Behavior
    * The returned size reflects the animated image Visual, including the desired
    * size or decoded image size when applicable. It may differ from the laid-out View size.
    *
+   * @SINCE_3_0.0
    * @return The natural size of the animated image content
    */
   Vector3 GetNaturalSize() const;
@@ -423,6 +464,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Sets the desired image width used as a hint for the image loader.
    *
+   * @SINCE_3_0.0
    * @param[in] width The desired width in pixels (0 to use natural size)
    */
   void SetDesiredWidth(int width);
@@ -430,6 +472,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Gets the desired image width hint.
    *
+   * @SINCE_3_0.0
    * @return The desired width in pixels, or 0 if not set
    */
   int GetDesiredWidth() const;
@@ -437,6 +480,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Sets the desired image height used as a hint for the image loader.
    *
+   * @SINCE_3_0.0
    * @param[in] height The desired height in pixels (0 to use natural size)
    */
   void SetDesiredHeight(int height);
@@ -444,6 +488,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Gets the desired image height hint.
    *
+   * @SINCE_3_0.0
    * @return The desired height in pixels, or 0 if not set
    */
   int GetDesiredHeight() const;
@@ -451,6 +496,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Sets the load policy for the image resource.
    *
+   * @SINCE_3_0.0
    * @param[in] loadPolicy The load policy to use
    */
   void SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
@@ -458,6 +504,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Gets the load policy.
    *
+   * @SINCE_3_0.0
    * @return The current load policy
    */
   Ui::Image::LoadPolicy GetLoadPolicy() const;
@@ -465,6 +512,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Sets the release policy for the image resource.
    *
+   * @SINCE_3_0.0
    * @param[in] releasePolicy The release policy to use
    */
   void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
@@ -472,6 +520,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Gets the release policy.
    *
+   * @SINCE_3_0.0
    * @return The current release policy
    */
   Ui::Image::ReleasePolicy GetReleasePolicy() const;
@@ -479,6 +528,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Sets whether the image is loaded synchronously.
    *
+   * @SINCE_3_0.0
    * @param[in] synchronous True to load the image on the main thread synchronously
    */
   void SetSynchronousLoading(bool synchronous);
@@ -486,6 +536,7 @@ public: // Size & Loading Behavior
   /**
    * @brief Gets whether synchronous loading is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if synchronous loading is enabled
    */
   bool IsSynchronousLoading() const;
@@ -494,6 +545,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Sets the URL of an alpha mask image.
    *
+   * @SINCE_3_0.0
    * @param[in] maskUrl The URL of the alpha mask image
    */
   void SetAlphaMaskUrl(const Dali::String& maskUrl);
@@ -501,6 +553,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Gets the alpha mask image URL.
    *
+   * @SINCE_3_0.0
    * @return The URL of the alpha mask image, or empty string if not set
    */
   Dali::String GetAlphaMaskUrl() const;
@@ -508,6 +561,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Sets whether the image should be cropped to the mask bounds.
    *
+   * @SINCE_3_0.0
    * @param[in] cropToMask True to crop the image to the mask
    */
   void SetCropToMask(bool cropToMask);
@@ -515,6 +569,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Gets whether crop-to-mask is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if crop-to-mask is enabled
    */
   bool IsCropToMask() const;
@@ -522,6 +577,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Sets the masking policy.
    *
+   * @SINCE_3_0.0
    * @param[in] maskingPolicy The masking policy to use
    */
   void SetMaskingPolicy(Ui::Image::MaskingPolicy maskingPolicy);
@@ -529,6 +585,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Gets the masking policy.
    *
+   * @SINCE_3_0.0
    * @return The current masking policy
    */
   Ui::Image::MaskingPolicy GetMaskingPolicy() const;
@@ -536,6 +593,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Sets the URL of a placeholder image shown while loading.
    *
+   * @SINCE_3_0.0
    * @param[in] url The URL of the placeholder image
    */
   void SetPlaceholderUrl(const Dali::String& url);
@@ -543,6 +601,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Gets the placeholder image URL.
    *
+   * @SINCE_3_0.0
    * @return The URL of the placeholder image, or empty string if not set
    */
   Dali::String GetPlaceholderUrl() const;
@@ -553,6 +612,7 @@ public: // Advanced Rendering & Masking
    * The area is specified as normalized coordinates: (x, y, width, height)
    * where each component is in the range [0, 1].
    *
+   * @SINCE_3_0.0
    * @param[in] pixelArea The normalized sub-region of the image to display
    */
   void SetPixelArea(const Vector4& pixelArea);
@@ -560,6 +620,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Gets the pixel area.
    *
+   * @SINCE_3_0.0
    * @return The current pixel area as normalized coordinates
    */
   Vector4 GetPixelArea() const;
@@ -568,6 +629,7 @@ public: // Loading Status & Signals
   /**
    * @brief Gets the current loading status of the image.
    *
+   * @SINCE_3_0.0
    * @return The current ResourceStatus of the image visual
    */
   Ui::Visual::ResourceStatus GetLoadingStatus() const;
@@ -575,6 +637,7 @@ public: // Loading Status & Signals
   /**
    * @brief Returns the signal emitted when the image has finished loading and is ready to display.
    *
+   * @SINCE_3_0.0
    * @return A reference to the ResourceReady signal
    */
   ResourceReadySignalType& ResourceReadySignal();
@@ -582,6 +645,7 @@ public: // Loading Status & Signals
   /**
    * @brief Returns the signal emitted when the animation finishes all loops.
    *
+   * @SINCE_3_0.0
    * @return A reference to the AnimationFinished signal
    */
   AnimationFinishedSignalType& AnimationFinishedSignal();

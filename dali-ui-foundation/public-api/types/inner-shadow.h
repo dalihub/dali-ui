@@ -34,6 +34,7 @@ namespace Ui
  *
  * The insets control how far the solid part of the shadow reaches inward from
  * each logical edge before it is blurred.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API InnerShadow
 {
@@ -43,12 +44,14 @@ public:
    *
    * The default color is semi-transparent black, and the default blur radius
    * and insets are zero.
+   * @SINCE_3_0.0
    */
   InnerShadow();
 
   /**
    * @brief Creates an inner shadow with custom values.
    *
+   * @SINCE_3_0.0
    * @param[in] insets How far the shadow reaches inward from each logical edge
    * @param[in] blurRadius The blur radius in pixels
    * @param[in] color The shadow color
@@ -61,6 +64,7 @@ public:
    * Use this to clear a View inner shadow or to indicate that no inner shadow
    * should be applied.
    *
+   * @SINCE_3_0.0
    * @return An InnerShadow that represents no inner shadow
    */
   static InnerShadow None();
@@ -75,6 +79,7 @@ public:
   /**
    * @brief Compares this inner shadow with another inner shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The inner shadow to compare with
    * @return True if both values are equal
    */
@@ -83,6 +88,7 @@ public:
   /**
    * @brief Compares this inner shadow with another inner shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The inner shadow to compare with
    * @return True if both values are not equal
    */
@@ -91,6 +97,7 @@ public:
   /**
    * @brief Sets the inner shadow color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The shadow color
    * @return This inner shadow
    */
@@ -99,6 +106,7 @@ public:
   /**
    * @brief Gets the inner shadow color.
    *
+   * @SINCE_3_0.0
    * @return The shadow color
    */
   const UiColor& GetColor() const;
@@ -108,6 +116,7 @@ public:
    *
    * Negative values are clamped to zero.
    *
+   * @SINCE_3_0.0
    * @param[in] blurRadius The blur radius in pixels
    * @return This inner shadow
    */
@@ -116,6 +125,7 @@ public:
   /**
    * @brief Gets the blur radius.
    *
+   * @SINCE_3_0.0
    * @return The blur radius in pixels
    */
   float GetBlurRadius() const;
@@ -123,6 +133,7 @@ public:
   /**
    * @brief Sets how far the shadow reaches inward from each logical edge.
    *
+   * @SINCE_3_0.0
    * @param[in] insets The start, end, top, and bottom insets in pixels
    * @return This inner shadow
    */
@@ -131,6 +142,7 @@ public:
   /**
    * @brief Gets how far the shadow reaches inward from each logical edge.
    *
+   * @SINCE_3_0.0
    * @return The start, end, top, and bottom insets in pixels
    */
   const Insets& GetInsets() const;

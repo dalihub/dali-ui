@@ -54,23 +54,27 @@ class UiScaleManagerImpl;
  * @code
  *   float scale = UiScaleManager::Get().GetScale();
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiScaleManager : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized UiScaleManager handle.
+   * @SINCE_3_0.0
    */
   UiScaleManager();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~UiScaleManager() = default;
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to copy
    */
   UiScaleManager(const UiScaleManager& handle) = default;
@@ -78,6 +82,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   UiScaleManager(UiScaleManager&& rhs) noexcept = default;
@@ -85,6 +90,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -93,6 +99,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -105,6 +112,7 @@ public:
    *
    * Creates the instance on first call.
    *
+   * @SINCE_3_0.0
    * @return A handle to the UiScaleManager singleton
    */
   static UiScaleManager Get();
@@ -114,6 +122,7 @@ public:
    *
    * @deprecated Use Extension::LayoutScaleManager::DownCast() instead.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a UiScaleManager or an uninitialized handle
    */
@@ -124,6 +133,7 @@ public:
    *
    * @deprecated Use Extension::LayoutScaleManager::GetUiScale() instead.
    *
+   * @SINCE_3_0.0
    * @return The current scale value (1.0 by default)
    */
   float GetScale() const;
@@ -136,6 +146,7 @@ public:
    * Called by system/vconf handlers when the display scale changes.
    * Invalidates all registered layout roots and triggers re-layout.
    *
+   * @SINCE_3_0.0
    * @param[in] scale The new scale factor. It must be positive, finite and normal
    *            (>= FLT_MIN), because the layout also divides by it; other values are
    *            ignored and logged, leaving the current scale in place.
@@ -147,6 +158,7 @@ public:
    *
    * @deprecated Use Extension::LayoutScaleManager::IsScalable() instead.
    *
+   * @SINCE_3_0.0
    * @return true if scaling is enabled (default), false if globally disabled
    */
   bool IsScalable() const;
@@ -162,6 +174,7 @@ public:
    * Flipping the switch invalidates all registered layout roots and triggers
    * a full re-layout.
    *
+   * @SINCE_3_0.0
    * @param[in] enable true to enable scaling, false to disable
    */
   void SetScalable(bool enable);

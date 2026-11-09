@@ -57,6 +57,7 @@ namespace Text
  * ImageSpan::New() snapshots the supplied ImageAttributes. Each consuming text
  * control manages its runtime image resource independently.
  *
+ * @SINCE_3_0.0
  * @note A range containing more than one code point is supported. The exact
  *       authored range is used without grapheme-cluster or shaping-boundary
  *       normalization.
@@ -66,6 +67,7 @@ class DALI_UI_API ImageSpan : public ReplacementSpan
 public:
   /**
    * @brief Creates an uninitialized ImageSpan handle.
+   * @SINCE_3_0.0
    */
   ImageSpan() = default;
 
@@ -76,6 +78,7 @@ public:
    * incomplete attributes still create an initialized handle, but the
    * replacement is not applied when attached.
    *
+   * @SINCE_3_0.0
    * @param[in] attributes The image attributes to snapshot
    * @return A new ImageSpan
    */
@@ -84,6 +87,7 @@ public:
   /**
    * @brief Downcasts a handle to ImageSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized ImageSpan on success, otherwise an empty handle
    */
@@ -95,6 +99,7 @@ public:
    * Changing the returned value does not affect this ImageSpan. An
    * uninitialized handle returns a default-constructed ImageAttributes value.
    *
+   * @SINCE_3_0.0
    * @return An independent copy of the image attributes
    */
   ImageAttributes GetImageAttributes() const;
@@ -103,6 +108,7 @@ private:
   /**
    * @brief Creates an ImageSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL ImageSpan(BaseObject* impl);

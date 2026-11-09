@@ -37,18 +37,21 @@ namespace Ui
  *   .SetBounds(LayoutRect(10, 20, 100, 200))
  *   .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API AbsoluteLayoutParams
 {
 public:
   /**
    * @brief Creates parameters with default values.
+   * @SINCE_3_0.0
    */
   AbsoluteLayoutParams();
 
   /**
    * @brief Creates a new AbsoluteLayoutParams with default values.
    *
+   * @SINCE_3_0.0
    * @return A value initialized with default parameters
    */
   static AbsoluteLayoutParams New();
@@ -56,6 +59,7 @@ public:
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] other Value to copy
    */
   AbsoluteLayoutParams(const AbsoluteLayoutParams& other);
@@ -63,6 +67,7 @@ public:
   /**
    * @brief Creates a value by moving another value.
    *
+   * @SINCE_3_0.0
    * @note After the move the source is in a moved-from state; assign it a valid
    * value before use. Calling a getter or setter on, or copying from, a
    * moved-from value throws.
@@ -71,12 +76,14 @@ public:
 
   /**
    * @brief Copies another value.
+   * @SINCE_3_0.0
    */
   AbsoluteLayoutParams& operator=(const AbsoluteLayoutParams& other);
 
   /**
    * @brief Moves another value.
    *
+   * @SINCE_3_0.0
    * @note After the move the source is in a moved-from state; assign it a valid
    * value before use. Calling a getter or setter on, or copying from, a
    * moved-from value throws.
@@ -85,12 +92,14 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~AbsoluteLayoutParams();
 
   /**
    * @brief Sets the absolute position and size of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @param[in] bounds The layout bounds (x, y, width, height)
    * @return Reference to this for chaining
    * @note RTL mirror: under a RIGHT_TO_LEFT effective layout direction the X
@@ -103,6 +112,7 @@ public:
   /**
    * @brief Gets the absolute position and size of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @return The layout bounds
    */
   LayoutRect GetBounds() const;
@@ -110,6 +120,7 @@ public:
   /**
    * @brief Sets the X position of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @param[in] x The X position
    * @return Reference to this for chaining
    */
@@ -118,6 +129,7 @@ public:
   /**
    * @brief Gets the X position of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @return The X position
    */
   float GetX() const;
@@ -125,6 +137,7 @@ public:
   /**
    * @brief Sets the Y position of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @param[in] y The Y position
    * @return Reference to this for chaining
    */
@@ -133,6 +146,7 @@ public:
   /**
    * @brief Gets the Y position of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @return The Y position
    */
   float GetY() const;
@@ -140,6 +154,7 @@ public:
   /**
    * @brief Sets the width of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @param[in] width The width (-1 means use View's own size)
    * @return Reference to this for chaining
    */
@@ -148,6 +163,7 @@ public:
   /**
    * @brief Gets the width of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @return The width
    */
   float GetWidth() const;
@@ -155,6 +171,7 @@ public:
   /**
    * @brief Sets the height of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @param[in] height The height (-1 means use View's own size)
    * @return Reference to this for chaining
    */
@@ -163,6 +180,7 @@ public:
   /**
    * @brief Gets the height of the child within the layout.
    *
+   * @SINCE_3_0.0
    * @return The height
    */
   float GetHeight() const;
@@ -170,6 +188,7 @@ public:
   /**
    * @brief Sets the layout flags that control proportional sizing behavior.
    *
+   * @SINCE_3_0.0
    * @param[in] flags The absolute layout flags
    * @return Reference to this for chaining
    */
@@ -178,6 +197,7 @@ public:
   /**
    * @brief Gets the layout flags that control proportional sizing behavior.
    *
+   * @SINCE_3_0.0
    * @return The absolute layout flags
    */
   AbsoluteLayoutFlags GetFlags() const;

@@ -26,6 +26,7 @@
  * The hook invokes @p action with this instance as the first argument and forwards
  * any extra arguments after it. The return type of @p action is propagated to the
  * caller. This does not return @c *this for fluent chaining.
+ * @SINCE_3_0.0
  */
 #define DALI_UI_VIEW_WITH(SelfType)                                \
   template<typename F, typename... Args>                           \

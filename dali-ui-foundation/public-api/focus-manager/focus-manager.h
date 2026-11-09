@@ -49,17 +49,20 @@ class FocusManager;
  * | %Signal Name            | Method                             |
  * |-------------------------|------------------------------------|
  * | focusChanged            | @ref FocusChangedSignal()          |
+ * @SINCE_3_0.0
  */
 class DALI_UI_API FocusManager : public BaseHandle
 {
 public:
   /// @brief Focus changed signal
+  /// @SINCE_3_0.0
   typedef Signal<void(View, View)> FocusChangedSignalType;
 
   /**
    * @brief Creates a FocusManager handle; this can be initialized with FocusManager::New().
    *
    * Calling member functions with an uninitialized handle is not allowed.
+   * @SINCE_3_0.0
    */
   FocusManager();
 
@@ -67,12 +70,14 @@ public:
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~FocusManager();
 
   /**
    * @brief Gets the singleton of FocusManager object.
    *
+   * @SINCE_3_0.0
    * @return A handle to the FocusManager view
    */
   static FocusManager Get();
@@ -109,6 +114,7 @@ public:
    * View subActual = focusManager.GetCurrentFocusView(subWindow); // subView
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] view The target View, which also determines the Window to update
    * @return true if the request was accepted for application or storage, false
    *         if the request was rejected. Success alone does not guarantee actual focus.
@@ -133,6 +139,7 @@ public:
    * the resolved focus without making the accepted request fail. Query
    * GetCurrentFocusView(Window) to inspect the resulting focus.
    *
+   * @SINCE_3_0.0
    * @param view The view to request focus on
    * @return true if the resolved request was accepted for application or storage,
    *         false if it was rejected
@@ -152,6 +159,7 @@ public:
    * Use GetCurrentFocusView(Window) to query actual navigation focus within a
    * particular Window. Stored targets awaiting activation are not returned.
    *
+   * @SINCE_3_0.0
    * @return The global current navigation focus View, or an empty handle if no
    *         global target exists. Other Windows may still have independent focus.
    * @pre The FocusManager has been initialized.
@@ -174,6 +182,7 @@ public:
    * Key navigation uses the input event's Window; this overload uses the last
    * Window that received platform focus. This does not activate a Window.
    *
+   * @SINCE_3_0.0
    * @param direction The direction of focus movement
    * @return true if the actual or stored focus target moved
    * @pre The FocusManager has been initialized.
@@ -189,6 +198,7 @@ public:
    * any deferred replacement. Other Windows' stored targets are preserved.
    * If no View is focused, the last platform-focused Window's target is removed.
    * This does not change platform Window activation.
+   * @SINCE_3_0.0
    * @pre The FocusManager has been initialized.
    */
   void ClearFocus();
@@ -199,6 +209,7 @@ public:
    * This clears FOCUS_INDICATED from the current focused view. It also hides
    * the FocusManager-managed default focus indicator, if any.
    *
+   * @SINCE_3_0.0
    * @pre The FocusManager has been initialized.
    */
   void ClearFocusIndication();
@@ -210,6 +221,7 @@ public:
    * cannot leave the view's subtree. Explicit programmatic calls such as
    * RequestFocus() and SetCurrentFocusView() may move focus outside it.
    *
+   * @SINCE_3_0.0
    * @param view The view to be set as a focus group
    * @param isFocusGroup Whether to set the view as a focus group or not
    * @pre The FocusManager has been initialized.
@@ -220,6 +232,7 @@ public:
   /**
    * @brief Checks whether the view is set as a focus group or not.
    *
+   * @SINCE_3_0.0
    * @param view The view to be checked
    * @return Whether the view is set as a focus group
    * @pre The FocusManager has been initialized.
@@ -230,6 +243,7 @@ public:
   /**
    * @brief Returns the closest ancestor of the given view that is a focus group.
    *
+   * @SINCE_3_0.0
    * @param view The view to be checked for its focus group
    * @return The focus group the given view belongs to or an empty handle if the given view
    * doesn't belong to any focus group
@@ -242,6 +256,7 @@ public:
    * This controls only the default focus indicator actor managed by
    * FocusManager. It does not change focus state or FOCUS_INDICATED state.
    *
+   * @SINCE_3_0.0
    * @param enabled Whether to enable the default focus indicator
    * @pre The FocusManager has been initialized.
    */
@@ -250,6 +265,7 @@ public:
   /**
    * @brief Gets whether FocusManager's default focus indicator is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if the default focus indicator is enabled
    * @pre The FocusManager has been initialized.
    */
@@ -260,6 +276,7 @@ public:
    *
    * An inactive target Window only updates its stored target. Repeated calls
    * continue walking the history even while actual focus is unchanged.
+   * @SINCE_3_0.0
    */
   void MoveFocusBackward();
 
@@ -269,6 +286,7 @@ public:
    * This method returns what caused the most recent focus change,
    * allowing applications to differentiate between different input methods.
    *
+   * @SINCE_3_0.0
    * @return The device of the last focus change
    * @pre The FocusManager has been initialized.
    */
@@ -281,6 +299,7 @@ public:
    * the most recent focus change. For non-device inputs (like programmatic
    * focus changes), an empty string may be returned.
    *
+   * @SINCE_3_0.0
    * @return The device name that caused the last focus change
    * @pre The FocusManager has been initialized.
    */
@@ -301,6 +320,7 @@ public:
    * by its stored target, or cleared if it has no valid target. No default target
    * is automatically selected on Window focus gain.
    *
+   * @SINCE_3_0.0
    * @param enabled Whether to clear focus when window loses focus
    */
   void SetClearFocusOnWindowFocusLost(bool enabled);
@@ -308,6 +328,7 @@ public:
   /**
    * @brief Gets whether to clear focus when window loses focus.
    *
+   * @SINCE_3_0.0
    * @return Whether clear focus is enabled when window loses focus
    */
   bool GetClearFocusOnWindowFocusLost() const;
@@ -318,6 +339,7 @@ public:
    * The final focus indication state may be overridden by a configured
    * integration focus indication policy.
    *
+   * @SINCE_3_0.0
    * @param clear Whether touch interaction proposes clearing focus indication from the focused view
    */
   void SetClearFocusIndicationOnTouch(bool clear);
@@ -325,6 +347,7 @@ public:
   /**
    * @brief Gets whether touch interaction proposes clearing focus indication.
    *
+   * @SINCE_3_0.0
    * @return True if touch interaction proposes clearing focus indication from the focused view
    */
   bool IsClearFocusIndicationOnTouchEnabled() const;
@@ -335,6 +358,7 @@ public:
    * The final focus indication state may be overridden by a configured
    * integration focus indication policy.
    *
+   * @SINCE_3_0.0
    * @param clear Whether hover outside the focused view proposes clearing focus indication
    */
   void SetClearFocusIndicationOnHover(bool clear);
@@ -342,6 +366,7 @@ public:
   /**
    * @brief Gets whether hover outside the focused view proposes clearing focus indication.
    *
+   * @SINCE_3_0.0
    * @return True if hover outside the focused view proposes clearing focus indication
    */
   bool IsClearFocusIndicationOnHoverEnabled() const;
@@ -363,6 +388,7 @@ public:
    * write the supplied result instead of changing focus directly. The result
    * is valid only during the callback and must not be retained.
    *
+   * @SINCE_3_0.0
    * @param[in] callback The move-only fallback callback
    */
   void SetFocusNavigationFallback(FocusNavigationCallback callback);
@@ -375,6 +401,7 @@ public: // Signals
    * @code
    *   void YourCallbackName(View originalFocusedView, View currentFocusedView);
    * @endcode
+   * @SINCE_3_0.0
    * @return The signal to connect to
    * @pre The Object has been initialized.
    */
@@ -392,6 +419,7 @@ public: // Signals
    * is shown. Showing them preserves focus requested while hidden.
    * InputField, InputEditor and custom IME sessions are not
    * supported in an independent Window.
+   * @SINCE_3_0.0
    * @param[in] window The Window whose policy is changed
    * @param[in] enabled Whether independent focus is enabled
    * @return True if applied, false for an invalid Window, unsupported target,
@@ -402,6 +430,7 @@ public: // Signals
 
   /**
    * @brief Queries whether the Window allows independent actual focus.
+   * @SINCE_3_0.0
    * @param[in] window The Window to query
    * @return True if enabled, false otherwise, including an empty Window
    * @pre Called on the UI thread.
@@ -419,6 +448,7 @@ public: // Signals
    * GetCurrentFocusView(). A separately configured key input target may also
    * differ from the navigation target returned here. Querying does not activate
    * the Window or apply a stored target.
+   * @SINCE_3_0.0
    * @param[in] window The Window to query
    * @return Its actual navigation focus View, or an empty handle if no actual
    *         target exists or the Window is empty
@@ -432,6 +462,7 @@ public: // Signals
    * @brief Clears actual focus, key input and the stored target in the Window only.
    *
    * Focus history is retained for a later explicit MoveFocusBackward(window).
+   * @SINCE_3_0.0
    * @param[in] window The Window to clear; an empty Window is ignored
    * @pre Called on the UI thread, outside a navigation callback.
    */
@@ -444,6 +475,7 @@ public: // Signals
    * after enabling or showing, navigation policies receive an empty current View
    * and can select an initial target. An ordinary inactive Window continues to
    * navigate from its stored target and stores the destination for activation.
+   * @SINCE_3_0.0
    * @param[in] window The Window in which navigation is performed
    * @param[in] direction The navigation direction
    * @return True if the destination was applied or stored, false otherwise
@@ -463,6 +495,7 @@ public: // Signals
    * If no current target exists, the most recent valid entry is restored, even
    * when the history contains only one entry. If no valid destination exists,
    * actual focus and the stored target remain unchanged.
+   * @SINCE_3_0.0
    * @param[in] window The Window in which navigation is performed
    * @pre Called on the UI thread, outside a navigation callback.
    * @see MoveFocus(Window, FocusDirection)
@@ -472,6 +505,7 @@ public: // Signals
 
   /**
    * @brief Clears focus indication in the Window without releasing actual focus.
+   * @SINCE_3_0.0
    * @param[in] window The Window whose focus indication is cleared
    * @pre Called on the UI thread.
    */
@@ -479,6 +513,7 @@ public: // Signals
 
   /**
    * @brief Actual navigation focus changes within a Window: Window, previous, current.
+   * @SINCE_3_0.0
    */
   using WindowFocusChangedSignalType = Signal<void(Window, View, View)>;
 
@@ -486,6 +521,7 @@ public: // Signals
    * @brief Returns the signal for actual navigation focus changes in a Window.
    * Stored requests and changes of a Window's global role alone do not emit it.
    * The callback receives the Window, previous View and current View.
+   * @SINCE_3_0.0
    * @return The signal to connect to
    * @pre The FocusManager has been initialized.
    */

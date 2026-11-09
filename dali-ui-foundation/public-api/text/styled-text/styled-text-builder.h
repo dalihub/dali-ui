@@ -47,23 +47,27 @@ namespace Text
  * converting byte ranges from UTF-8 string APIs. When building text
  * incrementally, use GetUtf32Length() before and after AppendText() to calculate
  * the range of appended text.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API StyledTextBuilder : public BaseHandle
 {
 public:
   /**
    * @brief Invalid span token returned by PushSpan() on failure.
+   * @SINCE_3_0.0
    */
   static constexpr uint32_t INVALID_SPAN_TOKEN = 0u;
 
   /**
    * @brief Creates an uninitialized StyledTextBuilder handle.
+   * @SINCE_3_0.0
    */
   StyledTextBuilder() = default;
 
   /**
    * @brief Creates an empty StyledTextBuilder.
    *
+   * @SINCE_3_0.0
    * @return A new StyledTextBuilder
    */
   static StyledTextBuilder New();
@@ -71,6 +75,7 @@ public:
   /**
    * @brief Creates a StyledTextBuilder with initial UTF-8 text.
    *
+   * @SINCE_3_0.0
    * @param[in] text The initial UTF-8 text payload
    * @return A new StyledTextBuilder
    */
@@ -79,6 +84,7 @@ public:
   /**
    * @brief Creates a builder initialized from a StyledText snapshot.
    *
+   * @SINCE_3_0.0
    * @param[in] styledText The source snapshot
    * @return A new StyledTextBuilder
    */
@@ -99,6 +105,7 @@ public:
    * is treated as a void element. A matching end tag is ignored, and text after
    * the start tag remains ordinary following text.
    *
+   * @SINCE_3_0.0
    * @param[in] markup The markup string to convert
    * @return A new StyledTextBuilder
    */
@@ -107,6 +114,7 @@ public:
   /**
    * @brief Replaces the text and clears all span attachments.
    *
+   * @SINCE_3_0.0
    * @param[in] text The new text
    */
   void SetText(const Dali::String& text);
@@ -114,6 +122,7 @@ public:
   /**
    * @brief Appends text without extending existing span attachments.
    *
+   * @SINCE_3_0.0
    * @param[in] text The text to append
    */
   void AppendText(const Dali::String& text);
@@ -124,6 +133,7 @@ public:
    * The returned token is local to this builder and remains valid only while
    * the pushed span is still open. 0u is an invalid token.
    *
+   * @SINCE_3_0.0
    * @param[in] span The span payload
    * @return A non-zero token on success, or 0u if validation failed
    */
@@ -134,6 +144,7 @@ public:
    *
    * Empty ranges are closed without creating a span attachment.
    *
+   * @SINCE_3_0.0
    * @return true if an open span was closed
    */
   bool PopSpan();
@@ -144,6 +155,7 @@ public:
    * The token must have been returned by PushSpan() from this builder and must
    * still be open. 0u is an invalid token.
    *
+   * @SINCE_3_0.0
    * @param[in] token The token returned by PushSpan()
    * @return true if the token was found and closed
    */
@@ -163,6 +175,7 @@ public:
    * range without changing its insertion order. The same visual style can be
    * attached to different ranges by creating separate Span handles.
    *
+   * @SINCE_3_0.0
    * @param[in] span The span payload
    * @param[in] utf32StartIndex The inclusive UTF-32 start index
    * @param[in] utf32EndIndex The exclusive UTF-32 end index
@@ -175,6 +188,7 @@ public:
    *
    * The match is based on Span handle identity.
    *
+   * @SINCE_3_0.0
    * @param[in] span The span payload to remove
    * @return true if an attachment was removed
    */
@@ -183,6 +197,7 @@ public:
   /**
    * @brief Removes the attachment at the given index.
    *
+   * @SINCE_3_0.0
    * @param[in] index The attachment index
    * @return true if an attachment was removed
    */
@@ -190,12 +205,14 @@ public:
 
   /**
    * @brief Clears all span attachments.
+   * @SINCE_3_0.0
    */
   void ClearSpans();
 
   /**
    * @brief Gets the current text payload.
    *
+   * @SINCE_3_0.0
    * @return The current text payload
    */
   Dali::String GetText() const;
@@ -206,6 +223,7 @@ public:
    * The returned value is the same unit used by span range indexes. It is not
    * the UTF-8 byte size returned by Dali::String::Size().
    *
+   * @SINCE_3_0.0
    * @return The decoded UTF-32 length
    */
   uint32_t GetUtf32Length() const;
@@ -213,6 +231,7 @@ public:
   /**
    * @brief Gets the number of attached spans.
    *
+   * @SINCE_3_0.0
    * @return The span attachment count
    */
   uint32_t GetSpanCount() const;
@@ -220,6 +239,7 @@ public:
   /**
    * @brief Gets the span payload at the given attachment index.
    *
+   * @SINCE_3_0.0
    * @param[in] index The attachment index
    * @return The span payload, or an empty Span if the index is invalid
    */
@@ -230,6 +250,7 @@ public:
    *
    * The attachment index should be less than GetSpanCount().
    *
+   * @SINCE_3_0.0
    * @param[in] index The attachment index
    * @return The UTF-32 start index
    */
@@ -240,6 +261,7 @@ public:
    *
    * The attachment index should be less than GetSpanCount().
    *
+   * @SINCE_3_0.0
    * @param[in] index The attachment index
    * @return The exclusive UTF-32 end index
    */
@@ -248,6 +270,7 @@ public:
   /**
    * @brief Gets the number of attached annotation spans.
    *
+   * @SINCE_3_0.0
    * @return The annotation span attachment count
    */
   uint32_t GetAnnotationCount() const;
@@ -255,6 +278,7 @@ public:
   /**
    * @brief Gets the annotation span payload at the given annotation index.
    *
+   * @SINCE_3_0.0
    * @param[in] index The annotation index
    * @return The annotation span payload, or an empty AnnotationSpan if the index is invalid
    */
@@ -265,6 +289,7 @@ public:
    *
    * The annotation index should be less than GetAnnotationCount().
    *
+   * @SINCE_3_0.0
    * @param[in] index The annotation index
    * @return The UTF-32 start index
    */
@@ -275,6 +300,7 @@ public:
    *
    * The annotation index should be less than GetAnnotationCount().
    *
+   * @SINCE_3_0.0
    * @param[in] index The annotation index
    * @return The exclusive UTF-32 end index
    */
@@ -283,6 +309,7 @@ public:
   /**
    * @brief Builds an immutable StyledText snapshot.
    *
+   * @SINCE_3_0.0
    * @return A StyledText snapshot
    */
   StyledText Build() const;
@@ -291,6 +318,7 @@ private:
   /**
    * @brief Creates a StyledTextBuilder handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL StyledTextBuilder(BaseObject* impl);

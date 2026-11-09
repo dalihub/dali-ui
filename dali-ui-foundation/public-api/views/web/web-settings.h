@@ -37,43 +37,51 @@ class WebSettingsImpl;
  * A WebSettings handle remains safe to retain after its WebView is destroyed.
  * Operations then return their documented default result without affecting an
  * engine.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API WebSettings : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized WebSettings handle.
+   * @SINCE_3_0.0
    */
   WebSettings();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~WebSettings();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   WebSettings(const WebSettings& settings);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   WebSettings(WebSettings&& settings) noexcept;
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   WebSettings& operator=(const WebSettings& settings);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   WebSettings& operator=(WebSettings&& settings) noexcept;
 
   /**
    * @brief Downcasts a handle to WebSettings.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized WebSettings on success, otherwise an empty handle
    */
@@ -85,6 +93,7 @@ public:
    * This generic extension point allows additional settings to be exposed
    * without adding a dedicated API for every feature.
    *
+   * @SINCE_3_0.0
    * @param[in] feature The feature name
    * @param[in] value The feature value
    * @return True on success, or false when the feature or engine is unavailable
@@ -94,6 +103,7 @@ public:
   /**
    * @brief Gets a string value for an extra web engine feature.
    *
+   * @SINCE_3_0.0
    * @param[in] feature The feature name
    * @return The feature value, or an empty string when unavailable
    */
@@ -102,6 +112,7 @@ public:
   /**
    * @brief Sets whether spatial navigation is enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable spatial navigation
    */
   void SetSpatialNavigationEnabled(bool enabled);
@@ -109,6 +120,7 @@ public:
   /**
    * @brief Gets the default web page font size in pixels.
    *
+   * @SINCE_3_0.0
    * @return The default font size, or 0 when the engine is unavailable
    */
   uint32_t GetDefaultFontSize() const;
@@ -116,6 +128,7 @@ public:
   /**
    * @brief Sets the default web page font size in pixels.
    *
+   * @SINCE_3_0.0
    * @param[in] defaultFontSize The default font size
    */
   void SetDefaultFontSize(uint32_t defaultFontSize);
@@ -126,6 +139,7 @@ public:
    * Disabling web security weakens isolation between web origins and should be
    * limited to trusted content and controlled environments.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable web security
    */
   void SetWebSecurityEnabled(bool enabled);
@@ -135,6 +149,7 @@ public:
    *
    * Unsupported feature names are ignored by the backend.
    *
+   * @SINCE_3_0.0
    * @param[in] feature The feature name
    * @param[in] enabled True to enable the feature
    */
@@ -146,6 +161,7 @@ public:
    * A false result can mean either that the feature is disabled or that the
    * backend does not support the feature name.
    *
+   * @SINCE_3_0.0
    * @param[in] feature The feature name
    * @return True when the feature is supported and enabled
    */

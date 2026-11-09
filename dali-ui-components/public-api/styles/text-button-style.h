@@ -45,6 +45,7 @@ class TextButtonStyleImpl;
 
 /**
  * @brief Style values used to initialize TextButton appearance and layout.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API TextButtonStyle : public UiStyle
 {
@@ -61,6 +62,7 @@ public:
    * The returned style is created from the builder defaults and reused across
    * calls. This function requires UiConfig::Apply().
    *
+   * @SINCE_3_0.0
    * @return The built-in default preset
    */
   static TextButtonStyle DefaultPreset();
@@ -72,6 +74,7 @@ public:
    * sheet. If no override is registered, DefaultPreset() is returned. This
    * function requires UiConfig::Apply().
    *
+   * @SINCE_3_0.0
    * @return The default TextButton style
    */
   static TextButtonStyle Default();
@@ -126,6 +129,7 @@ public: // Not intended for application developers
  * Maximum sizes must be finite and non-negative or UNCONSTRAINED_MAX_SIZE (no upper bound).
  * Build() checks that each axis's minimum does not exceed its constrained maximum, so setters can be called in any order.
  * If Build() fails because of an invalid size relationship, the Builder is not consumed and can be corrected and built again.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API TextButtonStyle::Builder
 {
@@ -201,6 +205,7 @@ public:
 
   /**
    * @brief Builds an immutable style from the configured values.
+   * @SINCE_3_0.0
    * @pre Each axis's minimum size must not exceed its constrained maximum size.
    */
   TextButtonStyle Build() &&;

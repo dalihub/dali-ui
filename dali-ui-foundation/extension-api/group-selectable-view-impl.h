@@ -41,6 +41,7 @@ using GroupSelectableViewImplPtr = IntrusivePtr<GroupSelectableViewImpl>;
  * implementations whose members form a single-selection group should subclass
  * this instead of SelectableViewImpl.
  *
+ * @SINCE_3_0.0
  * @see Dali::Ui::GroupSelectableView
  */
 class DALI_UI_API GroupSelectableViewImpl : public SelectableViewImpl
@@ -49,6 +50,7 @@ public:
   /**
    * @brief Creates a new GroupSelectableViewImpl.
    *
+   * @SINCE_3_0.0
    * @return An intrusive pointer to a newly allocated GroupSelectableViewImpl
    */
   static GroupSelectableViewImplPtr New();
@@ -80,17 +82,20 @@ protected:
   /**
    * @brief Gets the guaranteed GroupSelectableTrait.
    *
+   * @SINCE_3_0.0
    * @return The GroupSelectableTrait attached to this view
    */
   GroupSelectableTrait GetGroupSelectableTrait() const;
 
   /**
    * @brief Constructor.
+   * @SINCE_3_0.0
    */
   GroupSelectableViewImpl();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~GroupSelectableViewImpl() override;
 };

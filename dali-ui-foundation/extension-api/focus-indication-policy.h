@@ -48,6 +48,7 @@ namespace Extension
  * individual View or InputEvent handles if they are needed after the callback.
  * View handles preserve object lifetime, not a snapshot of mutable View state.
  *
+ * @SINCE_3_0.0
  * @note FocusManager owns the implementation on its call stack. Keeping only
  *       an opaque pointer here permits new decision data without changing the
  *       extension ABI or allocating a context body on the heap. Future fields
@@ -64,34 +65,40 @@ public:
 
   /**
    * @brief Gets the previous focused View, or an empty handle if none.
+   * @SINCE_3_0.0
    * @return A reference valid only during the policy invocation
    */
   const Dali::Ui::View& GetPreviousFocusView() const;
 
   /**
    * @brief Gets the View that will be focused after this decision.
+   * @SINCE_3_0.0
    * @return A reference valid only during the policy invocation
    */
   const Dali::Ui::View& GetFocusedView() const;
 
   /**
    * @brief Gets the device associated with this decision.
+   * @SINCE_3_0.0
    */
   FocusDevice GetDevice() const;
 
   /**
    * @brief Gets the input event associated with this decision.
+   * @SINCE_3_0.0
    * @return A reference valid only during the policy invocation
    */
   const InputEvent& GetInputEvent() const;
 
   /**
    * @brief Checks whether the previous View was focus indicated.
+   * @SINCE_3_0.0
    */
   bool IsPreviousFocusIndicated() const;
 
   /**
    * @brief Gets the framework's proposed focus indication state.
+   * @SINCE_3_0.0
    */
   bool IsFocusIndicationProposed() const;
 
@@ -110,6 +117,7 @@ namespace FocusIndicationPolicy
  *
  * The returned value becomes the final FOCUS_INDICATED state.
  *
+ * @SINCE_3_0.0
  * @note This is a plain function pointer. Capturing lambdas and non-static
  *       member functions are not accepted.
  */
@@ -118,6 +126,7 @@ using Function = bool (*)(const FocusIndicationContext& context);
 /**
  * @brief Uses the framework's proposed focus indication state.
  *
+ * @SINCE_3_0.0
  * @param[in] context Information about the focus indication decision
  * @return FocusIndicationContext::IsFocusIndicationProposed()
  */
@@ -129,6 +138,7 @@ DALI_UI_API bool Default(const FocusIndicationContext& context);
  * Explicit focus indication changes, such as
  * FocusManager::ClearFocusIndication(), are not overridden.
  *
+ * @SINCE_3_0.0
  * @param[in] context Information about the focus indication decision
  * @return True
  */

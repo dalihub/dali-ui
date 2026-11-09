@@ -42,18 +42,21 @@ class Conic;
  * @brief Common authored gradient value.
  *
  * Base stores only public authored data. It does not own or reference an internal renderer gradient object.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Base
 {
 public:
   /**
    * @brief Creates a gradient value with Type::NONE.
+   * @SINCE_3_0.0
    */
   Base();
 
   /**
    * @brief Copies a gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The gradient value to copy
    */
   Base(const Base& rhs);
@@ -61,18 +64,21 @@ public:
   /**
    * @brief Moves a gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The gradient value to move from
    */
   Base(Base&& rhs) noexcept;
 
   /**
    * @brief Destroys the gradient value.
+   * @SINCE_3_0.0
    */
   ~Base();
 
   /**
    * @brief Copies a gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The gradient value to copy
    * @return This gradient value
    */
@@ -81,6 +87,7 @@ public:
   /**
    * @brief Moves a gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The gradient value to move from
    * @return This gradient value
    */
@@ -92,6 +99,7 @@ public:
    * This value can be passed to APIs such as Label::SetTextGradient() to remove
    * an authored gradient and restore normal single-color text rendering.
    *
+   * @SINCE_3_0.0
    * @return A shared immutable none gradient value.
    */
   static const Base& None();
@@ -99,6 +107,7 @@ public:
   /**
    * @brief Returns the gradient type.
    *
+   * @SINCE_3_0.0
    * @return The gradient type, or Type::NONE if this value has no gradient type
    */
   Type GetType() const;
@@ -106,6 +115,7 @@ public:
   /**
    * @brief Sets the stop nodes.
    *
+   * @SINCE_3_0.0
    * @param[in] stopNodes The authored stop nodes
    */
   void SetStopNodes(const Dali::Vector<StopNode>& stopNodes);
@@ -113,6 +123,7 @@ public:
   /**
    * @brief Gets the stop nodes.
    *
+   * @SINCE_3_0.0
    * @return The authored stop nodes
    */
   Dali::Vector<StopNode> GetStopNodes() const;
@@ -120,6 +131,7 @@ public:
   /**
    * @brief Sets the stop nodes in a declarative way.
    *
+   * @SINCE_3_0.0
    * @param[in] stopNodes The authored stop nodes
    */
   void SetStopNodes(std::initializer_list<StopNode> stopNodes)
@@ -138,6 +150,7 @@ public:
   /**
    * @brief Sets the gradient coordinate units.
    *
+   * @SINCE_3_0.0
    * @param[in] units The coordinate units
    */
   void SetUnits(Units units);
@@ -145,6 +158,7 @@ public:
   /**
    * @brief Gets the gradient coordinate units.
    *
+   * @SINCE_3_0.0
    * @return The coordinate units
    */
   Units GetUnits() const;
@@ -152,6 +166,7 @@ public:
   /**
    * @brief Sets the spread method.
    *
+   * @SINCE_3_0.0
    * @param[in] spreadMethod The spread method
    */
   void SetSpreadMethod(SpreadMethod spreadMethod);
@@ -159,6 +174,7 @@ public:
   /**
    * @brief Gets the spread method.
    *
+   * @SINCE_3_0.0
    * @return The spread method
    */
   SpreadMethod GetSpreadMethod() const;
@@ -166,6 +182,7 @@ public:
   /**
    * @brief Sets the start offset.
    *
+   * @SINCE_3_0.0
    * @param[in] offset The start offset
    */
   void SetStartOffset(float offset);
@@ -173,6 +190,7 @@ public:
   /**
    * @brief Gets the start offset.
    *
+   * @SINCE_3_0.0
    * @return The start offset
    */
   float GetStartOffset() const;
