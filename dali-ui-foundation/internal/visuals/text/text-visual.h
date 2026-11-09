@@ -44,6 +44,16 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+namespace Text
+{
+namespace Internal
+{
+namespace Gradient
+{
+struct RenderData;
+}
+} //namespace Internal
+} //namespace Text
 namespace Internal
 {
 class TextVisual;
@@ -544,7 +554,6 @@ private:
     int32_t   width;
     int32_t   height;
     uint32_t  offsetHeight;
-    Vector2   transformOffset;
 
     TilingInfo(int32_t initWidth, int32_t initHeight)
     : textPixelData(),
@@ -554,8 +563,7 @@ private:
       revealPixelData(),
       width(initWidth),
       height(initHeight),
-      offsetHeight(0u),
-      transformOffset(0.f, 0.f)
+      offsetHeight(0u)
     {
     }
 
@@ -831,12 +839,15 @@ private:
                         unsigned int textureSetIndex);
 
   /**
-   * @brief Create the text's texture. It will use cached shader feature for text visual.
-   * @param[in] info This is the information you need to create a Tiling.
-   * @param[in] renderer The renderer to which the TextureSet will be added.
-   * @param[in] sampler The sampler.
+   * @brief Prepares a height tile's textures and crops the full visual transform to its raster range.
+   *
+   * @param[in] info The full raster planes and the tile's size and vertical offset in pixels.
+   * @param[in] renderer The primary renderer or the additional tile renderer to populate.
+   * @param[in] sampler The sampler used for the tile's raster textures.
+   * @return True if the tile was appended to the current rendering, or false if a synchronous
+   *         property callback retired or replaced that rendering.
    */
-  void CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sampler& sampler);
+  bool CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sampler& sampler);
 
   /**
    * Create renderer of the text for rendering.
@@ -922,18 +933,21 @@ private:
    * @param[in] textureSize The full-text layout size in UI-scaled local coordinates, before world transforms.
    * @param[in] contentBounds The text content bounds normalized to textureSize.
    * @param[in] uiScale The owning View's effective UI scale, or the scale captured by the async request.
+   * @return True if the rendering remains current, or false if a property callback retired or replaced it.
    */
-  void ApplyTiledGradientUniforms(const Vector2& textureSize, const Vector4& contentBounds, float uiScale);
+  bool ApplyTiledGradientUniforms(const Vector2& textureSize, const Vector4& contentBounds, float uiScale);
 
   /**
    * @brief Distributes resolved gradient uniforms and constraints across height tiles.
    *
-   * The first renderer supplies the full-text geometry. Cached bounds remain in
-   * full-text coordinates; sampling bounds use each tile's actual texture height.
+   * Cached bounds remain in full-text coordinates; sampling bounds use each
+   * tile's actual texture height. Property callbacks may replace the rendering.
    *
+   * @param[in] renderData The resolved full-text geometry and sampling bounds.
    * @param[in] overlay True for the overlay gradient; false for the base gradient.
+   * @return True if the rendering remains current, or false if a property callback retired or replaced it.
    */
-  void ApplyGradientTiling(bool overlay);
+  bool ApplyGradientTiling(const Ui::Text::Internal::Gradient::RenderData& renderData, bool overlay);
 
   /**
    * @brief Gets text textures using the cached shader features.

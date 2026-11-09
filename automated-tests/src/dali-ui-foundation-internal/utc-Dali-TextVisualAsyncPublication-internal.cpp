@@ -4083,10 +4083,10 @@ int UtcDaliTextVisualGradientTilingBoundsAndLookupP(void)
       DALI_TEST_CHECK(textures.GetSampler(1u) == firstTextures.GetSampler(1u));
       DALI_TEST_CHECK(textures.GetTexture(2u) == firstTextures.GetTexture(2u));
       DALI_TEST_CHECK(textures.GetSampler(2u) == firstTextures.GetSampler(2u));
-      const Vector4 expected(0.1f, (0.2f * height - tile * limit) / tileHeight, 0.7f, 0.6f * height / tileHeight);
+      const Vector4 expected(0.1f, (0.2f * static_cast<float>(height) - static_cast<float>(tile * limit)) / tileHeight, 0.7f, 0.6f * static_cast<float>(height) / tileHeight);
       DALI_TEST_EQUALS(renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uTextGradientBounds")), expected, 0.002f, TEST_LOCATION);
-      const Vector4 expectedOverlay(fullOverlay.x, (fullOverlay.y * height - tile * limit) / tileHeight,
-                                    fullOverlay.z, fullOverlay.w * height / tileHeight);
+      const Vector4 expectedOverlay(fullOverlay.x, (fullOverlay.y * static_cast<float>(height) - static_cast<float>(tile * limit)) / tileHeight,
+                                    fullOverlay.z, fullOverlay.w * static_cast<float>(height) / tileHeight);
       DALI_TEST_EQUALS(renderer.GetProperty<Vector4>(renderer.GetPropertyIndex("uTextGradientOverlayBounds")), expectedOverlay, 0.002f, TEST_LOCATION);
       DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientStartPosition")),
                        first.GetProperty<Vector2>(first.GetPropertyIndex("uTextGradientStartPosition")), TEST_LOCATION);
@@ -4099,7 +4099,7 @@ int UtcDaliTextVisualGradientTilingBoundsAndLookupP(void)
   PublishDirect(rendered, MakeTilingParameters(thinHeight), thinBounds);
   auto last = rendered.view.GetRendererAt(2u);
   DALI_TEST_EQUALS(last.GetProperty<Vector4>(last.GetPropertyIndex("uTextGradientBounds")).w,
-                   0.000001f * thinHeight, 0.0000001f, TEST_LOCATION);
+                   0.000001f * static_cast<float>(thinHeight), 0.0000001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -4273,17 +4273,14 @@ int UtcDaliTextVisualGradientTilingTransformIsolationP(void)
       {
         auto       renderer = rendered.view.GetRendererAt(tile);
         const auto policy   = renderer.GetPropertyIndex("visualTransformUseEffectiveScale");
+        DALI_TEST_CHECK(policy != Property::INVALID_INDEX);
+        DALI_TEST_EQUALS(renderer.GetProperty<float>(policy), 0.0f, TEST_LOCATION);
         if(feature == 0u)
         {
-          // Preserve HEAD's additional-tile transform contract, including its
-          // shader default. Global/overlay tiling must not change plain text.
-          DALI_TEST_EQUALS(policy, Property::INVALID_INDEX, TEST_LOCATION);
           DALI_TEST_EQUALS(renderer.GetTextures().GetTextureCount(), 1u, TEST_LOCATION);
         }
         else
         {
-          DALI_TEST_CHECK(policy != Property::INVALID_INDEX);
-          DALI_TEST_EQUALS(renderer.GetProperty<float>(policy), 0.0f, TEST_LOCATION);
           const auto propertyCount = renderer.GetPropertyCount();
           const auto source        = rendered.view.RegisterProperty("isolationOffset", 0.3f);
           UiInternal::TextVisual::SetGradientAnimProperties(rendered.visual, source);
@@ -4294,6 +4291,119 @@ int UtcDaliTextVisualGradientTilingTransformIsolationP(void)
         DALI_TEST_EQUALS(size.y, static_cast<float>(std::min(limit, height - tile * limit)), TEST_LOCATION);
       }
     }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualGradientTilingPolicyReentryP(void)
+{
+  UiTestApplication application;
+  auto              rendered = CreateTextVisual(application);
+  const uint32_t    height   = 2u * Dali::GetMaxTextureSize() + 1u;
+  PublishDirect(rendered, MakeTilingParameters(height), MakeTilingRenderInfo(height));
+  DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 3u, TEST_LOCATION);
+  auto&             impl     = Dali::Ui::GetImplementation(rendered.visual).GetVisualObject();
+  auto              renderer = rendered.view.GetRendererAt(1u);
+  const auto        policy   = renderer.GetPropertyIndex("visualTransformUseEffectiveScale");
+  ConnectionTracker tracker;
+  bool              fired = false;
+  renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value&)
+  {
+    if(index == policy)
+    {
+      fired = true;
+      // Disconnecting destroys the closure, so keep the target on the stack first.
+      auto* target = &impl;
+      tracker.DisconnectAll();
+      target->SetTransformMapUsageForFittingMode(true);
+      target->SetTransformAndSize(Property::Map{}, Vector2(VISUAL_WIDTH, VISUAL_HEIGHT), 1.0f);
+    }
+  });
+  impl.SetTransformMapUsageForFittingMode(false);
+  impl.SetTransformAndSize(Property::Map{}, Vector2(VISUAL_WIDTH, VISUAL_HEIGHT), 1.0f);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(fired);
+  DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 3u, TEST_LOCATION);
+  for(uint32_t tile = 0u; tile < 3u; ++tile)
+  {
+    auto       current = rendered.view.GetRendererAt(tile);
+    const auto index   = current.GetPropertyIndex("visualTransformUseEffectiveScale");
+    DALI_TEST_EQUALS(current.GetProperty<float>(index), 0.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(current.GetCurrentProperty<float>(index), 0.0f, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextVisualGradientTilingCallbackRetirementP(void)
+{
+  UiTestApplication application;
+  for(unsigned action = 0u; action < 5u; ++action)
+  {
+    auto           rendered = CreateTextVisual(application);
+    const uint32_t height   = 3u * Dali::GetMaxTextureSize() + 1u;
+    PublishDirect(rendered, MakeTilingParameters(height), MakeTilingRenderInfo(height));
+    auto&             impl     = Ui::GetImplementation(rendered.visual).GetVisualObject();
+    auto              renderer = rendered.view.GetRendererAt(1u);
+    const auto        policy   = renderer.GetPropertyIndex("visualTransformUseEffectiveScale");
+    ConnectionTracker tracker;
+    bool              fired = false;
+    renderer.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value&)
+    {
+      if(index == policy && !fired)
+      {
+        fired = true;
+        if(action == 0u)
+        {
+          impl.SetTransformMapUsageForFittingMode(false);
+          impl.SetTransformAndSize(Property::Map{}, Vector2(VISUAL_WIDTH, VISUAL_HEIGHT), 1.0f);
+        }
+        else if(action == 1u || action == 2u)
+        {
+          // Keep the tile count and revision for action 2. TextureSet identity
+          // must still distinguish the nested publication from the old one.
+          const uint32_t replacementHeight = action == 1u ? 32u : height;
+          const auto     revision          = UiInternal::TextVisual::GetController(rendered.visual)->GetRenderRevision();
+          const auto     previous          = rendered.view.GetRendererAt(0u).GetTextures();
+          PublishDirect(rendered, MakeTilingParameters(replacementHeight), MakeTilingRenderInfo(replacementHeight));
+          DALI_TEST_EQUALS(UiInternal::TextVisual::GetController(rendered.visual)->GetRenderRevision(), revision, TEST_LOCATION);
+          DALI_TEST_CHECK(rendered.view.GetRendererAt(0u).GetTextures() != previous);
+        }
+        else if(action == 3u)
+        {
+          impl.SetOffScene(rendered.view);
+        }
+        else
+        {
+          impl.SetOffScene(rendered.view);
+          rendered.view.Unparent();
+          rendered.view.Reset();
+        }
+      }
+    });
+    impl.SetTransformMapUsageForFittingMode(false);
+    impl.SetTransformAndSize(Property::Map{}, Vector2(VISUAL_WIDTH, VISUAL_HEIGHT), 1.0f);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(fired);
+    if(action < 3u)
+    {
+      const uint32_t expected = action == 0u ? 4u : action == 1u ? 1u
+                                                                 : 4u;
+      DALI_TEST_EQUALS(rendered.view.GetRendererCount(), expected, TEST_LOCATION);
+      for(uint32_t tile = 0u; tile < expected; ++tile)
+      {
+        auto current = rendered.view.GetRendererAt(tile);
+        DALI_TEST_EQUALS(current.GetCurrentProperty<float>(current.GetPropertyIndex("visualTransformUseEffectiveScale")), action == 0u ? 1.0f : 0.0f, TEST_LOCATION);
+      }
+    }
+    else if(action == 3u)
+    {
+      DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 0u, TEST_LOCATION);
+    }
+    tracker.DisconnectAll();
   }
   END_TEST;
 }
