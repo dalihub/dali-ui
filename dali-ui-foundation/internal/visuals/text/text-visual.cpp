@@ -1079,6 +1079,36 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
     ++textureSetIndex;
   }
 
+  if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
+  {
+    AddTilingTexture(textureSet, info, info.maskPixelData, sampler, textureSetIndex);
+    ++textureSetIndex;
+  }
+
+  // Create each lookup once; every tile's TextureSet retains the shared texture and sampler.
+  const auto addLookup = [this, &textureSet, &textureSetIndex](const Text::Internal::Gradient::Style& style)
+  {
+    if(mRendererList.empty())
+    {
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, style);
+    }
+    else
+    {
+      const TextureSet firstTile = mRendererList.front().GetTextures();
+      textureSet.SetTexture(textureSetIndex, firstTile.GetTexture(textureSetIndex));
+      textureSet.SetSampler(textureSetIndex, firstTile.GetSampler(textureSetIndex));
+      ++textureSetIndex;
+    }
+  };
+  if(mTextShaderFeatureCache.IsEnabledAnyTextGradient())
+  {
+    addLookup(GetTextVisualGradientData(mGradientData)->mTextGradientStyle);
+  }
+  if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
+  {
+    addLookup(GetTextVisualGradientData(mGradientData)->mTextGradientOverlayStyle);
+  }
+
   if(mTextShaderFeatureCache.IsEnabledStyle() && info.stylePixelData)
   {
     AddTilingTexture(textureSet, info, info.stylePixelData, sampler, textureSetIndex);
@@ -1091,7 +1121,8 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
     ++textureSetIndex;
   }
 
-  if(mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor() && info.maskPixelData)
+  if(mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor() &&
+     !mTextShaderFeatureCache.IsEnabledAnyTextGradient() && info.maskPixelData)
   {
     AddTilingTexture(textureSet, info, info.maskPixelData, sampler, textureSetIndex);
     ++textureSetIndex;
@@ -1439,11 +1470,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       IsTextGradientMixedCompositionSupported(renderInfo.size, renderInfo.hasMultipleTextColors,
                                               renderInfo.containsColorGlyph, textGradientStyleBlocksComposition,
                                               renderInfo.styleTextureEnabled, renderInfo.isOverlayStyle,
-                                              renderInfo.isEmbossEnabled, isHeightTiling,
+                                              renderInfo.isEmbossEnabled,
                                               isMarqueeEnabled, isCutoutEnabled) &&
       textGradientMixedPixelDataAvailable;
     const bool textGradientOverlayCompositionEnabled =
-      IsTextGradientOverlayCompositionSupported(renderInfo.size, isHeightTiling, isMarqueeEnabled, isCutoutEnabled);
+      IsTextGradientOverlayCompositionSupported(renderInfo.size, isMarqueeEnabled, isCutoutEnabled);
     const bool featureStyleEnabled =
       (textGradientCompositionEnabled || textGradientMixedCompositionEnabled) ? renderInfo.styleTextureEnabled
                                                                               : renderInfo.styleEnabled;
@@ -1599,6 +1630,37 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     }
     else
     {
+      if(!textGradientMixedPixelDataAvailable &&
+         IsTextGradientMixedCompositionSupported(renderInfo.size, renderInfo.hasMultipleTextColors,
+                                                 renderInfo.containsColorGlyph, textGradientStyleBlocksComposition,
+                                                 renderInfo.styleTextureEnabled, renderInfo.isOverlayStyle,
+                                                 renderInfo.isEmbossEnabled, isMarqueeEnabled, isCutoutEnabled))
+      {
+        // An incomplete tiled mixed result follows the existing pixel-less
+        // completion contract; never publish a shader with missing inputs.
+        DALI_LOG_ERROR("Missing mixed gradient pixels for tiled text\n");
+        // The non-USER_SPACE path has already cleared the list, retaining its default renderer.
+        control.RemoveRenderer(mImpl->mRenderer);
+        RemoveRenderer(control, true);
+        renderInfo.textPixelData.Reset();
+        mAsyncRenderUsesUserSpaceGradient = false;
+        if(mTextLoadingTaskId != publicationTaskId ||
+           mController->GetRenderRevision() != publicationRevision || mControl.GetHandle() != control)
+        {
+          return;
+        }
+        if(mAsyncTextInterface)
+        {
+          mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
+        }
+        if(mTextLoadingTaskId == publicationTaskId &&
+           mController->GetRenderRevision() == publicationRevision && mControl.GetHandle() == control)
+        {
+          ResourceReady(Ui::Visual::ResourceStatus::FAILED);
+        }
+        return;
+      }
+
       // Filter mode needs to be set to linear to produce better quality while scaling.
       Sampler sampler = Sampler::New();
       sampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
@@ -1615,8 +1677,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       // Set information for creating textures.
       TilingInfo info(verifiedWidth, std::min(verifiedHeight, maxTextureSize));
 
-      // Get the pixel data of text.
-      info.textPixelData = renderInfo.textPixelData;
+      // Mixed composition uses the worker's existing preserved foreground and coverage.
+      info.textPixelData = mTextShaderFeatureCache.IsEnabledTextGradientMixed()
+                             ? renderInfo.textGradientPreservedPixelData
+                             : renderInfo.textPixelData;
 
       if(mTextShaderFeatureCache.IsEnabledStyle())
       {
@@ -1628,7 +1692,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         info.overlayStylePixelData = renderInfo.overlayStylePixelData;
       }
 
-      if(mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor())
+      if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
+      {
+        info.maskPixelData = renderInfo.textGradientMaskPixelData;
+      }
+      else if(mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor())
       {
         info.maskPixelData = renderInfo.maskPixelData;
       }
@@ -1687,6 +1755,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         }
 
         verifiedHeight -= maxTextureSize;
+      }
+      if(mTextShaderFeatureCache.IsEnabledAnyTextGradient() || mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
+      {
+        ApplyTiledGradientUniforms(renderInfo.size, renderInfo.textLogicalBounds, parameters.decorationUiScale);
       }
     }
 
@@ -2190,6 +2262,10 @@ void TextVisual::RebindGradientAnimConstraints()
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
 
   BindGradientAnimConstraints(gradientData->mGradientRenderer, startOffsetIndex);
+  if(mRendererList.size() > 1u)
+  {
+    ApplyGradientTiling(false);
+  }
 }
 
 void TextVisual::RebindGradientOverlayAnimConstraints()
@@ -2229,6 +2305,10 @@ void TextVisual::RebindGradientOverlayAnimConstraints()
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME, static_cast<float>(gradientData->mTextGradientOverlayMode));
 
   BindGradientOverlayAnimConstraints(gradientData->mGradientOverlayRenderer, startOffsetIndex);
+  if(mRendererList.size() > 1u)
+  {
+    ApplyGradientTiling(true);
+  }
 }
 
 void TextVisual::BindGradientAnimConstraints(VisualRenderer& renderer,
@@ -2775,7 +2855,7 @@ bool TextVisual::IsTextGradientCompositionSupported(const Vector2& size, bool ha
     return false;
   }
 
-  if(isHeightTiling || isCutoutEnabled)
+  if((isHeightTiling && isMarqueeEnabled) || isCutoutEnabled)
   {
     return false;
   }
@@ -2796,7 +2876,7 @@ bool TextVisual::IsTextGradientCompositionSupported(const Vector2& size, bool ha
 bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bool hasMultipleTextColors,
                                                          bool containsColorGlyph, bool styleBlocksTextGradient,
                                                          bool styleTextureEnabled, bool isOverlayStyle,
-                                                         bool embossEnabled, bool isHeightTiling,
+                                                         bool embossEnabled,
                                                          bool isMarqueeEnabled, bool isCutoutEnabled) const
 {
   (void)styleTextureEnabled;
@@ -2808,7 +2888,7 @@ bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bo
     return false;
   }
 
-  if(isHeightTiling || isMarqueeEnabled || isCutoutEnabled)
+  if(isMarqueeEnabled || isCutoutEnabled)
   {
     return false;
   }
@@ -2828,7 +2908,7 @@ bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bo
   return true;
 }
 
-bool TextVisual::IsTextGradientOverlayCompositionSupported(const Vector2& size, bool isHeightTiling,
+bool TextVisual::IsTextGradientOverlayCompositionSupported(const Vector2& size,
                                                            bool isMarqueeEnabled, bool isCutoutEnabled) const
 {
   const auto* gradientData = GetTextVisualGradientData(mGradientData);
@@ -2837,7 +2917,7 @@ bool TextVisual::IsTextGradientOverlayCompositionSupported(const Vector2& size, 
     return false;
   }
 
-  if(isHeightTiling || isMarqueeEnabled || isCutoutEnabled)
+  if(isMarqueeEnabled || isCutoutEnabled)
   {
     return false;
   }
@@ -2994,6 +3074,102 @@ void TextVisual::ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, cons
   BindGradientOverlayAnimConstraints(renderer, startOffsetIndex);
 }
 
+void TextVisual::ApplyTiledGradientUniforms(const Vector2& textureSize, const Vector4& contentBounds, float uiScale)
+{
+  for(auto& renderer : mRendererList)
+  {
+    if(renderer != mImpl->mRenderer)
+    {
+      // Match the first renderer's policy to avoid scaling fitted layout coordinates twice.
+      renderer.RegisterUniqueProperty("visualTransformUseEffectiveScale", IsTransformMapSetForFittingMode() ? 0.0f : 1.0f);
+    }
+  }
+  if(mTextShaderFeatureCache.IsEnabledAnyTextGradient())
+  {
+    ApplyTextGradientUniforms(mImpl->mRenderer, textureSize, ResolveTextGradientBounds(textureSize, contentBounds), uiScale);
+    ApplyGradientTiling(false);
+  }
+  if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
+  {
+    ApplyTextGradientOverlayUniforms(mImpl->mRenderer, textureSize, ResolveTextGradientOverlayBounds(textureSize, contentBounds), uiScale);
+    ApplyGradientTiling(true);
+  }
+}
+
+void TextVisual::ApplyGradientTiling(bool overlay)
+{
+  auto&          gradientData  = *GetTextVisualGradientData(mGradientData);
+  const Vector4  fullBounds    = overlay ? gradientData.mLastGradientOverlayBounds : gradientData.mLastGradientBounds;
+  VisualRenderer firstRenderer = overlay ? gradientData.mGradientOverlayRenderer : gradientData.mGradientRenderer;
+  if(!firstRenderer)
+  {
+    return;
+  }
+
+  static constexpr const char* baseProperties[] = {
+    UNIFORM_TEXT_GRADIENT_START_POSITION_NAME,
+    UNIFORM_TEXT_GRADIENT_END_POSITION_NAME,
+    UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME,
+    UNIFORM_TEXT_GRADIENT_EVALUATION_MODE_NAME,
+    UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME,
+    UNIFORM_TEXT_GRADIENT_EVALUATION_SCALE_NAME,
+    UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME,
+    UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME,
+    UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME};
+  static constexpr const char* overlayProperties[] = {
+    UNIFORM_TEXT_GRADIENT_OVERLAY_START_POSITION_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_END_POSITION_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_MODE_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_SCALE_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME,
+    UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME};
+  const auto* properties      = overlay ? overlayProperties : baseProperties;
+  const auto  count           = overlay ? sizeof(overlayProperties) / sizeof(overlayProperties[0])
+                                        : sizeof(baseProperties) / sizeof(baseProperties[0]);
+  const char* boundsName      = overlay ? UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME : UNIFORM_TEXT_GRADIENT_BOUNDS_NAME;
+  const char* startOffsetName = overlay ? UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME : UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME;
+
+  double fullHeight = 0.0;
+  for(const auto& renderer : mRendererList)
+  {
+    fullHeight += renderer.GetTextures().GetTexture(0u).GetHeight();
+  }
+  double tileOffset = 0.0;
+  for(auto& renderer : mRendererList)
+  {
+    if(renderer != firstRenderer)
+    {
+      for(size_t i = 0u; i < count; ++i)
+      {
+        Text::Internal::Gradient::SetRendererProperty(renderer, properties[i], firstRenderer.GetProperty(firstRenderer.GetPropertyIndex(properties[i])));
+      }
+      // Each tile needs its own constraint to follow the same animated source.
+      const Property::Index startOffsetIndex = renderer.GetPropertyIndex(startOffsetName);
+      if(overlay)
+      {
+        BindGradientOverlayAnimConstraints(renderer, startOffsetIndex);
+      }
+      else
+      {
+        BindGradientAnimConstraints(renderer, startOffsetIndex);
+      }
+    }
+    const double tileHeight = renderer.GetTextures().GetTexture(0u).GetHeight();
+    // Match the fragment shader's denominator clamp before converting to tile UVs.
+    // Width is unchanged by height tiling, so keep its authored rounding intact.
+    // Keep cached full-text bounds unchanged so rebinding cannot accumulate tile offsets.
+    Vector4 tileBounds = fullBounds;
+    tileBounds.y       = static_cast<float>((static_cast<double>(fullBounds.y) * fullHeight - tileOffset) / tileHeight);
+    tileBounds.w       = static_cast<float>(static_cast<double>(std::max(fullBounds.w, 0.000001f)) * fullHeight / tileHeight);
+    Text::Internal::Gradient::SetRendererProperty(renderer, boundsName, tileBounds);
+    tileOffset += tileHeight;
+  }
+}
+
 void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultipleTextColors, bool containsColorGlyph,
                              bool styleEnabled, bool styleTextureEnabled, bool styleBlocksTextGradient,
                              bool isOverlayStyle, bool embossEnabled)
@@ -3022,10 +3198,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
                                        isMarqueeEnabled, mController->IsTextCutout());
   const bool textGradientMixedCompositionEnabled =
     IsTextGradientMixedCompositionSupported(size, hasMultipleTextColors, containsColorGlyph, textGradientStyleBlocksComposition,
-                                            styleTextureEnabled, isOverlayStyle, embossEnabled, isHeightTiling,
+                                            styleTextureEnabled, isOverlayStyle, embossEnabled,
                                             isMarqueeEnabled, mController->IsTextCutout());
   const bool textGradientOverlayCompositionEnabled =
-    IsTextGradientOverlayCompositionSupported(size, isHeightTiling, isMarqueeEnabled, mController->IsTextCutout());
+    IsTextGradientOverlayCompositionSupported(size, isMarqueeEnabled, mController->IsTextCutout());
   const bool featureStyleEnabled =
     (textGradientCompositionEnabled || textGradientMixedCompositionEnabled) ? styleTextureEnabled
                                                                             : styleEnabled;
@@ -3113,8 +3289,9 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     uint64_t                              replacementSourceRevision = 0u;
 
     // Create a texture for the text without any styles
-    PixelData data =
-      mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat, Size::ZERO, context);
+    PixelData data = mTextShaderFeatureCache.IsEnabledTextGradientMixed()
+                       ? mTypesetter->RenderTextGradientPreserved(size, textDirection, false, Pixel::RGBA8888, Size::ZERO, context)
+                       : mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat, Size::ZERO, context);
 
     if(textRevealEnabled)
     {
@@ -3144,7 +3321,11 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
         mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE, false, Pixel::RGBA8888);
     }
 
-    if(mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor())
+    if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
+    {
+      info.maskPixelData = mTypesetter->RenderTextGradientMask(size, textDirection, false, Pixel::L8);
+    }
+    else if(mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor())
     {
       // Create a L8 texture as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
       info.maskPixelData = mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
@@ -3204,6 +3385,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
       }
 
       verifiedHeight -= maxTextureSize;
+    }
+    if(mTextShaderFeatureCache.IsEnabledAnyTextGradient() || mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
+    {
+      ApplyTiledGradientUniforms(size, CalculateGradientContentBounds(size), mController->GetUiScale());
     }
     if(mTextShaderFeatureCache.IsEnabledTextReveal())
     {
