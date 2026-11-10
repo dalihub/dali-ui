@@ -105,8 +105,6 @@ public:
   {
     VIEW_BEHAVIOUR_DEFAULT = 0,      ///< Default behaviour: Visuals are enabled. @SINCE_3_0.0
     DISABLE_VISUALS        = 1 << 0, ///< True if view should not use visuals @SINCE_3_0.0
-
-    LAST_VIEW_BEHAVIOUR_FLAG
   };
 
 public:
@@ -118,6 +116,10 @@ public:
   // virtual in this class -- public and protected sections alike --
   // defines the slot order, and the base class list (order included)
   // is part of the same frozen ABI.
+  //
+  // The object layout is frozen with it: mImpl is the ONLY data member,
+  // because subclass member offsets depend on sizeof(ViewImpl). Never
+  // add a data member here; extend Internal::ViewDataImpl instead.
   // ============================================================
 
   // Resource & offscreen-rendering queries
@@ -256,6 +258,20 @@ public:
    * @return true if this view supplied the value
    */
   virtual bool OnAccessibilityRequestValue(Dali::String& value);
+
+  /**
+   * @brief Called when this View may supply a fallback accessibility value.
+   *
+   * This method is called only when OnAccessibilityRequestValue() did not
+   * handle the request and the explicit accessibility value is empty.
+   * Returning true accepts @p value as the final default, including an
+   * intentionally empty value. Returning false leaves the accessible value empty.
+   *
+   * @SINCE_3_0.0
+   * @param[out] value The default value
+   * @return true if this view supplied the default, false to leave the value empty
+   */
+  virtual bool OnAccessibilityRequestDefaultValue(Dali::String& value);
 
 public: // Non-virtual API (safe to reorder / extend)
   // Creation & initialization
@@ -1185,8 +1201,15 @@ public:
   /**
    * @brief Retrieves the extension for this view.
    *
-   * The overrides above fill dali-core base-class slots and introduce none.
-   * New virtual hooks are appended after this existing extension slot.
+   * The overrides above fill dali-core base-class slots and introduce none,
+   * so this is the LAST virtual of this class: the final slot of the frozen
+   * vtable. Keep it last. Until the release that first ships this class
+   * (DALi 3.0.0) freezes the vtable, a new virtual hook is added to its
+   * category section above, since every repo rebuilds together. After the
+   * freeze NO virtual may be added anywhere in this class, not even appended
+   * after this one: the appended slot would collide with the first own
+   * virtual of any subclass binary that has not been rebuilt. Post-freeze
+   * hooks go on the Extension interface returned here.
    *
    * @SINCE_3_0.0
    * @return The extension if available, nullptr otherwise
@@ -1195,20 +1218,6 @@ public:
   {
     return nullptr;
   }
-
-  /**
-   * @brief Called when this View may supply a fallback accessibility value.
-   *
-   * This method is called only when OnAccessibilityRequestValue() did not
-   * handle the request and the explicit accessibility value is empty.
-   * Returning true accepts @p value as the final default, including an
-   * intentionally empty value. Returning false leaves the accessible value empty.
-   *
-   * @SINCE_3_0.0
-   * @param[out] value The default value
-   * @return true if this view supplied the default, false to leave the value empty
-   */
-  virtual bool OnAccessibilityRequestDefaultValue(Dali::String& value);
 
 protected:
   // ============================================================
@@ -1348,6 +1357,11 @@ private:
   ViewImpl& operator=(const ViewImpl&) = delete;
   ViewImpl& operator=(ViewImpl&&)      = delete;
 
+  // The color-binding helpers below are called from the SetColorBinding
+  // templates above, which are inlined into other DSOs: they are exported
+  // ABI despite being private. Do not change their signatures or stop
+  // exporting them.
+
   /**
    * @brief Updates or clears an existing color binding.
    * @SINCE_3_0.0
@@ -1365,7 +1379,7 @@ private:
   void SetColorBindingInternal(StringView bindingId, const Gradient::Base& gradient, Callback<void(const Gradient::Base&)> callback);
   void ClearGradientColorBinding(StringView bindingId);
 
-  Internal::ViewDataImpl* mImpl;
+  Internal::ViewDataImpl* mImpl; ///< The ONLY data member -- see the frozen-ABI WARNING at the top of the class; extend ViewDataImpl instead of adding members here.
 };
 
 // Helpers for public-api forwarding methods

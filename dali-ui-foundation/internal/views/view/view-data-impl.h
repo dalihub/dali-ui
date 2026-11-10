@@ -2188,7 +2188,12 @@ private:
   /// costs exactly one byte.
   bool mKeyEventDispatchInProgress; ///< True while this view's key event dispatch is on the stack; guards unsupported same-view re-entrancy.
 
-  static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG)>::value + 1;
+  /// Width of the mFlags bit-field, anchored on the HIGHEST ViewBehaviour flag:
+  /// one bit per defined flag, plus one spare bit because ViewBehaviour has no
+  /// fixed underlying type, so the bit-field may be signed on some ABIs and the
+  /// top flag must not occupy the sign bit. Update the anchor when a higher
+  /// flag is added.
+  static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::DISABLE_VISUALS)>::value + 2;
   ViewImpl::ViewBehaviour   mFlags : VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
 
   // Property registrations access private methods and data of ViewImpl and ViewDataImpl.
