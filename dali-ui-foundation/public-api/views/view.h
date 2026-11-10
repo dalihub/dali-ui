@@ -101,6 +101,15 @@ public: // Property & enumeration declarations
     ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX   = Ui::VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX,
   };
 
+  // ============================================================
+  // ABI-frozen property indices
+  // WARNING: These enum values are compiled into application binaries.
+  // Each block (event-side from PROPERTY_START_INDEX, animatable from
+  // ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX) is APPEND-ONLY:
+  // add a new property only at the END of its block. Never insert,
+  // reorder or remove an entry, and never move a block's start anchor.
+  // ============================================================
+
   /**
    * @brief Enumeration for the instance of properties belonging to the View class.
    * @SINCE_3_0.0
@@ -1671,6 +1680,12 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    * retrieved from another translation unit, because they may not have a stable
    * cross-translation-unit type identity.
    *
+   * @note ABI: the attachment templates (SetAttachment, GetAttachment,
+   * DetachAttachment) are inlined into application binaries together with
+   * their storage convention -- the UniqueAny holds a Dali::UniquePtr<T>.
+   * That convention is frozen: changing it would desynchronise binaries
+   * built against older headers without any build-time error.
+   *
    * @param[in] id The key to identify the attachment
    * @param[in] data The data whose ownership is transferred to this View
    */
@@ -3098,6 +3113,9 @@ public: // Templates for Deriving Classes
   }
 
 private:
+  // Called from the attachment templates above, which are inlined into
+  // application binaries: exported ABI despite being private. Do not
+  // change these signatures or stop exporting them.
   UniqueAny*       GetAttachmentInternal(AttachmentId id);
   const UniqueAny* GetAttachmentInternal(AttachmentId id) const;
   UniqueAny        DetachAttachmentInternal(AttachmentId id);
