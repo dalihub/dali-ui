@@ -1616,7 +1616,6 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   // @ANIMATABLE_MANUAL(ScaleX, float, 3_0.0)
   // @ANIMATABLE_MANUAL(ScaleY, float, 3_0.0)
   // @ANIMATABLE_MANUAL(ColorMultiplier, Vector4, 3_0.0)
-  // @ANIMATABLE_MANUAL(Color, Vector4, 3_0.0)
   // @ANIMATABLE_MANUAL(Opacity, float, 3_0.0)
 
   DALI_UI_VIEW_WITH(View)

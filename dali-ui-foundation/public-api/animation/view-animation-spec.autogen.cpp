@@ -295,18 +295,6 @@ ViewAnimationSpec& ViewAnimationSpec::ColorMultiplierBy(const Vector4& relative,
   return *this;
 }
 
-ViewAnimationSpec& ViewAnimationSpec::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyColorTo);
-  return *this;
-}
-
-ViewAnimationSpec& ViewAnimationSpec::ColorBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyColorBy);
-  return *this;
-}
-
 ViewAnimationSpec& ViewAnimationSpec::Opacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyOpacityTo);

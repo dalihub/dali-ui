@@ -303,20 +303,6 @@ ViewAnimationBridge& ViewAnimationBridge::ColorMultiplierBy(const Vector4& relat
   return *this;
 }
 
-ViewAnimationBridge& ViewAnimationBridge::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  Internal::ViewAnimationSpecImpl::ApplyColorTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::ColorBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  Internal::ViewAnimationSpecImpl::ApplyColorBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
-  return *this;
-}
-
 ViewAnimationBridge& ViewAnimationBridge::Opacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
