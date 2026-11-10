@@ -43,9 +43,14 @@ class LayoutImpl;
  *
  * Add() appends. InsertAbove/InsertBelow position a child relative to an
  * existing sibling and accept both a child that is already a child of this
- * layout (a reorder) and a newly created one (a fresh insert); either way the
- * child takes the logical (layout) position matching its resulting actor
- * position, skipping non-View actor children and in-flight EXIT ghosts.
+ * layout (a reorder) and a newly created one (a fresh insert). Either way the
+ * logical (layout) order then follows the resulting actor order, skipping
+ * non-View actor children and in-flight EXIT ghosts, except that a fresh
+ * insert that leaves the child last only appends it, like Add(). The two
+ * orders can still differ, for example after
+ * Extension::View::RaisePreservingLayout() or one of the other five
+ * ...PreservingLayout() functions; see RaisePreservingLayout() for the cases
+ * and for when the orders agree again.
  * @SINCE_3_0.0
  */
 class DALI_UI_API Layout : public View

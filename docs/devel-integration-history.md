@@ -415,3 +415,46 @@ UTC는 deprecated 멤버도 계속 검증하고, Public API만 사용하는 text
 | Before (deprecated) | After |
 |---|---|
 | `ViewImpl::GetEffectiveScale()` | `Extension::View::GetEffectiveLayoutScale(viewImpl)` |
+
+## View sibling-order PRESERVE → Extension::View::...PreservingLayout()
+
+`LayoutOrderPolicy`를 받는 `View`/`ViewImpl`의 `Raise()`, `Lower()`, `RaiseToTop()`,
+`LowerToBottom()`, `RaiseAbove()`, `LowerBelow()` 오버로드와 `LayoutOrderPolicy` 열거형은 계속
+deprecated이며 `@deprecated` 안내가 바뀌었다. 이 오버로드들의 릴리스된 심볼과 시그니처는 그대로
+유지되고, 동작은 아래에 정리한 자식 목록 관리 변경 세 가지를 제외하면 같다. `UPDATE`의 대체는
+상속된 `Dali::Actor` 호출이고, `PRESERVE`의 대체는 extension API에 새로 추가한 여섯
+함수(`dali-ui-foundation/extension-api/view.h`의 `Extension::View::RaisePreservingLayout()`,
+`LowerPreservingLayout()`, `RaiseToTopPreservingLayout()`, `LowerToBottomPreservingLayout()`,
+`RaiseAbovePreservingLayout()`, `LowerBelowPreservingLayout()`)이다. deprecated `PRESERVE` 분기는
+이 함수들을 그대로 호출하므로 동작이 같다. `UPDATE`의 `RaiseAbove()`/`LowerBelow()`는 deprecated
+오버로드가 빈 `target`을 무시하지만 상속된 `Dali::Actor` 호출은 빈 `target`에서 assertion이
+발생하므로 `target`을 먼저 확인한다. 2.5.46.11678의 안내가 `PRESERVE` 대신 권하던
+`Actor::Property::DEPTH_INDEX`는 더 이상 `PRESERVE`의 대체 수단으로 안내하지 않으며, 액터 순서,
+레이아웃 순서와 독립인 그리기 순서 계층으로만 설명한다. 라이브러리, 컴포넌트, 샘플, manual
+test에는 `LayoutOrderPolicy`를 쓰는 코드가 없고, UTC는 deprecated 오버로드도 계속 검증한다.
+`ViewImpl` 하위 클래스 안에서는
+`Ui::Extension::View::RaisePreservingLayout(Ui::View::DownCast(Self()))`처럼 호출한다(한정자 없는
+`Extension::`은 `CustomActorImpl::Extension`을 가리킨다). 자세한 내용은
+`docs/view-sibling-order-migration.md`에 정리했다.
+
+이번 변경으로 자식 목록 관리에서 바뀐 동작은 다음과 같다.
+
+- 새 자식을 `InsertAbove()`/`InsertBelow()`로 마지막이 아닌 위치에 넣으면 레이아웃 순서 전체가 액터
+  순서를 따른다. 이전에는 새 자식의 위치만 계산했다. 두 순서가 같던 부모에서는 결과가 같다.
+- `PRESERVE` 또는 `...PreservingLayout()` 호출 중 `ChildOrderChangedSignal` 콜백에서 추가하거나 제거한
+  자식이 레이아웃 자식 목록에 반영된다.
+- 자식을 부모에 붙이는 도중 실행된 콜백(예: 그 자식의 `SceneConnectedSignal()` 콜백)이 자식을 다시
+  제거하면, 그 자식은 레이아웃 자식 목록에 남지 않는다.
+
+| Before (deprecated) | After |
+|---|---|
+| `view.Raise(LayoutOrderPolicy::UPDATE)` (`Lower`, `RaiseToTop`, `LowerToBottom`도 같음) | `view.Raise()` |
+| `view.RaiseAbove(target, LayoutOrderPolicy::UPDATE)` (`LowerBelow`도 같음) | `if(target) { view.RaiseAbove(target); }` |
+| `view.Raise(LayoutOrderPolicy::PRESERVE)` | `Extension::View::RaisePreservingLayout(view)` |
+| `view.Lower(LayoutOrderPolicy::PRESERVE)` | `Extension::View::LowerPreservingLayout(view)` |
+| `view.RaiseToTop(LayoutOrderPolicy::PRESERVE)` | `Extension::View::RaiseToTopPreservingLayout(view)` |
+| `view.LowerToBottom(LayoutOrderPolicy::PRESERVE)` | `Extension::View::LowerToBottomPreservingLayout(view)` |
+| `view.RaiseAbove(target, LayoutOrderPolicy::PRESERVE)` | `Extension::View::RaiseAbovePreservingLayout(view, target)` |
+| `view.LowerBelow(target, LayoutOrderPolicy::PRESERVE)` | `Extension::View::LowerBelowPreservingLayout(view, target)` |
+| `ViewImpl` 안의 `Raise(Ui::LayoutOrderPolicy::UPDATE)` / `Raise(Ui::LayoutOrderPolicy::PRESERVE)` (`Lower`, `RaiseToTop`, `LowerToBottom`도 같음) | `Self().Raise()` / `Ui::Extension::View::RaisePreservingLayout(Ui::View::DownCast(Self()))` |
+| `ViewImpl` 안의 `RaiseAbove(target, Ui::LayoutOrderPolicy::UPDATE)` / `RaiseAbove(target, Ui::LayoutOrderPolicy::PRESERVE)` (`LowerBelow`도 같음) | `if(target) { Self().RaiseAbove(target); }` / `Ui::Extension::View::RaiseAbovePreservingLayout(Ui::View::DownCast(Self()), target)` |

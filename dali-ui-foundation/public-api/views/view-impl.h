@@ -757,11 +757,12 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Raises the view one step above its immediate next sibling.
    *
-   * @deprecated Use Self().Raise() or Self().SetDepthIndex() instead; this overload will be
-   * removed. An unqualified Raise() does not compile in a ViewImpl subclass. Replace
-   * Raise(Ui::LayoutOrderPolicy::UPDATE) with Self().Raise(); for
-   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of Ui::View::Raise(LayoutOrderPolicy)
-   * to Self().
+   * @deprecated Use Self().Raise() or Ui::Extension::View::RaisePreservingLayout() instead; this
+   * overload will be removed. An unqualified Raise() does not compile in a ViewImpl subclass.
+   * Replace Raise(Ui::LayoutOrderPolicy::UPDATE) with Self().Raise() and
+   * Raise(Ui::LayoutOrderPolicy::PRESERVE) with
+   * Ui::Extension::View::RaisePreservingLayout(Ui::View::DownCast(Self())); keep the Ui::
+   * qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
    *
    * @SINCE_3_0.0
    * @param[in] policy See Ui::View::Raise(LayoutOrderPolicy).
@@ -771,11 +772,12 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Lowers the view one step below its immediate previous sibling.
    *
-   * @deprecated Use Self().Lower() or Self().SetDepthIndex() instead; this overload will be
-   * removed. An unqualified Lower() does not compile in a ViewImpl subclass. Replace
-   * Lower(Ui::LayoutOrderPolicy::UPDATE) with Self().Lower(); for
-   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of Ui::View::Lower(LayoutOrderPolicy)
-   * to Self().
+   * @deprecated Use Self().Lower() or Ui::Extension::View::LowerPreservingLayout() instead; this
+   * overload will be removed. An unqualified Lower() does not compile in a ViewImpl subclass.
+   * Replace Lower(Ui::LayoutOrderPolicy::UPDATE) with Self().Lower() and
+   * Lower(Ui::LayoutOrderPolicy::PRESERVE) with
+   * Ui::Extension::View::LowerPreservingLayout(Ui::View::DownCast(Self())); keep the Ui::
+   * qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
    *
    * @SINCE_3_0.0
    * @param[in] policy See Ui::View::Lower(LayoutOrderPolicy).
@@ -785,11 +787,12 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Raises the view to the top of its sibling list.
    *
-   * @deprecated Use Self().RaiseToTop() or Self().SetDepthIndex() instead; this overload
-   * will be removed. An unqualified RaiseToTop() does not compile in a ViewImpl subclass.
-   * Replace RaiseToTop(Ui::LayoutOrderPolicy::UPDATE) with Self().RaiseToTop(); for
-   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
-   * Ui::View::RaiseToTop(LayoutOrderPolicy) to Self().
+   * @deprecated Use Self().RaiseToTop() or Ui::Extension::View::RaiseToTopPreservingLayout()
+   * instead; this overload will be removed. An unqualified RaiseToTop() does not compile in a
+   * ViewImpl subclass. Replace RaiseToTop(Ui::LayoutOrderPolicy::UPDATE) with
+   * Self().RaiseToTop() and RaiseToTop(Ui::LayoutOrderPolicy::PRESERVE) with
+   * Ui::Extension::View::RaiseToTopPreservingLayout(Ui::View::DownCast(Self())); keep the Ui::
+   * qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
    *
    * @SINCE_3_0.0
    * @param[in] policy See Ui::View::RaiseToTop(LayoutOrderPolicy).
@@ -799,11 +802,13 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Lowers the view to the bottom of its sibling list.
    *
-   * @deprecated Use Self().LowerToBottom() or Self().SetDepthIndex() instead; this overload
-   * will be removed. An unqualified LowerToBottom() does not compile in a ViewImpl subclass.
-   * Replace LowerToBottom(Ui::LayoutOrderPolicy::UPDATE) with Self().LowerToBottom(); for
-   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
-   * Ui::View::LowerToBottom(LayoutOrderPolicy) to Self().
+   * @deprecated Use Self().LowerToBottom() or
+   * Ui::Extension::View::LowerToBottomPreservingLayout() instead; this overload will be
+   * removed. An unqualified LowerToBottom() does not compile in a ViewImpl subclass. Replace
+   * LowerToBottom(Ui::LayoutOrderPolicy::UPDATE) with Self().LowerToBottom() and
+   * LowerToBottom(Ui::LayoutOrderPolicy::PRESERVE) with
+   * Ui::Extension::View::LowerToBottomPreservingLayout(Ui::View::DownCast(Self())); keep the
+   * Ui:: qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
    *
    * @SINCE_3_0.0
    * @param[in] policy See Ui::View::LowerToBottom(LayoutOrderPolicy).
@@ -813,12 +818,13 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Raises the view above the given target sibling.
    *
-   * @deprecated Use Self().RaiseAbove() or Self().SetDepthIndex() instead; this overload
-   * will be removed. An unqualified RaiseAbove() does not compile in a ViewImpl subclass.
-   * Replace RaiseAbove(target, Ui::LayoutOrderPolicy::UPDATE) with
-   * Self().RaiseAbove(target) after checking that @p target is not empty; for
-   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
-   * Ui::View::RaiseAbove(View, LayoutOrderPolicy) to Self().
+   * @deprecated Use Self().RaiseAbove() or Ui::Extension::View::RaiseAbovePreservingLayout()
+   * instead; this overload will be removed. An unqualified RaiseAbove() does not compile in a
+   * ViewImpl subclass. Replace RaiseAbove(target, Ui::LayoutOrderPolicy::UPDATE) with
+   * Self().RaiseAbove(target) after checking that @p target is not empty, and
+   * RaiseAbove(target, Ui::LayoutOrderPolicy::PRESERVE) with
+   * Ui::Extension::View::RaiseAbovePreservingLayout(Ui::View::DownCast(Self()), target); keep the
+   * Ui:: qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
    *
    * @SINCE_3_0.0
    * @param[in] target See Ui::View::RaiseAbove(View, LayoutOrderPolicy).
@@ -829,12 +835,13 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Lowers the view below the given target sibling.
    *
-   * @deprecated Use Self().LowerBelow() or Self().SetDepthIndex() instead; this overload
-   * will be removed. An unqualified LowerBelow() does not compile in a ViewImpl subclass.
-   * Replace LowerBelow(target, Ui::LayoutOrderPolicy::UPDATE) with
-   * Self().LowerBelow(target) after checking that @p target is not empty; for
-   * Ui::LayoutOrderPolicy::PRESERVE apply the rules of
-   * Ui::View::LowerBelow(View, LayoutOrderPolicy) to Self().
+   * @deprecated Use Self().LowerBelow() or Ui::Extension::View::LowerBelowPreservingLayout()
+   * instead; this overload will be removed. An unqualified LowerBelow() does not compile in a
+   * ViewImpl subclass. Replace LowerBelow(target, Ui::LayoutOrderPolicy::UPDATE) with
+   * Self().LowerBelow(target) after checking that @p target is not empty, and
+   * LowerBelow(target, Ui::LayoutOrderPolicy::PRESERVE) with
+   * Ui::Extension::View::LowerBelowPreservingLayout(Ui::View::DownCast(Self()), target); keep the
+   * Ui:: qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
    *
    * @SINCE_3_0.0
    * @param[in] target See Ui::View::LowerBelow(View, LayoutOrderPolicy).

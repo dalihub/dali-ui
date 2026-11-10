@@ -128,27 +128,47 @@ namespace Ui
 namespace Internal
 {
 
+// Keeps the parent View of a child from rebuilding its logical child order (mChildren) out of
+// the ChildOrderChangedSignal that a sibling-order call on that child emits, so that call changes
+// the actor order only. This is the whole of the ...PreservingLayout() behaviour, shared by
+// Extension::View and the deprecated LayoutOrderPolicy::PRESERVE overloads.
+//
+// It suppresses OnChildOrderChanged ONLY. A child that a ChildOrderChangedSignal callback adds
+// to or removes from the parent while the guard is alive still goes through OnChildAdded /
+// OnChildRemoved, so mChildren keeps the right membership; a fresh insert there that does not
+// leave the child last even synchronises the whole order (see OnChildAdded). Nothing is
+// suppressed when the child has no parent or its parent is not a Ui::View: the call is then the
+// plain Actor call. The parent handle keeps the parent, and so its ViewDataImpl, alive while the
+// guard is; the previous flag is restored, so guards nest.
 class ViewDataImpl::ScopedSkipChildrenUpdate
 {
 public:
-  explicit ScopedSkipChildrenUpdate(ViewDataImpl& viewDataImpl)
-  : mViewDataImpl(viewDataImpl),
-    mPrevious(viewDataImpl.mSkipChildrenUpdate)
+  explicit ScopedSkipChildrenUpdate(ViewDataImpl& childData)
+  : mParent(Ui::View::DownCast(childData.mViewImpl.Self().GetParent())),
+    mParentData(mParent ? &ViewDataImpl::Get(Ui::GetImpl(mParent)) : nullptr),
+    mPrevious(mParentData ? mParentData->mSkipChildrenUpdate : false)
   {
-    mViewDataImpl.mSkipChildrenUpdate = true;
+    if(mParentData)
+    {
+      mParentData->mSkipChildrenUpdate = true;
+    }
   }
 
   ~ScopedSkipChildrenUpdate()
   {
-    mViewDataImpl.mSkipChildrenUpdate = mPrevious;
+    if(mParentData)
+    {
+      mParentData->mSkipChildrenUpdate = mPrevious;
+    }
   }
 
   ScopedSkipChildrenUpdate(const ScopedSkipChildrenUpdate&)            = delete;
   ScopedSkipChildrenUpdate& operator=(const ScopedSkipChildrenUpdate&) = delete;
 
 private:
-  ViewDataImpl& mViewDataImpl;
-  bool          mPrevious;
+  Ui::View      mParent;     ///< Keeps the parent alive; empty when it is not a Ui::View.
+  ViewDataImpl* mParentData; ///< The parent's data, or nullptr when nothing is suppressed.
+  bool          mPrevious;   ///< The parent's flag before this guard, restored on exit.
 };
 
 namespace
@@ -3414,7 +3434,7 @@ void ViewDataImpl::SetLayoutTransition(LayoutTransition transition)
 {
   // Detach: drop any pending ENTER / REORDER / REMOVE markers. Records
   // are only produced while a transition is attached (see OnChildAdd /
-  // OnChildOrderChanged / Remove); a previously attached
+  // SyncChildrenWithActorOrder / Remove); a previously attached
   // transition could have left entries that we want to discard now so
   // a later re-attach does not surface them as a stale cause on the
   // next pass. In particular hasPendingChildRemoval is
@@ -3807,7 +3827,7 @@ void ViewDataImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
   selfActor.Remove(child);
 }
 
-uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child) const
+uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child, bool& isLastActorChild) const
 {
   Actor          self            = mViewImpl.Self();
   const uint32_t actorChildCount = self.GetChildCount();
@@ -3815,8 +3835,11 @@ uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child) const
   // Fast path: Actor::Add appends, so the new child is the last actor child
   // and every logical sibling precedes it -- the logical index is simply the
   // current logical child count. This is the overwhelmingly common add path
-  // and stays O(1).
-  if(actorChildCount > 0u && self.GetChildAt(actorChildCount - 1u) == child)
+  // and stays O(1). OnChildAdded does not synchronise the order for this case
+  // either: an insert that leaves the child last cannot be told apart from
+  // Actor::Add.
+  isLastActorChild = (actorChildCount > 0u && self.GetChildAt(actorChildCount - 1u) == child);
+  if(isLastActorChild)
   {
     return static_cast<uint32_t>(mChildren.Count());
   }
@@ -3825,7 +3848,7 @@ uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child) const
   // already placed the child at its FINAL actor position before notifying us,
   // so the logical index is the number of actor children before it that are
   // logical children of this view. The predicate mirrors
-  // OnChildOrderChanged's rebuild filter -- a View that is present in
+  // SyncChildrenWithActorOrder()'s rebuild filter -- a View that is present in
   // mChildren -- so it skips non-View actor children (never tracked) and
   // in-flight EXIT ghosts (actor-parented but erased from mChildren).
   uint32_t logicalIndex = 0u;
@@ -3844,75 +3867,49 @@ uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child) const
     }
   }
 
-  // If @p child is not an actor child at all (defensive -- this hook is only
-  // reached from Actor::Add / InsertAbove / InsertBelow after the child is in
-  // place), the loop counts every logical child and the result is
-  // mChildren.Count(), i.e. a plain append.
+  // OnChildAdded returns before calling this when @p child is no longer an
+  // actor child of this view, so the loop always meets @p child.
   return logicalIndex;
 }
 
 void ViewDataImpl::Raise(Ui::LayoutOrderPolicy policy)
 {
-  Actor self = mViewImpl.Self();
   if(policy == Ui::LayoutOrderPolicy::PRESERVE)
   {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.Raise();
-      return;
-    }
+    RaisePreservingLayout();
+    return;
   }
-  self.Raise();
+  mViewImpl.Self().Raise();
 }
 
 void ViewDataImpl::Lower(Ui::LayoutOrderPolicy policy)
 {
-  Actor self = mViewImpl.Self();
   if(policy == Ui::LayoutOrderPolicy::PRESERVE)
   {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.Lower();
-      return;
-    }
+    LowerPreservingLayout();
+    return;
   }
-  self.Lower();
+  mViewImpl.Self().Lower();
 }
 
 void ViewDataImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
 {
-  Actor self = mViewImpl.Self();
   if(policy == Ui::LayoutOrderPolicy::PRESERVE)
   {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.RaiseToTop();
-      return;
-    }
+    RaiseToTopPreservingLayout();
+    return;
   }
-  self.RaiseToTop();
+  mViewImpl.Self().RaiseToTop();
 }
 
 void ViewDataImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
 {
-  Actor self = mViewImpl.Self();
   if(policy == Ui::LayoutOrderPolicy::PRESERVE)
   {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.LowerToBottom();
-      return;
-    }
+    LowerToBottomPreservingLayout();
+    return;
   }
-  self.LowerToBottom();
+  mViewImpl.Self().LowerToBottom();
 }
 
 void ViewDataImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
@@ -3921,18 +3918,12 @@ void ViewDataImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
   {
     return;
   }
-  Actor self = mViewImpl.Self();
   if(policy == Ui::LayoutOrderPolicy::PRESERVE)
   {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.RaiseAbove(target);
-      return;
-    }
+    RaiseAbovePreservingLayout(target);
+    return;
   }
-  self.RaiseAbove(target);
+  mViewImpl.Self().RaiseAbove(target);
 }
 
 void ViewDataImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
@@ -3941,35 +3932,92 @@ void ViewDataImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
   {
     return;
   }
-  Actor self = mViewImpl.Self();
   if(policy == Ui::LayoutOrderPolicy::PRESERVE)
   {
-    Ui::View parent = Ui::View::DownCast(self.GetParent());
-    if(parent)
-    {
-      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
-      self.LowerBelow(target);
-      return;
-    }
+    LowerBelowPreservingLayout(target);
+    return;
   }
-  self.LowerBelow(target);
+  mViewImpl.Self().LowerBelow(target);
+}
+
+// The ...PreservingLayout() family behind Extension::View and the deprecated PRESERVE overloads
+// above: the inherited Actor call, made while ScopedSkipChildrenUpdate keeps a parent View from
+// following the actor order for that one call.
+void ViewDataImpl::RaisePreservingLayout()
+{
+  ScopedSkipChildrenUpdate guard(*this);
+  mViewImpl.Self().Raise();
+}
+
+void ViewDataImpl::LowerPreservingLayout()
+{
+  ScopedSkipChildrenUpdate guard(*this);
+  mViewImpl.Self().Lower();
+}
+
+void ViewDataImpl::RaiseToTopPreservingLayout()
+{
+  ScopedSkipChildrenUpdate guard(*this);
+  mViewImpl.Self().RaiseToTop();
+}
+
+void ViewDataImpl::LowerToBottomPreservingLayout()
+{
+  ScopedSkipChildrenUpdate guard(*this);
+  mViewImpl.Self().LowerToBottom();
+}
+
+void ViewDataImpl::RaiseAbovePreservingLayout(Ui::View target)
+{
+  // An empty target is ignored, as the deprecated overload does; Dali::Actor::RaiseAbove()
+  // asserts on it.
+  if(!target)
+  {
+    return;
+  }
+  ScopedSkipChildrenUpdate guard(*this);
+  mViewImpl.Self().RaiseAbove(target);
+}
+
+void ViewDataImpl::LowerBelowPreservingLayout(Ui::View target)
+{
+  // An empty target is ignored, as the deprecated overload does; Dali::Actor::LowerBelow()
+  // asserts on it.
+  if(!target)
+  {
+    return;
+  }
+  ScopedSkipChildrenUpdate guard(*this);
+  mViewImpl.Self().LowerBelow(target);
 }
 
 void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
 {
-  if(mSkipChildrenUpdate)
-  {
-    return;
-  }
-
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
+    // dali-core reports the add even when a callback run from Actor::SetParent() -- the
+    // child's OnSceneConnection() or its SceneConnectedSignal(), for example -- has already
+    // removed the child again: ActorParentImpl::AddChild calls OnChildAdd after SetParent()
+    // without re-checking the parent. Such a child is not ours any more, and tracking it would
+    // leave a view in mChildren that is no actor child. Returning before the bookkeeping below
+    // also skips the reparent notification (NotifyChildReparented), which is right for the same
+    // reason: an EXIT the child still runs under a previous parent is not cancelled and finishes
+    // on its own, and the dispatcher unparents a ghost only while it is still a child of that
+    // parent.
+    if(child.GetParent() != mViewImpl.Self())
+    {
+      return;
+    }
+
     // Place the child at the logical position matching its actor position.
     // A fresh Actor::InsertAbove / InsertBelow emits no ChildOrderChangedSignal
     // (the child had no previous order), so this hook is the only chance to
     // keep both orders in sync; Actor::Add takes the O(1) append fast path.
-    const uint32_t logicalIndex = ComputeLogicalChildIndex(child);
+    // A fresh insert that is not the last actor child is followed by a full
+    // order sync at the end of this block.
+    bool           isLastActorChild = false;
+    const uint32_t logicalIndex     = ComputeLogicalChildIndex(child, isLastActorChild);
     if(logicalIndex >= mChildren.Count())
     {
       mChildren.PushBack(view);
@@ -3989,10 +4037,10 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // the logical-index sync above exists in the first place.
     //
     // Nothing is lost before the connection either: mChildren grows ONLY at the insert
-    // above, and OnChildOrderChanged's rebuild copies only views already in mChildren,
-    // so with mChildren empty the handler rebuilds an empty list, compares equal and
-    // returns without touching anything. A reorder among non-View actor children is
-    // exactly that case.
+    // above, and SyncChildrenWithActorOrder()'s rebuild copies only views already in
+    // mChildren, so with mChildren empty the handler rebuilds an empty list, compares
+    // equal and returns without touching anything. A reorder among non-View actor
+    // children is exactly that case.
     if(!mChildOrderSignalConnected)
     {
       DevelActor::ChildOrderChangedSignal(mViewImpl.Self()).Connect(this, &ViewDataImpl::OnChildOrderChanged);
@@ -4193,6 +4241,23 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
       // UtcDaliLayoutTransitionAddStandaloneChildToTransitionParentDispatchesEnterP
       // pins it.
     }
+
+    // A fresh Actor::InsertAbove / InsertBelow that left the child in the MIDDLE of the actor
+    // children makes the whole logical order follow the actor order, as a reorder of an existing
+    // child does. The child already sits at its counted index, so for a parent whose two orders
+    // agreed the rebuilt sequence equals mChildren and nothing is reordered, tagged or
+    // invalidated. Only when a ...PreservingLayout() call (or a reorder dali-core could not
+    // report) left the orders apart do pre-existing children move; they are then tagged
+    // REORDERED and this view re-measures, like any other reorder. This is not suppressed while
+    // a ...PreservingLayout() call is running: mSkipChildrenUpdate covers OnChildOrderChanged
+    // only. An append (Actor::Add, or an insert that left the child last) does not synchronise.
+    // "Last" is what this hook finds, after the callbacks of Actor::SetParent() have run: one
+    // that adds, removes or moves a sibling here can make the child stop or start being the last
+    // one, so that an Actor::Add() synchronises or a mid insert appends instead.
+    if(!isLastActorChild)
+    {
+      SyncChildrenWithActorOrder();
+    }
   }
   else
   {
@@ -4208,11 +4273,6 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
 
 void ViewDataImpl::OnChildRemoved(Actor& child)
 {
-  if(mSkipChildrenUpdate)
-  {
-    return;
-  }
-
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
@@ -4230,7 +4290,7 @@ void ViewDataImpl::OnChildRemoved(Actor& child)
       // If the child was added and removed within the same frame (before
       // any layout pass consumed the pending-enter set), drop the ENTER
       // marker so the dispatcher does not fire on a no-longer-present view.
-      // Same for the reorder marker: OnChildOrderChanged keeps
+      // Same for the reorder marker: SyncChildrenWithActorOrder() keeps
       // raw ViewImpl* pointers in pendingReorderedChildren which must
       // not survive the child's removal -- otherwise a heap-reused address
       // could mis-classify a future child as REORDERED.
@@ -7264,11 +7324,18 @@ void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)
 
 void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
 {
+  // A ...PreservingLayout() call on one of this view's children is running
+  // (ScopedSkipChildrenUpdate): keep the logical order as it is.
   if(mSkipChildrenUpdate)
   {
     return;
   }
 
+  SyncChildrenWithActorOrder();
+}
+
+void ViewDataImpl::SyncChildrenWithActorOrder()
+{
   Actor                           self            = mViewImpl.Self();
   uint32_t                        actorChildCount = self.GetChildCount();
   IntegrationView::ChildContainer newChildren;
@@ -7304,6 +7371,10 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
   //
   // Skipping the reorder tagging as well as the invalidation is intentional: no
   // View moved, so no View's dispatch should be tagged REORDERED.
+  //
+  // From OnChildAdded (a fresh insert that is not the last actor child) the same
+  // check leaves a parent whose two orders already agree untouched: the newcomer
+  // already sits at its counted index, so the rebuilt sequence equals mChildren.
   if(newChildren.Count() == mChildren.Count() &&
      std::equal(newChildren.Begin(), newChildren.End(), mChildren.Begin()))
   {
