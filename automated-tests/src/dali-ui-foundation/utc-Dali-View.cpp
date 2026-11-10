@@ -1583,29 +1583,27 @@ int UtcDaliViewColorMultiplierAnimationP(void)
     .ColorMultiplierBy(Vector4(0.05f, 0.05f, 0.05f, 0.05f), Duration(0.1f));
   DALI_TEST_EQUALS(bridgeAnimation.GetDuration(), 0.1f, TEST_LOCATION);
 
-  // Legacy alias names on the bridge animate the same multiplier property.
-  const Vector4 legacyTarget(0.4f, 0.3f, 0.2f, 1.0f);
-  Animation     legacyToAnimation = Animation::New(0.0f);
-  view.Animate(legacyToAnimation).Color(legacyTarget, Duration(0.1f));
-  legacyToAnimation.Play();
+  // Playing a bridge animation updates the multiplier property.
+  const Vector4 target(0.4f, 0.3f, 0.2f, 1.0f);
+  Animation     toAnimation = Animation::New(0.0f);
+  view.Animate(toAnimation).ColorMultiplier(target, Duration(0.1f));
+  toAnimation.Play();
   application.SendNotification();
   application.Render(200);
-  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), legacyTarget, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), target, 0.001f, TEST_LOCATION);
 
-  const Vector4 legacyDelta(0.1f, 0.1f, 0.1f, 0.0f);
-  Animation     legacyByAnimation = Animation::New(0.0f);
-  view.Animate(legacyByAnimation).ColorBy(legacyDelta, Duration(0.1f));
-  legacyByAnimation.Play();
+  const Vector4 delta(0.1f, 0.1f, 0.1f, 0.0f);
+  Animation     byAnimation = Animation::New(0.0f);
+  view.Animate(byAnimation).ColorMultiplierBy(delta, Duration(0.1f));
+  byAnimation.Play();
   application.SendNotification();
   application.Render(200);
-  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), legacyTarget + legacyDelta, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), target + delta, 0.001f, TEST_LOCATION);
 
-  // Legacy alias entries on the spec reach the same apply path as the multiplier entries.
+  // Spec entries reach the multiplier apply path.
   ViewAnimationSpec spec = View::NewAnimationSpec();
   spec.ColorMultiplier(Vector4(0.6f, 0.5f, 0.4f, 1.0f), Duration(0.1f))
-    .ColorMultiplierBy(Vector4(0.1f, 0.1f, 0.1f, 0.0f), Duration(0.1f))
-    .Color(Vector4(0.2f, 0.2f, 0.2f, 1.0f), Duration(0.1f))
-    .ColorBy(Vector4(0.05f, 0.05f, 0.05f, 0.0f), Duration(0.1f));
+    .ColorMultiplierBy(Vector4(0.1f, 0.1f, 0.1f, 0.0f), Duration(0.1f));
 
   Animation specAnimation = Animation::New(0.0f);
   spec.ApplyTo(specAnimation, view);
