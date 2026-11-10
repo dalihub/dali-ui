@@ -5284,6 +5284,78 @@ int UtcDaliViewExtensionGetUiScalePolicyEmptyHandleN(void)
   END_TEST;
 }
 
+// === Extension::View sibling order that keeps the layout order ===
+
+// The six ...PreservingLayout() functions move the view in the actor order exactly like the
+// inherited Actor calls and leave the parent's layout order as it is; the next reorder made
+// through an inherited Actor call makes the layout order follow the actor order again.
+int UtcDaliViewExtensionPreservingLayoutP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionPreservingLayoutP - the ...PreservingLayout() functions change the actor order only");
+
+  View parent = View::New();
+  View a      = View::New();
+  View b      = View::New();
+  View c      = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+
+  auto actorOrderIs = [&parent](const View& first, const View& second, const View& third)
+  {
+    return parent.GetChildCount() == 3u && parent.GetChildAt(0u) == first && parent.GetChildAt(1u) == second && parent.GetChildAt(2u) == third;
+  };
+
+  Ui::Extension::View::RaisePreservingLayout(a);
+  DALI_TEST_CHECK(actorOrderIs(b, a, c));
+  Ui::Extension::View::RaiseToTopPreservingLayout(b);
+  DALI_TEST_CHECK(actorOrderIs(a, c, b));
+  Ui::Extension::View::LowerPreservingLayout(c);
+  DALI_TEST_CHECK(actorOrderIs(c, a, b));
+  Ui::Extension::View::LowerToBottomPreservingLayout(b);
+  DALI_TEST_CHECK(actorOrderIs(b, c, a));
+  Ui::Extension::View::RaiseAbovePreservingLayout(c, a);
+  DALI_TEST_CHECK(actorOrderIs(b, a, c));
+  Ui::Extension::View::LowerBelowPreservingLayout(c, b);
+  DALI_TEST_CHECK(actorOrderIs(c, b, a));
+
+  // The layout order is still the order of the adds.
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(parent.GetChildViewAt(0u) == a);
+  DALI_TEST_CHECK(parent.GetChildViewAt(1u) == b);
+  DALI_TEST_CHECK(parent.GetChildViewAt(2u) == c);
+  DALI_TEST_EQUALS(parent.IndexOfChildView(c), 2, TEST_LOCATION);
+
+  // An inherited Actor reorder: actor order [c, b, a] -> [c, a, b], and the layout order follows it.
+  a.Lower();
+  DALI_TEST_CHECK(actorOrderIs(c, a, b));
+  DALI_TEST_CHECK(parent.GetChildViewAt(0u) == c);
+  DALI_TEST_CHECK(parent.GetChildViewAt(1u) == a);
+  DALI_TEST_CHECK(parent.GetChildViewAt(2u) == b);
+
+  END_TEST;
+}
+
+int UtcDaliViewExtensionPreservingLayoutEmptyHandleN(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionPreservingLayoutEmptyHandleN - an empty View asserts, whatever the target");
+
+  View target = View::New();
+
+  DALI_TEST_ASSERTION(Ui::Extension::View::RaisePreservingLayout(View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::LowerPreservingLayout(View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::RaiseToTopPreservingLayout(View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::LowerToBottomPreservingLayout(View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::RaiseAbovePreservingLayout(View(), target), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::LowerBelowPreservingLayout(View(), target), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::RaiseAbovePreservingLayout(View(), View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::LowerBelowPreservingLayout(View(), View()), "view");
+
+  END_TEST;
+}
+
 // === Extension::View effective layout scale ===
 
 namespace

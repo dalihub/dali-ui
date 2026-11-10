@@ -170,7 +170,7 @@ scenario는 두 계열 30개입니다. 반복 sample 계열 `TR15.mode-{0.4}-n{1
 
 아래는 검토용 metadata와 CPP의 scenario 생성식을 대조한 체크리스트입니다. TC132의 `TR14.ancestor-replay-during-enter`는 초기 metadata 수집 뒤 추가된 source delta이며 아래 합계/행에는 포함했습니다. 최종 실행 전 metadata/manifest를 다시 추출·검토해야 합니다. metadata는 실행 성공의 증거가 아닙니다. 실행 로그에서 계약을 축소해도 통과하지 않도록 최종 manifest는 별도로 검토하고 외부 SHA pin을 고정하십시오. 이 문서는 manifest를 수정하지 않습니다.
 
-표의 수치는 단일 계약(`layout-validation-manifest.json`, SHA-256 `a456e4737c9dd7dce0655f80c7d650a6e580e5a1f85dad23f1079511a4b7e763`)에서 생성했습니다. manifest에는 `release` profile 하나만 있습니다.
+표의 수치는 단일 계약(`layout-validation-manifest.json`, SHA-256 `d3c3920a233ab09fc2a5289d518d218d197ec771f58d2731d5daa4ee43ff6643`)에서 생성했습니다. manifest에는 `release` profile 하나만 있습니다.
 
 | TC | scenario 수 | action 수 | required checks 합계 | 코드 |
 |---|---:|---:|---:|---|

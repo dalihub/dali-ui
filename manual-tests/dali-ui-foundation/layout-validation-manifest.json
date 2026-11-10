@@ -1,5 +1,5 @@
 {
-  "revision": 15,
+  "revision": 16,
   "base_revision": "fb86f14d2fe42705fecfcd2b73855213a667736b",
   "scope": "new TC suite only; existing TC45–94 preserved",
   "coordinate_contract": {
@@ -4163,6 +4163,147 @@
                 {
                   "id": "reorder",
                   "required_checks": 20
+                }
+              ]
+            },
+            {
+              "id": "ORDER.preserve-raise-to-top",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "reorder",
+                  "required_checks": 20
+                }
+              ]
+            },
+            {
+              "id": "ORDER.preserve-lower-to-bottom",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "reorder",
+                  "required_checks": 20
+                }
+              ]
+            },
+            {
+              "id": "ORDER.preserve-raise-above",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "reorder",
+                  "required_checks": 20
+                }
+              ]
+            },
+            {
+              "id": "ORDER.rebuild-reorder",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "preserve",
+                  "required_checks": 20
+                },
+                {
+                  "id": "lower-c",
+                  "required_checks": 20
+                }
+              ]
+            },
+            {
+              "id": "ORDER.rebuild-insert-existing",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "preserve",
+                  "required_checks": 20
+                },
+                {
+                  "id": "insert-c-above-b",
+                  "required_checks": 20
+                }
+              ]
+            },
+            {
+              "id": "ORDER.rebuild-insert-new",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "preserve",
+                  "required_checks": 20
+                },
+                {
+                  "id": "insert-d-above-b",
+                  "required_checks": 26
+                }
+              ]
+            },
+            {
+              "id": "ORDER.keep-add",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "preserve",
+                  "required_checks": 20
+                },
+                {
+                  "id": "add-d",
+                  "required_checks": 26
+                }
+              ]
+            },
+            {
+              "id": "ORDER.keep-insert-last",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "preserve",
+                  "required_checks": 20
+                },
+                {
+                  "id": "insert-d-above-a",
+                  "required_checks": 26
+                }
+              ]
+            },
+            {
+              "id": "ORDER.keep-remove",
+              "steps": [
+                {
+                  "id": "mount",
+                  "required_checks": 12
+                },
+                {
+                  "id": "preserve",
+                  "required_checks": 20
+                },
+                {
+                  "id": "remove-c",
+                  "required_checks": 14
                 }
               ]
             }

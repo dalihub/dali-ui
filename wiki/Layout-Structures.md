@@ -68,7 +68,7 @@ root.Add(child2);
 window.Add(root);
 ```
 
-> **Note:** All layout types inherit from `Layout`, which inherits from `View`. Child management uses the inherited Actor API: `Add(View)`, `Remove(View)`, `InsertAbove`/`InsertBelow`, and `RemoveAll()`. `Add()` appends; `InsertAbove`/`InsertBelow` position a child relative to an existing sibling and accept both a child that is **already** a child of the parent (a reorder) and a newly created one (a fresh insert) — either way the child takes the logical (layout) position matching its actor position.
+> **Note:** All layout types inherit from `Layout`, which inherits from `View`. Child management uses the inherited Actor API: `Add(View)`, `Remove(View)`, `InsertAbove`/`InsertBelow`, and `RemoveAll()`. `Add()` appends; `InsertAbove`/`InsertBelow` position a child relative to an existing sibling and accept both a child that is **already** a child of the parent (a reorder) and a newly created one (a fresh insert). Either way the logical (layout) order then follows the resulting actor order, except that a fresh insert that leaves the child last only appends it, like `Add()`. The two orders can still differ, for example after `Extension::View::RaisePreservingLayout()` or one of the other five `...PreservingLayout()` functions (`dali-ui-foundation/extension-api/view.h`); see `RaisePreservingLayout()` for the cases and for when the orders agree again.
 
 ---
 

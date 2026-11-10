@@ -22,27 +22,43 @@
 
 ## 시나리오와 독립 기대값
 
-- `ORDER.update/preserve`: a20,b30,c40에서 a를 c 위로 올립니다. UPDATE는 논리 순서 b,c,a와 a x70/b x0입니다. PRESERVE는 논리 a,b,c와 a x0/b x20입니다.
+- `ORDER.update/preserve`: a20,b30,c40에서 a를 c 위로 올립니다. `ORDER.update`는 상속된 `Dali::Actor` 호출 `a.RaiseAbove(c)`를 사용하며 논리 순서 b,c,a와 a x70/b x0입니다. `ORDER.preserve`는 `Dali::Ui::Extension::View::RaiseAbovePreservingLayout(a, c)`를 사용하며 논리 순서 a,b,c와 a x0/b x20입니다.
 - `ORDER.non-view`: a와 b 사이 장식 Actor를 integration API로 추가합니다. Actor child 수 3, View child 수 2이며 b x20입니다.
 
 
-- 추가 ORDER.preserve-raise / preserve-lower / preserve-lower-below는 각각 20행입니다. 초기 Actor와 논리 순서 a,b,c, 각 width20/30/40에서 실행합니다. Raise/Lower는 한 단계, LowerBelow는 지정 sibling 바로 아래라는 공개 동작을 사용합니다.
+- 추가 ORDER.preserve-raise / preserve-lower / preserve-lower-below / preserve-raise-to-top / preserve-lower-to-bottom / preserve-raise-above는 `reorder`가 각각 20행입니다. 초기 Actor와 논리 순서 a,b,c, 각 width20/30/40에서 `Dali::Ui::Extension::View`의 `...PreservingLayout()` 함수를 하나씩 호출합니다(아래 표에서는 `Dali::Ui::Extension::View::`를 생략했습니다). Raise/Lower는 한 단계, RaiseToTop/LowerToBottom은 맨 위/맨 아래, RaiseAbove/LowerBelow는 지정 sibling 바로 위/아래라는 공개 동작을 사용합니다. `ORDER.preserve-raise-above`는 `ORDER.preserve`와 같은 호출이지만 Actor 순서 행을 함께 검사하므로, 호출이 아무것도 바꾸지 않은 경우도 FAIL로 구분합니다.
 
 | scenario | 실제 호출 | expected Actor 순서 | expected 논리 순서 |
 |---|---|---|---|
-| ORDER.preserve-raise | a.Raise(PRESERVE) | b,a,c | a,b,c |
-| ORDER.preserve-lower | c.Lower(PRESERVE) | a,c,b | a,b,c |
-| ORDER.preserve-lower-below | c.LowerBelow(a,PRESERVE) | c,a,b | a,b,c |
+| ORDER.preserve-raise | RaisePreservingLayout(a) | b,a,c | a,b,c |
+| ORDER.preserve-lower | LowerPreservingLayout(c) | a,c,b | a,b,c |
+| ORDER.preserve-lower-below | LowerBelowPreservingLayout(c,a) | c,a,b | a,b,c |
+| ORDER.preserve-raise-to-top | RaiseToTopPreservingLayout(a) | b,c,a | a,b,c |
+| ORDER.preserve-lower-to-bottom | LowerToBottomPreservingLayout(c) | c,a,b | a,b,c |
+| ORDER.preserve-raise-above | RaiseAbovePreservingLayout(a,c) | b,c,a | a,b,c |
 
-각 scenario는 GetChildAt의 실제 Actor 순서 3행과 GetChildViewAt의 논리 순서 3행, 두 child count=3의 2행을 별도로 검사합니다. 이후 실제 rect는 a=(0,0,20,10), b=(20,0,30,10), c=(50,0,40,10)의 12행이어야 합니다. 논리 순서만 맞고 시각 순서가 바뀌지 않는 경우도 FAIL입니다. fresh fixture를 사용하므로 이전 시나리오의 z-order를 expected에 섞지 마십시오.
+위 표의 각 scenario는 GetChildAt의 실제 Actor 순서 3행과 GetChildViewAt의 논리 순서 3행, 두 child count=3의 2행을 별도로 검사합니다. 이후 실제 rect는 a=(0,0,20,10), b=(20,0,30,10), c=(50,0,40,10)의 12행이어야 합니다. 논리 순서만 맞고 시각 순서가 바뀌지 않는 경우도 FAIL입니다. fresh fixture를 사용하므로 이전 시나리오의 z-order를 expected에 섞지 마십시오.
 
-- `ORDER.update/preserve`는 `mount`(a (0,0,20,10), b (20,0,30,10)) → `raise-a-above-c`(정책 적용 후 형제 pass: UPDATE는 a (70,…), b (0,…); PRESERVE는 불변)이고, `ORDER.preserve-*`는 `mount` → `reorder`(Actor 순서 변경, logical 순서와 렌더 rect 유지)입니다.
+- `ORDER.rebuild-*`와 `ORDER.keep-*`는 `mount`(12행) → `preserve`(20행) → 마지막 action의 세 단계입니다. `preserve`는 `...PreservingLayout()` 호출 하나로 Actor 순서와 논리 순서를 서로 다르게 만든 뒤 그 상태(바뀐 Actor 순서, 논리 순서 a,b,c, rect 불변)를 검사합니다. 마지막 action은 `...PreservingLayout()`이 아닌 호출 하나입니다. `rebuild`는 논리 순서 전체가 Actor 순서와 같아지는 호출이고, `keep`은 기존 child의 논리 순서가 그대로 남는 호출입니다. d는 마지막 action에서 새로 만드는 15×10 View입니다.
+
+| scenario | `preserve`의 호출과 Actor 순서 | 마지막 action과 호출 | expected Actor 순서 | expected 논리 순서 | 논리 순서대로의 expected x |
+|---|---|---|---|---|---|
+| ORDER.rebuild-reorder | RaiseToTopPreservingLayout(a): b,c,a | `lower-c`: c.Lower() | c,b,a | c,b,a | c0, b40, a70 |
+| ORDER.rebuild-insert-existing | RaisePreservingLayout(a): b,a,c | `insert-c-above-b`: stack.InsertAbove(c,b) | b,c,a | b,c,a | b0, c30, a70 |
+| ORDER.rebuild-insert-new | RaisePreservingLayout(a): b,a,c | `insert-d-above-b`: stack.InsertAbove(d,b) | b,d,a,c | b,d,a,c | b0, d30, a45, c65 |
+| ORDER.keep-add | RaisePreservingLayout(a): b,a,c | `add-d`: stack.Add(d) | b,a,c,d | a,b,c,d | a0, b20, c50, d90 |
+| ORDER.keep-insert-last | RaiseToTopPreservingLayout(a): b,c,a | `insert-d-above-a`: stack.InsertAbove(d,a) | b,c,a,d | a,b,c,d | a0, b20, c50, d90 |
+| ORDER.keep-remove | RaiseToTopPreservingLayout(a): b,c,a | `remove-c`: stack.Remove(c) | b,a | a,b | a0, b20 |
+
+`preserve`와 마지막 action은 child 수 n에 대해 2+6n행입니다. 두 child count 2행, slot마다 GetChildViewAt의 논리 순서 1행과 GetChildAt의 Actor 순서 1행, child마다 rect 4행이며 n=3은 20행, n=4는 26행, n=2는 14행입니다. rect의 x는 expected 논리 순서대로 요청 width(a20, b30, c40, d15)를 누적한 값이고 y=0, height=10입니다. `ORDER.rebuild-insert-new`에서 새 View만 Actor 위치에 맞춰 넣고 기존 child의 논리 순서를 그대로 두면 논리 순서가 a,d,b,c(a x0, d x20, b x35)가 되므로 FAIL입니다. `ORDER.keep-remove`의 c는 scene에서 빠지므로 완료 fence에 넣지 않습니다. `...PreservingLayout()` 호출은 layout pass를 요청하지 않으므로, mount 뒤의 모든 action은 형제 View의 요청 width를 1 늘려 pass를 일으킨 뒤 관측합니다.
+
+- `ORDER.update/preserve`는 `mount`(a (0,0,20,10), b (20,0,30,10)) → `raise-a-above-c`(호출 뒤 형제 pass: `ORDER.update`는 a (70,…), b (0,…); `ORDER.preserve`는 불변)이고, `ORDER.preserve-*`는 `mount` → `reorder`(Actor 순서 변경, logical 순서와 렌더 rect 유지)이며, `ORDER.rebuild-*`와 `ORDER.keep-*`는 `mount` → `preserve` → 마지막 action입니다.
 
 `Rect`는 x/y/width/height의 네 필수 행, `Size`는 width/height의 두 필수 행입니다. 일반 geometry 허용오차는 0.001이며 정수·순서·bool·별도로 지정한 exact 항목은 정확히 일치해야 합니다. NaN/Inf는 일반 geometry 비교에서 실패합니다. expected는 입력 표·식에서 계산하며 candidate 출력으로 갱신하지 마십시오.
 
 ## 근거와 검증 경계
 
-LayoutOrderPolicy의 UPDATE/PRESERVE와 non-View exclusion을 각기 실제 API로 검사합니다.
+상속된 `Dali::Actor`의 순서 변경·삽입·추가·제거 호출과 `Dali::Ui::Extension::View`의 `...PreservingLayout()` 함수 6종이 Actor 순서와 논리 순서에 주는 영향, 그리고 non-View exclusion을 각기 실제 API로 검사합니다.
 
 `Snapshot`은 `LayoutController`가 `LayoutFinished`로 보고한 최종 parent-local target bounds(post-RTL, pre-transition)입니다. `GetArrangedBounds()`의 logical rect(pre-RTL)와 구분하십시오. 행 이름에 `logical`이나 `arranged`가 포함되어도 좌표 의미는 관측 API를 기준으로 판단하십시오. `Rendered` 행(id.x/.y/.width/.height, `*.rendered.*` 포함)은 current scene-graph 상태에서 계산한 화면 사각형을 부모 또는 명시한 base 기준으로 관측한 값이며 RTL 적용 후 좌표입니다. `GetMeasuredSize`는 해당 pass의 측정 결과입니다. controller 완료 snapshot, transition 중간 current geometry, Window의 최종 화면 합성은 서로 다른 관측입니다. callback 측정·배치 횟수는 controller pass가 호출한 synthetic producer의 횟수입니다.
 
@@ -56,7 +72,7 @@ LayoutOrderPolicy의 UPDATE/PRESERVE와 non-View exclusion을 각기 실제 API�
 
 아래 목록은 검토된 manifest의 정확한 ID와 필수 행 수입니다. 설명의 축약 이름보다 이 목록을 우선하십시오. 각 step의 전체 stdout 행은 완료 시 자동 출력되므로 그대로 보존하십시오. stdout와 stderr를 함께 수집하십시오.
 
-Profile `release`: 6 scenario, 11 action, 139 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
+Profile `release`: 15 scenario, 35 action, 559 checks. 이 표에 없는 scenario는 컴파일된 계약에 선언되지 않으며 실행·판정 대상이 아닙니다.
 
 | Scenario ID | 순서대로 실행할 action ID : required_checks |
 |---|---|
@@ -66,6 +82,15 @@ Profile `release`: 6 scenario, 11 action, 139 checks. 이 표에 없는 scenario
 | `ORDER.preserve-raise` | `mount` : 12 → `reorder` : 20 |
 | `ORDER.preserve-lower` | `mount` : 12 → `reorder` : 20 |
 | `ORDER.preserve-lower-below` | `mount` : 12 → `reorder` : 20 |
+| `ORDER.preserve-raise-to-top` | `mount` : 12 → `reorder` : 20 |
+| `ORDER.preserve-lower-to-bottom` | `mount` : 12 → `reorder` : 20 |
+| `ORDER.preserve-raise-above` | `mount` : 12 → `reorder` : 20 |
+| `ORDER.rebuild-reorder` | `mount` : 12 → `preserve` : 20 → `lower-c` : 20 |
+| `ORDER.rebuild-insert-existing` | `mount` : 12 → `preserve` : 20 → `insert-c-above-b` : 20 |
+| `ORDER.rebuild-insert-new` | `mount` : 12 → `preserve` : 20 → `insert-d-above-b` : 26 |
+| `ORDER.keep-add` | `mount` : 12 → `preserve` : 20 → `add-d` : 26 |
+| `ORDER.keep-insert-last` | `mount` : 12 → `preserve` : 20 → `insert-d-above-a` : 26 |
+| `ORDER.keep-remove` | `mount` : 12 → `preserve` : 20 → `remove-c` : 14 |
 
 마지막 결과 수집 후 `< Back`으로 나가 같은 `(tc,pid,run)`의 `LR_CASE_END`를 수집하십시오. `reason=exit`, `cleanup_passed=true`이고 `completed_scenarios == required_scenarios`이며 모든 count(failures 포함)가 마지막 `LR_RESULT`와 같아야 합니다. PASS는 그 완료 조건과 failures=0이 함께 성립할 때만입니다. `layout-validation-coverage.md`에 알려진 제품 결함 행이 문서화된 TC는 failures>0으로 종결되며, `check-log`가 `observations-valid-with-failures`로 그 행을 **정확히** 나열해야 합니다. 그 밖의 실패 행이나 `invalid-evidence`는 회귀 또는 무효 증거이며 PASS가 아닙니다. END 누락·cleanup 오류도 PASS가 아닙니다.
 
