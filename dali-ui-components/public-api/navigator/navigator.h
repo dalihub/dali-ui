@@ -47,6 +47,7 @@ class NavigatorImpl;
  * with optional fade transitions; modal content (e.g. a DialogContainer) is
  * shown above the navigation stack and dismissed via NavigateBack or by tapping
  * a DialogContainer's scrim.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API Navigator : public View
 {
@@ -66,6 +67,7 @@ public:
 public: // Navigation stack
   /**
    * @brief Pushes a page onto the navigation stack.
+   * @SINCE_3_0.0
    * @param[in] page     The page view to show
    * @param[in] animated Whether to fade the transition (default true)
    */
@@ -76,6 +78,7 @@ public: // Navigation stack
    *
    * The last page may be popped, leaving the navigation stack empty.
    * (NavigateBack(), by contrast, never pops the last page and returns false.)
+   * @SINCE_3_0.0
    * @param[in] animated Whether to fade the transition (default true)
    * @return The popped page, or an empty handle if the stack was already empty
    */
@@ -83,6 +86,7 @@ public: // Navigation stack
 
   /**
    * @brief Inserts a page below the top of the navigation stack (no transition).
+   * @SINCE_3_0.0
    * @param[in] page   The page to insert
    * @param[in] before An existing page; @p page is inserted before it
    */
@@ -90,18 +94,21 @@ public: // Navigation stack
 
   /**
    * @brief Removes a page from either stack. Removing the top page pops it.
+   * @SINCE_3_0.0
    * @param[in] page The page to remove
    */
   void Remove(View page);
 
   /**
    * @brief Removes all pages from both stacks.
+   * @SINCE_3_0.0
    */
   void Clear();
 
 public: // Modal stack
   /**
    * @brief Pushes modal content (shown above the navigation stack).
+   * @SINCE_3_0.0
    * @param[in] modal    The modal content (e.g. a DialogContainer)
    * @param[in] animated Whether to fade the transition (default true)
    */
@@ -109,6 +116,7 @@ public: // Modal stack
 
   /**
    * @brief Pops the top modal content.
+   * @SINCE_3_0.0
    * @param[in] animated Whether to fade the transition (default true)
    * @return The popped modal content, or an empty handle if the modal stack is empty
    */
@@ -117,17 +125,22 @@ public: // Modal stack
 public: // Queries
   /**
    * @brief Gets the current top-most view (modal top if any, else navigation top).
+   * @SINCE_3_0.0
    * @return The current view, or an empty handle if both stacks are empty
    */
   View GetCurrentView() const;
 
   /// @brief Returns the number of pages in the navigation stack.
+  /// @SINCE_3_0.0
   uint32_t GetNavigationStackCount() const;
   /// @brief Returns the number of items in the modal stack.
+  /// @SINCE_3_0.0
   uint32_t GetModalStackCount() const;
   /// @brief Returns the navigation-stack page at @p index (bottom = 0), or an empty handle.
+  /// @SINCE_3_0.0
   View GetNavigationStackItem(uint32_t index) const;
   /// @brief Returns the modal-stack item at @p index (bottom = 0), or an empty handle.
+  /// @SINCE_3_0.0
   View GetModalStackItem(uint32_t index) const;
 
 public: // Back navigation
@@ -137,6 +150,7 @@ public: // Back navigation
    * Parameters are this Navigator and the current view. A callback may return
    * true to consume Back and keep the current view in place. When multiple
    * callbacks are connected, Back is consumed if any callback returns true.
+   * @SINCE_3_0.0
    */
   using BackRequestedSignalType = Signal<bool(Navigator, View)>;
 
@@ -144,6 +158,7 @@ public: // Back navigation
    * @brief Navigates back: dismisses the top modal, else pops the navigation stack.
    *
    * A callback connected to BackRequestedSignal() may consume the event.
+   * @SINCE_3_0.0
    * @return True if the back navigation was handled, false if there was nothing to go back to
    */
   bool NavigateBack();
@@ -154,6 +169,7 @@ public: // Back navigation
    * The current view is supplied to each callback so a callback can limit
    * itself to one page. Return true to consume Back, or false to let Navigator
    * dismiss the current modal or pop the current page.
+   * @SINCE_3_0.0
    * @return The back-requested signal
    */
   BackRequestedSignalType& BackRequestedSignal();
@@ -165,12 +181,14 @@ public: // Transition customization
    * When disabled, Push/Pop finish immediately even if their @p animated
    * parameter is true. PushModal/PopModal are controlled independently by
    * SetModalTransitionAnimationEnabled().
+   * @SINCE_3_0.0
    * @param[in] enabled True to allow page transition animation
    */
   void SetPageTransitionAnimationEnabled(bool enabled);
 
   /**
    * @brief Gets whether page transition animation is enabled.
+   * @SINCE_3_0.0
    * @return True if page transition animation is enabled
    */
   bool IsPageTransitionAnimationEnabled() const;
@@ -181,12 +199,14 @@ public: // Transition customization
    * When disabled, PushModal/PopModal finish immediately even if their
    * @p animated parameter is true. This also affects automatic modal dismiss
    * paths, such as tapping a DialogContainer scrim.
+   * @SINCE_3_0.0
    * @param[in] enabled True to allow modal transition animation
    */
   void SetModalTransitionAnimationEnabled(bool enabled);
 
   /**
    * @brief Gets whether modal transition animation is enabled.
+   * @SINCE_3_0.0
    * @return True if modal transition animation is enabled
    */
   bool IsModalTransitionAnimationEnabled() const;
@@ -196,6 +216,7 @@ public: // Transition customization
    *
    * Per-page specifications registered with SetPageTransitionSpec() take
    * precedence.
+   * @SINCE_3_0.0
    * @param[in] spec The transition specification
    */
   void SetTransitionSpec(NavigationTransitionSpec spec);
@@ -205,6 +226,7 @@ public: // Transition customization
    *
    * Navigator uses its built-in fade transition after the specification is
    * cleared.
+   * @SINCE_3_0.0
    */
   void ClearTransitionSpec();
 
@@ -213,6 +235,7 @@ public: // Transition customization
    *
    * When the page is removed from Navigator, its per-page specification is
    * removed automatically.
+   * @SINCE_3_0.0
    * @param[in] page The target page
    * @param[in] spec The transition specification
    */
@@ -220,6 +243,7 @@ public: // Transition customization
 
   /**
    * @brief Clears the transition specification for one page.
+   * @SINCE_3_0.0
    * @param[in] page The target page
    */
   void ClearPageTransitionSpec(View page);
@@ -229,6 +253,7 @@ public: // Transition customization
    *
    * This specification is used only for PushModal/PopModal. It is independent
    * from SetTransitionSpec(), which is used only for Push/Pop.
+   * @SINCE_3_0.0
    * @param[in] spec The modal transition specification
    */
   void SetModalTransitionSpec(NavigationTransitionSpec spec);
@@ -238,6 +263,7 @@ public: // Transition customization
    *
    * Navigator uses its built-in modal fade transition after the specification
    * is cleared.
+   * @SINCE_3_0.0
    */
   void ClearModalTransitionSpec();
 
@@ -247,6 +273,7 @@ public: // Transition customization
    * This override is used only when the view participates in PushModal/PopModal.
    * When the view is removed from Navigator, its per-page modal specification
    * is removed automatically.
+   * @SINCE_3_0.0
    * @param[in] page The target page or modal view
    * @param[in] spec The modal transition specification
    */
@@ -254,6 +281,7 @@ public: // Transition customization
 
   /**
    * @brief Clears the modal transition specification for one view.
+   * @SINCE_3_0.0
    * @param[in] page The target page or modal view
    */
   void ClearPageModalTransitionSpec(View page);

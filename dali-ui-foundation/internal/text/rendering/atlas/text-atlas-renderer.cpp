@@ -29,6 +29,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
@@ -702,7 +703,7 @@ struct AtlasRenderer::Impl
     if(mGradientState.IsEnabled() || gradientSpanData)
     {
       Ui::View owner   = Ui::View::DownCast(textControl);
-      mGradientUiScale = owner ? Ui::GetImpl(owner).GetEffectiveScale() : 1.0f;
+      mGradientUiScale = owner ? Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(owner)) : 1.0f;
     }
     PrepareGradientSpanResources(gradientSpanData,
                                  positions,
@@ -836,18 +837,18 @@ struct AtlasRenderer::Impl
           }
         } // decorative-lines
 
-        AtlasGlyphManager::GlyphStyle style;
-        style.isItalic = glyph.isItalicRequired;
-        style.isBold   = glyph.isBoldRequired;
+        AtlasGlyphManager::GlyphStyle glyphStyle;
+        glyphStyle.isItalic = glyph.isItalicRequired;
+        glyphStyle.isBold   = glyph.isBoldRequired;
 
         // Retrieves and caches the glyph's bitmap.
-        CacheGlyph(glyph, lastFontId, style, slot);
+        CacheGlyph(glyph, lastFontId, glyphStyle, slot);
 
         // Retrieves and caches the outline glyph's bitmap.
         if(isOutline)
         {
-          style.outline = outlineWidth;
-          CacheGlyph(glyph, lastFontId, style, slotOutline);
+          glyphStyle.outline = outlineWidth;
+          CacheGlyph(glyph, lastFontId, glyphStyle, slotOutline);
         }
 
         // Move the origin (0,0) of the mesh to the center of the actor
@@ -1238,10 +1239,11 @@ struct AtlasRenderer::Impl
     {
       return;
     }
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEvaluationMode", static_cast<float>(data.evaluationMode));
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientStartPosition", data.startPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEndPosition", data.endPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialCenter", data.radialCenter);
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialScale", data.radialScale);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEvaluationScale", data.GetEvaluationScale());
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicCenter", data.conicCenter);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicScale", data.conicScale);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicStartAngle", data.conicStartAngle);
@@ -1260,7 +1262,6 @@ struct AtlasRenderer::Impl
     {
       return;
     }
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
     Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
     ApplyGradientGeometryProperties(renderer, mGradientCoordinateSize, mGradientBounds, mGradientUiScale);
   }
@@ -1317,12 +1318,12 @@ struct AtlasRenderer::Impl
     }
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", coordinateSize);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", bounds);
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEvaluationMode", static_cast<float>(data.evaluationMode));
     Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientStartPosition", data.startPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEndPosition", data.endPosition);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialCenter", data.radialCenter);
-    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialScale", data.radialScale);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEvaluationScale", data.GetEvaluationScale());
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicCenter", data.conicCenter);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicScale", data.conicScale);
     Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicStartAngle", data.conicStartAngle);

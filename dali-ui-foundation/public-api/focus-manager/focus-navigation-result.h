@@ -35,12 +35,13 @@ struct FocusNavigationResultImpl;
 
 /**
  * @brief Describes how a focus-navigation policy handled a request.
+ * @SINCE_3_0.0
  */
 enum class FocusNavigationResultType : uint8_t
 {
-  NOT_HANDLED, ///< Continue with the next navigation policy.
-  MOVE,        ///< Resolve and move focus to the supplied candidate.
-  STAY,        ///< Stop navigation and keep the current focus unchanged.
+  NOT_HANDLED, ///< Continue with the next navigation policy. @SINCE_3_0.0
+  MOVE,        ///< Resolve and move focus to the supplied candidate. @SINCE_3_0.0
+  STAY,        ///< Stop navigation and keep the current focus unchanged. @SINCE_3_0.0
 };
 
 /**
@@ -50,6 +51,7 @@ enum class FocusNavigationResultType : uint8_t
  * delegates to the next policy. Mutators record a decision; they do not move focus.
  * The last decision written by the policy takes effect.
  *
+ * @SINCE_3_0.0
  * @note Valid only during the policy invocation. Do not retain pointers or
  * references to this object, including in asynchronous work.
  * @note Applications must use the framework-supplied result. Copying and moving
@@ -65,6 +67,7 @@ public:
 
   /**
    * @brief Delegates to the next policy and clears any previously selected candidate.
+   * @SINCE_3_0.0
    */
   void NotHandled();
 
@@ -75,23 +78,27 @@ public:
    * the navigation request to fail. The candidate is retained until overwritten
    * or until the framework finishes processing the result.
    *
+   * @SINCE_3_0.0
    * @param[in] candidate The View to resolve and focus
    */
   void MoveTo(View candidate);
 
   /**
    * @brief Consumes the request without moving focus and clears the candidate.
+   * @SINCE_3_0.0
    */
   void Stay();
 
   /**
    * @brief Gets the result type.
+   * @SINCE_3_0.0
    */
   FocusNavigationResultType GetType() const;
 
   /**
    * @brief Gets the candidate supplied to MoveTo().
    *
+   * @SINCE_3_0.0
    * @return The candidate, or an empty View for other result types
    */
   View GetCandidate() const;

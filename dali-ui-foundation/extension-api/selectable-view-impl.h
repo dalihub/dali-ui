@@ -40,6 +40,7 @@ using SelectableViewImplPtr = IntrusivePtr<SelectableViewImpl>;
  * implementations such as SwitchImpl and CheckboxImpl should subclass this
  * instead of InteractiveViewImpl when selection state is part of the component.
  *
+ * @SINCE_3_0.0
  * @see Dali::Ui::SelectableView
  */
 class DALI_UI_API SelectableViewImpl : public InteractiveViewImpl
@@ -48,6 +49,7 @@ public:
   /**
    * @brief Creates a new SelectableViewImpl.
    *
+   * @SINCE_3_0.0
    * @return An intrusive pointer to a newly allocated SelectableViewImpl
    */
   static SelectableViewImplPtr New();
@@ -89,17 +91,20 @@ protected:
   /**
    * @brief Gets the guaranteed SelectableTrait.
    *
+   * @SINCE_3_0.0
    * @return The SelectableTrait attached to this view
    */
   SelectableTrait GetSelectableTrait() const;
 
   /**
    * @brief Constructor.
+   * @SINCE_3_0.0
    */
   SelectableViewImpl();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~SelectableViewImpl() override;
 };

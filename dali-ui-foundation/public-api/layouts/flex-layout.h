@@ -39,18 +39,21 @@ class FlexLayoutImpl;
  * - Wrap behavior (NoWrap, Wrap, WrapReverse)
  * - Justify content (FlexStart, FlexEnd, Center, SpaceBetween, SpaceAround, SpaceEvenly)
  * - Align items and align content
+ * @SINCE_3_0.0
  */
 class DALI_UI_API FlexLayout : public Layout
 {
 public:
   /**
    * @brief Creates an uninitialized FlexLayout handle.
+   * @SINCE_3_0.0
    */
   FlexLayout();
 
   /**
    * @brief Creates a new FlexLayout.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated FlexLayout
    */
   static FlexLayout New();
@@ -58,6 +61,7 @@ public:
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] layout Handle to copy
    */
   FlexLayout(const FlexLayout& layout);
@@ -65,18 +69,21 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   FlexLayout(FlexLayout&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~FlexLayout();
 
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -85,6 +92,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -95,6 +103,7 @@ public:
   /**
    * @brief Downcasts a handle to FlexLayout handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a FlexLayout or an uninitialized handle
    */
@@ -104,6 +113,7 @@ public: // API
   /**
    * @brief Sets the flex direction.
    *
+   * @SINCE_3_0.0
    * @param[in] direction The flex direction
    */
   void SetDirection(FlexDirection direction);
@@ -111,6 +121,7 @@ public: // API
   /**
    * @brief Gets the flex direction.
    *
+   * @SINCE_3_0.0
    * @return The flex direction
    */
   FlexDirection GetDirection() const;
@@ -118,6 +129,7 @@ public: // API
   /**
    * @brief Sets the wrap behavior.
    *
+   * @SINCE_3_0.0
    * @param[in] wrap The wrap behavior
    */
   void SetWrap(FlexWrap wrap);
@@ -125,6 +137,7 @@ public: // API
   /**
    * @brief Gets the wrap behavior.
    *
+   * @SINCE_3_0.0
    * @return The wrap behavior
    */
   FlexWrap GetWrap() const;
@@ -132,6 +145,7 @@ public: // API
   /**
    * @brief Sets the justify content alignment.
    *
+   * @SINCE_3_0.0
    * @param[in] justify The justify content value
    */
   void SetJustifyContent(FlexJustify justify);
@@ -139,6 +153,7 @@ public: // API
   /**
    * @brief Gets the justify content alignment.
    *
+   * @SINCE_3_0.0
    * @return The justify content value
    */
   FlexJustify GetJustifyContent() const;
@@ -146,6 +161,7 @@ public: // API
   /**
    * @brief Sets the align items value.
    *
+   * @SINCE_3_0.0
    * @param[in] align The align items value
    */
   void SetAlignItems(FlexAlign align);
@@ -153,6 +169,7 @@ public: // API
   /**
    * @brief Gets the align items value.
    *
+   * @SINCE_3_0.0
    * @return The align items value
    */
   FlexAlign GetAlignItems() const;
@@ -160,6 +177,7 @@ public: // API
   /**
    * @brief Sets the align content value (for wrapped lines).
    *
+   * @SINCE_3_0.0
    * @param[in] align The align content value
    */
   void SetAlignContent(FlexAlign align);
@@ -167,6 +185,7 @@ public: // API
   /**
    * @brief Gets the align content value.
    *
+   * @SINCE_3_0.0
    * @return The align content value
    */
   FlexAlign GetAlignContent() const;

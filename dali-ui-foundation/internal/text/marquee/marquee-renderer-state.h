@@ -37,6 +37,14 @@ namespace Text
  * @return True if the owner is a Label with a pending FINISH_LOOP stop, false otherwise.
  */
 bool IsMarqueeStopRequested(Actor control);
+
+/**
+ * @brief Returns whether the owning Label has a pending manual render request.
+ *
+ * @param[in] control The actor that owns the text visual.
+ * @return True if the owner is a Label with a manual render in progress.
+ */
+bool IsManualAsyncRenderInProgress(Actor control);
 } // namespace Text
 } // namespace Ui
 } // namespace Dali

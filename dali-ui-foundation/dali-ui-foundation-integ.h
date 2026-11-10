@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/dali-ui-foundation-extension.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/widget-view-integ.h>
 
 // Integration APIs
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>

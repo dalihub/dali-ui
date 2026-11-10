@@ -68,6 +68,7 @@ class CoreInteractionObject;
  * Internally the interactive, selectable, and group-selectable trait
  * implementations share the single core interaction trait slot.
  *
+ * @SINCE_3_0.0
  * @note InteractiveTrait, SelectableTrait, and GroupSelectableTrait are facets of a
  * single shared interaction object on a View. Comparing handles with operator== compares
  * that same underlying object, and DownCast is presence-based (does the requested facet's
@@ -81,6 +82,7 @@ public:
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized GroupSelectableTrait handle.
+   * @SINCE_3_0.0
    */
   GroupSelectableTrait();
 
@@ -90,6 +92,7 @@ public: // Creation & Destruction
    * If the handle refers to a GroupSelectableTrait, the downcast produces a
    * valid handle. Otherwise the returned handle is uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object stored in View's core interaction trait slot
    * @return A handle to GroupSelectableTrait or an uninitialized handle
    */
@@ -99,6 +102,7 @@ public: // Creation & Destruction
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    * @param[in] groupSelectableTrait Handle to copy
    */
   GroupSelectableTrait(const GroupSelectableTrait& groupSelectableTrait);
@@ -107,6 +111,7 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~GroupSelectableTrait();
 
@@ -124,6 +129,7 @@ public: // API
    * parent auto-grouping; when off-scene it auto-joins on the next scene
    * connection.
    *
+   * @SINCE_3_0.0
    * @param[in] name The group name, or an empty string to clear it
    */
   void SetGroupName(const Dali::String& name);
@@ -131,6 +137,7 @@ public: // API
   /**
    * @brief Returns this member's explicit group name.
    *
+   * @SINCE_3_0.0
    * @return The group name, or an empty string if no explicit name is set (the
    * member then participates in parent auto-grouping when on-scene)
    */
@@ -144,6 +151,7 @@ public: // API
    * Membership is changed declaratively through SetGroupName() and parent
    * grouping; this accessor is read-only.
    *
+   * @SINCE_3_0.0
    * @return The bound SelectionGroup, or an uninitialized handle if unbound
    */
   SelectionGroup GetGroup() const;
@@ -156,6 +164,7 @@ public: // Not intended for application developers
    * selectable, and group-selectable trait implementations. Application
    * developers should obtain this trait through View::AsGroupSelectable().
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated GroupSelectableTrait.
    */
   DALI_INTERNAL static GroupSelectableTrait New();
@@ -163,6 +172,7 @@ public: // Not intended for application developers
   /**
    * @brief Creates a handle using the internal core interaction trait object.
    *
+   * @SINCE_3_0.0
    * @param[in] container The core interaction trait object
    * @return A handle to GroupSelectableTrait
    */

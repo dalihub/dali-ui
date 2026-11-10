@@ -35,6 +35,7 @@ namespace Ui
  * UniqueAny is move-only. It owns one stored value and can hold copyable
  * and move-only value types.
  *
+ * @SINCE_3_0.0
  * @note Use a stable namespace-scope type as the stored value type. Local types
  * and anonymous-namespace types should not be used when the value may be
  * retrieved from another translation unit, because they may not have a stable
@@ -45,6 +46,7 @@ class DALI_UI_API UniqueAny
 public:
   /**
    * @brief Creates an empty UniqueAny.
+   * @SINCE_3_0.0
    */
   UniqueAny();
 
@@ -54,6 +56,7 @@ public:
    * The stored value is constructed from @p value. Passing an rvalue moves the
    * value into the UniqueAny, so move-only value types are supported.
    *
+   * @SINCE_3_0.0
    * @tparam T The value type to store
    * @param[in] value The value to store
    */
@@ -65,22 +68,26 @@ public:
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   UniqueAny(UniqueAny&& rhs) noexcept;
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   UniqueAny& operator=(UniqueAny&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~UniqueAny();
 
   /**
    * @brief Checks whether this UniqueAny stores a value.
    *
+   * @SINCE_3_0.0
    * @return True if no value is stored
    */
   bool Empty() const;
@@ -88,12 +95,14 @@ public:
   /**
    * @brief Checks whether this UniqueAny stores a value.
    *
+   * @SINCE_3_0.0
    * @return True if a value is stored
    */
   explicit operator bool() const;
 
   /**
    * @brief Clears the stored value.
+   * @SINCE_3_0.0
    */
   void Reset();
 
@@ -103,6 +112,7 @@ public:
    * The returned pointer is owned by this UniqueAny. The caller must not delete
    * it and must not use it after this UniqueAny is destroyed or moved from.
    *
+   * @SINCE_3_0.0
    * @return Pointer to the stored value, or nullptr if the type does not match
    */
   template<typename T>
@@ -118,6 +128,7 @@ public:
    * The returned pointer is owned by this UniqueAny. The caller must not delete
    * it and must not use it after this UniqueAny is destroyed or moved from.
    *
+   * @SINCE_3_0.0
    * @return Pointer to the stored value, or nullptr if the type does not match
    */
   template<typename T>
@@ -134,6 +145,7 @@ public:
    * returned UniquePtr and this UniqueAny becomes empty. If the type does not
    * match, this UniqueAny is left unchanged.
    *
+   * @SINCE_3_0.0
    * @return The detached value, or nullptr if the type does not match
    */
   template<typename T>

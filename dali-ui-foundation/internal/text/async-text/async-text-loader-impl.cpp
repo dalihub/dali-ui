@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
+#include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
@@ -873,10 +874,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                                       endIt = underlinedCharacterRuns.End();
         it != endIt; ++it)
     {
-      CharacterIndex characterIndex     = it->characterRun.characterIndex;
-      Length         numberOfCharacters = it->characterRun.numberOfCharacters;
+      CharacterIndex characterIndex        = it->characterRun.characterIndex;
+      Length         runNumberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if(numberOfCharacters == 0)
+      if(runNumberOfCharacters == 0)
       {
         continue;
       }
@@ -888,7 +889,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       underlineGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       underlineGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for(Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < runNumberOfCharacters; index++)
       {
         underlineGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }
@@ -907,10 +908,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                                          endIt = strikethroughCharacterRuns.End();
         it != endIt; ++it)
     {
-      CharacterIndex characterIndex     = it->characterRun.characterIndex;
-      Length         numberOfCharacters = it->characterRun.numberOfCharacters;
+      CharacterIndex characterIndex        = it->characterRun.characterIndex;
+      Length         runNumberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if(numberOfCharacters == 0)
+      if(runNumberOfCharacters == 0)
       {
         continue;
       }
@@ -920,7 +921,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       strikethroughGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       strikethroughGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for(Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < runNumberOfCharacters; index++)
       {
         strikethroughGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }
@@ -939,10 +940,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                                             endIt = characterSpacingCharacterRuns.End();
         it != endIt; ++it)
     {
-      const CharacterIndex& characterIndex     = it->characterRun.characterIndex;
-      const Length&         numberOfCharacters = it->characterRun.numberOfCharacters;
+      const CharacterIndex& characterIndex        = it->characterRun.characterIndex;
+      const Length&         runNumberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if(numberOfCharacters == 0)
+      if(runNumberOfCharacters == 0)
       {
         continue;
       }
@@ -952,7 +953,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       characterSpacingGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       characterSpacingGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for(Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < runNumberOfCharacters; index++)
       {
         characterSpacingGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }
@@ -1459,6 +1460,9 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
   const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
   const bool embossEnabled               = parameters.isEmbossEnabled;
+  const bool marqueeGradientCoverage     = parameters.isMarqueeEnabled && parameters.isTextGradientRequested &&
+                                       !hasMultipleTextColors && !containsColorGlyph &&
+                                       !styleBlocksTextGradient && !embossEnabled;
 
   // Create RGBA texture if the text contains emojis or multiple text colors, otherwise L8 texture
   Pixel::Format textPixelFormat =
@@ -1496,11 +1500,37 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     layoutSize.y = parameters.textHeight + (parameters.padding.top + parameters.padding.bottom);
   }
 
+  // Use the same return object on every path to preserve return-value elision.
+  AsyncTextRenderInfo renderInfo;
+
+  // Height tiles currently use display-pixel coordinates. They cannot crop a
+  // scaled raster without losing content. Keep 1x height tiling, but reject a
+  // scaled request before producing any bitmap if its raster needs tiling.
+  // Marquee has already resolved its actual, capped raster size at this point.
+  if(parameters.maxTextureSize > 0 && (parameters.renderScale > 1.0f || parameters.isMarqueeEnabled))
+  {
+    int32_t width, height;
+    if(!Raster::Convert(layoutSize.x, width) || !Raster::Convert(layoutSize.y, height) ||
+       width > parameters.maxTextureSize || height > parameters.maxTextureSize)
+    {
+      DALI_LOG_ERROR("Async text raster size (%f, %f) exceeds texture limit %d at RenderScale %f\n",
+                     layoutSize.x, layoutSize.y, parameters.maxTextureSize, parameters.renderScale);
+      // Keep the rejected raster dimensions so completion can distinguish this
+      // limit check from other results that legitimately contain no pixels.
+      renderInfo.size = layoutSize;
+      return renderInfo;
+    }
+  }
+
+  // Match the synchronous Label's width clipping. Height can use the existing
+  // 1x tile path; there is no horizontal tiling path.
+  if(parameters.maxTextureSize > 0)
+  {
+    layoutSize.x = std::min(layoutSize.x, static_cast<float>(parameters.maxTextureSize));
+  }
+
   // Check the text direction
   Direction textDirection = mIsTextDirectionRTL ? Direction::RIGHT_TO_LEFT : Direction::LEFT_TO_RIGHT;
-
-  // Set information for creating pixel datas.
-  AsyncTextRenderInfo renderInfo;
 
   if(!parameters.isMarqueeEnabled)
   {
@@ -1553,7 +1583,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                                   parameters);
 
   std::optional<GradientRasterContext> gradientContext;
-  if(Internal::HasUserSpaceGradientSpan(gradientSpanData))
+  if(Internal::RequiresGradientRasterContext(gradientSpanData))
   {
     const float   controlWidth  = isRenderScale ? parameters.renderScaleWidth : parameters.textWidth;
     const float   controlHeight = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;
@@ -1595,7 +1625,9 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     // Create a pixel data for the text without any styles
     renderInfo.textPixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
+      marqueeGradientCoverage
+        ? mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, textPixelFormat)
+        : mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
   }
 
   std::unique_ptr<Internal::Reveal::Plan> blurPlan;
@@ -1759,8 +1791,10 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     if(!hasMixedColorTarget)
     {
       renderInfo.marqueeFillPixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
-                            ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
+        marqueeGradientCoverage
+          ? mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888, originSize)
+          : mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
+                                ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
     }
     renderInfo.marqueeStylePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT,
@@ -1781,9 +1815,12 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     // Resolve immediately after the primary text render. Later supplemental
     // render passes must not replace the texture geometry used by the delta.
     renderInfo.marqueePixelData =
-      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
-                          ignoreHorizontalAlignment, Pixel::RGBA8888,
-                          Size(parameters.originWidth, parameters.originHeight), context);
+      marqueeGradientCoverage
+        ? mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888,
+                                              Size(parameters.originWidth, parameters.originHeight))
+        : mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
+                              ignoreHorizontalAlignment, Pixel::RGBA8888,
+                              Size(parameters.originWidth, parameters.originHeight), context);
     if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
     {
       renderInfo.marqueeStartAnchor = parameters.marqueeStartAnchor;
@@ -1936,6 +1973,20 @@ Size AsyncTextLoader::ComputeLayoutSize(AsyncTextParameters& parameters, float w
 
 Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& cachedNaturalSize)
 {
+  // ConvertToEven and marquee gap use signed integers. Check in double before
+  // any scaled font/layout calculation or float-to-integer conversion.
+  const double largestInput = std::max({static_cast<double>(parameters.textWidth),
+                                        static_cast<double>(parameters.textHeight),
+                                        static_cast<double>(parameters.minLineSize),
+                                        std::abs(static_cast<double>(parameters.marqueeGap))});
+  if(!std::isfinite(parameters.renderScale) ||
+     largestInput * parameters.renderScale >= std::numeric_limits<int>::max() - 1.0)
+  {
+    parameters.renderScale = 1.0f;
+    cachedNaturalSize      = false;
+    return Size::ZERO;
+  }
+
   if(parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled)
   {
     // If text fit, only update the scaled size.
@@ -2166,9 +2217,14 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   }
   else // MarqueeOrientation::VERTICAL
   {
-    bool  layoutOnly      = useCachedNaturalSize;
-    bool  useCachedHeight = false;
-    float textHeight      = 0.0f;
+    // Render() adds padding to cutout rasters. Reserve that space before
+    // laying out the capped scrolling content, including its ellipsis.
+    const float maxTextureHeight = parameters.isCutoutEnabled
+                                     ? std::max(static_cast<float>(maxTextureSize) - parameters.padding.top - parameters.padding.bottom, 0.0f)
+                                     : static_cast<float>(maxTextureSize);
+    bool        layoutOnly       = useCachedNaturalSize;
+    bool        useCachedHeight  = false;
+    float       textHeight       = 0.0f;
     if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
     {
       // The real height calculated during layout should be set.
@@ -2207,10 +2263,10 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     verifiedSize = textureSize;
 
     // If the texture size height exceed maxTextureSize, modify the visual model size and enabled the ellipsis.
-    if(verifiedSize.height > maxTextureSize)
+    if(verifiedSize.height > maxTextureHeight)
     {
-      verifiedSize.height = static_cast<float>(maxTextureSize);
-      if(textHeight > maxTextureSize)
+      verifiedSize.height = maxTextureHeight;
+      if(textHeight > maxTextureHeight)
       {
         float actualWidth  = parameters.textWidth;
         float actualHeight = parameters.textHeight;
@@ -2228,7 +2284,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
         parameters.textHeight       = actualHeight;
         parameters.isMarqueeEnabled = true;
       }
-      wrapGap = std::max(maxTextureSize - textHeight, 0.0f);
+      wrapGap = std::max(maxTextureHeight - textHeight, 0.0f);
     }
   }
 

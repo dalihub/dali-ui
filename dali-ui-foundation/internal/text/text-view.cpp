@@ -704,13 +704,13 @@ Length View::GetGlyphsUncached(GlyphInfo*                   glyphs,
 
         // Get the lines for the given range of glyphs.
         // The lines contain the alignment offset which needs to be added to the glyph's position.
-        LineIndex firstLineIndex = 0u;
-        Length    numberOfLines  = 0u;
-        mImpl->mVisualModel->GetNumberOfLines(glyphIndex, numberOfLaidOutGlyphs, firstLineIndex, numberOfLines);
+        LineIndex firstLineIndex        = 0u;
+        Length    ellipsisNumberOfLines = 0u;
+        mImpl->mVisualModel->GetNumberOfLines(glyphIndex, numberOfLaidOutGlyphs, firstLineIndex, ellipsisNumberOfLines);
 
-        Vector<LineRun> lines;
-        lines.Resize(numberOfLines);
-        LineRun* lineBuffer = lines.Begin();
+        Vector<LineRun> ellipsisLines;
+        ellipsisLines.Resize(ellipsisNumberOfLines);
+        LineRun* lineBuffer = ellipsisLines.Begin();
 
         mImpl->mVisualModel->GetLinesOfGlyphRange(lineBuffer, glyphIndex, numberOfLaidOutGlyphs);
 
@@ -745,7 +745,7 @@ Length View::GetGlyphsUncached(GlyphInfo*                   glyphs,
             // Get the next line.
             ++lineIndex;
 
-            if(lineIndex < numberOfLines)
+            if(lineIndex < ellipsisNumberOfLines)
             {
               line          = lineBuffer + lineIndex;
               minLineOffset = std::min(minLineOffset, line->alignmentOffset);
@@ -780,7 +780,7 @@ Length View::GetGlyphsUncached(GlyphInfo*                   glyphs,
         {
           const LineRun& elidedLine = *ellipsisLine;
 
-          if((1u == numberOfLines) && (GetLineHeight(elidedLine, true) > mImpl->mVisualModel->mControlSize.height))
+          if((1u == ellipsisNumberOfLines) && (GetLineHeight(elidedLine, true) > mImpl->mVisualModel->mControlSize.height))
           {
             // Replace the first glyph with ellipsis glyph
             const GlyphIndex indexOfFirstGlyph = 0u;

@@ -35,18 +35,19 @@ namespace Ui
  * @brief All the visual types.
  *
  * Returned by VisualBase::GetVisualType() to identify which kind of visual a handle owns.
+ * @SINCE_3_0.0
  */
 enum class VisualType
 {
-  INVALID = -1, ///< Not a valid visual type.
+  INVALID = -1, ///< Not a valid visual type. @SINCE_3_0.0
 
-  BORDER = 0,       ///< Renders a solid color as a border inside the visual's quad. @see BorderVisual
-  COLOR,            ///< Renders a solid color over the visual's quad. @see ColorVisual
-  GRADIENT,         ///< Renders a smooth transition of colors over the visual's quad. @see GradientVisual
-  TEXT,             ///< Renders text. @see TextVisual
-  IMAGE,            ///< Renders an image. @see ImageVisual
-  ANIMATED_IMAGE,   ///< Renders an animated image or a sequence of images. @see AnimatedImageVisual
-  LOTTIE_ANIMATION, ///< Renders a Lottie animation. @see LottieAnimationVisual
+  BORDER = 0,       ///< Renders a solid color as a border inside the visual's quad. @see BorderVisual @SINCE_3_0.0
+  COLOR,            ///< Renders a solid color over the visual's quad. @see ColorVisual @SINCE_3_0.0
+  GRADIENT,         ///< Renders a smooth transition of colors over the visual's quad. @see GradientVisual @SINCE_3_0.0
+  TEXT,             ///< Renders text. @see TextVisual @SINCE_3_0.0
+  IMAGE,            ///< Renders an image. @see ImageVisual @SINCE_3_0.0
+  ANIMATED_IMAGE,   ///< Renders an animated image or a sequence of images. @see AnimatedImageVisual @SINCE_3_0.0
+  LOTTIE_ANIMATION, ///< Renders a Lottie animation. @see LottieAnimationVisual @SINCE_3_0.0
 };
 
 /**
@@ -55,20 +56,21 @@ enum class VisualType
  * The point is absolute and is never mirrored: LEFT is always the left edge, whatever the effective
  * layout direction.
  *
+ * @SINCE_3_0.0
  * @see VisualBase::SetOrigin()
  * @see VisualPivot
  */
 enum class VisualOrigin : uint8_t
 {
-  TOP_LEFT = 0,  ///< The top-left corner of the View.
-  TOP_CENTER,    ///< The midpoint of the View's top edge.
-  TOP_RIGHT,     ///< The top-right corner of the View.
-  CENTER_LEFT,   ///< The midpoint of the View's left edge.
-  CENTER,        ///< The centre of the View.
-  CENTER_RIGHT,  ///< The midpoint of the View's right edge.
-  BOTTOM_LEFT,   ///< The bottom-left corner of the View.
-  BOTTOM_CENTER, ///< The midpoint of the View's bottom edge.
-  BOTTOM_RIGHT   ///< The bottom-right corner of the View.
+  TOP_LEFT = 0,  ///< The top-left corner of the View. @SINCE_3_0.0
+  TOP_CENTER,    ///< The midpoint of the View's top edge. @SINCE_3_0.0
+  TOP_RIGHT,     ///< The top-right corner of the View. @SINCE_3_0.0
+  CENTER_LEFT,   ///< The midpoint of the View's left edge. @SINCE_3_0.0
+  CENTER,        ///< The centre of the View. @SINCE_3_0.0
+  CENTER_RIGHT,  ///< The midpoint of the View's right edge. @SINCE_3_0.0
+  BOTTOM_LEFT,   ///< The bottom-left corner of the View. @SINCE_3_0.0
+  BOTTOM_CENTER, ///< The midpoint of the View's bottom edge. @SINCE_3_0.0
+  BOTTOM_RIGHT   ///< The bottom-right corner of the View. @SINCE_3_0.0
 };
 
 /**
@@ -76,20 +78,21 @@ enum class VisualOrigin : uint8_t
  *
  * Like VisualOrigin, the point is absolute and is never mirrored.
  *
+ * @SINCE_3_0.0
  * @see VisualBase::SetPivot()
  * @see VisualOrigin
  */
 enum class VisualPivot : uint8_t
 {
-  TOP_LEFT = 0,  ///< The top-left corner of the visual.
-  TOP_CENTER,    ///< The midpoint of the visual's top edge.
-  TOP_RIGHT,     ///< The top-right corner of the visual.
-  CENTER_LEFT,   ///< The midpoint of the visual's left edge.
-  CENTER,        ///< The centre of the visual.
-  CENTER_RIGHT,  ///< The midpoint of the visual's right edge.
-  BOTTOM_LEFT,   ///< The bottom-left corner of the visual.
-  BOTTOM_CENTER, ///< The midpoint of the visual's bottom edge.
-  BOTTOM_RIGHT   ///< The bottom-right corner of the visual.
+  TOP_LEFT = 0,  ///< The top-left corner of the visual. @SINCE_3_0.0
+  TOP_CENTER,    ///< The midpoint of the visual's top edge. @SINCE_3_0.0
+  TOP_RIGHT,     ///< The top-right corner of the visual. @SINCE_3_0.0
+  CENTER_LEFT,   ///< The midpoint of the visual's left edge. @SINCE_3_0.0
+  CENTER,        ///< The centre of the visual. @SINCE_3_0.0
+  CENTER_RIGHT,  ///< The midpoint of the visual's right edge. @SINCE_3_0.0
+  BOTTOM_LEFT,   ///< The bottom-left corner of the visual. @SINCE_3_0.0
+  BOTTOM_CENTER, ///< The midpoint of the visual's bottom edge. @SINCE_3_0.0
+  BOTTOM_RIGHT   ///< The bottom-right corner of the visual. @SINCE_3_0.0
 };
 
 namespace Visual
@@ -97,6 +100,7 @@ namespace Visual
 /**
  * @brief Controls whether the offset and size of a visual are proportional to
  * the attached View's size, or absolute.
+ * @SINCE_3_0.0
  */
 namespace Transform
 {
@@ -108,53 +112,63 @@ namespace Transform
  *
  * The default is ALL, so every offset and size value is proportional unless changed.
  *
+ * @SINCE_3_0.0
  * @see VisualBase::SetTransformProportionFlags()
  */
 enum class ProportionFlags : uint8_t
 {
   /**
    * @brief Every offset and size value is an absolute length in pixels.
+   * @SINCE_3_0.0
    */
   NONE = 0x0,
 
   /**
    * @brief Offset X is a fraction of the attached View's width; without this flag it is absolute.
+   * @SINCE_3_0.0
    */
   X_PROPORTIONAL = 0x1,
 
   /**
    * @brief Offset Y is a fraction of the attached View's height; without this flag it is absolute.
+   * @SINCE_3_0.0
    */
   Y_PROPORTIONAL = 0x2,
 
   /**
    * @brief Both offset values are fractions of the attached View's size.
+   * @SINCE_3_0.0
    */
   OFFSET_PROPORTIONAL = X_PROPORTIONAL | Y_PROPORTIONAL,
 
   /**
    * @brief Width is a fraction of the attached View's width; without this flag it is absolute.
+   * @SINCE_3_0.0
    */
   WIDTH_PROPORTIONAL = 0x4,
 
   /**
    * @brief Height is a fraction of the attached View's height; without this flag it is absolute.
+   * @SINCE_3_0.0
    */
   HEIGHT_PROPORTIONAL = 0x8,
 
   /**
    * @brief Both size values are fractions of the attached View's size.
+   * @SINCE_3_0.0
    */
   SIZE_PROPORTIONAL = WIDTH_PROPORTIONAL | HEIGHT_PROPORTIONAL,
 
   /**
    * @brief Every offset and size value is a fraction of the attached View's size. (Default)
+   * @SINCE_3_0.0
    */
   ALL = OFFSET_PROPORTIONAL | SIZE_PROPORTIONAL
 };
 
 /**
  * @brief Bitwise OR operator for ProportionFlags.
+ * @SINCE_3_0.0
  */
 inline ProportionFlags operator|(ProportionFlags lhs, ProportionFlags rhs)
 {
@@ -163,6 +177,7 @@ inline ProportionFlags operator|(ProportionFlags lhs, ProportionFlags rhs)
 
 /**
  * @brief Bitwise AND operator for ProportionFlags.
+ * @SINCE_3_0.0
  */
 inline ProportionFlags operator&(ProportionFlags lhs, ProportionFlags rhs)
 {
@@ -173,6 +188,7 @@ inline ProportionFlags operator&(ProportionFlags lhs, ProportionFlags rhs)
 
 /**
  * @brief Status of resource which is used for visual.
+ * @SINCE_3_0.0
  */
 enum class ResourceStatus
 {
@@ -188,20 +204,21 @@ enum class ResourceStatus
  * decoration, then foreground effect. Each value selects one of those layers. A visual attached to
  * a layer is drawn above the View's own visual of that layer and below the next layer.
  *
+ * @SINCE_3_0.0
  * @note Sibling order reorders visuals sharing the same DepthLayer. A visual can never be drawn
  * outside of the layer it is attached to.
  */
 enum class DepthLayer
 {
-  BACKGROUND_EFFECT, ///< The background effect layer. The bottom-most layer.
-  BACKGROUND,        ///< The background layer.
-  CONTENT,           ///< The content layer.
-  DECORATION,        ///< The decoration layer.
-  FOREGROUND_EFFECT, ///< The foreground effect layer. The top-most layer.
+  BACKGROUND_EFFECT, ///< The background effect layer. The bottom-most layer. @SINCE_3_0.0
+  BACKGROUND,        ///< The background layer. @SINCE_3_0.0
+  CONTENT,           ///< The content layer. @SINCE_3_0.0
+  DECORATION,        ///< The decoration layer. @SINCE_3_0.0
+  FOREGROUND_EFFECT, ///< The foreground effect layer. The top-most layer. @SINCE_3_0.0
 
-  MAX_COUNT, ///< Sentinel value used to validate depth layer values. Not a layer itself.
+  MAX_COUNT, ///< Sentinel value used to validate depth layer values. Not a layer itself. @SINCE_3_0.0
 
-  NONE = -1, ///< The visual is not attached to any View.
+  NONE = -1, ///< The visual is not attached to any View. @SINCE_3_0.0
 };
 
 } // namespace Visual

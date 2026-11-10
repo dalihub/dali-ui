@@ -53,6 +53,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
@@ -67,6 +68,7 @@
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/input-event-impl.h>
+#include <dali-ui-foundation/internal/layout-scale-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
@@ -92,7 +94,6 @@
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
@@ -447,24 +448,194 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
   return std::abs(a - b) < epsilon;
 }
 
-// THE single place the global UI-scale master switch is read. Every scale that
-// enters the layout system does so through one of the two calls to this function
-// in ComputeEffectiveScale() -- every other Measure/Arrange site, every
-// measure-cache scale key and the actor-side VIEW_EFFECTIVE_SCALE
-// push obtain the scale via GetEffectiveScale(), which memoizes what
-// ComputeEffectiveScale() returns. So collapsing the system scale to 1.0f here
-// is what makes the whole system behave as unscaled, with no change at any call
-// site. The scale stored in UiScaleManager is left untouched and is re-applied
-// as soon as scaling is re-enabled.
+// THE single read of the SYSTEM term: the global UI-scale master switch and the scale
+// stored in LayoutScaleManager. Every scale that enters the layout system does so through
+// ComputeEffectiveScale() -- every other Measure/Arrange site, every measure-cache scale
+// key and the actor-side VIEW_EFFECTIVE_SCALE push obtain the scale via
+// GetEffectiveLayoutScale(), which memoizes on scene what ComputeEffectiveScale() returns -- and that
+// function reads this term only here: at a fast-path root, and through
+// ResolveSystemScaleTerm() for a node that left the fast path. Collapsing the system
+// scale to 1.0f here is one half of what makes the whole system behave as unscaled with
+// no change at any call site; the other half is the same switch read for the per-window
+// term, inside LayoutScaleManagerImpl::ResolveWindowScale(), behind the gate GetWindowScale()
+// below tests. Both stored values are left untouched and are re-applied as soon as
+// scaling is re-enabled.
 //
-// Reading the switch HERE rather than at the top of ComputeEffectiveScale() is
-// what keeps the two policies that never consult the system scale -- DISABLED,
-// and INHERIT with a parent -- free of the handle's refcount touch, exactly as
-// they were before the switch existed.
+// Reading the switch HERE rather than at the top of ComputeEffectiveScale() is what
+// keeps the paths that never consult the system scale free of the handle's refcount
+// touch, exactly as they were before the switch existed. The fast path -- INHERIT for
+// both terms, with a parent -- keeps that unconditionally: it is a pass-through of its
+// parent's value (memoized on scene) and calls neither this function nor the window one. A node
+// whose system term is DISABLED keeps it too: its term is the constant 1.0f, and its
+// window term costs one inline static load while no window scale is recorded anywhere
+// in the process -- which is every application that does not use that feature. Once a
+// window scale IS recorded, such a node pays a policy ascent and at most one
+// manager-handle touch and one Window lookup per effective-scale cache MISS.
 inline float GetSystemScale()
 {
-  UiScaleManager manager = UiScaleManager::Get();
-  return manager.IsScalable() ? manager.GetScale() : 1.0f;
+  Ui::Extension::LayoutScaleManager manager = Ui::Extension::LayoutScaleManager::Get();
+  return manager.IsScalable() ? manager.GetUiScale() : 1.0f;
+}
+
+// The SECOND scale term: the per-window scale. A view's final scale is
+//     windowScale * uiScale
+// where the uiScale term is whichever of 1.0f / GetSystemScale() the view's
+// UiScalePolicy selects, and the windowScale term whichever of 1.0f / this function its
+// framework-internal WindowScalePolicy selects. For an application view that is this
+// function -- application code cannot set its WindowScalePolicy, so it is INHERIT --
+// unless the framework opted an ancestor out of the window term. That is why it is
+// a term of its own and not folded into GetSystemScale(): a view that opts out of the
+// system term (UiScalePolicy::DISABLED) must still receive this one.
+//
+// The master switch gates this term too: LayoutScaleManagerImpl::ResolveWindowScale()
+// returns 1.0f while SetScalable(false) is in force, which is what makes the switch the
+// complete kill switch its public documentation describes. That read lives there and
+// not here because the resolver already holds the manager handle it needs; testing it
+// here would cost a handle on every call.
+//
+// The gate is tested HERE, inline, ahead of the cross-TU call, so that while no
+// application has ever set a window scale the whole term costs one static load and one
+// branch: no singleton handle, no actor temporary and no Window lookup. Calling the
+// resolver ungated would still be correct, just not free.
+//
+// INVARIANT (W1): the window scale enters a view's effective scale exactly ONCE. It is
+// read only where a product is FORMED -- at a fast-path root, and at a node that leaves
+// ComputeEffectiveScale()'s fast path (through ResolveWindowScaleTerm()) -- and NEVER on
+// the fast path itself, which returns the parent's ALREADY-multiplied memoized value;
+// multiplying there would compound the scale to scale^depth down an INHERIT chain. A
+// node that leaves the fast path cannot compound it either: it reads its ancestors'
+// POLICIES, never their products.
+inline float GetWindowScale(const ViewImpl& viewImpl)
+{
+  if(!Internal::LayoutScaleManagerImpl::HasAnyWindowScale())
+  {
+    return 1.0f;
+  }
+  return Internal::LayoutScaleManagerImpl::ResolveWindowScale(viewImpl);
+}
+
+// The SYSTEM term of a node that left ComputeEffectiveScale()'s fast path: its own
+// UiScalePolicy when that is not INHERIT, else the nearest ancestor's that is not, else
+// the root's -- the system scale. DISABLED is 1.0f; ENABLED and the root read
+// GetSystemScale(), the single read site of this term. The ascent stops at the first
+// non-View parent, exactly as GetParentView() does for the fast path, and it reads
+// POLICIES only, never an ancestor's memoized product: that product carries the window
+// term too, and recovering one term from it would take a division the exactly-compared
+// measure-cache scale key cannot afford.
+//
+// O(depth), and only on an effective-scale cache MISS. A node whose own UiScalePolicy is
+// DISABLED or ENABLED -- every application view that leaves the fast path -- does not
+// ascend at all: it returns before the ascent's View handle is even constructed, at the
+// cost the DISABLED and ENABLED branches had before WindowScalePolicy existed.
+float ResolveSystemScaleTerm(const ViewDataImpl& viewData)
+{
+  Ui::Extension::UiScalePolicy policy = viewData.GetUiScalePolicy();
+  if(policy != Ui::Extension::UiScalePolicy::INHERIT)
+  {
+    return (policy == Ui::Extension::UiScalePolicy::ENABLED) ? GetSystemScale() : 1.0f;
+  }
+
+  const ViewDataImpl* node = &viewData;
+  Ui::View            ancestor; // keeps the node being read alive across the ascent
+  while(policy == Ui::Extension::UiScalePolicy::INHERIT)
+  {
+    ancestor = node->GetParentView();
+    if(!ancestor)
+    {
+      return GetSystemScale();
+    }
+    node   = &ViewDataImpl::Get(GetImpl(ancestor));
+    policy = node->GetUiScalePolicy();
+  }
+  return (policy == Ui::Extension::UiScalePolicy::ENABLED) ? GetSystemScale() : 1.0f;
+}
+
+// Whether the SYSTEM term of a node is fixed at 1.0f by a DISABLED policy -- its own
+// UiScalePolicy when that is not INHERIT, else the nearest ancestor's that is not -- rather
+// than being the UI scale (ENABLED, or INHERIT up to the root). The same policy ascent as
+// ResolveSystemScaleTerm(), which cannot answer this because it returns the term's VALUE: the
+// UI term is 1.0f too whenever the UI scale is 1.0 or SetScalable(false) is in force, so after
+// SetUiScale(2.0f -> 1.0f), or under the switch, a fixed 1.0f and the UI term are equal values
+// with different futures. Only the policy says which of them the next UI-scale change moves.
+//
+// Read by the off-scene measure-cache rule (the last term of Measure()'s hit predicate, and
+// CanSkipArrangeRemeasure()) only off scene, only for a view with View children and only once
+// every other term has matched. A node whose own policy decides returns before any handle is
+// constructed; an INHERIT node ascends to the first non-INHERIT policy or to the root (the first
+// non-View parent), O(depth).
+bool SystemScaleTermIsConstant(const ViewDataImpl& viewData)
+{
+  Ui::Extension::UiScalePolicy policy = viewData.GetUiScalePolicy();
+  if(policy != Ui::Extension::UiScalePolicy::INHERIT)
+  {
+    return policy == Ui::Extension::UiScalePolicy::DISABLED;
+  }
+
+  const ViewDataImpl* node = &viewData;
+  Ui::View            ancestor; // keeps the node being read alive across the ascent
+  while(policy == Ui::Extension::UiScalePolicy::INHERIT)
+  {
+    ancestor = node->GetParentView();
+    if(!ancestor)
+    {
+      return false;
+    }
+    node   = &ViewDataImpl::Get(GetImpl(ancestor));
+    policy = node->GetUiScalePolicy();
+  }
+  return policy == Ui::Extension::UiScalePolicy::DISABLED;
+}
+
+// The PER-WINDOW term of a node that left ComputeEffectiveScale()'s fast path: its own
+// WindowScalePolicy when that is not INHERIT, else the nearest ancestor's that is not,
+// else the root's -- the scale of the view's window. DISABLED is 1.0f; ENABLED and the
+// root read GetWindowScale() of THIS view, the single read site of this term (a deciding
+// ancestor is connected to this view, so it is in the same window). Same ascent rules as
+// ResolveSystemScaleTerm(): it stops at the first non-View parent and reads policies,
+// never products.
+//
+// Gated FIRST, ahead of the ascent: while no window scale is recorded anywhere in the
+// process -- every application that does not use the feature -- the term is 1.0f
+// whatever the policies say, so it costs one static load, as the plain `return 1.0f` the
+// DISABLED branch had before the window scale existed. Once a window scale IS recorded, a
+// node whose own policy decides -- DISABLED or ENABLED, the framework's opted-out views --
+// returns before any handle is constructed, and an INHERIT node pays the O(depth) policy
+// ascent on a cache MISS, with the Window lookup only when the deciding policy is ENABLED
+// or the ascent reached the root. Misses are not rare: InvalidateMeasure() drops the
+// memoized scale, so a view re-measured along a dirty path resolves again on every layout
+// pass. Application code cannot set this policy, so an application view that leaves the
+// fast path (its UiScalePolicy is ENABLED or DISABLED) is INHERIT here and its ascent
+// reaches the root -- unless the framework opted an ancestor out of the window term,
+// which is exactly the case the ascent exists for.
+//
+// The final GetWindowScale() re-tests the gate (one more static load) on purpose: it
+// keeps that wrapper the ONLY window-term read in this file.
+float ResolveWindowScaleTerm(const ViewDataImpl& viewData, const ViewImpl& viewImpl)
+{
+  if(!Internal::LayoutScaleManagerImpl::HasAnyWindowScale())
+  {
+    return 1.0f;
+  }
+
+  WindowScalePolicy policy = viewData.GetWindowScalePolicy();
+  if(policy != WindowScalePolicy::INHERIT)
+  {
+    return (policy == WindowScalePolicy::DISABLED) ? 1.0f : GetWindowScale(viewImpl);
+  }
+
+  const ViewDataImpl* node = &viewData;
+  Ui::View            ancestor; // keeps the node being read alive across the ascent
+  while(policy == WindowScalePolicy::INHERIT)
+  {
+    ancestor = node->GetParentView();
+    if(!ancestor)
+    {
+      break;
+    }
+    node   = &ViewDataImpl::Get(GetImpl(ancestor));
+    policy = node->GetWindowScalePolicy();
+  }
+  return (policy == WindowScalePolicy::DISABLED) ? 1.0f : GetWindowScale(viewImpl);
 }
 
 // Sanitize size property inputs. RequestedWidth/Height accept any
@@ -1280,7 +1451,7 @@ ViewDataImpl::VisualData& ViewDataImpl::EnsureVisualData()
 
 MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightConstraint)
 {
-  float s    = mViewImpl.GetEffectiveScale();
+  float s    = GetEffectiveLayoutScale();
   float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
   float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
 
@@ -1402,7 +1573,7 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
         continue;
       }
 
-      float  childScale            = childImpl.GetEffectiveScale();
+      float  childScale            = GetEffectiveLayoutScaleOf(childImpl);
       Insets margin                = childImpl.GetMargin();
       float  marginW               = static_cast<float>(margin.start + margin.end) * childScale;
       float  marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
@@ -1646,7 +1817,7 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
   // the default arrange only places regular children and echoes the input bounds.
   if(!mChildren.Empty())
   {
-    float s            = mViewImpl.GetEffectiveScale();
+    float s            = GetEffectiveLayoutScale();
     float visPadLeft   = static_cast<float>(mPadding.start) * s;
     float visPadRight  = static_cast<float>(mPadding.end) * s;
     float visPadTop    = static_cast<float>(mPadding.top) * s;
@@ -1667,7 +1838,7 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
         continue;
       }
 
-      float        childScale      = childImpl.GetEffectiveScale();
+      float        childScale      = GetEffectiveLayoutScaleOf(childImpl);
       Insets       margin          = childImpl.GetMargin();
       float        visMarginStart  = static_cast<float>(margin.start) * childScale;
       float        visMarginEnd    = static_cast<float>(margin.end) * childScale;
@@ -2435,7 +2606,7 @@ float ViewDataImpl::GetRequestedY() const
   return mRequestedY;
 }
 
-void ViewDataImpl::SetUiScalePolicy(UiScalePolicy policy)
+void ViewDataImpl::SetUiScalePolicy(Ui::Extension::UiScalePolicy policy)
 {
   if(mScalePolicy != policy)
   {
@@ -2445,24 +2616,72 @@ void ViewDataImpl::SetUiScalePolicy(UiScalePolicy policy)
   }
 }
 
-UiScalePolicy ViewDataImpl::GetUiScalePolicy() const
+Ui::Extension::UiScalePolicy ViewDataImpl::GetUiScalePolicy() const
 {
   return mScalePolicy;
 }
 
-float ViewDataImpl::GetEffectiveScale() const
+void ViewDataImpl::SetWindowScalePolicy(WindowScalePolicy policy)
+{
+  // SetUiScalePolicy()'s exact shape, for the same reason. The policy decides the window
+  // term of this view AND of every INHERIT descendant -- a descendant on the INHERIT fast
+  // path memoizes this view's product, and a descendant that left the fast path read this
+  // view's policy on its ascent -- so the whole subtree's cached scale and every layout
+  // result derived from it are dropped, and a measure pass is scheduled. Unchanged policy,
+  // nothing to drop.
+  if(mWindowScalePolicy != policy)
+  {
+    mWindowScalePolicy = policy;
+    ResetSubtreeScaleAndLayoutCaches();
+    InvalidateMeasure();
+  }
+}
+
+WindowScalePolicy ViewDataImpl::GetWindowScalePolicy() const
+{
+  return mWindowScalePolicy;
+}
+
+float ViewDataImpl::GetEffectiveLayoutScale() const
 {
   // mEffectiveScaleValid -- not a value sentinel on mEffectiveScale itself -- is
   // what says whether the cached scale is usable. Every scale-context
   // invalidation clears that bit; this is the only place that sets it, which is
   // exactly what makes "bit true" mean "mEffectiveScale is what
   // ComputeEffectiveScale() would return now".
+  //
+  // ON SCENE ONLY. That claim holds only while every change that can move the value
+  // reaches this view as a scale-context invalidation, and a UI-scale, master-switch or
+  // window-scale change reaches only the subtrees of the layout roots LayoutScaleManager
+  // has registered -- a view that is not on a scene is in none of them. So off scene a
+  // miss returns what it computed and writes nothing: a detached or never-added view
+  // follows SetUiScale() and SetScalable() at once, at the price of recomputing on every
+  // read (O(depth) on the INHERIT fast path, whose parent is off scene too). A scale root
+  // that leaves the scene drops what its subtree memoized there
+  // (OnViewSceneDisconnection), so no bit set here outlives the scene membership it relied
+  // on -- with one exception, an in-flight EXIT ghost. Remove(child, RemovePolicy::ANIMATE_EXIT)
+  // takes the child out of its host's mChildren but leaves it actor-parented to the host, so
+  // the reset, which walks mChildren, does not reach it, and with a View parent it is no scale
+  // root of its own. If the host leaves the scene mid-EXIT, the EXIT is cancelled
+  // (LayoutTransitionDispatcher::OnViewDestroyed) but the ghost stays the host's child and
+  // keeps what it memoized here until something invalidates it. The scene test is paid on a
+  // miss only; the hit path is the bit test it always was.
   if(!mEffectiveScaleValid)
   {
-    mEffectiveScale      = ComputeEffectiveScale();
+    const float scale = ComputeEffectiveScale();
+    if(!mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+    {
+      return scale;
+    }
+    mEffectiveScale      = scale;
     mEffectiveScaleValid = true;
   }
   return mEffectiveScale;
+}
+
+float ViewDataImpl::GetEffectiveLayoutScaleOf(const ViewImpl& viewImpl)
+{
+  return viewImpl.GetViewDataImpl().GetEffectiveLayoutScale();
 }
 
 void ViewDataImpl::InvalidateMeasure()
@@ -2491,7 +2710,7 @@ void ViewDataImpl::InvalidateMeasure()
   //
   // Drop the cached effective scale: whatever changed may have moved this view's
   // effective scale (a reparent re-roots the INHERIT chain), so the next
-  // GetEffectiveScale() must recompute rather than serve the cached value.
+  // GetEffectiveLayoutScale() must recompute rather than serve the cached value.
   DropCachedEffectiveScale();
 
   // Both caches go with it: a cached measured size or arranged bounds produced
@@ -3850,7 +4069,7 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // ResetSubtreeScaleAndLayoutCaches() clears the effective-scale sync bit
     // (mEffectiveScaleValid) and both layout caches (mMeasureCacheValid and
     // mArrangeCacheValid) for every node in the subtree, guaranteeing:
-    //   (a) scale is recomputed from the new parent chain on next GetEffectiveScale(), and
+    //   (a) scale is recomputed from the new parent chain on next GetEffectiveLayoutScale(), and
     //   (b) the invalid measure cache forces a cache miss in Measure() so all
     //       nodes fully re-measure with the new scale.
     //
@@ -4013,7 +4232,7 @@ void ViewDataImpl::OnChildRemoved(Actor& child)
 
       // Removal re-roots the removed subtree's effective-scale chain: an INHERIT
       // node's ComputeEffectiveScale walks its parent chain, and severing this
-      // link re-roots that chain (ultimately at UiScaleManager's global scale).
+      // link re-roots that chain (ultimately at LayoutScaleManager's global scale).
       // So the whole removed subtree's cached effective scale is now stale. The
       // InvalidateMeasure() below drops it on the direct child ONLY and
       // propagates upward, never into the subtree -- the mirror of OnChildAdded's
@@ -4082,7 +4301,7 @@ void ViewDataImpl::OnViewSceneConnection()
   // reach the view: a standalone view whose parent is never arranged -- one inside a
   // regular child of a producer that never arranges its children (a Label:
   // LabelImpl::OnArrange returns its bounds), or under a parent whose own parent
-  // ignores it -- is placed by no parent pass, and UiScaleManager's root registration
+  // ignores it -- is placed by no parent pass, and LayoutScaleManager's root registration
   // is only a map insert that schedules nothing. Its own self pass is therefore the
   // only route that brings it to the current scale and window, and keeps a window
   // resize reaching it (the controller invalidates its tracked roots and nothing
@@ -4090,20 +4309,23 @@ void ViewDataImpl::OnViewSceneConnection()
   // self pass after the parent's pass is a measure + arrange cache hit:
   // ArrangeStandaloneChild and LayoutController::ProcessLayoutRoot derive the same
   // constraint and slot from the same parent layout target.
-  // RegisterWithLayoutController() also registers the view with UiScaleManager, so
+  // RegisterWithLayoutController() also registers the view with LayoutScaleManager, so
   // future scale changes reach it.
   const bool isLayoutRoot = !GetParentView();
 
   // Off-scene scale gap. While this view is a detached layout root it is not in
-  // UiScaleManager's root set, so a global SetScale() cannot reach it -- its
-  // cached effective scale, and the whole subtree's for INHERIT chains, may be
-  // stale (computed against the scale in force before it was detached). On
-  // (re)connection re-derive the subtree's effective scale so the layout pass
-  // registered below measures and arranges at the CURRENT scale. On a first-ever
-  // connection this is a cheap no-op (the caches are empty and the scale merely
-  // recomputes to the same value). This is the mirror, for the Window/Actor
-  // remove-then-add path, of OnChildRemoved's recursive invalidation for the
-  // View reparent path.
+  // LayoutScaleManager's root set, so a global SetUiScale() or SetScalable() cannot
+  // reach it. Its effective scale does not go stale for that: off scene
+  // GetEffectiveLayoutScale() memoizes nothing, and a scale root that leaves the scene
+  // drops what its subtree memoized there (OnViewSceneDisconnection). What off-scene
+  // work did record is still the subtree's: measure entries published at the off-scene
+  // scale, which has no window term, and invalidation propagation records written
+  // against the detached chain. On (re)connection drop the subtree's scale and layout
+  // caches so the layout pass registered below measures and arranges at the CURRENT
+  // scale, the window term of the window it joins included. On a first-ever connection
+  // this is a cheap no-op (the caches are empty and nothing is memoized). This is the
+  // mirror, for the Window/Actor remove-then-add path, of OnChildRemoved's recursive
+  // invalidation for the View reparent path.
   if(isLayoutRoot)
   {
     ResetSubtreeScaleAndLayoutCaches();
@@ -4139,6 +4361,40 @@ void ViewDataImpl::OnViewSceneDisconnection()
     InvalidateLayoutCaches();
   }
 
+  // The scale leaves with the scene. A view in no Window has no window scale
+  // (LayoutScaleManagerImpl::ResolveWindowScale() returns 1.0f for it), and off scene no
+  // view memoizes its effective scale at all (GetEffectiveLayoutScale()): no layout root
+  // LayoutScaleManager has registered covers it there, so nothing would clear a memoized
+  // value when SetUiScale(), SetScalable() or a window scale move it. This reset makes that
+  // true for what the subtree memoized ON scene too: a SCALE ROOT -- a view with no View
+  // parent -- that leaves still holds the product it memoized there, and so does every node
+  // beneath it that inherits it. Without the reset GetEffectiveLayoutScale() would keep
+  // reporting the window's scale and the UI term in force when the view left, a Measure()
+  // on the detached view would measure at that scale, and an Arrange() could serve an
+  // arrange entry -- which carries no scale term -- published at it. Drop the subtree's
+  // scale and every layout result derived from it, as reconnection does in
+  // OnViewSceneConnection. Cache-only: no dirty bit is raised and nothing is registered, so
+  // no layout work is scheduled off-scene.
+  //
+  // Scale roots only. dali-core clears the parent BEFORE it notifies the disconnection
+  // (Actor::SetParent), so the view that was just removed -- from the window, from a plain
+  // Actor or from a View -- is a scale root here. A descendant its View parent still lays
+  // out (one in that parent's mChildren) is reached by its root's recursion; one under a plain
+  // Actor is a scale root of its own and is notified itself; an in-flight EXIT ghost is
+  // neither (see GetEffectiveLayoutScale()). A view removed from a View parent is reset once
+  // more by that parent's OnChildRemoved right after this; the second walk is idempotent.
+  //
+  // Unconditional: every scale root pays one walk of its subtree when it leaves -- the walk
+  // OnViewSceneConnection makes when it comes back, so the re-layout a re-add causes is
+  // unchanged. dali-core marks the whole subtree off scene before it notifies any of it,
+  // and notifies children before their parents, so a descendant's own disconnection hook
+  // runs before this reset: it can still read the value memoized on scene, but it memoizes
+  // nothing there, and no layout result it caches outlives the reset.
+  if(!GetParentView())
+  {
+    ResetSubtreeScaleAndLayoutCaches();
+  }
+
   if(auto* traitObject = GetCoreInteractionObject())
   {
     if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
@@ -4149,14 +4405,15 @@ void ViewDataImpl::OnViewSceneDisconnection()
 
   OnSceneDisconnection();
 
-  // Remove from UiScaleManager if this view was registered as a layout root.
+  // Remove from LayoutScaleManager if this view was registered as a layout root.
   // Two cases match the registration paths in RegisterWithLayoutController:
   //   (a) tree root: no parent view -- which also means no parent LAYOUT, since
   //       Ui::Layout derives from Ui::View and View::DownCast matches both
   //   (b) standalone: boundary views self-register regardless of their parent
   if(!GetParentView() || IntegrationView::IsLayoutModeStandalone(mViewImpl))
   {
-    UiScaleManager::Get().UnregisterLayoutRoot(View::DownCast(mViewImpl.Self()));
+    Ui::Extension::LayoutScaleManager layoutScaleManager = Ui::Extension::LayoutScaleManager::Get();
+    GetImpl(layoutScaleManager).UnregisterLayoutRoot(View::DownCast(mViewImpl.Self()));
   }
 }
 
@@ -4974,7 +5231,7 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
     return mMeasuredSize; // {0,0} until a pass completes
   }
 
-  float s = mViewImpl.GetEffectiveScale();
+  float s = GetEffectiveLayoutScale();
 
   // Push effective scale to the actor animatable property so that decoration
   // constraints (corner radius, borderline width) can read it as a scale input.
@@ -4991,7 +5248,7 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
   // property can stop matching `s` from the event side clears the bit:
   //   - the cached scale moving: DropCachedEffectiveScale() clears BOTH bits in one
   //     breath, which is also why this bit stores no value of its own. Every
-  //     scale-context change routes through it (InvalidateMeasure,
+  //     on-scene scale-context change routes through it (InvalidateMeasure,
   //     ResetSubtreeScaleAndLayoutCaches), so the same subtree-wide invalidation
   //     the arrange cache relies on for Corollary C covers this bit too.
   //   - anyone writing the property: it is a REGISTERED animatable property with a
@@ -5007,7 +5264,15 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
   // the event-side cached value through Object::NotifyPropertyAnimation, which does
   // NOT run the registered setter, so the bit survives. Animating a framework-owned
   // property was never supported (the push below has always fought it).
-  if(!mEffectiveScaleActorSynced)
+  //
+  // Off scene the first bullet does not hold: a view that is not on a scene is in no
+  // registered layout root, so SetUiScale() and SetScalable() move `s` without any drop.
+  // GetEffectiveLayoutScale() memoizes nothing there -- mEffectiveScaleValid is set on
+  // scene only -- so the gate also opens while that bit is false: off scene every Measure()
+  // reads the property back and writes it only on a mismatch, whatever
+  // mEffectiveScaleActorSynced says. On scene the GetEffectiveLayoutScale() above has just
+  // set the bit, so the extra term is one bit test that never opens the gate.
+  if(!mEffectiveScaleActorSynced || !mEffectiveScaleValid)
   {
     // Read back the current actor property value to skip redundant scene-graph writes.
     // This also naturally corrects any value set externally on EFFECTIVE_SCALE.
@@ -5059,11 +5324,15 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
   //    arrange x direction, and `s` is already in hand here (it is read above the
   //    predicate because the constraint normalisation needs it), so the term costs one
   //    float compare and no extra property access.
-  //  - Under the CURRENT invariant this term cannot fire: every path that moves the
-  //    cached scale pairs DropCachedEffectiveScale() with InvalidateLayoutCaches(),
-  //    which clears mMeasureCacheValid first. It is therefore defence in depth, and it
-  //    exists so that a future unpaired caller degrades to a miss instead of serving a
-  //    result produced at the old scale.
+  //  - On scene this term cannot fire under the current invariant: every path that moves
+  //    the cached scale pairs DropCachedEffectiveScale() with InvalidateLayoutCaches(),
+  //    which clears mMeasureCacheValid first. There it is defence in depth, and it exists
+  //    so that a future unpaired caller degrades to a miss instead of serving a result
+  //    produced at the old scale. Off scene it is the mechanism: no invalidation reaches a
+  //    view in no registered layout root when SetUiScale() or SetScalable() move its
+  //    scale, and the scale recomputed above (nothing is memoized off scene) misses this
+  //    key instead. That covers the view's OWN scale only, so a container whose own term a
+  //    DISABLED policy fixes cannot rely on it off scene -- see the last term below.
   //
   // Compared EXACTLY rather than with FloatEqual: this is a copy of the very
   // computation the producer was run under, with no arithmetic in between, so an
@@ -5086,11 +5355,34 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH, MeasureMode mod
   // (NormaliseMeasureConstraint): two exact sizes that clamp to the same value share the entry,
   // which is sound because the producer ran at that value and the report is the same clamp of
   // either.
+  //
+  // The LAST term is the off-scene rule for a view WITH View children. Off a scene the window
+  // term of every view is 1.0f (no Window resolves for it), so every effective scale is either
+  // the UI term, G = IsScalable() ? GetUiScale() : 1.0f, or the 1.0f a DISABLED policy fixes;
+  // and G is the only input that moves without an invalidation reaching a view in no registered
+  // layout root (a policy change or a reparent resets and invalidates the subtree). A view whose
+  // own term is G keys on G, so any change of G is a miss through the scale key above, and while
+  // G is unchanged no view's scale has moved. A view whose own term is fixed keys on 1.0f
+  // whatever G does, while a descendant whose term is G -- a UiScalePolicy::ENABLED view under
+  // it -- moves with G. So off a scene such a container never serves its entry and re-runs its
+  // producer, whose child Measure() calls decide on their own keys. SystemScaleTermIsConstant()
+  // names it from the policies; whether such a descendant exists is not looked for, which would
+  // take a subtree walk. A childless view depends on no other view's scale, so its own key is
+  // enough; children added through Integration::View::AddActorChild() are not in mChildren and
+  // take no part in this view's layout. Cost: the policy walk runs only off scene, only for a
+  // view with View children and only when every other term has matched, and it stops at the
+  // first non-INHERIT policy or at the root. On a scene the term is one bit test that is always
+  // true when it is reached: the GetEffectiveLayoutScale() above has just set
+  // mEffectiveScaleValid, and every path that can clear it before this point (a callback run
+  // by the property push above, a removal from the scene) drops mMeasureCacheValid with it --
+  // each caller of DropCachedEffectiveScale() pairs it with InvalidateLayoutCaches() -- so the
+  // first term has already failed. Last, so a miss never pays it.
   if(mMeasureCacheValid && !mMeasureDirty && !mMeasurePassPoisoned &&
      mMeasureModeWidth == modes.width && mMeasureModeHeight == modes.height &&
      mMeasureKeyOrPropagation.scaleKey == s &&
      FloatEqual(mLastMeasureConstraint.width, effNatW) &&
-     FloatEqual(mLastMeasureConstraint.height, effNatH))
+     FloatEqual(mLastMeasureConstraint.height, effNatH) &&
+     (mEffectiveScaleValid || mChildren.Empty() || !SystemScaleTermIsConstant(*this)))
   {
     return mMeasuredSize;
   }
@@ -5347,8 +5639,9 @@ void ViewDataImpl::ReplayArrangeSubtreeFromCache(bool mirrorUnderParentRtl, floa
 {
   // Corollary C, checked live and per node: a valid arrange cache implies a valid
   // cached effective scale, because every scale-context reset clears both for the WHOLE
-  // subtree (ResetSubtreeScaleAndLayoutCaches). The replay skips the
-  // GetEffectiveScale() the MISS path performs at every level, so this assert is
+  // subtree (ResetSubtreeScaleAndLayoutCaches) -- a scale root leaving the scene included --
+  // and an off-scene pass never publishes (the bit is set on scene only). The replay skips the
+  // GetEffectiveLayoutScale() the MISS path performs at every level, so this assert is
   // what makes the reliance visible. DEBUG-only, like every other first-party layout
   // invariant on this hot path. It runs BEFORE the node scope below on purpose: it
   // reads nothing the scope owns, and throwing out of it leaves no flag to restore.
@@ -5664,10 +5957,12 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // children reads the effective scale anyway, but the DEFAULT arrange of a
   // CHILDLESS view never does (ArrangeDefault's scale read sits behind its
   // child loop), so without this read the sync bit would still be false at the
-  // publish gate below and a settled leaf could never cache. Amortised O(1):
+  // publish gate below and a settled leaf could never cache. On scene only: off
+  // scene GetEffectiveLayoutScale() memoizes nothing, so the bit stays false and the
+  // publish gate below declines, deliberately (see there). Amortised O(1) on scene:
   // the walk stops at the first ancestor whose bit is already live. Return value
   // intentionally discarded -- called for its side effect of establishing the bit.
-  (void)mViewImpl.GetEffectiveScale();
+  (void)GetEffectiveLayoutScale();
 
   // This view is never laid out outside its own minimum/maximum: the size of the slot is clamped
   // here (ClampToOwnSizeBounds, max wins) and its start edge -- the logical x/y -- is kept. The
@@ -5751,14 +6046,20 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // not be frozen into the cache (plan34 11).
   //
   // The cached effective scale is READ here, never written: mEffectiveScaleValid is the
-  // effective-scale sync bit, owned solely by GetEffectiveScale() and the
+  // effective-scale sync bit, owned solely by GetEffectiveLayoutScale() and the
   // invalidation paths. Both logical terms are required and neither implies the
   // other. mEffectiveScaleValid alone would accept a pass whose context was
-  // reset mid-flight and then re-validated by a later GetEffectiveScale() -- the
+  // reset mid-flight and then re-validated by a later GetEffectiveLayoutScale() -- the
   // work done before that reset used the OLD scale. mEffectiveScaleInvalidatedDuringPass
   // alone would accept a pass that simply never established a context (the bit
-  // still false at entry), which is what the GetEffectiveScale() at pass entry
+  // still false at entry), which is what the GetEffectiveLayoutScale() at pass entry
   // rules out for the childless-default case.
+  //
+  // Off scene the bit is never set (GetEffectiveLayoutScale() memoizes on scene only), so
+  // an off-scene pass never publishes, and that is deliberate: the arrange key carries no
+  // scale term, and no invalidation reaches a view in no registered layout root when
+  // SetUiScale() or SetScalable() move its scale, so an entry published there could be
+  // served after its scale moved.
   //
   // What this block writes is LIVE: mArrangeCacheValid / the arrange input key /
   // mLastArrangeDirection are exactly what the cache-HIT test at the top of this
@@ -5942,40 +6243,49 @@ void ViewDataImpl::ApplyLayoutDirection(float parentWidth)
 
 float ViewDataImpl::ComputeEffectiveScale() const
 {
-  if(mScalePolicy == UiScalePolicy::DISABLED)
+  // FAST PATH: INHERIT for BOTH terms -- the branch nearly every view takes, every
+  // application view whose UiScalePolicy is INHERIT -- at exactly the cost the INHERIT
+  // branch had before WindowScalePolicy existed: two one-byte compares and ONE parent
+  // lookup. ONE parent lookup, the same collapse InvalidateMeasure makes: Ui::Layout
+  // derives from Ui::View and LayoutImpl from ViewImpl, so Ui::View::DownCast also matches
+  // a Layout parent and GetImpl reaches the very same ViewImpl -- and GetEffectiveLayoutScaleOf()
+  // is a non-virtual static read, so the Layout branch resolved to this exact call. The
+  // dropped branch cost a second Actor::GetParent() plus a Layout::DownCast that FAILS for
+  // the common plain-View parent, once per node on every effective-scale cache miss.
+  //
+  // Returning the parent's memoized PRODUCT is exact, not an approximation: a node that
+  // inherits both terms has, term for term, its parent's terms, so it has its parent's
+  // product -- bit for bit, because nothing is recombined. That is also why no other node
+  // may take this shortcut: a node that overrides either term cannot recover the OTHER
+  // term from the parent's product without a division, and the measure cache compares its
+  // scale key exactly (MeasureKeyOrPropagation::scaleKey).
+  if(mScalePolicy == Ui::Extension::UiScalePolicy::INHERIT && mWindowScalePolicy == WindowScalePolicy::INHERIT)
   {
-    return 1.0f;
-  }
-  if(mScalePolicy == UiScalePolicy::ENABLED)
-  {
-    return GetSystemScale();
+    Ui::View parentView = GetParentView();
+    if(parentView)
+    {
+      return GetEffectiveLayoutScaleOf(GetImpl(parentView));
+    }
+
+    // Root: both terms are taken here, each through its single read site, so the master
+    // switch -- read by both -- reaches every node in the tree exactly as a gate at the
+    // top of this function would: an inheriting node just resolves to 1.0f through its
+    // ancestor's already-memoized scale instead of returning it directly. Invariant W1:
+    // see GetWindowScale().
+    return GetWindowScale(mViewImpl) * GetSystemScale();
   }
 
-  // INHERIT: walk up the parent chain. ONE parent lookup, the same collapse
-  // InvalidateMeasure makes: Ui::Layout derives from Ui::View and LayoutImpl from
-  // ViewImpl, so Ui::View::DownCast also matches a Layout parent and GetImpl reaches
-  // the very same ViewImpl -- and GetEffectiveScale is a non-virtual ViewImpl member,
-  // so the Layout branch resolved to this exact call. The dropped branch cost a second
-  // Actor::GetParent() plus a Layout::DownCast that FAILS for the common plain-View
-  // parent, once per node on every effective-scale cache miss.
-  Ui::View parentView = GetParentView();
-  if(parentView)
-  {
-    return GetImpl(parentView).GetEffectiveScale();
-  }
-
-  // Root: inherit from UiScaleManager. Every INHERIT chain terminates either
-  // here or at a DISABLED/ENABLED ancestor, so the switch read inside
-  // GetSystemScale() reaches every node in the tree exactly as a gate at the top
-  // of this function would -- an INHERIT node just resolves to 1.0f through its
-  // ancestor's already-memoized scale instead of returning it directly.
-  return GetSystemScale();
+  // A node that sets either policy away from INHERIT -- an application view whose
+  // UiScalePolicy is ENABLED or DISABLED, or a framework view that opts out of the window
+  // term. Each term is resolved on its own, from the POLICIES on the ancestor chain, and
+  // the product is formed once, here.
+  return ResolveWindowScaleTerm(*this, mViewImpl) * ResolveSystemScaleTerm(*this);
 }
 
 void ViewDataImpl::DropCachedEffectiveScale()
 {
   // Clearing mEffectiveScaleValid IS the scale drop: it is the sync bit for
-  // mEffectiveScale, so the next GetEffectiveScale() on this node recomputes
+  // mEffectiveScale, so the next GetEffectiveLayoutScale() on this node recomputes
   // from the (possibly re-rooted) parent chain.
   mEffectiveScaleValid = false;
 
@@ -5985,8 +6295,10 @@ void ViewDataImpl::DropCachedEffectiveScale()
   // value, which Measure() must then push. Clearing the two together is what makes
   // the bit mean "in sync with the CURRENT effective scale" rather than "in sync
   // with whatever scale was current when it was set", and it is why this bit needs
-  // no invalidation path of its own: every scale-context change already comes
-  // through here.
+  // no invalidation path of its own: every scale-context change on scene already
+  // comes through here. Off scene none does -- no registered layout root covers the
+  // view -- which is why Measure() also re-reads the property whenever
+  // mEffectiveScaleValid is false, and that bit is never set off scene.
   //
   // What this clear is still REQUIRED for, and what it no longer is:
   //  - the ARRANGE cache: required. Its hit predicate carries no scale term at all,
@@ -6006,7 +6318,7 @@ void ViewDataImpl::DropCachedEffectiveScale()
   {
     // The running pass has already arranged part of this view against the OLD
     // scale, so its result must not be published even if a later
-    // GetEffectiveScale() re-validates the bit before the pass ends.
+    // GetEffectiveLayoutScale() re-validates the bit before the pass ends.
     mEffectiveScaleInvalidatedDuringPass = true;
   }
 }
@@ -6055,9 +6367,10 @@ void ViewDataImpl::ResetSubtreeScaleAndLayoutCaches()
   // DropCachedEffectiveScale (which InvalidateMeasure calls on every invalidation and
   // where retracting them would defeat the coalescing entirely). Every path that can
   // move a View's ancestor chain runs through here -- OnChildAdded and OnChildRemoved
-  // on the moved child, OnViewSceneConnection on a (re)connecting root -- and a record
-  // written against the OLD chain must not authorise skipping a walk that now has a
-  // DIFFERENT root to reach.
+  // on the moved child, OnViewSceneConnection on a (re)connecting root and
+  // OnViewSceneDisconnection on a departing scale root -- and a record written against
+  // the OLD chain must not authorise skipping a walk that now has a DIFFERENT root to
+  // reach.
   //
   // Recursive because the chain change is subtree-wide: a descendant's record names
   // the same old root as the moved node's.
@@ -6209,16 +6522,17 @@ void ViewDataImpl::RegisterWithLayoutController()
     // layout root, not an application asking for a layout.
     controller.RequestLayoutInternal(&mViewImpl);
 
-    // Register as a layout root in UiScaleManager so it gets invalidated when
+    // Register as a layout root in LayoutScaleManager so it gets invalidated when
     // the system scale changes. Duplicate registration is silently ignored.
-    UiScaleManager::Get().RegisterLayoutRoot(Ui::View::DownCast(self));
+    Ui::Extension::LayoutScaleManager layoutScaleManager = Ui::Extension::LayoutScaleManager::Get();
+    GetImpl(layoutScaleManager).RegisterLayoutRoot(Ui::View::DownCast(self));
   }
 }
 
 MeasuredSize ViewDataImpl::ApplyConstraints(const MeasuredSize& size) const
 {
   // size is in visual (scale-applied) units; scale min/max (natural) accordingly.
-  float        s           = mViewImpl.GetEffectiveScale();
+  float        s           = GetEffectiveLayoutScale();
   MeasuredSize constrained = size;
   constrained.width        = std::max(constrained.width, GetMinimumWidth() * s);
   constrained.height       = std::max(constrained.height, GetMinimumHeight() * s);
@@ -6581,7 +6895,7 @@ MeasuredSize ViewDataImpl::GetMatchFollowerSize() const
 {
   // The same product the producers return, through the same clamp Measure() applies, hence
   // bit-identical to what a measurement would report.
-  const float s = mViewImpl.GetEffectiveScale();
+  const float s = GetEffectiveLayoutScale();
   return ApplyConstraints(MeasuredSize(GetMinimumWidth() * s, GetMinimumHeight() * s));
 }
 
@@ -6728,7 +7042,7 @@ bool ViewDataImpl::CanSkipArrangeRemeasure(float visualW, float visualH, Measure
   {
     return false;
   }
-  const float s = mViewImpl.GetEffectiveScale();
+  const float s = GetEffectiveLayoutScale();
   if(mMeasureKeyOrPropagation.scaleKey != s)
   {
     return false;
@@ -6746,6 +7060,17 @@ bool ViewDataImpl::CanSkipArrangeRemeasure(float visualW, float visualH, Measure
   }
   if((mRequestedHeight == MATCH_PARENT || modes.height == MeasureMode::EXACTLY) &&
      !FloatEqual(mLastMeasureConstraint.height, NormaliseMeasureConstraint(visualH, s, false)))
+  {
+    return false;
+  }
+  // The last term of Measure()'s hit predicate, the same condition in full (this refuses
+  // exactly where that term fails), so that a skip stays exactly "a real Measure() would be a
+  // pure cache hit": every caller -- ArrangeDefault and the Absolute, Flex, Grid, ScrollView and
+  // Stack layout managers -- reads the child's measured size instead of calling Measure() when
+  // this returns true. Last, so the policy walk runs only when every other term allows the
+  // skip; on a scene the bit is true here (the GetEffectiveLayoutScale() above set it), so it
+  // is one bit test.
+  if(!mEffectiveScaleValid && !mChildren.Empty() && SystemScaleTermIsConstant(*this))
   {
     return false;
   }
@@ -6784,7 +7109,7 @@ void ViewDataImpl::SetBackgroundColorInternal(const Vector4& color)
 
 MeasuredSize ViewDataImpl::DispatchMeasureWithLayoutManager(LayoutManager* manager, float widthConstraint, float heightConstraint)
 {
-  float s = mViewImpl.GetEffectiveScale();
+  float s = GetEffectiveLayoutScale();
 
   Insets padding = mViewImpl.GetPadding();
   float  visPadW = static_cast<float>(padding.start + padding.end) * s;
@@ -6828,7 +7153,7 @@ void ViewDataImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, cons
 {
   // Self geometry is applied centrally in Arrange(); the manager arranges
   // children only within the padding-adjusted content bounds. Owner final == input.
-  float  s       = mViewImpl.GetEffectiveScale();
+  float  s       = GetEffectiveLayoutScale();
   Insets padding = mViewImpl.GetPadding();
 
   LayoutRect visContentBounds;
@@ -7579,16 +7904,18 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
   // handle and a reference-count round trip on every event-side property write, and
   // `custom` is all the CORNER_RADIUS / CORNER_SQUARENESS re-entries below need.
   //
-  // The IMPL cast stays a dynamic_cast in EVERY build. Registration makes it
+  // The IMPL cast stays a dynamic_cast in EVERY build. The resolution rules make it
   // near-certain to succeed -- these callbacks are registered only on the View type
   // (DALI_TYPE_REGISTRATION_BEGIN_FULL above), and dali-core resolves a CustomActor's
-  // TypeInfo from the RTTI of its own CustomActorImpl, so an impl that is not a
-  // registered View descendant falls back to the plain CustomActor type whose base
-  // chain never reaches here. But the type registry does NOT verify that a registered
-  // inheritance chain matches the actual C++ one, so an impl falsely registered as a
-  // View descendant is reachable. Under the old Ui::View::DownCast that was a silent
-  // no-op; a static_cast would make it release-build undefined behaviour. Failing
-  // silently, as before, is worth one dynamic_cast on the scripting / styling route.
+  // TypeInfo from the RTTI of its own CustomActorImpl: an impl that is neither a
+  // registered View descendant nor an unregistered ViewImpl subclass (those resolve
+  // as Ui::View through ViewImpl's GetTypeRegistrationFallback override) falls back to
+  // the plain CustomActor type whose base chain never reaches here. But the type
+  // registry does NOT verify that a registered inheritance chain matches the actual
+  // C++ one, so an impl falsely registered as a View descendant is reachable. Under
+  // the old Ui::View::DownCast that was a silent no-op; a static_cast would make it
+  // release-build undefined behaviour. Failing silently, as before, is worth one
+  // dynamic_cast on the scripting / styling route.
   Dali::CustomActor custom      = Dali::CustomActor::DownCast(BaseHandle(object));
   ViewImpl*         viewImplPtr = custom ? dynamic_cast<ViewImpl*>(&custom.GetImplementation()) : nullptr;
 
@@ -8020,7 +8347,8 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
               // self turn that a batch already collected is skipped at its tracked check.
               // A view with no View parent stays a root and keeps both registrations.
               LayoutController::ReleaseLayoutRootInternal(&viewImpl);
-              UiScaleManager::Get().UnregisterLayoutRoot(Ui::View::DownCast(viewImpl.Self()));
+              Ui::Extension::LayoutScaleManager layoutScaleManager = Ui::Extension::LayoutScaleManager::Get();
+              GetImpl(layoutScaleManager).UnregisterLayoutRoot(Ui::View::DownCast(viewImpl.Self()));
             }
 
             // Both directions: a propagation record written while the view had its

@@ -35,27 +35,30 @@ namespace Ui
  * That covers both kinds: a raster animation, meaning a GIF, a WebP or a list of images drawn
  * by AnimatedImageVisual, and a vector animation, meaning a Lottie file drawn by
  * LottieAnimationVisual. A still image has none of these.
+ * @SINCE_3_0.0
  */
 namespace AnimatedImage
 {
 /**
  * @brief Enumeration for what state the animation is in.
+ * @SINCE_3_0.0
  */
 enum class PlayState : uint8_t
 {
-  STOPPED, ///< Animation has stopped
-  PLAYING, ///< The animation is playing
-  PAUSED   ///< The animation is paused
+  STOPPED, ///< Animation has stopped @SINCE_3_0.0
+  PLAYING, ///< The animation is playing @SINCE_3_0.0
+  PAUSED   ///< The animation is paused @SINCE_3_0.0
 };
 
 /**
  * @brief Enumeration for what to do when the animation is stopped.
+ * @SINCE_3_0.0
  */
 enum class StopBehavior : uint8_t
 {
-  CURRENT_FRAME, ///< When the animation is stopped, the current frame is shown.
-  FIRST_FRAME,   ///< When the animation is stopped, the first frame is shown.
-  LAST_FRAME     ///< When the animation is stopped, the last frame is shown.
+  CURRENT_FRAME, ///< When the animation is stopped, the current frame is shown. @SINCE_3_0.0
+  FIRST_FRAME,   ///< When the animation is stopped, the first frame is shown. @SINCE_3_0.0
+  LAST_FRAME     ///< When the animation is stopped, the last frame is shown. @SINCE_3_0.0
 };
 
 } // namespace AnimatedImage

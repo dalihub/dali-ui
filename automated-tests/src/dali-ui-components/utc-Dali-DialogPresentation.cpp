@@ -16,6 +16,7 @@
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 #include <dali-ui-components/public-api/dialog/dialog-container.h>
@@ -28,6 +29,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {
@@ -601,7 +603,7 @@ int UtcDaliDialogPresentationLayoutParity(void)
   application.GetScene().Add(managedHost);
   for(unsigned scenario = 0u; scenario < 3u; ++scenario)
   {
-    UiScaleManager::Get().SetScale(scenario == 2u ? 1.5f : 1.0f);
+    LayoutScaleManager::Get().SetUiScale(scenario == 2u ? 1.5f : 1.0f);
     auto manual = AlertDialog::New();
     auto managed = AlertDialog::New();
     for(auto dialog : {manual, managed})
@@ -660,7 +662,7 @@ int UtcDaliDialogPresentationLayoutParity(void)
     DALI_TEST_CHECK(!managed.IsAccessibilityModal());
     DALI_TEST_EQUALS(managed.GetRequestedWidth(), requestedWidth, TEST_LOCATION);
   }
-  UiScaleManager::Get().SetScale(1.0f);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
   END_TEST;
 }
 

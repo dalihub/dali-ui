@@ -36,6 +36,7 @@ class UiStyle;
  * This is shared by all UiStyleKey<T> instantiations so key values can be used
  * as dense indices in one UiStyleSheet storage.
  *
+ * @SINCE_3_0.0
  * @return A new unique style key value
  */
 DALI_UI_API uint32_t AllocateUiStyleKeyValue();
@@ -51,6 +52,7 @@ DALI_UI_API uint32_t AllocateUiStyleKeyValue();
  * does not change the stored key value, but it binds the key to the style type
  * used by UiStyleSheet::GetStyle() and helps prevent key/type mismatches at
  * compile time.
+ * @SINCE_3_0.0
  */
 template<typename StyleT = UiStyle>
 struct UiStyleKey
@@ -62,6 +64,7 @@ struct UiStyleKey
    * If the uint32_t id space is exhausted, an assertion is raised instead of
    * wrapping around to an already allocated key.
    *
+   * @SINCE_3_0.0
    * @return A new unique UiStyleKey
    */
   static UiStyleKey Alloc()
@@ -71,6 +74,7 @@ struct UiStyleKey
 
   /**
    * @brief Equality operator.
+   * @SINCE_3_0.0
    */
   bool operator==(const UiStyleKey& other) const
   {
@@ -79,6 +83,7 @@ struct UiStyleKey
 
   /**
    * @brief Inequality operator.
+   * @SINCE_3_0.0
    */
   bool operator!=(const UiStyleKey& other) const
   {

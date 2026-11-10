@@ -31,57 +31,68 @@ namespace Ui
  *
  * An item does not change when the WebView navigates after the item has been
  * retrieved.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API WebBackForwardListItem
 {
 public:
   /**
    * @brief Creates an invalid item.
+   * @SINCE_3_0.0
    */
   WebBackForwardListItem();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~WebBackForwardListItem();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   WebBackForwardListItem(const WebBackForwardListItem& item);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   WebBackForwardListItem(WebBackForwardListItem&& item) noexcept;
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   WebBackForwardListItem& operator=(const WebBackForwardListItem& item);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   WebBackForwardListItem& operator=(WebBackForwardListItem&& item) noexcept;
 
   /**
    * @brief Returns whether this item contains a history entry.
+   * @SINCE_3_0.0
    */
   bool IsValid() const;
 
   /**
    * @brief Gets the final URL of the history entry.
+   * @SINCE_3_0.0
    */
   Dali::String GetUrl() const;
 
   /**
    * @brief Gets the title of the history entry.
+   * @SINCE_3_0.0
    */
   Dali::String GetTitle() const;
 
   /**
    * @brief Gets the URL originally requested for the history entry.
+   * @SINCE_3_0.0
    */
   Dali::String GetOriginalUrl() const;
 

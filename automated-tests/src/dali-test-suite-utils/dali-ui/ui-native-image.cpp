@@ -57,6 +57,10 @@ void NativeImage::SetSource(Any source)
 {
 }
 
+void NativeImage::SetAlphaPreMultiplied(bool preMultiplied)
+{
+}
+
 bool NativeImage::IsColorDepthSupported(ColorDepth colorDepth)
 {
   return false;
@@ -89,6 +93,11 @@ unsigned int NativeImage::GetWidth() const
 unsigned int NativeImage::GetHeight() const
 {
   return 32;
+}
+
+bool NativeImage::IsAlphaPreMultiplied() const
+{
+  return false;
 }
 
 bool NativeImage::RequiresBlending() const

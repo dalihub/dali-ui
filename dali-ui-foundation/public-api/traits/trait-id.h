@@ -37,6 +37,7 @@ namespace Ui
  * // One-time allocation per trait type (e.g. in an anonymous namespace or as a static)
  * static const TraitId kMyScrollStateTrait = TraitId::Alloc();
  * @endcode
+ * @SINCE_3_0.0
  */
 struct DALI_UI_API TraitId
 {
@@ -46,12 +47,14 @@ struct DALI_UI_API TraitId
    * Uses an internal atomic counter. Thread-safe and lock-free.
    * Call once per logical trait type and store the result statically.
    *
+   * @SINCE_3_0.0
    * @return A new unique TraitId
    */
   static TraitId Alloc();
 
   /**
    * @brief Equality operator.
+   * @SINCE_3_0.0
    */
   bool operator==(const TraitId& other) const
   {
@@ -60,6 +63,7 @@ struct DALI_UI_API TraitId
 
   /**
    * @brief Inequality operator.
+   * @SINCE_3_0.0
    */
   bool operator!=(const TraitId& other) const
   {

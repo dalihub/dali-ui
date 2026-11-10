@@ -53,6 +53,7 @@ namespace Ui
  *
  * Its visual type is VisualType::GRADIENT. It can use the CornerRadius, CornerSquareness
  * and Borderline features of VisualBase.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API GradientVisual : public VisualBase
 {
@@ -60,6 +61,7 @@ public:
   /**
    * @brief Creates a GradientVisual object.
    *
+   * @SINCE_3_0.0
    * @return The newly created gradient visual object.
    */
   static GradientVisual New();
@@ -70,6 +72,7 @@ public:
    * If handle points to a GradientVisual, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a GradientVisual or an uninitialized handle
    */
@@ -83,6 +86,7 @@ public: // Properties
    * Gradient::Linear, Gradient::Radial or Gradient::Conic to render that kind of gradient.
    * Setting a gradient of a different type discards the geometry of the previous type.
    *
+   * @SINCE_3_0.0
    * @param[in] gradient The gradient to set
    * @note A gradient whose type is Gradient::Type::NONE is ignored, since a gradient
    * visual has no geometry to fall back to. The visual keeps the gradient it already has.
@@ -96,6 +100,7 @@ public: // Properties
    * Use Gradient::Linear::DownCast(), Gradient::Radial::DownCast() or
    * Gradient::Conic::DownCast() on the returned value to read the type specific geometry.
    *
+   * @SINCE_3_0.0
    * @return The gradient of the GradientVisual, or a gradient whose GetType() is
    * Gradient::Type::NONE if no gradient has been set
    */

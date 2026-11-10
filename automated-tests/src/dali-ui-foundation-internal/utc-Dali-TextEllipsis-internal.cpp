@@ -2713,6 +2713,72 @@ int UtcDaliTextRendererOwnedEndElisionP(void)
   END_TEST;
 }
 
+int UtcDaliTextRendererOwnedEllipsisLineAdvanceP(void)
+{
+  UiTestApplication           application;
+  TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+
+  // These deliberately non-contiguous runs isolate the advance sum's line
+  // selection. They are not a model produced by a previous production elision.
+  // With 15 glyphs the wrong line stays inside the allocation, but its large
+  // advances make the result fail deterministically even without sanitizers.
+  // With 13 glyphs the same wrong-line sum also exceeds the glyph buffer.
+  for(Text::Length sourceCount : {15u, 13u})
+  {
+    Text::ControllerPtr controller = Text::Controller::New();
+    controller->SetText(std::string(sourceCount, 'a'));
+    controller->SetDefaultFontSize(12.0f, Text::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(true);
+    controller->SetTextElideEnabled(true);
+    controller->Relayout(Size(40.0f, 32.0f));
+
+    auto& impl        = Text::Controller::Impl::GetImplementation(*controller.Get());
+    auto  visualModel = impl.mModel->mVisualModel;
+    DALI_TEST_EQUALS(visualModel->mGlyphs.Count(), sourceCount, TEST_LOCATION);
+    for(Text::GlyphIndex index = 0u; index < sourceCount; ++index)
+    {
+      visualModel->mGlyphs[index].advance = index < 10u ? 1.0f : 100.0f;
+    }
+    const Text::LineRun lines[] = {
+      {{0u, 2u}, {0u, 2u}, 16.0f, 12.0f, -3.0f, 0.0f, 0.0f, 0.0f, false, false},
+      {{5u, 5u}, {5u, 5u}, 40.0f, 12.0f, -3.0f, 0.0f, 0.0f, 0.0f, false, true},
+      {{10u, 3u}, {10u, 3u}, 24.0f, 12.0f, -3.0f, 0.0f, 0.0f, 0.0f, false, false},
+    };
+    visualModel->mLines.Clear();
+    for(const Text::LineRun& line : lines)
+    {
+      visualModel->mLines.PushBack(line);
+    }
+
+    const Text::GlyphInfo sourceGlyph    = visualModel->mGlyphs[9u];
+    const Vector2         sourcePosition = visualModel->mGlyphPositions[9u];
+    const Text::GlyphInfo ellipsisGlyph  = fontClient.GetEllipsisGlyph(fontClient.GetPointSize(sourceGlyph.fontId));
+    Text::TypesetterPtr   typesetter     = Text::Typesetter::New(controller->GetRenderTextModel());
+    Text::ViewModel*      view           = typesetter->GetViewModel();
+    for(unsigned int repeat = 0u; repeat < 2u; ++repeat)
+    {
+      view->EnableFinalGlyphMapping();
+      view->ElideGlyphs(fontClient);
+      DALI_TEST_EQUALS(view->GetNumberOfGlyphs(), 10u, TEST_LOCATION);
+      DALI_TEST_EQUALS(view->GetEndIndexOfElidedGlyphs(), 9u, TEST_LOCATION);
+      DALI_TEST_CHECK(view->GetEndIndexOfElidedGlyphs() < view->GetNumberOfGlyphs());
+      DALI_TEST_EQUALS(view->GetEllipsisFinalGlyphIndex(), 9u, TEST_LOCATION);
+      DALI_TEST_EQUALS(view->GetGlyphs()[9u].fontId, ellipsisGlyph.fontId, TEST_LOCATION);
+      DALI_TEST_EQUALS(view->GetGlyphs()[9u].index, ellipsisGlyph.index, TEST_LOCATION);
+      DALI_TEST_EQUALS(view->GetFinalToSourceGlyphIndices()[9u], Text::FinalElisionResult::INVALID_GLYPH_INDEX, TEST_LOCATION);
+      DALI_TEST_EQUALS(visualModel->mGlyphs[9u].index, sourceGlyph.index, TEST_LOCATION);
+      DALI_TEST_EQUALS(visualModel->mGlyphs[9u].advance, sourceGlyph.advance, TEST_LOCATION);
+      DALI_TEST_EQUALS(visualModel->mGlyphPositions[9u], sourcePosition, TEST_LOCATION);
+      for(Text::LineIndex index = 0u; index < 3u; ++index)
+      {
+        DALI_TEST_EQUALS(visualModel->mLines[index].glyphRun.glyphIndex, lines[index].glyphRun.glyphIndex, TEST_LOCATION);
+        DALI_TEST_EQUALS(visualModel->mLines[index].glyphRun.numberOfGlyphs, lines[index].glyphRun.numberOfGlyphs, TEST_LOCATION);
+      }
+    }
+  }
+  END_TEST;
+}
+
 int UtcDaliTextViewUncachedMultilineAndDirectionP(void)
 {
   UiTestApplication application;

@@ -20,13 +20,19 @@
 
 // EXTERNAL INCLUDES
 #include <algorithm>
+#include <cmath>
 #include <iterator>
+#include <limits>
 #include <utility>
 
 #include <dali/devel-api/events/hit-test-algorithm.h>
 #include <dali/integration-api/adaptor-framework/scene-holder-impl.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h> // VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, Ui::GetImpl()
 
 namespace DALI_NAMESPACE
 {
@@ -151,6 +157,26 @@ bool IsValidDeviceClass(Device::Class::Type deviceClass)
 {
   return deviceClass >= Device::Class::NONE &&
          deviceClass <= Device::Class::GAMEPAD;
+}
+
+// Converts a rendered-pixel value -- a position in a parent's local actor coordinates or an actor
+// SIZE, both of which include the effective scale -- into the units View::SetRequestedX() and
+// View::SetRequestedWidth() take, for a view laid out at @p scale. The layout multiplies a
+// STANDALONE view's requested position (DeriveStandaloneRootBounds) and a view's requested size
+// (ViewDataImpl::MeasureDefault) by that view's own effective scale, so this is the exact inverse
+// up to rounding, and at a scale of exactly 1.0 the value is returned bit for bit.
+// A scale that cannot be inverted -- not a finite normal positive number, which LayoutScaleManager's
+// caller contract excludes but an over- or underflowing product of two valid terms can still
+// produce -- or a quotient that overflows returns the input unchanged, so no non-finite value ever
+// reaches SetRequested*, which does not validate it.
+Vector2 ToRequestedUnits(const Vector2& rendered, float scale)
+{
+  if(!(scale >= std::numeric_limits<float>::min()) || !std::isfinite(scale))
+  {
+    return rendered;
+  }
+  const Vector2 requested(rendered.x / scale, rendered.y / scale);
+  return (std::isfinite(requested.x) && std::isfinite(requested.y)) ? requested : rendered;
 }
 
 } // unnamed namespace
@@ -1008,7 +1034,9 @@ Dali::Ui::DragAndDropEvent DragAndDropDetector::CreateEvent(
                                     std::move(proposal),
                                     targetStatus,
                                     result,
-                                    cancelReason);
+                                    cancelReason,
+                                    ComputePreviewRequestedPosition(),
+                                    mPreviewRequestedSize);
 }
 
 void DragAndDropDetector::CreateDragPreview()
@@ -1065,7 +1093,7 @@ void DragAndDropDetector::UpdateDragPreview()
     }
     else
     {
-      ApplyDefaultDragPreviewPosition();
+      ApplyDefaultDragPreviewPosition(Vector2(event.GetPreviewRequestedX(), event.GetPreviewRequestedY()));
     }
   }
 }
@@ -1103,7 +1131,23 @@ void DragAndDropDetector::UpdateCoordinateSnapshots(const Vector2& screenPositio
   }
 }
 
-void DragAndDropDetector::ApplyDefaultDragPreviewPosition()
+Vector2 DragAndDropDetector::ComputePreviewRequestedPosition() const
+{
+  // mPreviewLocalPosition is in the preview parent's local actor coordinates. The layout places a
+  // STANDALONE preview at (requestedX + margin) times the preview's OWN effective scale
+  // (DeriveStandaloneRootBounds), so dividing by that scale puts the grab point on the pointer.
+  // CreateDragPreview() adds the preview before any snapshot that carries it, and the Add drops the
+  // memoized scale against the final parent chain and window, so this is the scale of the next
+  // layout pass. Without a session preview -- the DragPreviewFactory event, created before the
+  // preview exists, and a preview-less session -- there is nothing to convert for.
+  if(!mSessionDragPreview)
+  {
+    return mPreviewLocalPosition;
+  }
+  return ToRequestedUnits(mPreviewLocalPosition, Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(mSessionDragPreview)));
+}
+
+void DragAndDropDetector::ApplyDefaultDragPreviewPosition(const Vector2& requestedPosition)
 {
   if(!mDragPreviewPositioningPropertiesOverridden)
   {
@@ -1111,15 +1155,20 @@ void DragAndDropDetector::ApplyDefaultDragPreviewPosition()
       mSessionDragPreview.GetProperty<Vector3>(Actor::Property::PIVOT);
     mOriginalDragPreviewParentOrigin =
       mSessionDragPreview.GetProperty<Vector3>(Actor::Property::PARENT_ORIGIN);
-    mOriginalDragPreviewLayoutMode    = mSessionDragPreview.GetLayoutMode();
-    mOriginalDragPreviewUiScalePolicy = mSessionDragPreview.GetUiScalePolicy();
-    mOriginalDragPreviewRequestedX    = mSessionDragPreview.GetRequestedX();
-    mOriginalDragPreviewRequestedY    = mSessionDragPreview.GetRequestedY();
+    mOriginalDragPreviewLayoutMode = mSessionDragPreview.GetLayoutMode();
+    mOriginalDragPreviewRequestedX = mSessionDragPreview.GetRequestedX();
+    mOriginalDragPreviewRequestedY = mSessionDragPreview.GetRequestedY();
     mOriginalDragPreviewPositionUsesPivot =
       mSessionDragPreview.GetProperty<bool>(Actor::Property::POSITION_USES_PIVOT);
 
+    // Only what turns a requested position into the grab point's position is overridden.
+    // STANDALONE: the layout places a STANDALONE view at its requested position times its OWN
+    // effective scale -- the scale GetPreviewRequestedX() and GetPreviewRequestedY() divide by --
+    // under any parent, with no padding, layout-manager flow or RTL mirroring. TOP_LEFT is the
+    // origin ScreenToLocal() measures from, and POSITION_USES_PIVOT with the anchor pivot puts the
+    // grabbed point, not a corner, at that position. The preview's UiScalePolicy is left alone: the
+    // preview and its children are laid out like any other View added to the same container.
     mSessionDragPreview.SetLayoutMode(LayoutMode::STANDALONE);
-    mSessionDragPreview.SetUiScalePolicy(UiScalePolicy::DISABLED);
     mSessionDragPreview.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     mSessionDragPreview.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
     mSessionDragPreview.SetProperty(
@@ -1128,8 +1177,8 @@ void DragAndDropDetector::ApplyDefaultDragPreviewPosition()
     mDragPreviewPositioningPropertiesOverridden = true;
   }
 
-  mSessionDragPreview.SetRequestedX(mPreviewLocalPosition.x);
-  mSessionDragPreview.SetRequestedY(mPreviewLocalPosition.y);
+  mSessionDragPreview.SetRequestedX(requestedPosition.x);
+  mSessionDragPreview.SetRequestedY(requestedPosition.y);
 }
 
 void DragAndDropDetector::RestoreDragPreviewPositioningProperties(Dali::Ui::View visual)
@@ -1139,7 +1188,6 @@ void DragAndDropDetector::RestoreDragPreviewPositioningProperties(Dali::Ui::View
     visual.SetProperty(Actor::Property::PIVOT, mOriginalDragPreviewPivot);
     visual.SetProperty(Actor::Property::PARENT_ORIGIN, mOriginalDragPreviewParentOrigin);
     visual.SetLayoutMode(mOriginalDragPreviewLayoutMode);
-    visual.SetUiScalePolicy(mOriginalDragPreviewUiScalePolicy);
     visual.SetRequestedX(mOriginalDragPreviewRequestedX);
     visual.SetRequestedY(mOriginalDragPreviewRequestedY);
     visual.SetProperty(Actor::Property::POSITION_USES_PIVOT,
@@ -1813,15 +1861,24 @@ void DragAndDropDetector::ActivateDrag(Dali::Ui::View        view,
   mSessionPayload         = std::move(payload);
   mCurrentTarget.Reset();
   mFeedbackTarget.Reset();
-  mDropProposal                               = Dali::Ui::DropProposal::Reject();
-  mTargetStatus                               = Dali::Ui::DragAndDropTargetStatus::NONE;
-  const Vector3 sourceSize                    = view.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
-  mSourceAnchor.x                             = sourceSize.x > 0.0f
-                                                  ? std::clamp(mSourceGrabPosition.x / sourceSize.x, 0.0f, 1.0f)
-                                                  : 0.5f;
-  mSourceAnchor.y                             = sourceSize.y > 0.0f
-                                                  ? std::clamp(mSourceGrabPosition.y / sourceSize.y, 0.0f, 1.0f)
-                                                  : 0.5f;
+  mDropProposal            = Dali::Ui::DropProposal::Reject();
+  mTargetStatus            = Dali::Ui::DragAndDropTargetStatus::NONE;
+  const Vector3 sourceSize = view.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+  mSourceAnchor.x          = sourceSize.x > 0.0f
+                               ? std::clamp(mSourceGrabPosition.x / sourceSize.x, 0.0f, 1.0f)
+                               : 0.5f;
+  mSourceAnchor.y          = sourceSize.y > 0.0f
+                               ? std::clamp(mSourceGrabPosition.y / sourceSize.y, 0.0f, 1.0f)
+                               : 0.5f;
+  // The source's laid-out size in requested units, for DragAndDropEvent::GetPreviewRequestedWidth()
+  // and DragAndDropEvent::GetPreviewRequestedHeight(): the SIZE the anchor above is computed from,
+  // divided by the effective scale the source was laid out at. Both are read as last rendered, so
+  // they come from the same layout pass even while a scale change waits for the next one, when
+  // the memoized GetEffectiveLayoutScale() would already report the new scale. A requested size does not
+  // change with the effective scale, so one snapshot serves the whole session, the DragPreviewFactory
+  // event included.
+  mPreviewRequestedSize                       = ToRequestedUnits(Vector2(sourceSize.x, sourceSize.y),
+                                                                 view.GetCurrentProperty<float>(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
   mDragPreviewPositioningPropertiesOverridden = false;
   UpdateCoordinateSnapshots(screenPosition);
   CreateDragPreview();

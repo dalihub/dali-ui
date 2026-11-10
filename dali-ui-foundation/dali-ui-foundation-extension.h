@@ -24,6 +24,7 @@
 #include <dali-ui-foundation/extension-api/focus-manager.h>
 #include <dali-ui-foundation/extension-api/group-selectable-view-impl.h>
 #include <dali-ui-foundation/extension-api/interactive-view-impl.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/progress-view-impl.h>
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/extension-api/selectable-view-impl.h>
@@ -31,4 +32,5 @@
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 #include <dali-ui-foundation/extension-api/theme-loader-interface.h>
 #include <dali-ui-foundation/extension-api/ui-config-impl.h>
+#include <dali-ui-foundation/extension-api/ui-scale-policy.h>
 #include <dali-ui-foundation/extension-api/view.h>

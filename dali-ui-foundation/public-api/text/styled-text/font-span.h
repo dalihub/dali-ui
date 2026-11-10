@@ -35,18 +35,21 @@ namespace Text
  * FontSpan stores only the font attribute payload. The text range is owned by
  * the StyledTextBuilder attachment that uses the span. The payload is provided
  * when the span is created and is not mutated through public setters.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API FontSpan : public Span
 {
 public:
   /**
    * @brief Creates an uninitialized FontSpan handle.
+   * @SINCE_3_0.0
    */
   FontSpan() = default;
 
   /**
    * @brief Creates a FontSpan with the given font attributes.
    *
+   * @SINCE_3_0.0
    * @param[in] attributes The partial font attribute override payload
    * @return A new FontSpan
    */
@@ -55,6 +58,7 @@ public:
   /**
    * @brief Downcasts a handle to FontSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized FontSpan on success, otherwise empty
    */
@@ -63,6 +67,7 @@ public:
   /**
    * @brief Gets the font attribute override payload.
    *
+   * @SINCE_3_0.0
    * @return The font attributes
    */
   Text::FontAttributes GetFontAttributes() const;
@@ -71,6 +76,7 @@ private:
   /**
    * @brief Creates a FontSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL FontSpan(BaseObject* impl);

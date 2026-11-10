@@ -37,6 +37,7 @@ namespace Text
  *
  * Applications create a supported concrete subtype, such as ImageSpan. Custom
  * measurement and drawing hooks are not provided.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ReplacementSpan : public Span
 {
@@ -46,17 +47,20 @@ public:
    *        canonical one-character replacement authoring.
    *
    * Pass this value to StyledTextBuilder::AppendText().
+   * @SINCE_3_0.0
    */
   inline static constexpr char OBJECT_REPLACEMENT_CHARACTER[] = "\xEF\xBF\xBC";
 
   /**
    * @brief Creates an uninitialized ReplacementSpan handle.
+   * @SINCE_3_0.0
    */
   ReplacementSpan() = default;
 
   /**
    * @brief Downcasts a handle to ReplacementSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized ReplacementSpan on success, otherwise an empty handle
    */
@@ -66,6 +70,7 @@ protected:
   /**
    * @brief Creates a ReplacementSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL ReplacementSpan(BaseObject* impl);

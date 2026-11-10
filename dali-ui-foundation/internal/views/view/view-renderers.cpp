@@ -55,12 +55,12 @@ Shader CreateShader(std::string_view vertexSrc, std::string_view fragmentSrc, Da
         {
           return visualFactoryCache.GetExternalShader(iter->second);
         }
-        Shader shader = Shader::New(ToDaliStringView(vertexSrc), ToDaliStringView(fragmentSrc), hints, ToDaliStringView(shaderName));
-        shader.ReserveCustomProperties(1);
-        shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+        Shader newShader = Shader::New(ToDaliStringView(vertexSrc), ToDaliStringView(fragmentSrc), hints, ToDaliStringView(shaderName));
+        newShader.ReserveCustomProperties(1);
+        newShader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
 
-        gShaderIdMap[shaderName] = visualFactoryCache.RegisterExternalShader(shader);
-        return shader;
+        gShaderIdMap[shaderName] = visualFactoryCache.RegisterExternalShader(newShader);
+        return newShader;
       }
     }
 

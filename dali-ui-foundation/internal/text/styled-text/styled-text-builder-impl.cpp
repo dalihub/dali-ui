@@ -335,9 +335,9 @@ std::vector<SpanAttachment> StyledTextBuilder::CreateFinalizedAttachments() cons
     }
 
     SpanAttachment attachment{openSpan.span, openSpan.startIndex, mUtf32Length, openSpan.insertionOrder};
-    auto           iter = std::find_if(finalizedAttachments.begin(), finalizedAttachments.end(), [&openSpan](const SpanAttachment& existing)
+    auto           iter = std::find_if(finalizedAttachments.begin(), finalizedAttachments.end(), [&openSpan](const SpanAttachment& other)
               {
-      return existing.insertionOrder > openSpan.insertionOrder;
+      return other.insertionOrder > openSpan.insertionOrder;
     });
 
     finalizedAttachments.insert(iter, std::move(attachment));
@@ -388,9 +388,9 @@ void StyledTextBuilder::AddAttachment(const Dali::Ui::Text::Span& span, uint32_t
   }
 
   SpanAttachment attachment{span, startIndex, endIndex, insertionOrder};
-  auto           iter = std::find_if(mAttachments.begin(), mAttachments.end(), [insertionOrder](const SpanAttachment& existing)
+  auto           iter = std::find_if(mAttachments.begin(), mAttachments.end(), [insertionOrder](const SpanAttachment& other)
             {
-    return existing.insertionOrder > insertionOrder;
+    return other.insertionOrder > insertionOrder;
   });
 
   const uint32_t insertedIndex = static_cast<uint32_t>(iter - mAttachments.begin());

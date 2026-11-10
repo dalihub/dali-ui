@@ -32,6 +32,7 @@
 #include <typeinfo>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
@@ -232,8 +233,8 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
       needTextureUpdated = true;
     }
 
-    Property::Value* startOffsetValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::START_OFFSET, START_OFFSET_NAME);
-    float            startOffset;
+    const Property::Value* startOffsetValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::START_OFFSET, START_OFFSET_NAME);
+    float                  startOffset;
     if(startOffsetValue && startOffsetValue->Get(startOffset))
     {
       if(DALI_LIKELY(mGradient))
@@ -248,7 +249,7 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
 
     if(DALI_LIKELY(mGradient))
     {
-      Property::Value*           spreadValue  = propertyMap.Find(Ui::Integration::GradientVisual::Property::SPREAD_METHOD, SPREAD_METHOD_NAME);
+      const Property::Value*     spreadValue  = propertyMap.Find(Ui::Integration::GradientVisual::Property::SPREAD_METHOD, SPREAD_METHOD_NAME);
       Ui::Gradient::SpreadMethod spreadMethod = mGradient->GetSpreadMethod();
       if(spreadValue && Scripting::GetEnumerationProperty(*spreadValue, SPREAD_METHOD_TABLE, SPREAD_METHOD_TABLE_COUNT, spreadMethod))
       {
@@ -256,8 +257,8 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
 
         needTextureUpdated = true;
       }
-      Property::Value*    unitsValue    = propertyMap.Find(Ui::Integration::GradientVisual::Property::UNITS, UNITS_NAME);
-      Ui::Gradient::Units gradientUnits = mGradient->GetUnits();
+      const Property::Value* unitsValue    = propertyMap.Find(Ui::Integration::GradientVisual::Property::UNITS, UNITS_NAME);
+      Ui::Gradient::Units    gradientUnits = mGradient->GetUnits();
       if(unitsValue && Scripting::GetEnumerationProperty(*unitsValue, UNITS_TABLE, UNITS_TABLE_COUNT, gradientUnits))
       {
         mGradient->SetUnits(gradientUnits);
@@ -302,7 +303,7 @@ void GradientVisual::OnSetTransform()
 void GradientVisual::DoSetOnScene(Actor& actor)
 {
   Ui::View owner = Ui::View::DownCast(actor);
-  UpdateUiScale(owner ? GetImpl(owner).GetEffectiveScale() : 1.0f);
+  UpdateUiScale(owner ? Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(owner)) : 1.0f);
   actor.AddRenderer(mImpl->mRenderer);
 
   // Gradient Visual generated and ready to display
@@ -470,11 +471,11 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
 {
   if(gradientType == Type::LINEAR)
   {
-    Property::Value* startPositionValue =
+    const Property::Value* startPositionValue =
       propertyMap.Find(Ui::Integration::GradientVisual::Property::START_POSITION, START_POSITION_NAME);
-    Property::Value* endPositionValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::END_POSITION, END_POSITION_NAME);
-    Vector2          startPosition;
-    Vector2          endPosition;
+    const Property::Value* endPositionValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::END_POSITION, END_POSITION_NAME);
+    Vector2                startPosition;
+    Vector2                endPosition;
 
     if(startPositionValue && startPositionValue->Get(startPosition) && endPositionValue &&
        endPositionValue->Get(endPosition))
@@ -488,10 +489,10 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
   }
   else if(gradientType == Type::RADIAL)
   {
-    Property::Value* centerValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::CENTER, CENTER_NAME);
-    Property::Value* radiusValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::RADIUS, RADIUS_NAME);
-    Vector2          center;
-    float            radius;
+    const Property::Value* centerValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::CENTER, CENTER_NAME);
+    const Property::Value* radiusValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::RADIUS, RADIUS_NAME);
+    Vector2                center;
+    float                  radius;
     if(centerValue && centerValue->Get(center) && radiusValue && radiusValue->Get(radius))
     {
       mGradient = new RadialGradient(center, radius, mGradient);
@@ -503,8 +504,8 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
   }
   else // if(gradientType == Type::CONIC)
   {
-    Property::Value* centerValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::CENTER, CENTER_NAME);
-    Property::Value* startAngleValue =
+    const Property::Value* centerValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::CENTER, CENTER_NAME);
+    const Property::Value* startAngleValue =
       propertyMap.Find(Ui::Integration::GradientVisual::Property::START_ANGLE, CONIC_START_ANGLE_NAME);
     Vector2 center;
     float   startAngle;
@@ -528,8 +529,8 @@ bool GradientVisual::ApplyStopNodes(const Property::Map& propertyMap)
     return false;
   }
 
-  Property::Value* stopOffsetValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::STOP_OFFSET, STOP_OFFSET_NAME);
-  Property::Value* stopColorValue  = propertyMap.Find(Ui::Integration::GradientVisual::Property::STOP_COLOR, STOP_COLOR_NAME);
+  const Property::Value* stopOffsetValue = propertyMap.Find(Ui::Integration::GradientVisual::Property::STOP_OFFSET, STOP_OFFSET_NAME);
+  const Property::Value* stopColorValue  = propertyMap.Find(Ui::Integration::GradientVisual::Property::STOP_COLOR, STOP_COLOR_NAME);
 
   if(stopOffsetValue == nullptr && stopColorValue == nullptr)
   {
@@ -576,6 +577,9 @@ void GradientVisual::ApplyLookupTexture()
 
     if(DALI_LIKELY(lookupTexture))
     {
+      // TODO: Radial REPEAT/REFLECT periods drift because texel-center scaling
+      // is applied before wrapping. Correct the period without allowing the
+      // end color to bleed into the first texel.
       float textureSize = static_cast<float>(lookupTexture.GetWidth());
       mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_TEXTURE_COORDINATE_SCALE_FACTOR_NAME),
                                         (textureSize - 1.0f) / textureSize);

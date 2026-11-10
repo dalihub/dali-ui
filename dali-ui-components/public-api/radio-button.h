@@ -42,6 +42,7 @@ class RadioButtonImpl;
  * click behavior, and explicit or parent-based grouping are inherited from
  * GroupSelectableView.
  *
+ * @SINCE_3_0.0
  * @note RadioButton is icon-only. To compose a labelled option, use an outer
  * GroupSelectableView as the click, grouping, focus, and accessibility owner. Make the
  * display-only child RadioButton touch-transparent with SetSensitive(false), remove it from
@@ -56,21 +57,25 @@ class DALI_UI_COMPONENTS_API RadioButton : public GroupSelectableView
 public:
   /**
    * @brief Creates an uninitialized RadioButton handle.
+   * @SINCE_3_0.0
    */
   RadioButton();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~RadioButton();
 
   /**
    * @brief Creates a RadioButton using the current default style.
+   * @SINCE_3_0.0
    * @return An initialized RadioButton
    */
   static RadioButton New();
   /**
    * @brief Creates a RadioButton using @p style.
+   * @SINCE_3_0.0
    * @param[in] style The style to apply
    * @return An initialized RadioButton
    * @pre @p style must be initialized.
@@ -78,6 +83,7 @@ public:
   static RadioButton New(RadioButtonStyle style);
   /**
    * @brief Downcasts a base handle to RadioButton.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A RadioButton handle, or an uninitialized handle if the types do not match
    */
@@ -85,22 +91,26 @@ public:
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to copy
    */
   RadioButton(const RadioButton& handle);
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   RadioButton(RadioButton&& rhs) noexcept;
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to copy
    * @return A reference to this handle
    */
   RadioButton& operator=(const RadioButton& handle);
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return A reference to this handle
    */
@@ -114,11 +124,13 @@ public:
    * Animation is skipped when the RadioButton is off-scene or invisible, regardless of
    * the requested mode.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The animation policy
    */
   void SetSelectionAnimationMode(SelectionAnimationMode mode);
   /**
    * @brief Returns the selection animation mode.
+   * @SINCE_3_0.0
    * @return The current animation policy
    */
   SelectionAnimationMode GetSelectionAnimationMode() const;
@@ -129,11 +141,13 @@ public:
    * A non-positive or non-finite value is normalized to zero, which means that no explicit
    * icon width is requested.
    *
+   * @SINCE_3_0.0
    * @param[in] width The requested width in logical pixels
    */
   void SetIconWidth(float width);
   /**
    * @brief Returns the requested icon width.
+   * @SINCE_3_0.0
    * @return The requested width, or zero when unset
    */
   float GetIconWidth() const;
@@ -143,11 +157,13 @@ public:
    * A non-positive or non-finite value is normalized to zero, which means that no explicit
    * icon height is requested.
    *
+   * @SINCE_3_0.0
    * @param[in] height The requested height in logical pixels
    */
   void SetIconHeight(float height);
   /**
    * @brief Returns the requested icon height.
+   * @SINCE_3_0.0
    * @return The requested height, or zero when unset
    */
   float GetIconHeight() const;

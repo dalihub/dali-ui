@@ -48,6 +48,7 @@ namespace Ui
  *
  * It can use the CornerRadius, CornerSquareness and Borderline features of VisualBase, unless
  * the image is an n-patch image.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ImageVisual : public VisualBase
 {
@@ -55,6 +56,7 @@ public:
   /**
    * @brief Creates a ImageVisual object.
    *
+   * @SINCE_3_0.0
    * @return The newly created image visual object.
    */
   static ImageVisual New();
@@ -65,6 +67,7 @@ public:
    * If handle points to a ImageVisual, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a ImageVisual or an uninitialized handle
    */
@@ -74,6 +77,7 @@ public: // Properties
   /**
    * @brief Gets the resource url of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The resource url of the ImageVisual
    */
   Dali::String GetResourceUrl() const;
@@ -81,6 +85,7 @@ public: // Properties
   /**
    * @brief Sets the resource url of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @param[in] resourceUrl The resource url to set
    */
   void SetResourceUrl(const Dali::String& resourceUrl);
@@ -88,6 +93,7 @@ public: // Properties
   /**
    * @brief Gets whether synchronous loading is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if synchronous loading is enabled
    */
   bool IsSynchronousLoading() const;
@@ -99,6 +105,7 @@ public: // Properties
    * and no loading signal is needed. It also stalls whatever thread asked, so it suits small
    * local files and little else. The default is false, which loads on a worker thread.
    *
+   * @SINCE_3_0.0
    * @param[in] synchronous True to load on the calling thread
    */
   void SetSynchronousLoading(bool synchronous);
@@ -106,6 +113,7 @@ public: // Properties
   /**
    * @brief Gets the desired width of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The desired width of the ImageVisual
    */
   int GetDesiredWidth() const;
@@ -117,6 +125,7 @@ public: // Properties
    * source costs. Both a width and a height must be set for either to take effect; the
    * default, 0, loads the image at its own size.
    *
+   * @SINCE_3_0.0
    * @param[in] desiredWidth The desired width to set
    * @note Ignored while SetImageLoadWithViewSizeEnabled() is enabled, which loads at the View's
    *       size instead.
@@ -128,6 +137,7 @@ public: // Properties
   /**
    * @brief Gets the desired height of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The desired height of the ImageVisual
    */
   int GetDesiredHeight() const;
@@ -139,6 +149,7 @@ public: // Properties
    * source costs. Both a width and a height must be set for either to take effect; the
    * default, 0, loads the image at its own size.
    *
+   * @SINCE_3_0.0
    * @param[in] desiredHeight The desired height to set
    * @note Ignored while SetImageLoadWithViewSizeEnabled() is enabled, which loads at the View's
    *       size instead.
@@ -149,6 +160,7 @@ public: // Properties
   /**
    * @brief Gets the sampling mode of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The sampling mode of the ImageVisual
    */
   Image::SamplingMode GetSamplingMode() const;
@@ -160,6 +172,7 @@ public: // Properties
    * SetImageLoadWithViewSizeEnabled() asks for a size other than the source's own. The default is
    * Image::SamplingMode::BOX_THEN_LINEAR.
    *
+   * @SINCE_3_0.0
    * @param[in] samplingMode The sampling mode to set
    * @see SetDesiredWidth()
    */
@@ -168,6 +181,7 @@ public: // Properties
   /**
    * @brief Gets the pixel area of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The pixel area of the ImageVisual
    */
   Dali::Vector4 GetPixelArea() const;
@@ -179,6 +193,7 @@ public: // Properties
    * elements are its top-left corner and the last two its size. The default,
    * [0.0, 0.0, 1.0, 1.0], is the whole image.
    *
+   * @SINCE_3_0.0
    * @param[in] pixelArea The pixel area to set
    * @note Has no effect on an n-patch image.
    * @see SetWrapModeU()
@@ -188,6 +203,7 @@ public: // Properties
   /**
    * @brief Gets the wrap mode for u coordinate of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The wrap mode for u coordinate of the ImageVisual
    */
   Dali::WrapMode::Type GetWrapModeU() const;
@@ -202,6 +218,7 @@ public: // Properties
    * Dali::WrapMode::REPEAT tiles the image and Dali::WrapMode::MIRRORED_REPEAT tiles it
    * alternately flipped, while the default clamps to the edge pixel.
    *
+   * @SINCE_3_0.0
    * @param[in] wrapModeU The wrap mode for u coordinate to set
    * @note Has no effect on an n-patch image.
    * @see SetPixelArea()
@@ -211,6 +228,7 @@ public: // Properties
   /**
    * @brief Gets the wrap mode for v coordinate of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The wrap mode for v coordinate of the ImageVisual
    */
   Dali::WrapMode::Type GetWrapModeV() const;
@@ -221,6 +239,7 @@ public: // Properties
    * v is the vertical coordinate, running from 0.0 at the top edge of the image to 1.0 at
    * the bottom. See SetWrapModeU() for how a wrap mode is applied.
    *
+   * @SINCE_3_0.0
    * @param[in] wrapModeV The wrap mode for v coordinate to set
    * @note Has no effect on an n-patch image.
    * @see SetWrapModeU()
@@ -230,6 +249,7 @@ public: // Properties
   /**
    * @brief Gets whether the broken image is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if a broken image is shown when loading fails
    */
   bool IsBrokenImageEnabled() const;
@@ -243,6 +263,7 @@ public: // Properties
    *
    * This is enabled by default. Disable it where a failure should simply draw nothing.
    *
+   * @SINCE_3_0.0
    * @param[in] brokenImageEnabled True to show a broken image when loading fails
    * @see UiConfig::SetBrokenImageUrl()
    */
@@ -251,6 +272,7 @@ public: // Properties
   /**
    * @brief Gets the load policy of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The load policy of the ImageVisual
    */
   Image::LoadPolicy GetLoadPolicy() const;
@@ -262,6 +284,7 @@ public: // Properties
    * scene. Image::LoadPolicy::IMMEDIATE starts as soon as the url is set, trading memory
    * held earlier for a shorter wait when the visual does appear.
    *
+   * @SINCE_3_0.0
    * @param[in] loadPolicy The load policy to set
    * @see SetReleasePolicy()
    */
@@ -270,6 +293,7 @@ public: // Properties
   /**
    * @brief Gets the release policy of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The release policy of the ImageVisual
    */
   Image::ReleasePolicy GetReleasePolicy() const;
@@ -281,6 +305,7 @@ public: // Properties
    * scene. The other values keep it until the visual is destroyed, or until it is released
    * explicitly, which avoids reloading a image that comes and goes.
    *
+   * @SINCE_3_0.0
    * @param[in] releasePolicy The release policy to set
    * @see SetLoadPolicy()
    */
@@ -289,6 +314,7 @@ public: // Properties
   /**
    * @brief Gets the fitting mode of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The fitting mode of the ImageVisual
    */
   Image::FittingMode GetFittingMode() const;
@@ -296,6 +322,7 @@ public: // Properties
   /**
    * @brief Sets the fitting mode of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @param[in] fittingMode The fitting mode to set
    */
   void SetFittingMode(Image::FittingMode fittingMode);
@@ -303,6 +330,7 @@ public: // Properties
   /**
    * @brief Gets whether orientation correction is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if orientation correction is enabled
    */
   bool IsOrientationCorrectionEnabled() const;
@@ -314,6 +342,7 @@ public: // Properties
    * turned pixels. Correcting it, the default, rotates and flips the image on load so that
    * it is shown the way it was taken. Disabling this draws the pixels as they are stored.
    *
+   * @SINCE_3_0.0
    * @param[in] orientationCorrection True to apply the recorded orientation
    */
   void SetOrientationCorrectionEnabled(bool orientationCorrection);
@@ -321,6 +350,7 @@ public: // Properties
   /**
    * @brief Gets whether the image is loaded at the view size.
    *
+   * @SINCE_3_0.0
    * @return True if loading the image with the view size is enabled
    */
   bool IsImageLoadWithViewSizeEnabled() const;
@@ -331,6 +361,7 @@ public: // Properties
    * When enabled, the image is loaded at the View's size rather than at the desired size,
    * so it is resampled whenever that size changes.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to load the image with the view size
    * @see SetDesiredWidth()
    */
@@ -339,6 +370,7 @@ public: // Properties
   /**
    * @brief Gets whether the loaded image is uploaded straight to the render thread.
    *
+   * @SINCE_3_0.0
    * @return True if the upload skips the event thread
    */
   bool IsFastTrackUploadEnabled() const;
@@ -356,6 +388,7 @@ public: // Properties
    *    image's natural size settles late;
    *  - the image cannot be swapped seamlessly for another.
    *
+   * @SINCE_3_0.0
    * @param[in] fastTrackUploading True to upload straight to the render thread
    * @note The request is dropped, without failing, whenever the shortcut cannot be taken:
    *       when an alpha mask, a custom shader, synchronous loading or
@@ -368,6 +401,7 @@ public: // Properties
   /**
    * @brief Gets the NPatch border of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The width of the fixed frame at each edge, in source image pixels
    */
   Dali::Insets GetNPatchBorder() const;
@@ -380,6 +414,7 @@ public: // Properties
    * stretched to fill the visual. Giving an ordinary image a border makes it behave as an
    * n-patch image, which is otherwise decided by a ".9" file name.
    *
+   * @SINCE_3_0.0
    * @param[in] border The frame widths as start, end, top and bottom distances
    * @note The values are rounded to whole source pixels, since they select which columns
    *       and rows of the image stretch.
@@ -390,6 +425,7 @@ public: // Properties
   /**
    * @brief Gets whether only the border regions are drawn.
    *
+   * @SINCE_3_0.0
    * @return True if the region inside the border is left undrawn
    */
   bool IsNPatchBorderOnly() const;
@@ -401,6 +437,7 @@ public: // Properties
    * that whatever sits behind shows through — it is not filled with a colour. The default is
    * false, which draws the whole image with the inside stretched.
    *
+   * @SINCE_3_0.0
    * @param[in] borderOnly True to draw only the border regions
    * @see SetNPatchBorder()
    */
@@ -409,6 +446,7 @@ public: // Properties
   /**
    * @brief Gets the auxiliary image url of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The auxiliary image url of the ImageVisual
    */
   Dali::String GetNPatchAuxiliaryImage() const;
@@ -425,6 +463,7 @@ public: // Properties
    * SetNPatchAuxiliaryImageAlpha(). Since that alpha starts at 0, setting only this url
    * shows nothing until the alpha is raised.
    *
+   * @SINCE_3_0.0
    * @param[in] auxiliaryImage The auxiliary image url to set
    * @note Only available if resource is n-patch, or NPatchBorder applied.
    * @note The visual's natural size grows to hold both images, so an auxiliary image larger
@@ -436,6 +475,7 @@ public: // Properties
   /**
    * @brief Gets how opaque the auxiliary image is drawn.
    *
+   * @SINCE_3_0.0
    * @return The opacity applied to the auxiliary image, from 0 to 1
    */
   float GetNPatchAuxiliaryImageAlpha() const;
@@ -446,6 +486,7 @@ public: // Properties
    * The value multiplies the auxiliary image's own alpha, so 1 draws it as it is and 0 hides
    * it. The default is 0, which means an auxiliary image stays invisible until this is set.
    *
+   * @SINCE_3_0.0
    * @param[in] auxiliaryImageAlpha The opacity to apply, from 0 to 1
    * @note Only available if resource is n-patch, or NPatchBorder applied.
    * @see SetNPatchAuxiliaryImage()
@@ -458,6 +499,7 @@ public: // Properties
    * This returns the requested value, which is not necessarily what happened to the loaded
    * image. See SetPreMultiplyAlphaOnLoadEnabled() for when a request is not honoured.
    *
+   * @SINCE_3_0.0
    * @return True if alpha is requested to be pre-multiplied while loading
    * @see SetPreMultiplyAlphaOnLoadEnabled()
    */
@@ -472,6 +514,7 @@ public: // Properties
    * The request is not always honoured. It is ignored when a custom shader is set, and it is
    * dropped when the loaded image uses a compressed pixel format, which cannot be pre-multiplied.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to pre-multiply alpha while loading
    * @note Default is true.
    */
@@ -480,6 +523,7 @@ public: // Properties
   /**
    * @brief Gets the alpha mask url of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return The alpha mask url of the ImageVisual
    */
   Dali::String GetAlphaMaskUrl() const;
@@ -492,6 +536,7 @@ public: // Properties
    * other is decided by SetCropToMask(), and when the mask is applied by SetMaskingPolicy().
    * Setting this once the image has finished loading may make it load again.
    *
+   * @SINCE_3_0.0
    * @param[in] alphaMaskUrl The alpha mask url to set
    * @see SetCropToMask()
    * @see SetMaskingPolicy()
@@ -501,6 +546,7 @@ public: // Properties
   /**
    * @brief Gets the scale factor applied to the content image before it is masked.
    *
+   * @SINCE_3_0.0
    * @return The scale factor applied to the content image before it is masked
    */
   float GetContentScaleForMasking() const;
@@ -512,6 +558,7 @@ public: // Properties
    * cropped to the size of the alpha mask. The default is 1.0, which leaves the image at
    * its own size, and the value has no effect unless an alpha mask is set.
    *
+   * @SINCE_3_0.0
    * @param[in] contentScale The content scale to set
    * @note With Image::MaskingPolicy::ON_RENDERING the scale is applied only while
    *       crop to mask is enabled.
@@ -523,6 +570,7 @@ public: // Properties
   /**
    * @brief Gets whether crop to mask is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if crop to mask is enabled
    */
   bool IsCropToMask() const;
@@ -533,6 +581,7 @@ public: // Properties
    * When enabled, the default, the image is cropped to the size of the alpha mask. When
    * disabled, the image keeps its own size and the mask is scaled to fit it instead.
    *
+   * @SINCE_3_0.0
    * @param[in] cropToMask True to crop to mask
    * @see SetAlphaMaskUrl()
    */
@@ -541,6 +590,7 @@ public: // Properties
   /**
    * @brief Gets the masking type of the ImageVisual.
    *
+   * @SINCE_3_0.0
    * @return Whether the alpha mask is applied as the image loads or as it is drawn
    */
   Image::MaskingPolicy GetMaskingPolicy() const;
@@ -553,6 +603,7 @@ public: // Properties
    * Image::MaskingPolicy::ON_RENDERING keeps the image and the mask as two textures
    * and combines them while drawing.
    *
+   * @SINCE_3_0.0
    * @param[in] maskingPolicy The masking policy to set
    * @note An image backed by an external texture, such as one from
    *       ImageUrlUtils::GenerateUrl(), can only be masked while drawing, and the value is
@@ -564,6 +615,7 @@ public: // Properties
   /**
    * @brief Forces the image to be reloaded.
    *
+   * @SINCE_3_0.0
    * @note Every visual using the same image will get the latest one.
    */
   void Reload();

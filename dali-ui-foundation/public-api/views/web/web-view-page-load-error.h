@@ -36,57 +36,68 @@ namespace Ui
  * PageLoadErrorSignal provides this value through a const reference that is
  * valid only for the duration of the signal callback. Copy the value to retain
  * the error after the callback returns.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API WebViewPageLoadError
 {
 public:
   /**
    * @brief Creates an empty page load error.
+   * @SINCE_3_0.0
    */
   WebViewPageLoadError();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~WebViewPageLoadError();
 
   /**
    * @brief Creates an independent copy of a page load error.
+   * @SINCE_3_0.0
    */
   WebViewPageLoadError(const WebViewPageLoadError& error);
 
   /**
    * @brief Moves a page load error.
+   * @SINCE_3_0.0
    */
   WebViewPageLoadError(WebViewPageLoadError&& error) noexcept;
 
   /**
    * @brief Replaces this value with an independent copy of a page load error.
+   * @SINCE_3_0.0
    */
   WebViewPageLoadError& operator=(const WebViewPageLoadError& error);
 
   /**
    * @brief Moves a page load error into this value.
+   * @SINCE_3_0.0
    */
   WebViewPageLoadError& operator=(WebViewPageLoadError&& error) noexcept;
 
   /**
    * @brief Gets the URL that failed to load.
+   * @SINCE_3_0.0
    */
   Dali::String GetUrl() const;
 
   /**
    * @brief Gets the error code.
+   * @SINCE_3_0.0
    */
   WebViewPageLoadErrorCode GetCode() const;
 
   /**
    * @brief Gets the human-readable error description.
+   * @SINCE_3_0.0
    */
   Dali::String GetDescription() const;
 
   /**
    * @brief Gets the error type.
+   * @SINCE_3_0.0
    */
   WebViewPageLoadErrorType GetType() const;
 

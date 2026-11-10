@@ -1155,6 +1155,11 @@ Visual::Base& Visual::Base::GetVisualObject()
   return *this;
 }
 
+const Visual::Base& Visual::Base::GetVisualObject() const
+{
+  return *this;
+}
+
 VisualRenderer Visual::Base::GetRenderer() const
 {
   return mImpl->mRenderer;

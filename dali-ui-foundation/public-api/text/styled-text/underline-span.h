@@ -31,18 +31,21 @@ namespace Text
 
 /**
  * @brief Span payload that applies underline styling to text.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UnderlineSpan : public Span
 {
 public:
   /**
    * @brief Creates an uninitialized UnderlineSpan handle.
+   * @SINCE_3_0.0
    */
   UnderlineSpan() = default;
 
   /**
    * @brief Creates an UnderlineSpan with the given underline style.
    *
+   * @SINCE_3_0.0
    * @param[in] underline The underline style payload
    * @return A new UnderlineSpan
    */
@@ -51,6 +54,7 @@ public:
   /**
    * @brief Downcasts a handle to UnderlineSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized UnderlineSpan on success, otherwise empty
    */
@@ -59,6 +63,7 @@ public:
   /**
    * @brief Gets the underline style payload.
    *
+   * @SINCE_3_0.0
    * @return The underline style
    */
   Text::Underline GetUnderline() const;
@@ -67,6 +72,7 @@ private:
   /**
    * @brief Creates an UnderlineSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL UnderlineSpan(BaseObject* impl);

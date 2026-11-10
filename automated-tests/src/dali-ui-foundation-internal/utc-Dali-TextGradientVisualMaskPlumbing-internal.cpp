@@ -149,9 +149,9 @@ void ExpectNoTextGradientOverlayRendererProperties(Renderer renderer)
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayEndPosition"), Property::INVALID_INDEX, TEST_LOCATION);
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayStartOffset"), Property::INVALID_INDEX, TEST_LOCATION);
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayBounds"), Property::INVALID_INDEX, TEST_LOCATION);
-  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayType"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayEvaluationMode"), Property::INVALID_INDEX, TEST_LOCATION);
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayRadialCenter"), Property::INVALID_INDEX, TEST_LOCATION);
-  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayRadialScale"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayEvaluationScale"), Property::INVALID_INDEX, TEST_LOCATION);
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayConicCenter"), Property::INVALID_INDEX, TEST_LOCATION);
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayConicScale"), Property::INVALID_INDEX, TEST_LOCATION);
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayConicStartAngle"), Property::INVALID_INDEX, TEST_LOCATION);
@@ -223,7 +223,7 @@ int UtcDaliTextGradientOverlayVisualDefaultModeUniformP(void)
   const Property::Index modeIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME);
   DALI_TEST_CHECK(modeIndex != Property::INVALID_INDEX);
   DALI_TEST_EQUALS(renderer.GetProperty<float>(modeIndex), 0.0f, EPSILON, TEST_LOCATION);
-  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientType"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientEvaluationMode"), Property::INVALID_INDEX, TEST_LOCATION);
   END_TEST;
 }
 
@@ -258,7 +258,7 @@ int UtcDaliTextGradientOverlayGradientSpanCompositionP(void)
 
     Dali::VisualRenderer renderer = rendered.internalVisual.GetRenderer();
     DALI_TEST_CHECK(renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME) != Property::INVALID_INDEX);
-    DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientType"), Property::INVALID_INDEX, TEST_LOCATION);
+    DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientEvaluationMode"), Property::INVALID_INDEX, TEST_LOCATION);
     DALI_TEST_EQUALS(renderer.GetTextures().GetTextureCount(), 2u, TEST_LOCATION);
     const Property::Index overlayModeIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME);
     DALI_TEST_CHECK(overlayModeIndex != Property::INVALID_INDEX);
@@ -270,7 +270,7 @@ int UtcDaliTextGradientOverlayGradientSpanCompositionP(void)
     UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
     UpdateTextVisual(rendered.internalVisual);
     renderer = rendered.internalVisual.GetRenderer();
-    DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextGradientType") != Property::INVALID_INDEX);
+    DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextGradientEvaluationMode") != Property::INVALID_INDEX);
     DALI_TEST_CHECK(renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME) != Property::INVALID_INDEX);
     DALI_TEST_CHECK(UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual));
     // Preserved RGBA + ordinary-glyph mask + base LUT + overlay LUT. A

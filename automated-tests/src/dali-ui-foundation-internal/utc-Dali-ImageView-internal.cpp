@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
@@ -26,7 +27,6 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
@@ -46,6 +46,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {
@@ -667,8 +668,8 @@ int UtcDaliImageViewRebuildViewSizeFallbackAndOtherVisuals(void)
 int UtcDaliImageViewRebuildViewSizePreservesFitting(void)
 {
   UiTestApplication application;
-  const float       originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.5f);
+  const float       originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.5f);
   for(auto fitting : {Image::FittingMode::FILL, Image::FittingMode::FIT_KEEP_ASPECT_RATIO,
                       Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO, Image::FittingMode::CENTER})
   {
@@ -706,7 +707,7 @@ int UtcDaliImageViewRebuildViewSizePreservesFitting(void)
     DALI_TEST_EQUALS(ReportedLoadSize(view), fitInside ? ImageDimensions(270, 135) : ImageDimensions(270, 150), TEST_LOCATION);
     application.GetWindow().Remove(view);
   }
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -1697,15 +1698,15 @@ int UtcDaliImageViewExplicitSizeFirstUpload(void)
 #endif
   struct ScaleRestorer
   {
-    float original = UiScaleManager::Get().GetScale();
+    float original = LayoutScaleManager::Get().GetUiScale();
     ~ScaleRestorer()
     {
-      UiScaleManager::Get().SetScale(original);
+      LayoutScaleManager::Get().SetUiScale(original);
     }
   } restoreScale;
   for(float scale : {1.0f, 1.5f})
   {
-    UiScaleManager::Get().SetScale(scale);
+    LayoutScaleManager::Get().SetUiScale(scale);
     for(const auto& url : urls)
     {
       for(bool synchronous : {false, true})

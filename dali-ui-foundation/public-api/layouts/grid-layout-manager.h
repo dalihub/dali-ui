@@ -36,6 +36,7 @@ namespace Ui
  * Arranges children in a row/column grid described by row/column GridLength
  * definitions. Per-child row, column, row-span, column-span and alignment
  * are read from GridLayoutParams.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API GridLayoutManager : public LayoutManager
 {

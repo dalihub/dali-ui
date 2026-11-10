@@ -65,6 +65,7 @@
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view-registration.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -174,3 +175,5 @@
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 #include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
+
+#include <dali-ui-foundation/public-api/views/widget/widget-view.h>

@@ -875,3 +875,87 @@ int UtcDaliGridLayoutDefinitionSnapshotsP(void)
   DALI_TEST_EQUALS(layout.GetColumnDefinitions()[0].GetValue(), 2.0f, TEST_LOCATION);
   END_TEST;
 }
+
+namespace
+{
+// Either callback makes a grid a custom parent: its GridLayoutManager then measures every
+// child in one step with the custom-parent modes.
+LayoutRect GridEchoArrange(View, const LayoutRect& bounds)
+{
+  return bounds;
+}
+
+MeasuredSize GridFixedMeasure(View, float, float)
+{
+  return MeasuredSize(200.0f, 100.0f);
+}
+} // namespace
+
+// A grid with its own ArrangeCallback still measures through its GridLayoutManager: the AUTO
+// columns fit their children (60 + 10 spacing + 30) and the AUTO row the taller child (40).
+int UtcDaliGridLayoutArrangeCallbackMeasuresAutoTracksP(void)
+{
+  UiTestApplication application;
+  GridLayout        layout = GridLayout::New();
+  layout.AddRowDefinition(GridLength::Auto());
+  layout.AddColumnDefinition(GridLength::Auto());
+  layout.AddColumnDefinition(GridLength::Auto());
+  layout.SetColumnSpacing(10.0f);
+  layout.SetArrangeCallback(ArrangeCallback::New(&GridEchoArrange));
+
+  View left = View::New();
+  left.SetRequestedWidth(60.0f);
+  left.SetRequestedHeight(40.0f);
+  left.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(0));
+  layout.Add(left);
+
+  View right = View::New();
+  right.SetRequestedWidth(30.0f);
+  right.SetRequestedHeight(20.0f);
+  right.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
+  layout.Add(right);
+
+  layout.SetRequestedWidth(WRAP_CONTENT);
+  layout.SetRequestedHeight(WRAP_CONTENT);
+  MeasuredSize m = layout.Measure(500.0f, 500.0f);
+
+  DALI_TEST_EQUALS(m.GetWidth(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(m.GetHeight(), 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+// A grid with its own MeasureCallback still arranges through its GridLayoutManager: the AUTO
+// columns are 60 and 30 wide with 10 between them, so the right cell starts at 70.
+int UtcDaliGridLayoutMeasureCallbackArrangesAutoTracksP(void)
+{
+  UiTestApplication application;
+  GridLayout        layout = GridLayout::New();
+  layout.AddRowDefinition(GridLength::Auto());
+  layout.AddColumnDefinition(GridLength::Auto());
+  layout.AddColumnDefinition(GridLength::Auto());
+  layout.SetColumnSpacing(10.0f);
+  layout.SetMeasureCallback(MeasureCallback::New(&GridFixedMeasure));
+
+  View left = View::New();
+  left.SetRequestedWidth(60.0f);
+  left.SetRequestedHeight(40.0f);
+  left.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(0));
+  layout.Add(left);
+
+  View right = View::New();
+  right.SetRequestedWidth(30.0f);
+  right.SetRequestedHeight(40.0f);
+  right.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
+  layout.Add(right);
+
+  MeasuredSize m = layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(left.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(left.GetSize().width, 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetPositionX(), 70.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetSize().width, 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetSize().height, 40.0f, TEST_LOCATION);
+  END_TEST;
+}

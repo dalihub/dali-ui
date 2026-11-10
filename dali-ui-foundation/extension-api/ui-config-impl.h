@@ -51,6 +51,7 @@ using UiConfigImplPtr = IntrusivePtr<UiConfigImpl>;
  * UiConfig handles. It supports a "freeze" mechanism: once Freeze() is called
  * by UiConfig::Apply(), all subsequent setter calls will trigger
  * DALI_ASSERT_ALWAYS.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiConfigImpl : public BaseObject
 {
@@ -58,6 +59,7 @@ public:
   /**
    * @brief Creates a new UiConfig implementation.
    *
+   * @SINCE_3_0.0
    * @return An IntrusivePtr to the new UiConfigImpl
    */
   static UiConfigImplPtr New();
@@ -66,12 +68,14 @@ public:
    * @brief Marks this config as frozen.
    *
    * Setter calls after this point will trigger an assertion failure.
+   * @SINCE_3_0.0
    */
   void Freeze();
 
   /**
    * @brief Returns whether this config is frozen.
    *
+   * @SINCE_3_0.0
    * @return True if frozen
    */
   bool IsFrozen() const;
@@ -81,6 +85,7 @@ public:
    *
    * This value is cached when Freeze() is called.
    *
+   * @SINCE_3_0.0
    * @pre Must be frozen.
    * @return The computed DPI factor
    */
@@ -91,6 +96,7 @@ public:
    *
    * This value is cached when Freeze() is called.
    *
+   * @SINCE_3_0.0
    * @pre Must be frozen.
    * @return The computed scaled DPI factor
    */
@@ -99,6 +105,7 @@ public:
   /**
    * @brief Sets the scaling factor.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] scalingFactor The scaling factor
    */
@@ -107,6 +114,7 @@ public:
   /**
    * @brief Retrieves the scaling factor.
    *
+   * @SINCE_3_0.0
    * @return The scaling factor
    */
   float GetScalingFactor() const;
@@ -116,6 +124,7 @@ public:
    *
    * @deprecated Use SetUnitDpi() instead.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] dpi The DPI value
    */
@@ -126,6 +135,7 @@ public:
    *
    * @deprecated Use GetUnitDpi() instead.
    *
+   * @SINCE_3_0.0
    * @return The DPI value
    */
   int GetDpi() const;
@@ -135,6 +145,7 @@ public:
    *
    * @deprecated Use SetUnitBaselineDpi() instead.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] baselineDpi The baseline DPI
    */
@@ -145,6 +156,7 @@ public:
    *
    * @deprecated Use GetUnitBaselineDpi() instead.
    *
+   * @SINCE_3_0.0
    * @return The baseline DPI value
    */
   int GetBaselineDpi() const;
@@ -152,6 +164,7 @@ public:
   /**
    * @brief Sets the default key click policy.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] policy The key click policy
    */
@@ -160,6 +173,7 @@ public:
   /**
    * @brief Retrieves the default key click policy.
    *
+   * @SINCE_3_0.0
    * @return The key click policy
    */
   KeyClickPolicy GetKeyClickPolicy() const;
@@ -167,6 +181,7 @@ public:
   /**
    * @brief Sets the execution key predicate.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] predicate A function pointer with signature bool(const Dali::String&)
    */
@@ -175,6 +190,7 @@ public:
   /**
    * @brief Retrieves the execution key predicate.
    *
+   * @SINCE_3_0.0
    * @return The current execution key predicate function pointer
    */
   ExecutionKeyPredicate GetExecutionKeyPredicate() const;
@@ -312,6 +328,7 @@ public:
   /**
    * @brief Sets whether to clear focus when the Escape key is pressed.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] enable True to enable focus clearing on Escape key
    */
@@ -320,6 +337,7 @@ public:
   /**
    * @brief Retrieves whether to clear focus when the Escape key is pressed.
    *
+   * @SINCE_3_0.0
    * @return True if focus clearing on Escape key is enabled
    */
   bool IsClearFocusOnEscapeEnabled() const;
@@ -357,6 +375,7 @@ public:
   /**
    * @brief Sets the default font size.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] fontSize The default font size
    */
@@ -365,6 +384,7 @@ public:
   /**
    * @brief Retrieves the default font size.
    *
+   * @SINCE_3_0.0
    * @return The default font size
    */
   float GetDefaultFontSize() const;
@@ -412,6 +432,7 @@ public:
   /**
    * @brief Sets the default text color.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] color The default text color
    */
@@ -420,6 +441,7 @@ public:
   /**
    * @brief Retrieves the default text color.
    *
+   * @SINCE_3_0.0
    * @return The default text color
    */
   Vector4 GetDefaultTextColor() const;
@@ -427,6 +449,7 @@ public:
   /**
    * @brief Sets the default placeholder text color.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] color The default placeholder text color.
    */
@@ -435,6 +458,7 @@ public:
   /**
    * @brief Returns the default placeholder text color.
    *
+   * @SINCE_3_0.0
    * @return The default placeholder text color.
    */
   Vector4 GetDefaultPlaceholderTextColor() const;
@@ -442,6 +466,7 @@ public:
   /**
    * @brief Sets whether the placeholder text is shown when the control has focus.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] enabled True to show the placeholder text when focused, false otherwise.
    */
@@ -450,6 +475,7 @@ public:
   /**
    * @brief Returns whether the placeholder text is shown when the control has focus.
    *
+   * @SINCE_3_0.0
    * @return True if the placeholder text is shown when focused, false otherwise.
    */
   bool IsPlaceholderTextShownOnFocus() const;
@@ -457,6 +483,7 @@ public:
   /**
    * @brief Sets the marquee speed in pixels per second.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] speed The marquee speed in pixels per second
    */
@@ -465,6 +492,7 @@ public:
   /**
    * @brief Retrieves the marquee speed.
    *
+   * @SINCE_3_0.0
    * @return The marquee speed in pixels per second
    */
   int GetMarqueeSpeed() const;
@@ -472,6 +500,7 @@ public:
   /**
    * @brief Sets the number of complete loops for marquee.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] loopCount The number of loops
    */
@@ -480,6 +509,7 @@ public:
   /**
    * @brief Retrieves the number of complete loops for marquee.
    *
+   * @SINCE_3_0.0
    * @return The number of loops
    */
   int GetMarqueeLoopCount() const;
@@ -487,6 +517,7 @@ public:
   /**
    * @brief Sets the amount of time to delay the start of marquee and further loops.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] delay The delay time in seconds
    */
@@ -495,6 +526,7 @@ public:
   /**
    * @brief Retrieves the amount of time to delay the start of marquee and further loops.
    *
+   * @SINCE_3_0.0
    * @return The delay time in seconds
    */
   float GetMarqueeLoopDelay() const;
@@ -502,6 +534,7 @@ public:
   /**
    * @brief Sets the gap before marquee wraps.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] gap The gap in pixels
    */
@@ -510,6 +543,7 @@ public:
   /**
    * @brief Retrieves the gap before marquee wraps.
    *
+   * @SINCE_3_0.0
    * @return The gap in pixels
    */
   float GetMarqueeGap() const;
@@ -517,6 +551,7 @@ public:
   /**
    * @brief Sets the marquee stop behaviour.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] stopMode The marquee stop mode
    */
@@ -525,6 +560,7 @@ public:
   /**
    * @brief Retrieves the marquee stop behaviour.
    *
+   * @SINCE_3_0.0
    * @return The marquee stop mode
    */
   Text::MarqueeStopMode GetMarqueeStopMode() const;
@@ -532,6 +568,7 @@ public:
   /**
    * @brief Sets the marquee orientation.
    *
+   * @SINCE_3_0.0
    * @pre Must not be frozen.
    * @param[in] orientation The marquee orientation
    */
@@ -540,6 +577,7 @@ public:
   /**
    * @brief Retrieves the marquee orientation.
    *
+   * @SINCE_3_0.0
    * @return The marquee orientation
    */
   Text::MarqueeOrientation GetMarqueeOrientation() const;
@@ -550,6 +588,7 @@ public:
    * Text-based views use this mode unless their layout direction mode is
    * explicitly set.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] mode The default LayoutDirectionMode used to determine text layout direction.
    */
@@ -558,6 +597,7 @@ public:
   /**
    * @brief Gets the default mode for resolving text layout direction.
    *
+   * @SINCE_3_0.0
    * @return The default LayoutDirectionMode used to resolve text layout direction.
    */
   Text::LayoutDirectionMode GetTextLayoutDirectionMode() const;
@@ -565,6 +605,7 @@ public:
   /**
    * @brief Sets whether Label uses asynchronous text rendering by default.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] asyncRendering True to enable asynchronous rendering for Label by default,
    * false to use synchronous rendering.
@@ -574,6 +615,7 @@ public:
   /**
    * @brief Retrieves whether Label uses asynchronous text rendering by default.
    *
+   * @SINCE_3_0.0
    * @return True if asynchronous rendering is enabled for Label by default
    */
   bool IsLabelAsyncRendering() const;
@@ -641,6 +683,7 @@ public:
   /**
    * @brief Sets the policy used to resolve automatic focus indication changes.
    *
+   * @SINCE_3_0.0
    * @param[in] policy The policy function, or nullptr to restore the default policy
    */
   void SetFocusIndicationPolicy(FocusIndicationPolicy::Function policy);
@@ -648,6 +691,7 @@ public:
   /**
    * @brief Gets the policy used to resolve automatic focus indication changes.
    *
+   * @SINCE_3_0.0
    * @return The configured policy function
    */
   FocusIndicationPolicy::Function GetFocusIndicationPolicy() const;
@@ -657,6 +701,7 @@ public:
    *
    * Derived config implementations override this to register themselves
    * with their own layer-specific config manager.
+   * @SINCE_3_0.0
    */
   virtual void OnApplied();
 
@@ -665,6 +710,7 @@ public:
    *
    * Derived config implementations override this to register themselves
    * with their own layer-specific config manager.
+   * @SINCE_3_0.0
    */
   virtual void OnApplicationCreated();
 
@@ -675,6 +721,7 @@ public:
    * implementations override this to provide a custom theme loader.
    * The framework takes ownership of the returned pointer.
    *
+   * @SINCE_3_0.0
    * @return A ThemeLoaderInterface instance, or nullptr to use the default loader
    */
   virtual ThemeLoaderInterface* CreateThemeLoader();
@@ -691,11 +738,13 @@ public:
 protected:
   /**
    * @brief Constructor with default configuration values.
+   * @SINCE_3_0.0
    */
   UiConfigImpl();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~UiConfigImpl() override;
 
@@ -705,6 +754,7 @@ private:
    *
    * Only the options that the application has explicitly set are applied; the others
    * keep the DALi default and are cached so that the getters report the effective value.
+   * @SINCE_3_0.0
    */
   void ApplyGestureOptions();
 
@@ -724,6 +774,7 @@ private:
 /**
  * @brief Retrieves the UiConfigImpl from a UiConfig handle.
  *
+ * @SINCE_3_0.0
  * @param[in] obj The UiConfig handle
  * @return A reference to the internal implementation
  */
@@ -736,6 +787,7 @@ inline Extension::UiConfigImpl& GetImpl(UiConfig& obj)
 /**
  * @brief Retrieves the UiConfigImpl from a const UiConfig handle.
  *
+ * @SINCE_3_0.0
  * @param[in] obj The UiConfig handle
  * @return A const reference to the internal implementation
  */

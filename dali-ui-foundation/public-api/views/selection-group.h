@@ -84,6 +84,7 @@ class SelectionGroupImpl;
  *   parent.Add(optionB.AsGroupSelectable());
  *   SelectionGroup parentGroup = SelectionGroup::Find(parent);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API SelectionGroup : public BaseHandle
 {
@@ -92,6 +93,7 @@ public: // Creation & Destruction
    * @brief Creates an uninitialized SelectionGroup handle.
    *
    * Use SelectionGroup::Find() to obtain an initialized group.
+   * @SINCE_3_0.0
    */
   SelectionGroup();
 
@@ -103,6 +105,7 @@ public: // Creation & Destruction
    * returns the same group while it is alive; once its last handle and last member are
    * gone the group is freed and a later Find(name) creates a fresh one.
    *
+   * @SINCE_3_0.0
    * @note Names live in a single global, single-threaded namespace.
    *
    * @param[in] name The group name
@@ -118,6 +121,7 @@ public: // Creation & Destruction
    * child with no group name auto-joins. Calling Find with the same parent View always
    * returns the same group while it is alive.
    *
+   * @SINCE_3_0.0
    * @param[in] parentView The parent View
    * @return The parent auto-group SelectionGroup
    */
@@ -129,6 +133,7 @@ public: // Creation & Destruction
    * If the handle points to a SelectionGroup object, the downcast produces a valid
    * handle. Otherwise the returned handle is uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle A handle to an object
    * @return A handle to a SelectionGroup object or an uninitialized handle
    */
@@ -137,6 +142,7 @@ public: // Creation & Destruction
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle A reference to the copied handle
    */
   SelectionGroup(const SelectionGroup& handle);
@@ -144,6 +150,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs A reference to the moved handle
    */
   SelectionGroup(SelectionGroup&& rhs) noexcept;
@@ -151,6 +158,7 @@ public: // Creation & Destruction
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle A reference to the copied handle
    * @return A reference to this
    */
@@ -159,6 +167,7 @@ public: // Creation & Destruction
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs A reference to the moved handle
    * @return A reference to this
    */
@@ -166,6 +175,7 @@ public: // Creation & Destruction
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~SelectionGroup();
 
@@ -180,6 +190,7 @@ public: // Signals
    * empty View handle if the group is now empty). @c event carries the originating
    * input cause, or InputEvent::Programmatic() for API-driven changes.
    *
+   * @SINCE_3_0.0
    * @return The selected-member-changed signal
    */
   Signal<void(View, View, InputEvent)>& SelectedMemberChangedSignal();
@@ -188,6 +199,7 @@ public: // API
   /**
    * @brief Returns the number of live members currently in the group.
    *
+   * @SINCE_3_0.0
    * @return The member count
    */
   uint32_t GetMemberCount() const;
@@ -195,6 +207,7 @@ public: // API
   /**
    * @brief Returns the currently selected member of the group.
    *
+   * @SINCE_3_0.0
    * @return The selected member, or an empty View handle if the group has no
    * selected member
    */
@@ -207,6 +220,7 @@ public: // API
    * SetSelected(false) on the selected member, or the selected member leaving the group
    * via SetGroupName("") / reparenting away / destruction); a gesture never empties the
    * group. If the group already has no selected member, this call is a no-op.
+   * @SINCE_3_0.0
    */
   void ClearSelection();
 

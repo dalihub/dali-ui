@@ -32,6 +32,7 @@ namespace Ui
  *
  * Runtime setters on ProgressBar may subsequently change track thickness, track color and
  * trail color. Padding and divider color remain construction-time style values.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ProgressBarStyle : public UiStyle
 {
@@ -40,12 +41,14 @@ public:
 
   /**
    * @brief Creates an uninitialized ProgressBarStyle handle.
+   * @SINCE_3_0.0
    */
   ProgressBarStyle() = default;
 
   /**
    * @brief Returns the key used to register the default ProgressBarStyle in UiConfig.
    *
+   * @SINCE_3_0.0
    * @return The default ProgressBarStyle key
    */
   static UiStyleKey<ProgressBarStyle> DefaultKey();
@@ -55,6 +58,7 @@ public:
    *
    * This function requires UiConfig::Apply().
    *
+   * @SINCE_3_0.0
    * @return The built-in default preset
    */
   static ProgressBarStyle DefaultPreset();
@@ -65,6 +69,7 @@ public:
    * The style registered for DefaultKey() is returned when present. Otherwise,
    * DefaultPreset() is returned. This function requires UiConfig::Apply().
    *
+   * @SINCE_3_0.0
    * @return The configured default ProgressBarStyle
    */
   static ProgressBarStyle Default();
@@ -72,6 +77,7 @@ public:
   /**
    * @brief Downcasts a handle to ProgressBarStyle using a runtime type check.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized ProgressBarStyle on success, otherwise an empty handle
    */
@@ -82,6 +88,7 @@ public:
    *
    * The caller must ensure that @p style contains a ProgressBarStyle implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] style The style to downcast
    * @return The ProgressBarStyle handle
    */
@@ -90,6 +97,7 @@ public:
   /**
    * @brief Creates a mutable builder initialized with a copy of this style.
    *
+   * @SINCE_3_0.0
    * @return A builder that can create a modified immutable style
    */
   Builder Configure() const;
@@ -97,6 +105,7 @@ public:
   /**
    * @brief Returns the padding around the track.
    *
+   * @SINCE_3_0.0
    * @return The configured padding
    */
   Insets GetPadding() const;
@@ -104,6 +113,7 @@ public:
   /**
    * @brief Returns the track thickness.
    *
+   * @SINCE_3_0.0
    * @return The configured track thickness
    */
   float GetTrackThickness() const;
@@ -111,6 +121,7 @@ public:
   /**
    * @brief Returns the track color.
    *
+   * @SINCE_3_0.0
    * @return The configured track color
    */
   UiColor GetTrackColor() const;
@@ -118,6 +129,7 @@ public:
   /**
    * @brief Returns the trail color.
    *
+   * @SINCE_3_0.0
    * @return The configured trail color
    */
   UiColor GetTrailColor() const;
@@ -125,6 +137,7 @@ public:
   /**
    * @brief Returns the divider color.
    *
+   * @SINCE_3_0.0
    * @return The configured divider color
    */
   UiColor GetDividerColor() const;
@@ -137,18 +150,21 @@ public: // Not intended for application developers
 
 /**
  * @brief Mutable, move-only builder for ProgressBarStyle.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ProgressBarStyle::Builder
 {
 public:
   /**
    * @brief Creates a builder initialized with the built-in ProgressBarStyle values.
+   * @SINCE_3_0.0
    */
   Builder();
 
   /**
    * @brief Creates a builder by moving another builder.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The builder to move
    */
   Builder(Builder&& rhs) noexcept;
@@ -156,6 +172,7 @@ public:
   /**
    * @brief Move-assigns another builder to this builder.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The builder to move
    * @return A reference to this builder
    */
@@ -163,16 +180,19 @@ public:
 
   /**
    * @brief Copy construction is disabled because a builder has unique mutable state.
+   * @SINCE_3_0.0
    */
   Builder(const Builder&) = delete;
 
   /**
    * @brief Copy assignment is disabled because a builder has unique mutable state.
+   * @SINCE_3_0.0
    */
   Builder& operator=(const Builder&) = delete;
 
   /**
    * @brief Destroys the builder.
+   * @SINCE_3_0.0
    */
   ~Builder();
 
@@ -181,6 +201,7 @@ public:
    *
    * Every inset must be finite and non-negative.
    *
+   * @SINCE_3_0.0
    * @param[in] padding The padding to set
    * @return A reference to this builder
    */
@@ -191,6 +212,7 @@ public:
    *
    * Every inset must be finite and non-negative.
    *
+   * @SINCE_3_0.0
    * @param[in] padding The padding to set
    * @return An rvalue reference to this builder
    */
@@ -199,6 +221,7 @@ public:
   /**
    * @brief Sets the track thickness on an lvalue builder.
    *
+   * @SINCE_3_0.0
    * @param[in] thickness The finite, positive track thickness
    * @return A reference to this builder
    */
@@ -207,6 +230,7 @@ public:
   /**
    * @brief Sets the track thickness on an rvalue builder.
    *
+   * @SINCE_3_0.0
    * @param[in] thickness The finite, positive track thickness
    * @return An rvalue reference to this builder
    */
@@ -215,6 +239,7 @@ public:
   /**
    * @brief Sets the track color on an lvalue builder.
    *
+   * @SINCE_3_0.0
    * @param[in] color The track color
    * @return A reference to this builder
    */
@@ -223,6 +248,7 @@ public:
   /**
    * @brief Sets the track color on an rvalue builder.
    *
+   * @SINCE_3_0.0
    * @param[in] color The track color
    * @return An rvalue reference to this builder
    */
@@ -231,6 +257,7 @@ public:
   /**
    * @brief Sets the trail color on an lvalue builder.
    *
+   * @SINCE_3_0.0
    * @param[in] color The trail color
    * @return A reference to this builder
    */
@@ -239,6 +266,7 @@ public:
   /**
    * @brief Sets the trail color on an rvalue builder.
    *
+   * @SINCE_3_0.0
    * @param[in] color The trail color
    * @return An rvalue reference to this builder
    */
@@ -247,6 +275,7 @@ public:
   /**
    * @brief Sets the divider color on an lvalue builder.
    *
+   * @SINCE_3_0.0
    * @param[in] color The divider color
    * @return A reference to this builder
    */
@@ -255,6 +284,7 @@ public:
   /**
    * @brief Sets the divider color on an rvalue builder.
    *
+   * @SINCE_3_0.0
    * @param[in] color The divider color
    * @return An rvalue reference to this builder
    */
@@ -265,6 +295,7 @@ public:
    *
    * A builder can be consumed only once.
    *
+   * @SINCE_3_0.0
    * @return The configured ProgressBarStyle
    */
   ProgressBarStyle Build() &&;

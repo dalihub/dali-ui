@@ -35,23 +35,26 @@ namespace Ui
  * It is shared between:
  *   - AnimatedImageView::Property  (public-api, for application code)
  *   - AnimatedImageViewImpl         (integration-api, for DALI_PROPERTY_REGISTRATION_EXTERNAL)
+ * @SINCE_3_0.0
  */
 struct AnimatedImageViewPropertyIndex
 {
   /**
    * @brief Enumeration for the start and end property ranges for this control.
+   * @SINCE_3_0.0
    */
   enum PropertyRange
   {
     PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_END_INDEX + 1,
-    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices. @SINCE_3_0.0
 
     ANIMATABLE_PROPERTY_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_END_INDEX + 1,
-    ANIMATABLE_PROPERTY_END_INDEX   = ANIMATABLE_PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+    ANIMATABLE_PROPERTY_END_INDEX   = ANIMATABLE_PROPERTY_START_INDEX + 1000, ///< Reserve property indices. @SINCE_3_0.0
   };
 
   /**
    * @brief Enumeration for the instance of properties belonging to the AnimatedImageView class.
+   * @SINCE_3_0.0
    */
   enum
   {
@@ -61,6 +64,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The URL of the animated image resource (e.g. GIF, WebP).
+     * @SINCE_3_0.0
      * @details Name "image", type Property::STRING.
      * @note See also: AnimatedImageView::SetResourceUrl(), AnimatedImageView::GetResourceUrl().
      */
@@ -68,6 +72,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief Array of image URLs for frame-by-frame animation.
+     * @SINCE_3_0.0
      * @details Name "imageUrls", type Property::ARRAY of STRING.
      * @note Setting this overrides IMAGE. See also: AnimatedImageView::SetResourceUrlList().
      */
@@ -79,6 +84,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The number of times to loop. -1 for infinite.
+     * @SINCE_3_0.0
      * @details Name "loopCount", type Property::INTEGER.
      * @note See also: AnimatedImageView::SetLoopCount(), AnimatedImageView::GetLoopCount().
      */
@@ -86,6 +92,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The behavior when the animation is stopped.
+     * @SINCE_3_0.0
      * @details Name "stopBehavior", type Ui::AnimatedImage::StopBehavior (Property::INTEGER).
      * @note See also: AnimatedImageView::SetStopBehavior(), AnimatedImageView::GetStopBehavior().
      */
@@ -93,6 +100,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief Playback speed multiplier. 1.0 is normal speed.
+     * @SINCE_3_0.0
      * @details Name "frameSpeedFactor", type Property::FLOAT.
      * @note See also: AnimatedImageView::SetFrameSpeedFactor(), AnimatedImageView::GetFrameSpeedFactor().
      */
@@ -100,6 +108,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The number of frames to pre-load into the batch.
+     * @SINCE_3_0.0
      * @details Name "batchSize", type Property::INTEGER.
      * @note See also: AnimatedImageView::SetBatchSize(), AnimatedImageView::GetBatchSize().
      */
@@ -107,6 +116,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The number of frames to keep in the cache.
+     * @SINCE_3_0.0
      * @details Name "cacheSize", type Property::INTEGER.
      * @note See also: AnimatedImageView::SetCacheSize(), AnimatedImageView::GetCacheSize().
      */
@@ -114,6 +124,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The frame delay in milliseconds. -1 to use the value from the file.
+     * @SINCE_3_0.0
      * @details Name "frameDelay", type Property::INTEGER.
      * @note See also: AnimatedImageView::SetFrameDelay(), AnimatedImageView::GetFrameDelay().
      */
@@ -125,6 +136,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The color to apply to the image.
+     * @SINCE_3_0.0
      * @details Name "imageColor", type Property::VECTOR4.
      * @note See also: AnimatedImageView::SetImageColor(), AnimatedImageView::GetImageColor().
      */
@@ -132,6 +144,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief Whether to multiply the colour channels of each frame by its alpha channel as it is loaded.
+     * @SINCE_3_0.0
      * @details Name "preMultiplyAlphaOnLoad", type Property::BOOLEAN.
      * @note See also: AnimatedImageView::SetPreMultiplyAlphaOnLoadEnabled(), AnimatedImageView::IsPreMultiplyAlphaOnLoadEnabled().
      */
@@ -143,6 +156,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief How the image is fitted within the view bounds.
+     * @SINCE_3_0.0
      * @details Name "fittingMode", type Ui::Image::FittingMode (Property::INTEGER).
      * @note See also: AnimatedImageView::SetFittingMode(), AnimatedImageView::GetFittingMode().
      */
@@ -150,6 +164,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The sampling mode used when scaling the image.
+     * @SINCE_3_0.0
      * @details Name "samplingMode", type Ui::Image::SamplingMode (Property::INTEGER).
      * @note See also: AnimatedImageView::SetSamplingMode(), AnimatedImageView::GetSamplingMode().
      */
@@ -161,6 +176,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The desired decoding width hint in pixels. 0 means no constraint.
+     * @SINCE_3_0.0
      * @details Name "desiredWidth", type Property::INTEGER.
      * @note See also: AnimatedImageView::SetDesiredWidth(), AnimatedImageView::GetDesiredWidth().
      */
@@ -168,6 +184,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The desired decoding height hint in pixels. 0 means no constraint.
+     * @SINCE_3_0.0
      * @details Name "desiredHeight", type Property::INTEGER.
      * @note See also: AnimatedImageView::SetDesiredHeight(), AnimatedImageView::GetDesiredHeight().
      */
@@ -175,6 +192,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The load policy for the image resource.
+     * @SINCE_3_0.0
      * @details Name "loadPolicy", type Ui::Image::LoadPolicy (Property::INTEGER).
      * @note See also: AnimatedImageView::SetLoadPolicy(), AnimatedImageView::GetLoadPolicy().
      */
@@ -182,6 +200,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief Controls when the visual's texture resources are released.
+     * @SINCE_3_0.0
      * @details Name "releasePolicy", type Ui::Image::ReleasePolicy (Property::INTEGER).
      * @note See also: AnimatedImageView::SetReleasePolicy(), AnimatedImageView::GetReleasePolicy().
      */
@@ -189,6 +208,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief Whether to load the image synchronously on the event thread.
+     * @SINCE_3_0.0
      * @details Name "synchronousLoading", type Property::BOOLEAN.
      * @note See also: AnimatedImageView::SetSynchronousLoading(), AnimatedImageView::IsSynchronousLoading().
      */
@@ -196,6 +216,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief Whether the image is loaded at the current view size.
+     * @SINCE_3_0.0
      * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
      * @note See also: AnimatedImageView::SetImageLoadWithViewSizeEnabled(), AnimatedImageView::IsImageLoadWithViewSizeEnabled().
      */
@@ -207,6 +228,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The URL of the alpha mask image.
+     * @SINCE_3_0.0
      * @details Name "alphaMaskUrl", type Property::STRING.
      * @note See also: AnimatedImageView::SetAlphaMaskUrl(), AnimatedImageView::GetAlphaMaskUrl().
      */
@@ -214,6 +236,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief Whether the image is cropped to the mask bounds.
+     * @SINCE_3_0.0
      * @details Name "cropToMask", type Property::BOOLEAN.
      * @note See also: AnimatedImageView::SetCropToMask(), AnimatedImageView::IsCropToMask().
      */
@@ -221,6 +244,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The masking mode.
+     * @SINCE_3_0.0
      * @details Name "maskingPolicy", type Ui::Image::MaskingPolicy (Property::INTEGER).
      * @note See also: AnimatedImageView::SetMaskingPolicy(), AnimatedImageView::GetMaskingPolicy().
      */
@@ -228,6 +252,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The URL of the placeholder image shown while loading.
+     * @SINCE_3_0.0
      * @details Name "placeholderImage", type Property::STRING.
      * @note See also: AnimatedImageView::SetPlaceholderUrl(), AnimatedImageView::GetPlaceholderUrl().
      */
@@ -239,6 +264,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The normalized sub-region of the image to display.
+     * @SINCE_3_0.0
      * @details Name "pixelArea", type Property::VECTOR4 (animatable).
      * @note See also: AnimatedImageView::SetPixelArea(), AnimatedImageView::GetPixelArea().
      */

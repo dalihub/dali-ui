@@ -27,6 +27,7 @@ namespace DALI_NAMESPACE::Ui
 
 /**
  * @brief Commands routed through WindowFrame's command policy.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameCommand
 {
@@ -40,6 +41,7 @@ enum class WindowFrameCommand
 
 /**
  * @brief Command and optional resize direction passed to a policy callback.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API WindowFrameCommandRequest
 {
@@ -52,6 +54,7 @@ public:
 
   /**
    * @brief Returns the command.
+   * @SINCE_3_0.0
    * @return Requested command
    */
   WindowFrameCommand GetCommand() const;
@@ -62,6 +65,7 @@ public:
    * This reports request metadata only. It does not report whether resize is
    * enabled, dispatched, or completed. The output is not modified when the request
    * has no direction.
+   * @SINCE_3_0.0
    * @param[out] direction Resize direction supplied with the request
    * @return true when a resize direction is available
    */
@@ -70,12 +74,14 @@ public:
 public: // Not intended for application developers
   /**
    * @brief Creates a request for a command.
+   * @SINCE_3_0.0
    * @param[in] command Command to dispatch
    */
   DALI_INTERNAL explicit WindowFrameCommandRequest(WindowFrameCommand command);
 
   /**
    * @brief Creates a resize command request with its native direction.
+   * @SINCE_3_0.0
    * @param[in] command Resize command to dispatch
    * @param[in] resizeDirection Native resize direction
    * @pre command is WindowFrameCommand::RESIZE
@@ -93,6 +99,7 @@ private:
  * HANDLED means the interceptor took the command over, whether it completed it,
  * rejected it, or started its own operation. WindowFrame performs no default
  * operation and tracks nothing further for it.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameCommandDisposition
 {
@@ -129,12 +136,13 @@ enum class WindowFrameCommandDisposition
  *
  * CommandProcessedSignal() reports this value itself for every command, so it
  * says what was dispatched rather than what completed.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameCommandResult
 {
-  DISPATCHED     = 0, ///< Default operation was dispatched to the underlying window or callback
-  NOT_DISPATCHED = 1, ///< Default operation was unavailable or disabled
-  HANDLED        = 2  ///< Command interceptor handled the command
+  DISPATCHED     = 0, ///< Default operation was dispatched to the underlying window or callback @SINCE_3_0.0
+  NOT_DISPATCHED = 1, ///< Default operation was unavailable or disabled @SINCE_3_0.0
+  HANDLED        = 2  ///< Command interceptor handled the command @SINCE_3_0.0
 };
 
 } //namespace DALI_NAMESPACE::Ui

@@ -47,12 +47,13 @@ namespace Integration
 class LabelImpl;
 }
 
-// @ANIMATION_CONFIG(Label, View)
+// @ANIMATION_CONFIG(Label, View, 3_0.0)
 /**
  * @brief Label is a non-editable View that displays text.
  *
  * It performs text layout and rendering using the text rendering backend,
  * but does not support user interaction or text editing.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Label : public View
 {
@@ -60,6 +61,7 @@ public:
   /**
    * @brief Property indices for Label.
    *
+   * @SINCE_3_0.0
    * @note See Dali::Ui::Text::LabelPropertyIndex for the underlying property definitions.
    */
   struct Property
@@ -110,12 +112,14 @@ public: // Creation & Destruction
    *
    * Only derived versions can be instantiated. Calling member
    * functions with an uninitialized Dali::Object is not allowed.
+   * @SINCE_3_0.0
    */
   Label();
 
   /**
    * @brief Creates an initialized Label.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource
    */
   static Label New();
@@ -123,6 +127,7 @@ public: // Creation & Destruction
   /**
    * @brief Creates an initialized Label.
    *
+   * @SINCE_3_0.0
    * @param[in] text The initial text to be displayed by the Label.
    * @return A handle to a newly allocated Dali resource
    */
@@ -132,6 +137,7 @@ public: // Creation & Destruction
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    * @param[in] label Handle to copy
    */
   Label(const Label& label);
@@ -139,6 +145,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   Label(Label&& rhs) noexcept;
@@ -147,6 +154,7 @@ public: // Creation & Destruction
    * @brief Virtual destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~Label();
 
@@ -155,6 +163,7 @@ public: // Operators
    * @brief Copy assignment operator.
    *
    * Changes this handle to point to another real object.
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -163,6 +172,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -177,6 +187,7 @@ public: // Static Methods
    * If handle points to a Label, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a Label or an uninitialized handle
    */
@@ -186,6 +197,7 @@ public: // Text Size Measurement
   /**
    * @brief Returns the natural size required to lay out the text.
    *
+   * @SINCE_3_0.0
    * @return The natural size, including padding.
    */
   Vector3 GetNaturalSize() const;
@@ -193,6 +205,7 @@ public: // Text Size Measurement
   /**
    * @brief Calculates the height required to lay out the text at the given width.
    *
+   * @SINCE_3_0.0
    * @param[in] width The total view width, including padding.
    * @return The required height, including padding.
    */
@@ -202,6 +215,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the text.
    *
+   * @SINCE_3_0.0
    * @param[in] text The text to display in UTF-8 format.
    */
   void SetText(const Dali::String& text);
@@ -209,6 +223,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the text.
    *
+   * @SINCE_3_0.0
    * @return The text currently set on the label in UTF-8 format.
    */
   Dali::String GetText() const;
@@ -219,6 +234,7 @@ public: // Setters for chaining
    * StyledText is applied as plain text plus span attachments and does not use
    * the raw markup parser.
    *
+   * @SINCE_3_0.0
    * @param[in] styledText The styled text snapshot to display.
    */
   void SetStyledText(const Text::StyledText& styledText);
@@ -226,6 +242,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the styled text snapshot currently set on the label.
    *
+   * @SINCE_3_0.0
    * @return The current styled text snapshot, or an empty handle if the current
    * source was set by SetText().
    */
@@ -234,6 +251,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font family of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] fontFamily The requested font family to use.
    */
   void SetFontFamily(const Dali::String& fontFamily);
@@ -241,6 +259,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font family of the text.
    *
+   * @SINCE_3_0.0
    * @return The font family currently set on the label.
    */
   Dali::String GetFontFamily() const;
@@ -248,6 +267,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font size of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] fontSize The font size in pixels.
    */
   void SetFontSize(float fontSize);
@@ -255,6 +275,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font size of the text.
    *
+   * @SINCE_3_0.0
    * @return The font size currently set on the label, in pixels.
    */
   float GetFontSize() const;
@@ -262,6 +283,7 @@ public: // Setters for chaining
   /**
    * @brief Sets whether the text should be multi-line.
    *
+   * @SINCE_3_0.0
    * @param[in] multiLine True for multi-line layout, false for single-line layout.
    */
   void SetMultiLine(bool multiLine);
@@ -269,6 +291,7 @@ public: // Setters for chaining
   /**
    * @brief Gets whether the text should be multi-line.
    *
+   * @SINCE_3_0.0
    * @return True if multi-line layout is enabled, otherwise false.
    */
   bool IsMultiLine() const;
@@ -281,6 +304,7 @@ public: // Setters for chaining
    * as @c Text::MAXIMUM_LINES_UNLIMITED. This setting does not enable multi-line
    * layout automatically.
    *
+   * @SINCE_3_0.0
    * @note When a maximum line count is set, GetNaturalSize(),
    * GetHeightForWidth(), and GetLineCount() reflect the configured line limit.
    * Text fitting also respects the configured line limit.
@@ -292,6 +316,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the maximum number of lines used to layout the text.
    *
+   * @SINCE_3_0.0
    * @return The maximum number of lines, or @c Text::MAXIMUM_LINES_UNLIMITED if there is no limit.
    */
   int GetMaximumLines() const;
@@ -299,6 +324,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the line wrap mode.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The line wrap mode to apply.
    */
   void SetLineWrapMode(Text::LineWrapMode mode);
@@ -306,6 +332,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the line wrap mode.
    *
+   * @SINCE_3_0.0
    * @return The current line wrap mode.
    */
   Text::LineWrapMode GetLineWrapMode() const;
@@ -314,6 +341,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the color of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The required text color value.
    */
   void SetTextColor(const UiColor& color);
@@ -321,6 +349,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the color of the text.
    *
+   * @SINCE_3_0.0
    * @return The text color currently set on the label.
    */
   UiColor GetTextColor();
@@ -328,9 +357,20 @@ public: // Setters for chaining
   /**
    * @brief Sets the text gradient.
    *
-   * A gradient value with Type::NONE, or a gradient with fewer than two stops,
-   * removes the text gradient and restores normal single-color text rendering.
+   * A renderable gradient replaces the default TextColor RGBA, including alpha.
+   * Gradient-filled glyphs can remain visible when TextColor alpha is zero.
+   * ForegroundColorSpan and GradientSpan retain their own foreground RGBA.
+   * TextColor remains stored and is used again when the gradient is removed.
    *
+   * Unstyled color glyphs retain their native RGBA while the gradient is active,
+   * independently of TextColor and gradient stop alpha. Actor opacity still
+   * applies. Explicit spans on color glyphs retain their own rendering policy.
+   *
+   * A gradient value with Type::NONE, or a gradient with fewer than two stops,
+   * removes the text gradient and restores the stored TextColor for default
+   * foreground glyphs. Explicit foreground spans remain in effect.
+   *
+   * @SINCE_3_0.0
    * @note For Label text rendering, Gradient::Units::OBJECT_BOUNDING_BOX uses
    * normalized coordinates inside the bounds selected by
    * SetTextGradientBoundsMode(), where the top-left is (-0.5, -0.5) and
@@ -352,6 +392,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the text gradient.
    *
+   * @SINCE_3_0.0
    * @return The authored text gradient, or Type::NONE if no text gradient is set.
    */
   Gradient::Base GetTextGradient() const;
@@ -363,6 +404,7 @@ public: // Setters for chaining
    * gradient to the laid-out text content. Text::GradientBoundsMode::VIEW_BOUND
    * maps the gradient to the full Label view bounds, including padding.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The text gradient bounds mode.
    */
   void SetTextGradientBoundsMode(Text::GradientBoundsMode mode);
@@ -370,6 +412,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the bounds mode used to evaluate text gradient coordinates.
    *
+   * @SINCE_3_0.0
    * @return The current text gradient bounds mode.
    */
   Text::GradientBoundsMode GetTextGradientBoundsMode() const;
@@ -383,8 +426,10 @@ public: // Setters for chaining
    * shadow, underline, strikethrough, outline, or background.
    *
    * The overlay mode is evaluated inside the text shader and does not change
-   * the framebuffer blending state.
+   * the framebuffer blending state. The resolved foreground alpha is preserved;
+   * a fully transparent foreground remains transparent with any overlay.
    *
+   * @SINCE_3_0.0
    * @param[in] gradient The overlay gradient. Use Gradient::Base::None()
    * to remove the overlay.
    * @return This Label.
@@ -394,6 +439,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the text gradient overlay.
    *
+   * @SINCE_3_0.0
    * @return The current text gradient overlay, or Type::NONE if no overlay is set.
    */
   Gradient::Base GetTextGradientOverlay() const;
@@ -404,6 +450,7 @@ public: // Setters for chaining
    * This is independent from TextGradientBoundsMode used by the base
    * TextGradient.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The overlay gradient bounds mode.
    * @return This Label.
    */
@@ -412,6 +459,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the bounds mode used to evaluate text gradient overlay coordinates.
    *
+   * @SINCE_3_0.0
    * @return The current text gradient overlay bounds mode.
    */
   Text::GradientBoundsMode GetTextGradientOverlayBoundsMode() const;
@@ -423,6 +471,7 @@ public: // Setters for chaining
    * GradientOverlayMode is a text-specific mode evaluated inside the text
    * shader. It does not change framebuffer blending state.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The overlay mode.
    * @return This Label.
    */
@@ -432,6 +481,7 @@ public: // Setters for chaining
    * @brief Gets how the text gradient overlay is applied to the resolved text
    * glyph fill.
    *
+   * @SINCE_3_0.0
    * @return The current text gradient overlay mode.
    */
   Text::GradientOverlayMode GetTextGradientOverlayMode() const;
@@ -439,6 +489,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the horizontal alignment of the text within the label.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment The horizontal text alignment.
    */
   void SetHorizontalTextAlignment(Text::Alignment alignment);
@@ -446,6 +497,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the horizontal text alignment.
    *
+   * @SINCE_3_0.0
    * @return The horizontal text alignment.
    */
   Text::Alignment GetHorizontalTextAlignment() const;
@@ -453,6 +505,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the vertical alignment of the text within the label.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment The vertical text alignment.
    */
   void SetVerticalTextAlignment(Text::Alignment alignment);
@@ -460,6 +513,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the vertical text alignment.
    *
+   * @SINCE_3_0.0
    * @return The vertical text alignment.
    */
   Text::Alignment GetVerticalTextAlignment() const;
@@ -467,6 +521,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the overflow mode.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The overflow mode to apply.
    */
   void SetTextOverflowMode(Text::OverflowMode mode);
@@ -474,6 +529,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the overflow mode.
    *
+   * @SINCE_3_0.0
    * @return The current overflow mode.
    */
   Text::OverflowMode GetTextOverflowMode() const;
@@ -505,6 +561,7 @@ public: // Setters for chaining
    * This behavior is similar to the "Auto" line height option in design tools
    * such as Figma.
    *
+   * @SINCE_3_0.0
    * @note The final line height is clamped to be no smaller than
    *       the natural line height derived from the font metrics.
    *
@@ -521,6 +578,7 @@ public: // Setters for chaining
    * A value of -1.0f indicates that the natural line height
    * (based on font metrics) is used.
    *
+   * @SINCE_3_0.0
    * @return The line height value.
    */
   float GetLineHeight() const;
@@ -536,6 +594,7 @@ public: // Setters for chaining
    *
    * The default mode is LineHeightMode::RELATIVE.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The line height mode.
    */
   void SetLineHeightMode(Text::LineHeightMode mode);
@@ -543,6 +602,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the current line height mode.
    *
+   * @SINCE_3_0.0
    * @return The current LineHeightMode.
    */
   Text::LineHeightMode GetLineHeightMode() const;
@@ -559,6 +619,7 @@ public: // Setters for chaining
    * - LayoutDirectionMode::LOCALE:
    *   The layout direction is determined based on the system locale.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The LayoutDirectionMode used to determine the text layout direction.
    */
   void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
@@ -566,6 +627,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the current layout direction mode.
    *
+   * @SINCE_3_0.0
    * @return The LayoutDirectionMode used to resolve the text layout direction.
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
@@ -573,6 +635,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the color of anchors in the text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The color to apply to anchors.
    */
   void SetAnchorColor(const UiColor& color);
@@ -580,6 +643,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the color of anchors in the text.
    *
+   * @SINCE_3_0.0
    * @return The current anchor color.
    */
   UiColor GetAnchorColor();
@@ -587,6 +651,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the color of anchors when they are clicked.
    *
+   * @SINCE_3_0.0
    * @param[in] color The color to apply to clicked anchors.
    */
   void SetAnchorClickedColor(const UiColor& color);
@@ -594,6 +659,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the color of anchors when they are clicked.
    *
+   * @SINCE_3_0.0
    * @return The current clicked anchor color.
    */
   UiColor GetAnchorClickedColor();
@@ -610,6 +676,7 @@ public: // Setters for chaining
    *
    * The default policy is MarqueeTriggerPolicy::MANUAL.
    *
+   * @SINCE_3_0.0
    * @param[in] policy The marquee trigger policy.
    */
   void SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy);
@@ -617,6 +684,7 @@ public: // Setters for chaining
   /**
    * @brief Returns when the marquee animation is triggered.
    *
+   * @SINCE_3_0.0
    * @return The current marquee trigger policy.
    */
   Text::MarqueeTriggerPolicy GetMarqueeTriggerPolicy() const;
@@ -624,6 +692,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the marquee speed.
    *
+   * @SINCE_3_0.0
    * @param[in] speed The marquee speed in pixels per second.
    */
   void SetMarqueeSpeed(int speed);
@@ -631,6 +700,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the marquee speed.
    *
+   * @SINCE_3_0.0
    * @return The marquee speed in pixels per second.
    */
   int GetMarqueeSpeed() const;
@@ -638,6 +708,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the number of complete loops for marquee.
    *
+   * @SINCE_3_0.0
    * @note Use Text::MARQUEE_LOOP_COUNT_INFINITE to repeat indefinitely.
    *
    * @param[in] loopCount The number of loops.
@@ -647,6 +718,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the number of complete loops for marquee.
    *
+   * @SINCE_3_0.0
    * @return The number of loops.
    */
   int GetMarqueeLoopCount() const;
@@ -654,6 +726,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the amount of time to delay the start of marquee and further loops.
    *
+   * @SINCE_3_0.0
    * @param[in] delay The delay time in seconds.
    */
   void SetMarqueeLoopDelay(float delay);
@@ -661,6 +734,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the amount of time to delay the start of marquee and further loops.
    *
+   * @SINCE_3_0.0
    * @return The delay time in seconds.
    */
   float GetMarqueeLoopDelay() const;
@@ -668,6 +742,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the gap before marquee wraps.
    *
+   * @SINCE_3_0.0
    * @param[in] gap The gap in pixels.
    */
   void SetMarqueeGap(int gap);
@@ -675,6 +750,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the gap before marquee wraps.
    *
+   * @SINCE_3_0.0
    * @return The gap in pixels.
    */
   int GetMarqueeGap() const;
@@ -685,6 +761,7 @@ public: // Setters for chaining
    * Horizontal is applied only for single-line text, and vertical only for multi-line text.
    * The setting is ignored if the text layout does not match the required condition.
    *
+   * @SINCE_3_0.0
    * @param[in] orientation The marquee orientation.
    */
   void SetMarqueeOrientation(Text::MarqueeOrientation orientation);
@@ -692,6 +769,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the marquee orientation.
    *
+   * @SINCE_3_0.0
    * @return The marquee orientation.
    */
   Text::MarqueeOrientation GetMarqueeOrientation() const;
@@ -699,6 +777,7 @@ public: // Setters for chaining
   /**
    * @brief Sets how the marquee stops.
    *
+   * @SINCE_3_0.0
    * @param[in] stopMode The marquee stop mode.
    */
   void SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
@@ -706,6 +785,7 @@ public: // Setters for chaining
   /**
    * @brief Returns how the marquee stops.
    *
+   * @SINCE_3_0.0
    * @return The marquee stop mode.
    */
   Text::MarqueeStopMode GetMarqueeStopMode() const;
@@ -713,6 +793,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font weight.
    *
+   * @SINCE_3_0.0
    * @param[in] weight The font weight.
    */
   void SetFontWeight(Text::FontWeight weight);
@@ -720,6 +801,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the font weight.
    *
+   * @SINCE_3_0.0
    * @return The font weight.
    */
   Text::FontWeight GetFontWeight() const;
@@ -727,6 +809,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font width.
    *
+   * @SINCE_3_0.0
    * @param[in] width The font width.
    */
   void SetFontWidth(Text::FontWidth width);
@@ -734,6 +817,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the font width.
    *
+   * @SINCE_3_0.0
    * @return The font width.
    */
   Text::FontWidth GetFontWidth() const;
@@ -741,6 +825,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font slant.
    *
+   * @SINCE_3_0.0
    * @param[in] slant The font slant.
    */
   void SetFontSlant(Text::FontSlant slant);
@@ -748,6 +833,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the font slant.
    *
+   * @SINCE_3_0.0
    * @return The font slant.
    */
   Text::FontSlant GetFontSlant() const;
@@ -757,6 +843,7 @@ public: // Setters for chaining
    *
    * The background is rendered behind the glyphs of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The text background color.
    */
   void SetTextBackgroundColor(const UiColor& color);
@@ -764,6 +851,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the background color behind the text.
    *
+   * @SINCE_3_0.0
    * @return The current text background color.
    */
   UiColor GetTextBackgroundColor() const;
@@ -772,6 +860,7 @@ public: // Setters for chaining
    * @brief Clears the text background color.
    *
    * Disables the text background and removes the previously set color.
+   * @SINCE_3_0.0
    */
   void ClearTextBackgroundColor();
 
@@ -780,6 +869,7 @@ public: // Setters for chaining
    *
    * Pass Text::Underline::None() to clear the underline style.
    *
+   * @SINCE_3_0.0
    * @param[in] underline The underline configuration.
    */
   void SetTextUnderline(const Text::Underline& underline);
@@ -787,6 +877,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the underline style.
    *
+   * @SINCE_3_0.0
    * @return The current underline style, or Text::Underline::None() if not set.
    */
   Text::Underline GetTextUnderline() const;
@@ -800,6 +891,7 @@ public: // Setters for chaining
    * Marquee and cutout do not apply reveal rendering; the authored configuration
    * is retained and takes effect again when the unsupported mode is disabled.
    *
+   * @SINCE_3_0.0
    * @param[in] reveal The reveal configuration.
    */
   void SetTextReveal(const Text::Reveal& reveal);
@@ -807,6 +899,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the text reveal configuration.
    *
+   * @SINCE_3_0.0
    * @return The current configuration, or Text::Reveal::None() if disabled.
    */
   Text::Reveal GetTextReveal() const;
@@ -820,6 +913,7 @@ public: // Setters for chaining
    *
    * Animating backwards hides units in reverse reveal order.
    *
+   * @SINCE_3_0.0
    * @param[in] progress The normalized timeline position.
    */
   void SetTextRevealProgress(float progress);
@@ -831,6 +925,7 @@ public: // Setters for chaining
    * animation. When not connected to a scene, it reflects the latest event-side
    * value.
    *
+   * @SINCE_3_0.0
    * @return The current progress in [0, 1].
    */
   float GetTextRevealProgress() const;
@@ -840,6 +935,7 @@ public: // Setters for chaining
    *
    * Pass Text::Shadow::None() to clear the shadow style.
    *
+   * @SINCE_3_0.0
    * @param[in] shadow The shadow configuration.
    */
   void SetTextShadow(const Text::Shadow& shadow);
@@ -847,6 +943,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the shadow style.
    *
+   * @SINCE_3_0.0
    * @return The current shadow style, or Text::Shadow::None() if not set.
    */
   Text::Shadow GetTextShadow() const;
@@ -856,6 +953,7 @@ public: // Setters for chaining
    *
    * Pass Text::Outline::None() to clear the outline style.
    *
+   * @SINCE_3_0.0
    * @param[in] outline The outline configuration.
    */
   void SetTextOutline(const Text::Outline& outline);
@@ -863,6 +961,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the outline style.
    *
+   * @SINCE_3_0.0
    * @return The current outline style, or Text::Outline::None() if not set.
    */
   Text::Outline GetTextOutline() const;
@@ -872,6 +971,7 @@ public: // Setters for chaining
    *
    * Pass Text::LineThrough::None() to clear the line-through style.
    *
+   * @SINCE_3_0.0
    * @param[in] lineThrough The line-through configuration.
    */
   void SetTextLineThrough(const Text::LineThrough& lineThrough);
@@ -879,6 +979,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the line-through style.
    *
+   * @SINCE_3_0.0
    * @return The current line-through style, or Text::LineThrough::None() if not set.
    */
   Text::LineThrough GetTextLineThrough() const;
@@ -888,6 +989,7 @@ public: // Setters for chaining
    *
    * Pass Text::Bevel::None() to clear the bevel style.
    *
+   * @SINCE_3_0.0
    * @param[in] bevel The bevel configuration.
    */
   void SetTextBevel(const Text::Bevel& bevel);
@@ -895,6 +997,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the bevel style.
    *
+   * @SINCE_3_0.0
    * @return The current bevel style, or Text::Bevel::None() if not set.
    */
   Text::Bevel GetTextBevel() const;
@@ -907,6 +1010,7 @@ public: // Setters for chaining
    *
    * Font size scale is applied when measuring and laying out text fit.
    *
+   * @SINCE_3_0.0
    * @note Text fit is designed for bounded layout sizes. It is recommended to
    * explicitly specify width and height when using this feature.
    *
@@ -922,6 +1026,7 @@ public: // Setters for chaining
    *
    * Font size scale is applied when measuring and laying out text fit.
    *
+   * @SINCE_3_0.0
    * @note Text fit is designed for bounded layout sizes. It is recommended to
    * explicitly specify width and height when using this feature.
    * When width or height is WRAP_CONTENT, measurement is performed using the
@@ -943,6 +1048,7 @@ public: // Setters for chaining
    * Passing an empty candidate vector clears text fit. This is equivalent to
    * calling SetTextFit(Text::Fit::None()).
    *
+   * @SINCE_3_0.0
    * @note Text fit is designed for bounded layout sizes. It is recommended to
    * explicitly specify width and height when using this feature.
    * When width or height is WRAP_CONTENT, measurement uses the maximum fit
@@ -959,6 +1065,7 @@ public: // Setters for chaining
    * The returned fit type indicates whether text fit is disabled,
    * range-based, or candidate-based.
    *
+   * @SINCE_3_0.0
    * @return The current text fit configuration.
    */
   Text::Fit GetTextFit() const;
@@ -969,6 +1076,7 @@ public: // Setters for chaining
    * If this value is greater than the maximum font size scale,
    * the adjusted font size scale follows this minimum value.
    *
+   * @SINCE_3_0.0
    * @param[in] scale The minimum font size scale.
    */
   void SetMinimumFontSizeScale(float scale);
@@ -976,6 +1084,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the minimum font size scale.
    *
+   * @SINCE_3_0.0
    * @return The minimum font size scale.
    */
   float GetMinimumFontSizeScale() const;
@@ -986,6 +1095,7 @@ public: // Setters for chaining
    * If this value is less than the minimum font size scale,
    * the adjusted font size scale follows the minimum font size scale.
    *
+   * @SINCE_3_0.0
    * @param[in] scale The maximum font size scale.
    */
   void SetMaximumFontSizeScale(float scale);
@@ -993,6 +1103,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the maximum font size scale.
    *
+   * @SINCE_3_0.0
    * @return The maximum font size scale.
    */
   float GetMaximumFontSizeScale() const;
@@ -1003,6 +1114,7 @@ public: // Setters for chaining
    * When enabled, the system font size scale is combined with the current
    * font size scale before applying the minimum and maximum constraints.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to apply the system font size scale, false otherwise.
    */
   void SetSystemFontSizeScaleEnabled(bool enabled);
@@ -1010,6 +1122,7 @@ public: // Setters for chaining
   /**
    * @brief Gets whether the system font size scale is applied.
    *
+   * @SINCE_3_0.0
    * @return True if the system font size scale is applied, otherwise false.
    */
   bool IsSystemFontSizeScaleEnabled() const;
@@ -1024,6 +1137,7 @@ public: // Setters for chaining
    *
    * Unsupported axis tags may be ignored depending on the selected font.
    *
+   * @SINCE_3_0.0
    * @param[in] axes The font variation axes.
    */
   void SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes);
@@ -1053,6 +1167,7 @@ public: // Setters for chaining
    *
    * Unsupported axis tags may be ignored depending on the selected font.
    *
+   * @SINCE_3_0.0
    * @param[in] settings The font variation settings string.
    */
   void SetFontVariation(const Dali::String& settings);
@@ -1060,6 +1175,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the font variation axes.
    *
+   * @SINCE_3_0.0
    * @return The font variation axes.
    */
   Dali::Vector<Text::FontVariation::Axis> GetFontVariation() const;
@@ -1070,6 +1186,7 @@ public: // Setters for chaining
    * When enabled, the glyph shapes are cut out from the rendered content
    * instead of being filled with the text color.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to render the text as a cutout, false to render it normally.
    */
   void SetTextCutoutEnabled(bool enabled);
@@ -1077,6 +1194,7 @@ public: // Setters for chaining
   /**
    * @brief Gets whether the text is rendered as a cutout.
    *
+   * @SINCE_3_0.0
    * @return True if the text is rendered as a cutout, otherwise false.
    */
   bool IsTextCutoutEnabled() const;
@@ -1090,6 +1208,7 @@ public: // Setters for chaining
    * The given view is added as a child of the label and retained internally
    * until ClearMaskEffect() is called.
    *
+   * @SINCE_3_0.0
    * @note Any existing RenderEffect on the label will be replaced.
    *
    * @param[in] view The view used as the mask source.
@@ -1105,6 +1224,7 @@ public: // Setters for chaining
    * Removes the internally retained mask view from the label and clears
    * the applied RenderEffect.
    *
+   * @SINCE_3_0.0
    * @see Dali::Ui::View::ClearRenderEffect()
    */
   void ClearMaskEffect();
@@ -1117,6 +1237,7 @@ public: // Setters for chaining
    *
    * By default, text is rendered synchronously.
    *
+   * @SINCE_3_0.0
    * @param[in] asyncRendering True to enable asynchronous text rendering,
    * false to render text synchronously.
    *
@@ -1127,12 +1248,14 @@ public: // Setters for chaining
   /**
    * @brief Gets whether asynchronous text rendering is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if asynchronous text rendering is enabled, otherwise false.
    */
   bool IsAsyncRendering() const;
 
   /**
    * @brief Sets the render scale of the text.
+   * @SINCE_3_0.0
    * @details Renders text by rasterizing glyphs at a larger scale and downscaling the result.
    * This improves rendering quality when the view is visually scaled, by reducing
    * quality loss caused by texture upscaling.
@@ -1146,6 +1269,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the render scale of the text.
    *
+   * @SINCE_3_0.0
    * @return The current render scale.
    */
   float GetRenderScale() const;
@@ -1161,6 +1285,7 @@ public: // Setters for chaining
    * - The default domain changes
    * - The localization override or bypass mode changes
    *
+   * @SINCE_3_0.0
    * @note SetText() does not clear the translatable text binding.
    *       Use ClearTranslatableText() to remove the binding.
    *
@@ -1174,6 +1299,7 @@ public: // Setters for chaining
    * Passing an empty domain makes the binding use the current default domain,
    * equivalent to SetTranslatableText(resourceId).
    *
+   * @SINCE_3_0.0
    * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE").
    * @param[in] domain The translation domain, or empty to use the default domain.
    */
@@ -1182,6 +1308,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the translatable text resource ID.
    *
+   * @SINCE_3_0.0
    * @return The resource ID currently set, or an empty string if not set.
    */
   Dali::String GetTranslatableText() const;
@@ -1192,11 +1319,13 @@ public: // Setters for chaining
    * Removes the localization binding from this Label.
    * The current display text is not changed.
    * Subsequent RefreshBindings() calls will no longer update this Label's text.
+   * @SINCE_3_0.0
    */
   void ClearTranslatableText();
   /**
    * @brief Gets the number of lines of text within the current layout width.
    *
+   * @SINCE_3_0.0
    * @note The line count is calculated based on the current width of the label,
    * clamped between its minimum and maximum width.
    * If the width is not yet resolved (e.g., when using wrap content or match parent constraints),
@@ -1208,6 +1337,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the number of lines of text within the given width.
    *
+   * @SINCE_3_0.0
    * @param[in] width The width used to calculate the line count.
    * @return The number of lines.
    */
@@ -1216,6 +1346,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the line count from the most recent asynchronous result.
    *
+   * @SINCE_3_0.0
    * @note This value is updated when an asynchronous render or asynchronous size
    * computation completes.
    *
@@ -1226,6 +1357,7 @@ public: // Setters for chaining
   /**
    * @brief Returns whether the marquee animation is currently running.
    *
+   * @SINCE_3_0.0
    * @return True if the marquee animation is running, false otherwise.
    */
   bool IsMarqueeRunning() const;
@@ -1240,6 +1372,7 @@ public: // Setters for chaining
    * If the minimum font size scale is greater than the maximum font size scale,
    * the minimum font size scale takes precedence and is used as the adjusted scale.
    *
+   * @SINCE_3_0.0
    * @return The adjusted font size scale used for rendering.
    */
   float GetAdjustedFontSizeScale() const;
@@ -1250,6 +1383,7 @@ public: // Setters for chaining
    * horizontal for single-line text, and vertical for multi-line text.
    * If the condition is not met, this call has no effect.
    *
+   * @SINCE_3_0.0
    * @note If the trigger policy is MarqueeTriggerPolicy::ON_OVERFLOW,
    *       the marquee starts only when the text exceeds the available space.
    */
@@ -1267,6 +1401,7 @@ public: // Setters for chaining
    *
    * This method works regardless of the current MarqueeTriggerPolicy.
    * It stops the marquee even if the policy is MANUAL or ON_OVERFLOW.
+   * @SINCE_3_0.0
    */
   void StopMarquee();
 
@@ -1280,6 +1415,7 @@ public: // Setters for chaining
    * The backing animatable property is registered on demand when this method
    * is first called or when PixelSnapFactor animation is first used.
    *
+   * @SINCE_3_0.0
    * @param[in] factor The pixel snap factor.
    */
   void SetPixelSnapFactor(float factor);
@@ -1287,6 +1423,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the pixel snap factor value set on this Label.
    *
+   * @SINCE_3_0.0
    * @return The pixel snap factor, or 0.0f if it has not been set.
    */
   float GetPixelSnapFactor() const;
@@ -1298,6 +1435,7 @@ public: // Setters for chaining
    *
    * The computed natural size includes the label padding.
    *
+   * @SINCE_3_0.0
    * @note The computed result is delivered through Label::AsyncNaturalSizeComputedSignal().
    */
   void RequestAsyncNaturalSize();
@@ -1309,6 +1447,7 @@ public: // Setters for chaining
    *
    * The given width must be the total label width including padding.
    *
+   * @SINCE_3_0.0
    * @param[in] width The total width used for the computation, including padding.
    *
    * @note The computed result is delivered through Label::AsyncHeightForWidthComputedSignal().
@@ -1323,6 +1462,7 @@ public: // Signals
    *   void OnAnchorClicked(View view, const Dali::String& href);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] view The view that received the click event.
    * @param[in] href The href of the clicked anchor.
    *
@@ -1337,6 +1477,7 @@ public: // Signals
    *   void OnAsyncRenderFinished(View view, float width, float height);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] view The view whose async text rendering has completed.
    * @param[in] width The rendered text width, including padding.
    * @param[in] height The rendered text height, including padding.
@@ -1352,6 +1493,7 @@ public: // Signals
    *   void OnAsyncNaturalSizeComputed(View view, float width, float height);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] view The view whose async natural size computation has completed.
    * @param[in] width The computed natural width, including padding.
    * @param[in] height The computed natural height, including padding.
@@ -1367,6 +1509,7 @@ public: // Signals
    *   void OnAsyncHeightForWidthComputed(View view, float width, float height);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] view The view whose async height-for-width computation has completed.
    * @param[in] width The total width used for the computation, including padding.
    * @param[in] height The computed height for the given width, including padding.
@@ -1392,10 +1535,10 @@ public: // Not intended for application developers
   explicit Label(Dali::Internal::CustomActor* internal);
   /// @endcond
 
-  // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)
-  // @ANIMATABLE_MANUAL(TextGradientOverlayStartOffset, float)
-  // @ANIMATABLE_MANUAL(TextRevealProgress, float)
-  // @ANIMATABLE_MANUAL(PixelSnapFactor, float)
+  // @ANIMATABLE_MANUAL(TextGradientStartOffset, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(TextGradientOverlayStartOffset, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(TextRevealProgress, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(PixelSnapFactor, float, 3_0.0)
 public: // Animation
   /**
    * @brief Creates a LabelAnimationBridge for this Label.
@@ -1408,6 +1551,7 @@ public: // Animation
    *   anim.Play();
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] animation The Animation to apply to
    * @return A LabelAnimationBridge
    */
@@ -1423,6 +1567,7 @@ public: // Animation
    *   spec.ApplyTo(anim, label);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @return A new LabelAnimationSpec
    */
   static LabelAnimationSpec NewAnimationSpec();

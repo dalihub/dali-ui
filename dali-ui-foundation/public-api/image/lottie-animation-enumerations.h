@@ -34,12 +34,13 @@ namespace LottieAnimation
 {
 /**
  * @brief Enumeration for what looping mode is in.
+ * @SINCE_3_0.0
  */
 enum class LoopingMode : uint8_t
 {
-  RESTART,     ///< When the animation arrives at the end in looping mode, the animation restarts from the beginning.
+  RESTART,     ///< When the animation arrives at the end in looping mode, the animation restarts from the beginning. @SINCE_3_0.0
   AUTO_REVERSE ///< When the animation arrives at the end in looping mode, the animation reverses direction and runs
-               ///< backwards again.
+               ///< backwards again. @SINCE_3_0.0
 };
 
 /**
@@ -48,19 +49,20 @@ enum class LoopingMode : uint8_t
  * These name properties of the shapes and layers in the animation file. They are not DALi
  * properties: they carry no property index and cannot be set with SetProperty(). The only way
  * to give one a value is the callback passed to SetDynamicProperty().
+ * @SINCE_3_0.0
  */
 enum class ContentProperty : uint8_t
 {
-  FILL_COLOR = 0,     ///< Fill color of a shape
-  FILL_OPACITY,       ///< Fill opacity of a shape
-  STROKE_COLOR,       ///< Stroke color of a shape
-  STROKE_OPACITY,     ///< Stroke opacity of a shape
-  STROKE_WIDTH,       ///< Stroke width of a shape
-  TRANSFORM_ANCHOR,   ///< Anchor point of a layer
-  TRANSFORM_POSITION, ///< Position of a layer
-  TRANSFORM_SCALE,    ///< Scale of a layer
-  TRANSFORM_ROTATION, ///< Rotation of a layer
-  TRANSFORM_OPACITY   ///< Opacity of a layer
+  FILL_COLOR = 0,     ///< Fill color of a shape @SINCE_3_0.0
+  FILL_OPACITY,       ///< Fill opacity of a shape @SINCE_3_0.0
+  STROKE_COLOR,       ///< Stroke color of a shape @SINCE_3_0.0
+  STROKE_OPACITY,     ///< Stroke opacity of a shape @SINCE_3_0.0
+  STROKE_WIDTH,       ///< Stroke width of a shape @SINCE_3_0.0
+  TRANSFORM_ANCHOR,   ///< Anchor point of a layer @SINCE_3_0.0
+  TRANSFORM_POSITION, ///< Position of a layer @SINCE_3_0.0
+  TRANSFORM_SCALE,    ///< Scale of a layer @SINCE_3_0.0
+  TRANSFORM_ROTATION, ///< Rotation of a layer @SINCE_3_0.0
+  TRANSFORM_OPACITY   ///< Opacity of a layer @SINCE_3_0.0
 };
 
 } // namespace LottieAnimation

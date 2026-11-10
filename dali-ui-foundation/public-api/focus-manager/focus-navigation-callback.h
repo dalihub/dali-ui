@@ -44,6 +44,7 @@ class View;
  * Write a decision with result.MoveTo(), result.Stay() or result.NotHandled().
  * Do not retain its address or reference after returning.
  *
+ * @SINCE_3_0.0
  * @note Signature: void(View currentFocusedView, FocusNavigationContext context, FocusNavigationResult& result)
  */
 using FocusNavigationCallback = Callback<void(View, FocusNavigationContext, FocusNavigationResult&)>;

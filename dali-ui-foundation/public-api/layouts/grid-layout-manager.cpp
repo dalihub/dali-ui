@@ -31,6 +31,7 @@
 // view-data-impl.h includes.
 #include <dali-ui-foundation/integration-api/label-impl.h>
 
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
@@ -107,6 +108,13 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
                                     float rowSpacing, float colSpacing, float scale,
                                     const Internal::ViewDataImpl& viewData)
 {
+  // Every caller passes at least one track per axis; the guard states it, so the
+  // `rowCount - 1` / `colCount - 1` clamps below cannot wrap.
+  if(rowCount == 0u || colCount == 0u)
+  {
+    return; // LCOV_EXCL_LINE
+  }
+
   // A grid that is not mode-aware (a subclass, a view with a layout callback) measures every
   // child with the custom-parent modes of its view, which is also what the child's own
   // derivation gives (ViewDataImpl::DeriveChildModesAsCustomParent).
@@ -130,7 +138,7 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
     rowSpan          = std::min(rowSpan, rowCount - row);
     colSpan          = std::min(colSpan, colCount - col);
 
-    float                        childScale            = childImpl.GetEffectiveScale();
+    float                        childScale            = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     Insets                       margin                = childImpl.GetMargin();
     float                        marginW               = (margin.start + margin.end) * childScale;
     float                        marginH               = (margin.top + margin.bottom) * childScale;
@@ -204,7 +212,7 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
       continue; // Non-spanning children are already handled by the first pass.
     }
 
-    float                        childScale            = childImpl.GetEffectiveScale();
+    float                        childScale            = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     Insets                       margin                = childImpl.GetMargin();
     float                        marginW               = (margin.start + margin.end) * childScale;
     float                        marginH               = (margin.top + margin.bottom) * childScale;
@@ -584,6 +592,15 @@ void MeasureGridChildrenPhased(std::vector<View>& children, float availableWidth
                                float rowSpacing, float colSpacing, float scale, bool widthDetermined, bool heightDetermined,
                                bool arrangePhase, ViewImpl& view, float& totalWidthOut, float& totalHeightOut)
 {
+  // Every caller passes at least one track per axis; the guard states it, so the
+  // `rowCount - 1` / `colCount - 1` clamps below cannot wrap.
+  if(rowCount == 0u || colCount == 0u)
+  {
+    totalWidthOut  = 0.0f; // LCOV_EXCL_LINE
+    totalHeightOut = 0.0f; // LCOV_EXCL_LINE
+    return;                // LCOV_EXCL_LINE
+  }
+
   // 1. ABSOLUTE tracks up front.
   for(uint32_t i = 0; i < colCount; ++i)
   {
@@ -618,7 +635,7 @@ void MeasureGridChildrenPhased(std::vector<View>& children, float availableWidth
     entry.rowSpan = std::min(GetChildRowSpan(childImpl), rowCount - entry.row);
     entry.colSpan = std::min(GetChildColumnSpan(childImpl), colCount - entry.col);
 
-    float  childScale = childImpl.GetEffectiveScale();
+    float  childScale = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     Insets margin     = childImpl.GetMargin();
     entry.marginW     = (margin.start + margin.end) * childScale;
     entry.marginH     = (margin.top + margin.bottom) * childScale;
@@ -880,6 +897,15 @@ void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vecto
                           const LayoutRect& bounds, float rowSpacing, float colSpacing, uint32_t rowCount,
                           uint32_t colCount, std::vector<float>& rowPositionsOut, std::vector<float>& colPositionsOut)
 {
+  // Every caller passes at least one track per axis; the guard states it, so the
+  // `rowCount - 1` / `colCount - 1` comparisons below cannot wrap.
+  if(rowCount == 0u || colCount == 0u)
+  {
+    rowPositionsOut.clear(); // LCOV_EXCL_LINE
+    colPositionsOut.clear(); // LCOV_EXCL_LINE
+    return;                  // LCOV_EXCL_LINE
+  }
+
   rowPositionsOut.resize(rowCount + 1);
   colPositionsOut.resize(colCount + 1);
   rowPositionsOut[0] = bounds.y;
@@ -904,6 +930,13 @@ void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, co
                                 const Dali::Vector<GridLength>& rowDefs, const Dali::Vector<GridLength>& colDefs,
                                 const Internal::ViewDataImpl& viewData)
 {
+  // Every caller passes at least one track per axis; the guard states it, so the
+  // `rowCount - 1` / `colCount - 1` clamps below cannot wrap.
+  if(rowCount == 0u || colCount == 0u)
+  {
+    return; // LCOV_EXCL_LINE
+  }
+
   for(auto& childView : children)
   {
     ViewImpl& childImpl = GetImpl(childView);
@@ -935,7 +968,7 @@ void ArrangeGridChildrenToCells(ViewImpl* owner, std::vector<View>& children, co
       childBounds.height -= rowSpacing;
     }
 
-    float  childScale = childImpl.GetEffectiveScale();
+    float  childScale = Ui::Extension::View::GetEffectiveLayoutScale(childImpl);
     Insets margin     = childImpl.GetMargin();
     childBounds.x += margin.start * childScale;
     childBounds.y += margin.top * childScale;
@@ -1137,7 +1170,7 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
 
   auto* impl = GetImplAs<Impl>();
 
-  float s               = view->GetEffectiveScale();
+  float s               = Ui::Extension::View::GetEffectiveLayoutScale(*view);
   float visRowSpacing   = impl->mRowSpacing * s;
   float visColSpacing   = impl->mColumnSpacing * s;
   float availableWidth  = widthConstraint;
@@ -1231,7 +1264,7 @@ void GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
   auto* impl = GetImplAs<Impl>();
 
-  float s               = view->GetEffectiveScale();
+  float s               = Ui::Extension::View::GetEffectiveLayoutScale(*view);
   float visRowSpacing   = impl->mRowSpacing * s;
   float visColSpacing   = impl->mColumnSpacing * s;
   float availableWidth  = bounds.width;

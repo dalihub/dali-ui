@@ -18,8 +18,8 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-components/public-api/dialog/dialog-properties.h>
 #include <dali-ui-components/public-api/dialog/dialog-post-options.h>
+#include <dali-ui-components/public-api/dialog/dialog-properties.h>
 #include <dali-ui-components/public-api/styles/dialog-style.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -51,43 +51,53 @@ class DialogImpl;
  * manage its removal through Navigator. Do not mix manual parent management
  * with Post/Dismiss during a presentation, including its closing animation.
  * Switch paths only after the previous presentation and parent links are cleared.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API Dialog : public View
 {
 public:
   /**
    * @brief Creates an uninitialized Dialog handle.
+   * @SINCE_3_0.0
    */
   Dialog();
 
   /**
    * @brief Creates an initialized Dialog.
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource
    */
   static Dialog New();
 
-  /** @brief Creates a Dialog with the specified immutable style. Empty styles are not allowed. */
+  /**
+   * @brief Creates a Dialog with the specified immutable style. Empty styles are not allowed.
+   * @SINCE_3_0.0
+   */
   static Dialog New(DialogStyle style);
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    * @param[in] dialog Handle to copy
    */
   Dialog(const Dialog& dialog);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   Dialog(Dialog&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Dialog();
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -95,6 +105,7 @@ public:
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -104,6 +115,7 @@ public:
 
   /**
    * @brief Downcasts a handle to a Dialog handle.
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a Dialog or an uninitialized handle
    */
@@ -111,11 +123,12 @@ public:
 
 public: // Presentation
   using DismissRequestedSignalType = Signal<bool(Dialog, DialogDismissReason)>;
-  using ShownSignalType = Signal<void(Dialog)>;
-  using HiddenSignalType = Signal<void(Dialog, DialogDismissReason)>;
+  using ShownSignalType            = Signal<void(Dialog)>;
+  using HiddenSignalType           = Signal<void(Dialog, DialogDismissReason)>;
 
   /**
    * @brief Presents this Dialog using a container owned by the given Navigator.
+   * @SINCE_3_0.0
    * @param[in] navigator The Navigator that owns the modal presentation
    * @return True if accepted or already posted to the same Navigator. Returns
    * false for a different active host, a closing session, or rejected registration.
@@ -137,6 +150,7 @@ public: // Presentation
   bool Post(Navigator navigator, const DialogPostOptions& options);
   /**
    * @brief Dismisses only this managed presentation. Repeated calls do nothing.
+   * @SINCE_3_0.0
    * @param[in] animated Whether to use the Navigator's modal exit transition
    * @pre A Dialog without a managed presentation must have no parent.
    * Calling Dismiss on manually parented content always asserts.
@@ -147,21 +161,28 @@ public: // Presentation
    */
   void Dismiss(bool animated = true);
   /// @brief Whether a managed session exists, including covered and closing sessions.
+  /// @SINCE_3_0.0
   bool IsPosted() const;
   /// @brief Sets the allowed user requests. Defaults to BACK_AND_SCRIM.
+  /// @SINCE_3_0.0
   void SetDismissPolicy(DialogDismissPolicy policy);
   /// @brief Gets the allowed user requests.
+  /// @SINCE_3_0.0
   DialogDismissPolicy GetDismissPolicy() const;
   /// @brief Emitted after policy checks. Returning true vetoes a user request.
+  /// @SINCE_3_0.0
   DismissRequestedSignalType& DismissRequestedSignal();
   /// @brief Emitted once after first appearance in a presentation session.
+  /// @SINCE_3_0.0
   ShownSignalType& ShownSignal();
   /// @brief Emitted once after cleanup. The callback may post the Dialog again.
+  /// @SINCE_3_0.0
   HiddenSignalType& HiddenSignal();
 
 public: // Sections
   /**
    * @brief Sets the header section view (shown at the top).
+   * @SINCE_3_0.0
    * @note The supplied view retains its padding and appearance; Dialog manages section layout.
    * @param[in] headerView The view to use as the header, or an empty handle to clear it
    */
@@ -169,12 +190,14 @@ public: // Sections
 
   /**
    * @brief Gets the header section view.
+   * @SINCE_3_0.0
    * @return The header view, or an empty handle if none is set
    */
   View GetHeaderView() const;
 
   /**
    * @brief Sets the body section view (shown in the middle).
+   * @SINCE_3_0.0
    * @note The supplied view retains its padding and appearance; Dialog manages section layout.
    * @param[in] bodyView The view to use as the body, or an empty handle to clear it
    */
@@ -182,12 +205,14 @@ public: // Sections
 
   /**
    * @brief Gets the body section view.
+   * @SINCE_3_0.0
    * @return The body view, or an empty handle if none is set
    */
   View GetBodyView() const;
 
   /**
    * @brief Sets the footer section view (shown at the bottom).
+   * @SINCE_3_0.0
    * @note The supplied view retains its padding and appearance; Dialog manages section layout.
    * @param[in] footerView The view to use as the footer, or an empty handle to clear it
    */
@@ -195,6 +220,7 @@ public: // Sections
 
   /**
    * @brief Gets the footer section view.
+   * @SINCE_3_0.0
    * @return The footer view, or an empty handle if none is set
    */
   View GetFooterView() const;
@@ -202,24 +228,28 @@ public: // Sections
 public: // Layout
   /**
    * @brief Sets the spacing between the header, body and footer sections.
+   * @SINCE_3_0.0
    * @param[in] spacing The spacing in pixels
    */
   void SetSpacing(float spacing);
 
   /**
    * @brief Gets the spacing between sections.
+   * @SINCE_3_0.0
    * @return The spacing in pixels
    */
   float GetSpacing() const;
 
   /**
    * @brief Sets the cross-axis alignment applied to the sections.
+   * @SINCE_3_0.0
    * @param[in] alignment FILL (default), START, CENTER or END
    */
   void SetLayoutAlignment(LayoutAlignment alignment);
 
   /**
    * @brief Gets the cross-axis alignment applied to the sections.
+   * @SINCE_3_0.0
    * @return The current layout alignment
    */
   LayoutAlignment GetLayoutAlignment() const;

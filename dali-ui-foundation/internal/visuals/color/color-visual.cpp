@@ -186,7 +186,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // By virtue of DoSetProperties being called last, this will override
   // anything set by Ui::Integration::Visual::Property::MIX_COLOR
-  Property::Value* colorValue = propertyMap.Find(Ui::Integration::Visual::Property::MIX_COLOR, MIX_COLOR);
+  const Property::Value* colorValue = propertyMap.Find(Ui::Integration::Visual::Property::MIX_COLOR, MIX_COLOR);
   if(colorValue)
   {
     Vector4 color;
@@ -209,7 +209,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* blurRadiusValue = propertyMap.Find(Ui::Integration::ColorVisual::Property::BLUR_RADIUS, BLUR_RADIUS_NAME);
+  const Property::Value* blurRadiusValue = propertyMap.Find(Ui::Integration::ColorVisual::Property::BLUR_RADIUS, BLUR_RADIUS_NAME);
   if(blurRadiusValue)
   {
     if(!blurRadiusValue->Get(mBlurRadius))
@@ -246,7 +246,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* cutoutPolicyValue =
+  const Property::Value* cutoutPolicyValue =
     propertyMap.Find(Ui::Integration::ColorVisual::Property::CUTOUT_POLICY, CUTOUT_POLICY_NAME);
   if(cutoutPolicyValue)
   {

@@ -37,12 +37,12 @@ namespace Internal
 {
 namespace // anon
 {
-Property::Value* FindReplacement(const std::string& str, const Property::Map& overrideMap,
-                                 const Property::Map& defaultMap)
+const Property::Value* FindReplacement(const std::string& str, const Property::Map& overrideMap,
+                                       const Property::Map& defaultMap)
 {
   Dali::StringView strStringView = ToDaliStringView(str);
 
-  Property::Value* ret = overrideMap.Find(strStringView);
+  const Property::Value* ret = overrideMap.Find(strStringView);
 
   if(!ret)
   {
@@ -129,7 +129,7 @@ bool ResolvePartialReplacement(const std::string& initialValue, Property::Value&
 
       const std::string str(initialValue.substr(startPos, size));
 
-      Property::Value* value = FindReplacement(str, overrideMap, defaultMap);
+      const Property::Value* value = FindReplacement(str, overrideMap, defaultMap);
 
       if(!value)
       {
@@ -216,7 +216,7 @@ Property::Value Replacement::GetFullReplacement(const std::string& replacementSt
   DALI_ASSERT_DEBUG(mOverrideMap && "missing map");
   DALI_ASSERT_DEBUG(mDefaultMap && "missing map");
 
-  Property::Value* value = FindReplacement(replacementString, *mOverrideMap, *mDefaultMap);
+  const Property::Value* value = FindReplacement(replacementString, *mOverrideMap, *mDefaultMap);
 
   if(!value)
   {

@@ -55,44 +55,52 @@ class PageScrollViewImpl;
  * auto indicator = PageIndicator::New();
  * indicator.Bind(pager);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API PageScrollView : public ScrollView, public PageScrollableInterface
 {
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized PageScrollView handle.
+   * @SINCE_3_0.0
    */
   PageScrollView();
 
   /**
    * @brief Creates an initialized PageScrollView.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated PageScrollView.
    */
   static PageScrollView New();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   PageScrollView(const PageScrollView& rhs);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   PageScrollView(PageScrollView&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~PageScrollView();
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   PageScrollView& operator=(const PageScrollView& rhs);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   PageScrollView& operator=(PageScrollView&& rhs) noexcept;
 
@@ -102,6 +110,7 @@ public: // Static Methods
   /**
    * @brief Downcasts a handle to PageScrollView.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object.
    * @return A valid PageScrollView handle if the object is a PageScrollView,
    *         otherwise an uninitialized handle.
@@ -118,6 +127,7 @@ public: // Page API
    *
    * Set to (0, 0) (the default) to use the viewport size as the page size.
    *
+   * @SINCE_3_0.0
    * @param[in] size Page size in pixels.
    */
   void SetPageSize(const Vector2& size);
@@ -126,6 +136,7 @@ public: // Page API
    * @brief Gets the explicitly set page size.
    *
    * Returns (0, 0) if no explicit page size has been set (viewport-size mode).
+   * @SINCE_3_0.0
    */
   Vector2 GetPageSize() const;
 
@@ -135,6 +146,7 @@ public: // Page API
    * @brief Returns the zero-based index of the currently visible page.
    *
    * Returns -1 when GetPageCount() == 0.
+   * @SINCE_3_0.0
    */
   int GetCurrentPage() const override;
 
@@ -143,12 +155,14 @@ public: // Page API
    *
    * Returns 0 when the view has no content pages (empty state after
    * NotifyPagesRemoved removes all pages).
+   * @SINCE_3_0.0
    */
   int GetPageCount() const override;
 
   /**
    * @brief Animates or snaps to the given page.
    *
+   * @SINCE_3_0.0
    * @param[in] page    Target page index, clamped to [0, GetPageCount()-1].
    * @param[in] animate True to animate, false for instant jump.
    */
@@ -158,11 +172,13 @@ public: // Page API
    * @brief Signal emitted when the active page changes.
    *
    * Signature: void(int currentPage, int pageCount)
+   * @SINCE_3_0.0
    */
   PageScrollableInterface::PageChangedSignalType& PageChangedSignal() override;
 
   /**
    * @brief Signal emitted from the destructor before the underlying object is freed.
+   * @SINCE_3_0.0
    */
   PageScrollableInterface::DestroyingSignalType& DestroyingSignal() override;
 
@@ -178,6 +194,7 @@ public: // Page API
    * GetPageCount() returns the new expected count immediately (before the
    * next layout pass) so that PageIndicator updates its dot row at once.
    *
+   * @SINCE_3_0.0
    * @param[in] atIndex       First index at which pages were inserted (0-based).
    * @param[in] insertedCount Number of pages inserted (default 1).
    */
@@ -192,6 +209,7 @@ public: // Page API
    *  - Snap to @p atIndex (or the last valid page) if the current page was removed.
    *  - Emit PageChangedSignal with the updated state.
    *
+   * @SINCE_3_0.0
    * @param[in] atIndex      Index of the first removed page (0-based).
    * @param[in] removedCount Number of pages removed (default 1).
    */

@@ -48,12 +48,13 @@ namespace Integration
 class InputFieldImpl;
 }
 
-// @ANIMATION_CONFIG(InputField, View)
+// @ANIMATION_CONFIG(InputField, View, 3_0.0)
 /**
  * @brief InputField is a single-line editable text view.
  *
  * It supports user interaction for text input and editing,
  * and handles text layout and rendering.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API InputField : public View
 {
@@ -61,6 +62,7 @@ public:
   /**
    * @brief Property indices for InputField.
    *
+   * @SINCE_3_0.0
    * @note See Dali::Ui::Text::InputFieldPropertyIndex for the underlying property definitions.
    */
   struct Property
@@ -123,12 +125,14 @@ public: // Creation & Destruction
    *
    * Only derived versions can be instantiated. Calling member
    * functions with an uninitialized Dali::Object is not allowed.
+   * @SINCE_3_0.0
    */
   InputField();
 
   /**
    * @brief Creates an initialized InputField.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource
    */
   static InputField New();
@@ -137,6 +141,7 @@ public: // Creation & Destruction
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    * @param[in] inputField Handle to copy
    */
   InputField(const InputField& inputField);
@@ -144,6 +149,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   InputField(InputField&& rhs) noexcept;
@@ -152,6 +158,7 @@ public: // Creation & Destruction
    * @brief Virtual destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~InputField();
 
@@ -160,6 +167,7 @@ public: // Operators
    * @brief Copy assignment operator.
    *
    * Changes this handle to point to another real object.
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -168,6 +176,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -182,6 +191,7 @@ public: // Static Methods
    * If handle points to an InputField, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to an InputField or an uninitialized handle
    */
@@ -191,6 +201,7 @@ public: // Text Size Measurement
   /**
    * @brief Returns the natural size required to lay out the text.
    *
+   * @SINCE_3_0.0
    * @return The natural size, including padding.
    */
   Vector3 GetNaturalSize() const;
@@ -199,6 +210,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the text.
    *
+   * @SINCE_3_0.0
    * @param[in] text The text to display in UTF-8 format.
    */
   void SetText(const Dali::String& text);
@@ -206,6 +218,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the text.
    *
+   * @SINCE_3_0.0
    * @return The text currently set on the inputField in UTF-8 format.
    */
   Dali::String GetText() const;
@@ -222,6 +235,7 @@ public: // Setters for chaining
    * Text edits update the ranges of surviving span attachments. SetText()
    * clears the styled text state.
    *
+   * @SINCE_3_0.0
    * @param[in] styledText The styled text snapshot to apply.
    */
   void SetStyledText(const Text::StyledText& styledText);
@@ -229,6 +243,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font family of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] fontFamily The requested font family to use.
    */
   void SetFontFamily(const Dali::String& fontFamily);
@@ -236,6 +251,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font family of the text.
    *
+   * @SINCE_3_0.0
    * @return The font family currently set on the inputField.
    */
   Dali::String GetFontFamily() const;
@@ -243,6 +259,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font size of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] fontSize The font size in pixels.
    */
   void SetFontSize(float fontSize);
@@ -250,6 +267,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font size of the text.
    *
+   * @SINCE_3_0.0
    * @return The font size currently set on the inputField, in pixels.
    */
   float GetFontSize() const;
@@ -257,6 +275,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the color of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The required text color value.
    */
   void SetTextColor(const UiColor& color);
@@ -264,6 +283,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the color of the text.
    *
+   * @SINCE_3_0.0
    * @return The text color currently set on the inputField.
    */
   UiColor GetTextColor();
@@ -271,10 +291,10 @@ public: // Setters for chaining
   /**
    * @brief Sets the gradient used to fill the default monochrome text glyphs.
    *
-   * A renderable gradient replaces TextColor RGB for monochrome glyphs that
-   * otherwise use the default text color. TextColor alpha remains an opacity
-   * multiplier. Explicit foreground colors, color glyphs, embedded items, and
-   * text decorations are not replaced. Password masking glyphs are treated as
+   * A renderable gradient replaces TextColor RGBA, including alpha, for
+   * monochrome glyphs that otherwise use the default text color. Explicit
+   * foreground colors, color glyphs, embedded items, and text decorations are
+   * not replaced. Password masking glyphs are treated as
    * default monochrome glyphs and receive the gradient.
    *
    * Changing TextColor while a gradient is active does not clear the gradient.
@@ -287,6 +307,7 @@ public: // Setters for chaining
    * selected bounds, from (-0.5, -0.5) to (0.5, 0.5), while
    * Gradient::Units::USER_SPACE uses pixel coordinates in the same bounds.
    *
+   * @SINCE_3_0.0
    * @param[in] gradient The authored gradient value.
    */
   void SetTextGradient(const Gradient::Base& gradient);
@@ -294,6 +315,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the text gradient.
    *
+   * @SINCE_3_0.0
    * @return The authored text gradient, or Type::NONE if no gradient is set.
    */
   Gradient::Base GetTextGradient() const;
@@ -312,6 +334,7 @@ public: // Setters for chaining
    *
    * The selected mode is shared by the normal and placeholder gradients.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The text gradient bounds mode.
    */
   void SetTextGradientBoundsMode(Text::GradientBoundsMode mode);
@@ -319,6 +342,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the shared bounds mode used for text and placeholder gradients.
    *
+   * @SINCE_3_0.0
    * @return The current text gradient bounds mode.
    */
   Text::GradientBoundsMode GetTextGradientBoundsMode() const;
@@ -326,6 +350,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the horizontal alignment of the text within the inputField.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment The horizontal text alignment.
    */
   void SetHorizontalTextAlignment(Text::Alignment alignment);
@@ -333,6 +358,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the horizontal text alignment.
    *
+   * @SINCE_3_0.0
    * @return The horizontal text alignment.
    */
   Text::Alignment GetHorizontalTextAlignment() const;
@@ -340,6 +366,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the vertical alignment of the text within the inputField.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment The vertical text alignment.
    */
   void SetVerticalTextAlignment(Text::Alignment alignment);
@@ -347,6 +374,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the vertical text alignment.
    *
+   * @SINCE_3_0.0
    * @return The vertical text alignment.
    */
   Text::Alignment GetVerticalTextAlignment() const;
@@ -354,6 +382,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the overflow mode.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The overflow mode to apply.
    */
   void SetTextOverflowMode(Text::OverflowMode mode);
@@ -361,6 +390,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the overflow mode.
    *
+   * @SINCE_3_0.0
    * @return The current overflow mode.
    */
   Text::OverflowMode GetTextOverflowMode() const;
@@ -368,6 +398,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the placeholder text displayed when the input field is empty.
    *
+   * @SINCE_3_0.0
    * @param[in] text The placeholder text in UTF-8 encoding.
    */
   void SetPlaceholder(const Dali::String& text);
@@ -375,6 +406,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the placeholder text.
    *
+   * @SINCE_3_0.0
    * @return The placeholder text in UTF-8 encoding.
    */
   Dali::String GetPlaceholder() const;
@@ -382,6 +414,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the color of the placeholder text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The placeholder text color as a UiColor.
    */
   void SetPlaceholderColor(const UiColor& color);
@@ -389,6 +422,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the color of the placeholder text.
    *
+   * @SINCE_3_0.0
    * @return The placeholder text color as a UiColor.
    */
   UiColor GetPlaceholderColor();
@@ -405,6 +439,7 @@ public: // Setters for chaining
    * This authored value is independent of the normal text gradient.
    * Linear, Radial, and Conic gradients have the same support as TextGradient.
    *
+   * @SINCE_3_0.0
    * @param[in] gradient The authored placeholder gradient value.
    */
   void SetPlaceholderTextGradient(const Gradient::Base& gradient);
@@ -412,6 +447,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the placeholder text gradient.
    *
+   * @SINCE_3_0.0
    * @return The authored placeholder gradient, or Type::NONE if none is set.
    */
   Gradient::Base GetPlaceholderTextGradient() const;
@@ -419,6 +455,7 @@ public: // Setters for chaining
   /**
    * @brief Sets whether the placeholder text is shown when the input field has focus.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to show the placeholder text when focused, false otherwise.
    */
   void SetShowPlaceholderOnFocus(bool enabled);
@@ -426,6 +463,7 @@ public: // Setters for chaining
   /**
    * @brief Returns whether the placeholder text is shown when the input field has focus.
    *
+   * @SINCE_3_0.0
    * @return True if the placeholder text is shown when focused, false otherwise.
    */
   bool IsPlaceholderShownOnFocus() const;
@@ -433,6 +471,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the width of the text cursor.
    *
+   * @SINCE_3_0.0
    * @param[in] width The cursor width in pixels.
    */
   void SetCursorWidth(int width);
@@ -440,6 +479,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the width of the text cursor.
    *
+   * @SINCE_3_0.0
    * @return The cursor width in pixels.
    */
   int GetCursorWidth() const;
@@ -450,6 +490,7 @@ public: // Setters for chaining
    * This color is applied to both primary and secondary cursors
    * when a split cursor is shown in bidirectional text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The cursor color as a UiColor.
    */
   void SetCursorColor(const UiColor& color);
@@ -457,6 +498,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the color of the text cursor.
    *
+   * @SINCE_3_0.0
    * @return The cursor color as a UiColor.
    */
   UiColor GetCursorColor();
@@ -464,6 +506,7 @@ public: // Setters for chaining
   /**
    * @brief Sets whether the cursor should blink.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable cursor blinking, false otherwise.
    */
   void SetCursorBlinkEnabled(bool enabled);
@@ -471,6 +514,7 @@ public: // Setters for chaining
   /**
    * @brief Returns whether the cursor is set to blink.
    *
+   * @SINCE_3_0.0
    * @return True if cursor blinking is enabled, false otherwise.
    */
   bool IsCursorBlinkEnabled() const;
@@ -478,6 +522,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the time interval in seconds between cursor on and off states.
    *
+   * @SINCE_3_0.0
    * @param[in] interval The cursor blink interval in seconds.
    */
   void SetCursorBlinkInterval(float interval);
@@ -485,6 +530,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the time interval in seconds between cursor on and off states.
    *
+   * @SINCE_3_0.0
    * @return The cursor blink interval in seconds.
    */
   float GetCursorBlinkInterval() const;
@@ -494,6 +540,7 @@ public: // Setters for chaining
    *
    * The position is specified as a character index in the current text.
    *
+   * @SINCE_3_0.0
    * @param[in] position The cursor position.
    */
   void SetCursorPosition(uint32_t position);
@@ -503,6 +550,7 @@ public: // Setters for chaining
    *
    * The returned value is the character index in the current text.
    *
+   * @SINCE_3_0.0
    * @return The current cursor position.
    */
   uint32_t GetCursorPosition() const;
@@ -510,6 +558,7 @@ public: // Setters for chaining
   /**
    * @brief Sets whether text selection is enabled.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable text selection, false otherwise.
    */
   void SetSelectionEnabled(bool enabled);
@@ -517,6 +566,7 @@ public: // Setters for chaining
   /**
    * @brief Returns whether text selection is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if text selection is enabled, false otherwise.
    */
   bool IsSelectionEnabled() const;
@@ -524,6 +574,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the highlight color of the selected text region.
    *
+   * @SINCE_3_0.0
    * @param[in] color The selection highlight color as a UiColor.
    */
   void SetSelectionColor(const UiColor& color);
@@ -531,6 +582,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the highlight color of the selected text region.
    *
+   * @SINCE_3_0.0
    * @return The selection highlight color as a UiColor.
    */
   UiColor GetSelectionColor();
@@ -541,6 +593,7 @@ public: // Setters for chaining
    * Text editing handles include the cursor handle (shown below the insertion cursor)
    * and the left/right selection handles (shown at both ends of the selected text range).
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable text editing handles, false otherwise.
    */
   void SetTextHandleEnabled(bool enabled);
@@ -548,6 +601,7 @@ public: // Setters for chaining
   /**
    * @brief Returns whether text editing handles are enabled.
    *
+   * @SINCE_3_0.0
    * @return True if text editing handles are enabled, false otherwise.
    */
   bool IsTextHandleEnabled() const;
@@ -557,6 +611,7 @@ public: // Setters for chaining
    *
    * This color is applied to both the cursor handle and the left/right selection handles.
    *
+   * @SINCE_3_0.0
    * @param[in] color The text editing handle color as a UiColor.
    */
   void SetTextHandleColor(const UiColor& color);
@@ -564,6 +619,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the color of the text editing handles.
    *
+   * @SINCE_3_0.0
    * @return The text editing handle color as a UiColor.
    */
   UiColor GetTextHandleColor() const;
@@ -573,6 +629,7 @@ public: // Setters for chaining
    *
    * The cursor handle is shown below the insertion cursor when there is no selection range.
    *
+   * @SINCE_3_0.0
    * @param[in] image The cursor handle image URL.
    */
   void SetCursorHandleImage(const Dali::String& image);
@@ -580,6 +637,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the cursor handle image.
    *
+   * @SINCE_3_0.0
    * @return The cursor handle image URL.
    */
   Dali::String GetCursorHandleImage() const;
@@ -589,6 +647,7 @@ public: // Setters for chaining
    *
    * The cursor handle is shown below the insertion cursor when there is no selection range.
    *
+   * @SINCE_3_0.0
    * @param[in] image The pressed cursor handle image URL.
    */
   void SetCursorHandlePressedImage(const Dali::String& image);
@@ -596,6 +655,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the pressed cursor handle image.
    *
+   * @SINCE_3_0.0
    * @return The pressed cursor handle image URL.
    */
   Dali::String GetCursorHandlePressedImage() const;
@@ -605,6 +665,7 @@ public: // Setters for chaining
    *
    * The selection handle is shown at the left bound of the selected text range.
    *
+   * @SINCE_3_0.0
    * @param[in] image The left selection handle image URL.
    */
   void SetSelectionHandleImageLeft(const Dali::String& image);
@@ -612,6 +673,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the left selection handle image.
    *
+   * @SINCE_3_0.0
    * @return The left selection handle image URL.
    */
   Dali::String GetSelectionHandleImageLeft() const;
@@ -621,6 +683,7 @@ public: // Setters for chaining
    *
    * The selection handle is shown at the right bound of the selected text range.
    *
+   * @SINCE_3_0.0
    * @param[in] image The right selection handle image URL.
    */
   void SetSelectionHandleImageRight(const Dali::String& image);
@@ -628,6 +691,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the right selection handle image.
    *
+   * @SINCE_3_0.0
    * @return The right selection handle image URL.
    */
   Dali::String GetSelectionHandleImageRight() const;
@@ -637,6 +701,7 @@ public: // Setters for chaining
    *
    * The selection handle is shown at the left bound of the selected text range.
    *
+   * @SINCE_3_0.0
    * @param[in] image The pressed left selection handle image URL.
    */
   void SetSelectionHandlePressedImageLeft(const Dali::String& image);
@@ -644,6 +709,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the pressed left selection handle image.
    *
+   * @SINCE_3_0.0
    * @return The pressed left selection handle image URL.
    */
   Dali::String GetSelectionHandlePressedImageLeft() const;
@@ -653,6 +719,7 @@ public: // Setters for chaining
    *
    * The selection handle is shown at the right bound of the selected text range.
    *
+   * @SINCE_3_0.0
    * @param[in] image The pressed right selection handle image URL.
    */
   void SetSelectionHandlePressedImageRight(const Dali::String& image);
@@ -660,6 +727,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the pressed right selection handle image.
    *
+   * @SINCE_3_0.0
    * @return The pressed right selection handle image URL.
    */
   Dali::String GetSelectionHandlePressedImageRight() const;
@@ -667,6 +735,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the maximum number of characters that can be entered into the InputField.
    *
+   * @SINCE_3_0.0
    * @param[in] length The maximum number of characters allowed.
    */
   void SetMaximumLength(int length);
@@ -674,6 +743,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the maximum number of characters allowed in the InputField.
    *
+   * @SINCE_3_0.0
    * @return The maximum character count.
    */
   int GetMaximumLength() const;
@@ -690,6 +760,7 @@ public: // Setters for chaining
    * If both patterns are set, input must match the allow pattern and must not
    * match the deny pattern.
    *
+   * @SINCE_3_0.0
    * @note This filter is applied to inserted input, such as user input, input
    * method commits, and paste operations. It is not applied when text is set
    * directly with SetText().
@@ -702,6 +773,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the input filter.
    *
+   * @SINCE_3_0.0
    * @return The current input filter, or Text::InputFilter::None() if not set.
    */
   Text::InputFilter GetInputFilter() const;
@@ -714,6 +786,7 @@ public: // Setters for chaining
    * - PasswordMode::REVEAL_LAST_CHARACTER: The last entered character is briefly displayed
    *   for the password reveal duration, then replaced with the password mask character.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The password display mode.
    * @return This input field.
    */
@@ -722,6 +795,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the current password display mode.
    *
+   * @SINCE_3_0.0
    * @return The current password display mode.
    */
   Text::PasswordMode GetPasswordMode() const;
@@ -736,6 +810,7 @@ public: // Setters for chaining
    * - '*' is U+002A (0x2A)
    * - '•' is U+2022 (0x2022)
    *
+   * @SINCE_3_0.0
    * @note Although the parameter type is uint32_t, only valid Unicode code points
    *       should be used. When setting this property via the property system,
    *       Property::INTEGER is used, so only code points within the int range
@@ -749,6 +824,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the password mask character as a Unicode code point.
    *
+   * @SINCE_3_0.0
    * @return The Unicode code point of the password mask character.
    */
   uint32_t GetPasswordMaskCharacter() const;
@@ -761,6 +837,7 @@ public: // Setters for chaining
    *
    * A duration of 0 means the character is immediately masked.
    *
+   * @SINCE_3_0.0
    * @param[in] duration The password reveal duration in milliseconds.
    * @return This input field.
    */
@@ -769,6 +846,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the password reveal duration in milliseconds.
    *
+   * @SINCE_3_0.0
    * @return The password reveal duration in milliseconds.
    */
   uint32_t GetPasswordRevealDuration() const;
@@ -776,6 +854,7 @@ public: // Setters for chaining
   /**
    * @brief Sets whether the InputField can be edited by user interaction.
    *
+   * @SINCE_3_0.0
    * @param[in] editable True to allow editing, false otherwise.
    */
   void SetEditable(bool editable);
@@ -783,6 +862,7 @@ public: // Setters for chaining
   /**
    * @brief Returns whether the InputField can be edited by user interaction.
    *
+   * @SINCE_3_0.0
    * @return True if the InputField is editable, false otherwise.
    */
   bool IsEditable() const;
@@ -799,6 +879,7 @@ public: // Setters for chaining
    * - LayoutDirectionMode::LOCALE:
    *   The layout direction is determined based on the system locale.
    *
+   * @SINCE_3_0.0
    * @note The default layout direction mode of InputField is LayoutDirectionMode::INHERIT.
    *
    * @param[in] mode The LayoutDirectionMode used to determine the text layout direction.
@@ -808,6 +889,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the current layout direction mode.
    *
+   * @SINCE_3_0.0
    * @return The LayoutDirectionMode used to resolve the text layout direction.
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
@@ -815,6 +897,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font weight.
    *
+   * @SINCE_3_0.0
    * @param[in] weight The font weight.
    */
   void SetFontWeight(Text::FontWeight weight);
@@ -822,6 +905,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the font weight.
    *
+   * @SINCE_3_0.0
    * @return The font weight.
    */
   Text::FontWeight GetFontWeight() const;
@@ -829,6 +913,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font width.
    *
+   * @SINCE_3_0.0
    * @param[in] width The font width.
    */
   void SetFontWidth(Text::FontWidth width);
@@ -836,6 +921,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the font width.
    *
+   * @SINCE_3_0.0
    * @return The font width.
    */
   Text::FontWidth GetFontWidth() const;
@@ -843,6 +929,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the font slant.
    *
+   * @SINCE_3_0.0
    * @param[in] slant The font slant.
    */
   void SetFontSlant(Text::FontSlant slant);
@@ -850,6 +937,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the font slant.
    *
+   * @SINCE_3_0.0
    * @return The font slant.
    */
   Text::FontSlant GetFontSlant() const;
@@ -859,6 +947,7 @@ public: // Setters for chaining
    *
    * The background is rendered behind the glyphs of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The text background color.
    *
    * @return This input field.
@@ -868,6 +957,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the background color behind the text.
    *
+   * @SINCE_3_0.0
    * @return The current text background color.
    */
   UiColor GetTextBackgroundColor() const;
@@ -876,6 +966,7 @@ public: // Setters for chaining
    * @brief Clears the text background color.
    *
    * Disables the text background and removes the previously set color.
+   * @SINCE_3_0.0
    */
   void ClearTextBackgroundColor();
 
@@ -884,6 +975,7 @@ public: // Setters for chaining
    *
    * Pass Text::Underline::None() to clear the underline style.
    *
+   * @SINCE_3_0.0
    * @param[in] underline The underline configuration.
    */
   void SetTextUnderline(const Text::Underline& underline);
@@ -891,6 +983,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the underline style.
    *
+   * @SINCE_3_0.0
    * @return The current underline style, or Text::Underline::None() if not set.
    */
   Text::Underline GetTextUnderline() const;
@@ -900,6 +993,7 @@ public: // Setters for chaining
    *
    * Pass Text::Shadow::None() to clear the shadow style.
    *
+   * @SINCE_3_0.0
    * @param[in] shadow The shadow configuration.
    */
   void SetTextShadow(const Text::Shadow& shadow);
@@ -907,6 +1001,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the shadow style.
    *
+   * @SINCE_3_0.0
    * @return The current shadow style, or Text::Shadow::None() if not set.
    */
   Text::Shadow GetTextShadow() const;
@@ -916,6 +1011,7 @@ public: // Setters for chaining
    *
    * Pass Text::Outline::None() to clear the outline style.
    *
+   * @SINCE_3_0.0
    * @param[in] outline The outline configuration.
    */
   void SetTextOutline(const Text::Outline& outline);
@@ -923,6 +1019,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the outline style.
    *
+   * @SINCE_3_0.0
    * @return The current outline style, or Text::Outline::None() if not set.
    */
   Text::Outline GetTextOutline() const;
@@ -932,6 +1029,7 @@ public: // Setters for chaining
    *
    * Pass Text::LineThrough::None() to clear the line-through style.
    *
+   * @SINCE_3_0.0
    * @param[in] lineThrough The line-through configuration.
    */
   void SetTextLineThrough(const Text::LineThrough& lineThrough);
@@ -939,6 +1037,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the line-through style.
    *
+   * @SINCE_3_0.0
    * @return The current line-through style, or Text::LineThrough::None() if not set.
    */
   Text::LineThrough GetTextLineThrough() const;
@@ -949,6 +1048,7 @@ public: // Setters for chaining
    * If this value is greater than the maximum font size scale,
    * the adjusted font size scale follows this minimum value.
    *
+   * @SINCE_3_0.0
    * @param[in] scale The minimum font size scale.
    */
   void SetMinimumFontSizeScale(float scale);
@@ -956,6 +1056,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the minimum font size scale.
    *
+   * @SINCE_3_0.0
    * @return The minimum font size scale.
    */
   float GetMinimumFontSizeScale() const;
@@ -966,6 +1067,7 @@ public: // Setters for chaining
    * If this value is less than the minimum font size scale,
    * the adjusted font size scale follows the minimum font size scale.
    *
+   * @SINCE_3_0.0
    * @param[in] scale The maximum font size scale.
    */
   void SetMaximumFontSizeScale(float scale);
@@ -973,6 +1075,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the maximum font size scale.
    *
+   * @SINCE_3_0.0
    * @return The maximum font size scale.
    */
   float GetMaximumFontSizeScale() const;
@@ -984,6 +1087,7 @@ public: // Setters for chaining
    * the user-defined font size scale before applying the minimum
    * and maximum constraints.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to apply the system font size scale, false otherwise.
    */
   void SetSystemFontSizeScaleEnabled(bool enabled);
@@ -991,6 +1095,7 @@ public: // Setters for chaining
   /**
    * @brief Gets whether the system font size scale is applied.
    *
+   * @SINCE_3_0.0
    * @return True if the system font size scale is applied, otherwise false.
    */
   bool IsSystemFontSizeScaleEnabled() const;
@@ -1002,6 +1107,7 @@ public: // Setters for chaining
    * If the selection is collapsed, the color is applied to text inserted after
    * the current cursor position.
    *
+   * @SINCE_3_0.0
    * @param[in] color The typing text color.
    * @return This input field.
    */
@@ -1010,6 +1116,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the text color used for typing.
    *
+   * @SINCE_3_0.0
    * @return The typing text color.
    */
   UiColor GetTypingTextColor() const;
@@ -1021,6 +1128,7 @@ public: // Setters for chaining
    * If the selection is collapsed, the font family is applied to text inserted after
    * the current cursor position.
    *
+   * @SINCE_3_0.0
    * @param[in] fontFamily The typing font family.
    * @return This input field.
    */
@@ -1029,6 +1137,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font family used for typing.
    *
+   * @SINCE_3_0.0
    * @return The typing font family.
    */
   Dali::String GetTypingFontFamily() const;
@@ -1040,6 +1149,7 @@ public: // Setters for chaining
    * If the selection is collapsed, the font size is applied to text inserted after
    * the current cursor position.
    *
+   * @SINCE_3_0.0
    * @param[in] fontSize The typing font size in pixels.
    * @return This input field.
    */
@@ -1048,6 +1158,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font size in pixels used for typing.
    *
+   * @SINCE_3_0.0
    * @return The typing font size in pixels.
    */
   float GetTypingFontSize() const;
@@ -1059,6 +1170,7 @@ public: // Setters for chaining
    * If the selection is collapsed, the font weight is applied to text inserted after
    * the current cursor position.
    *
+   * @SINCE_3_0.0
    * @param[in] weight The typing font weight.
    * @return This input field.
    */
@@ -1067,6 +1179,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font weight used for typing.
    *
+   * @SINCE_3_0.0
    * @return The typing font weight.
    */
   Text::FontWeight GetTypingFontWeight() const;
@@ -1078,6 +1191,7 @@ public: // Setters for chaining
    * If the selection is collapsed, the font width is applied to text inserted after
    * the current cursor position.
    *
+   * @SINCE_3_0.0
    * @param[in] width The typing font width.
    * @return This input field.
    */
@@ -1086,6 +1200,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font width used for typing.
    *
+   * @SINCE_3_0.0
    * @return The typing font width.
    */
   Text::FontWidth GetTypingFontWidth() const;
@@ -1097,6 +1212,7 @@ public: // Setters for chaining
    * If the selection is collapsed, the font slant is applied to text inserted after
    * the current cursor position.
    *
+   * @SINCE_3_0.0
    * @param[in] slant The typing font slant.
    * @return This input field.
    */
@@ -1105,6 +1221,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the font slant used for typing.
    *
+   * @SINCE_3_0.0
    * @return The typing font slant.
    */
   Text::FontSlant GetTypingFontSlant() const;
@@ -1119,6 +1236,7 @@ public: // Setters for chaining
    *
    * Unsupported axis tags may be ignored depending on the selected font.
    *
+   * @SINCE_3_0.0
    * @param[in] axes The font variation axes.
    */
   void SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes);
@@ -1148,6 +1266,7 @@ public: // Setters for chaining
    *
    * Unsupported axis tags may be ignored depending on the selected font.
    *
+   * @SINCE_3_0.0
    * @param[in] settings The font variation settings string.
    */
   void SetFontVariation(const Dali::String& settings);
@@ -1155,6 +1274,7 @@ public: // Setters for chaining
   /**
    * @brief Returns the font variation axes.
    *
+   * @SINCE_3_0.0
    * @return The font variation axes.
    */
   Dali::Vector<Text::FontVariation::Axis> GetFontVariation() const;
@@ -1170,6 +1290,7 @@ public: // Setters for chaining
    * - The default domain changes
    * - The localization override or bypass mode changes
    *
+   * @SINCE_3_0.0
    * @note SetPlaceholder() does not clear the translatable placeholder binding.
    *       Use ClearTranslatablePlaceholder() to remove the binding.
    *
@@ -1183,6 +1304,7 @@ public: // Setters for chaining
    * Passing an empty domain makes the binding use the current default domain,
    * equivalent to SetTranslatablePlaceholder(resourceId).
    *
+   * @SINCE_3_0.0
    * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_PLACEHOLDER").
    * @param[in] domain The translation domain, or empty to use the default domain.
    */
@@ -1191,6 +1313,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the translatable placeholder resource ID.
    *
+   * @SINCE_3_0.0
    * @return The resource ID currently set, or an empty string if not set.
    */
   Dali::String GetTranslatablePlaceholder() const;
@@ -1201,6 +1324,7 @@ public: // Setters for chaining
    * Removes the localization binding from this InputField.
    * The current display placeholder is not changed.
    * Subsequent RefreshBindings() calls will no longer update this InputField's placeholder.
+   * @SINCE_3_0.0
    */
   void ClearTranslatablePlaceholder();
   /**
@@ -1213,6 +1337,7 @@ public: // Setters for chaining
    * If the minimum font size scale is greater than the maximum font size scale,
    * the minimum font size scale takes precedence and is used as the adjusted scale.
    *
+   * @SINCE_3_0.0
    * @return The adjusted font size scale used for rendering.
    */
   float GetAdjustedFontSizeScale() const;
@@ -1220,6 +1345,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the currently selected text.
    *
+   * @SINCE_3_0.0
    * @return The selected text in UTF-8 format.
    */
   Dali::String GetSelectedText() const;
@@ -1227,6 +1353,7 @@ public: // Setters for chaining
   /**
    * @brief Gets the start index of the currently selected text.
    *
+   * @SINCE_3_0.0
    * @return The start index of the selected text.
    */
   uint32_t GetSelectedTextStart() const;
@@ -1234,12 +1361,14 @@ public: // Setters for chaining
   /**
    * @brief Gets the end index of the currently selected text.
    *
+   * @SINCE_3_0.0
    * @return The end index of the selected text.
    */
   uint32_t GetSelectedTextEnd() const;
   /**
    * @brief Selects the text within the specified index range.
    *
+   * @SINCE_3_0.0
    * @param[in] startIndex The start index of the selection.
    * @param[in] endIndex The end index of the selection.
    * @return This input field.
@@ -1249,6 +1378,7 @@ public: // Setters for chaining
   /**
    * @brief Selects the whole text.
    *
+   * @SINCE_3_0.0
    * @return This input field.
    */
   void SelectWholeText();
@@ -1256,6 +1386,7 @@ public: // Setters for chaining
   /**
    * @brief Clears the current selection.
    *
+   * @SINCE_3_0.0
    * @return This input field.
    */
   void ClearSelection();
@@ -1266,6 +1397,7 @@ public: // Setters for chaining
    * The returned context can be used to control input panel behavior and
    * configure application-level input method options.
    *
+   * @SINCE_3_0.0
    * @return The input method context.
    */
   InputMethodContext GetInputMethodContext();
@@ -1277,6 +1409,7 @@ public: // Signals
    * @code
    *   void OnTextChanged(View view);
    * @endcode
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   Signal<void(View)>& TextChangedSignal();
@@ -1291,6 +1424,7 @@ public: // Signals
    *   void OnMaximumLengthReached(View view);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   Signal<void(View)>& MaximumLengthReachedSignal();
@@ -1308,6 +1442,7 @@ public: // Signals
    * The reason indicates whether the input did not match the allow pattern,
    * or matched the deny pattern.
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   Signal<void(View, Text::InputFilter::RejectReason)>& InputRejectedSignal();
@@ -1319,6 +1454,7 @@ public: // Signals
    *   void OnCursorPositionChanged(View view, uint32_t position);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] view The view whose cursor position changed.
    * @param[in] position The current cursor position.
    *
@@ -1333,6 +1469,7 @@ public: // Signals
    *   void OnSelectionStarted(View view);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   Signal<void(View)>& SelectionStartedSignal();
@@ -1344,6 +1481,7 @@ public: // Signals
    *   void OnSelectionChanged(View view, uint32_t start, uint32_t end);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] view The view whose selection changed.
    * @param[in] start The current selection start index.
    * @param[in] end The current selection end index.
@@ -1359,6 +1497,7 @@ public: // Signals
    *   void OnSelectionCleared(View view);
    * @endcode
    *
+   * @SINCE_3_0.0
    * @return The signal to connect to.
    */
   Signal<void(View)>& SelectionClearedSignal();
@@ -1372,6 +1511,7 @@ public: // Signals
    *
    * The mask indicates which typing style attributes changed.
    *
+   * @SINCE_3_0.0
    * @note This signal is intended to notify changes detected from the current
    * cursor position or selection, not to mirror every SetTyping*() API call.
    *
@@ -1400,12 +1540,13 @@ public: // Not intended for application developers
   explicit InputField(Dali::Internal::CustomActor* internal);
   /// @endcond
 
-  // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)
-  // @ANIMATABLE_MANUAL(PlaceholderTextGradientStartOffset, float)
+  // @ANIMATABLE_MANUAL(TextGradientStartOffset, float, 3_0.0)
+  // @ANIMATABLE_MANUAL(PlaceholderTextGradientStartOffset, float, 3_0.0)
 public: // Animation
   /**
    * @brief Creates an InputFieldAnimationBridge for this InputField.
    *
+   * @SINCE_3_0.0
    * @param[in] animation The Animation to apply to
    * @return An InputFieldAnimationBridge
    */
@@ -1414,6 +1555,7 @@ public: // Animation
   /**
    * @brief Creates a new InputFieldAnimationSpec.
    *
+   * @SINCE_3_0.0
    * @return A new InputFieldAnimationSpec
    */
   static InputFieldAnimationSpec NewAnimationSpec();

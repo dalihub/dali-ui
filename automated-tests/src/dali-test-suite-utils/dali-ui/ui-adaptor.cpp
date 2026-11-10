@@ -118,6 +118,15 @@ Adaptor::Adaptor()
 
 Adaptor::~Adaptor()
 {
+  const auto observers = mObservers;
+  for(auto* observer : observers)
+  {
+    if(std::find(mObservers.begin(), mObservers.end(), observer) != mObservers.end())
+    {
+      observer->OnDestroy();
+    }
+  }
+  mObservers.clear();
   gAdaptor = nullptr;
 
   for(auto& callback : mReturnCallbacks)
@@ -142,6 +151,14 @@ void Adaptor::Start(Dali::Window window)
 
 void Adaptor::Stop()
 {
+  const auto observers = mObservers;
+  for(auto* observer : observers)
+  {
+    if(std::find(mObservers.begin(), mObservers.end(), observer) != mObservers.end())
+    {
+      observer->OnStop();
+    }
+  }
   if(mTestApplication)
   {
     Dali::Integration::Core& core = mTestApplication->GetCore();
@@ -153,6 +170,16 @@ void Adaptor::Stop()
   FileDownloadPluginProxy::Shutdown();
 
   mStopped = true;
+}
+
+void Adaptor::AddObserver(LifeCycleObserver& observer)
+{
+  mObservers.push_back(&observer);
+}
+
+void Adaptor::RemoveObserver(LifeCycleObserver& observer)
+{
+  mObservers.erase(std::remove(mObservers.begin(), mObservers.end(), &observer), mObservers.end());
 }
 
 Dali::Integration::Scene Adaptor::GetScene(Dali::Window window)

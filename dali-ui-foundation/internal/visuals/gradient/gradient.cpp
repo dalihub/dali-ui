@@ -258,9 +258,12 @@ Texture Gradient::GenerateLookupTextureFromNormalizedStops()
     Vector4 preMulipliedStartColor = preMulipliedColors[i];
     Vector4 preMulipliedEndColor   = preMulipliedColors[i + 1];
 
+    // A single texel cannot represent both stops. Keep the start color except
+    // at the texture boundary, where the final stop must remain addressable.
+    const float singleTexelRatio = segmentEnd == static_cast<int>(resolution) ? 1.f : 0.f;
     for(int j = segmentStart; j < segmentEnd; j++)
     {
-      float   ratio        = static_cast<float>(j - segmentStart) / (segmentWidth - 1);
+      float   ratio        = segmentWidth > 1.f ? static_cast<float>(j - segmentStart) / (segmentWidth - 1.f) : singleTexelRatio;
       Vector4 currentColor = preMulipliedStartColor * (1.f - ratio) + preMulipliedEndColor * ratio;
       pixels[k * bpp]      = static_cast<unsigned char>(255.f * Clamp(currentColor.r, 0.f, 1.f));
       pixels[k * bpp + 1]  = static_cast<unsigned char>(255.f * Clamp(currentColor.g, 0.f, 1.f));

@@ -41,12 +41,13 @@ class LayoutTransitionDispatcher;
  * @brief Identifies which layout transition slot is being applied to a view.
  *
  * Each slot has its own spec/animator/timing and is dispatched independently.
+ * @SINCE_3_0.0
  */
 enum class LayoutTransitionSlot : uint8_t
 {
-  ENTER  = 0, ///< View has been added as a child of a transition-attached parent
-  EXIT   = 1, ///< View is being removed via View::Remove(child, RemovePolicy::ANIMATE_EXIT) / View::RemoveAll(RemovePolicy::ANIMATE_EXIT)
-  CHANGE = 2  ///< Existing child's bounds (size or position) have changed
+  ENTER  = 0, ///< View has been added as a child of a transition-attached parent @SINCE_3_0.0
+  EXIT   = 1, ///< View is being removed via View::Remove(child, RemovePolicy::ANIMATE_EXIT) / View::RemoveAll(RemovePolicy::ANIMATE_EXIT) @SINCE_3_0.0
+  CHANGE = 2  ///< Existing child's bounds (size or position) have changed @SINCE_3_0.0
 };
 
 /**
@@ -57,6 +58,7 @@ enum class LayoutTransitionSlot : uint8_t
  * exposes @c GetChangeCause(), which is meaningful only when
  * @c GetSlot() returns @c CHANGE.
  *
+ * @SINCE_3_0.0
  * @note @c SIBLING_ADDED and @c SIBLING_REMOVED do NOT mean "this child was
  * added/removed". They mean "this existing child moved BECAUSE a sibling was
  * added/removed under the same parent".
@@ -68,11 +70,11 @@ enum class LayoutTransitionSlot : uint8_t
  */
 enum class LayoutChangeCause : uint8_t
 {
-  SIBLING_ADDED   = 0, ///< Sibling was added under the same parent → this child moved
-  SIBLING_REMOVED = 1, ///< Sibling was removed → this child moved
-  REORDERED       = 2, ///< Sibling order changed
-  WINDOW_RESIZED  = 3, ///< Top-level window was resized
-  OTHER           = 4  ///< Any other layout-driven bounds change
+  SIBLING_ADDED   = 0, ///< Sibling was added under the same parent → this child moved @SINCE_3_0.0
+  SIBLING_REMOVED = 1, ///< Sibling was removed → this child moved @SINCE_3_0.0
+  REORDERED       = 2, ///< Sibling order changed @SINCE_3_0.0
+  WINDOW_RESIZED  = 3, ///< Top-level window was resized @SINCE_3_0.0
+  OTHER           = 4  ///< Any other layout-driven bounds change @SINCE_3_0.0
 };
 
 /**
@@ -90,6 +92,7 @@ enum class LayoutChangeCause : uint8_t
  * transition becomes the closest ancestor for its own children, so a
  * @c SUBTREE scope does not cross it (no double animation).
  *
+ * @SINCE_3_0.0
  * @note Applies to CHANGE, and to ENTER / EXIT when the owner carries the
  * corresponding slot effect: a child added under a no-transition descendant
  * fires the owner's ENTER, and a child removed via
@@ -106,8 +109,8 @@ enum class LayoutChangeCause : uint8_t
  */
 enum class LayoutReflowScope : uint8_t
 {
-  DIRECT_CHILDREN = 0, ///< (default) Animate only the attached view's direct children
-  SUBTREE         = 1  ///< Also reach deeper descendants; recursion stops at (and includes) a descendant with its own transition, which then governs its subtree
+  DIRECT_CHILDREN = 0, ///< (default) Animate only the attached view's direct children @SINCE_3_0.0
+  SUBTREE         = 1  ///< Also reach deeper descendants; recursion stops at (and includes) a descendant with its own transition, which then governs its subtree @SINCE_3_0.0
 };
 
 /**
@@ -127,6 +130,7 @@ enum class LayoutReflowScope : uint8_t
  *  - @c AlphaFunction::SIN
  * Target-ending curves such as @c EASE_OUT_BACK are accepted.
  *
+ * @SINCE_3_0.0
  * @note Distinct from @c LayoutAnimatorTiming. Both expose duration, alpha,
  * and delay, but the semantics differ:
  *  - @c LayoutTransitionTiming: dali-core Animation entry timing (declarative).
@@ -144,11 +148,15 @@ enum class LayoutReflowScope : uint8_t
  */
 struct DALI_UI_API LayoutTransitionTiming
 {
-  /** @brief Creates timing with a 300ms duration, EASE_IN_OUT alpha, and no delay. */
+  /**
+   * @brief Creates timing with a 300ms duration, EASE_IN_OUT alpha, and no delay.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionTiming();
 
   /**
    * @brief Creates timing from a duration, alpha function, and optional delay.
+   * @SINCE_3_0.0
    * @param[in] duration The duration of the transition
    * @param[in] alpha The alpha function
    * @param[in] delay The delay before the transition
@@ -158,41 +166,72 @@ struct DALI_UI_API LayoutTransitionTiming
                          AlphaFunction alpha = AlphaFunction(AlphaFunction::EASE_IN_OUT),
                          Duration      delay = Duration());
 
-  /** @brief Copies the timing into independent storage. */
+  /**
+   * @brief Copies the timing into independent storage.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionTiming(const LayoutTransitionTiming& other);
 
-  /** @brief Moves the timing. The source may only be destroyed or reassigned. */
+  /**
+   * @brief Moves the timing. The source may only be destroyed or reassigned.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionTiming(LayoutTransitionTiming&& other) noexcept;
 
-  /** @brief Copies the timing into independent storage. */
+  /**
+   * @brief Copies the timing into independent storage.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionTiming& operator=(const LayoutTransitionTiming& other);
 
-  /** @brief Moves the timing. The source may only be destroyed or reassigned. */
+  /**
+   * @brief Moves the timing. The source may only be destroyed or reassigned.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionTiming& operator=(LayoutTransitionTiming&& other) noexcept;
 
-  /** @brief Destroys the timing. */
+  /**
+   * @brief Destroys the timing.
+   * @SINCE_3_0.0
+   */
   ~LayoutTransitionTiming();
 
-  /** @brief Sets the duration and returns this timing. Non-positive values are permitted. */
+  /**
+   * @brief Sets the duration and returns this timing. Non-positive values are permitted.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionTiming& SetDuration(Duration duration);
 
-  /** @brief Returns the duration. */
+  /**
+   * @brief Returns the duration.
+   * @SINCE_3_0.0
+   */
   Duration GetDuration() const;
 
-  /** @brief Sets the alpha function and returns this timing. */
+  /**
+   * @brief Sets the alpha function and returns this timing.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionTiming& SetAlpha(AlphaFunction alpha);
 
   /**
    * @brief Returns the alpha function.
+   * @SINCE_3_0.0
    * @return A reference valid until this timing is assigned, moved from, or destroyed
    * @note SetAlpha() updates the value observed through this reference.
    */
   const AlphaFunction& GetAlpha() const;
 
-  /** @brief Sets the delay and returns this timing. */
+  /**
+   * @brief Sets the delay and returns this timing.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionTiming& SetDelay(Duration delay);
 
-  /** @brief Returns the delay. */
+  /**
+   * @brief Returns the delay.
+   * @SINCE_3_0.0
+   */
   Duration GetDelay() const;
 
 private:
@@ -207,12 +246,13 @@ private:
  * units. The unit determines what the @c value field of a
  * @c LayoutBoundsLength is multiplied by when the dispatcher resolves the
  * effect into pixel coordinates each frame.
+ * @SINCE_3_0.0
  */
 enum class LayoutBoundsUnit : uint8_t
 {
-  PIXEL           = 0, ///< DALi coordinate units (1 unit = 1 pixel after scaling)
-  SELF_FRACTION   = 1, ///< Fraction of the child's own arranged width/height
-  PARENT_FRACTION = 2  ///< Fraction of the parent's arranged width/height
+  PIXEL           = 0, ///< DALi coordinate units (1 unit = 1 pixel after scaling) @SINCE_3_0.0
+  SELF_FRACTION   = 1, ///< Fraction of the child's own arranged width/height @SINCE_3_0.0
+  PARENT_FRACTION = 2  ///< Fraction of the parent's arranged width/height @SINCE_3_0.0
 };
 
 /**
@@ -221,6 +261,7 @@ enum class LayoutBoundsUnit : uint8_t
  * Negative values are permitted — they encode a direction (e.g. a slide
  * starts from the negative side of an edge).
  *
+ * @SINCE_3_0.0
  * @note The public value and unit fields form a fixed ABI representation.
  * Their types, order and count, and the underlying type of LayoutBoundsUnit,
  * must remain unchanged. Compound lengths require a separate type or API.
@@ -258,6 +299,7 @@ struct DALI_UI_API LayoutBoundsLength
  * own unit; mixing PIXEL on one axis and SELF_FRACTION on the other is
  * supported.
  *
+ * @SINCE_3_0.0
  * @note The two public axes and their scalar lengths are a fixed ABI
  * representation. Copies contain independent axis values.
  */
@@ -287,6 +329,7 @@ struct DALI_UI_API LayoutBoundsOffset
  *    its children to the view's own arranged bounding rectangle. To
  *    clip a sliding child to its parent's region instead, set the
  *    parent's clipping mode explicitly.
+ * @SINCE_3_0.0
  */
 enum class LayoutBoundsClipMode : uint8_t
 {
@@ -322,85 +365,151 @@ enum class LayoutBoundsClipMode : uint8_t
  * anchor values outside @c [0,1] are rejected at registration with
  * @c DALI_ABORT. Negative offsets and size factors greater than 1 are
  * permitted.
+ * @SINCE_3_0.0
  */
 struct DALI_UI_API LayoutBoundsEffect
 {
-  /** @brief Creates an effect with no offset or size-factor channel enabled. */
+  /**
+   * @brief Creates an effect with no offset or size-factor channel enabled.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect();
 
-  /** @brief Copies the effect and its timing into independent storage. */
+  /**
+   * @brief Copies the effect and its timing into independent storage.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect(const LayoutBoundsEffect& other);
 
-  /** @brief Moves the effect. The source may only be destroyed or reassigned. */
+  /**
+   * @brief Moves the effect. The source may only be destroyed or reassigned.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect(LayoutBoundsEffect&& other) noexcept;
 
-  /** @brief Copies the effect and its timing into independent storage. */
+  /**
+   * @brief Copies the effect and its timing into independent storage.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& operator=(const LayoutBoundsEffect& other);
 
-  /** @brief Moves the effect. The source may only be destroyed or reassigned. */
+  /**
+   * @brief Moves the effect. The source may only be destroyed or reassigned.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& operator=(LayoutBoundsEffect&& other) noexcept;
 
-  /** @brief Destroys the effect. */
+  /**
+   * @brief Destroys the effect.
+   * @SINCE_3_0.0
+   */
   ~LayoutBoundsEffect();
 
-  /** @brief Copies the timing and returns this effect. */
+  /**
+   * @brief Copies the timing and returns this effect.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& SetTiming(const LayoutTransitionTiming& timing);
 
   /**
    * @brief Returns the effect's timing.
+   * @SINCE_3_0.0
    * @return A reference valid until this effect is assigned, moved from, or destroyed
    * @note SetTiming() updates the value observed through this reference.
    */
   const LayoutTransitionTiming& GetTiming() const;
 
-  /** @brief Enables the offset channel, sets its value, and returns this effect. */
+  /**
+   * @brief Enables the offset channel, sets its value, and returns this effect.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& SetOffset(LayoutBoundsOffset value);
 
-  /** @brief Enables the offset channel, sets both axes, and returns this effect. */
+  /**
+   * @brief Enables the offset channel, sets both axes, and returns this effect.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& SetOffset(LayoutBoundsLength x, LayoutBoundsLength y);
 
-  /** @brief Disables the offset channel, resets it to zero pixels, and returns this effect. */
+  /**
+   * @brief Disables the offset channel, resets it to zero pixels, and returns this effect.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& ClearOffset();
 
-  /** @brief Returns whether the offset channel is enabled. */
+  /**
+   * @brief Returns whether the offset channel is enabled.
+   * @SINCE_3_0.0
+   */
   bool HasOffset() const;
 
   /**
    * @brief Returns the offset without copying its axis values.
+   * @SINCE_3_0.0
    * @return A reference valid until this effect is assigned, moved from, or destroyed
    * @note SetOffset() and ClearOffset() update the value observed through this
    * reference. To edit an offset, copy it, modify the copy, then call SetOffset().
    */
   const LayoutBoundsOffset& GetOffset() const;
 
-  /** @brief Enables the size-factor channel, sets both axes, and returns this effect. */
+  /**
+   * @brief Enables the size-factor channel, sets both axes, and returns this effect.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& SetSizeFactor(float x, float y);
 
-  /** @brief Disables the size-factor channel, resets both axes to 1, and returns this effect. */
+  /**
+   * @brief Disables the size-factor channel, resets both axes to 1, and returns this effect.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& ClearSizeFactor();
 
-  /** @brief Returns whether the size-factor channel is enabled. */
+  /**
+   * @brief Returns whether the size-factor channel is enabled.
+   * @SINCE_3_0.0
+   */
   bool HasSizeFactor() const;
 
-  /** @brief Returns the horizontal size factor. */
+  /**
+   * @brief Returns the horizontal size factor.
+   * @SINCE_3_0.0
+   */
   float GetSizeFactorX() const;
 
-  /** @brief Returns the vertical size factor. */
+  /**
+   * @brief Returns the vertical size factor.
+   * @SINCE_3_0.0
+   */
   float GetSizeFactorY() const;
 
-  /** @brief Sets the anchor on both axes and returns this effect. */
+  /**
+   * @brief Sets the anchor on both axes and returns this effect.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& SetAnchor(float x, float y);
 
-  /** @brief Returns the horizontal anchor, which defaults to 0.5. */
+  /**
+   * @brief Returns the horizontal anchor, which defaults to 0.5.
+   * @SINCE_3_0.0
+   */
   float GetAnchorX() const;
 
-  /** @brief Returns the vertical anchor, which defaults to 0.5. */
+  /**
+   * @brief Returns the vertical anchor, which defaults to 0.5.
+   * @SINCE_3_0.0
+   */
   float GetAnchorY() const;
 
-  /** @brief Sets the clipping mode and returns this effect. */
+  /**
+   * @brief Sets the clipping mode and returns this effect.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsEffect& SetClipMode(LayoutBoundsClipMode mode);
 
-  /** @brief Returns the clipping mode, which defaults to AUTO. */
+  /**
+   * @brief Returns the clipping mode, which defaults to AUTO.
+   * @SINCE_3_0.0
+   */
   LayoutBoundsClipMode GetClipMode() const;
 
 private:
@@ -415,6 +524,7 @@ private:
  * @c rawProgress from 0.0 to 1.0 across @c duration with @c alpha shaping
  * the curve, after waiting @c delay seconds.
  *
+ * @SINCE_3_0.0
  * @note Animator-mode shapes raw progress with @c alpha server-side
  * (the dispatcher evaluates the curve before invoking the callback).
  * The set of @c alpha modes honoured server-side is **smaller** than
@@ -451,11 +561,15 @@ private:
  */
 struct DALI_UI_API LayoutAnimatorTiming
 {
-  /** @brief Creates timing with a 300ms duration, EASE_IN_OUT alpha, and no delay. */
+  /**
+   * @brief Creates timing with a 300ms duration, EASE_IN_OUT alpha, and no delay.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorTiming();
 
   /**
    * @brief Creates timing from a duration, alpha function, and optional delay.
+   * @SINCE_3_0.0
    * @param[in] duration The duration of the transition
    * @param[in] alpha The alpha function
    * @param[in] delay The delay before the transition
@@ -465,41 +579,72 @@ struct DALI_UI_API LayoutAnimatorTiming
                        AlphaFunction alpha = AlphaFunction(AlphaFunction::EASE_IN_OUT),
                        Duration      delay = Duration());
 
-  /** @brief Copies the timing into independent storage. */
+  /**
+   * @brief Copies the timing into independent storage.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorTiming(const LayoutAnimatorTiming& other);
 
-  /** @brief Moves the timing. The source may only be destroyed or reassigned. */
+  /**
+   * @brief Moves the timing. The source may only be destroyed or reassigned.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorTiming(LayoutAnimatorTiming&& other) noexcept;
 
-  /** @brief Copies the timing into independent storage. */
+  /**
+   * @brief Copies the timing into independent storage.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorTiming& operator=(const LayoutAnimatorTiming& other);
 
-  /** @brief Moves the timing. The source may only be destroyed or reassigned. */
+  /**
+   * @brief Moves the timing. The source may only be destroyed or reassigned.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorTiming& operator=(LayoutAnimatorTiming&& other) noexcept;
 
-  /** @brief Destroys the timing. */
+  /**
+   * @brief Destroys the timing.
+   * @SINCE_3_0.0
+   */
   ~LayoutAnimatorTiming();
 
-  /** @brief Sets the duration and returns this timing. Non-positive values are permitted. */
+  /**
+   * @brief Sets the duration and returns this timing. Non-positive values are permitted.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorTiming& SetDuration(Duration duration);
 
-  /** @brief Returns the duration. */
+  /**
+   * @brief Returns the duration.
+   * @SINCE_3_0.0
+   */
   Duration GetDuration() const;
 
-  /** @brief Sets the alpha function and returns this timing. */
+  /**
+   * @brief Sets the alpha function and returns this timing.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorTiming& SetAlpha(AlphaFunction alpha);
 
   /**
    * @brief Returns the alpha function.
+   * @SINCE_3_0.0
    * @return A reference valid until this timing is assigned, moved from, or destroyed
    * @note SetAlpha() updates the value observed through this reference.
    */
   const AlphaFunction& GetAlpha() const;
 
-  /** @brief Sets the delay and returns this timing. */
+  /**
+   * @brief Sets the delay and returns this timing.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorTiming& SetDelay(Duration delay);
 
-  /** @brief Returns the delay. */
+  /**
+   * @brief Returns the delay.
+   * @SINCE_3_0.0
+   */
   Duration GetDelay() const;
 
 private:
@@ -525,6 +670,7 @@ private:
  * the view tree, request layout, or rebind the LayoutTransition during the
  * callback.
  *
+ * @SINCE_3_0.0
  * @note For ENTER and EXIT slots, GetFromBounds() equals GetToBounds() — the
  * layout system has already placed the child at its final position by
  * the time the animator runs, so the dispatcher has no concept of an
@@ -541,27 +687,43 @@ private:
  */
 struct DALI_UI_API LayoutAnimatorContext
 {
-  /** @brief Creates an independently owned snapshot of a callback context. */
+  /**
+   * @brief Creates an independently owned snapshot of a callback context.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorContext(const LayoutAnimatorContext& other);
 
-  /** @brief Replaces this snapshot with an independent copy of another context. */
+  /**
+   * @brief Replaces this snapshot with an independent copy of another context.
+   * @SINCE_3_0.0
+   */
   LayoutAnimatorContext& operator=(const LayoutAnimatorContext& other);
 
-  /** @brief Destroys this context or snapshot. */
+  /**
+   * @brief Destroys this context or snapshot.
+   * @SINCE_3_0.0
+   */
   ~LayoutAnimatorContext();
 
   /**
    * @brief Returns the target View handle.
+   * @SINCE_3_0.0
    * @warning Do not retain this handle or a context snapshot in the owning
    * transition's callback closure: View and LayoutTransition references can
    * form a cycle. Use WeakHandle<View> for a captured reference.
    */
   View GetView() const;
 
-  /** @brief Returns the transition slot. */
+  /**
+   * @brief Returns the transition slot.
+   * @SINCE_3_0.0
+   */
   LayoutTransitionSlot GetSlot() const;
 
-  /** @brief Returns the CHANGE cause, or OTHER for ENTER and EXIT. */
+  /**
+   * @brief Returns the CHANGE cause, or OTHER for ENTER and EXIT.
+   * @SINCE_3_0.0
+   */
   LayoutChangeCause GetChangeCause() const;
 
   /**
@@ -571,6 +733,7 @@ struct DALI_UI_API LayoutAnimatorContext
    * CUSTOM_FUNCTION output is application-owned and may fall outside [0, 1],
    * be non-monotonic, or be reverse-shaped. Use SetOnFinished for completion,
    * chaining, or view-tree mutation instead of comparing progress with 1.
+   * @SINCE_3_0.0
    */
   float GetProgress() const;
 
@@ -580,13 +743,20 @@ struct DALI_UI_API LayoutAnimatorContext
    * For positive duration, progress stays at 0 during delay and then advances
    * to 1 over the active duration. Non-positive duration gives 1 on the first
    * tick. Use SetOnFinished for lifecycle completion and view-tree mutation.
+   * @SINCE_3_0.0
    */
   float GetRawProgress() const;
 
-  /** @brief Returns the entry bounds in visual coordinates, mirrored for RTL parents. */
+  /**
+   * @brief Returns the entry bounds in visual coordinates, mirrored for RTL parents.
+   * @SINCE_3_0.0
+   */
   LayoutRect GetFromBounds() const;
 
-  /** @brief Returns the target bounds in visual coordinates, mirrored for RTL parents. */
+  /**
+   * @brief Returns the target bounds in visual coordinates, mirrored for RTL parents.
+   * @SINCE_3_0.0
+   */
   LayoutRect GetToBounds() const;
 
 private:
@@ -594,7 +764,10 @@ private:
 
   struct Impl;
 
-  /** @brief Borrows invocation-local storage owned by the dispatcher. */
+  /**
+   * @brief Borrows invocation-local storage owned by the dispatcher.
+   * @SINCE_3_0.0
+   */
   DALI_INTERNAL explicit LayoutAnimatorContext(Impl* impl);
 
   Impl* mImpl;

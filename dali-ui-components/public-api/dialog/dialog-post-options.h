@@ -25,6 +25,7 @@ namespace DALI_NAMESPACE
 namespace Ui
 {
 /// @brief Allowed user dismiss requests. Explicit removal bypasses this policy.
+/// @SINCE_3_0.0
 enum class DialogDismissPolicy : uint32_t
 {
   NONE           = 0u,
@@ -34,6 +35,7 @@ enum class DialogDismissPolicy : uint32_t
 };
 
 /// @brief The reason a managed presentation ended.
+/// @SINCE_3_0.0
 enum class DialogDismissReason : uint32_t
 {
   PROGRAMMATIC = 0u,
@@ -49,6 +51,7 @@ enum class DialogDismissReason : uint32_t
  * Reposting to the same Navigator does not replace an active session's options.
  * For a custom scrim view or complex scrim composition, use a separate manual
  * DialogContainer instead; do not mix that ownership path with Post/Dismiss.
+ * @SINCE_3_0.0
  */
 struct DialogPostOptions
 {
@@ -58,12 +61,14 @@ struct DialogPostOptions
    * @brief Style of the internally generated scrim; empty selects Default().
    * Use DialogContainerStyle::NoScrimPreset() to remove tint and blur while
    * retaining background input blocking and the Dialog's dismiss policy.
+   * @SINCE_3_0.0
    */
   DialogContainerStyle containerStyle;
   /**
    * @brief Optional content transition; empty uses the Navigator's modal default.
    * Animator and snap callbacks receive the Dialog, not its DialogContainer.
    * Navigator independently fades the scrim on the same animation timeline.
+   * @SINCE_3_0.0
    */
   NavigationTransitionSpec transitionSpec;
 };

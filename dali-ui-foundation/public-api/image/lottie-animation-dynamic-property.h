@@ -42,6 +42,7 @@ namespace LottieAnimation
  * The arguments are the id given to DynamicProperty, the property being driven, and the
  * frame number being rendered. The returned Property::Value must suit that property's type.
  *
+ * @SINCE_3_0.0
  * @note The callback is invoked on a worker thread. Do NOT call DALi APIs from it.
  */
 using DynamicPropertyCallback = Callback<Dali::Property::Value(int32_t, ContentProperty, uint32_t)>;
@@ -53,6 +54,7 @@ using DynamicPropertyCallback = Callback<Dali::Property::Value(int32_t, ContentP
  * and carries the callback that supplies the value. Ownership of that callback is transferred to
  * the visual once SetDynamicProperty() is called.
  *
+ * @SINCE_3_0.0
  * @note The callback is invoked on a worker thread. Do NOT call DALi APIs from it.
  */
 class DALI_UI_API DynamicProperty
@@ -63,12 +65,14 @@ public:
    *
    * The id is 0, the key path is empty, the content property is ContentProperty::FILL_COLOR and
    * there is no callback.
+   * @SINCE_3_0.0
    */
   DynamicProperty();
 
   /**
    * @brief Creates a dynamic property with all of its values.
    *
+   * @SINCE_3_0.0
    * @param[in] id Unique identifier passed to the callback
    * @param[in] keyPath Target layer or element path, e.g. "Layer 1.Ellipse 1.Fill 1", or "**" for all
    * @param[in] contentProperty The content property to drive
@@ -90,6 +94,7 @@ public:
    *
    * It is how the callback tells apart the properties it serves.
    *
+   * @SINCE_3_0.0
    * @param[in] id Unique identifier passed to the callback
    * @return This dynamic property
    */
@@ -98,6 +103,7 @@ public:
   /**
    * @brief Gets the identifier passed to the callback.
    *
+   * @SINCE_3_0.0
    * @return The identifier
    */
   int32_t GetId() const;
@@ -108,6 +114,7 @@ public:
    * The path names the layer and the element within it, such as
    * "Layer 1.Ellipse 1.Fill 1". "**" matches every element.
    *
+   * @SINCE_3_0.0
    * @param[in] keyPath Target layer or element path
    * @return This dynamic property
    */
@@ -116,6 +123,7 @@ public:
   /**
    * @brief Gets which layer or element the property belongs to.
    *
+   * @SINCE_3_0.0
    * @return The target layer or element path
    */
   const Dali::String& GetKeyPath() const;
@@ -123,6 +131,7 @@ public:
   /**
    * @brief Sets which content property is driven.
    *
+   * @SINCE_3_0.0
    * @param[in] contentProperty The content property to drive
    * @return This dynamic property
    */
@@ -131,6 +140,7 @@ public:
   /**
    * @brief Gets which content property is driven.
    *
+   * @SINCE_3_0.0
    * @return The content property
    */
   ContentProperty GetProperty() const;
@@ -138,6 +148,7 @@ public:
   /**
    * @brief Sets the callback that supplies a value for each frame.
    *
+   * @SINCE_3_0.0
    * @param[in] callback Callback returning a Property::Value each frame
    * @return This dynamic property
    */
@@ -146,6 +157,7 @@ public:
   /**
    * @brief Gets the callback that supplies a value for each frame.
    *
+   * @SINCE_3_0.0
    * @return The callback, empty when none is set
    */
   DynamicPropertyCallback& GetCallback();

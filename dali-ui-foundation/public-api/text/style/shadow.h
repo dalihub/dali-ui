@@ -33,18 +33,21 @@ namespace Text
  * @brief Describes shadow styling for text.
  *
  * This is a value-type object used to configure shadow appearance.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Shadow
 {
 public:
   /**
    * @brief Creates a shadow with default values.
+   * @SINCE_3_0.0
    */
   Shadow();
 
   /**
    * @brief Creates a shadow by copying another shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The shadow to copy.
    */
   Shadow(const Shadow& rhs);
@@ -52,6 +55,7 @@ public:
   /**
    * @brief Creates a shadow by moving another shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The shadow to move.
    */
   Shadow(Shadow&& rhs) noexcept;
@@ -59,6 +63,7 @@ public:
   /**
    * @brief Copies another shadow to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The shadow to copy.
    */
   Shadow& operator=(const Shadow& rhs);
@@ -66,12 +71,14 @@ public:
   /**
    * @brief Moves another shadow to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The shadow to move.
    */
   Shadow& operator=(Shadow&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Shadow();
 
@@ -80,6 +87,7 @@ public:
    *
    * This value can be passed to SetTextShadow() to clear the shadow style.
    *
+   * @SINCE_3_0.0
    * @return A shared immutable none value.
    */
   static const Shadow& None();
@@ -87,6 +95,7 @@ public:
   /**
    * @brief Compares this shadow with another shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The shadow to compare with.
    * @return true if both values are equal.
    */
@@ -95,6 +104,7 @@ public:
   /**
    * @brief Compares this shadow with another shadow.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The shadow to compare with.
    * @return true if both values are not equal.
    */
@@ -104,6 +114,7 @@ public:
   /**
    * @brief Sets the shadow color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The shadow color.
    */
   void SetColor(const UiColor& color);
@@ -111,6 +122,7 @@ public:
   /**
    * @brief Returns the shadow color.
    *
+   * @SINCE_3_0.0
    * @return The shadow color.
    */
   const UiColor& GetColor() const;
@@ -118,6 +130,7 @@ public:
   /**
    * @brief Sets the shadow offset.
    *
+   * @SINCE_3_0.0
    * @param[in] offset The shadow offset in pixels.
    */
   void SetOffset(const Vector2& offset);
@@ -125,6 +138,7 @@ public:
   /**
    * @brief Returns the shadow offset.
    *
+   * @SINCE_3_0.0
    * @return The shadow offset in pixels.
    */
   const Vector2& GetOffset() const;
@@ -132,6 +146,7 @@ public:
   /**
    * @brief Sets the shadow blur radius.
    *
+   * @SINCE_3_0.0
    * @param[in] blurRadius The shadow blur radius in pixels.
    */
   void SetBlurRadius(float blurRadius);
@@ -139,6 +154,7 @@ public:
   /**
    * @brief Returns the shadow blur radius.
    *
+   * @SINCE_3_0.0
    * @return The shadow blur radius in pixels.
    */
   float GetBlurRadius() const;

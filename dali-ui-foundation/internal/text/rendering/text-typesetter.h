@@ -50,7 +50,7 @@ struct MarqueeTextureAnchor;
 typedef IntrusivePtr<Typesetter> TypesetterPtr;
 
 /**
- * @brief Request-local coordinates for preparing USER_SPACE span paints.
+ * @brief Request-local display and view coordinates for preparing span paints.
  *
  * Borrowed only during synchronous raster calls; never stored by Typesetter.
  */

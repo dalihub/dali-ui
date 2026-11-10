@@ -45,23 +45,26 @@ namespace Ui
  * color properties are accepted.
  *
  * A moved-from binding is invalid and must only be destroyed or assigned a new value.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API SelectableLottieColorBinding
 {
 public:
   /**
    * @brief Defines which selectable state color a dynamic property returns.
+   * @SINCE_3_0.0
    */
   enum class ColorPolicy : uint8_t
   {
-    BY_SELECTION_STATE      = 0, ///< Use the current logical selection state.
-    ALWAYS_DESELECTED       = 1, ///< Always use the deselected color.
-    ALWAYS_SELECTED         = 2, ///< Always use the selected color.
-    SELECTED_IN_FRAME_RANGE = 3  ///< Use selected color only inside the inclusive frame range.
+    BY_SELECTION_STATE      = 0, ///< Use the current logical selection state. @SINCE_3_0.0
+    ALWAYS_DESELECTED       = 1, ///< Always use the deselected color. @SINCE_3_0.0
+    ALWAYS_SELECTED         = 2, ///< Always use the selected color. @SINCE_3_0.0
+    SELECTED_IN_FRAME_RANGE = 3  ///< Use selected color only inside the inclusive frame range. @SINCE_3_0.0
   };
 
   /**
    * @brief Deleted because an empty key path is not a valid binding.
+   * @SINCE_3_0.0
    */
   SelectableLottieColorBinding() = delete;
 
@@ -72,6 +75,7 @@ public:
    * The key path is copied and owned by the binding. @p selectedColorRange is used only
    * when @p colorPolicy is ColorPolicy::SELECTED_IN_FRAME_RANGE.
    *
+   * @SINCE_3_0.0
    * @param[in] keyPath The non-empty Lottie property key path
    * @param[in] property The fill-color or stroke-color property
    * @param[in] colorPolicy The rule selecting between state colors
@@ -89,18 +93,21 @@ public:
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    * @param[in] rhs The binding to copy
    */
   SelectableLottieColorBinding(const SelectableLottieColorBinding& rhs);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    * @param[in] rhs The binding to move
    */
   SelectableLottieColorBinding(SelectableLottieColorBinding&& rhs) noexcept;
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    * @param[in] rhs The binding to copy
    * @return A reference to this binding
    */
@@ -108,6 +115,7 @@ public:
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    * @param[in] rhs The binding to move
    * @return A reference to this binding
    */
@@ -115,23 +123,27 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~SelectableLottieColorBinding();
 
   /**
    * @brief Returns the owned Lottie property key path.
+   * @SINCE_3_0.0
    * @return The key path
    */
   Dali::String GetKeyPath() const;
 
   /**
    * @brief Returns the bound Lottie property.
+   * @SINCE_3_0.0
    * @return The fill-color or stroke-color property
    */
   LottieAnimation::ContentProperty GetProperty() const;
 
   /**
    * @brief Returns the color selection policy.
+   * @SINCE_3_0.0
    * @return The color policy
    */
   ColorPolicy GetColorPolicy() const;
@@ -142,6 +154,7 @@ public:
    * The range affects rendering only when GetColorPolicy() returns
    * ColorPolicy::SELECTED_IN_FRAME_RANGE.
    *
+   * @SINCE_3_0.0
    * @return The frame range
    */
   Int32Pair GetSelectedColorRange() const;
@@ -153,6 +166,7 @@ private:
 
 /**
  * @brief A list of selectable Lottie color bindings.
+ * @SINCE_3_0.0
  */
 using SelectableLottieColorBindings = Dali::Vector<SelectableLottieColorBinding>;
 

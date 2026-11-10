@@ -39,9 +39,33 @@ namespace Internal
 namespace Gradient
 {
 
+/**
+ * @brief Selects the prepared gradient progress calculation, independently of its authored type.
+ *
+ * The values are also used by the text gradient shader evaluation uniforms.
+ */
+enum class EvaluationMode : uint8_t
+{
+  NONE              = 0u,
+  LINEAR_NORMALIZED = 1u,
+  RADIAL            = 2u,
+  CONIC             = 3u,
+  LINEAR_USER_SPACE = 4u,
+};
+
 bool IsRenderable(const Dali::Ui::Gradient::Base& gradient);
 
 bool IsRenderable(const Style& style);
+
+/**
+ * @brief Checks whether the relevant authored gradient geometry is finite.
+ *
+ * Stop normalization and the minimum renderable geometry are checked separately.
+ *
+ * @param[in] style The gradient style to check.
+ * @return True if the geometry and start offset are finite, false otherwise.
+ */
+bool HasFiniteGeometry(const Style& style);
 
 /**
  * @brief Compares two immutable gradient rendering snapshots by value.
@@ -53,7 +77,8 @@ Dali::WrapMode::Type GetWrapMode(Dali::Ui::Gradient::SpreadMethod spread);
 struct RenderData
 {
   bool                     enabled{false};
-  Dali::Ui::Gradient::Type type{Dali::Ui::Gradient::Type::NONE};
+  Dali::Ui::Gradient::Type  type{Dali::Ui::Gradient::Type::NONE};
+  EvaluationMode           evaluationMode{EvaluationMode::NONE};
 
   Vector2 startPosition{Vector2::ZERO};
   Vector2 endPosition{Vector2::ONE};
@@ -67,6 +92,18 @@ struct RenderData
 
   float   startOffset{0.0f};
   Vector4 bounds{0.0f, 0.0f, 1.0f, 1.0f};
+
+  Vector2 linearProjection{Vector2::ZERO}; ///< Authored-space projection coefficients for LINEAR_USER_SPACE.
+
+  /**
+   * @brief Packs the scale coefficients selected by the evaluation mode for shader transport.
+   *
+   * @return Linear projection coefficients for LINEAR_USER_SPACE, otherwise the radial scale.
+   */
+  Vector2 GetEvaluationScale() const
+  {
+    return evaluationMode == EvaluationMode::LINEAR_USER_SPACE ? linearProjection : radialScale;
+  }
 };
 
 RenderData ResolveRenderData(const Style&   style,

@@ -23,6 +23,10 @@
 #include <player.h>
 #include <cstdio>
 #include <string>
+#include <utility>
+
+// INTERNAL INCLUDES
+#include "video-view-validation.h"
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -44,6 +48,7 @@ Dali::Ui::VideoSource MakeVideoSource(const char* providerId, void* nativeSessio
   Dali::VideoSourceDescriptor descriptor;
   descriptor.SetProviderId(providerId);
   descriptor.SetNativeSession(Dali::Any(nativeSession));
+  descriptor.SetOwnership(Dali::VideoSourceOwnership::EXTERNAL);
   descriptor.SetRenderingMode(renderingMode);
   return Dali::Ui::CreateVideoSource(descriptor);
 }
@@ -2065,13 +2070,17 @@ void PrintPlayerError(const char* operation, int error)
 } // namespace
 
 /**
- * @brief VideoView sample with four rendering modes:
+ * @brief VideoView sample with MMPlayer/ESPlayer rendering and device validation modes:
  *
  * Usage:
  *   video-view.example             — MMPlayer underlay (VideoShell hole-punch)
  *   video-view.example <uri>       — MMPlayer underlay, custom URI
  *   video-view.example mn          — MMPlayer NativeImage (GPU texture, default URI)
  *   video-view.example mn <uri>    — MMPlayer NativeImage, custom URI
+ *   video-view.example ms <uri>    — MMPlayer synchronized underlay
+ *   video-view.example test-sync <uri> — Ui synchronized underlay device validation
+ *   video-view.example test-underlay <uri> — Ui underlay device validation
+ *   video-view.example test-native <uri> — Ui NativeImage device validation
  *   video-view.example es          — ESPlayer NativeImage, hardcoded H.264 test data
  *   video-view.example es-underlay — ESPlayer underlay, hardcoded H.264 test data
  *
@@ -2126,6 +2135,7 @@ public:
     MmPlayerNativeImage,
     EsPlayerNativeImage,
     EsPlayerUnderlay,
+    MmPlayerSyncUnderlay,
   };
 
   VideoViewController(Application& application, std::string uri, Mode mode)
@@ -2239,7 +2249,12 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
 
-    mVideoView = VideoView::New(source);
+    mVideoView = VideoView::New();
+    if(mMode == Mode::MmPlayerSyncUnderlay)
+    {
+      mVideoView.SetSyncMode(Ui::VideoSyncMode::ENABLED);
+    }
+    mVideoView.SetSource(std::move(source));
     mVideoView.SetLayoutParams(AbsoluteLayoutParams::New()
                                  .SetX(0.5f)
                                  .SetY(0.5f)
@@ -2475,6 +2490,22 @@ private:
       mReadyCheckTimer.Reset();
     }
 
+    // The application owns MMPlayer. Stop it before releasing the view's decoded
+    // callback and packets, and unprepare only after those packets are returned.
+    if(mPlayer)
+    {
+      player_state_e state = PLAYER_STATE_NONE;
+      int            error = player_get_state(mPlayer, &state);
+      if(error == PLAYER_ERROR_NONE && (state == PLAYER_STATE_PLAYING || state == PLAYER_STATE_PAUSED))
+      {
+        error = player_stop(mPlayer);
+        if(error != PLAYER_ERROR_NONE)
+        {
+          PrintPlayerError("player_stop", error);
+        }
+      }
+    }
+
     if(mVideoView)
     {
       mVideoView.ClearSource();
@@ -2497,7 +2528,11 @@ private:
     }
     else if(mPlayer)
     {
-      player_unprepare(mPlayer);
+      player_state_e state = PLAYER_STATE_NONE;
+      if(player_get_state(mPlayer, &state) == PLAYER_ERROR_NONE && state == PLAYER_STATE_READY)
+      {
+        player_unprepare(mPlayer);
+      }
       player_destroy(mPlayer);
       mPlayer = nullptr;
     }
@@ -2518,6 +2553,15 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
+  if(argc > 1)
+  {
+    const std::string command = argv[1];
+    if(command == "test-sync" || command == "test-underlay" || command == "test-native")
+    {
+      std::string uri = argc > 2 ? argv[2] : DEFAULT_VIDEO_URI;
+      return RunVideoViewValidation(argc, argv, std::move(uri));
+    }
+  }
   Application application = Application::New(&argc, &argv);
 
   UiConfig config = UiConfig::New();
@@ -2545,23 +2589,32 @@ int DALI_EXPORT_API main(int argc, char** argv)
         uri = argv[2];
       }
     }
+    else if(arg1 == "ms")
+    {
+      mode = VideoViewController::Mode::MmPlayerSyncUnderlay;
+      if(argc > 2)
+      {
+        uri = argv[2];
+      }
+    }
     else
     {
       uri = arg1; // custom URI, MMPlayer underlay
     }
   }
 
-  const char* modeName = (mode == VideoViewController::Mode::EsPlayerNativeImage)   ? "ESPlayer NativeImage"
-                         : (mode == VideoViewController::Mode::EsPlayerUnderlay)    ? "ESPlayer underlay"
-                         : (mode == VideoViewController::Mode::MmPlayerNativeImage) ? "MMPlayer NativeImage"
-                                                                                    : "MMPlayer underlay";
+  const char* modeName = (mode == VideoViewController::Mode::EsPlayerNativeImage)    ? "ESPlayer NativeImage"
+                         : (mode == VideoViewController::Mode::EsPlayerUnderlay)     ? "ESPlayer underlay"
+                         : (mode == VideoViewController::Mode::MmPlayerNativeImage)  ? "MMPlayer NativeImage"
+                         : (mode == VideoViewController::Mode::MmPlayerSyncUnderlay) ? "MMPlayer synchronized underlay"
+                                                                                     : "MMPlayer underlay";
   printf("[video-view] mode: %s\n", modeName);
   if(mode != VideoViewController::Mode::EsPlayerNativeImage && mode != VideoViewController::Mode::EsPlayerUnderlay)
   {
     printf("[video-view] uri: %s\n", uri.c_str());
   }
 
-  VideoViewController controller(application, uri, mode);
+  VideoViewController controller(application, std::move(uri), mode);
   application.MainLoop();
   return 0;
 }

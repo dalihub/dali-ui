@@ -48,23 +48,27 @@ class VideoSource;
  * VideoView with VideoView::New(VideoSource) or VideoView::SetSource().
  * VideoSource only carries the provider id, native session handle, and
  * rendering mode; VideoView does not read or write these once attached.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API VideoSource : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized VideoSource handle.
+   * @SINCE_3_0.0
    */
   VideoSource();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~VideoSource();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   VideoSource(const VideoSource& rhs);
@@ -72,6 +76,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -80,6 +85,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   VideoSource(VideoSource&& rhs) noexcept;
@@ -87,6 +93,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return A reference to this handle
    */
@@ -95,6 +102,7 @@ public:
   /**
    * @brief Downcasts a handle to a VideoSource handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A VideoSource handle, or an uninitialized handle if the cast fails
    */
@@ -106,6 +114,7 @@ public:
    * VideoView::SetSource() attaches the source only if this is true and the
    * handle itself is initialized.
    *
+   * @SINCE_3_0.0
    * @return True if the source has a provider id and a native session
    */
   bool IsValid() const;
@@ -113,6 +122,7 @@ public:
   /**
    * @brief Retrieves how this source is rendered into the scene.
    *
+   * @SINCE_3_0.0
    * @return The rendering mode
    */
   VideoRenderingMode GetRenderingMode() const;
@@ -120,6 +130,7 @@ public:
   /**
    * @brief Retrieves the native session ownership policy.
    *
+   * @SINCE_3_0.0
    * @return The ownership policy
    */
   VideoSourceOwnership GetOwnership() const;
@@ -170,6 +181,7 @@ public: // Not intended for application developers
  * descriptor's rendering mode is mapped by value in case a caller's descriptor
  * type uses a different (but underlying-value-compatible) rendering mode enum.
  *
+ * @SINCE_3_0.0
  * @param[in] descriptor A platform video source descriptor
  * @param[in] ownership The native session ownership policy
  * @return A VideoSource describing the platform player session

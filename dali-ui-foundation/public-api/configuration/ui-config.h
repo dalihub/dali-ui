@@ -41,6 +41,7 @@ class View;
 /**
  * @brief Function pointer type for determining whether a key triggers click execution.
  *
+ * @SINCE_3_0.0
  * @param[in] keyName The name of the key
  * @return True if the key should trigger click execution
  */
@@ -49,6 +50,7 @@ using ExecutionKeyPredicate = bool (*)(const Dali::String& keyName);
 /**
  * @brief Function pointer type for initializing View defaults.
  *
+ * @SINCE_3_0.0
  * @param[in] view The View to initialize
  */
 using ViewInitializer = void (*)(View view);
@@ -74,6 +76,7 @@ class UiConfigImpl;
  *  config.SetUnitDpi(320);
  *  config.Apply();
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiConfig : public BaseHandle
 {
@@ -85,40 +88,45 @@ public:
    * based on the size of the view that needs to display them.
    * For example, a small icon view can use a compact broken image (SMALL),
    * while a large image view can use a more detailed broken image (LARGE).
+   * @SINCE_3_0.0
    */
   enum class BrokenImageType
   {
-    SMALL  = 0, ///< Broken image for small-sized views
-    NORMAL = 1, ///< Broken image for normal-sized views
-    LARGE  = 2  ///< Broken image for large-sized views
+    SMALL  = 0, ///< Broken image for small-sized views @SINCE_3_0.0
+    NORMAL = 1, ///< Broken image for normal-sized views @SINCE_3_0.0
+    LARGE  = 2  ///< Broken image for large-sized views @SINCE_3_0.0
   };
 
   /**
    * @brief Platform font size preference categories used by dali-ui policy.
+   * @SINCE_3_0.0
    */
   enum class SystemFontSize
   {
-    SMALL       = 0, ///< Small system font size preference
-    NORMAL      = 1, ///< Normal system font size preference
-    LARGE       = 2, ///< Large system font size preference
-    EXTRA_LARGE = 3, ///< Extra large system font size preference
-    GIANT       = 4  ///< Giant system font size preference
+    SMALL       = 0, ///< Small system font size preference @SINCE_3_0.0
+    NORMAL      = 1, ///< Normal system font size preference @SINCE_3_0.0
+    LARGE       = 2, ///< Large system font size preference @SINCE_3_0.0
+    EXTRA_LARGE = 3, ///< Extra large system font size preference @SINCE_3_0.0
+    GIANT       = 4  ///< Giant system font size preference @SINCE_3_0.0
   };
 
 public:
   /**
    * @brief Creates an uninitialized UiConfig handle.
+   * @SINCE_3_0.0
    */
   UiConfig() = default;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~UiConfig() = default;
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to copy
    */
   UiConfig(const UiConfig& handle) = default;
@@ -126,6 +134,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   UiConfig(UiConfig&& rhs) noexcept = default;
@@ -133,6 +142,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -141,6 +151,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -152,6 +163,7 @@ public:
    * Default: scalingFactor=1.0f, baselineDpi=72,
    * webEngineType=WebEngineType::CHROMIUM.
    *
+   * @SINCE_3_0.0
    * @return An initialized UiConfig handle
    */
   static UiConfig New();
@@ -162,6 +174,7 @@ public:
    * If handle points to a UiConfig, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a UiConfig or an uninitialized handle
    */
@@ -177,6 +190,7 @@ public: // Properties
    * called before they can be used.
    *
    * Calling Apply() more than once triggers an assertion failure.
+   * @SINCE_3_0.0
    */
   void Apply();
 
@@ -185,6 +199,7 @@ public: // Properties
    *
    * @deprecated Use SetUnitScalingFactor() instead.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()).
    * @param[in] scalingFactor The scaling factor value
    */
@@ -195,6 +210,7 @@ public: // Properties
    *
    * @deprecated Use GetUnitScalingFactor() instead.
    *
+   * @SINCE_3_0.0
    * @return The scaling factor applied to spx and sdp units
    */
   float GetScalingFactor() const;
@@ -204,6 +220,7 @@ public: // Properties
    *
    * @deprecated Use the _dp unit literals for unit conversions instead.
    *
+   * @SINCE_3_0.0
    * @pre The config must be frozen (i.e. Apply() must have been called).
    * @return The computed DPI factor
    */
@@ -214,6 +231,7 @@ public: // Properties
    *
    * @deprecated Use the _sdp unit literals for unit conversions instead.
    *
+   * @SINCE_3_0.0
    * @pre The config must be frozen (i.e. Apply() must have been called).
    * @return The computed scaled DPI factor
    */
@@ -224,6 +242,7 @@ public: // Properties
    *
    * @deprecated Use SetUnitDpi() instead.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] dpi The dots-per-inch value of the target display
    */
@@ -234,6 +253,7 @@ public: // Properties
    *
    * @deprecated Use GetUnitDpi() instead.
    *
+   * @SINCE_3_0.0
    * @return The dots-per-inch value of the target display
    */
   int GetDpi() const;
@@ -243,6 +263,7 @@ public: // Properties
    *
    * @deprecated Use SetUnitBaselineDpi() instead.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] baselineDpi The baseline dots-per-inch value
    */
@@ -253,6 +274,7 @@ public: // Properties
    *
    * @deprecated Use GetUnitBaselineDpi() instead.
    *
+   * @SINCE_3_0.0
    * @return The baseline dots-per-inch used as the reference for dp calculations
    */
   int GetBaselineDpi() const;
@@ -260,6 +282,7 @@ public: // Properties
   /**
    * @brief Sets the default key click policy for clickable views.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] policy The key click policy
    */
@@ -268,6 +291,7 @@ public: // Properties
   /**
    * @brief Retrieves the default key click policy.
    *
+   * @SINCE_3_0.0
    * @return The key click policy
    */
   KeyClickPolicy GetKeyClickPolicy() const;
@@ -281,6 +305,7 @@ public: // Properties
    * click execution key and fires the click action. The default predicate
    * matches "Return" only.
    *
+   * @SINCE_3_0.0
    * @note This parameter is a plain function pointer (ExecutionKeyPredicate).
    * Lambdas with captures and member function pointers are not accepted.
    * Only free functions or stateless lambdas may be used.
@@ -307,6 +332,7 @@ public: // Properties
   /**
    * @brief Retrieves the execution key predicate.
    *
+   * @SINCE_3_0.0
    * @return The current execution key predicate function pointer
    */
   ExecutionKeyPredicate GetExecutionKeyPredicate() const;
@@ -319,6 +345,7 @@ public: // Properties
    * key down, that must be received before the input is recognized as a long-press
    * action. For example, a value of 3 means the initial key down plus two repeats.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] count The minimum number of consecutive key events, including the
    *                  initial key down, required to trigger a long-press
@@ -329,6 +356,7 @@ public: // Properties
   /**
    * @brief Retrieves the minimum number of key events required to recognize a key long-press.
    *
+   * @SINCE_3_0.0
    * @return The minimum number of consecutive key events, including the initial
    *         key down, required to trigger a long-press
    */
@@ -345,6 +373,7 @@ public: // Properties
    * An option that is not set here is left at the DALi default, so a value coming from
    * an environment variable is not overwritten.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] timeMs The time value in milliseconds
    * @note If not set, Dali::Integration::DEFAULT_LONG_PRESS_GESTURE_MINIMUM_HOLDING_TIME is used.
@@ -358,6 +387,7 @@ public: // Properties
    * Before the application is created this returns the requested value, or the DALi
    * default if nothing has been set. Afterwards it returns the value in effect.
    *
+   * @SINCE_3_0.0
    * @return The time value in milliseconds
    */
   uint32_t GetLongPressGestureMinimumHoldingTime() const;
@@ -373,6 +403,7 @@ public: // Properties
    *
    * See SetLongPressGestureMinimumHoldingTime() for how these gesture options are applied.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] intervalMs The interval in milliseconds
    * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MULTI_TAP_INTERVAL is used.
@@ -387,6 +418,7 @@ public: // Properties
    * Before the application is created this returns the requested value, or the DALi
    * default if nothing has been set. Afterwards it returns the value in effect.
    *
+   * @SINCE_3_0.0
    * @return The interval in milliseconds
    */
   uint32_t GetTapGestureMaximumMultiTapInterval() const;
@@ -401,6 +433,7 @@ public: // Properties
    *
    * See SetLongPressGestureMinimumHoldingTime() for how these gesture options are applied.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] timeMs The time value in milliseconds
    * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_HOLDING_TIME is used.
@@ -415,6 +448,7 @@ public: // Properties
    * Before the application is created this returns the requested value, or the DALi
    * default if nothing has been set. Afterwards it returns the value in effect.
    *
+   * @SINCE_3_0.0
    * @return The time value in milliseconds
    */
   uint32_t GetTapGestureMaximumHoldingTime() const;
@@ -429,6 +463,7 @@ public: // Properties
    *
    * See SetLongPressGestureMinimumHoldingTime() for how these gesture options are applied.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] distance The distance in pixels
    * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MOTION_DISTANCE is used.
@@ -442,6 +477,7 @@ public: // Properties
    * Before the application is created this returns the requested value, or the DALi
    * default if nothing has been set. Afterwards it returns the value in effect.
    *
+   * @SINCE_3_0.0
    * @return The distance in pixels
    */
   float GetTapGestureMaximumMotionDistance() const;
@@ -452,6 +488,7 @@ public: // Properties
    * Raising this value reduces accidental pans but delays drag and scroll startup.
    * See SetLongPressGestureMinimumHoldingTime() for how gesture options are applied.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] distance The distance in pixels
    * @note If not set, Dali::Integration::DEFAULT_PAN_GESTURE_MINIMUM_DISTANCE is used.
@@ -465,6 +502,7 @@ public: // Properties
    * Before the application is created this returns the requested value, or the DALi
    * default if nothing has been set. Afterwards it returns the value in effect.
    *
+   * @SINCE_3_0.0
    * @return The distance in pixels
    */
   int GetPanGestureMinimumDistance() const;
@@ -476,6 +514,7 @@ public: // Properties
    * more input noise but delays pan startup.
    * See SetLongPressGestureMinimumHoldingTime() for how gesture options are applied.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] count The number of touch events, including the initial touch-down event
    * @note If not set, Dali::Integration::DEFAULT_PAN_GESTURE_MINIMUM_PAN_EVENTS is used.
@@ -490,6 +529,7 @@ public: // Properties
    * Before the application is created this returns the requested value, or the DALi
    * default if nothing has been set. Afterwards it returns the value in effect.
    *
+   * @SINCE_3_0.0
    * @return The number of touch events, including the initial touch-down event
    */
   uint32_t GetPanGestureMinimumPanEvents() const;
@@ -500,6 +540,7 @@ public: // Properties
    * Raising this value reduces accidental pinches but delays pinch startup.
    * See SetLongPressGestureMinimumHoldingTime() for how gesture options are applied.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] distance The distance in pixels
    * @note If not set, DALi calculates the distance automatically from the scene DPI.
@@ -513,6 +554,7 @@ public: // Properties
    * A negative return value means that DALi calculates the distance automatically
    * from the scene DPI.
    *
+   * @SINCE_3_0.0
    * @return The distance in pixels, or a negative value when automatic calculation is used
    */
   float GetPinchGestureMinimumDistance() const;
@@ -520,6 +562,7 @@ public: // Properties
   /**
    * @brief Sets the minimum number of touch events required before a pinch can start.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] count The number of touch events
    * @note If not set, Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_TOUCH_EVENTS is used.
@@ -530,6 +573,7 @@ public: // Properties
   /**
    * @brief Retrieves the minimum number of touch events required before a pinch can start.
    *
+   * @SINCE_3_0.0
    * @return The number of touch events
    */
   uint32_t GetPinchGestureMinimumTouchEvents() const;
@@ -537,6 +581,7 @@ public: // Properties
   /**
    * @brief Sets the minimum number of touch events required for updates after a pinch has started.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] count The number of touch events accumulated between pinch updates
    * @note If not set, Dali::Integration::DEFAULT_PINCH_GESTURE_MINIMUM_TOUCH_EVENTS_AFTER_START is used.
@@ -547,6 +592,7 @@ public: // Properties
   /**
    * @brief Retrieves the minimum number of touch events required for updates after a pinch has started.
    *
+   * @SINCE_3_0.0
    * @return The number of touch events accumulated between pinch updates
    */
   uint32_t GetPinchGestureMinimumTouchEventsAfterStart() const;
@@ -554,6 +600,7 @@ public: // Properties
   /**
    * @brief Sets the minimum number of touch events required before a rotation can start.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] count The number of touch events
    * @note If not set, Dali::Integration::DEFAULT_ROTATION_GESTURE_MINIMUM_TOUCH_EVENTS is used.
@@ -564,6 +611,7 @@ public: // Properties
   /**
    * @brief Retrieves the minimum number of touch events required before a rotation can start.
    *
+   * @SINCE_3_0.0
    * @return The number of touch events
    */
   uint32_t GetRotationGestureMinimumTouchEvents() const;
@@ -571,6 +619,7 @@ public: // Properties
   /**
    * @brief Sets the minimum number of touch events required for updates after a rotation has started.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] count The number of touch events accumulated between rotation updates
    * @note If not set, Dali::Integration::DEFAULT_ROTATION_GESTURE_MINIMUM_TOUCH_EVENTS_AFTER_START is used.
@@ -581,6 +630,7 @@ public: // Properties
   /**
    * @brief Retrieves the minimum number of touch events required for updates after a rotation has started.
    *
+   * @SINCE_3_0.0
    * @return The number of touch events accumulated between rotation updates
    */
   uint32_t GetRotationGestureMinimumTouchEventsAfterStart() const;
@@ -592,6 +642,7 @@ public: // Properties
    * when the requested image fails to load properly. Using different broken image types
    * allows for appropriate broken images based on the target view size.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
    * @param[in] brokenImageUrl The URL of the broken image to use
@@ -604,6 +655,7 @@ public: // Properties
    * Retrieves the broken image URL that was previously set for the specified broken image type.
    * This image will be shown in image views when the requested image fails to load.
    *
+   * @SINCE_3_0.0
    * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
    * @return A reference to the broken image URL string
    */
@@ -612,6 +664,7 @@ public: // Properties
   /**
    * @brief Sets whether to clear focus when the Escape key is pressed.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] enable True to enable focus clearing on Escape key
    */
@@ -620,6 +673,7 @@ public: // Properties
   /**
    * @brief Retrieves whether to clear focus when the Escape key is pressed.
    *
+   * @SINCE_3_0.0
    * @return True if focus clearing on Escape key is enabled
    */
   bool IsClearFocusOnEscapeEnabled() const;
@@ -627,6 +681,7 @@ public: // Properties
   /**
    * @brief Sets whether touch interaction clears focus indication by default.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] clear Whether touch interaction clears focus indication from the focused view
    */
@@ -635,6 +690,7 @@ public: // Properties
   /**
    * @brief Gets whether touch interaction clears focus indication by default.
    *
+   * @SINCE_3_0.0
    * @return True if touch interaction clears focus indication from the focused view
    */
   bool IsClearFocusIndicationOnTouchEnabled() const;
@@ -642,6 +698,7 @@ public: // Properties
   /**
    * @brief Sets whether hover outside the focused view clears focus indication by default.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] clear Whether hover outside the focused view clears focus indication
    */
@@ -650,6 +707,7 @@ public: // Properties
   /**
    * @brief Gets whether hover outside the focused view clears focus indication by default.
    *
+   * @SINCE_3_0.0
    * @return True if hover outside the focused view clears focus indication
    */
   bool IsClearFocusIndicationOnHoverEnabled() const;
@@ -657,6 +715,7 @@ public: // Properties
   /**
    * @brief Sets whether FocusManager's default focus indicator is enabled by default.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] enabled Whether the default focus indicator is enabled
    */
@@ -665,6 +724,7 @@ public: // Properties
   /**
    * @brief Gets whether FocusManager's default focus indicator is enabled by default.
    *
+   * @SINCE_3_0.0
    * @return True if the default focus indicator is enabled
    */
   bool IsDefaultFocusIndicatorEnabled() const;
@@ -672,6 +732,7 @@ public: // Properties
   /**
    * @brief Sets the default font point-size for text elements.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] fontSize The default font size in points
    */
@@ -680,6 +741,7 @@ public: // Properties
   /**
    * @brief Retrieves the default font point-size.
    *
+   * @SINCE_3_0.0
    * @return The default font size in points
    */
   float GetDefaultFontSize() const;
@@ -690,6 +752,7 @@ public: // Properties
    * This value is applied to newly initialized text views.
    * Each text view may override it with its own system font size scale enabled property.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] enabled True to enable system font size scaling by default.
    */
@@ -698,6 +761,7 @@ public: // Properties
   /**
    * @brief Gets whether text views use system font size scale by default.
    *
+   * @SINCE_3_0.0
    * @return True if system font size scaling is enabled by default.
    */
   bool IsDefaultSystemFontSizeScaleEnabled() const;
@@ -708,6 +772,7 @@ public: // Properties
    * This clamps the adjusted font size scale computed for text views.
    * It does not clamp UI scale or view scale.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] scale The minimum font size scale.
    */
@@ -716,6 +781,7 @@ public: // Properties
   /**
    * @brief Gets the minimum font size scale used by text views by default.
    *
+   * @SINCE_3_0.0
    * @return The minimum font size scale.
    */
   float GetDefaultMinimumFontSizeScale() const;
@@ -726,6 +792,7 @@ public: // Properties
    * This clamps the adjusted font size scale computed for text views.
    * It does not clamp UI scale or view scale.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] scale The maximum font size scale.
    */
@@ -734,6 +801,7 @@ public: // Properties
   /**
    * @brief Gets the maximum font size scale used by text views by default.
    *
+   * @SINCE_3_0.0
    * @return The maximum font size scale.
    */
   float GetDefaultMaximumFontSizeScale() const;
@@ -756,6 +824,7 @@ public: // Properties
    * - SystemFontSize::EXTRA_LARGE: 1.26
    * - SystemFontSize::GIANT: 1.4
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] fontSize The system font size preference.
    * @param[in] scale The scale used for the preference.
@@ -767,6 +836,7 @@ public: // Properties
    *
    * Returns the scale mapped to the given @p fontSize.
    *
+   * @SINCE_3_0.0
    * @param[in] fontSize The system font size preference.
    * @return The scale used for the preference.
    */
@@ -775,6 +845,7 @@ public: // Properties
   /**
    * @brief Sets the default text color for text elements.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] color The default text color
    */
@@ -783,6 +854,7 @@ public: // Properties
   /**
    * @brief Retrieves the default text color.
    *
+   * @SINCE_3_0.0
    * @return The default text color
    */
   Vector4 GetDefaultTextColor() const;
@@ -790,6 +862,7 @@ public: // Properties
   /**
    * @brief Sets the default placeholder text color.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] color The default placeholder text color.
    */
@@ -798,6 +871,7 @@ public: // Properties
   /**
    * @brief Returns the default placeholder text color.
    *
+   * @SINCE_3_0.0
    * @return The default placeholder text color.
    */
   Vector4 GetDefaultPlaceholderTextColor() const;
@@ -805,6 +879,7 @@ public: // Properties
   /**
    * @brief Sets whether the placeholder text is shown when the control has focus.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] enabled True to show the placeholder text when focused, false otherwise.
    */
@@ -813,6 +888,7 @@ public: // Properties
   /**
    * @brief Returns whether the placeholder text is shown when the control has focus.
    *
+   * @SINCE_3_0.0
    * @return True if the placeholder text is shown when focused, false otherwise.
    */
   bool IsPlaceholderTextShownOnFocus() const;
@@ -820,6 +896,7 @@ public: // Properties
   /**
    * @brief Sets the marquee speed in pixels per second.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] speed The marquee speed in pixels per second
    */
@@ -828,6 +905,7 @@ public: // Properties
   /**
    * @brief Retrieves the marquee speed.
    *
+   * @SINCE_3_0.0
    * @return The marquee speed in pixels per second
    */
   int GetMarqueeSpeed() const;
@@ -835,6 +913,7 @@ public: // Properties
   /**
    * @brief Sets the number of complete loops for marquee.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] loopCount The number of loops
    */
@@ -843,6 +922,7 @@ public: // Properties
   /**
    * @brief Retrieves the number of complete loops for marquee.
    *
+   * @SINCE_3_0.0
    * @return The number of loops
    */
   int GetMarqueeLoopCount() const;
@@ -850,6 +930,7 @@ public: // Properties
   /**
    * @brief Sets the amount of time to delay the start of marquee and further loops.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] delay The delay time in seconds
    */
@@ -858,6 +939,7 @@ public: // Properties
   /**
    * @brief Retrieves the amount of time to delay the start of marquee and further loops.
    *
+   * @SINCE_3_0.0
    * @return The delay time in seconds
    */
   float GetMarqueeLoopDelay() const;
@@ -865,6 +947,7 @@ public: // Properties
   /**
    * @brief Sets the gap before marquee wraps.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] gap The gap in pixels
    */
@@ -873,6 +956,7 @@ public: // Properties
   /**
    * @brief Retrieves the gap before marquee wraps.
    *
+   * @SINCE_3_0.0
    * @return The gap in pixels
    */
   float GetMarqueeGap() const;
@@ -880,6 +964,7 @@ public: // Properties
   /**
    * @brief Sets the marquee stop behaviour.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] stopMode The marquee stop mode
    */
@@ -888,6 +973,7 @@ public: // Properties
   /**
    * @brief Retrieves the marquee stop behaviour.
    *
+   * @SINCE_3_0.0
    * @return The marquee stop mode
    */
   Text::MarqueeStopMode GetMarqueeStopMode() const;
@@ -895,6 +981,7 @@ public: // Properties
   /**
    * @brief Sets the marquee orientation.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] orientation The marquee orientation
    */
@@ -903,6 +990,7 @@ public: // Properties
   /**
    * @brief Retrieves the marquee orientation.
    *
+   * @SINCE_3_0.0
    * @return The marquee orientation
    */
   Text::MarqueeOrientation GetMarqueeOrientation() const;
@@ -922,6 +1010,7 @@ public: // Properties
    * - Text::LayoutDirectionMode::LOCALE:
    *   The layout direction is determined based on the system locale.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] mode The default LayoutDirectionMode used to determine text layout direction.
    */
@@ -930,6 +1019,7 @@ public: // Properties
   /**
    * @brief Gets the default mode for resolving text layout direction.
    *
+   * @SINCE_3_0.0
    * @return The default LayoutDirectionMode used to resolve text layout direction.
    */
   Text::LayoutDirectionMode GetTextLayoutDirectionMode() const;
@@ -937,6 +1027,7 @@ public: // Properties
   /**
    * @brief Sets whether Label uses asynchronous text rendering by default.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] asyncRendering True to enable asynchronous rendering for Label by default,
    * false to use synchronous rendering.
@@ -946,6 +1037,7 @@ public: // Properties
   /**
    * @brief Retrieves whether Label uses asynchronous text rendering by default.
    *
+   * @SINCE_3_0.0
    * @return True if asynchronous rendering is enabled for Label by default
    */
   bool IsLabelAsyncRendering() const;
@@ -957,6 +1049,7 @@ public: // Properties
    * tracking signal has been connected. Passing @c nullptr restores the
    * default initializer.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] initializer The view initializer function
    */
@@ -965,12 +1058,14 @@ public: // Properties
   /**
    * @brief Retrieves the initializer called from ViewImpl::OnInitialize().
    *
+   * @SINCE_3_0.0
    * @return The current view initializer function pointer
    */
   ViewInitializer GetViewInitializer() const;
 
   /**
    * @brief The default View initializer.
+   * @SINCE_3_0.0
    */
   static void DefaultViewInitializer(View view);
 
@@ -996,6 +1091,7 @@ public: // Properties
    * Pass StateEffect::None() to disable the automatic default effect for
    * interactive Views.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] effect A StateEffect, or StateEffect::None() to disable the default
    */
@@ -1004,6 +1100,7 @@ public: // Properties
   /**
    * @brief Gets the default StateEffect for Views that become interactive.
    *
+   * @SINCE_3_0.0
    * @return The default StateEffect. StateEffect::None() means no effect is
    * applied automatically when a View receives an interactive trait.
    */
@@ -1016,6 +1113,7 @@ public: // Properties
    * gesture is a tap or a scroll, the pressed state of the touched interactive
    * View is delayed by this time.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] timeMs The delay in milliseconds
    */
@@ -1024,6 +1122,7 @@ public: // Properties
   /**
    * @brief Retrieves the delay before an ambiguous touch press is applied.
    *
+   * @SINCE_3_0.0
    * @return The delay in milliseconds
    */
   uint32_t GetAmbiguousPressDelay() const;
@@ -1036,6 +1135,7 @@ public: // Properties
    * the pressed state is applied synchronously and then kept for this duration
    * before being released.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] timeMs The duration in milliseconds
    */
@@ -1044,6 +1144,7 @@ public: // Properties
   /**
    * @brief Retrieves how long a completed ambiguous press is kept visible.
    *
+   * @SINCE_3_0.0
    * @return The duration in milliseconds
    */
   uint32_t GetAmbiguousPressDuration() const;
@@ -1051,6 +1152,7 @@ public: // Properties
   /**
    * @brief Returns whether a current global UiConfig is available.
    *
+   * @SINCE_3_0.0
    * @return True if UiConfig::Apply() has been called
    */
   static bool HasCurrent();
@@ -1058,6 +1160,7 @@ public: // Properties
   /**
    * @brief Returns the currently applied global UiConfig.
    *
+   * @SINCE_3_0.0
    * @pre UiConfig::Apply() must have been called.
    * @return The currently applied UiConfig handle
    */
@@ -1069,6 +1172,7 @@ public: // Properties
    * The style sheet is stored as a shared handle. If no style sheet is set
    * before Apply(), components use their default presets.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] styleSheet The style sheet to use
    */
@@ -1081,6 +1185,7 @@ public: // Properties
    * stored in this config. This allows applications to inspect or override a
    * extension preset before Apply().
    *
+   * @SINCE_3_0.0
    * @return The style sheet stored in this config
    */
   UiStyleSheet StyleSheet() const;
@@ -1091,6 +1196,7 @@ public: // Properties
    * If no style sheet or style entry is found, an uninitialized UiStyle is returned.
    * Components may use their own default preset in that case.
    *
+   * @SINCE_3_0.0
    * @pre UiConfig::Apply() must have been called before resolving style objects.
    *
    * @param[in] key The style key
@@ -1108,6 +1214,7 @@ public: // Properties
    * @deprecated Use WebView::SetWebEngineType() instead. This setting is used
    * only if WebView::SetWebEngineType() has not been called.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] type The web engine type
    */
@@ -1119,6 +1226,7 @@ public: // Properties
    * @deprecated This returns the UiConfig setting, which may differ from the
    * engine selected through WebView::SetWebEngineType().
    *
+   * @SINCE_3_0.0
    * @return The configured web engine type
    */
   WebEngineType GetWebEngineType() const;
@@ -1127,6 +1235,7 @@ public: // Properties
    * @brief Sets the DPI override used only for dp and sdp unit calculations.
    *
    * Zero selects system DPI.
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] dpi A nonnegative DPI value. Default is 0.
    */
@@ -1136,6 +1245,7 @@ public: // Properties
    * @brief Retrieves the configured unit DPI override.
    *
    * Returns only the configured value.
+   * @SINCE_3_0.0
    * @return The configured override, or 0 for automatic system DPI.
    */
   int GetUnitDpi() const;
@@ -1143,6 +1253,7 @@ public: // Properties
   /**
    * @brief Sets the reference DPI used as the denominator for dp calculations.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] baselineDpi The nonzero reference DPI. Default is 72.
    */
@@ -1150,6 +1261,7 @@ public: // Properties
 
   /**
    * @brief Retrieves the configured reference DPI for unit calculations.
+   * @SINCE_3_0.0
    * @return The configured reference DPI. Default is 72.
    */
   int GetUnitBaselineDpi() const;
@@ -1157,6 +1269,7 @@ public: // Properties
   /**
    * @brief Sets the scaling factor applied to spx and sdp units.
    *
+   * @SINCE_3_0.0
    * @pre The config must not be frozen.
    * @param[in] scalingFactor The scaling factor. Default is 1.0.
    */
@@ -1164,6 +1277,7 @@ public: // Properties
 
   /**
    * @brief Retrieves the scaling factor applied to spx and sdp units.
+   * @SINCE_3_0.0
    * @return The scaling factor. Default is 1.0.
    */
   float GetUnitScalingFactor() const;
@@ -1172,6 +1286,7 @@ public: // Not intended for Application developers
   /**
    * @brief This constructor is used by extension config presets to wrap an implementation object.
    *
+   * @SINCE_3_0.0
    * @param[in] impl A pointer to the extension UiConfig implementation
    */
   explicit UiConfig(Extension::UiConfigImpl* impl);

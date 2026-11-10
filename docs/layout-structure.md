@@ -145,8 +145,10 @@ The **measure cache** is unconditional. `View::Measure()` serves a stored
 `MeasuredSize` whenever the normalised constraint and its measure mode (see
 *Measure modes* below) are unchanged and nothing has invalidated the view's layout,
 and the measure implementation — `OnMeasure()`, an attached `LayoutManager::Measure()`,
-or a `MeasureCallback` — is simply not called. There is no opt-out. A measure
-implementation is therefore **required** to be a pure function of:
+or a `MeasureCallback` — is simply not called. There is no opt-out. One exception applies
+off a scene only: a view with View children whose UI-scale term an `Extension::UiScalePolicy::DISABLED`
+policy fixes is measured again on every call (see the effective-scale paragraphs below). A
+measure implementation is therefore **required** to be a pure function of:
 
 - its two constraints,
 - the measure mode of each axis (the parent's layout decides it; a mode-less call
@@ -165,16 +167,53 @@ reaches this view, and an ancestor's own miss does not clear this view's cache.
 The stale measured size is recovered only by an invalidation that reaches THIS
 view -- its own `InvalidateMeasure()`, a recursive drop (scale change, reparent,
 direction change), or a `LayoutManager`'s `InvalidateOwnerMeasure()` -- or by a
-pass that hands it a different normalised constraint or effective scale. The same
+pass that hands it a different normalised constraint or effective scale (or, for the
+off-scene exception above, by any call). The same
 reasoning applies to the arrange cache, with the input bounds and the effective
 layout direction as the keyed inputs.
 
 The effective scale is part of the measure cache key, so a scale change alone
-forces a re-measure. The effective scale is resolved in one place,
-`ViewDataImpl::ComputeEffectiveScale()`; when the process-wide UI-scale master
-switch (`UiScaleManager::SetScalable(false)`) is off it returns `1.0` for every
-view regardless of the view's `UiScalePolicy`, so the whole tree behaves as
-unscaled.
+forces a re-measure. The effective scale is still resolved in exactly one place,
+`ViewDataImpl::ComputeEffectiveScale()`, and it is the product of two independent
+terms: the per-window scale (`Extension::LayoutScaleManager::SetWindowScale()`) and the UI-scale
+term the view's `Extension::UiScalePolicy` selects. When the process-wide scaling master
+switch (`Extension::LayoutScaleManager::SetScalable(false)`) is off, both terms are `1.0` for
+every view regardless of its policies, so the whole tree behaves as unscaled.
+A view that inherits both terms and has a parent returns its parent's memoized
+product unchanged -- the fast path nearly every view takes. Any other view
+resolves each term on its own -- from its own policy, or by walking its ancestors'
+policies to the nearest one that decides that term -- and multiplies the two once;
+it never divides an ancestor's product, because the cache key is compared exactly.
+The window scale therefore enters each view's product exactly once and never
+compounds to `scale^depth` down an inheritance chain. The window term has a
+framework-internal policy too, `WindowScalePolicy` (view-data-impl.h): the views
+that are handed already-scaled geometry -- the text cursor, handles and markers,
+and the editable inline replacement layer -- set it to `DISABLED` next to
+`Extension::UiScalePolicy::DISABLED`; application code cannot set it.
+
+The window term applies only while a view is in a Window: a view in no Window --
+never added, or removed from its window -- resolves it to `1.0`, so its effective
+scale is the UI-scale term alone. Off a scene the effective scale is not memoized at
+all: no layout root `Extension::LayoutScaleManager` has registered covers a view that is not on a
+scene, so nothing would clear a memoized value when `SetUiScale()` or `SetScalable()`
+moves it, and `ViewDataImpl::GetEffectiveLayoutScale()` therefore caches the value only
+while the view is on a scene and computes it on every read off scene. A view without a
+View parent that leaves the scene (removed from its window, under a plain `Actor` that is
+removed, or still in it when the window is destroyed) drops what it memoized there,
+together with its whole subtree's: `ViewDataImpl::OnViewSceneDisconnection()` runs the
+same cache-only subtree reset that reconnection runs. `Extension::View::GetEffectiveLayoutScale()` and
+`View::Measure()` on a detached or never-added view therefore use no window scale and
+follow `SetUiScale()` and `SetScalable()` at once, and adding the view to a window applies
+that window's scale again. `View::Measure()` does so for a container too. Off a scene every
+view's window term is `1.0`, so a view's effective scale is either the UI term or a `1.0` that
+a `DISABLED` policy fixes, and only the UI term moves without an invalidation. A view whose
+term is the UI term misses its measure entry through the cache key whenever that term moves.
+A view whose term is fixed keeps its key while an `Extension::UiScalePolicy::ENABLED` descendant follows
+the UI term, so a view with View children whose term is fixed never serves its measure entry
+off a scene and re-runs its producer; a childless view still hits while its own scale is
+unchanged. The check walks the policies only off a scene, only for a view with View children
+and only when everything else would hit, and it stops at the first policy that is not
+`INHERIT` or at the root.
 
 The **arrange cache** uses `ArrangePolicy::IF_CHANGED` by default.
 `View::Arrange()` may serve a stored result when the input bounds, effective layout
@@ -182,7 +221,9 @@ direction and effective scale are unchanged and nothing has invalidated the view
 The default applies to `OnArrange()`, a callback installed through the one-argument
 `SetArrangeCallback()`, and `LayoutManager::Arrange()`. It reaches the same
 guarantee about the scale by a different route: the scale is not part of the
-arrange key, it is an invalidation — a scale change drops the entry.
+arrange key, it is an invalidation — a scale change drops the entry. Off a scene no
+entry is published at all, because no invalidation reaches a view there when the UI
+scale moves.
 
 Use `ArrangePolicy::ALWAYS` when an arrange implementation reads state outside
 layout invalidation or performs externally visible work on every pass:
@@ -357,7 +398,7 @@ implementations.
 
 During Measure the parent passes the width and height constraints each as a single **sign-encoded `float`** — the public API carries one scalar per axis; internally the framework pairs it with a measure mode (see *Measure modes* below):
 
-- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `GetEffectiveScale()` to obtain the natural-unit budget before computing sizes. Under the default mode (at-most) this budget acts as an **at-most ceiling**.
+- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `Ui::Extension::View::GetEffectiveLayoutScale(*this)` to obtain the natural-unit budget before computing sizes. Under the default mode (at-most) this budget acts as an **at-most ceiling**.
 - **Negative value** — a sentinel carrying intent, not a size: `WRAP_CONTENT` (-1.0f) or `MATCH_PARENT` (-2.0f).
 
 Before `OnMeasure` runs, `ViewImpl::Measure` reconciles the incoming constraint against this view's min/max bounds: `effective = std::min(std::max(constraint, Minimum), Maximum)` -- on every axis, an axis measured exactly included (see *Measure modes*). With the default `Minimum` of `0`, a negative sentinel constraint is therefore **floored to 0** — so the budget that actually reaches `OnMeasure` is always `>= 0`. (An axis is left "unbounded" not by a negative value but by passing a large positive budget such as `FLT_MAX`, as ScrollView does on its scrollable axes.)

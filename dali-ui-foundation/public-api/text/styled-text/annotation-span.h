@@ -40,18 +40,21 @@ namespace Text
  *
  * When converted from DALi markup, each attribute in an annotation markup tag is
  * represented as a separate AnnotationSpan over the same text range.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API AnnotationSpan : public Span
 {
 public:
   /**
    * @brief Creates an uninitialized AnnotationSpan handle.
+   * @SINCE_3_0.0
    */
   AnnotationSpan() = default;
 
   /**
    * @brief Creates an AnnotationSpan with the given annotation key/value pair.
    *
+   * @SINCE_3_0.0
    * @param[in] key The annotation key
    * @param[in] value The annotation payload
    * @return A new AnnotationSpan
@@ -61,6 +64,7 @@ public:
   /**
    * @brief Downcasts a handle to AnnotationSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized AnnotationSpan on success, otherwise empty
    */
@@ -69,6 +73,7 @@ public:
   /**
    * @brief Gets the annotation key.
    *
+   * @SINCE_3_0.0
    * @return The annotation key
    */
   Dali::String GetKey() const;
@@ -76,6 +81,7 @@ public:
   /**
    * @brief Gets the annotation value.
    *
+   * @SINCE_3_0.0
    * @return The annotation value
    */
   Dali::String GetValue() const;
@@ -84,6 +90,7 @@ private:
   /**
    * @brief Creates an AnnotationSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL AnnotationSpan(BaseObject* impl);

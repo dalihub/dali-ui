@@ -34,6 +34,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-async-task-manager.h>
@@ -43,6 +44,7 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 using Dali::Integration::ToStdString;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {
@@ -3273,7 +3275,7 @@ int UtcDaliLabelGradientSpanOverlaySyncAsyncP(void)
                          mode == Text::GradientOverlayMode::SCREEN ? 1.0f : 0.0f,
                          0.001f,
                          TEST_LOCATION);
-        DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextGradientType") != Property::INVALID_INDEX);
+        DALI_TEST_CHECK(renderer.GetPropertyIndex("uTextGradientEvaluationMode") != Property::INVALID_INDEX);
         DALI_TEST_CHECK(renderer.GetTextures().GetTextureCount() >= 3u);
       }
       DALI_TEST_CHECK(foundCompositionRenderer);
@@ -3773,7 +3775,7 @@ int UtcDaliLabelMarqueeOrientation(void)
 int UtcDaliLabelSyncMarqueeRestartsAfterUiScaleChangeP(void)
 {
   UiTestApplication application;
-  UiScaleManager::Get().SetScale(1.0f);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   Label label = Label::New("This is a long single-line marquee text that should keep scrolling after UI scale changes.");
   label.SetAsyncRendering(false);
@@ -3794,7 +3796,7 @@ int UtcDaliLabelSyncMarqueeRestartsAfterUiScaleChangeP(void)
 
   DALI_TEST_CHECK(label.IsMarqueeRunning());
 
-  UiScaleManager::Get().SetScale(1.2f);
+  LayoutScaleManager::Get().SetUiScale(1.2f);
   application.SendNotification();
   application.Render();
   application.SendNotification();
@@ -3802,7 +3804,7 @@ int UtcDaliLabelSyncMarqueeRestartsAfterUiScaleChangeP(void)
 
   DALI_TEST_CHECK(label.IsMarqueeRunning());
 
-  UiScaleManager::Get().SetScale(1.0f);
+  LayoutScaleManager::Get().SetUiScale(1.0f);
   END_TEST;
 }
 

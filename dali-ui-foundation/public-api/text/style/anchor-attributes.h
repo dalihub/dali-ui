@@ -38,12 +38,14 @@ namespace Text
  * A default-constructed AnchorAttributes object is an empty attribute set. Use
  * Has() to distinguish an explicitly set empty/default-looking value from an
  * unset attribute.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API AnchorAttributes
 {
 public:
   /**
    * @brief Anchor attribute identifiers used by Has() and Unset().
+   * @SINCE_3_0.0
    */
   enum class Attribute : uint32_t
   {
@@ -55,12 +57,14 @@ public:
 public:
   /**
    * @brief Creates an empty anchor attribute set.
+   * @SINCE_3_0.0
    */
   AnchorAttributes();
 
   /**
    * @brief Creates a copy of another anchor attribute set.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The anchor attributes to copy
    */
   AnchorAttributes(const AnchorAttributes& rhs);
@@ -68,6 +72,7 @@ public:
   /**
    * @brief Creates anchor attributes by moving another anchor attribute set.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The anchor attributes to move
    */
   AnchorAttributes(AnchorAttributes&& rhs) noexcept;
@@ -75,6 +80,7 @@ public:
   /**
    * @brief Copies another anchor attribute set to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The anchor attributes to copy
    * @return This object
    */
@@ -83,6 +89,7 @@ public:
   /**
    * @brief Moves another anchor attribute set to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The anchor attributes to move
    * @return This object
    */
@@ -90,6 +97,7 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~AnchorAttributes();
 
@@ -99,6 +107,7 @@ public:
    * Passing an empty string still defines the HREF attribute. Use Unset() to
    * remove the attribute.
    *
+   * @SINCE_3_0.0
    * @param[in] href The href string
    */
   void SetHref(const Dali::String& href);
@@ -108,6 +117,7 @@ public:
    *
    * Use Has(Attribute::HREF) to check whether this value is applied.
    *
+   * @SINCE_3_0.0
    * @return The stored href value
    */
   Dali::String GetHref() const;
@@ -115,6 +125,7 @@ public:
   /**
    * @brief Sets an explicit normal anchor color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The normal anchor color
    */
   void SetColor(const UiColor& color);
@@ -122,6 +133,7 @@ public:
   /**
    * @brief Gets the stored normal anchor color.
    *
+   * @SINCE_3_0.0
    * @return The stored normal anchor color
    */
   UiColor GetColor() const;
@@ -129,6 +141,7 @@ public:
   /**
    * @brief Sets an explicit clicked anchor color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The clicked anchor color
    */
   void SetClickedColor(const UiColor& color);
@@ -136,6 +149,7 @@ public:
   /**
    * @brief Gets the stored clicked anchor color.
    *
+   * @SINCE_3_0.0
    * @return The stored clicked anchor color
    */
   UiColor GetClickedColor() const;
@@ -143,6 +157,7 @@ public:
   /**
    * @brief Checks whether a specific attribute is explicitly set.
    *
+   * @SINCE_3_0.0
    * @param[in] attribute The attribute to check
    * @return true if the attribute is explicitly set
    */
@@ -151,6 +166,7 @@ public:
   /**
    * @brief Checks whether any anchor attribute is explicitly set.
    *
+   * @SINCE_3_0.0
    * @return true if one or more attributes are explicitly set
    */
   bool HasAttributes() const;
@@ -161,6 +177,7 @@ public:
    * This only removes the attribute from the explicit set; it does not reset the
    * stored value.
    *
+   * @SINCE_3_0.0
    * @param[in] attribute The attribute to unset
    */
   void Unset(Attribute attribute);
@@ -171,6 +188,7 @@ public:
    * The explicitly defined attribute set must match. Values are compared only
    * for attributes that are explicitly defined.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The anchor attributes to compare with
    * @return true if both anchor attribute sets are equal
    */
@@ -179,6 +197,7 @@ public:
   /**
    * @brief Compares two anchor attribute sets.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The anchor attributes to compare with
    * @return true if both anchor attribute sets are not equal
    */

@@ -35,6 +35,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
@@ -42,6 +43,7 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-renderer-state.h>
+#include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-reveal-bridge.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
@@ -93,9 +95,9 @@ constexpr const char* UNIFORM_TEXT_GRADIENT_START_POSITION_NAME    = "uTextGradi
 constexpr const char* UNIFORM_TEXT_GRADIENT_END_POSITION_NAME      = "uTextGradientEndPosition";
 constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME      = "uTextGradientStartOffset";
 constexpr const char* UNIFORM_TEXT_GRADIENT_BOUNDS_NAME            = "uTextGradientBounds";
-constexpr const char* UNIFORM_TEXT_GRADIENT_TYPE_NAME              = "uTextGradientType";
+constexpr const char* UNIFORM_TEXT_GRADIENT_EVALUATION_MODE_NAME   = "uTextGradientEvaluationMode";
 constexpr const char* UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME     = "uTextGradientRadialCenter";
-constexpr const char* UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME      = "uTextGradientRadialScale";
+constexpr const char* UNIFORM_TEXT_GRADIENT_EVALUATION_SCALE_NAME  = "uTextGradientEvaluationScale";
 constexpr const char* UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME      = "uTextGradientConicCenter";
 constexpr const char* UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME       = "uTextGradientConicScale";
 constexpr const char* UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME = "uTextGradientConicStartAngle";
@@ -104,9 +106,9 @@ constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_START_POSITION_NAME    = "uT
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_END_POSITION_NAME      = "uTextGradientOverlayEndPosition";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME      = "uTextGradientOverlayStartOffset";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME            = "uTextGradientOverlayBounds";
-constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME              = "uTextGradientOverlayType";
+constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_MODE_NAME   = "uTextGradientOverlayEvaluationMode";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME     = "uTextGradientOverlayRadialCenter";
-constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME      = "uTextGradientOverlayRadialScale";
+constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_SCALE_NAME  = "uTextGradientOverlayEvaluationScale";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME      = "uTextGradientOverlayConicCenter";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME       = "uTextGradientOverlayConicScale";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME = "uTextGradientOverlayConicStartAngle";
@@ -602,16 +604,22 @@ PixelData TextVisual::RenderMarqueeText(Ui::Integration::Visual::Base     visual
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
   visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
   std::optional<Text::GradientRasterContext> gradientContext;
-  if(Text::Internal::HasUserSpaceGradientSpan(visualObject.mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  if(Text::Internal::RequiresGradientRasterContext(visualObject.mController->GetRenderTextModel()->GetGradientSpanModelData()))
   {
     gradientContext.emplace(Text::GradientRasterContext{size, CalculateGradientViewBounds(visual, size), visualObject.mController->GetUiScale()});
   }
-  PixelData pixelData = visualObject.mTypesetter->Render(size,
-                                                         textDirection,
-                                                         behaviour,
-                                                         ignoreHorizontalAlignment,
-                                                         pixelFormat,
-                                                         originSize, gradientContext ? &*gradientContext : nullptr);
+  const bool gradientCoverage = visualObject.mTextShaderFeatureCache.IsEnabledTextGradient() &&
+                                !visualObject.mTextShaderFeatureCache.IsEnabledTextGradientMixed() &&
+                                (behaviour == Text::Typesetter::RENDER_TEXT_AND_STYLES ||
+                                 behaviour == Text::Typesetter::RENDER_NO_STYLES);
+  PixelData pixelData = gradientCoverage
+                          ? visualObject.mTypesetter->RenderTextGradientMask(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize)
+                          : visualObject.mTypesetter->Render(size,
+                                                             textDirection,
+                                                             behaviour,
+                                                             ignoreHorizontalAlignment,
+                                                             pixelFormat,
+                                                             originSize, gradientContext ? &*gradientContext : nullptr);
   if(marqueeTextureAnchor)
   {
     *marqueeTextureAnchor = visualObject.mTypesetter->ResolveMarqueeTextureAnchor(marqueeStartAnchor);
@@ -630,7 +638,7 @@ PixelData TextVisual::RenderMarqueeTextGradientPreserved(Ui::Integration::Visual
   visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
   visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
   std::optional<Text::GradientRasterContext> gradientContext;
-  if(Text::Internal::HasUserSpaceGradientSpan(visualObject.mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  if(Text::Internal::RequiresGradientRasterContext(visualObject.mController->GetRenderTextModel()->GetGradientSpanModelData()))
   {
     gradientContext.emplace(Text::GradientRasterContext{size, CalculateGradientViewBounds(visual, size), visualObject.mController->GetUiScale()});
   }
@@ -1108,6 +1116,8 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
   // Enable the pre-multiplied alpha to improve the text quality
   renderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, true);
 
+  // Apply the shared transform first; the tile's size/offset must survive.
+  mImpl->SetTransformUniforms(renderer);
   // Set size and offset for the tiling.
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_SIZE,
                        Vector2(static_cast<float>(info.width), static_cast<float>(info.height)));
@@ -1142,7 +1152,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     Ui::View owner = Ui::View::DownCast(mControl.GetHandle());
     // Match Controller::SetUiScale: sub-epsilon changes do not schedule a
     // new text layout and must not strand a manual request.
-    if(!owner || Dali::Equals(GetImpl(owner).GetEffectiveScale(), parameters.decorationUiScale, Math::MACHINE_EPSILON_1000))
+    if(!owner || Dali::Equals(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(owner)), parameters.decorationUiScale, Math::MACHINE_EPSILON_1000))
     {
       return true;
     }
@@ -1253,6 +1263,28 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
   if(loadingSuccess)
   {
+    // The loader records the actual rejected raster dimensions, before conversion
+    // to display units. Effective RS1 marquee still needs this final limit check.
+    const auto exceedsTextureLimit = [&]()
+    {
+      int32_t     width, height;
+      const auto& size = textInformation.renderInfo.size;
+      return parameters.maxTextureSize > 0 &&
+             (parameters.renderScale > 1.0f || parameters.isMarqueeEnabled) &&
+             (!Text::Raster::Convert(size.x, width) || !Text::Raster::Convert(size.y, height) ||
+              width > parameters.maxTextureSize || height > parameters.maxTextureSize);
+    };
+    if(isRenderRequest && parameters.isMarqueeEnabled && parameters.textColor != mController->GetDefaultColor() &&
+       !Text::IsManualAsyncRenderInProgress(mControl.GetHandle()) &&
+       UsesDefaultMarqueeTextColor(textInformation.renderInfo.containsColorGlyph, parameters.textColor.a != mController->GetDefaultColor().a) &&
+       (textInformation.renderInfo.textPixelData || !exceedsTextureLimit()))
+    {
+      // Initial ON_OVERFLOW requests resolve marquee on the worker. Retry a
+      // stale baked color before publishing, without rerasterizing static text.
+      mController->RequestAsyncRender();
+      mController->RequestRelayout();
+      return;
+    }
     resourceStatus = Ui::Visual::ResourceStatus::READY;
 
     Text::AsyncTextRenderInfo renderInfo = textInformation.renderInfo;
@@ -1272,6 +1304,31 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     {
       // Nothing to do.
       ResourceReady(Ui::Visual::ResourceStatus::READY);
+      return;
+    }
+
+    if(!renderInfo.textPixelData)
+    {
+      // Other pixel-less results keep their existing removal/completion contract.
+      if(!exceedsTextureLimit())
+      {
+        RemoveRenderer(control, true);
+      }
+      mAsyncRenderUsesUserSpaceGradient = false;
+      if(mTextLoadingTaskId != publicationTaskId ||
+         mController->GetRenderRevision() != publicationRevision || mControl.GetHandle() != control)
+      {
+        return;
+      }
+      if(mAsyncTextInterface)
+      {
+        mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
+      }
+      if(mTextLoadingTaskId == publicationTaskId &&
+         mController->GetRenderRevision() == publicationRevision && mControl.GetHandle() == control)
+      {
+        ResourceReady(Ui::Visual::ResourceStatus::FAILED);
+      }
       return;
     }
 
@@ -1421,6 +1478,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       return;
     }
     mTextShaderFeatureCache = featureBuilder;
+    SetRequireRender(isCutoutEnabled || (isMarqueeEnabled && textGradientMixedPixelDataAvailable));
     if(!usesUserSpaceGradient)
     {
       mImpl->mRenderer.SetShader(shader);
@@ -1551,11 +1609,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         RemoveRenderer(control, false);
       }
 
-      int verifiedWidth  = static_cast<int>(renderInfo.size.width);
-      int verifiedHeight = static_cast<int>(renderInfo.size.height);
+      int verifiedWidth  = renderInfo.textPixelData.GetWidth();
+      int verifiedHeight = renderInfo.textPixelData.GetHeight();
 
       // Set information for creating textures.
-      TilingInfo info(verifiedWidth, maxTextureSize);
+      TilingInfo info(verifiedWidth, std::min(verifiedHeight, maxTextureSize));
 
       // Get the pixel data of text.
       info.textPixelData = renderInfo.textPixelData;
@@ -1640,7 +1698,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       if(renderer)
       {
         // Register transform properties
-        mImpl->SetTransformUniforms(renderer);
+        if(!isHeightTiling)
+        {
+          mImpl->SetTransformUniforms(renderer);
+        }
 
         control.AddRenderer(renderer);
 
@@ -1707,18 +1768,18 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       const auto& prepared           = *renderInfo.revealBlur;
       const auto& options            = prepared.options;
       Ui::View    owner              = Ui::View::DownCast(control);
-      const auto* currentReveal      = GetTextVisualRevealData(mRevealData);
+      const auto* latestReveal       = GetTextVisualRevealData(mRevealData);
       const bool  currentReplacement = !parameters.replacementSourceSnapshot.hasValidReplacementSource ||
                                       (IsCurrentInlineReplacementRender(owner, renderInfo.replacementLayoutGeneration) &&
                                        renderInfo.replacementSourceRevision == mController->GetReplacementSourceSnapshot().sourceRevision);
-      if(owner && currentReveal && currentReveal->revision == parameters.textRevealRevision &&
+      if(owner && latestReveal && latestReveal->revision == parameters.textRevealRevision &&
          mController->IsAsyncRendering() && currentReplacement &&
-         currentReveal->blurRadius > 0.0f && currentReveal->blurDurationRatio > 0.0f &&
+         latestReveal->blurRadius > 0.0f && latestReveal->blurDurationRatio > 0.0f &&
          options.controlSize == textControlSize &&
-         options.radius == ResolveRevealBlurRadius(currentReveal->blurRadius * GetImpl(owner).GetEffectiveScale()) &&
-         options.durationRatio == currentReveal->blurDurationRatio &&
-         options.stagger == currentReveal->sequenceStaggerRatio &&
-         options.perLine == (currentReveal->sequence == Text::Internal::Reveal::Sequence::PER_LINE) &&
+         options.radius == ResolveRevealBlurRadius(latestReveal->blurRadius * Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(owner))) &&
+         options.durationRatio == latestReveal->blurDurationRatio &&
+         options.stagger == latestReveal->sequenceStaggerRatio &&
+         options.perLine == (latestReveal->sequence == Text::Internal::Reveal::Sequence::PER_LINE) &&
          PublishPreparedRevealBlur(control, prepared, renderInfo.replacementSourceRevision, renderInfo.replacementRevealTimings))
       {
         renderInfo.replacementRevealTimings = prepared.timings;
@@ -1909,6 +1970,25 @@ void TextVisual::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
   {
     UpdateRenderer();
   }
+}
+
+bool TextVisual::UsesDefaultMarqueeTextColor(bool containsColorGlyph, bool alphaChanged) const
+{
+  if(mController->IsTextCutout() || mController->IsBackgroundWithCutoutEnabled())
+  {
+    return true;
+  }
+  const auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(gradientData && Text::Internal::Gradient::IsRenderable(gradientData->mTextGradientStyle) &&
+     !mController->IsEmbossEnabled())
+  {
+    // Color glyphs inside GradientSpan retain their fallback TextColor alpha.
+    // The existing result identifies color glyphs, but not their intersection
+    // with spans. Refresh this combination conservatively on alpha changes.
+    const auto* spans = mController->GetLogicalTextModel()->GetGradientSpanModelData();
+    return alphaChanged && containsColorGlyph && spans && !spans->characterRuns.Empty();
+  }
+  return mController->HasDefaultColorCharacters(alphaChanged && containsColorGlyph);
 }
 
 PixelData TextVisual::GetTextGradientMaskPixelData() const
@@ -2102,9 +2182,9 @@ void TextVisual::RebindGradientAnimConstraints()
   const Property::Index startOffsetIndex =
     Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, renderData.startOffset);
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, renderData.bounds);
-  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(renderData.type));
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_EVALUATION_MODE_NAME, static_cast<float>(renderData.evaluationMode));
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, renderData.radialCenter);
-  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, renderData.radialScale);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_EVALUATION_SCALE_NAME, renderData.GetEvaluationScale());
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME, renderData.conicCenter);
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME, renderData.conicScale);
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
@@ -2140,9 +2220,9 @@ void TextVisual::RebindGradientOverlayAnimConstraints()
   const Property::Index startOffsetIndex =
     Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME, renderData.startOffset);
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME, renderData.bounds);
-  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME, static_cast<float>(renderData.type));
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_MODE_NAME, static_cast<float>(renderData.evaluationMode));
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME, renderData.radialCenter);
-  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME, renderData.radialScale);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_SCALE_NAME, renderData.GetEvaluationScale());
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME, renderData.conicCenter);
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME, renderData.conicScale);
   Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
@@ -2860,9 +2940,9 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
   const Property::Index startOffsetIndex =
     Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, renderData.startOffset);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, renderData.bounds);
-  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(renderData.type));
+  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_EVALUATION_MODE_NAME, static_cast<float>(renderData.evaluationMode));
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, renderData.radialCenter);
-  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, renderData.radialScale);
+  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_EVALUATION_SCALE_NAME, renderData.GetEvaluationScale());
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME, renderData.conicCenter);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME, renderData.conicScale);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
@@ -2897,9 +2977,9 @@ void TextVisual::ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, cons
   const Property::Index startOffsetIndex =
     Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME, renderData.startOffset);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME, renderData.bounds);
-  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME, static_cast<float>(renderData.type));
+  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_MODE_NAME, static_cast<float>(renderData.evaluationMode));
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME, renderData.radialCenter);
-  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME, renderData.radialScale);
+  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_EVALUATION_SCALE_NAME, renderData.GetEvaluationScale());
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME, renderData.conicCenter);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME, renderData.conicScale);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
@@ -2919,7 +2999,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
                              bool isOverlayStyle, bool embossEnabled)
 {
   std::optional<Text::GradientRasterContext> gradientContext;
-  if(Text::Internal::HasUserSpaceGradientSpan(mController->GetRenderTextModel()->GetGradientSpanModelData()))
+  if(Text::Internal::RequiresGradientRasterContext(mController->GetRenderTextModel()->GetGradientSpanModelData()))
   {
     const Vector2 offset = mImpl->mTransform ? mImpl->mTransform->mOffset : Vector2::ZERO;
     gradientContext.emplace(Text::GradientRasterContext{size,
@@ -3045,7 +3125,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     int verifiedHeight = data.GetHeight();
 
     // Set information for creating textures.
-    TilingInfo info(verifiedWidth, maxTextureSize);
+    TilingInfo info(verifiedWidth, std::min(verifiedHeight, maxTextureSize));
 
     // Get the pixel data of text.
     info.textPixelData = data;
@@ -3143,7 +3223,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     if(renderer)
     {
       // Register transform properties
-      mImpl->SetTransformUniforms(renderer);
+      if(!isHeightTiling)
+      {
+        mImpl->SetTransformUniforms(renderer);
+      }
 
       // Note, AddRenderer will ignore renderer if it is already added.
       actor.AddRenderer(renderer);
@@ -3277,7 +3360,7 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
     return false;
   }
   const auto padding        = ownerView.GetPadding();
-  const auto effectiveScale = GetImpl(ownerView).GetEffectiveScale();
+  const auto effectiveScale = Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(ownerView));
   // Capture quality and display radius from this revision, not a later Label
   // getter during runtime allocation (which can reenter or publish asynchronously).
   const auto  blurSettings = ResolveRuntimeRevealBlurSettings(data->blurMode, data->blurRadius * effectiveScale);
@@ -3300,7 +3383,7 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
            mTextShaderFeatureCache.GetShaderType() == features && mController->GetUiScale() == uiScale &&
            mController->GetRenderScale() == renderScale && mControl.GetHandle() == actor &&
            Dali::Integration::SceneHolder::Get(actor) == scene && actor.GetProperty<Vector3>(Actor::Property::SIZE) == ownerSize &&
-           ownerView.GetPadding() == padding && GetImpl(ownerView).GetEffectiveScale() == effectiveScale &&
+           ownerView.GetPadding() == padding && Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(ownerView)) == effectiveScale &&
            mRendererList.size() == 1u && mRendererList.front() == foreground;
   };
   if(options.radius == 0u || options.radius != ResolveRevealBlurRadius(static_cast<float>(options.radius)) || maximum <= 0 ||
@@ -3397,12 +3480,12 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
       {
         return false;
       }
-      const auto& atlas  = prepared.sourceAtlases[line.atlasIndex];
-      const auto& entry  = line.atlasRectangle;
-      const auto  width  = atlas.foreground.GetWidth();
-      const auto  height = atlas.foreground.GetHeight();
+      const auto& atlas       = prepared.sourceAtlases[line.atlasIndex];
+      const auto& entry       = line.atlasRectangle;
+      const auto  atlasWidth  = atlas.foreground.GetWidth();
+      const auto  atlasHeight = atlas.foreground.GetHeight();
       if(w == 0u || h == 0u || entry.width != w || entry.height != h || entry.x == 0u || entry.y == 0u ||
-         entry.x >= width || entry.y >= height || w >= width - entry.x || h >= height - entry.y)
+         entry.x >= atlasWidth || entry.y >= atlasHeight || w >= atlasWidth - entry.x || h >= atlasHeight - entry.y)
       {
         return false;
       }
@@ -3820,6 +3903,7 @@ Shader TextVisual::GetTextShader(VisualFactoryCache&                      factor
 {
   // Cache feature builder informations.
   mTextShaderFeatureCache = featureBuilder;
+  SetRequireRender(mController->IsTextCutout());
 
   Shader shader = mTextVisualShaderFactory.GetShader(factoryCache, mTextShaderFeatureCache);
   return shader;
@@ -3827,6 +3911,18 @@ Shader TextVisual::GetTextShader(VisualFactoryCache&                      factor
 
 void TextVisual::SetRequireRender(bool requireRender)
 {
+  // Independent foregrounds remain visible when the default text color is transparent.
+  requireRender = requireRender || mTextShaderFeatureCache.IsEnabledMultiColor() ||
+                  mTextShaderFeatureCache.IsEnabledAnyTextGradient();
+  if(!requireRender && mTextShaderFeatureCache.IsEnabledEmoji() && mController->IsMarqueeEnabled())
+  {
+    // Mixed marquee uses the scroller shader instead of the cached text shader.
+    // Its preserved color glyphs are independent of the default text alpha.
+    const auto* gradientData = GetTextVisualGradientData(mGradientData);
+    requireRender            = gradientData && Text::Internal::Gradient::IsRenderable(gradientData->mTextGradientStyle) &&
+                    !mController->IsEmbossEnabled();
+  }
+
   // Avoid function calls if there is no change.
   if(mTextRequireRender != requireRender)
   {

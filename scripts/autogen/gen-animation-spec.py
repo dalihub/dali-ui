@@ -41,11 +41,20 @@ TYPE_INFO = {
 # @ANIMATABLE(prop, type)
 TAG_RE = re.compile(r'//\s*@ANIMATABLE\(\s*(.+?)\s*,\s*(\w+)\s*\)')
 
-# @ANIMATABLE_MANUAL(PropertyName, type)
-MANUAL_TAG_RE = re.compile(r'//\s*@ANIMATABLE_MANUAL\(\s*(\w+)\s*,\s*(\w+)\s*\)')
+# @ANIMATABLE_MANUAL(PropertyName, type[, since])  e.g. (BackgroundColor, UiColor, 3_0.0)
+MANUAL_TAG_RE = re.compile(r'//\s*@ANIMATABLE_MANUAL\(\s*(\w+)\s*,\s*(\w+)\s*(?:,\s*([0-9][\w.]*)\s*)?\)')
 
-# @ANIMATION_CONFIG(Class) or @ANIMATION_CONFIG(Class, Parent)
-CONFIG_TAG_RE = re.compile(r'//\s*@ANIMATION_CONFIG\(\s*(\w+)(?:\s*,\s*(\w+))?\s*\)')
+# @SINCE version in the setter's doxygen block, propagated to generated methods
+SINCE_RE = re.compile(r'@SINCE_[0-9][\w.]*')
+
+# Fallback when neither the doc block nor the tag states a version
+DEFAULT_SINCE = '@SINCE_3_0.0'
+
+# @ANIMATION_CONFIG(Class[, Parent][, since])  e.g. (Label, View, 3_0.0)
+CONFIG_TAG_RE = re.compile(
+    r'//\s*@ANIMATION_CONFIG\(\s*(\w+)'
+    r'(?:\s*,\s*([A-Za-z]\w*))?'      # parent class (starts with a letter)
+    r'(?:\s*,\s*([0-9][\w.]*))?\s*\)')  # since version (starts with a digit)
 
 SETTER_RE = re.compile(r'(?:\w+&|void)\s+Set(\w+)\s*\(')
 
@@ -85,15 +94,23 @@ def parse_animatable_tags(header_path):
                 print(f"WARNING: Unknown type '{type_name}' at {header_path}:{i+1}", file=sys.stderr)
                 continue
 
+            since = None
             for j in range(i + 1, min(i + 30, len(lines))):
+                if since is None:
+                    since_m = SINCE_RE.search(lines[j])
+                    if since_m:
+                        since = since_m.group(0)
                 sm = SETTER_RE.search(lines[j])
                 if sm:
+                    if since is None:
+                        print(f"WARNING: No @SINCE in doc block of Set{sm.group(1)} "
+                              f"at {header_path}:{i+1}; using {DEFAULT_SINCE}", file=sys.stderr)
                     entries.append({
                         'name': sm.group(1),
                         'prop_index': prop_index,
                         'type': type_name,
                         'type_info': TYPE_INFO[type_name],
-
+                        'since': since or DEFAULT_SINCE,
                         'is_manual': False,
                     })
                     break
@@ -109,11 +126,16 @@ def parse_animatable_tags(header_path):
                 print(f"WARNING: Unknown type '{type_name}' at {header_path}:{i+1}", file=sys.stderr)
                 continue
 
+            if not m.group(3):
+                print(f"WARNING: No since version on @ANIMATABLE_MANUAL({prop_name}, ...) "
+                      f"at {header_path}:{i+1}; using {DEFAULT_SINCE}", file=sys.stderr)
+
             entries.append({
                 'name': prop_name,
                 'prop_index': None,
                 'type': type_name,
                 'type_info': TYPE_INFO[type_name],
+                'since': f'@SINCE_{m.group(3)}' if m.group(3) else DEFAULT_SINCE,
                 'is_manual': True,
             })
 
@@ -126,7 +148,12 @@ def parse_animation_config(header_path):
         for line in f:
             m = CONFIG_TAG_RE.search(line)
             if m:
-                return {'cls': m.group(1), 'parent': m.group(2), 'header': header_path}
+                if not m.group(3):
+                    print(f"WARNING: No since version on @ANIMATION_CONFIG({m.group(1)}, ...) "
+                          f"in {header_path}; using {DEFAULT_SINCE}", file=sys.stderr)
+                since = f'@SINCE_{m.group(3)}' if m.group(3) else DEFAULT_SINCE
+                return {'cls': m.group(1), 'parent': m.group(2), 'since': since,
+                        'header': header_path}
     return None
 
 
@@ -134,7 +161,7 @@ def parse_animation_config(header_path):
 # Doxygen generation
 # ---------------------------------------------------------------------------
 
-def _gen_doxygen(name_words, is_by):
+def _gen_doxygen(name_words, is_by, since):
     brief_name_overrides = {
         'shadow blur radius': 'first shadow blur radius',
         'shadow opacity': 'first shadow opacity',
@@ -145,7 +172,7 @@ def _gen_doxygen(name_words, is_by):
               ('duration', 'The animation duration'),
               ('alpha', 'The alpha function (default: linear)'),
               ('delay', 'The delay before starting (default: 0)')]
-    lines = ['/**', f' * @brief {brief}', ' *']
+    lines = ['/**', f' * @brief {brief}', ' *', f' * {since}']
     for pname, pdesc in params:
         lines.append(f' * @param[in] {pname} {pdesc}')
     lines.append(' */')
@@ -298,7 +325,7 @@ def _gen_methods_block(entries, parent_entries, cls, parent_cls, gen_own_fn, gen
         for entry in parent_entries:
             nw = _camel_to_words(entry['name'])
             for is_by in (False, True):
-                lines.append(_indent(2, _gen_doxygen(nw, is_by)))
+                lines.append(_indent(2, _gen_doxygen(nw, is_by, entry['since'])))
                 lines.append(_indent(2, gen_parent_fn(cls, parent_cls, entry, is_by)))
             lines.append('')
 
@@ -310,7 +337,7 @@ def _gen_methods_block(entries, parent_entries, cls, parent_cls, gen_own_fn, gen
         for entry in entries:
             nw = _camel_to_words(entry['name'])
             for is_by in (False, True):
-                lines.append(_indent(2, _gen_doxygen(nw, is_by)))
+                lines.append(_indent(2, _gen_doxygen(nw, is_by, entry['since'])))
                 lines.append(_indent(2, gen_own_fn(cls, entry, is_by)))
             lines.append('')
 
@@ -371,7 +398,8 @@ def _root_class(cls, configs):
     return root
 
 
-def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs=None, public_api_root=None):
+def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs=None, public_api_root=None, since=None):
+    since = since or DEFAULT_SINCE
     """Generate all files for one component class."""
     bridge = f'{cls}AnimationBridge'
     spec = f'{cls}AnimationSpec'
@@ -432,6 +460,7 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
         'PARENT_BRIDGE': parent_bridge or '',
         'PARENT_INCLUDE': f'#include <{P}/public-api/animation/{_class_to_filename(parent_bridge)}.autogen.h>' if has_parent else '',
         'VIEW_INCLUDE': f'#include <{view_include}>',
+        'SINCE': since,
         'METHODS': bridge_methods,
     }))
 
@@ -497,7 +526,7 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
 
     _out(pub_anim_dir, f'{spec_fn}.autogen.h', render(load_template(sh_tmpl), {
         'SPEC_CLASS': spec, 'VIEW_CLASS': cls, 'VIEW_INSTANCE': view_instance,
-        'IMPL_CLASS': impl, 'METHODS': spec_methods,
+        'IMPL_CLASS': impl, 'METHODS': spec_methods, 'SINCE': since,
         'PARENT_SPEC': parent_spec or '',
         'PARENT_INCLUDE': f'#include <{P}/public-api/animation/{_class_to_filename(parent_spec)}.autogen.h>' if has_parent else '',
     }))
@@ -634,7 +663,7 @@ def main():
             parent = cfg.get('parent')
             parent_header = configs[parent]['header'] if parent and parent in configs else None
             print(f'[{cls}] {cfg["header"]}')
-            generate_for_class(cls, cfg['header'], parent, parent_header, configs, args.scan_dir)
+            generate_for_class(cls, cfg['header'], parent, parent_header, configs, args.scan_dir, since=cfg.get('since'))
         return
 
     if not args.cls or not args.header:

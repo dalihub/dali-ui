@@ -54,6 +54,7 @@ class GlViewImpl;
  * parent.Add(glView);
  * @endcode
  *
+ * @SINCE_3_0.0
  * @note The callbacks run on a rendering thread, not the event thread. Do not call DALi APIs from inside them.
  */
 class DALI_UI_API GlView : public View
@@ -61,6 +62,7 @@ class DALI_UI_API GlView : public View
 public: // Types
   /**
    * @brief Determines how GlView executes the application's GL code.
+   * @SINCE_3_0.0
    */
   enum class BackendMode
   {
@@ -77,6 +79,7 @@ public: // Types
      * The context shares resources with DALi's, so DALi's textures and buffers are
      * reachable, but context-local objects such as vertex array objects and framebuffer
      * objects are not.
+     * @SINCE_3_0.0
      */
     DIRECT_RENDERING,
 
@@ -92,6 +95,7 @@ public: // Types
      * application's responsibility - failing to restore it corrupts the rest of the
      * DALi rendering in the same frame.
      *
+     * @SINCE_3_0.0
      * @warning The framework resets a baseline GL state before and after the callback,
      *          but the following are NOT covered and must be restored by the application:
      *          viewport and scissor box values, pixel store alignment, the bound program,
@@ -114,6 +118,7 @@ public: // Types
      * direct backends inherit from DALi and forbid changing. The size to set it
      * to is GlViewRenderInfo::GetSize().
      *
+     * @SINCE_3_0.0
      * @note The buffer is described by GlViewOffscreenConfig, which New() only
      *       reads for this backend.
      * @note GlViewRenderInfo describes the buffer rather than the screen here,
@@ -125,22 +130,25 @@ public: // Types
 
   /**
    * @brief Determines when GlView asks the application to render.
+   * @SINCE_3_0.0
    */
   enum class RenderingMode
   {
-    CONTINUOUS, ///< The render frame callback is invoked every frame.
-    ON_DEMAND,  ///< The render frame callback is invoked only when GlView::RenderOnce() is called.
+    CONTINUOUS, ///< The render frame callback is invoked every frame. @SINCE_3_0.0
+    ON_DEMAND,  ///< The render frame callback is invoked only when GlView::RenderOnce() is called. @SINCE_3_0.0
   };
 
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized GlView handle.
+   * @SINCE_3_0.0
    */
   GlView();
 
   /**
    * @brief Creates an initialized GlView using the given backend.
    *
+   * @SINCE_3_0.0
    * @param[in] backendMode The backend used to execute the application's GL code
    * @param[in] offscreenConfig Describes the offscreen buffer. Only read for
    *                            BackendMode::OFFSCREEN_RENDERING - the direct
@@ -154,12 +162,14 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~GlView();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] glView Handle to copy. The copy will point at the same implementation
    */
   GlView(const GlView& glView);
@@ -167,6 +177,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   GlView(GlView&& rhs) noexcept;
@@ -175,6 +186,7 @@ public: // Operators
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] glView Object to assign this to
    * @return Reference to this
    */
@@ -183,6 +195,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -197,6 +210,7 @@ public: // Static methods
    * If handle points to a GlView, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a GlView or an uninitialized handle
    */
@@ -206,6 +220,7 @@ public: // Callback registration
   /**
    * @brief Registers the GL callbacks.
    *
+   * @SINCE_3_0.0
    * @param[in] initCallback        Creates GL resources. Invoked once, immediately before
    *                                the first render frame callback.
    * @param[in] renderFrameCallback Renders one frame. Return true if new content was
@@ -243,6 +258,7 @@ public: // Callback registration
    * position of a texture in @p textures is the only thing identifying it there, so keep
    * the order stable.
    *
+   * @SINCE_3_0.0
    * @param[in] textures The textures to bind
    *
    * @note May be called at any time, including while the view is rendering, which is
@@ -259,6 +275,7 @@ public: // Rendering control
   /**
    * @brief Sets when the render frame callback is invoked.
    *
+   * @SINCE_3_0.0
    * @param[in] mode The rendering mode to use
    *
    * @note The default is RenderingMode::CONTINUOUS.
@@ -268,6 +285,7 @@ public: // Rendering control
   /**
    * @brief Returns when the render frame callback is invoked.
    *
+   * @SINCE_3_0.0
    * @return The current rendering mode
    */
   RenderingMode GetRenderingMode() const;
@@ -275,6 +293,7 @@ public: // Rendering control
   /**
    * @brief Requests one frame while in RenderingMode::ON_DEMAND.
    *
+   * @SINCE_3_0.0
    * @note Has no effect while the window is hidden, as no frames are produced then.
    */
   void RenderOnce();
@@ -282,6 +301,7 @@ public: // Rendering control
   /**
    * @brief Returns the backend this view was created with.
    *
+   * @SINCE_3_0.0
    * @return The backend mode
    */
   BackendMode GetBackendMode() const;
@@ -305,6 +325,7 @@ public: // Rendering control
    * replacing a terminated view means keeping the retired callback target around rather
    * than reusing it.
    *
+   * @SINCE_3_0.0
    * @param[in] onTerminated Invoked on the event thread once the sequence is complete
    *
    * @note This must be called explicitly. It is deliberately not called on scene

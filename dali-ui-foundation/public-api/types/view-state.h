@@ -50,12 +50,14 @@ namespace Ui
  * // Custom state
  * static const ViewState Loading = ViewState::Create("Loading");
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ViewState
 {
 public:
   /**
    * @brief Creates a Normal state (no bits set).
+   * @SINCE_3_0.0
    */
   constexpr ViewState()
   : mBits(0u)
@@ -86,6 +88,7 @@ public:
    * If the name was already registered, the same bitmask is returned.
    * "Normal" always returns zero, "All" always returns full mask.
    *
+   * @SINCE_3_0.0
    * @param[in] name The unique name for the state
    * @return The ViewState with the assigned bitmask
    * @throws DaliException if no more bits are available (max 32 custom states)
@@ -97,6 +100,7 @@ public:
   /**
    * @brief Checks if this state fully contains the specified state.
    *
+   * @SINCE_3_0.0
    * @param[in] other The state to check for
    * @return True if all bits of @p other are set in this state
    */
@@ -108,6 +112,7 @@ public:
   /**
    * @brief Checks if there is any overlap between this and the other state.
    *
+   * @SINCE_3_0.0
    * @param[in] other The state to check against
    * @return True if any common bit is set
    */
@@ -119,6 +124,7 @@ public:
   /**
    * @brief Checks if this is the Normal state (no bits set).
    *
+   * @SINCE_3_0.0
    * @return True if no state bits are set
    */
   constexpr bool IsNormal() const
@@ -129,6 +135,7 @@ public:
   /**
    * @brief Checks if this state contains DISABLED or PSEUDO_DISABLED.
    *
+   * @SINCE_3_0.0
    * @return True if either DISABLED or PSEUDO_DISABLED is set
    */
   bool IsAnyDisabled() const
@@ -139,6 +146,7 @@ public:
   /**
    * @brief Returns a human-readable string representation for debugging.
    *
+   * @SINCE_3_0.0
    * @return A string like "Focused, Pressed" or "Normal"
    */
   String ToString() const;
@@ -148,6 +156,7 @@ public:
 
   /**
    * @brief Checks if this state was newly added (not in prev, present in cur).
+   * @SINCE_3_0.0
    */
   constexpr bool WasAdded(const ViewState& prev, const ViewState& cur) const
   {
@@ -156,6 +165,7 @@ public:
 
   /**
    * @brief Checks if this state was removed (present in prev, not in cur).
+   * @SINCE_3_0.0
    */
   constexpr bool WasRemoved(const ViewState& prev, const ViewState& cur) const
   {
@@ -164,6 +174,7 @@ public:
 
   /**
    * @brief Checks if this state was either added or removed.
+   * @SINCE_3_0.0
    */
   constexpr bool WasChanged(const ViewState& prev, const ViewState& cur) const
   {
@@ -175,6 +186,7 @@ public:
    *
    * Unlike WasChanged(), this works with composite states — it returns true
    * if any constituent bit was toggled.
+   * @SINCE_3_0.0
    */
   constexpr bool AnyChanged(const ViewState& prev, const ViewState& cur) const
   {

@@ -38,6 +38,7 @@ namespace StyleSheet
  * Create a separate sheet only when an extension author needs to replace the whole
  * style sheet through UiConfig::ResetStyleSheet().
  *
+ * @SINCE_3_0.0
  * @return A new components style sheet
  */
 DALI_UI_COMPONENTS_API UiStyleSheet New();

@@ -30,12 +30,13 @@ namespace Ui
 
 /**
  * @brief Controls whether a selection-state change animates.
+ * @SINCE_3_0.0
  */
 enum class SelectionAnimationMode : uint8_t
 {
-  AUTO     = 0, ///< Animate user-initiated changes while on-scene and visible; programmatic changes snap.
-  ENABLED  = 1, ///< Animate all state changes while on-scene and visible.
-  DISABLED = 2  ///< Never animate state changes.
+  AUTO     = 0, ///< Animate user-initiated changes while on-scene and visible; programmatic changes snap. @SINCE_3_0.0
+  ENABLED  = 1, ///< Animate all state changes while on-scene and visible. @SINCE_3_0.0
+  DISABLED = 2  ///< Never animate state changes. @SINCE_3_0.0
 };
 
 /** @} */

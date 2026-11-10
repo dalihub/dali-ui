@@ -49,6 +49,7 @@ namespace FocusManager
  * a navigation reservation. Independent Windows support visible, enabled,
  * focusable general Views; InputField and InputEditor are rejected.
  *
+ * @SINCE_3_0.0
  * @pre This function must be called from the UI thread.
  * @pre @p view must be connected to a valid scene.
  * @param[in] view The View to receive key input
@@ -66,6 +67,7 @@ DALI_UI_API bool SetKeyInputTarget(Ui::View view);
  * Clearing an editable target sends its focus-lost notification and may end
  * its editing session or deactivate its input method context.
  *
+ * @SINCE_3_0.0
  * @pre This function must be called from the UI thread.
  * @param[in] view The expected current key-input target
  * @return true if @p view was the current target and was cleared; false otherwise
@@ -79,6 +81,7 @@ DALI_UI_API bool ClearKeyInputTarget(Ui::View view);
  * whether a View is capable of becoming a key-input target. It also does not
  * indicate navigation focus, focus indication, or accessibility focus.
  *
+ * @SINCE_3_0.0
  * @pre This function must be called from the UI thread.
  * @param[in] view The View to check
  * @return true if @p view is the current key-input target; false otherwise

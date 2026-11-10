@@ -37,6 +37,7 @@ class SwitchImpl;
  * Selection state, click-to-toggle, SelectionChangedSignal, and enabled state
  * are inherited from SelectableView. Horizontal dragging is provided by the
  * component, while focused execution keys use the inherited selectable path.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API Switch : public SelectableView
 {
@@ -57,6 +58,7 @@ public:
 
   /**
    * @brief Sets/gets how a selection-state change animates (default AUTO).
+   * @SINCE_3_0.0
    */
   void                   SetSelectionAnimationMode(SelectionAnimationMode mode);
   SelectionAnimationMode GetSelectionAnimationMode() const;

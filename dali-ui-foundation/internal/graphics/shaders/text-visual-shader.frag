@@ -58,11 +58,11 @@ UNIFORM_BLOCK FragBlock
   UNIFORM lowp vec4 uColor;
 
   #ifdef IS_REQUIRED_TEXT_GRADIENT
-  UNIFORM highp float uTextGradientType;
+  UNIFORM highp float uTextGradientEvaluationMode;
   UNIFORM highp vec2 uTextGradientStartPosition;
   UNIFORM highp vec2 uTextGradientEndPosition;
   UNIFORM highp vec2 uTextGradientRadialCenter;
-  UNIFORM highp vec2 uTextGradientRadialScale;
+  UNIFORM highp vec2 uTextGradientEvaluationScale;
   UNIFORM highp vec2 uTextGradientConicCenter;
   UNIFORM highp vec2 uTextGradientConicScale;
   UNIFORM highp float uTextGradientConicStartAngle;
@@ -71,11 +71,11 @@ UNIFORM_BLOCK FragBlock
   #endif
 
   #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
-  UNIFORM highp float uTextGradientOverlayType;
+  UNIFORM highp float uTextGradientOverlayEvaluationMode;
   UNIFORM highp vec2 uTextGradientOverlayStartPosition;
   UNIFORM highp vec2 uTextGradientOverlayEndPosition;
   UNIFORM highp vec2 uTextGradientOverlayRadialCenter;
-  UNIFORM highp vec2 uTextGradientOverlayRadialScale;
+  UNIFORM highp vec2 uTextGradientOverlayEvaluationScale;
   UNIFORM highp vec2 uTextGradientOverlayConicCenter;
   UNIFORM highp vec2 uTextGradientOverlayConicScale;
   UNIFORM highp float uTextGradientOverlayConicStartAngle;
@@ -101,15 +101,21 @@ UNIFORM_BLOCK FragBlock
 #ifdef IS_REQUIRED_TEXT_GRADIENT
 highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
 {
-  const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
-  const highp float TEXT_GRADIENT_TYPE_CONIC = 3.0;
+  const highp float TEXT_GRADIENT_EVALUATION_RADIAL = 2.0;
+  const highp float TEXT_GRADIENT_EVALUATION_CONIC  = 3.0;
   const highp float TEXT_GRADIENT_INV_TWO_PI = 0.15915494309189533576888376337251;
-  if(abs(uTextGradientType - TEXT_GRADIENT_TYPE_RADIAL) < 0.5)
+  if(abs(uTextGradientEvaluationMode - TEXT_GRADIENT_EVALUATION_RADIAL) < 0.5)
   {
-    return length((textGradientCoord - uTextGradientRadialCenter) * uTextGradientRadialScale);
+    return length((textGradientCoord - uTextGradientRadialCenter) * uTextGradientEvaluationScale);
   }
-  if(abs(uTextGradientType - TEXT_GRADIENT_TYPE_CONIC) < 0.5)
+  // Conic and authored-space linear evaluations share this dispatch.
+  // Normalized linear evaluation keeps its original projection and branch count.
+  if(uTextGradientEvaluationMode > TEXT_GRADIENT_EVALUATION_CONIC - 0.5)
   {
+    if(uTextGradientEvaluationMode > TEXT_GRADIENT_EVALUATION_CONIC + 0.5)
+    {
+      return dot(textGradientCoord - uTextGradientStartPosition, uTextGradientEvaluationScale);
+    }
     highp vec2 conicVector = (textGradientCoord - uTextGradientConicCenter) * uTextGradientConicScale;
     highp float angle = atan(conicVector.y, conicVector.x) - uTextGradientConicStartAngle;
     return fract(angle * TEXT_GRADIENT_INV_TWO_PI);
@@ -124,15 +130,21 @@ highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
 #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
 highp float EvaluateTextGradientOverlayPosition(highp vec2 textGradientCoord)
 {
-  const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
-  const highp float TEXT_GRADIENT_TYPE_CONIC = 3.0;
+  const highp float TEXT_GRADIENT_EVALUATION_RADIAL = 2.0;
+  const highp float TEXT_GRADIENT_EVALUATION_CONIC  = 3.0;
   const highp float TEXT_GRADIENT_INV_TWO_PI = 0.15915494309189533576888376337251;
-  if(abs(uTextGradientOverlayType - TEXT_GRADIENT_TYPE_RADIAL) < 0.5)
+  if(abs(uTextGradientOverlayEvaluationMode - TEXT_GRADIENT_EVALUATION_RADIAL) < 0.5)
   {
-    return length((textGradientCoord - uTextGradientOverlayRadialCenter) * uTextGradientOverlayRadialScale);
+    return length((textGradientCoord - uTextGradientOverlayRadialCenter) * uTextGradientOverlayEvaluationScale);
   }
-  if(abs(uTextGradientOverlayType - TEXT_GRADIENT_TYPE_CONIC) < 0.5)
+  // Conic and authored-space linear evaluations share this dispatch.
+  // Normalized linear evaluation keeps its original projection and branch count.
+  if(uTextGradientOverlayEvaluationMode > TEXT_GRADIENT_EVALUATION_CONIC - 0.5)
   {
+    if(uTextGradientOverlayEvaluationMode > TEXT_GRADIENT_EVALUATION_CONIC + 0.5)
+    {
+      return dot(textGradientCoord - uTextGradientOverlayStartPosition, uTextGradientOverlayEvaluationScale);
+    }
     highp vec2 conicVector = (textGradientCoord - uTextGradientOverlayConicCenter) * uTextGradientOverlayConicScale;
     highp float angle = atan(conicVector.y, conicVector.x) - uTextGradientOverlayConicStartAngle;
     return fract(angle * TEXT_GRADIENT_INV_TWO_PI);
@@ -145,8 +157,8 @@ highp float EvaluateTextGradientOverlayPosition(highp vec2 textGradientCoord)
 
 mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill, highp vec2 texCoord)
 {
-  mediump float glyphAlpha = baseFill.a;
-  if(glyphAlpha <= 0.000001)
+  mediump float foregroundAlpha = baseFill.a;
+  if(foregroundAlpha <= 0.0)
   {
     return baseFill;
   }
@@ -157,20 +169,19 @@ mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill, highp vec2 texCoord
   highp float gradientPosition = EvaluateTextGradientOverlayPosition(textGradientOverlayCoord);
   mediump vec4 overlayColor =
     TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5));
-  mediump vec3 baseRgb = baseFill.rgb / max(glyphAlpha, 0.000001);
+  // Both inputs are premultiplied. Overlay changes color within the existing
+  // foreground alpha; it does not add glyph coverage or increase opacity.
   mediump vec3 blendedRgb;
-
   const highp float TEXT_GRADIENT_OVERLAY_MODE_SCREEN = 1.0;
   if(abs(uTextGradientOverlayMode - TEXT_GRADIENT_OVERLAY_MODE_SCREEN) < 0.5)
   {
-    mediump vec3 screen = vec3(1.0) - (vec3(1.0) - baseRgb) * (vec3(1.0) - overlayColor.rgb);
-    blendedRgb = mix(baseRgb, screen, overlayColor.a);
+    blendedRgb = baseFill.rgb + overlayColor.rgb * (foregroundAlpha - baseFill.rgb);
   }
   else
   {
-    blendedRgb = overlayColor.rgb * overlayColor.a + baseRgb * (1.0 - overlayColor.a);
+    blendedRgb = overlayColor.rgb * foregroundAlpha + baseFill.rgb * (1.0 - overlayColor.a);
   }
-  return vec4(blendedRgb * glyphAlpha, glyphAlpha);
+  return vec4(blendedRgb, foregroundAlpha);
 }
 #endif
 
@@ -228,8 +239,7 @@ void main()
     (vTexCoord - gradientBounds.xy) / max(gradientBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
-  mediump vec4 gradientFill = vec4(gradientColor.rgb * textTexture,
-                                   gradientColor.a * textTexture * uTextColorAnimatable.a);
+  mediump vec4 gradientFill = gradientColor * textTexture;
   textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);
 #elif defined(IS_REQUIRED_TEXT_GRADIENT)
   mediump float textTexture = TEXTURE(sTexture, TEXT_SOURCE_UV(vTexCoord)).r;
@@ -238,7 +248,7 @@ void main()
     (vTexCoord - gradientBounds.xy) / max(gradientBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
-  textColor = vec4(gradientColor.rgb * textTexture, gradientColor.a * textTexture * uTextColorAnimatable.a);
+  textColor = gradientColor * textTexture;
 #elif defined(IS_REQUIRED_MULTI_COLOR) || defined(IS_REQUIRED_EMOJI)
   // Multiple color or use emoji.
   textColor = TEXTURE(sTexture, TEXT_SOURCE_UV(vTexCoord));

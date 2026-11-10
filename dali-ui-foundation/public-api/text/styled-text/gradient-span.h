@@ -41,6 +41,12 @@ namespace Text
  * paint for the overlapping characters. Color glyphs, such as emoji, retain
  * their native colors.
  *
+ * Monochrome glyphs use the gradient RGBA independently of the default
+ * TextColor. Color glyphs are not gradient-filled. Label color glyphs retain
+ * the fallback foreground alpha: TextColor alpha unless an explicit foreground
+ * color supplies it.
+ *
+ * @SINCE_3_0.0
  * @note This is a static paint payload. To change the gradient, replace the
  * span with a newly created one.
  */
@@ -52,22 +58,25 @@ public:
    *
    * The gradient's Units determine how authored coordinates are interpreted
    * within the selected bounds.
+   * @SINCE_3_0.0
    */
   enum class BoundsMode : uint8_t
   {
-    SPAN_BOUND = 0u, ///< The union of visible glyph ink bounds owned by this span.
-    CONTENT_BOUND,   ///< The laid-out bounds of the complete text content.
-    VIEW_BOUND       ///< The bounds of the text view.
+    SPAN_BOUND = 0u, ///< The union of visible glyph ink bounds owned by this span. @SINCE_3_0.0
+    CONTENT_BOUND,   ///< The laid-out bounds of the complete text content. @SINCE_3_0.0
+    VIEW_BOUND       ///< The bounds of the text view. @SINCE_3_0.0
   };
 
   /**
    * @brief Creates an uninitialized GradientSpan handle.
+   * @SINCE_3_0.0
    */
   GradientSpan() = default;
 
   /**
    * @brief Creates a GradientSpan with an immutable authored gradient snapshot.
    *
+   * @SINCE_3_0.0
    * @param[in] gradient The foreground gradient
    * @return A new SPAN_BOUND GradientSpan
    */
@@ -76,6 +85,7 @@ public:
   /**
    * @brief Creates a GradientSpan with an immutable authored gradient snapshot.
    *
+   * @SINCE_3_0.0
    * @param[in] gradient The foreground gradient
    * @param[in] boundsMode The coordinate bounds used to evaluate the gradient
    * @return A new GradientSpan
@@ -85,6 +95,7 @@ public:
   /**
    * @brief Downcasts a handle to GradientSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized GradientSpan on success, otherwise empty
    */
@@ -93,6 +104,7 @@ public:
   /**
    * @brief Gets a copy of the authored gradient snapshot.
    *
+   * @SINCE_3_0.0
    * @return The foreground gradient
    */
   Gradient::Base GetGradient() const;
@@ -100,6 +112,7 @@ public:
   /**
    * @brief Gets the coordinate bounds mode.
    *
+   * @SINCE_3_0.0
    * @return The coordinate bounds mode
    */
   BoundsMode GetBoundsMode() const;
@@ -108,6 +121,7 @@ private:
   /**
    * @brief Creates a GradientSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL GradientSpan(BaseObject* impl);

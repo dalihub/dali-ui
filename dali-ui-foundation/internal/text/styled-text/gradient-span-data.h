@@ -73,18 +73,19 @@ struct GradientSpanModelData
 };
 
 /**
- * @brief Checks whether canonical span paints require USER_SPACE coordinates.
+ * @brief Checks whether canonical span paints require display or view coordinates.
  *
  * @param[in] data Optional span data from the current render model.
- * @return True if at least one span paint uses USER_SPACE.
+ * @return True if at least one span paint uses USER_SPACE or VIEW_BOUND.
  */
-inline bool HasUserSpaceGradientSpan(const GradientSpanModelData* data)
+inline bool RequiresGradientRasterContext(const GradientSpanModelData* data)
 {
   if(data)
   {
     for(const auto& paint : data->paints)
     {
-      if(paint.style.units == Ui::Gradient::Units::USER_SPACE)
+      if(paint.style.units == Ui::Gradient::Units::USER_SPACE ||
+         paint.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND)
       {
         return true;
       }

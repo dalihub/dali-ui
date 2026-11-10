@@ -39,18 +39,21 @@ namespace FontVariation
  * "slnt", and "opsz".
  *
  * This object is used to configure font variation settings explicitly.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Axis
 {
 public:
   /**
    * @brief Creates a font variation axis with default values.
+   * @SINCE_3_0.0
    */
   Axis();
 
   /**
    * @brief Creates a font variation axis with the given parameters.
    *
+   * @SINCE_3_0.0
    * @param[in] tag The OpenType axis tag.
    * @param[in] value The axis value.
    */
@@ -59,6 +62,7 @@ public:
   /**
    * @brief Creates a font variation axis by copying another axis.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font variation axis to copy.
    */
   Axis(const Axis& rhs);
@@ -66,6 +70,7 @@ public:
   /**
    * @brief Creates a font variation axis by moving another axis.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font variation axis to move.
    */
   Axis(Axis&& rhs) noexcept;
@@ -73,6 +78,7 @@ public:
   /**
    * @brief Copies another font variation axis to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font variation axis to copy.
    */
   Axis& operator=(const Axis& rhs);
@@ -80,12 +86,14 @@ public:
   /**
    * @brief Moves another font variation axis to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The font variation axis to move.
    */
   Axis& operator=(Axis&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Axis();
 
@@ -93,6 +101,7 @@ public:
   /**
    * @brief Sets the axis tag.
    *
+   * @SINCE_3_0.0
    * @param[in] tag The OpenType axis tag.
    */
   void SetTag(const Dali::String& tag);
@@ -100,6 +109,7 @@ public:
   /**
    * @brief Returns the axis tag.
    *
+   * @SINCE_3_0.0
    * @return The OpenType axis tag.
    */
   const Dali::String& GetTag() const;
@@ -107,6 +117,7 @@ public:
   /**
    * @brief Sets the axis value.
    *
+   * @SINCE_3_0.0
    * @param[in] value The axis value.
    */
   void SetValue(float value);
@@ -114,6 +125,7 @@ public:
   /**
    * @brief Returns the axis value.
    *
+   * @SINCE_3_0.0
    * @return The axis value.
    */
   float GetValue() const;

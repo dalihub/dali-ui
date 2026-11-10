@@ -30,13 +30,31 @@ namespace Ui
  * @brief Controls how a view participates in the system-driven UiScale.
  *
  * Mirrors the semantics of LayoutDirection / RTL: each view can inherit
- * from its parent, force-apply the system scale, or opt out entirely.
+ * from its parent, force-apply the system scale, or opt out of it.
+ *
+ * The policy selects the SYSTEM-scale term of a view's effective scale only. The
+ * per-window scale set through Extension::LayoutScaleManager::SetWindowScale() is an
+ * independent multiplier on top of whichever term the policy selects, so it applies to
+ * DISABLED views as well; the comments below name the term the policy chooses, not the
+ * resulting effective scale. (Both terms are 1.0 while
+ * Extension::LayoutScaleManager::SetScalable(false) is in force.)
+ *
+ * @deprecated Use Extension::UiScalePolicy instead, an extension API for platform integrators
+ * and module providers (dali-ui-foundation/extension-api/ui-scale-policy.h). This enumeration
+ * is used only by the deprecated View::SetUiScalePolicy(), View::GetUiScalePolicy(),
+ * ViewImpl::SetUiScalePolicy() and ViewImpl::GetUiScalePolicy(), which take and return it,
+ * and is removed together with them. Extension::View::SetUiScalePolicy() and
+ * Extension::View::GetUiScalePolicy() take and return Extension::UiScalePolicy, a distinct
+ * type with the same enumerators and values: an enumerator of the same name selects the same
+ * policy, and static_cast<Extension::UiScalePolicy>(policy) converts a value read through the
+ * deprecated members.
+ * @SINCE_3_0.0
  */
 enum class UiScalePolicy : uint8_t
 {
-  INHERIT  = 0, ///< Inherit effective scale from parent; root inherits from UiScaleManager (default).
-  ENABLED  = 1, ///< Always apply the current UiScaleManager scale, ignoring parent policy.
-  DISABLED = 2, ///< Opt out of scaling (effectiveScale = 1.0); descendant INHERIT views also get 1.0.
+  INHERIT  = 0, ///< Inherit effective scale from parent; root takes the UI scale of Extension::LayoutScaleManager (default). @SINCE_3_0.0
+  ENABLED  = 1, ///< Always apply the current Extension::LayoutScaleManager UI scale, ignoring parent policy. @SINCE_3_0.0
+  DISABLED = 2, ///< Opt out of the system scale (its term is 1.0); descendant INHERIT views also opt out. @SINCE_3_0.0
 };
 
 } // namespace Ui

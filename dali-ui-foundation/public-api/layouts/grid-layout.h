@@ -47,44 +47,52 @@ class GridLayoutImpl;
  *   entire cell. When a child's measured size is larger than the cell, the
  *   child is clipped to the cell bounds regardless of alignment.
  * - @b Margin: Applied inside the cell, reducing the space available for the child.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API GridLayout : public Layout
 {
 public:
   /**
    * @brief Creates an uninitialized GridLayout handle.
+   * @SINCE_3_0.0
    */
   GridLayout();
 
   /**
    * @brief Creates a new GridLayout.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated GridLayout
    */
   static GridLayout New();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   GridLayout(const GridLayout& layout);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   GridLayout(GridLayout&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~GridLayout();
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   GridLayout& operator=(const GridLayout& handle);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   GridLayout& operator=(GridLayout&& rhs) noexcept;
 
@@ -92,6 +100,7 @@ public:
 
   /**
    * @brief Downcasts a handle to GridLayout handle.
+   * @SINCE_3_0.0
    */
   static GridLayout DownCast(BaseHandle handle);
 
@@ -99,6 +108,7 @@ public: // Row/Column Definition API
   /**
    * @brief Adds a row definition.
    *
+   * @SINCE_3_0.0
    * @param[in] height The row height specification
    */
   void AddRowDefinition(GridLength height);
@@ -106,6 +116,7 @@ public: // Row/Column Definition API
   /**
    * @brief Adds a column definition.
    *
+   * @SINCE_3_0.0
    * @param[in] width The column width specification
    */
   void AddColumnDefinition(GridLength width);
@@ -113,6 +124,7 @@ public: // Row/Column Definition API
   /**
    * @brief Sets all row definitions at once.
    *
+   * @SINCE_3_0.0
    * @param[in] rows Vector of row height specifications
    */
   void SetRowDefinitions(const Dali::Vector<GridLength>& rows);
@@ -120,6 +132,7 @@ public: // Row/Column Definition API
   /**
    * @brief Sets all column definitions at once.
    *
+   * @SINCE_3_0.0
    * @param[in] columns Vector of column width specifications
    */
   void SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
@@ -127,6 +140,7 @@ public: // Row/Column Definition API
   /**
    * @brief Gets the row definitions.
    *
+   * @SINCE_3_0.0
    * @return Vector of row height specifications
    */
   Dali::Vector<GridLength> GetRowDefinitions() const;
@@ -134,6 +148,7 @@ public: // Row/Column Definition API
   /**
    * @brief Gets the column definitions.
    *
+   * @SINCE_3_0.0
    * @return Vector of column width specifications
    */
   Dali::Vector<GridLength> GetColumnDefinitions() const;
@@ -141,6 +156,7 @@ public: // Row/Column Definition API
   /**
    * @brief Gets the number of rows.
    *
+   * @SINCE_3_0.0
    * @return The row count
    */
   uint32_t GetRowCount() const;
@@ -148,17 +164,20 @@ public: // Row/Column Definition API
   /**
    * @brief Gets the number of columns.
    *
+   * @SINCE_3_0.0
    * @return The column count
    */
   uint32_t GetColumnCount() const;
 
   /**
    * @brief Clears all row definitions.
+   * @SINCE_3_0.0
    */
   void ClearRowDefinitions();
 
   /**
    * @brief Clears all column definitions.
+   * @SINCE_3_0.0
    */
   void ClearColumnDefinitions();
 
@@ -166,6 +185,7 @@ public: // Spacing API
   /**
    * @brief Sets the row spacing.
    *
+   * @SINCE_3_0.0
    * @param[in] spacing The spacing between rows
    */
   void SetRowSpacing(float spacing);
@@ -173,6 +193,7 @@ public: // Spacing API
   /**
    * @brief Gets the row spacing.
    *
+   * @SINCE_3_0.0
    * @return The row spacing
    */
   float GetRowSpacing() const;
@@ -180,6 +201,7 @@ public: // Spacing API
   /**
    * @brief Sets the column spacing.
    *
+   * @SINCE_3_0.0
    * @param[in] spacing The spacing between columns
    */
   void SetColumnSpacing(float spacing);
@@ -187,6 +209,7 @@ public: // Spacing API
   /**
    * @brief Gets the column spacing.
    *
+   * @SINCE_3_0.0
    * @return The column spacing
    */
   float GetColumnSpacing() const;

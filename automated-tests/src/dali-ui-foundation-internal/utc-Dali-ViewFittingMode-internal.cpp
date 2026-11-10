@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
@@ -23,7 +24,6 @@
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -34,6 +34,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {
@@ -274,7 +275,7 @@ int UtcDaliTextVisualLabelFittingPreservesInvalidation(void)
   gl.SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
   gl.EnableTextureCallTrace(true);
 
-  const float originalScale = UiScaleManager::Get().GetScale();
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
   Label       label         = Label::New("Initial text at fixed geometry");
   label.SetRequestedWidth(420.0f);
   label.SetRequestedHeight(96.0f);
@@ -305,7 +306,7 @@ int UtcDaliTextVisualLabelFittingPreservesInvalidation(void)
   }
 
   gl.ResetTextureCallStack();
-  UiScaleManager::Get().SetScale(originalScale * 1.25f);
+  LayoutScaleManager::Get().SetUiScale(originalScale * 1.25f);
   application.SendNotification();
   application.Render(16);
   application.SendNotification();
@@ -313,7 +314,7 @@ int UtcDaliTextVisualLabelFittingPreservesInvalidation(void)
   DALI_TEST_CHECK(gl.GetTextureTrace().CountMethod("TexImage2D") > 0);
   DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   application.SendNotification();
   application.Render(16);
 
@@ -1029,6 +1030,12 @@ int UtcDaliViewManualArrangeDoesNotApplyFittingMode(void)
 
   FinalFittingBounds producer;
   view.SetArrangeCallback(ArrangeCallback::New(&producer, &FinalFittingBounds::Arrange));
+
+  // On scene: the arrange cache is published only where the effective scale is memoized,
+  // so only there can the second Arrange() below be a hit. Nothing is notified, so no
+  // controller pass runs either.
+  application.GetScene().Add(view);
+
   view.Measure(100.0f, 50.0f);
   view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 50.0f)); // miss: the producer runs
   view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 50.0f)); // hit: the cached result is replayed

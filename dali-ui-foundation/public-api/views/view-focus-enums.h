@@ -26,35 +26,37 @@ namespace DALI_NAMESPACE::Ui
 
 /**
  * @brief Keyboard focus direction.
+ * @SINCE_3_0.0
  */
 enum FocusDirection
 {
-  LEFT,              ///< Move keyboard focus towards the left direction
-  RIGHT,             ///< Move keyboard focus towards the right direction
-  UP,                ///< Move keyboard focus towards the up direction
-  DOWN,              ///< Move keyboard focus towards the down direction
-  PAGE_UP,           ///< Move keyboard focus towards the previous page direction
-  PAGE_DOWN,         ///< Move keyboard focus towards the next page direction
-  FORWARD,           ///< Move keyboard focus towards the forward direction
-  BACKWARD,          ///< Move keyboard focus towards the backward direction
-  CLOCKWISE,         ///< Move keyboard focus towards the clockwise direction
-  COUNTER_CLOCKWISE, ///< Move keyboard focus towards the counter clockwise direction
+  LEFT,              ///< Move keyboard focus towards the left direction @SINCE_3_0.0
+  RIGHT,             ///< Move keyboard focus towards the right direction @SINCE_3_0.0
+  UP,                ///< Move keyboard focus towards the up direction @SINCE_3_0.0
+  DOWN,              ///< Move keyboard focus towards the down direction @SINCE_3_0.0
+  PAGE_UP,           ///< Move keyboard focus towards the previous page direction @SINCE_3_0.0
+  PAGE_DOWN,         ///< Move keyboard focus towards the next page direction @SINCE_3_0.0
+  FORWARD,           ///< Move keyboard focus towards the forward direction @SINCE_3_0.0
+  BACKWARD,          ///< Move keyboard focus towards the backward direction @SINCE_3_0.0
+  CLOCKWISE,         ///< Move keyboard focus towards the clockwise direction @SINCE_3_0.0
+  COUNTER_CLOCKWISE, ///< Move keyboard focus towards the counter clockwise direction @SINCE_3_0.0
 };
 
 /**
  * @brief Keyboard focus device.
+ * @SINCE_3_0.0
  */
 enum FocusDevice
 {
-  UNKNOWN,     ///< Unknown device.
-  KEYBOARD,    ///< A regular keyboard, numberpad or attached buttons.
-  MOUSE,       ///< A mouse, trackball or touchpad relative motion device.
-  TOUCH,       ///< A touchscreen with fingers or stylus.
-  PEN,         ///< A special pen device.
-  POINTER,     ///< A pointing device based on laser, infrared or similar technology.
-  GAMEPAD,     ///< A gamepad Viewler or joystick.
-  WHEEL,       ///< A mouse device.
-  PROGRAMMATIC ///< Set to API call, not device.
+  UNKNOWN,     ///< Unknown device. @SINCE_3_0.0
+  KEYBOARD,    ///< A regular keyboard, numberpad or attached buttons. @SINCE_3_0.0
+  MOUSE,       ///< A mouse, trackball or touchpad relative motion device. @SINCE_3_0.0
+  TOUCH,       ///< A touchscreen with fingers or stylus. @SINCE_3_0.0
+  PEN,         ///< A special pen device. @SINCE_3_0.0
+  POINTER,     ///< A pointing device based on laser, infrared or similar technology. @SINCE_3_0.0
+  GAMEPAD,     ///< A gamepad Viewler or joystick. @SINCE_3_0.0
+  WHEEL,       ///< A mouse device. @SINCE_3_0.0
+  PROGRAMMATIC ///< Set to API call, not device. @SINCE_3_0.0
 };
 } //namespace DALI_NAMESPACE::Ui
 

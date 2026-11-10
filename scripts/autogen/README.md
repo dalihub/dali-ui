@@ -16,19 +16,22 @@ Animation Bridge, Spec, Impl 파일을 자동 생성합니다.
 
 ```cpp
 // view.h — 루트 클래스
-// @ANIMATION_CONFIG(View)
+// @ANIMATION_CONFIG(View, 3_0.0)
 
 // label.h — View를 상속하는 클래스
-// @ANIMATION_CONFIG(Label, View)
+// @ANIMATION_CONFIG(Label, View, 3_0.0)
 ```
 
 | Tag | 도출 |
 |-----|------|
-| `@ANIMATION_CONFIG(View)` | `ViewAnimationBridge`, `ViewAnimationSpec`, `ViewAnimationSpecImpl` |
-| `@ANIMATION_CONFIG(Label, View)` | `LabelAnimationBridge`, `LabelAnimationSpec`, `LabelAnimationSpecImpl` |
+| `@ANIMATION_CONFIG(View, 3_0.0)` | `ViewAnimationBridge`, `ViewAnimationSpec`, `ViewAnimationSpecImpl` |
+| `@ANIMATION_CONFIG(Label, View, 3_0.0)` | `LabelAnimationBridge`, `LabelAnimationSpec`, `LabelAnimationSpecImpl` |
 
 두 번째 인자(부모 클래스)를 지정하면 부모의 `@ANIMATION_CONFIG`가 있는 헤더를 자동 탐색하고,
 부모 프로퍼티의 inline 오버라이드를 자식 파일에 포함하여 fluent chaining을 보장합니다.
+
+마지막 인자는 Bridge/Spec 클래스가 처음 포함되는 릴리스 버전으로, 생성 파일의 클래스 레벨
+`@SINCE` 태그가 됩니다. 생략하면 경고와 함께 생성기의 `DEFAULT_SINCE`가 사용됩니다.
 
 ### @ANIMATABLE — 자동 apply 프로퍼티
 
@@ -38,6 +41,7 @@ setter 메소드의 doxygen 블록 **앞**에 태그를 추가합니다.
 // @ANIMATABLE(Actor::Property::OPACITY, float)
 /**
  * @brief Sets the opacity of the view.
+ * @SINCE_3_0.0
  */
 View& SetOpacity(float opacity);
 
@@ -45,17 +49,25 @@ View& SetOpacity(float opacity);
 // @ANIMATABLE(View::Property::BORDERLINE_COLOR, UiColor, TO)
 /**
  * @brief Sets the borderline color.
+ * @SINCE_3_0.0
  */
 View& SetBorderlineColor(const UiColor& color);
 ```
 
+생성되는 animate 메소드의 `@SINCE`는 setter doxygen 블록의 `@SINCE`를 그대로 가져옵니다.
+블록에 `@SINCE`가 없으면 경고와 함께 생성기의 `DEFAULT_SINCE`가 사용됩니다.
+
 ### @ANIMATABLE_MANUAL — 수동 apply 프로퍼티
 
-커스텀 애니메이션 로직이 필요한 프로퍼티. Property::Index 없이 프로퍼티 이름과 타입만 지정.
+커스텀 애니메이션 로직이 필요한 프로퍼티. Property::Index 없이 프로퍼티 이름, 타입,
+처음 포함되는 릴리스 버전을 지정.
 
 ```cpp
-// @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+// @ANIMATABLE_MANUAL(BackgroundColor, UiColor, 3_0.0)
 ```
+
+setter doxygen 블록이 없으므로 `@SINCE` 버전을 태그 인자로 직접 지정합니다.
+생략하면 경고와 함께 생성기의 `DEFAULT_SINCE`가 사용됩니다.
 
 개발자는 `internal/animation/*-impl.cpp`에 `Animate{PropertyName}()` static 함수만 구현하면 됩니다.
 

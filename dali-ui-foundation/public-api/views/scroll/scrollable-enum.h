@@ -28,43 +28,47 @@ namespace Ui
 
 /**
  * @brief Scroll direction enumeration.
+ * @SINCE_3_0.0
  */
 enum class ScrollDirection
 {
-  Vertical,   ///< Vertical scrolling only
-  Horizontal, ///< Horizontal scrolling only
-  Both        ///< Both horizontal and vertical scrolling
+  Vertical,   ///< Vertical scrolling only @SINCE_3_0.0
+  Horizontal, ///< Horizontal scrolling only @SINCE_3_0.0
+  Both        ///< Both horizontal and vertical scrolling @SINCE_3_0.0
 };
 
 /**
  * @brief Scroll bar visibility enumeration.
+ * @SINCE_3_0.0
  */
 enum class ScrollBarVisibility
 {
-  Auto,   ///< Show scroll bar only when scrolling
-  Always, ///< Always show scroll bar
-  Never   ///< Never show scroll bar
+  Auto,   ///< Show scroll bar only when scrolling @SINCE_3_0.0
+  Always, ///< Always show scroll bar @SINCE_3_0.0
+  Never   ///< Never show scroll bar @SINCE_3_0.0
 };
 
 /**
  * @brief Scroll to position enumeration.
+ * @SINCE_3_0.0
  */
 enum class ScrollToPosition
 {
-  Start,      ///< Scroll to start of view
-  Center,     ///< Scroll to center of view
-  End,        ///< Scroll to end of view
-  MakeVisible ///< Scroll to make the view visible
+  Start,      ///< Scroll to start of view @SINCE_3_0.0
+  Center,     ///< Scroll to center of view @SINCE_3_0.0
+  End,        ///< Scroll to end of view @SINCE_3_0.0
+  MakeVisible ///< Scroll to make the view visible @SINCE_3_0.0
 };
 
 /**
  * @brief Over scroll mode enumeration.
+ * @SINCE_3_0.0
  */
 enum class OverScrollMode
 {
-  Never,         ///< Never allow over-scrolling
-  Always,        ///< Always allow over-scrolling
-  ContentScrolls ///< Allow over-scrolling only when content is scrollable
+  Never,         ///< Never allow over-scrolling @SINCE_3_0.0
+  Always,        ///< Always allow over-scrolling @SINCE_3_0.0
+  ContentScrolls ///< Allow over-scrolling only when content is scrollable @SINCE_3_0.0
 };
 
 } // namespace Ui

@@ -47,44 +47,52 @@ class AbsoluteLayoutImpl;
  * - @b Alignment: Not used. Position is determined solely by the bounds
  *   x/y values and margin.
  * - @b Margin: Applied as an offset to the bounds position.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API AbsoluteLayout : public Layout
 {
 public:
   /**
    * @brief Creates an uninitialized AbsoluteLayout handle.
+   * @SINCE_3_0.0
    */
   AbsoluteLayout();
 
   /**
    * @brief Creates a new AbsoluteLayout.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated AbsoluteLayout
    */
   static AbsoluteLayout New();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   AbsoluteLayout(const AbsoluteLayout& layout);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   AbsoluteLayout(AbsoluteLayout&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~AbsoluteLayout();
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   AbsoluteLayout& operator=(const AbsoluteLayout& handle);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   AbsoluteLayout& operator=(AbsoluteLayout&& rhs) noexcept;
 
@@ -92,6 +100,7 @@ public:
 
   /**
    * @brief Downcasts a handle to AbsoluteLayout handle.
+   * @SINCE_3_0.0
    */
   static AbsoluteLayout DownCast(BaseHandle handle);
 

@@ -34,11 +34,12 @@ class DefaultWindowDecorationImpl;
 
 /**
  * @brief Colour theme used by the default window decoration.
+ * @SINCE_3_0.0
  */
 enum class DefaultWindowDecorationTheme
 {
-  DARK  = 0, ///< Dark frame with light icons
-  LIGHT = 1  ///< Light frame with dark icons
+  DARK  = 0, ///< Dark frame with light icons @SINCE_3_0.0
+  LIGHT = 1  ///< Light frame with dark icons @SINCE_3_0.0
 };
 
 /**
@@ -47,6 +48,7 @@ enum class DefaultWindowDecorationTheme
  * Defaults provide a dark frame with thin top and side edges. The bottom bar
  * contains an expandable move region, built-in minimize,
  * maximize/restore, and close buttons, and a resize handle in each corner.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API DefaultWindowDecorationOptions
 {
@@ -60,36 +62,42 @@ public:
 
   /**
    * @brief Sets the decoration colour theme.
+   * @SINCE_3_0.0
    * @param[in] theme Requested theme
    */
   void SetTheme(DefaultWindowDecorationTheme theme);
 
   /**
    * @brief Returns the decoration colour theme.
+   * @SINCE_3_0.0
    * @return Configured theme
    */
   DefaultWindowDecorationTheme GetTheme() const;
 
   /**
    * @brief Sets the height of the bottom bar.
+   * @SINCE_3_0.0
    * @param[in] height Bar height, defaults to 50
    */
   void SetBarHeight(float height);
 
   /**
    * @brief Returns the height of the bottom bar.
+   * @SINCE_3_0.0
    * @return Bar height
    */
   float GetBarHeight() const;
 
   /**
    * @brief Sets the width of the left and right frame edges.
+   * @SINCE_3_0.0
    * @param[in] thickness Edge thickness, defaults to 5
    */
   void SetEdgeThickness(float thickness);
 
   /**
    * @brief Returns the width of the left and right frame edges.
+   * @SINCE_3_0.0
    * @return Edge thickness
    */
   float GetEdgeThickness() const;
@@ -106,72 +114,84 @@ public:
    * A height of 0, the default, keeps the thin edge and leaves GetTopArea()
    * uninitialized. A height below the edge thickness is raised to it, since the
    * frame still needs its border.
+   * @SINCE_3_0.0
    * @param[in] height Top area height, defaults to 0
    */
   void SetTopAreaHeight(float height);
 
   /**
    * @brief Returns the configured top area height.
+   * @SINCE_3_0.0
    * @return Top area height, or 0 when the top is a thin edge
    */
   float GetTopAreaHeight() const;
 
   /**
    * @brief Sets the frame corner radius used while the window is not maximized.
+   * @SINCE_3_0.0
    * @param[in] radius Corner radius, defaults to 12
    */
   void SetCornerRadius(float radius);
 
   /**
    * @brief Returns the frame corner radius.
+   * @SINCE_3_0.0
    * @return Corner radius
    */
   float GetCornerRadius() const;
 
   /**
    * @brief Overrides the bar and frame colour selected by the theme.
+   * @SINCE_3_0.0
    * @param[in] color Background colour
    */
   void SetBackgroundColor(const Dali::Ui::UiColor& color);
 
   /**
    * @brief Returns the bar and frame colour.
+   * @SINCE_3_0.0
    * @return Background colour
    */
   Dali::Ui::UiColor GetBackgroundColor() const;
 
   /**
    * @brief Sets whether the bar carries a minimize control.
+   * @SINCE_3_0.0
    * @param[in] enabled true to include the control
    */
   void SetMinimizeControlEnabled(bool enabled);
 
   /**
    * @brief Returns whether the bar carries a minimize control.
+   * @SINCE_3_0.0
    * @return true when included
    */
   bool IsMinimizeControlEnabled() const;
 
   /**
    * @brief Sets whether the bar carries a maximize and restore control.
+   * @SINCE_3_0.0
    * @param[in] enabled true to include the control
    */
   void SetMaximizeRestoreControlEnabled(bool enabled);
 
   /**
    * @brief Returns whether the bar carries a maximize and restore control.
+   * @SINCE_3_0.0
    * @return true when included
    */
   bool IsMaximizeRestoreControlEnabled() const;
 
   /**
    * @brief Sets whether the bar carries a close control.
+   * @SINCE_3_0.0
    * @param[in] enabled true to include the control
    */
   void SetCloseControlEnabled(bool enabled);
 
   /**
    * @brief Returns whether the bar carries a close control.
+   * @SINCE_3_0.0
    * @return true when included
    */
   bool IsCloseControlEnabled() const;
@@ -182,24 +202,28 @@ public:
    * The shadow is drawn in the window surface outside the frame, so the window
    * has to be created transparent for it to be visible. It is not drawn while
    * the window is maximized.
+   * @SINCE_3_0.0
    * @param[in] enabled true to cast a shadow
    */
   void SetShadowEnabled(bool enabled);
 
   /**
    * @brief Returns whether the frame casts a shadow.
+   * @SINCE_3_0.0
    * @return true when a shadow is cast
    */
   bool IsShadowEnabled() const;
 
   /**
    * @brief Sets whether a resize handle is placed in each bottom corner.
+   * @SINCE_3_0.0
    * @param[in] enabled true to include the handles
    */
   void SetResizeHandlesEnabled(bool enabled);
 
   /**
    * @brief Returns whether resize handles are included.
+   * @SINCE_3_0.0
    * @return true when included
    */
   bool IsResizeHandlesEnabled() const;
@@ -247,12 +271,14 @@ private:
  * DefaultWindowDecorationOptions, add its own content to GetMoveRegion(), adjust the
  * installed views through GetDecoration(), or ignore this class and build a
  * WindowFrameDecoration directly.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API DefaultWindowDecoration : public Dali::BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized DefaultWindowDecoration handle.
+   * @SINCE_3_0.0
    */
   DefaultWindowDecoration();
   ~DefaultWindowDecoration();
@@ -263,6 +289,7 @@ public:
 
   /**
    * @brief Builds and installs the default window decoration.
+   * @SINCE_3_0.0
    * @param[in] windowFrame Window to decorate
    * @return An initialized handle, or an uninitialized handle when the decoration
    *         could not be installed
@@ -271,6 +298,7 @@ public:
 
   /**
    * @brief Builds and installs the default window decoration.
+   * @SINCE_3_0.0
    * @param[in] windowFrame Window to decorate
    * @param[in] options Appearance and control options
    * @return An initialized handle, or an uninitialized handle when the decoration
@@ -280,6 +308,7 @@ public:
 
   /**
    * @brief Downcasts a handle to DefaultWindowDecoration.
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A DefaultWindowDecoration handle, or an uninitialized handle on failure
    */
@@ -296,6 +325,7 @@ public:
    * reinstall the copy with WindowFrame::SetDecoration(). Reinstalling makes
    * the frame the caller's, so the state synchronisation this class performs no
    * longer applies to a replaced maximize control.
+   * @SINCE_3_0.0
    * @return Copy of the installed decoration
    */
   WindowFrameDecoration GetDecoration() const;
@@ -309,6 +339,7 @@ public:
    * receiving input in that state. Use AddBarAction() for a
    * bottom-bar action that must remain interactive, or GetTopArea() for custom
    * interactive content above the application content.
+   * @SINCE_3_0.0
    * @return Bottom-bar move region
    */
   Dali::Ui::View GetMoveRegion() const;
@@ -323,6 +354,7 @@ public:
    *
    * Unlike GetMoveRegion(), this area does not start a window move and its
    * children keep working while the window is maximized.
+   * @SINCE_3_0.0
    * @return Top decoration area, or an uninitialized handle for a thin top edge
    */
   Dali::Ui::View GetTopArea() const;
@@ -347,6 +379,7 @@ public:
    * The callback is owned by this handle and is not connection-tracked. Its
    * receiver must outlive this DefaultWindowDecoration, or the handle must be
    * released before the receiver.
+   * @SINCE_3_0.0
    * @param[in] iconUrl Full URL of the icon shown in the button
    * @param[in] onClick Invoked when the button is clicked
    * @return The installed button, for styling, or an uninitialized handle when
@@ -366,6 +399,7 @@ public:
    *
    * The decoration does not apply this itself, because the window's size
    * constraints belong to the application.
+   * @SINCE_3_0.0
    * @return Smallest frame size that lays out without overlap, excluding shadow
    */
   Dali::Vector2 GetMinimumFrameSize() const;

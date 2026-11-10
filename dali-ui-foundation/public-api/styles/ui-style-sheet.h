@@ -45,18 +45,21 @@ using UiStyleValidator = bool (*)(BaseHandle handle);
  * frozen, calling SetStyle() triggers an assertion failure. Style creators are
  * registered before Apply(), and resolved after Apply() when components request
  * style objects.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiStyleSheet : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized UiStyleSheet handle.
+   * @SINCE_3_0.0
    */
   UiStyleSheet() = default;
 
   /**
    * @brief Creates an initialized, mutable style sheet.
    *
+   * @SINCE_3_0.0
    * @return A new style sheet
    */
   static UiStyleSheet New();
@@ -69,6 +72,7 @@ public:
    * registration time. The created style is type-checked when the entry is first
    * resolved through GetStyle().
    *
+   * @SINCE_3_0.0
    * @pre The style sheet must not be frozen.
    *
    * @param[in] key The style key
@@ -91,6 +95,7 @@ public:
    * style is cached for later lookups, even if the returned handle is
    * uninitialized.
    *
+   * @SINCE_3_0.0
    * @pre UiConfig::Apply() must have been called before resolving style objects.
    * @pre StyleType must inherit UiStyle and provide static DownCast(BaseHandle)
    *      and StaticDownCast(UiStyle). DownCast() validates the creator result
@@ -121,6 +126,7 @@ public:
   /**
    * @brief Returns whether this style sheet is frozen.
    *
+   * @SINCE_3_0.0
    * @return True if frozen
    */
   bool IsFrozen() const;
@@ -129,6 +135,7 @@ public:
    * @brief Freezes this style sheet.
    *
    * Setter calls after this point trigger an assertion failure.
+   * @SINCE_3_0.0
    */
   DALI_INTERNAL void Freeze();
 

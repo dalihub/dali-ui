@@ -37,6 +37,7 @@ namespace Ui
  * scrolling of content that can be larger than the viewport. Scrollable
  * dimension updates only take effect when attached to a ScrollView; for
  * general layout use cases prefer the other LayoutManager subclasses.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ScrollViewLayoutManager : public LayoutManager
 {

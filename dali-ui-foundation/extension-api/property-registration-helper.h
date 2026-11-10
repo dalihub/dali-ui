@@ -35,10 +35,12 @@
  * DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui::Text, LabelPropertyIndex, Ui::Integration, LabelImpl, "text", STRING, TEXT)
  * DALI_TYPE_REGISTRATION_END()
  * @endcode
+ * @SINCE_3_0.0
  */
 
 /**
  * @brief Registers a property using an external property index definition.
+ * @SINCE_3_0.0
  */
 #define DALI_PROPERTY_REGISTRATION_EXTERNAL_INTERNAL(count, typeRegistrationObject, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)                                                             \
   Dali::PropertyRegistration DALI_TOKEN_PASTE(property, count)(typeRegistrationObject, text, indexNamespace::indexType::enumIndex, Dali::Property::valueType, &objectNamespace::objectType::SetProperty, &objectType::GetProperty); \
@@ -46,6 +48,7 @@
 
 /**
  * @brief Registers a read-only property using an external property index definition.
+ * @SINCE_3_0.0
  */
 #define DALI_PROPERTY_REGISTRATION_READ_ONLY_EXTERNAL_INTERNAL(count, typeRegistrationObject, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)                 \
   Dali::PropertyRegistration DALI_TOKEN_PASTE(property, count)(typeRegistrationObject, text, indexNamespace::indexType::enumIndex, Dali::Property::valueType, nullptr, &objectType::GetProperty); \
@@ -53,18 +56,21 @@
 
 /**
  * @brief Registers an animatable property with a default value using an external property index definition.
+ * @SINCE_3_0.0
  */
 #define DALI_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT_EXTERNAL_INTERNAL(count, typeRegistrationObject, indexNamespace, indexType, objectNamespace, objectType, text, value, enumIndex) \
   Dali::AnimatablePropertyRegistration DALI_TOKEN_PASTE(property, count)(typeRegistrationObject, text, indexNamespace::indexType::enumIndex, value, &objectNamespace::objectType::SetProperty, &objectType::GetProperty);
 
 /**
  * @brief Registers an animatable property component using an external property index definition.
+ * @SINCE_3_0.0
  */
 #define DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION_EXTERNAL_INTERNAL(count, typeRegistrationObject, indexNamespace, indexType, objectNamespace, objectType, text, enumIndex, baseEnumIndex, componentIndex) \
   Dali::AnimatablePropertyComponentRegistration DALI_TOKEN_PASTE(property, count)(typeRegistrationObject, text, indexNamespace::indexType::enumIndex, indexNamespace::indexType::baseEnumIndex, componentIndex);
 
 /**
  * @brief Registers an animatable property using an external property index definition.
+ * @SINCE_3_0.0
  */
 #define DALI_ANIMATABLE_PROPERTY_REGISTRATION_EXTERNAL_INTERNAL(count, typeRegistrationObject, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex) \
   Dali::AnimatablePropertyRegistration DALI_TOKEN_PASTE(property, count)(typeRegistrationObject, text, indexNamespace::indexType::enumIndex, Dali::Property::valueType, &objectNamespace::objectType::SetProperty, &objectType::GetProperty);
@@ -74,6 +80,7 @@
  *
  * This macro expects a local variable named @c typeRegistration to be available
  * in the current scope.
+ * @SINCE_3_0.0
  */
 #define DALI_PROPERTY_REGISTRATION_EXTERNAL(indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex) \
   DALI_PROPERTY_REGISTRATION_EXTERNAL_INTERNAL(__COUNTER__, typeRegistration, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)
@@ -83,6 +90,7 @@
  *
  * This macro expects a local variable named @c typeRegistration to be available
  * in the current scope.
+ * @SINCE_3_0.0
  */
 #define DALI_PROPERTY_REGISTRATION_READ_ONLY_EXTERNAL(indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex) \
   DALI_PROPERTY_REGISTRATION_READ_ONLY_EXTERNAL_INTERNAL(__COUNTER__, typeRegistration, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)
@@ -92,6 +100,7 @@
  *
  * This macro expects a local variable named @c typeRegistration to be available
  * in the current scope.
+ * @SINCE_3_0.0
  */
 #define DALI_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT_EXTERNAL(indexNamespace, indexType, objectNamespace, objectType, text, value, enumIndex) \
   DALI_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT_EXTERNAL_INTERNAL(__COUNTER__, typeRegistration, indexNamespace, indexType, objectNamespace, objectType, text, value, enumIndex)
@@ -101,6 +110,7 @@
  *
  * This macro expects a local variable named @c typeRegistration to be available
  * in the current scope.
+ * @SINCE_3_0.0
  */
 #define DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION_EXTERNAL(indexNamespace, indexType, objectNamespace, objectType, text, enumIndex, baseEnumIndex, componentIndex) \
   DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION_EXTERNAL_INTERNAL(__COUNTER__, typeRegistration, indexNamespace, indexType, objectNamespace, objectType, text, enumIndex, baseEnumIndex, componentIndex)
@@ -110,6 +120,7 @@
  *
  * This macro expects a local variable named @c typeRegistration to be available
  * in the current scope.
+ * @SINCE_3_0.0
  */
 #define DALI_ANIMATABLE_PROPERTY_REGISTRATION_EXTERNAL(indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex) \
   DALI_ANIMATABLE_PROPERTY_REGISTRATION_EXTERNAL_INTERNAL(__COUNTER__, typeRegistration, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)

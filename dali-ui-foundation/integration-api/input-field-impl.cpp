@@ -32,6 +32,7 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-property-handler.h>
 #include <dali-ui-foundation/internal/controls/text-controls/input-field-accessible.h>
@@ -1078,7 +1079,7 @@ void InputFieldImpl::UpdateInlineReplacementData(const Vector2& ownerSize, const
                        Vector2::ZERO,
                        contentSize,
                        contentSize,
-                       GetEffectiveScale(),
+                       Ui::Extension::View::GetEffectiveLayoutScale(*this),
                        source.sourceRevision);
 }
 
@@ -1739,7 +1740,14 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
   // If there is text changed, callback is called.
   if(mTextChanged)
   {
+    const bool hasListeners = !mTextChangedSignal.Empty();
     EmitTextChanged();
+
+    // Signal handlers may request another control's relayout and disconnect themselves.
+    if(hasListeners && Dali::Adaptor::IsAvailable())
+    {
+      Dali::Adaptor::Get().RequestProcessEventsOnIdle();
+    }
   }
 
   Ui::Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
@@ -2092,7 +2100,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
 {
   mMeasureInvalidated = false;
 
-  const float effectiveScale = GetEffectiveScale();
+  const float effectiveScale = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   if(SetTextUiScale(effectiveScale))
   {
     mController->InvalidateFontData();

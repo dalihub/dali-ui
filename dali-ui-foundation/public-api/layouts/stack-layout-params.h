@@ -35,18 +35,21 @@ namespace Ui
  * @code
  * view.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API StackLayoutParams
 {
 public:
   /**
    * @brief Creates parameters with default values.
+   * @SINCE_3_0.0
    */
   StackLayoutParams();
 
   /**
    * @brief Creates a new StackLayoutParams with default values.
    *
+   * @SINCE_3_0.0
    * @return A value initialized with default parameters
    */
   static StackLayoutParams New();
@@ -54,6 +57,7 @@ public:
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] other Value to copy
    */
   StackLayoutParams(const StackLayoutParams& other);
@@ -61,6 +65,7 @@ public:
   /**
    * @brief Creates a value by moving another value.
    *
+   * @SINCE_3_0.0
    * @note After the move the source is in a moved-from state; assign it a valid
    * value before use. Calling a getter or setter on, or copying from, a
    * moved-from value throws.
@@ -69,12 +74,14 @@ public:
 
   /**
    * @brief Copies another value.
+   * @SINCE_3_0.0
    */
   StackLayoutParams& operator=(const StackLayoutParams& other);
 
   /**
    * @brief Moves another value.
    *
+   * @SINCE_3_0.0
    * @note After the move the source is in a moved-from state; assign it a valid
    * value before use. Calling a getter or setter on, or copying from, a
    * moved-from value throws.
@@ -83,6 +90,7 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~StackLayoutParams();
 
@@ -94,6 +102,7 @@ public:
    * proportion of the remaining space (the main-axis LayoutWidth/LayoutHeight
    * is ignored).
    *
+   * @SINCE_3_0.0
    * @param[in] weight The layout weight
    * @return Reference to this for chaining
    */
@@ -102,6 +111,7 @@ public:
   /**
    * @brief Gets the layout weight.
    *
+   * @SINCE_3_0.0
    * @return The weight value
    */
   float GetWeight() const;
@@ -112,6 +122,7 @@ public:
    * In a vertical stack this controls horizontal placement;
    * in a horizontal stack this controls vertical placement.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment FILL, START (default), CENTER, or END
    * @return Reference to this for chaining
    */
@@ -120,6 +131,7 @@ public:
   /**
    * @brief Gets the cross-axis alignment.
    *
+   * @SINCE_3_0.0
    * @return The cross-axis alignment
    */
   LayoutAlignment GetAlignment() const;

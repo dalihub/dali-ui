@@ -35,6 +35,7 @@ namespace Ui
  * from a unique offset above Ui::VIEW_PROPERTY_END_INDEX to avoid collisions
  * (chart = +2001, navigator = +4001, dialog = +6001, dialog-container = +8001,
  *  alert-dialog = +10001).
+ * @SINCE_3_0.0
  */
 struct DialogPropertyIndex
 {
@@ -49,6 +50,7 @@ struct DialogPropertyIndex
 
 /**
  * @brief Property index definitions for DialogContainer.
+ * @SINCE_3_0.0
  */
 struct DialogContainerPropertyIndex
 {
@@ -61,6 +63,7 @@ struct DialogContainerPropertyIndex
 
 /**
  * @brief Property index definitions for AlertDialog.
+ * @SINCE_3_0.0
  */
 struct AlertDialogPropertyIndex
 {

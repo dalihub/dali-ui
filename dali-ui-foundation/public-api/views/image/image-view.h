@@ -50,6 +50,7 @@ class ImageViewImpl;
  * ImageView view = ImageView::New("image.png");
  * view.ResourceReadySignal().Connect(...);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ImageView : public View
 {
@@ -58,6 +59,7 @@ public:
    * @brief Property indices for ImageView.
    *
    * These can be used with Dali::Handle::GetProperty() and SetProperty().
+   * @SINCE_3_0.0
    */
   struct Property
   {
@@ -92,12 +94,14 @@ public: // Creation & Destruction
    *
    * Only derived versions can be instantiated. Calling member
    * functions with an uninitialized Dali::Object is not allowed.
+   * @SINCE_3_0.0
    */
   ImageView();
 
   /**
    * @brief Creates an initialized ImageView.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Dali resource
    */
   static ImageView New();
@@ -105,6 +109,7 @@ public: // Creation & Destruction
   /**
    * @brief Creates an initialized ImageView with a given URL.
    *
+   * @SINCE_3_0.0
    * @param[in] url The URL of the image resource to display
    * @return A handle to a newly allocated Dali resource
    */
@@ -117,6 +122,7 @@ public: // Creation & Destruction
    * the view is destroyed. The caller may reset its ImageUrl handle after
    * this method returns.
    *
+   * @SINCE_3_0.0
    * @param[in] imageUrl The image resource handle
    * @return A handle to a newly allocated Dali resource
    */
@@ -126,6 +132,7 @@ public: // Creation & Destruction
    * @brief Virtual destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~ImageView();
 
@@ -133,6 +140,7 @@ public: // Creation & Destruction
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    * @param[in] imageView Handle to copy
    */
   ImageView(const ImageView& imageView);
@@ -140,6 +148,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   ImageView(ImageView&& rhs) noexcept;
@@ -149,6 +158,7 @@ public: // Operators
    * @brief Copy assignment operator.
    *
    * Changes this handle to point to another real object.
+   * @SINCE_3_0.0
    * @param[in] imageView Object to assign this to
    * @return Reference to this
    */
@@ -157,6 +167,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -171,6 +182,7 @@ public: // Static Methods
    * If handle points to an ImageView, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to an ImageView or an uninitialized handle
    */
@@ -183,6 +195,7 @@ public: // Image
    * The image is loaded asynchronously. Use ResourceReadySignal() to be
    * notified when loading completes.
    *
+   * @SINCE_3_0.0
    * @param[in] url The URL of the image resource
    */
   void SetResourceUrl(const Dali::String& url);
@@ -194,6 +207,7 @@ public: // Image
    * the view is destroyed. The caller may therefore reset its ImageUrl handle
    * immediately after this method returns.
    *
+   * @SINCE_3_0.0
    * @param[in] imageUrl The image resource handle
    */
   void SetResourceUrl(const ImageUrl& imageUrl);
@@ -201,6 +215,7 @@ public: // Image
   /**
    * @brief Gets the current image URL.
    *
+   * @SINCE_3_0.0
    * @return The URL of the image currently set on this view
    */
   Dali::String GetResourceUrl() const;
@@ -209,6 +224,7 @@ public: // Image
    * @brief Reloads the current image from its URL.
    *
    * Has no effect if no image URL has been set.
+   * @SINCE_3_0.0
    */
   void Reload();
 
@@ -220,6 +236,7 @@ public: // Image
    * A failed main image load displays the broken image instead of the placeholder.
    * An empty placeholder URL disables the placeholder.
    *
+   * @SINCE_3_0.0
    * @param[in] url The URL of the placeholder image resource
    */
   void SetPlaceholderUrl(const Dali::String& url);
@@ -227,6 +244,7 @@ public: // Image
   /**
    * @brief Gets the placeholder image URL.
    *
+   * @SINCE_3_0.0
    * @return The URL of the placeholder image, or an empty string if not set
    */
   Dali::String GetPlaceholderUrl() const;
@@ -236,6 +254,7 @@ public: // Image
    *
    * Accepts both direct RGBA values and theme color tokens via UiColor.
    *
+   * @SINCE_3_0.0
    * @param[in] color The color to multiply with the image
    */
   void SetImageColor(const UiColor& color);
@@ -243,6 +262,7 @@ public: // Image
   /**
    * @brief Gets the color multiplier applied to the image.
    *
+   * @SINCE_3_0.0
    * @return The current image color
    */
   UiColor GetImageColor() const;
@@ -253,6 +273,7 @@ public: // Image
    * The area is specified as normalized coordinates: (x, y, width, height)
    * where each component is in the range [0, 1].
    *
+   * @SINCE_3_0.0
    * @param[in] pixelArea The normalized sub-region of the image to display
    */
   void SetPixelArea(const Vector4& pixelArea);
@@ -260,6 +281,7 @@ public: // Image
   /**
    * @brief Gets the pixel area.
    *
+   * @SINCE_3_0.0
    * @return The current pixel area as normalized coordinates
    */
   Vector4 GetPixelArea() const;
@@ -271,6 +293,7 @@ public: // Size & Fitting Control
    * The returned size reflects the image Visual, including the desired size or
    * decoded texture size when applicable. It may differ from the laid-out View size.
    *
+   * @SINCE_3_0.0
    * @return The natural size of the image content
    */
   Vector3 GetNaturalSize() const;
@@ -278,6 +301,7 @@ public: // Size & Fitting Control
   /**
    * @brief Sets the sampling mode used when scaling the image.
    *
+   * @SINCE_3_0.0
    * @param[in] samplingMode The sampling mode to use
    */
   void SetSamplingMode(Image::SamplingMode samplingMode);
@@ -285,6 +309,7 @@ public: // Size & Fitting Control
   /**
    * @brief Gets the sampling mode.
    *
+   * @SINCE_3_0.0
    * @return The current sampling mode
    */
   Image::SamplingMode GetSamplingMode() const;
@@ -294,6 +319,7 @@ public: // Size & Fitting Control
    *
    * The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill).
    *
+   * @SINCE_3_0.0
    * @param[in] fittingMode The fitting mode to use
    */
   void SetFittingMode(Image::FittingMode fittingMode);
@@ -301,6 +327,7 @@ public: // Size & Fitting Control
   /**
    * @brief Gets the fitting mode.
    *
+   * @SINCE_3_0.0
    * @return The current fitting mode (default: FILL)
    */
   Image::FittingMode GetFittingMode() const;
@@ -308,6 +335,7 @@ public: // Size & Fitting Control
   /**
    * @brief Sets the desired rasterization width as a hint for the image loader.
    *
+   * @SINCE_3_0.0
    * @param[in] width The desired width in pixels (0 to use natural size)
    */
   void SetDesiredWidth(int width);
@@ -315,6 +343,7 @@ public: // Size & Fitting Control
   /**
    * @brief Gets the desired rasterization width hint.
    *
+   * @SINCE_3_0.0
    * @return The desired width in pixels, or 0 if not set
    */
   int GetDesiredWidth() const;
@@ -322,6 +351,7 @@ public: // Size & Fitting Control
   /**
    * @brief Sets the desired rasterization height as a hint for the image loader.
    *
+   * @SINCE_3_0.0
    * @param[in] height The desired height in pixels (0 to use natural size)
    */
   void SetDesiredHeight(int height);
@@ -329,6 +359,7 @@ public: // Size & Fitting Control
   /**
    * @brief Gets the desired rasterization height hint.
    *
+   * @SINCE_3_0.0
    * @return The desired height in pixels, or 0 if not set
    */
   int GetDesiredHeight() const;
@@ -342,6 +373,7 @@ public: // Size & Fitting Control
    *
    * Direction: view size → image load size.
    *
+   * @SINCE_3_0.0
    * @note Do NOT use together with aspect-ratio layout on the same ImageView.
    *       ImageLoadWithViewSize causes GetNaturalSize to return the current view size
    *       instead of the true image dimensions, making aspect-ratio adjustment ineffective.
@@ -353,6 +385,7 @@ public: // Size & Fitting Control
   /**
    * @brief Gets whether the image is loaded with the view size.
    *
+   * @SINCE_3_0.0
    * @return True if loading image with view size is enabled
    */
   bool IsImageLoadWithViewSizeEnabled() const;
@@ -367,6 +400,7 @@ public: // Advanced Rendering & Masking
    * The request is not always honoured. It is ignored when a custom shader is set, and it is
    * dropped when the loaded image uses a compressed pixel format, which cannot be pre-multiplied.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to pre-multiply alpha while loading
    * @note Default is true.
    */
@@ -378,6 +412,7 @@ public: // Advanced Rendering & Masking
    * This returns the requested value, which is not necessarily what happened to the loaded
    * image. See SetPreMultiplyAlphaOnLoadEnabled() for when a request is not honoured.
    *
+   * @SINCE_3_0.0
    * @return True if alpha is requested to be pre-multiplied while loading
    * @see SetPreMultiplyAlphaOnLoadEnabled()
    */
@@ -388,6 +423,7 @@ public: // Advanced Rendering & Masking
    *
    * When set, the alpha channel of the mask image is applied to the main image.
    *
+   * @SINCE_3_0.0
    * @param[in] maskUrl The URL of the alpha mask image
    */
   void SetAlphaMaskUrl(const Dali::String& maskUrl);
@@ -395,6 +431,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Gets the alpha mask image URL.
    *
+   * @SINCE_3_0.0
    * @return The URL of the alpha mask image, or an empty string if not set
    */
   Dali::String GetAlphaMaskUrl() const;
@@ -402,6 +439,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Sets whether the image should be cropped to the mask bounds.
    *
+   * @SINCE_3_0.0
    * @param[in] cropToMask True to crop the image to the mask
    */
   void SetCropToMask(bool cropToMask);
@@ -409,6 +447,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Gets whether crop-to-mask is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if crop-to-mask is enabled
    */
   bool IsCropToMask() const;
@@ -416,6 +455,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Sets the masking policy.
    *
+   * @SINCE_3_0.0
    * @param[in] maskingPolicy The masking policy to use
    */
   void SetMaskingPolicy(Image::MaskingPolicy maskingPolicy);
@@ -423,6 +463,7 @@ public: // Advanced Rendering & Masking
   /**
    * @brief Gets the masking policy.
    *
+   * @SINCE_3_0.0
    * @return The current masking policy
    */
   Image::MaskingPolicy GetMaskingPolicy() const;
@@ -434,6 +475,7 @@ public: // Loading Behavior
    * Determines whether the image is loaded immediately when the view is created (IMMEDIATE),
    * or deferred until the view is attached to the scene (ATTACHED).
    *
+   * @SINCE_3_0.0
    * @param[in] loadPolicy The load policy to use
    */
   void SetLoadPolicy(Image::LoadPolicy loadPolicy);
@@ -441,6 +483,7 @@ public: // Loading Behavior
   /**
    * @brief Gets the load policy.
    *
+   * @SINCE_3_0.0
    * @return The current load policy
    */
   Image::LoadPolicy GetLoadPolicy() const;
@@ -450,6 +493,7 @@ public: // Loading Behavior
    *
    * Controls when the image texture is released from memory.
    *
+   * @SINCE_3_0.0
    * @param[in] releasePolicy The release policy to use
    */
   void SetReleasePolicy(Image::ReleasePolicy releasePolicy);
@@ -457,6 +501,7 @@ public: // Loading Behavior
   /**
    * @brief Gets the release policy.
    *
+   * @SINCE_3_0.0
    * @return The current release policy
    */
   Image::ReleasePolicy GetReleasePolicy() const;
@@ -464,6 +509,7 @@ public: // Loading Behavior
   /**
    * @brief Sets whether the image is loaded synchronously.
    *
+   * @SINCE_3_0.0
    * @param[in] synchronous True to load the image on the main thread synchronously
    */
   void SetSynchronousLoading(bool synchronous);
@@ -471,6 +517,7 @@ public: // Loading Behavior
   /**
    * @brief Gets whether synchronous loading is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if synchronous loading is enabled
    */
   bool IsSynchronousLoading() const;
@@ -488,6 +535,7 @@ public: // Loading Behavior
    *    image's natural size settles late;
    *  - the image cannot be swapped seamlessly for another.
    *
+   * @SINCE_3_0.0
    * @param[in] fastTrack True to upload straight to the render thread
    * @note The request is dropped, without failing, whenever the shortcut cannot be taken:
    *       when an alpha mask, a custom shader, synchronous loading or
@@ -500,6 +548,7 @@ public: // Loading Behavior
   /**
    * @brief Gets whether the loaded image is uploaded straight to the render thread.
    *
+   * @SINCE_3_0.0
    * @return True if the upload skips the event thread
    */
   bool IsFastTrackUploadEnabled() const;
@@ -507,6 +556,7 @@ public: // Loading Behavior
   /**
    * @brief Sets whether EXIF orientation metadata is applied automatically.
    *
+   * @SINCE_3_0.0
    * @param[in] orientationCorrection True to apply orientation correction
    */
   void SetOrientationCorrectionEnabled(bool orientationCorrection);
@@ -514,6 +564,7 @@ public: // Loading Behavior
   /**
    * @brief Gets whether orientation correction is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if orientation correction is enabled
    */
   bool IsOrientationCorrectionEnabled() const;
@@ -527,6 +578,7 @@ public: // N-Patch Border
    * stretched to fill the view. Giving an ordinary image a non-zero border makes it behave
    * as an n-patch image.
    *
+   * @SINCE_3_0.0
    * @param[in] border The frame widths as start, end, top and bottom distances
    * @note The values are rounded to whole source pixels, since they select which columns
    *       and rows of the image stretch.
@@ -537,6 +589,7 @@ public: // N-Patch Border
   /**
    * @brief Gets the N-patch border.
    *
+   * @SINCE_3_0.0
    * @return The width of the fixed frame at each edge, in source image pixels
    */
   Dali::Insets GetNPatchBorder() const;
@@ -548,6 +601,7 @@ public: // N-Patch Border
    * that whatever sits behind shows through — it is not filled with a colour. The default is
    * false, which draws the whole image with the inside stretched.
    *
+   * @SINCE_3_0.0
    * @param[in] borderOnly True to draw only the border regions
    * @see SetNPatchBorder()
    */
@@ -556,6 +610,7 @@ public: // N-Patch Border
   /**
    * @brief Gets whether only the border regions are drawn.
    *
+   * @SINCE_3_0.0
    * @return True if the region inside the border is left undrawn
    */
   bool IsNPatchBorderOnly() const;
@@ -564,6 +619,7 @@ public: // Loading Status & Signals
   /**
    * @brief Gets the current loading status of the image.
    *
+   * @SINCE_3_0.0
    * @return The current ResourceStatus of the image visual
    */
   Ui::Visual::ResourceStatus GetLoadingStatus() const;
@@ -571,6 +627,7 @@ public: // Loading Status & Signals
   /**
    * @brief Returns the signal emitted when the image has finished loading and is ready to display.
    *
+   * @SINCE_3_0.0
    * @return A reference to the ResourceReady signal
    */
   ResourceReadySignalType& ResourceReadySignal();

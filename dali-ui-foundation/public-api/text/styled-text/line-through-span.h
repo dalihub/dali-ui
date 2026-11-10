@@ -31,18 +31,21 @@ namespace Text
 
 /**
  * @brief Span payload that applies line-through styling to text.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API LineThroughSpan : public Span
 {
 public:
   /**
    * @brief Creates an uninitialized LineThroughSpan handle.
+   * @SINCE_3_0.0
    */
   LineThroughSpan() = default;
 
   /**
    * @brief Creates a LineThroughSpan with the given line-through style.
    *
+   * @SINCE_3_0.0
    * @param[in] lineThrough The line-through style payload
    * @return A new LineThroughSpan
    */
@@ -51,6 +54,7 @@ public:
   /**
    * @brief Downcasts a handle to LineThroughSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized LineThroughSpan on success, otherwise empty
    */
@@ -59,6 +63,7 @@ public:
   /**
    * @brief Gets the line-through style payload.
    *
+   * @SINCE_3_0.0
    * @return The line-through style
    */
   Text::LineThrough GetLineThrough() const;
@@ -67,6 +72,7 @@ private:
   /**
    * @brief Creates a LineThroughSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL LineThroughSpan(BaseObject* impl);

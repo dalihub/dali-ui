@@ -22,7 +22,7 @@ IF(NOT CAPI_MEDIA_PLAYER_FOUND)
 ENDIF()
 PKG_CHECK_MODULES(ESPLUSPLAYER REQUIRED IMPORTED_TARGET esplusplayer)
 
-DALI_ADD_SAMPLE(video-view.example video-view-example.cpp)
+DALI_ADD_SAMPLE(video-view.example video-view-example.cpp video-view-validation.cpp)
 TARGET_LINK_LIBRARIES(video-view.example PRIVATE
   PkgConfig::CAPI_MEDIA_PLAYER
   PkgConfig::ESPLUSPLAYER

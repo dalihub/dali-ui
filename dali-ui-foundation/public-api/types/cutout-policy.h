@@ -34,15 +34,16 @@ namespace Ui
  * the view is how such an area is kept from being drawn underneath the View, as a
  * drop shadow is.
  *
+ * @SINCE_3_0.0
  * @note When the two areas coincide, CUTOUT_VIEW discards everything.
  */
 enum class CutoutPolicy
 {
-  NONE,                              ///< Draw the whole area (Default)
-  CUTOUT_VIEW,                       ///< Discard the view's rectangle, ignoring its corner radius
-  CUTOUT_VIEW_WITH_CORNER_RADIUS,    ///< Discard the view's rectangle, following its corner radius
-  CUTOUT_OUTSIDE,                    ///< Discard everything outside the view's rectangle, ignoring its corner radius
-  CUTOUT_OUTSIDE_WITH_CORNER_RADIUS, ///< Discard everything outside the view's rectangle, following its corner radius
+  NONE,                              ///< Draw the whole area (Default) @SINCE_3_0.0
+  CUTOUT_VIEW,                       ///< Discard the view's rectangle, ignoring its corner radius @SINCE_3_0.0
+  CUTOUT_VIEW_WITH_CORNER_RADIUS,    ///< Discard the view's rectangle, following its corner radius @SINCE_3_0.0
+  CUTOUT_OUTSIDE,                    ///< Discard everything outside the view's rectangle, ignoring its corner radius @SINCE_3_0.0
+  CUTOUT_OUTSIDE_WITH_CORNER_RADIUS, ///< Discard everything outside the view's rectangle, following its corner radius @SINCE_3_0.0
 };
 
 } // namespace Ui

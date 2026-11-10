@@ -53,6 +53,7 @@ class MarkdownViewStyle;
  *
  * For predictable text wrapping in an unbounded-width container, specify a
  * maximum width or place MarkdownView in a container with a bounded width.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API MarkdownView : public View
 {
@@ -63,6 +64,7 @@ public:
   /**
    * @brief Creates a MarkdownView with the default style.
    *
+   * @SINCE_3_0.0
    * @return The created MarkdownView.
    */
   static MarkdownView New();
@@ -70,6 +72,7 @@ public:
   /**
    * @brief Creates a MarkdownView with the specified style.
    *
+   * @SINCE_3_0.0
    * @param[in] style The style to use.
    * @return The created MarkdownView.
    */
@@ -79,6 +82,7 @@ public:
   /**
    * @brief Converts Markdown source to plain text.
    *
+   * @SINCE_3_0.0
    * @param[in] markdown The Markdown source.
    * @return The converted plain text.
    */
@@ -94,6 +98,7 @@ public:
   /**
    * @brief Sets the Markdown source to display.
    *
+   * @SINCE_3_0.0
    * @param[in] markdown The Markdown source.
    */
   void SetMarkdown(const Dali::String& markdown);
@@ -101,12 +106,14 @@ public:
   /**
    * @brief Gets the current Markdown source.
    *
+   * @SINCE_3_0.0
    * @return The Markdown source.
    */
   Dali::String GetMarkdown() const;
 
   /**
    * @brief Clears the Markdown content.
+   * @SINCE_3_0.0
    */
   void Clear();
 

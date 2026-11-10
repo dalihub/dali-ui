@@ -1328,7 +1328,14 @@ int UtcDaliStyledTextControllerGradientSpanReachesRenderersP(void)
                                                      false,
                                                      Pixel::RGBA8888);
   DALI_TEST_CHECK(transparentTexture);
-  DALI_TEST_CHECK(!ContainsVisibleTextPixel(transparentTexture));
+  // GradientSpan owns its alpha even when the default foreground is transparent.
+  DALI_TEST_CHECK(ContainsVisibleTextPixel(transparentTexture));
+  const auto opaqueBuffer = Dali::Integration::GetPixelDataBuffer(texture);
+  const auto transparentBuffer = Dali::Integration::GetPixelDataBuffer(transparentTexture);
+  DALI_TEST_EQUALS(texture.GetWidth(), transparentTexture.GetWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(texture.GetHeight(), transparentTexture.GetHeight(), TEST_LOCATION);
+  DALI_TEST_EQUALS(std::memcmp(opaqueBuffer.buffer, transparentBuffer.buffer,
+                             texture.GetStrideBytes() * texture.GetHeight()), 0, TEST_LOCATION);
   controller->SetDefaultColor(Color::BLACK);
   RelayoutController(controller);
 
@@ -1352,7 +1359,7 @@ int UtcDaliStyledTextControllerGradientSpanReachesRenderersP(void)
       continue;
     }
     Renderer renderer = child.GetRendererAt(0u);
-    if(renderer.GetPropertyIndex("uTextGradientType") != Property::INVALID_INDEX)
+    if(renderer.GetPropertyIndex("uTextGradientEvaluationMode") != Property::INVALID_INDEX)
     {
       ++gradientRendererCount;
       DALI_TEST_CHECK(renderer.GetTextures().GetTexture(1u));
@@ -1492,7 +1499,7 @@ int UtcDaliStyledTextControllerGradientSpanUserSpaceRenderingP(void)
       continue;
     }
     Renderer renderer = child.GetRendererAt(0u);
-    const Property::Index typeIndex = renderer.GetPropertyIndex("uTextGradientType");
+    const Property::Index typeIndex = renderer.GetPropertyIndex("uTextGradientEvaluationMode");
     if(typeIndex == Property::INVALID_INDEX ||
        std::fabs(renderer.GetProperty<float>(typeIndex) - static_cast<float>(Dali::Ui::Gradient::Type::LINEAR)) > 0.1f)
     {
@@ -1563,7 +1570,7 @@ int UtcDaliStyledTextControllerGradientSpanUserSpaceRenderingP(void)
       continue;
     }
     Renderer renderer = child.GetRendererAt(0u);
-    const Property::Index typeIndex = renderer.GetPropertyIndex("uTextGradientType");
+    const Property::Index typeIndex = renderer.GetPropertyIndex("uTextGradientEvaluationMode");
     if(typeIndex == Property::INVALID_INDEX)
     {
       continue;
@@ -1578,7 +1585,7 @@ int UtcDaliStyledTextControllerGradientSpanUserSpaceRenderingP(void)
                        Vector2(24.0f / boundsPixelSize.x, 16.0f / boundsPixelSize.y),
                        Math::MACHINE_EPSILON_1000,
                        TEST_LOCATION);
-      DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientRadialScale")),
+      DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(renderer.GetPropertyIndex("uTextGradientEvaluationScale")),
                        boundsPixelSize / 32.0f,
                        Math::MACHINE_EPSILON_1000,
                        TEST_LOCATION);
@@ -1651,7 +1658,7 @@ int UtcDaliStyledTextControllerGradientSpanAtlasScalingP(void)
     {
       Actor child = atlasActor.GetChildAt(childIndex);
       if(child.GetRendererCount() > 0u &&
-         child.GetRendererAt(0u).GetPropertyIndex("uTextGradientType") != Property::INVALID_INDEX)
+         child.GetRendererAt(0u).GetPropertyIndex("uTextGradientEvaluationMode") != Property::INVALID_INDEX)
       {
         ++gradientRendererCount;
         DALI_TEST_EQUALS(child.GetRendererAt(0u).GetTextures().GetTextureCount(), 2u, TEST_LOCATION);
@@ -2539,5 +2546,57 @@ int UtcDaliStyledTextControllerAnchorActorsFromStyledTextP(void)
   RelayoutController(controller);
   controller->GetAnchorActors(anchors);
   DALI_TEST_CHECK(anchors.empty());
+  END_TEST;
+}
+
+int UtcDaliStyledTextDefaultForegroundRangesP(void)
+{
+  UiTestApplication application;
+  auto              controller = PublicText::Controller::New();
+  auto&             model      = GetLogicalModel(controller);
+  model.mText.Resize(100u, 'A');
+  model.mGradientSpanData = std::make_unique<PublicText::Internal::GradientSpanModelData>();
+  for(unsigned i = 0u; i < 100u; i += 2u)
+  {
+    PublicText::ColorRun color;
+    color.characterRun = {i, 1u};
+    color.color        = Color::GREEN;
+    model.mColorRuns.PushBack(color);
+    PublicText::Internal::GradientSpanCharacterRun gradient;
+    gradient.characterRun = {i + 1u, 1u};
+    gradient.paintIndex   = 1u;
+    model.mGradientSpanData->characterRuns.PushBack(gradient);
+  }
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters(true));
+  model.mGradientSpanData->characterRuns[20u].characterRun.numberOfCharacters = 0u;
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters());
+  model.mText[41u] = ' ';
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  model.mText[41u] = 0x05d0u; // Logical BiDi text still requires its default foreground.
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters());
+
+  // Unordered/overlapping/overflowing ranges must never conceal an uncovered glyph.
+  model.mGradientSpanData.reset();
+  model.mColorRuns.Clear();
+  PublicText::ColorRun run;
+  run.color        = Color::RED;
+  run.characterRun = {50u, std::numeric_limits<PublicText::Length>::max()};
+  model.mColorRuns.PushBack(run);
+  run.characterRun = {0u, 25u};
+  model.mColorRuns.PushBack(run);
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters());
+  model.mColorRuns[0u].characterRun = {0u, 100u};
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  model.mColorRuns.Clear();
+  for(auto& character : model.mText)
+  {
+    character = ' ';
+  }
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  model.mText.Clear();
+  DALI_TEST_CHECK(!controller->HasDefaultColorCharacters());
+  controller->SetText("New unstyled text");
+  DALI_TEST_CHECK(controller->HasDefaultColorCharacters());
   END_TEST;
 }

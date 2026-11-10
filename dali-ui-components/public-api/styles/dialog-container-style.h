@@ -27,6 +27,7 @@ namespace Ui
 {
 /**
  * @brief An immutable presentation policy applied at creation. Does not store content or modal state.
+ * @SINCE_3_0.0
  * @note UiConfig::Apply must be called before using Default, DefaultPreset or NoScrimPreset.
  */
 class DALI_UI_COMPONENTS_API DialogContainerStyle : public UiStyle
@@ -34,29 +35,39 @@ class DALI_UI_COMPONENTS_API DialogContainerStyle : public UiStyle
 public:
   class Builder;
   /// @brief Creates an empty handle.
+  /// @SINCE_3_0.0
   DialogContainerStyle() = default;
   /// @brief Gets the default key for registration with Components UiConfig.
+  /// @SINCE_3_0.0
   static UiStyleKey<DialogContainerStyle> DefaultKey();
   /// @brief Gets the OneUI fallback scrim: black with alpha 0.4 and blur radius 100.
   /// Independent of the configured provider; use NoScrimPreset to disable both.
+  /// @SINCE_3_0.0
   static DialogContainerStyle DefaultPreset();
   /**
    * @brief Gets a cached preset with transparent tint and no background blur.
    * The built-in scrim still receives input; this does not make the dialog non-modal.
+   * @SINCE_3_0.0
    */
   static DialogContainerStyle NoScrimPreset();
   /// @brief Gets the style from the current configuration, falling back to the built-in defaults.
+  /// @SINCE_3_0.0
   static DialogContainerStyle Default();
   /// @brief Returns an empty handle if the type does not match.
+  /// @SINCE_3_0.0
   static DialogContainerStyle DownCast(BaseHandle handle);
   /// @brief Does not check the type. The caller must ensure that the actual type matches.
+  /// @SINCE_3_0.0
   static DialogContainerStyle StaticDownCast(UiStyle style);
   /// @brief Returns a mutable builder independent of the original style.
+  /// @SINCE_3_0.0
   Builder Configure() const;
 
   /// @brief Built-in scrim color. Not applied to a custom scrim.
+  /// @SINCE_3_0.0
   UiColor GetScrimColor() const;
   /// @brief Built-in scrim blur radius. Must be finite and within [0, 4096]; zero disables blur. The fractional part is discarded when applied.
+  /// @SINCE_3_0.0
   float GetScrimBlurRadius() const;
 
 public: // Not intended for application developers
@@ -65,7 +76,10 @@ public: // Not intended for application developers
   /// @endcond
 };
 
-/** @brief A move-only builder that cannot be reused after Build. */
+/**
+ * @brief A move-only builder that cannot be reused after Build.
+ * @SINCE_3_0.0
+ */
 class DALI_UI_COMPONENTS_API DialogContainerStyle::Builder
 {
 public:
@@ -77,15 +91,18 @@ public:
   ~Builder();
 
   /// @brief Built-in scrim color. Not applied to a custom scrim.
+  /// @SINCE_3_0.0
   Builder& SetScrimColor(const UiColor& value) &;
   /// @copydoc SetScrimColor
   Builder&& SetScrimColor(const UiColor& value) &&;
   /// @brief Built-in scrim blur radius. Must be finite and within [0, 4096]; zero disables blur. The fractional part is discarded when applied. Invalid values trigger an assertion.
+  /// @SINCE_3_0.0
   Builder& SetScrimBlurRadius(float value) &;
   /// @copydoc SetScrimBlurRadius
   Builder&& SetScrimBlurRadius(float value) &&;
 
   /// @brief Consumes this builder and returns an immutable style.
+  /// @SINCE_3_0.0
   DialogContainerStyle Build() &&;
 
 private:

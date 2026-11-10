@@ -2061,6 +2061,17 @@ public: // Queries & retrieves.
   const ModelInterface* GetLogicalTextModel() const;
 
   /**
+   * @brief Checks for source characters that inherit the default foreground color.
+   *
+   * Consumes each foreground range once, without layout or temporary allocations.
+   * Unordered ranges may conservatively report an uncovered character.
+   *
+   * @param[in] ignoreGradientSpans Whether gradient spans may use fallback text alpha for color glyphs.
+   * @return True if a non-whitespace character may use the default color.
+   */
+  bool HasDefaultColorCharacters(bool ignoreGradientSpans = false) const;
+
+  /**
    * @brief Retrieves the authoritative layout/render-domain model.
    *
    * This is the logical model on the ordinary fast path and the projected

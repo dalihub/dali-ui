@@ -41,12 +41,13 @@ class WindowFrameImpl;
 
 /**
  * @brief Determines how interactive resize requests are handled.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameInteractiveResizePolicy
 {
-  FREE              = 0, ///< Allows free interactive resize
-  DISABLED          = 1, ///< Disables interactive resize
-  KEEP_ASPECT_RATIO = 2  ///< Preserves native surface aspect ratio during interactive resize
+  FREE              = 0, ///< Allows free interactive resize @SINCE_3_0.0
+  DISABLED          = 1, ///< Disables interactive resize @SINCE_3_0.0
+  KEEP_ASPECT_RATIO = 2  ///< Preserves native surface aspect ratio during interactive resize @SINCE_3_0.0
 };
 
 /**
@@ -60,6 +61,7 @@ enum class WindowFrameInteractiveResizePolicy
  * application content keeps its previous size. KEEP_WINDOW_SIZE leaves the
  * native window surface size unchanged, so frame or content bounds may change.
  * Maximized geometry remains compositor-owned for both policies.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameSizePolicy
 {
@@ -93,18 +95,20 @@ enum class WindowFrameSizePolicy
  * CommandInterceptor and every signal pass the originating WindowFrame as
  * their first argument. This allows one observer or policy object to serve
  * multiple frames.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API WindowFrame : public Dali::BaseHandle
 {
 public:
   /**
    * @brief State reported by the window system for the underlying window.
+   * @SINCE_3_0.0
    */
   enum class WindowState
   {
-    NORMAL    = 0, ///< Window is neither maximized nor minimized
-    MAXIMIZED = 1, ///< Window occupies its compositor-defined maximized bounds
-    MINIMIZED = 2  ///< Window is minimized and has no presented frame
+    NORMAL    = 0, ///< Window is neither maximized nor minimized @SINCE_3_0.0
+    MAXIMIZED = 1, ///< Window occupies its compositor-defined maximized bounds @SINCE_3_0.0
+    MINIMIZED = 2  ///< Window is minimized and has no presented frame @SINCE_3_0.0
   };
 
   using CloseCallback = Dali::Callback<void()>;
@@ -114,6 +118,7 @@ public:
    *
    * WindowFrame invokes this callback before dispatching its default native
    * operation. The callback can observe the request or take it over entirely.
+   * @SINCE_3_0.0
    */
   using CommandInterceptor                    = Dali::Callback<WindowFrameCommandDisposition(WindowFrame, const WindowFrameCommandRequest&)>;
   using WindowStateChangedSignalType          = Dali::Signal<void(WindowFrame, WindowState)>;
@@ -126,6 +131,7 @@ public:
 
   /**
    * @brief Creates an uninitialized WindowFrame handle.
+   * @SINCE_3_0.0
    */
   WindowFrame();
   ~WindowFrame();
@@ -136,6 +142,7 @@ public:
 
   /**
    * @brief Creates a WindowFrame with default options for an existing window.
+   * @SINCE_3_0.0
    * @param[in] window Window whose surface will host the frame and content
    * @param[in] closeCallback Callback used by the default close command
    * @return An initialized handle, or an uninitialized handle when window is empty
@@ -144,6 +151,7 @@ public:
 
   /**
    * @brief Creates a WindowFrame with initial options for an existing window.
+   * @SINCE_3_0.0
    * @param[in] window Window whose surface will host the frame and content
    * @param[in] closeCallback Callback used by the default close command
    * @param[in] options Initial state and feature options
@@ -153,6 +161,7 @@ public:
 
   /**
    * @brief Downcasts a handle to WindowFrame.
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A WindowFrame handle, or an uninitialized handle on failure
    */
@@ -163,6 +172,7 @@ public:
    *
    * A window can have only one attached WindowFrame. Calling this again on the
    * same WindowFrame succeeds without changing anything.
+   * @SINCE_3_0.0
    * @return true when attached, or false when another WindowFrame owns the window
    */
   bool Attach();
@@ -172,11 +182,13 @@ public:
    *
    * Content and custom decoration remain owned by this WindowFrame and are
    * restored by the next Attach().
+   * @SINCE_3_0.0
    */
   void Detach();
 
   /**
    * @brief Returns whether the frame is currently attached.
+   * @SINCE_3_0.0
    * @return true when the frame view tree and native callbacks are attached
    */
   bool IsAttached() const;
@@ -187,6 +199,7 @@ public:
    * The returned root is available before Attach() and remains stable across
    * decoration changes, Detach(), and subsequent Attach() calls. It becomes
    * invalid only after the last WindowFrame handle is destroyed.
+   * @SINCE_3_0.0
    * @return Persistent application content root
    */
   Dali::Ui::View GetContentRoot() const;
@@ -196,6 +209,7 @@ public:
    *
    * This is the value the caller configured, not a runtime backend capability
    * query. See WindowFrameFeature.
+   * @SINCE_3_0.0
    * @param[in] feature Feature to query
    * @return true when the feature is enabled
    */
@@ -203,24 +217,28 @@ public:
 
   /**
    * @brief Returns the compositor-confirmed window state.
+   * @SINCE_3_0.0
    * @return Current window state
    */
   WindowState GetWindowState() const;
 
   /**
    * @brief Returns whether the compositor confirmed the maximized state.
+   * @SINCE_3_0.0
    * @return true when maximized
    */
   bool IsMaximized() const;
 
   /**
    * @brief Returns whether the compositor confirmed the minimized state.
+   * @SINCE_3_0.0
    * @return true when minimized
    */
   bool IsMinimized() const;
 
   /**
    * @brief Returns current surface, frame, and content geometry.
+   * @SINCE_3_0.0
    * @return Current geometry
    */
   WindowFrameGeometry GetGeometry() const;
@@ -232,6 +250,7 @@ public:
    * so that the installed decoration can be resubmitted with new layout or
    * style. Role views must belong to a supplied slot. Invalid topology is
    * rejected without changing the current frame.
+   * @SINCE_3_0.0
    * @param[in] decoration Slot roots and command roles
    * @param[in] layout Decoration layout configuration
    * @param[in] sizePolicy Size preservation policy for this installation only
@@ -241,6 +260,7 @@ public:
 
   /**
    * @brief Atomically installs custom decoration, layout, and frame style.
+   * @SINCE_3_0.0
    * @param[in] decoration Slot roots and command roles
    * @param[in] layout Decoration layout configuration
    * @param[in] style Frame and shadow style
@@ -261,6 +281,7 @@ public:
    * a following SetFrameStyle(..., KEEP_WINDOW_SIZE) then keeps that current
    * window size and may change the frame or content bounds through new shadow
    * outsets.
+   * @SINCE_3_0.0
    * @param[in] layout New decoration layout configuration
    * @param[in] sizePolicy Size preservation policy for this update only
    */
@@ -271,6 +292,7 @@ public:
    *
    * The window size is preserved, so the content root grows into the space the
    * decoration occupied.
+   * @SINCE_3_0.0
    */
   void ClearDecoration();
 
@@ -280,12 +302,14 @@ public:
    * In active overlay mode, auto-hide can temporarily suppress decoration even
    * while visibility is requested.
    *
+   * @SINCE_3_0.0
    * @param[in] visible true to request visible decoration
    */
   void SetDecorationVisible(bool visible);
 
   /**
    * @brief Returns effective decoration visibility.
+   * @SINCE_3_0.0
    * @return true when decoration is currently visible after overlay resolution
    */
   bool IsDecorationVisible() const;
@@ -295,6 +319,7 @@ public:
    *
    * Keeps the installed decoration views and layout, so use this rather than
    * SetDecoration() when only the look changes.
+   * @SINCE_3_0.0
    * @param[in] style New style
    * @param[in] sizePolicy Size preservation policy for this update only
    */
@@ -302,6 +327,7 @@ public:
 
   /**
    * @brief Returns a copy of the configured frame style.
+   * @SINCE_3_0.0
    * @return Frame style
    */
   WindowFrameStyle GetFrameStyle() const;
@@ -311,18 +337,21 @@ public:
    *
    * In overlay mode the content bounds remain the full maximized frame while
    * decoration can auto-hide independently.
+   * @SINCE_3_0.0
    * @param[in] enabled true to enable
    */
   void SetOverlayEnabled(bool enabled);
 
   /**
    * @brief Returns whether maximized overlay layout is enabled.
+   * @SINCE_3_0.0
    * @return true when enabled
    */
   bool IsOverlayEnabled() const;
 
   /**
    * @brief Sets overlay auto-hide delay.
+   * @SINCE_3_0.0
    * @param[in] milliseconds Delay, or 0 to keep overlay decoration visible
    *            indefinitely. Passing 0 also reveals decoration that auto-hide
    *            had already hidden.
@@ -331,17 +360,20 @@ public:
 
   /**
    * @brief Returns overlay auto-hide delay.
+   * @SINCE_3_0.0
    * @return Delay in milliseconds, or 0 when auto-hide is disabled
    */
   uint32_t GetOverlayAutoHideDelay() const;
 
   /**
    * @brief Reveals an auto-hidden overlay and starts a fresh hide timeout.
+   * @SINCE_3_0.0
    */
   void ShowOverlayTemporarily();
 
   /**
    * @brief Returns whether decoration is suppressed by auto-hide.
+   * @SINCE_3_0.0
    * @return true when auto-hidden
    */
   bool IsOverlayAutoHidden() const;
@@ -353,18 +385,21 @@ public:
    * the window system. A backend that does not support the corresponding
    * native policy can continue to resize freely.
    *
+   * @SINCE_3_0.0
    * @param[in] policy Resize policy
    */
   void SetInteractiveResizePolicy(WindowFrameInteractiveResizePolicy policy);
 
   /**
    * @brief Returns interactive resize policy.
+   * @SINCE_3_0.0
    * @return Current policy
    */
   WindowFrameInteractiveResizePolicy GetInteractiveResizePolicy() const;
 
   /**
    * @brief Sets minimum frame size.
+   * @SINCE_3_0.0
    * @param[in] size Minimum size excluding shadow
    * @return true when applied, or false when it conflicts with the maximum
    * @note Native constraints are active only while WindowFrame is attached.
@@ -373,6 +408,7 @@ public:
 
   /**
    * @brief Sets maximum frame size.
+   * @SINCE_3_0.0
    * @param[in] size Maximum size excluding shadow
    * @return true when applied, or false when it conflicts with the minimum
    */
@@ -380,16 +416,19 @@ public:
 
   /**
    * @brief Clears the minimum frame-size constraint.
+   * @SINCE_3_0.0
    */
   void ClearMinimumFrameSize();
 
   /**
    * @brief Clears the maximum frame-size constraint.
+   * @SINCE_3_0.0
    */
   void ClearMaximumFrameSize();
 
   /**
    * @brief Reads minimum frame size.
+   * @SINCE_3_0.0
    * @param[out] size Configured size
    * @return true when configured
    */
@@ -397,6 +436,7 @@ public:
 
   /**
    * @brief Reads maximum frame size.
+   * @SINCE_3_0.0
    * @param[out] size Configured size
    * @return true when configured
    */
@@ -407,6 +447,7 @@ public:
    *
    * The target excludes shadow outsets. While attached, native resize is
    * deferred to the next event-loop tick and repeated requests are coalesced.
+   * @SINCE_3_0.0
    * @param[in] size Target frame size
    * @return true when accepted for resize, or false when no window is available
    *         or maximized geometry is compositor-owned
@@ -420,6 +461,7 @@ public:
    * outsets. While attached, native resize is deferred to the next event-loop
    * tick to avoid re-entering window event processing. Repeated requests are
    * coalesced and a pending request is dropped by Detach().
+   * @SINCE_3_0.0
    * @param[in] size Target application content size
    * @return true when accepted for resize, or false when no window is available
    *         or maximized geometry is compositor-owned
@@ -428,12 +470,14 @@ public:
 
   /**
    * @brief Returns current frame size excluding shadow outsets.
+   * @SINCE_3_0.0
    * @return Frame size
    */
   Dali::Vector2 GetFrameSize() const;
 
   /**
    * @brief Returns current layout-managed content size.
+   * @SINCE_3_0.0
    * @return Content size
    */
   Dali::Vector2 GetContentSize() const;
@@ -451,6 +495,7 @@ public:
    *
    * There is no matching request to leave a minimized window: that belongs to
    * the window system, and WindowFrame follows the state it reports.
+   * @SINCE_3_0.0
    * @return Command dispatch result
    */
   WindowFrameCommandResult RequestMinimize();
@@ -463,6 +508,7 @@ public:
    *
    * The request is dispatched even when the window already appears to be maximized,
    * so a RESTORE sent straight after this one is the state that lands.
+   * @SINCE_3_0.0
    * @return Command dispatch result
    */
   WindowFrameCommandResult RequestMaximize();
@@ -474,6 +520,7 @@ public:
    * supplied only for the initial full-size launch policy.
    *
    * The request is dispatched even when the window already appears to be restored.
+   * @SINCE_3_0.0
    * @return Command dispatch result
    */
   WindowFrameCommandResult RequestRestore();
@@ -487,6 +534,7 @@ public:
    * A toggle has no target of its own, so unlike the explicit requests it does
    * read the last reported state. Two toggles dispatched before that state changes
    * therefore ask for the same thing twice.
+   * @SINCE_3_0.0
    * @return Command dispatch result, or NOT_DISPATCHED when the current state
    *         cannot be toggled
    */
@@ -495,6 +543,7 @@ public:
   /**
    * @brief Requests close through interceptor or close callback.
    *
+   * @SINCE_3_0.0
    * @return Command dispatch result
    */
   WindowFrameCommandResult RequestClose();
@@ -507,6 +556,7 @@ public:
    *
    * The callback is not connection-tracked. Clear it before destroying a
    * receiver that does not outlive this WindowFrame.
+   * @SINCE_3_0.0
    * @param[in] interceptor Callback, or an empty callback to clear it
    */
   void SetCommandInterceptor(CommandInterceptor interceptor);
@@ -518,6 +568,7 @@ public:
    * therefore fires for a change the application requested and for a change the
    * compositor made on its own, and it does not fire when the window system
    * repeats a state WindowFrame already observed.
+   * @SINCE_3_0.0
    * @return State-change signal
    */
   WindowStateChangedSignalType& WindowStateChangedSignal();
@@ -532,12 +583,14 @@ public:
    *
    * WindowFrame registers the frame callback only while this signal has an
    * observer, so applications do not need a separate enable flag.
+   * @SINCE_3_0.0
    * @return Presented-state signal
    */
   WindowStatePresentedSignalType& WindowStatePresentedSignal();
 
   /**
    * @brief Emitted when laid-out surface, frame, or content geometry changes.
+   * @SINCE_3_0.0
    * @return Geometry-change signal
    */
   GeometryChangedSignalType& GeometryChangedSignal();
@@ -550,18 +603,21 @@ public:
    * when the geometry is unchanged, because it reports a completed operation
    * rather than a new value.
    *
+   * @SINCE_3_0.0
    * @return Geometry-completion signal
    */
   GeometryChangeCompletedSignalType& GeometryChangeCompletedSignal();
 
   /**
    * @brief Emitted when effective decoration visibility changes.
+   * @SINCE_3_0.0
    * @return Decoration visibility signal
    */
   DecorationVisibilityChangedSignalType& DecorationVisibilityChangedSignal();
 
   /**
    * @brief Emitted for move and resize interaction state changes.
+   * @SINCE_3_0.0
    * @return Interaction signal
    */
   InteractionChangedSignalType& InteractionChangedSignal();
@@ -569,6 +625,7 @@ public:
   /**
    * @brief Emitted with the result of every command dispatch.
    *
+   * @SINCE_3_0.0
    * @return Command-result signal
    */
   CommandProcessedSignalType& CommandProcessedSignal();

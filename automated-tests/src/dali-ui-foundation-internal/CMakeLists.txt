@@ -6,6 +6,7 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 # Keep the test source declarations at the top so the Windows runner can
 # include this file in source-list-only mode without configuring Unix targets.
 SET(TC_SOURCES
+    utc-Dali-TextRenderScaleFallback-internal.cpp
     utc-Dali-AsyncTextLoaderOwnership-internal.cpp
     utc-Dali-BidirectionalSupport-internal.cpp
     utc-Dali-AsyncMarqueeCoordinates-internal.cpp
@@ -18,6 +19,8 @@ SET(TC_SOURCES
     utc-Dali-ImageCache-internal.cpp
     utc-Dali-FastTrackLoadingTask-internal.cpp
     utc-Dali-ImageUrl-internal.cpp
+    utc-Dali-WidgetImageVisual-internal.cpp
+    utc-Dali-WidgetView-internal.cpp
     utc-Dali-InteractiveTrait-internal.cpp
     utc-Dali-InteractiveView-internal.cpp
     utc-Dali-SelectableTrait-internal.cpp
@@ -83,6 +86,11 @@ SET(TC_SOURCES
     utc-Dali-ArrangeCacheHit-internal.cpp
     utc-Dali-LayoutInvalidationGeneration-internal.cpp
 )
+
+# These tests load a Unix shared plugin through the real adaptor engine proxy.
+IF(WIN32)
+    LIST(REMOVE_ITEM TC_SOURCES utc-Dali-WidgetView-internal.cpp)
+ENDIF()
 
 SET(TC_SOURCE_LIST ${TC_SOURCES})
 
@@ -303,7 +311,17 @@ ADD_EXECUTABLE(${EXEC_NAME}
     ${ALL_SOURCES}
 )
 
+IF(NOT WIN32)
+    TARGET_SOURCES(${EXEC_NAME} PRIVATE test-widget-native-image.cpp)
+ENDIF()
+
 ADD_DEPENDENCIES(${EXEC_NAME} generate_builtin_shaders_internal)
+
+# Platform-independent provider for WidgetView creation and ownership tests.
+ADD_LIBRARY(widget-view-test-plugin SHARED test-widget-engine-plugin.cpp)
+TARGET_LINK_LIBRARIES(widget-view-test-plugin ${DALICORE_LDFLAGS} --coverage)
+ADD_DEPENDENCIES(${EXEC_NAME} widget-view-test-plugin)
+INSTALL(TARGETS widget-view-test-plugin DESTINATION ${BIN_DIR})
 
 TARGET_LINK_LIBRARIES(${EXEC_NAME}
     ${DALICORE_LIBRARIES}

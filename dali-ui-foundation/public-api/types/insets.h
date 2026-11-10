@@ -28,6 +28,7 @@ namespace Ui
  * @brief Alias kept so existing code spelling Dali::Ui::Insets keeps compiling.
  *
  * TODO: Remove once every external user has migrated to Dali::Insets.
+ * @SINCE_3_0.0
  */
 using Insets = Dali::Insets;
 

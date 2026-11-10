@@ -318,7 +318,7 @@ public:
    * @param[in] visual The text visual owning the prepared style snapshots.
    * @return True if a current global, overlay, span or last async request uses USER_SPACE.
    */
-  static bool UsesUserSpaceGradient(Ui::Integration::Visual::Base visual)
+  static bool UsesUserSpaceGradient(const Ui::Integration::Visual::Base& visual)
   {
     const auto& visualObject = GetVisualObject(visual);
     return visualObject.mAsyncRenderUsesUserSpaceGradient || visualObject.UsesUserSpaceGradient();
@@ -439,6 +439,19 @@ public:
                                                  const Vector2&                originSize);
 
   /**
+   * @brief Checks whether marquee foreground rendering uses the default text color.
+   *
+   * @param[in] visual The text visual.
+   * @param[in] alphaChanged Whether TextColor alpha changed.
+   * @return True if the marquee raster may depend on the changed text color.
+   */
+  static bool UsesDefaultMarqueeTextColor(Ui::Integration::Visual::Base visual, bool alphaChanged)
+  {
+    auto& textVisual = GetVisualObject(visual);
+    return textVisual.UsesDefaultMarqueeTextColor(textVisual.mTextShaderFeatureCache.IsEnabledEmoji(), alphaChanged);
+  }
+
+  /**
    * @brief Retrieve the stored TextGradient mask PixelData for internal rendering/tests.
    * @param[in] visual The text visual.
    * @return The stored TextGradient mask PixelData.
@@ -533,14 +546,14 @@ private:
     uint32_t  offsetHeight;
     Vector2   transformOffset;
 
-    TilingInfo(int32_t width, int32_t height)
+    TilingInfo(int32_t initWidth, int32_t initHeight)
     : textPixelData(),
       stylePixelData(),
       overlayStylePixelData(),
       maskPixelData(),
       revealPixelData(),
-      width(width),
-      height(height),
+      width(initWidth),
+      height(initHeight),
       offsetHeight(0u),
       transformOffset(0.f, 0.f)
     {
@@ -640,6 +653,15 @@ private:
   void SetTextGradientOverlayMode(Ui::Text::GradientOverlayMode mode);
 
   PixelData GetTextGradientMaskPixelData() const;
+
+  /**
+   * @brief Checks whether current marquee foreground sources use TextColor.
+   *
+   * @param[in] containsColorGlyph Whether the published or incoming raster contains color glyphs.
+   * @param[in] alphaChanged Whether TextColor alpha changed.
+   * @return True if default-color source characters can reach the marquee texture.
+   */
+  bool UsesDefaultMarqueeTextColor(bool containsColorGlyph, bool alphaChanged) const;
 
   /**
    * @brief Sets the TextGradient start-offset source property index registered by the control.
@@ -920,9 +942,19 @@ private:
    * @param[in] visual A handle to the TextVisual
    * @return The TextVisual object
    */
-  static TextVisual& GetVisualObject(Ui::Integration::Visual::Base visual)
+  static TextVisual& GetVisualObject(Ui::Integration::Visual::Base& visual)
   {
     return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject());
+  };
+
+  /**
+   * @brief Retrieve the TextVisual object.
+   * @param[in] visual A handle to the TextVisual
+   * @return The TextVisual object
+   */
+  static const TextVisual& GetVisualObject(const Ui::Integration::Visual::Base& visual)
+  {
+    return static_cast<const TextVisual&>(Ui::GetImplementation(visual).GetVisualObject());
   };
 
   /**

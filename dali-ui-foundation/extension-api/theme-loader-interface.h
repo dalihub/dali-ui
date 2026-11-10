@@ -39,12 +39,14 @@ namespace Ui
  *
  * The virtual method set is fixed for ABI stability. Future extensions
  * should be added as non-virtual helper methods only.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API ThemeLoaderInterface
 {
 public:
   /**
    * @brief Signal type emitted when the current theme changes.
+   * @SINCE_3_0.0
    */
   using ThemeChangedSignalType = Signal<void()>;
 
@@ -53,6 +55,7 @@ public:
   /**
    * @brief Looks up a color by its identifier.
    *
+   * @SINCE_3_0.0
    * @param[in] colorId The color identifier (e.g. "Primary", "Background")
    * @param[out] outColor The resolved RGBA value if found
    * @return True if the color was found
@@ -62,6 +65,7 @@ public:
   /**
    * @brief Returns the identifier of the current theme.
    *
+   * @SINCE_3_0.0
    * @return The theme identifier, or an empty string if none
    */
   virtual String GetCurrentThemeId() const = 0;
@@ -69,6 +73,7 @@ public:
   /**
    * @brief Returns the signal emitted when the theme changes.
    *
+   * @SINCE_3_0.0
    * @return A reference to the theme-changed signal
    */
   virtual ThemeChangedSignalType& ThemeChangedSignal() = 0;

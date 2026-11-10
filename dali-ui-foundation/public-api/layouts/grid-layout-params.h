@@ -41,18 +41,21 @@ namespace Ui
  *   .SetColumn(2)
  *   .SetColumnSpan(3));
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API GridLayoutParams
 {
 public:
   /**
    * @brief Creates parameters with default values.
+   * @SINCE_3_0.0
    */
   GridLayoutParams();
 
   /**
    * @brief Creates a new GridLayoutParams with default values.
    *
+   * @SINCE_3_0.0
    * @return A value initialized with default parameters
    */
   static GridLayoutParams New();
@@ -60,6 +63,7 @@ public:
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] other Value to copy
    */
   GridLayoutParams(const GridLayoutParams& other);
@@ -67,6 +71,7 @@ public:
   /**
    * @brief Creates a value by moving another value.
    *
+   * @SINCE_3_0.0
    * @note After the move the source is in a moved-from state; assign it a valid
    * value before use. Calling a getter or setter on, or copying from, a
    * moved-from value throws.
@@ -75,12 +80,14 @@ public:
 
   /**
    * @brief Copies another value.
+   * @SINCE_3_0.0
    */
   GridLayoutParams& operator=(const GridLayoutParams& other);
 
   /**
    * @brief Moves another value.
    *
+   * @SINCE_3_0.0
    * @note After the move the source is in a moved-from state; assign it a valid
    * value before use. Calling a getter or setter on, or copying from, a
    * moved-from value throws.
@@ -89,12 +96,14 @@ public:
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~GridLayoutParams();
 
   /**
    * @brief Sets the row index for this child in the grid.
    *
+   * @SINCE_3_0.0
    * @param[in] row Zero-based row index
    * @return Reference to this for chaining
    */
@@ -103,6 +112,7 @@ public:
   /**
    * @brief Gets the row index for this child in the grid.
    *
+   * @SINCE_3_0.0
    * @return The row index
    */
   uint32_t GetRow() const;
@@ -110,6 +120,7 @@ public:
   /**
    * @brief Sets the column index for this child in the grid.
    *
+   * @SINCE_3_0.0
    * @param[in] column Zero-based column index
    * @return Reference to this for chaining
    */
@@ -118,6 +129,7 @@ public:
   /**
    * @brief Gets the column index for this child in the grid.
    *
+   * @SINCE_3_0.0
    * @return The column index
    */
   uint32_t GetColumn() const;
@@ -125,6 +137,7 @@ public:
   /**
    * @brief Sets how many rows this child spans.
    *
+   * @SINCE_3_0.0
    * @param[in] span Number of rows to span (minimum 1)
    * @return Reference to this for chaining
    */
@@ -133,6 +146,7 @@ public:
   /**
    * @brief Gets how many rows this child spans.
    *
+   * @SINCE_3_0.0
    * @return The row span count
    */
   uint32_t GetRowSpan() const;
@@ -140,6 +154,7 @@ public:
   /**
    * @brief Sets how many columns this child spans.
    *
+   * @SINCE_3_0.0
    * @param[in] span Number of columns to span (minimum 1)
    * @return Reference to this for chaining
    */
@@ -148,6 +163,7 @@ public:
   /**
    * @brief Gets how many columns this child spans.
    *
+   * @SINCE_3_0.0
    * @return The column span count
    */
   uint32_t GetColumnSpan() const;
@@ -155,6 +171,7 @@ public:
   /**
    * @brief Sets the horizontal alignment within the grid cell.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment FILL, START, CENTER, or END
    * @return Reference to this for chaining
    */
@@ -163,6 +180,7 @@ public:
   /**
    * @brief Gets the horizontal alignment.
    *
+   * @SINCE_3_0.0
    * @return The horizontal alignment
    */
   LayoutAlignment GetHorizontalAlignment() const;
@@ -170,6 +188,7 @@ public:
   /**
    * @brief Sets the vertical alignment within the grid cell.
    *
+   * @SINCE_3_0.0
    * @param[in] alignment FILL, START, CENTER, or END
    * @return Reference to this for chaining
    */
@@ -178,6 +197,7 @@ public:
   /**
    * @brief Gets the vertical alignment.
    *
+   * @SINCE_3_0.0
    * @return The vertical alignment
    */
   LayoutAlignment GetVerticalAlignment() const;

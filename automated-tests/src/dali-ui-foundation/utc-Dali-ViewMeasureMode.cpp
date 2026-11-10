@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/integration-api/recycler/item-view-holder.h>
 #include <dali-ui-foundation/integration-api/recycler/linear-items-layouter.h>
 #include <dali-ui-foundation/integration-api/recycler/recycler-view.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
@@ -37,6 +38,7 @@ using Dali::Ui::Integration::RecyclerView;
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 // Measure modes, seen from the public API.
 //
@@ -2629,8 +2631,8 @@ int UtcDaliViewMeasureModeMatchContentItemAtFractionalScaleP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.1f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.1f);
   const float s = 1.1f;
 
   View p    = CreateCustomParent(300.0f, 600.0f);
@@ -2650,7 +2652,7 @@ int UtcDaliViewMeasureModeMatchContentItemAtFractionalScaleP(void)
   DALI_TEST_EQUALS(HeightOf(item), h, MODE_EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(HeightOf(label), h, MODE_EPSILON, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -2662,8 +2664,8 @@ int UtcDaliViewMeasureModeMatchContentCellAtFractionalScaleP(void)
   UiTestApplication application;
   Window            window = application.GetWindow();
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.1f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.1f);
   const float s = 1.1f;
 
   GridLayout grid = GridLayout::New();
@@ -2696,7 +2698,7 @@ int UtcDaliViewMeasureModeMatchContentCellAtFractionalScaleP(void)
   DALI_TEST_EQUALS(HeightOf(c), h + 24.0f * s, MODE_EPSILON, TEST_LOCATION);
   DALI_TEST_EQUALS(HeightOf(label), h, MODE_EPSILON, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 

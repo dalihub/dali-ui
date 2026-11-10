@@ -132,6 +132,7 @@ SET(WINDOWS_UNSUPPORTED_TEST_SOURCES
   "${INTERNAL_TEST_DIR}/utc-Dali-ObjLoader-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-PageScrollView-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-PrimitiveVisual-internal.cpp"
+  "${INTERNAL_TEST_DIR}/utc-Dali-WidgetImageVisual-internal.cpp"
   "${INTERNAL_TEST_DIR}/utc-Dali-WindowsWarningCoverage-internal.cpp"
   "${COMPONENTS_TEST_DIR}/utc-Dali-ChartView.cpp"
 )

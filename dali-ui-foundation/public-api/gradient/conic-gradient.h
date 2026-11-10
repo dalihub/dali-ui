@@ -34,18 +34,21 @@ namespace Gradient
 
 /**
  * @brief Authored conic gradient value.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Conic : public Base
 {
 public:
   /**
    * @brief Creates a conic gradient value.
+   * @SINCE_3_0.0
    */
   Conic();
 
   /**
    * @brief Creates a conic gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] center The center position
    * @param[in] startAngle The start angle
    */
@@ -54,6 +57,7 @@ public:
   /**
    * @brief Sets the conic gradient center and start angle.
    *
+   * @SINCE_3_0.0
    * @param[in] center The center position
    * @param[in] startAngle The start angle
    */
@@ -62,6 +66,7 @@ public:
   /**
    * @brief Gets the center position.
    *
+   * @SINCE_3_0.0
    * @return The center position
    */
   Vector2 GetCenter() const;
@@ -69,6 +74,7 @@ public:
   /**
    * @brief Gets the start angle.
    *
+   * @SINCE_3_0.0
    * @return The start angle
    */
   Radian GetStartAngle() const;
@@ -76,6 +82,7 @@ public:
   /**
    * @brief Returns a conic typed value from a base gradient value.
    *
+   * @SINCE_3_0.0
    * @param[in] base The source gradient value
    * @return A deep-copied conic value, or a value whose GetType() is Type::NONE if the source type does not match
    */

@@ -49,6 +49,7 @@ class ChartSection;
  *   band.SetFillColor(Vector4(1.0f, 0.0f, 0.0f, 0.15f));
  *   chart.AddSection(band);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ChartSection : public BaseHandle
 {
@@ -56,23 +57,27 @@ public:
   /**
    * @brief Creates a new ChartSection.
    *
+   * @SINCE_3_0.0
    * @return A handle to the new section
    */
   static ChartSection New();
 
   /**
    * @brief Creates an uninitialized ChartSection handle.
+   * @SINCE_3_0.0
    */
   ChartSection();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~ChartSection();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   ChartSection(const ChartSection&) = default;
@@ -80,6 +85,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -90,6 +96,7 @@ public:
    *
    * NaN (the default) extends the section to the left edge of the plot area.
    *
+   * @SINCE_3_0.0
    * @param[in] value The minimum X bound, or NaN to extend to the plot area edge
    */
   void SetMinimumX(float value);
@@ -97,6 +104,7 @@ public:
   /**
    * @brief Retrieves the minimum X bound of the section.
    *
+   * @SINCE_3_0.0
    * @return The minimum X bound, in data coordinates, or NaN if extended to the plot area edge
    */
   float GetMinimumX() const;
@@ -108,6 +116,7 @@ public:
    * Setting this equal to the minimum X bound draws a vertical threshold
    * line instead of a filled band.
    *
+   * @SINCE_3_0.0
    * @param[in] value The maximum X bound, or NaN to extend to the plot area edge
    */
   void SetMaximumX(float value);
@@ -115,6 +124,7 @@ public:
   /**
    * @brief Retrieves the maximum X bound of the section.
    *
+   * @SINCE_3_0.0
    * @return The maximum X bound, in data coordinates, or NaN if extended to the plot area edge
    */
   float GetMaximumX() const;
@@ -124,6 +134,7 @@ public:
    *
    * NaN (the default) extends the section to the bottom edge of the plot area.
    *
+   * @SINCE_3_0.0
    * @param[in] value The minimum Y bound, or NaN to extend to the plot area edge
    */
   void SetMinimumY(float value);
@@ -131,6 +142,7 @@ public:
   /**
    * @brief Retrieves the minimum Y bound of the section.
    *
+   * @SINCE_3_0.0
    * @return The minimum Y bound, in data coordinates, or NaN if extended to the plot area edge
    */
   float GetMinimumY() const;
@@ -142,6 +154,7 @@ public:
    * Setting this equal to the minimum Y bound draws a horizontal threshold
    * line instead of a filled band.
    *
+   * @SINCE_3_0.0
    * @param[in] value The maximum Y bound, or NaN to extend to the plot area edge
    */
   void SetMaximumY(float value);
@@ -149,6 +162,7 @@ public:
   /**
    * @brief Retrieves the maximum Y bound of the section.
    *
+   * @SINCE_3_0.0
    * @return The maximum Y bound, in data coordinates, or NaN if extended to the plot area edge
    */
   float GetMaximumY() const;
@@ -158,6 +172,7 @@ public:
    *
    * The default is (0.3, 0.6, 1.0, 0.15).
    *
+   * @SINCE_3_0.0
    * @param[in] color The fill color
    */
   void SetFillColor(const Vector4& color);
@@ -165,6 +180,7 @@ public:
   /**
    * @brief Retrieves the fill color of the section.
    *
+   * @SINCE_3_0.0
    * @return The fill color
    */
   Vector4 GetFillColor() const;
@@ -174,6 +190,7 @@ public:
    *
    * The default is (0.3, 0.6, 1.0, 0.8).
    *
+   * @SINCE_3_0.0
    * @param[in] color The stroke color
    */
   void SetStrokeColor(const Vector4& color);
@@ -181,6 +198,7 @@ public:
   /**
    * @brief Retrieves the stroke color of the section's border.
    *
+   * @SINCE_3_0.0
    * @return The stroke color
    */
   Vector4 GetStrokeColor() const;
@@ -190,6 +208,7 @@ public:
    *
    * A width of 0 (the default) draws no border.
    *
+   * @SINCE_3_0.0
    * @param[in] width The stroke width, in pixels
    */
   void SetStrokeWidth(float width);
@@ -197,30 +216,35 @@ public:
   /**
    * @brief Retrieves the width of the section's border, in pixels.
    *
+   * @SINCE_3_0.0
    * @return The stroke width, in pixels
    */
   float GetStrokeWidth() const;
 
   /**
    * @brief Sets a finite non-negative corner radius for area sections.
+   * @SINCE_3_0.0
    * @param[in] radius The radius in pixels
    */
   void SetCornerRadius(float radius);
 
   /**
    * @brief Returns the area corner radius.
+   * @SINCE_3_0.0
    * @return The radius
    */
   float GetCornerRadius() const;
 
   /**
    * @brief Enables diagonal hatching inside area sections.
+   * @SINCE_3_0.0
    * @param[in] enabled Whether to draw hatching
    */
   void SetPatternEnabled(bool enabled);
 
   /**
    * @brief Returns whether hatching is enabled.
+   * @SINCE_3_0.0
    * @return True when enabled
    */
   bool IsPatternEnabled() const;

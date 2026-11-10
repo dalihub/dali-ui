@@ -570,7 +570,7 @@ int UtcDaliTextAtlasGradientUiScaleUniformsAndResourcesP(void)
     renderer->UpdateAtlasGradient(size, bounds, scale);
     renderer->UpdateAtlasGradient(size, bounds, scale);
     const auto center = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter"));
-    const auto radial = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale"));
+    const auto radial = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientEvaluationScale"));
     DALI_TEST_EQUALS(center.x * size.x, 40.0f * scale, 0.001f, TEST_LOCATION);
     DALI_TEST_EQUALS(center.y * size.y, 20.0f * scale, 0.001f, TEST_LOCATION);
     DALI_TEST_EQUALS(size.x / radial.x, 30.0f * scale, 0.001f, TEST_LOCATION);
@@ -580,12 +580,57 @@ int UtcDaliTextAtlasGradientUiScaleUniformsAndResourcesP(void)
     DALI_TEST_EQUALS(prepared.GetLookupGenerationCount(), 1u, TEST_LOCATION);
   }
   const auto center = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter"));
-  const auto radial = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale"));
+  const auto radial = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientEvaluationScale"));
   renderer->UpdateAtlasGradient(size, bounds, std::numeric_limits<float>::min());
   DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialCenter")), center, TEST_LOCATION);
-  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale")), radial, TEST_LOCATION);
+  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientEvaluationScale")), radial, TEST_LOCATION);
   renderer->UpdateAtlasGradient(size, bounds, 1.0f);
-  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientRadialScale")), radial, TEST_LOCATION);
+  DALI_TEST_EQUALS(mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientEvaluationScale")), radial, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextAtlasLinearMetricGeometryTransitionP(void)
+{
+  UiTestApplication            application;
+  AtlasGradient::AtlasResource prepared;
+  PublicGradient::Linear       gradient(Vector2::ZERO, Vector2(100.0f, 50.0f));
+  gradient.SetUnits(PublicGradient::Units::USER_SPACE);
+  SetStops(gradient);
+  DALI_TEST_CHECK(prepared.Set(gradient));
+  auto controller = Dali::Ui::Text::Controller::New();
+  controller->SetText("Linear metric");
+  controller->SetDefaultFontSize(22.0f, Dali::Ui::Text::Controller::PIXEL_SIZE);
+  controller->Relayout(Size(300.0f, 60.0f));
+  auto renderer = Dali::Ui::Text::AtlasRenderer::New();
+  renderer->SetAtlasGradientState(prepared.GetRendererState());
+  float offset = 0.0f;
+  Actor text   = renderer->Render(controller->GetView(), Actor::New(), Property::INVALID_INDEX, offset, 0);
+  DALI_TEST_CHECK(text && text.GetChildCount() > 0u);
+  Renderer   mesh     = text.GetChildAt(0u).GetRendererAt(0u);
+  const auto geometry = mesh.GetGeometry();
+  const auto shader   = mesh.GetShader();
+  const auto glyph    = mesh.GetTextures().GetTexture(0u);
+  const auto lookup   = mesh.GetTextures().GetTexture(1u);
+  for(float width : {100.0f, 200.0f, 100.0f})
+  {
+    for(float scale : {1.0f, 2.0f, 1.0f})
+    {
+      const Vector2 size(width, 100.0f);
+      renderer->UpdateAtlasGradient(size, Vector4(0.0f, 0.0f, 1.0f, 1.0f), scale);
+      const float evaluationMode = mesh.GetProperty<float>(mesh.GetPropertyIndex("uTextGradientEvaluationMode"));
+      DALI_TEST_EQUALS(evaluationMode, width == 100.0f ? 1.0f : 4.0f, TEST_LOCATION);
+      const auto end = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientEndPosition"));
+      DALI_TEST_EQUALS(end, Vector2(100.0f * scale / width, 0.5f * scale), 0.0001f, TEST_LOCATION);
+      if(width != 100.0f)
+      {
+        const auto projection = mesh.GetProperty<Vector2>(mesh.GetPropertyIndex("uTextGradientEvaluationScale"));
+        DALI_TEST_EQUALS(projection, Vector2(width * 100.0f, 100.0f * 50.0f) / (12500.0f * scale), 0.0001f, TEST_LOCATION);
+      }
+      DALI_TEST_CHECK(mesh.GetGeometry() == geometry && mesh.GetShader() == shader);
+      DALI_TEST_CHECK(mesh.GetTextures().GetTexture(0u) == glyph && mesh.GetTextures().GetTexture(1u) == lookup);
+      DALI_TEST_EQUALS(prepared.GetLookupGenerationCount(), 1u, TEST_LOCATION);
+    }
+  }
   END_TEST;
 }
 

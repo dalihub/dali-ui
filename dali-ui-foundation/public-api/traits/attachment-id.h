@@ -41,6 +41,7 @@ namespace Ui
  * // One-time allocation per attachment type (e.g. in an anonymous namespace or as a static)
  * static const AttachmentId kMyViewDataAttachment = AttachmentId::Alloc();
  * @endcode
+ * @SINCE_3_0.0
  */
 struct DALI_UI_API AttachmentId
 {
@@ -52,12 +53,14 @@ struct DALI_UI_API AttachmentId
    * If the uint32_t id space is exhausted, an assertion is raised instead of
    * wrapping around to an already allocated id.
    *
+   * @SINCE_3_0.0
    * @return A new unique AttachmentId
    */
   static AttachmentId Alloc();
 
   /**
    * @brief Equality operator.
+   * @SINCE_3_0.0
    */
   bool operator==(const AttachmentId& other) const
   {
@@ -66,6 +69,7 @@ struct DALI_UI_API AttachmentId
 
   /**
    * @brief Inequality operator.
+   * @SINCE_3_0.0
    */
   bool operator!=(const AttachmentId& other) const
   {

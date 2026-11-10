@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/window-devel.h>
+#include <dali/devel-api/text-abstraction/script.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/clipboard-integ.h>
 #include <dali/integration-api/debug.h>
@@ -39,6 +40,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-text-updater.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 
 namespace
@@ -1875,6 +1877,48 @@ const ModelInterface* Controller::GetLogicalTextModel() const
   return mImpl->mModel.Get();
 }
 
+bool Controller::HasDefaultColorCharacters(bool ignoreGradientSpans) const
+{
+  const auto&    model         = *mImpl->mModel->mLogicalModel;
+  const auto*    gradients     = ignoreGradientSpans ? nullptr : model.mGradientSpanData.get();
+  const Length   count         = static_cast<Length>(model.mText.Count());
+  const Length   colorCount    = static_cast<Length>(model.mColorRuns.Count());
+  const Length   gradientCount = gradients ? static_cast<Length>(gradients->characterRuns.Count()) : 0u;
+  Length         colorIndex    = 0u;
+  Length         gradientIndex = 0u;
+  CharacterIndex covered       = 0u;
+
+  // Merge ordered ranges without revisiting a run. Color runs can also arrive
+  // out of order (for example appended anchors). A gap then conservatively
+  // requests a refresh; it must never hide a default-color character.
+  while(covered < count && (colorIndex < colorCount || gradientIndex < gradientCount))
+  {
+    const CharacterRun& run =
+      gradientIndex == gradientCount ||
+          (colorIndex < colorCount && model.mColorRuns[colorIndex].characterRun.characterIndex <=
+                                        gradients->characterRuns[gradientIndex].characterRun.characterIndex)
+        ? model.mColorRuns[colorIndex++].characterRun
+        : gradients->characterRuns[gradientIndex++].characterRun;
+    const CharacterIndex begin = std::min(run.characterIndex, count);
+    while(covered < begin)
+    {
+      if(!TextAbstraction::IsWhiteSpace(model.mText[covered++]))
+      {
+        return true;
+      }
+    }
+    covered = std::max(covered, begin + std::min(run.numberOfCharacters, count - begin));
+  }
+  while(covered < count)
+  {
+    if(!TextAbstraction::IsWhiteSpace(model.mText[covered++]))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 const ModelInterface* Controller::GetRenderTextModel() const
 {
   const ReplacementRenderState* replacement = mImpl->GetReplacementRenderStatePtr();
@@ -2107,7 +2151,7 @@ void Controller::SetVerticalLineAlignment(Alignment alignment)
 void Controller::SetRenderScale(const float renderScale)
 {
   float scale = renderScale;
-  if(scale < 1.0f)
+  if(!std::isfinite(scale) || scale < 1.0f)
   {
     DALI_LOG_DEBUG_INFO("RenderScale must be greater than or equal to 1.0f. It will change as follows:%f -> 1.0\n", scale);
     scale = 1.0f;

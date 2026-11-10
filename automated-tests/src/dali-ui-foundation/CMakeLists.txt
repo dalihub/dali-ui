@@ -29,6 +29,7 @@ SET(TC_SOURCES
         utc-Dali-LabelTextGradient.cpp
         utc-Dali-InputField.cpp
         utc-Dali-InputEditor.cpp
+        utc-Dali-EditableTextChanged.cpp
         utc-Dali-TextValueTypes.cpp
         utc-Dali-StyledText.cpp
         utc-Dali-ImageView.cpp
@@ -44,6 +45,8 @@ SET(TC_SOURCES
         utc-Dali-UiColorManager.cpp
         utc-Dali-UiLocalizationManager.cpp
         utc-Dali-UiThemeManager.cpp
+        utc-Dali-LayoutScaleManager.cpp
+        utc-Dali-UiScaleManager.cpp
         utc-Dali-UiConfig.cpp
         utc-Dali-InteractiveTrait.cpp
         utc-Dali-InteractiveView.cpp

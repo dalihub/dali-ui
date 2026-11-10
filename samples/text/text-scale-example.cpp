@@ -14,6 +14,8 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 #include <dali/integration-api/system/system-settings.h>
 
@@ -90,7 +92,7 @@ const Dali::Vector<Text::Fit::Candidate>& GetFitCandidates()
 Label CreateHeaderLabel(const char* text)
 {
   auto label = Label::New(text);
-  label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::DISABLED);
   label.SetSystemFontSizeScaleEnabled(false);
   label.SetFontSize(14.f);
   label.SetTextColor(UiColor(0x243447));
@@ -248,7 +250,7 @@ private:
 
     auto root = StackLayout::New(StackOrientation::VERTICAL);
     // Keep the test controls/HUD readable while the targets follow global UI scale.
-    root.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(root, Ui::Extension::UiScalePolicy::DISABLED);
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
@@ -314,7 +316,7 @@ private:
     mLabels            = {mTargetLabel, mImageLabel, mFitLabel, mFitCandidateLabel};
     for(auto label : Labels())
     {
-      label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+      Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
       label.SetRequestedWidth(MATCH_PARENT);
       label.SetRequestedHeight(WRAP_CONTENT);
       label.SetMultiLine(true);
@@ -335,7 +337,7 @@ private:
     mImageLabel.SetStyledText(builder.Build());
 
     mTargetInputField = InputField::New();
-    mTargetInputField.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(mTargetInputField, Ui::Extension::UiScalePolicy::ENABLED);
     mTargetInputField.SetRequestedWidth(MATCH_PARENT);
     mTargetInputField.SetRequestedHeight(TARGET_INPUT_HEIGHT);
     mTargetInputField.SetFontSize(24.f);
@@ -390,7 +392,7 @@ private:
   Label CreateStyleLabel()
   {
     auto label = Label::New("ABCD");
-    label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(WRAP_CONTENT);
     label.SetMultiLine(true);
@@ -500,7 +502,7 @@ private:
     page.Add(CreateSectionHeader("Editable"));
     page.Add(CreateHeaderLabel("9. InputField (SYNC) | same mixed StyledText and authored values as row 8"));
     mStyleInputField = InputField::New();
-    mStyleInputField.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(mStyleInputField, Ui::Extension::UiScalePolicy::ENABLED);
     mStyleInputField.SetRequestedWidth(MATCH_PARENT);
     mStyleInputField.SetRequestedHeight(WRAP_CONTENT);
     mStyleInputField.SetFontSize(24.f);
@@ -546,7 +548,7 @@ private:
 
   void SetUiScale(float scale)
   {
-    UiScaleManager::Get().SetScale(scale);
+    Ui::Extension::LayoutScaleManager::Get().SetUiScale(scale);
     UpdateStatus();
   }
 
@@ -587,7 +589,7 @@ private:
     for(const auto& option : FONT_OPTIONS)
       if(option.value == mSystemFont) fontName = option.name;
     const float        font = mTargetLabel.GetAdjustedFontSizeScale();
-    const float        ui   = UiScaleManager::Get().GetScale();
+    const float        ui   = Ui::Extension::LayoutScaleManager::Get().GetUiScale();
     const auto         size = IMAGE_SIZE * (font * ui);
     std::ostringstream status;
     status << std::fixed << std::setprecision(2)

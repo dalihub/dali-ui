@@ -42,26 +42,39 @@ class UiScaleManagerImpl;
  * UiScaleManager is a handle-based singleton that exposes the current system
  * scale factor and propagates scale changes to all registered layout roots.
  *
+ * It shares one state with Extension::LayoutScaleManager: a value set through either class is
+ * read back through both, and the last call wins. The two handles refer to different
+ * objects, so DownCast() of an Extension::LayoutScaleManager handle returns an uninitialized handle.
+ * Do not use it from the destructor of an object with static storage duration.
+ *
+ * @deprecated Use Extension::LayoutScaleManager instead, an extension API for platform
+ * integrators and module providers (dali-ui-foundation/extension-api/layout-scale-manager.h).
+ * This is kept for legacy apps.
+ *
  * @code
  *   float scale = UiScaleManager::Get().GetScale();
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiScaleManager : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized UiScaleManager handle.
+   * @SINCE_3_0.0
    */
   UiScaleManager();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~UiScaleManager() = default;
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to copy
    */
   UiScaleManager(const UiScaleManager& handle) = default;
@@ -69,6 +82,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   UiScaleManager(UiScaleManager&& rhs) noexcept = default;
@@ -76,6 +90,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -84,6 +99,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -92,8 +108,11 @@ public:
   /**
    * @brief Returns the singleton UiScaleManager instance.
    *
+   * @deprecated Use Extension::LayoutScaleManager::Get() instead.
+   *
    * Creates the instance on first call.
    *
+   * @SINCE_3_0.0
    * @return A handle to the UiScaleManager singleton
    */
   static UiScaleManager Get();
@@ -101,6 +120,9 @@ public:
   /**
    * @brief Downcasts a handle to a UiScaleManager handle.
    *
+   * @deprecated Use Extension::LayoutScaleManager::DownCast() instead.
+   *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a UiScaleManager or an uninitialized handle
    */
@@ -109,6 +131,9 @@ public:
   /**
    * @brief Returns the current system scale factor.
    *
+   * @deprecated Use Extension::LayoutScaleManager::GetUiScale() instead.
+   *
+   * @SINCE_3_0.0
    * @return The current scale value (1.0 by default)
    */
   float GetScale() const;
@@ -116,9 +141,12 @@ public:
   /**
    * @brief Sets the system scale factor.
    *
+   * @deprecated Use Extension::LayoutScaleManager::SetUiScale() instead.
+   *
    * Called by system/vconf handlers when the display scale changes.
    * Invalidates all registered layout roots and triggers re-layout.
    *
+   * @SINCE_3_0.0
    * @param[in] scale The new scale factor. It must be positive, finite and normal
    *            (>= FLT_MIN), because the layout also divides by it; other values are
    *            ignored and logged, leaving the current scale in place.
@@ -128,6 +156,9 @@ public:
   /**
    * @brief Returns whether UI scaling is currently enabled.
    *
+   * @deprecated Use Extension::LayoutScaleManager::IsScalable() instead.
+   *
+   * @SINCE_3_0.0
    * @return true if scaling is enabled (default), false if globally disabled
    */
   bool IsScalable() const;
@@ -135,12 +166,15 @@ public:
   /**
    * @brief Enables or disables UI scaling globally.
    *
+   * @deprecated Use Extension::LayoutScaleManager::SetScalable() instead.
+   *
    * A process-wide master switch. When disabled, every view's effective scale
    * resolves to 1.0 regardless of its UiScalePolicy or the value set via
    * SetScale(); the stored scale is preserved and re-applied when re-enabled.
    * Flipping the switch invalidates all registered layout roots and triggers
    * a full re-layout.
    *
+   * @SINCE_3_0.0
    * @param[in] enable true to enable scaling, false to disable
    */
   void SetScalable(bool enable);
@@ -152,7 +186,7 @@ public: // Not intended for Application developers
   /**
    * @brief Registers a layout root to be invalidated when the system scale changes.
    *
-   * Called automatically by ViewImpl when a view becomes a layout root.
+   * No longer called by the library; kept for binary compatibility.
    *
    * @param[in] root The root view to register
    */
@@ -161,7 +195,7 @@ public: // Not intended for Application developers
   /**
    * @brief Unregisters a layout root.
    *
-   * Called automatically by ViewImpl when a root view leaves the scene.
+   * No longer called by the library; kept for binary compatibility.
    *
    * @param[in] root The root view to unregister
    */

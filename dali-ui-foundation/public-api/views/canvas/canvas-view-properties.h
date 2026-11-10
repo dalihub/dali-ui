@@ -35,25 +35,29 @@ namespace Ui
  * It is shared between:
  *   - CanvasView::Property  (public-api, for application code)
  *   - CanvasViewImpl        (internal/canvas-view, for DALI_PROPERTY_REGISTRATION_EXTERNAL)
+ * @SINCE_3_0.0
  */
 struct CanvasViewPropertyIndex
 {
   /**
    * @brief Enumeration for the start and end property ranges for this control.
+   * @SINCE_3_0.0
    */
   enum PropertyRange
   {
     PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_END_INDEX + 1,
-    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices. @SINCE_3_0.0
   };
 
   /**
    * @brief Enumeration for the instance of properties belonging to the CanvasView class.
+   * @SINCE_3_0.0
    */
   enum
   {
     /**
      * @brief The viewbox of the CanvasView (ThorVG logical canvas size).
+     * @SINCE_3_0.0
      * @details Name "viewBox", type Property::VECTOR2.
      * @note See also: CanvasView::SetViewBox(), CanvasView::GetViewBox().
      */
@@ -61,6 +65,7 @@ struct CanvasViewPropertyIndex
 
     /**
      * @brief Whether to rasterize the canvas synchronously on the main thread.
+     * @SINCE_3_0.0
      * @details Name "synchronousLoading", type Property::BOOLEAN.
      * @note Default is true.
      * @note See also: CanvasView::SetSynchronousLoading(), CanvasView::IsSynchronousLoading().
@@ -69,6 +74,7 @@ struct CanvasViewPropertyIndex
 
     /**
      * @brief Whether to trigger rasterization manually via RequestRasterization().
+     * @SINCE_3_0.0
      * @details Name "rasterizationRequestManually", type Property::BOOLEAN.
      * @note Default is false. When false, rasterization is triggered automatically
      *       whenever the canvas changes.

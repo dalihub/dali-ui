@@ -36,6 +36,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/integration-api/view-accessibility.h>
@@ -99,6 +100,13 @@ bool IsMarqueeStopRequested(Actor control)
   auto& impl = static_cast<Ui::Integration::LabelImpl&>(Ui::GetImpl(label));
   return impl.mTextScroller && impl.mTextScroller->IsStopRequested();
 }
+
+bool IsManualAsyncRenderInProgress(Actor control)
+{
+  Ui::Label label = Ui::Label::DownCast(control);
+  return label && static_cast<Ui::Integration::LabelImpl&>(Ui::GetImpl(label)).IsManualAsyncRenderInProgress();
+}
+
 } // namespace Text
 
 namespace Integration
@@ -506,7 +514,7 @@ void LabelImpl::UpdateInlineReplacementData(const InlineReplacementUpdateData& u
                                std::max(0.0f,
                                         ownerSize.y - static_cast<float>(padding.top + padding.bottom))),
                        ownerSize,
-                       GetEffectiveScale(),
+                       Ui::Extension::View::GetEffectiveLayoutScale(*this),
                        updateData.sourceRevision,
                        pixelRevealRequested);
   Internal::TextVisual::RefreshRevealBlurImages(mVisual);
@@ -2401,7 +2409,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
            Vector2(Ui::Integration::Visual::Transform::Policy::ABSOLUTE, Ui::Integration::Visual::Transform::Policy::ABSOLUTE))
       .Add(Ui::Integration::Visual::Transform::Property::ORIGIN, Ui::VisualOrigin::TOP_LEFT)
       .Add(Ui::Integration::Visual::Transform::Property::PIVOT, Ui::VisualPivot::TOP_LEFT);
-    visualImpl.SetTransformAndSize(visualTransform, size, GetEffectiveScale());
+    visualImpl.SetTransformAndSize(visualTransform, size, Ui::Extension::View::GetEffectiveLayoutScale(*this));
 
     if(mController->IsMarqueeEnabled())
     {
@@ -2445,7 +2453,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   const bool measureInvalidated = mMeasureInvalidated;
   mMeasureInvalidated           = false;
 
-  const float effectiveScale = GetEffectiveScale();
+  const float effectiveScale = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   if(SetTextUiScale(effectiveScale))
   {
     if(mController->IsAsyncRendering())
@@ -2908,7 +2916,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                                                                            textGradientUseTextureCoordinates);
         compositionRequest.baseBoundsResolved               = true;
         compositionRequest.baseBounds.bounds                = textGradientBounds;
-        compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, GetEffectiveScale());
+        compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
         compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
       }
 
@@ -2921,7 +2929,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
                                                                                               textGradientOverlayUseTextureCoordinates);
         compositionRequest.overlayBoundsResolved               = true;
         compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
-        compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, GetEffectiveScale());
+        compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
         compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
       }
 
@@ -3000,65 +3008,71 @@ void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async render finished, size:%f,%f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
 
-  // A committed static result replaces the marquee renderer. Retire the old
-  // animation without a user/loop-finished callback (which suppresses ON_OVERFLOW).
-  // Marquee results carry marqueePixelData, including MANUAL fitting text.
-  if(!renderInfo.marqueePixelData && mTextScroller && mTextScroller->IsScrolling() && !mIsAsyncRenderRequested)
+  // LoadComplete retains textures only for a verified texture-limit rejection.
+  // Other pixel-less results remove them; ordinary empty completions have zero size.
+  if(renderInfo.textPixelData || renderInfo.size == Size::ZERO ||
+     !static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer().GetTextures())
   {
-    mTextScroller->StopScrollingForUpdate();
-    if(mController->IsMarqueeEnabled())
+    // A committed static result replaces the marquee renderer. Retire the old
+    // animation without a user/loop-finished callback (which suppresses ON_OVERFLOW).
+    // Marquee results carry marqueePixelData, including MANUAL fitting text.
+    if(!renderInfo.marqueePixelData && mTextScroller && mTextScroller->IsScrolling() && !mIsAsyncRenderRequested)
     {
-      mController->SetMarqueeEnabled(false, false, mTextScroller->GetOrientation());
-    }
-    InvalidateMarqueeStartGeometry();
-  }
-
-  // To avoid flickering issues, enable/disable the background visual when async load is completed.
-  SetViewBackgroundEnabled(!mController->IsTextCutout());
-
-  mAsyncLineCount = renderInfo.lineCount;
-  if(renderInfo.isMarqueeStartAnchorResolved)
-  {
-    mMarqueeStartAnchor = renderInfo.marqueeStartAnchor;
-  }
-  if(renderInfo.isMarqueeFittingStartGeometryResolved)
-  {
-    mMarqueeFittingStartGeometry = renderInfo.marqueeFittingStartGeometry;
-  }
-  Ui::View selfView = Ui::View::DownCast(Self());
-  if(renderInfo.anchorHitRegions.empty())
-  {
-    ClearAnchorInteractionState();
-  }
-  else
-  {
-    mHasA11yAnchors           = false;
-    mAsyncAnchorGeometryDirty = false;
-    mHasAsyncAnchorHitRegions =
-      Internal::Text::SetAnchorHitRegions(selfView, std::move(renderInfo.anchorHitRegions));
-    if(mHasAsyncAnchorHitRegions)
-    {
-      UpdateA11yAnchors(false);
-    }
-  }
-  UpdateAnchorConnections();
-
-  // Image visuals are event-thread objects. Worker output is applied only when
-  // both immutable source and render request generations are still current.
-  if(mController->HasValidReplacementSource())
-  {
-    const Ui::Text::ReplacementSourceSnapshot& replacementSource = mController->GetReplacementSourceSnapshot();
-    Internal::Text::InlineReplacementData*     data              = Internal::Text::GetInlineReplacementData(selfView);
-    if(data && renderInfo.replacementSourceRevision == replacementSource.sourceRevision &&
-       renderInfo.replacementLayoutGeneration == data->lastRenderGeneration)
-    {
-      Insets replacementPadding = GetEffectiveTextPadding();
-      Actor  self               = Self();
-      if(Dali::LayoutDirection::RIGHT_TO_LEFT == mController->GetLayoutDirection(self))
+      mTextScroller->StopScrollingForUpdate();
+      if(mController->IsMarqueeEnabled())
       {
-        std::swap(replacementPadding.start, replacementPadding.end);
+        mController->SetMarqueeEnabled(false, false, mTextScroller->GetOrientation());
       }
-      UpdateInlineReplacementData({replacementSource, renderInfo.replacementPlacements, renderInfo.replacementSourceRevision}, mSize, replacementPadding);
+      InvalidateMarqueeStartGeometry();
+    }
+
+    // To avoid flickering issues, enable/disable the background visual when async load is completed.
+    SetViewBackgroundEnabled(!mController->IsTextCutout());
+
+    mAsyncLineCount = renderInfo.lineCount;
+    if(renderInfo.isMarqueeStartAnchorResolved)
+    {
+      mMarqueeStartAnchor = renderInfo.marqueeStartAnchor;
+    }
+    if(renderInfo.isMarqueeFittingStartGeometryResolved)
+    {
+      mMarqueeFittingStartGeometry = renderInfo.marqueeFittingStartGeometry;
+    }
+    Ui::View selfView = Ui::View::DownCast(Self());
+    if(renderInfo.anchorHitRegions.empty())
+    {
+      ClearAnchorInteractionState();
+    }
+    else
+    {
+      mHasA11yAnchors           = false;
+      mAsyncAnchorGeometryDirty = false;
+      mHasAsyncAnchorHitRegions =
+        Internal::Text::SetAnchorHitRegions(selfView, std::move(renderInfo.anchorHitRegions));
+      if(mHasAsyncAnchorHitRegions)
+      {
+        UpdateA11yAnchors(false);
+      }
+    }
+    UpdateAnchorConnections();
+
+    // Image visuals are event-thread objects. Worker output is applied only when
+    // both immutable source and render request generations are still current.
+    if(mController->HasValidReplacementSource())
+    {
+      const Ui::Text::ReplacementSourceSnapshot& replacementSource = mController->GetReplacementSourceSnapshot();
+      Internal::Text::InlineReplacementData*     data              = Internal::Text::GetInlineReplacementData(selfView);
+      if(data && renderInfo.replacementSourceRevision == replacementSource.sourceRevision &&
+         renderInfo.replacementLayoutGeneration == data->lastRenderGeneration)
+      {
+        Insets replacementPadding = GetEffectiveTextPadding();
+        Actor  self               = Self();
+        if(Dali::LayoutDirection::RIGHT_TO_LEFT == mController->GetLayoutDirection(self))
+        {
+          std::swap(replacementPadding.start, replacementPadding.end);
+        }
+        UpdateInlineReplacementData({replacementSource, renderInfo.replacementPlacements, renderInfo.replacementSourceRevision}, mSize, replacementPadding);
+      }
     }
   }
 
@@ -3555,6 +3569,9 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     // Create a texture of the text for scrolling
     verifiedSize = textureSize;
 
+    // Clip the non-scrolling axis; marquee textures cannot use height tiles.
+    verifiedSize.height = std::min(verifiedSize.height, static_cast<float>(maxTextureSize));
+
     //if the texture size width exceed maxTextureSize, modify the visual model size and enabled the ellipsis
     if(verifiedSize.width > maxTextureSize)
     {
@@ -3580,6 +3597,9 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
     // Create a texture of the text for scrolling
     verifiedSize = textureSize;
+
+    // Clip the non-scrolling axis; marquee textures cannot use width tiles.
+    verifiedSize.width = std::min(verifiedSize.width, static_cast<float>(maxTextureSize));
 
     // if the texture size height exceed maxTextureSize, modify the visual model size and enabled the ellipsis
     if(verifiedSize.height > maxTextureSize)
@@ -3714,7 +3734,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                                                              textGradientUseTextureCoordinates);
           compositionRequest.baseBoundsResolved               = true;
           compositionRequest.baseBounds.bounds                = textGradientBounds;
-          compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, GetEffectiveScale());
+          compositionRequest.baseBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.baseStyle.units, textGradientCoordinateSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
           compositionRequest.baseBounds.useTextureCoordinates = textGradientUseTextureCoordinates;
         }
 
@@ -3727,7 +3747,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                                                                 textGradientOverlayUseTextureCoordinates);
           compositionRequest.overlayBoundsResolved               = true;
           compositionRequest.overlayBounds.bounds                = textGradientOverlayBounds;
-          compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, GetEffectiveScale());
+          compositionRequest.overlayBounds.coordinateSize        = Ui::Text::Internal::ResolveGradientCoordinateSize(gradientState.overlayStyle.units, textGradientOverlayCoordinateSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
           compositionRequest.overlayBounds.useTextureCoordinates = textGradientOverlayUseTextureCoordinates;
         }
       }
@@ -4239,8 +4259,8 @@ bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
 
   if(backgroundValue.GetType() == Property::MAP)
   {
-    const Property::Map& backgroundMap = backgroundValue.Get<Property::Map>();
-    Property::Value*     mixColorValue = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
+    const Property::Map&   backgroundMap = backgroundValue.Get<Property::Map>();
+    const Property::Value* mixColorValue = backgroundMap.Find(Ui::Integration::Visual::Property::MIX_COLOR);
     if(mixColorValue)
     {
       backgroundColor = mixColorValue->Get<Vector4>();
@@ -4409,7 +4429,7 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
     parameters.textRevealSequence             = Ui::Text::Internal::Reveal::ToInternalSequence(revealData->sequence);
     parameters.textRevealFadeDurationRatio    = revealData->fadeDurationRatio;
     parameters.textRevealSequenceStaggerRatio = revealData->sequenceStaggerRatio;
-    parameters.textRevealBlurRadius           = revealData->blurRadius * GetEffectiveScale();
+    parameters.textRevealBlurRadius           = revealData->blurRadius * Ui::Extension::View::GetEffectiveLayoutScale(*this);
     parameters.textRevealBlurDurationRatio    = revealData->blurDurationRatio;
     parameters.isTextRevealBlurRequested      = revealData->blurRadius > 0.0f &&
                                            revealData->blurDurationRatio > 0.0f;
@@ -4489,9 +4509,17 @@ void LabelImpl::SetTextColorInternal(const Vector4& color)
 {
   if(mController->GetDefaultColor() != color)
   {
+    const bool alphaChanged = mController->GetDefaultColor().a != color.a;
     Self().SetProperty(Ui::Text::LabelPropertyIndex::TEXT_COLOR, color);
     mController->SetDefaultColor(color);
     RequestRendererUpdate();
+
+    if(mController->IsAsyncRendering() && !mIsManualRenderInProgress && mTextScroller && mTextScroller->IsScrolling() &&
+       Internal::TextVisual::UsesDefaultMarqueeTextColor(mVisual, alphaChanged))
+    {
+      // Manual requests complete the snapshot captured at dispatch.
+      RequestAsyncRender();
+    }
 
     // Trigger constraint always.
     if(DALI_LIKELY(mVisual))

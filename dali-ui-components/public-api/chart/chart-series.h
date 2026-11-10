@@ -58,23 +58,27 @@ class ChartSeries;
  *   series.SetValues({12.0f, 48.0f, 31.0f, 66.0f});
  *   chart.AddSeries(series);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ChartSeries : public Dali::BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized ChartSeries handle.
+   * @SINCE_3_0.0
    */
   ChartSeries();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~ChartSeries();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   ChartSeries(const ChartSeries& rhs);
@@ -82,6 +86,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   ChartSeries(ChartSeries&& rhs);
@@ -89,6 +94,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -97,6 +103,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return A reference to this handle
    */
@@ -105,6 +112,7 @@ public:
   /**
    * @brief Downcasts a handle to a ChartSeries handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A ChartSeries handle, or an uninitialized handle if the cast fails
    */
@@ -116,6 +124,7 @@ public:
    * The name is shown in the legend and in the default tooltip text, and is
    * the key used by ChartView::RemoveSeries().
    *
+   * @SINCE_3_0.0
    * @param[in] name The series name
    */
   void SetName(const Dali::String& name);
@@ -123,6 +132,7 @@ public:
   /**
    * @brief Retrieves the name of the series.
    *
+   * @SINCE_3_0.0
    * @return The series name
    */
   Dali::String GetName() const;
@@ -140,6 +150,7 @@ public:
    *
    * The default is (0.3, 0.6, 1.0, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The base color of the series
    */
   void SetColor(const Vector4& color);
@@ -147,6 +158,7 @@ public:
   /**
    * @brief Retrieves the base color of the series.
    *
+   * @SINCE_3_0.0
    * @return The base color of the series
    */
   Vector4 GetColor() const;
@@ -156,6 +168,7 @@ public:
    *
    * Replaces any existing data. A NaN value marks a gap in the data.
    *
+   * @SINCE_3_0.0
    * @param[in] values The Y values, in series order
    */
   void SetValues(const Dali::Vector<float>& values);
@@ -165,6 +178,7 @@ public:
    *
    * Replaces any existing data. A NaN y-component marks a gap in the data.
    *
+   * @SINCE_3_0.0
    * @param[in] xyValues The values, where x is the X and y is the Y coordinate
    */
   void SetValues(const Dali::Vector<Vector2>& xyValues);
@@ -172,6 +186,7 @@ public:
   /**
    * @brief Sets the Y values of the series. X is the index of each value.
    *
+   * @SINCE_3_0.0
    * @param[in] values The Y values, in series order
    */
   void SetValues(std::initializer_list<float> values)
@@ -188,6 +203,7 @@ public:
   /**
    * @brief Sets the XY values of the series.
    *
+   * @SINCE_3_0.0
    * @param[in] xyValues The values, where x is the X and y is the Y coordinate
    */
   void SetValues(std::initializer_list<Vector2> xyValues)
@@ -206,6 +222,7 @@ public:
    *
    * The default is true.
    *
+   * @SINCE_3_0.0
    * @param[in] visible True to draw the series
    */
   void SetVisible(bool visible);
@@ -213,6 +230,7 @@ public:
   /**
    * @brief Retrieves whether the series is drawn and included in the axis range.
    *
+   * @SINCE_3_0.0
    * @return True if the series is drawn
    */
   bool IsVisible() const;
@@ -224,6 +242,7 @@ public:
    * or 0 if the series is empty. If SetMaxDataPoints() is set, the oldest
    * point is dropped once the limit is exceeded.
    *
+   * @SINCE_3_0.0
    * @param[in] y The Y value to append
    */
   void AppendValue(float y);
@@ -234,6 +253,7 @@ public:
    * If SetMaxDataPoints() is set, the oldest point is dropped once the limit
    * is exceeded.
    *
+   * @SINCE_3_0.0
    * @param[in] x The X value to append
    * @param[in] y The Y value to append
    */
@@ -246,6 +266,7 @@ public:
    * If SetMaxDataPoints() is set, the oldest points are dropped once the
    * limit is exceeded.
    *
+   * @SINCE_3_0.0
    * @param[in] values The Y values to append
    */
   void AppendValues(const Dali::Vector<float>& values);
@@ -253,6 +274,7 @@ public:
   /**
    * @brief Appends Y values to the end of the series.
    *
+   * @SINCE_3_0.0
    * @param[in] values The Y values to append
    */
   void AppendValues(std::initializer_list<float> values)
@@ -275,6 +297,7 @@ public:
    *
    * The default is 0, meaning unlimited. Negative values are treated as 0.
    *
+   * @SINCE_3_0.0
    * @param[in] maximumCount The maximum number of data points, or 0 for unlimited
    */
   void SetMaximumDataPoints(int maximumCount);
@@ -282,6 +305,7 @@ public:
   /**
    * @brief Retrieves the maximum number of data points retained by the series.
    *
+   * @SINCE_3_0.0
    * @return The maximum number of data points, or 0 if unlimited
    */
   int GetMaximumDataPoints() const;
@@ -292,6 +316,7 @@ public:
    * Series with a higher z-index are drawn on top of series with a lower one.
    * The default is 0.
    *
+   * @SINCE_3_0.0
    * @param[in] zIndex The draw order index
    */
   void SetZIndex(int zIndex);
@@ -299,12 +324,14 @@ public:
   /**
    * @brief Retrieves the draw order of the series relative to other series in the same chart.
    *
+   * @SINCE_3_0.0
    * @return The draw order index
    */
   int GetZIndex() const;
 
   /**
    * @brief Overrides one point's bar fill or marker color. Indices refer to the current data order.
+   * @SINCE_3_0.0
    * @param[in] pointIndex The point index
    * @param[in] color The point color; theme identifiers are retained
    */
@@ -312,6 +339,7 @@ public:
 
   /**
    * @brief Returns the point override, or the series color when no override exists.
+   * @SINCE_3_0.0
    * @param[in] pointIndex The point index
    * @return The authored point override, including its theme identifier, or the series color
    */
@@ -319,6 +347,7 @@ public:
 
   /**
    * @brief Removes all point color overrides.
+   * @SINCE_3_0.0
    */
   void ClearPointColors();
 

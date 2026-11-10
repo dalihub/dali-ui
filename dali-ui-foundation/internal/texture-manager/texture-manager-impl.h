@@ -631,9 +631,9 @@ private:
 private: // Member Variables:
   struct RemoveQueueElement
   {
-    RemoveQueueElement(TextureManager::TextureId textureId, bool keepUnusedTexture)
-    : textureId(textureId),
-      keepUnusedTexture(keepUnusedTexture)
+    RemoveQueueElement(TextureManager::TextureId initTextureId, bool initKeepUnusedTexture)
+    : textureId(initTextureId),
+      keepUnusedTexture(initKeepUnusedTexture)
     {
     }
 

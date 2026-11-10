@@ -58,8 +58,8 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
   WireframeVisualPtr wireframeVisual(new WireframeVisual(factoryCache, actualVisual));
 
   // Instead of calling SetProperties, looking for the only valid property 'transform'
-  Property::Value* transformValue = properties.Find(Ui::Integration::Visual::Property::TRANSFORM, TRANSFORM);
-  Property::Map    transformMap;
+  const Property::Value* transformValue = properties.Find(Ui::Integration::Visual::Property::TRANSFORM, TRANSFORM);
+  Property::Map          transformMap;
   if(transformValue && transformValue->Get(transformMap))
   {
     // TODO : It might not works well if effectiveScale is not 1.0f!
@@ -125,7 +125,7 @@ void WireframeVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 
 void WireframeVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  Property::Value* mixValue = propertyMap.Find(Ui::Integration::Visual::Property::MIX_COLOR, MIX_COLOR);
+  const Property::Value* mixValue = propertyMap.Find(Ui::Integration::Visual::Property::MIX_COLOR, MIX_COLOR);
   if(mixValue)
   {
     Vector4 mixColor;
@@ -209,6 +209,16 @@ void WireframeVisual::OnSetTransform()
 }
 
 Visual::Base& WireframeVisual::GetVisualObject()
+{
+  if(mActualVisual)
+  {
+    return *mActualVisual.Get();
+  }
+
+  return *this;
+}
+
+const Visual::Base& WireframeVisual::GetVisualObject() const
 {
   if(mActualVisual)
   {

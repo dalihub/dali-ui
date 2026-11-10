@@ -48,6 +48,7 @@ class CoreInteractionObject;
  * InteractiveTrait provides click, long-press, and pressed-state handling
  * functionality. It can be attached to any View to make it interactive.
  *
+ * @SINCE_3_0.0
  * @note InteractiveTrait, SelectableTrait, and GroupSelectableTrait are facets of a
  * single shared interaction object on a View. Comparing handles with operator== compares
  * that same underlying object, and DownCast is presence-based (does the requested facet's
@@ -62,6 +63,7 @@ public:
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized InteractiveTrait handle.
+   * @SINCE_3_0.0
    */
   InteractiveTrait();
 
@@ -71,6 +73,7 @@ public: // Creation & Destruction
    * If the handle refers to a InteractiveTrait (e.g. a trait from GetTrait),
    * the downcast produces a valid handle. Otherwise the returned handle is uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object stored in View's interaction trait slot
    * @return A handle to InteractiveTrait or an uninitialized handle
    */
@@ -80,6 +83,7 @@ public: // Creation & Destruction
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    * @param[in] interactiveTrait Handle to copy
    */
   InteractiveTrait(const InteractiveTrait& interactiveTrait);
@@ -88,6 +92,7 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~InteractiveTrait();
 
@@ -99,6 +104,7 @@ public: // Signals
    * The pressed state is true when the user is interacting with the view (e.g., pressing down),
    * and false when the interaction ends (e.g., releasing the touch or key).
    *
+   * @SINCE_3_0.0
    * @return The pressed changed signal
    */
   Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
@@ -110,6 +116,7 @@ public: // Signals
    * The view is visually presented as disabled when in pseudo disabled state, but it still
    * accepts user interaction to provide guidance or an alternative flow.
    *
+   * @SINCE_3_0.0
    * @return The pseudo disabled changed signal
    */
   Signal<void(View, bool)>& PseudoDisabledChangedSignal();
@@ -120,6 +127,7 @@ public: // Signals
    * This signal is emitted when the view receives a tap gesture, indicating a click action.
    * The click action is triggered when the user taps on the view.
    *
+   * @SINCE_3_0.0
    * @note This signal may not be emitted if the one of LongPressed signal handler consumes the event (returns true).
    *
    * @return The clicked signal
@@ -132,6 +140,7 @@ public: // Signals
    * This signal is emitted when the user performs a long press on the view.
    * A long press is detected when the user presses and holds on the view for a specified duration.
    *
+   * @SINCE_3_0.0
    * @note If the handler returns true to consume the event, the Clicked signal will not be emitted.
    * @note This signal is not emitted when ClickedKeyType is set to PRESS.
    * @note This signal is not emitted when long-press handling is disabled.
@@ -143,6 +152,7 @@ public: // Signals
   /**
    * @brief Emitted when the hovered state changes.
    *
+   * @SINCE_3_0.0
    * @return The hovered changed signal
    */
   Signal<void(View, bool, InputEvent)>& HoveredChangedSignal();
@@ -151,6 +161,7 @@ public: // API
   /**
    * @brief The boolean flag for pressed state.
    *
+   * @SINCE_3_0.0
    * @return True if the object is pressed
    */
   bool IsPressed() const;
@@ -160,6 +171,7 @@ public: // API
    * The view is visually presented as disabled, but it still accepts user interaction in order to provide guidance or
    * an alternative flow.
    *
+   * @SINCE_3_0.0
    * @return True if the object is pseudo disabled
    */
   bool IsPseudoDisabled() const;
@@ -167,6 +179,7 @@ public: // API
   /**
    * @brief The boolean flag for hovered state.
    *
+   * @SINCE_3_0.0
    * @return True if the object is hovered
    */
   bool IsHovered() const;
@@ -176,6 +189,7 @@ public: // API
    * The view is visually presented as disabled, but it still accepts user interaction in order to provide guidance or
    * an alternative flow.
    *
+   * @SINCE_3_0.0
    * @param[in] pseudoDisabled True if the object is pseudo disabled
    */
   void SetPseudoDisabled(bool pseudoDisabled);
@@ -183,6 +197,7 @@ public: // API
   /**
    * @brief Checks if clicking is currently allowed (not blocked).
    *
+   * @SINCE_3_0.0
    * @return True if clicking is allowed, false if clicking is blocked
    */
   bool IsClickable() const;
@@ -198,6 +213,7 @@ public: // API
    * still consume the event. Use the sensitive property when the View should be excluded from touch
    * hit testing.
    *
+   * @SINCE_3_0.0
    * @param[in] clickable True to allow clicking, false to block clicking
    */
   void SetClickable(bool clickable);
@@ -205,6 +221,7 @@ public: // API
   /**
    * @brief Returns whether long-press handling is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if long-press handling is enabled
    */
   bool IsLongPressEnabled() const;
@@ -217,6 +234,7 @@ public: // API
    * handler is not invoked and does not cause intrinsic touch consumption. Tap/click handling is
    * controlled independently by SetClickable().
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable long-press handling, false to disable it
    */
   void SetLongPressEnabled(bool enabled);
@@ -224,6 +242,7 @@ public: // API
   /**
    * @brief Retrieves the current key click policy.
    *
+   * @SINCE_3_0.0
    * @return The active KeyClickPolicy for this button.
    */
   KeyClickPolicy GetKeyClickPolicy() const;
@@ -231,6 +250,7 @@ public: // API
   /**
    * @brief Configures the trigger timing for key-driven click events.
    *
+   * @SINCE_3_0.0
    * @param policy The KeyClickPolicy to be applied (OnRelease, OnPress, or Disabled).
    */
   void SetKeyClickPolicy(KeyClickPolicy policy);
@@ -248,6 +268,7 @@ public: // API
    * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] obj  The object to connect to (must implement ConnectionTrackerInterface for auto-disconnect)
    * @param[in] func Member function pointer or functor with signature void(View, InputEvent)
    */
@@ -264,6 +285,7 @@ public: // API
    * The handler is called with @c pressed=true on press-down and @c pressed=false on release.
    * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
    *
+   * @SINCE_3_0.0
    * @param[in] obj  The object to connect to
    * @param[in] func Member function pointer or functor with signature void(View, bool, InputEvent)
    */
@@ -285,6 +307,7 @@ public: // API
    *
    * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
    *
+   * @SINCE_3_0.0
    * @param[in] obj  The object to connect to
    * @param[in] func Member function pointer or functor with signature bool(View, InputEvent)
    */
@@ -301,6 +324,7 @@ public: // Not intended for application developers
    * The returned handle stores a CoreInteractionObject and owns an interactive trait implementation.
    * Application developers should obtain this trait through View::AsInteractive().
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated InteractiveTrait.
    */
   DALI_INTERNAL static InteractiveTrait New();
@@ -308,6 +332,7 @@ public: // Not intended for application developers
   /**
    * @brief Creates a handle using the internal core interaction trait object.
    *
+   * @SINCE_3_0.0
    * @param[in] container The core interaction trait object
    * @return A handle to InteractiveTrait
    */

@@ -46,22 +46,26 @@ namespace Text
  * pattern, or if it matches the deny pattern.
  *
  * The patterns follow std::regex ECMAScript grammar.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API InputFilter
 {
 public:
   /**
    * @brief The reason why input was rejected by the input filter.
+   * @SINCE_3_0.0
    */
   enum class RejectReason : uint8_t
   {
     /**
      * @brief The input was rejected because it did not match the allow pattern.
+     * @SINCE_3_0.0
      */
     NOT_ALLOWED,
 
     /**
      * @brief The input was rejected because it matched the deny pattern.
+     * @SINCE_3_0.0
      */
     DENIED
   };
@@ -69,12 +73,14 @@ public:
 public:
   /**
    * @brief Creates an input filter with default values.
+   * @SINCE_3_0.0
    */
   InputFilter();
 
   /**
    * @brief Creates an input filter by copying another input filter.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The input filter to copy.
    */
   InputFilter(const InputFilter& rhs);
@@ -82,6 +88,7 @@ public:
   /**
    * @brief Creates an input filter by moving another input filter.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The input filter to move.
    */
   InputFilter(InputFilter&& rhs) noexcept;
@@ -89,6 +96,7 @@ public:
   /**
    * @brief Copies another input filter to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The input filter to copy.
    */
   InputFilter& operator=(const InputFilter& rhs);
@@ -96,12 +104,14 @@ public:
   /**
    * @brief Moves another input filter to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The input filter to move.
    */
   InputFilter& operator=(InputFilter&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~InputFilter();
 
@@ -111,6 +121,7 @@ public:
    * This value can be passed to SetInputFilter() to clear the input filter.
    * It is equivalent to an input filter with empty allow and deny patterns.
    *
+   * @SINCE_3_0.0
    * @return A shared none value.
    */
   static const InputFilter& None();
@@ -118,6 +129,7 @@ public:
   /**
    * @brief Compares this input filter with another input filter.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The input filter to compare with.
    * @return true if both values are equal.
    */
@@ -126,6 +138,7 @@ public:
   /**
    * @brief Compares this input filter with another input filter.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The input filter to compare with.
    * @return true if both values are not equal.
    */
@@ -137,6 +150,7 @@ public:
    *
    * If set, input that does not match this pattern is rejected.
    *
+   * @SINCE_3_0.0
    * @param[in] pattern A regular expression that defines allowed input.
    */
   void SetAllowPattern(const Dali::String& pattern);
@@ -144,6 +158,7 @@ public:
   /**
    * @brief Returns the allow pattern.
    *
+   * @SINCE_3_0.0
    * @return The allow pattern.
    */
   const Dali::String& GetAllowPattern() const;
@@ -153,6 +168,7 @@ public:
    *
    * If set, input that matches this pattern is rejected.
    *
+   * @SINCE_3_0.0
    * @param[in] pattern A regular expression that defines denied input.
    */
   void SetDenyPattern(const Dali::String& pattern);
@@ -160,6 +176,7 @@ public:
   /**
    * @brief Returns the deny pattern.
    *
+   * @SINCE_3_0.0
    * @return The deny pattern.
    */
   const Dali::String& GetDenyPattern() const;

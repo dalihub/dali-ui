@@ -33,6 +33,7 @@ namespace Ui
  *
  * Reserves a 1000-slot range starting at Ui::VIEW_PROPERTY_END_INDEX + 4001 to
  * avoid collisions with other dali-ui-components controls (chart = +2001).
+ * @SINCE_3_0.0
  */
 struct NavigatorPropertyIndex
 {

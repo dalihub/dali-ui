@@ -135,6 +135,8 @@ void VideoViewImpl::ClearSource()
   RemoveNativeImageVisual();
   mVideoPlayer = VideoPlayer();
   mSource      = VideoSource();
+  mRenderingTargetWindow.Reset();
+  mRenderingTargetSet = false;
 }
 
 void VideoViewImpl::Play()
@@ -168,18 +170,12 @@ void VideoViewImpl::SetSyncMode(Ui::VideoSyncMode syncMode)
   {
     return;
   }
-  mSyncMode = newSyncMode;
-
   if(mSource)
   {
-    // The video player only reads mSyncMode at creation time, so recreate it against the
-    // same source for the new mode to take effect immediately instead of on the next SetSource().
-    DetachFromScene();
-    RemoveUnderlayVisual();
-    RemoveNativeImageVisual();
-    CreateVideoPlayer();
-    AttachToScene();
+    DALI_LOG_ERROR("VideoViewImpl: SetSyncMode must be called before setting a source\n");
+    return;
   }
+  mSyncMode = newSyncMode;
 }
 
 Ui::VideoSyncMode VideoViewImpl::GetSyncMode() const
@@ -243,25 +239,49 @@ void VideoViewImpl::AttachToScene()
   if(isNativeImageMode)
   {
     EnsureNativeImageVisual();
-    if(mNativeImagePtr)
+    if(!mNativeImagePtr)
+    {
+      return;
+    }
+    if(!mRenderingTargetSet)
     {
       mVideoPlayer.SetRenderingTarget(Dali::Any(mNativeImagePtr));
+      mRenderingTargetSet = true;
     }
   }
   else
   {
+    Dali::Window window = Dali::Window::Get(Self());
+    if(!window || !Adaptor::IsAvailable())
+    {
+      return;
+    }
+    if(mRenderingTargetSet && mRenderingTargetWindow.GetHandle() != window)
+    {
+      DALI_LOG_ERROR("VideoViewImpl: reset the source with an IDLE player before moving underlay video to another Window\n");
+      Internal::ViewDataImpl::Get(*this).EnableVisual(UNDERLAY_VISUAL_INDEX, false);
+      return;
+    }
+
     EnsureUnderlayVisual();
-    if(Adaptor::IsAvailable())
+    if(!mUnderlayVisual)
+    {
+      return;
+    }
+    Internal::ViewDataImpl::Get(*this).EnableVisual(UNDERLAY_VISUAL_INDEX, true);
+    if(!mRenderingTargetSet)
     {
       Any windowHandle = Adaptor::Get().GetNativeWindowHandle(Self());
       mVideoPlayer.SetRenderingTarget(windowHandle);
+      mRenderingTargetWindow = window;
+      mRenderingTargetSet    = true;
     }
   }
 
   ConnectGeometrySync();
+  mAttachedToScene = true;
   UpdateDisplayArea();
   mVideoPlayer.SceneConnection();
-  mAttachedToScene = true;
 }
 
 void VideoViewImpl::DetachFromScene()
@@ -279,7 +299,7 @@ void VideoViewImpl::DetachFromScene()
 
 void VideoViewImpl::UpdateDisplayArea()
 {
-  if(!mVideoPlayer)
+  if(!mVideoPlayer || !mAttachedToScene)
   {
     return;
   }

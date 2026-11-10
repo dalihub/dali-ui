@@ -46,18 +46,21 @@ class LayoutImpl;
  * layout (a reorder) and a newly created one (a fresh insert); either way the
  * child takes the logical (layout) position matching its resulting actor
  * position, skipping non-View actor children and in-flight EXIT ghosts.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Layout : public View
 {
 public:
   /**
    * @brief Creates an uninitialized Layout handle.
+   * @SINCE_3_0.0
    */
   Layout();
 
   /**
    * @brief Creates an initialized Layout.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated Layout
    */
   static Layout New();
@@ -65,6 +68,7 @@ public:
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] layout Handle to copy
    */
   Layout(const Layout& layout);
@@ -72,6 +76,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   Layout(Layout&& rhs) noexcept;
@@ -80,12 +85,14 @@ public:
    * @brief Destructor.
    *
    * This is non-virtual since Handle classes must not have virtual methods.
+   * @SINCE_3_0.0
    */
   ~Layout();
 
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -94,6 +101,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -104,6 +112,7 @@ public:
   /**
    * @brief Downcasts a handle to Layout handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a Layout or an uninitialized handle
    */

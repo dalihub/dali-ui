@@ -20,10 +20,9 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
-#include <dali/public-api/object/weak-handle.h>
-#include <unordered_map>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layout-scale-manager-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
@@ -39,10 +38,17 @@ namespace Internal
 {
 
 /**
- * @brief Internal implementation of UiScaleManager.
+ * @brief Internal implementation of the deprecated UiScaleManager.
  *
- * Stores the current system scale factor and a list of layout root weak handles.
- * On scale change, all registered roots are invalidated and re-layout is triggered.
+ * Holds no scale state of its own. Every member forwards to the LayoutScaleManagerImpl
+ * singleton, which owns the UI scale, the scaling switch and the layout-root registry,
+ * so a value set through either public class is read back through both.
+ *
+ * It holds exactly one counted reference to that object, taken when this object is
+ * created. A UiScaleManager handle therefore keeps the shared state alive, as it kept
+ * its own state alive before the state moved, in whatever order the two function-local
+ * statics are destroyed at exit. The destructor only releases that reference; it calls
+ * no LayoutScaleManagerImpl member.
  */
 class DALI_UI_API UiScaleManagerImpl : public BaseObject
 {
@@ -77,16 +83,14 @@ public:
   void SetScalable(bool enable);
 
   /**
-   * @brief Registers a layout root view to be invalidated on scale change.
-   *
-   * Called when a view becomes a layout root (no parent layout/view).
+   * @brief Registers a layout root in the shared layout-root registry.
    *
    * @param[in] root The root view to register
    */
   void RegisterLayoutRoot(Ui::View root);
 
   /**
-   * @brief Unregisters a layout root view.
+   * @brief Unregisters a layout root from the shared layout-root registry.
    *
    * @param[in] root The root view to unregister
    */
@@ -102,14 +106,8 @@ private:
   UiScaleManagerImpl& operator=(const UiScaleManagerImpl&) = delete;
   UiScaleManagerImpl& operator=(UiScaleManagerImpl&&)      = delete;
 
-  // Drops the cached scale + layout caches of every registered layout root's
-  // subtree and re-triggers layout. Shared by SetScale and SetScalable.
-  void InvalidateAllLayoutRoots();
-
 private:
-  float                                            mScale{1.0f};
-  bool                                             mIsScalable{true};
-  std::unordered_map<RefObject*, WeakHandle<View>> mLayoutRoots;
+  IntrusivePtr<LayoutScaleManagerImpl> mLayoutScaleManager; ///< The owner of the shared state; the one counted reference this object holds.
 };
 
 } // namespace Internal

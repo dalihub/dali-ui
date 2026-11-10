@@ -43,12 +43,14 @@ namespace DALI_NAMESPACE::Ui
  * Views assigned a control role are made interactive while installed. Their
  * interactive trait remains part of the View if it is later removed from the
  * decoration, while WindowFrame disconnects its own command callbacks.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API WindowFrameDecoration
 {
 public:
   /**
    * @brief Creates an empty decoration.
+   * @SINCE_3_0.0
    */
   WindowFrameDecoration();
   WindowFrameDecoration(const WindowFrameDecoration& rhs);
@@ -59,48 +61,56 @@ public:
 
   /**
    * @brief Sets the top slot root.
+   * @SINCE_3_0.0
    * @param[in] view Unparented slot view, or an empty handle
    */
   void SetTopSlot(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the top slot root.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetTopSlot() const;
 
   /**
    * @brief Sets the bottom slot root.
+   * @SINCE_3_0.0
    * @param[in] view Unparented slot view, or an empty handle
    */
   void SetBottomSlot(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the bottom slot root.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetBottomSlot() const;
 
   /**
    * @brief Sets the left slot root.
+   * @SINCE_3_0.0
    * @param[in] view Unparented slot view, or an empty handle
    */
   void SetLeftSlot(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the left slot root.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetLeftSlot() const;
 
   /**
    * @brief Sets the right slot root.
+   * @SINCE_3_0.0
    * @param[in] view Unparented slot view, or an empty handle
    */
   void SetRightSlot(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the right slot root.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetRightSlot() const;
@@ -111,72 +121,84 @@ public:
    * Interactive children of the move region keep their own input, because a
    * child is hit-tested before its parent. A title bar can therefore be the
    * move region while the buttons inside it stay clickable.
+   * @SINCE_3_0.0
    * @param[in] view View contained by a slot root
    */
   void SetMoveRegion(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the view assigned the native-move role.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetMoveRegion() const;
 
   /**
    * @brief Assigns the minimize-control role to a view.
+   * @SINCE_3_0.0
    * @param[in] view View contained by a slot root
    */
   void SetMinimizeControl(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the view assigned the minimize-control role.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetMinimizeControl() const;
 
   /**
    * @brief Assigns the maximize/restore-control role to a view.
+   * @SINCE_3_0.0
    * @param[in] view View contained by a slot root
    */
   void SetMaximizeRestoreControl(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the view assigned the maximize/restore-control role.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetMaximizeRestoreControl() const;
 
   /**
    * @brief Assigns the close-control role to a view.
+   * @SINCE_3_0.0
    * @param[in] view View contained by a slot root
    */
   void SetCloseControl(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the view assigned the close-control role.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetCloseControl() const;
 
   /**
    * @brief Sets the view that acts as the bottom-left resize slot and role.
+   * @SINCE_3_0.0
    * @param[in] view Unparented slot view, or an empty handle
    */
   void SetBottomLeftResizeHandle(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the view assigned the bottom-left resize slot and role.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetBottomLeftResizeHandle() const;
 
   /**
    * @brief Sets the view that acts as the bottom-right resize slot and role.
+   * @SINCE_3_0.0
    * @param[in] view Unparented slot view, or an empty handle
    */
   void SetBottomRightResizeHandle(const Dali::Ui::View& view);
 
   /**
    * @brief Returns the view assigned the bottom-right resize slot and role.
+   * @SINCE_3_0.0
    * @return Configured view
    */
   Dali::Ui::View GetBottomRightResizeHandle() const;
@@ -192,12 +214,14 @@ private:
  * Insets reserve space inside the visible frame for the top, bottom, left, and
  * right slots. Resize-handle sizes are independent because the corner handles
  * can overlap the bottom slot.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API WindowFrameLayout
 {
 public:
   /**
    * @brief Creates a layout with the default decoration and handle sizes.
+   * @SINCE_3_0.0
    */
   WindowFrameLayout();
   WindowFrameLayout(const WindowFrameLayout& rhs);
@@ -208,36 +232,42 @@ public:
 
   /**
    * @brief Sets space reserved inside the frame for decoration slots.
+   * @SINCE_3_0.0
    * @param[in] insets Decoration insets
    */
   void SetDecorationInsets(const Dali::Ui::Insets& insets);
 
   /**
    * @brief Returns decoration insets.
+   * @SINCE_3_0.0
    * @return Configured insets
    */
   Dali::Ui::Insets GetDecorationInsets() const;
 
   /**
    * @brief Sets bottom-left resize-handle size.
+   * @SINCE_3_0.0
    * @param[in] size Handle size
    */
   void SetBottomLeftResizeHandleSize(const Dali::Vector2& size);
 
   /**
    * @brief Returns bottom-left resize-handle size.
+   * @SINCE_3_0.0
    * @return Configured size
    */
   Dali::Vector2 GetBottomLeftResizeHandleSize() const;
 
   /**
    * @brief Sets bottom-right resize-handle size.
+   * @SINCE_3_0.0
    * @param[in] size Handle size
    */
   void SetBottomRightResizeHandleSize(const Dali::Vector2& size);
 
   /**
    * @brief Returns bottom-right resize-handle size.
+   * @SINCE_3_0.0
    * @return Configured size
    */
   Dali::Vector2 GetBottomRightResizeHandleSize() const;
@@ -249,6 +279,7 @@ private:
 
 /**
  * @brief Result of validating and installing custom decoration views.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameDecorationResult
 {

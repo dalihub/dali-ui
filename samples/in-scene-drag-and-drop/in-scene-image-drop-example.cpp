@@ -144,10 +144,9 @@ private:
     mRoot.Add(mStatus);
 
     mOverlay = View::New();
-    mOverlay.SetRequestedWidth(windowWidth);
-    mOverlay.SetRequestedHeight(windowHeight);
+    mOverlay.SetRequestedWidth(MATCH_PARENT);
+    mOverlay.SetRequestedHeight(MATCH_PARENT);
     mOverlay.SetLayoutMode(LayoutMode::STANDALONE);
-    mOverlay.SetUiScalePolicy(UiScalePolicy::DISABLED);
     mOverlay.SetParentOrigin(ParentOrigin::TOP_LEFT);
     mOverlay.SetPivot(Pivot::TOP_LEFT);
     mOverlay.SetSensitive(false);
@@ -250,13 +249,12 @@ private:
       return View();
     }
 
-    const Vector3 sourceSize =
-      event.GetSource().GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+    // The source's laid-out size in requested units: the preview follows the
+    // effective scale like the source image.
     ImageView preview = ImageView::New(imageUrl);
-    preview.SetRequestedWidth(sourceSize.x);
-    preview.SetRequestedHeight(sourceSize.y);
+    preview.SetRequestedWidth(event.GetPreviewRequestedWidth());
+    preview.SetRequestedHeight(event.GetPreviewRequestedHeight());
     preview.SetLayoutMode(LayoutMode::STANDALONE);
-    preview.SetUiScalePolicy(UiScalePolicy::DISABLED);
     preview.SetParentOrigin(ParentOrigin::TOP_LEFT);
     preview.SetPivot(Pivot::TOP_LEFT);
     preview.SetPositionUsesPivotEnabled(true);
@@ -271,8 +269,8 @@ private:
   {
     preview.SetPivot(
       Vector3(event.GetSourceAnchor().x, event.GetSourceAnchor().y, 0.5f));
-    preview.SetRequestedX(event.GetPreviewLocalPosition().x);
-    preview.SetRequestedY(event.GetPreviewLocalPosition().y);
+    preview.SetRequestedX(event.GetPreviewRequestedX());
+    preview.SetRequestedY(event.GetPreviewRequestedY());
   }
 
   void FinalizePreview(View preview, const DragAndDropEvent& event)

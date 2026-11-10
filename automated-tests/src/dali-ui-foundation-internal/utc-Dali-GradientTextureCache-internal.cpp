@@ -21,18 +21,20 @@
 #include <dali.h>
 #include <dali/devel-api/object/base-object-observer.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/pixel-data-integ.h>
 #include <ui-adaptor-impl.h>
 #include <functional>
 #include <limits>
 #include <memory>
+#include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/internal/visuals/gradient/gradient-visual.h>
 #include <dali-ui-foundation/internal/visuals/gradient/linear-gradient.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -41,6 +43,65 @@ namespace
 {
 namespace Impl = Dali::Ui::Internal;
 using Cache    = Impl::GradientTextureCache;
+
+/**
+ * @brief Captures lookup pixels in this UTC without changing the shared graphics mock.
+ */
+class LookupTextureGraphicsController : public TestGraphicsController
+{
+public:
+  struct Upload
+  {
+    uint32_t                   width;
+    uint32_t                   height;
+    Pixel::Format              format;
+    std::vector<unsigned char> pixels;
+  };
+
+  /**
+   * @copydoc Dali::Graphics::Controller::UpdateTextures()
+   */
+  void UpdateTextures(const std::vector<Graphics::TextureUpdateInfo>&       updateInfoList,
+                      const std::vector<Graphics::TextureUpdateSourceInfo>& sourceList) override
+  {
+    for(const auto& source : sourceList)
+    {
+      if(source.sourceType == Graphics::TextureUpdateSourceInfo::Type::PIXEL_DATA)
+      {
+        const auto data   = source.pixelDataSource.pixelData;
+        const auto buffer = Integration::GetPixelDataBuffer(data);
+        DALI_TEST_CHECK(buffer.buffer);
+        mUploads.push_back({data.GetWidth(), data.GetHeight(), data.GetPixelFormat(),
+                            std::vector<unsigned char>(buffer.buffer, buffer.buffer + buffer.bufferSize)});
+      }
+    }
+    TestGraphicsController::UpdateTextures(updateInfoList, sourceList);
+  }
+
+  std::vector<Upload> mUploads;
+};
+
+/**
+ * @brief Uses the existing Core graphics interface to inject a UTC-local mock.
+ */
+class LookupTextureApplication : public TestApplication
+{
+public:
+  /**
+   * @brief Creates a synchronous Core fixture for lookup texture uploads.
+   * @param[in] graphicsController The graphics mock, which must outlive this application
+   */
+  explicit LookupTextureApplication(LookupTextureGraphicsController& graphicsController)
+  : TestApplication(DEFAULT_SURFACE_WIDTH, DEFAULT_SURFACE_HEIGHT, DEFAULT_HORIZONTAL_DPI, DEFAULT_VERTICAL_DPI, false)
+  {
+    mStatus.keepUpdating = Integration::KeepUpdating::KEEP_RENDERING;
+    mCore                = Integration::Core::New(mRenderController, mPlatformAbstraction, graphicsController, Integration::CorePolicyFlags::DEFAULT);
+    mCore->ContextCreated();
+    CreateScene();
+    InitializeCore();
+  }
+};
+
 /** Restores the mock adaptor flag even when a test assertion returns early. */
 struct AdaptorUnavailableScope
 {
@@ -82,6 +143,58 @@ Property::Map MakeProperties()
   return map;
 }
 } //namespace
+
+int UtcDaliGradientTextureSingleTexelSegments(void)
+{
+  UiTestApplication application;
+  Cache             cache;
+  auto&             textureTrace = application.GetGlAbstraction().GetTextureTrace();
+  textureTrace.Enable(true);
+  for(auto spread : {Ui::Gradient::SpreadMethod::PAD, Ui::Gradient::SpreadMethod::REPEAT, Ui::Gradient::SpreadMethod::REFLECT})
+  {
+    for(float alpha : {1.0f, 0.5f})
+    {
+      auto gradient = MakeGradient();
+      gradient->ClearStop();
+      Vector<float>   offsets;
+      Vector<Vector4> colors;
+      // First, middle and last one-texel segments, plus a zero-width segment.
+      for(float offset : {0.f, 1.f / 512.f, 0.5f, 0.5f, 257.f / 512.f, 511.f / 512.f, 1.f})
+      {
+        offsets.PushBack(offset);
+        colors.PushBack(Vector4(offset, 1.f - offset, 0.25f, alpha));
+      }
+      gradient->ApplyStops(offsets, colors);
+      gradient->SetSpreadMethod(spread);
+      textureTrace.Reset();
+      Texture uncached = gradient->GenerateLookupTexture();
+      DALI_TEST_CHECK(uncached);
+      const auto id     = cache.Acquire(*gradient);
+      Texture    cached = cache.GetTexture(id);
+      DALI_TEST_CHECK(cached);
+      DALI_TEST_EQUALS(cached.GetWidth(), 512u, TEST_LOCATION);
+      DALI_TEST_EQUALS(cached.GetHeight(), 1u, TEST_LOCATION);
+      DALI_TEST_EQUALS(cached.GetPixelFormat(), alpha < 1.0f ? Pixel::RGBA8888 : Pixel::RGB888, TEST_LOCATION);
+      application.SendNotification();
+      application.Render();
+      // TexImage2D also allocates storage; count generated textures separately.
+      DALI_TEST_EQUALS(textureTrace.CountMethod("GenTextures"), 2u, TEST_LOCATION);
+      DALI_TEST_CHECK(textureTrace.FindMethod("TexImage2D"));
+      textureTrace.Reset();
+      DALI_TEST_EQUALS(id, cache.Acquire(*gradient), TEST_LOCATION);
+      DALI_TEST_CHECK(cached == cache.GetTexture(id));
+      application.SendNotification();
+      application.Render();
+      DALI_TEST_EQUALS(textureTrace.CountMethod("GenTextures"), 0u, TEST_LOCATION);
+      DALI_TEST_EQUALS(textureTrace.CountMethod("TexImage2D"), 0u, TEST_LOCATION);
+      DALI_TEST_EQUALS(textureTrace.CountMethod("TexSubImage2D"), 0u, TEST_LOCATION);
+      cache.RequestRelease(id);
+      cache.RequestRelease(id);
+      application.SendNotification();
+    }
+  }
+  END_TEST;
+}
 
 int UtcDaliGradientTextureCacheReferences(void)
 {
@@ -642,9 +755,9 @@ int UtcDaliGradientTextureCacheNonKeyProperties(void)
 int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
 {
   UiTestApplication application;
-  auto              scale = Ui::UiScaleManager::Get();
+  auto              scale = Ui::Extension::LayoutScaleManager::Get();
   scale.SetScalable(true);
-  scale.SetScale(1.f);
+  scale.SetUiScale(1.f);
   auto enabled  = Ui::View::New();
   auto disabled = Ui::View::New();
   enabled.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
@@ -665,7 +778,7 @@ int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
   Texture original = view.GetRendererAt(0).GetTextures().GetTexture(0);
   for(float value : {0.5f, 1.f, 1.25f, 2.f})
   {
-    scale.SetScale(value);
+    scale.SetUiScale(value);
     view.SetRequestedWidth(100.f / value);
     view.SetRequestedHeight(50.f / value);
     frame();
@@ -685,7 +798,7 @@ int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
     frame();
     DALI_TEST_CHECK(view.GetRendererAt(0).GetTextures().GetTexture(0) == original);
   }
-  scale.SetScale(1.f);
+  scale.SetUiScale(1.f);
   END_TEST;
 }
 
@@ -741,5 +854,68 @@ int UtcDaliGradientTextureCachePendingShutdown(void)
   }
   DALI_TEST_CHECK(weakCache.expired());
   application.SendNotification();
+  END_TEST;
+}
+
+int UtcDaliGradientTextureSingleTexelEndpoints(void)
+{
+  // The controller outlives Core, including queued texture cleanup on failure.
+  LookupTextureGraphicsController graphicsController;
+  LookupTextureApplication        application(graphicsController);
+  for(auto spread : {Ui::Gradient::SpreadMethod::PAD, Ui::Gradient::SpreadMethod::REPEAT, Ui::Gradient::SpreadMethod::REFLECT})
+  {
+    for(float alpha : {0.0f, 0.5f, 1.0f})
+    {
+      for(float segmentWidth : {1.0f, 2.0f})
+      {
+        auto gradient = MakeGradient();
+        gradient->ClearStop();
+        Vector<float> offsets;
+        for(float offset : {0.0f, segmentWidth / 512.0f, 0.5f, 0.5f,
+                            (256.0f + segmentWidth) / 512.0f, (512.0f - segmentWidth) / 512.0f, 1.0f})
+        {
+          offsets.PushBack(offset);
+        }
+        Vector<Vector4> colors;
+        for(const auto& color : {Color::RED, Color::GREEN, Color::GREEN, Color::GREEN, Color::BLUE, Color::BLUE, Color::RED})
+        {
+          colors.PushBack(Vector4(color.r, color.g, color.b, alpha));
+        }
+        gradient->ApplyStops(offsets, colors);
+        gradient->SetSpreadMethod(spread);
+        graphicsController.mUploads.clear();
+        auto texture = gradient->GenerateLookupTexture();
+        DALI_TEST_CHECK(texture);
+        application.SendNotification();
+        application.Render();
+        DALI_TEST_EQUALS(graphicsController.mUploads.size(), 1u, TEST_LOCATION);
+        const auto& upload = graphicsController.mUploads.at(0u);
+        const auto  format = alpha < 1.0f ? Pixel::RGBA8888 : Pixel::RGB888;
+        const auto  bpp    = alpha < 1.0f ? 4u : 3u;
+        DALI_TEST_EQUALS(upload.width, 512u, TEST_LOCATION);
+        DALI_TEST_EQUALS(upload.height, 1u, TEST_LOCATION);
+        DALI_TEST_EQUALS(upload.format, format, TEST_LOCATION);
+        DALI_TEST_EQUALS(upload.pixels.size(), 512u * bpp, TEST_LOCATION);
+
+        // Independent golden bands: first/final red, green through texel 256,
+        // then blue. One- and two-texel transitions have the same endpoints.
+        // Equal-color duplicate stops avoid unspecified equal-key sort order.
+        const unsigned char value = alpha == 1.0f ? 255u : (alpha == 0.5f ? 127u : 0u);
+        for(unsigned int texel = 0u; texel < 512u; ++texel)
+        {
+          const bool red   = texel == 0u || texel == 511u;
+          const bool green = !red && texel <= 256u;
+          const bool blue  = !red && !green;
+          DALI_TEST_EQUALS(upload.pixels.at(texel * bpp), red ? value : 0u, TEST_LOCATION);
+          DALI_TEST_EQUALS(upload.pixels.at(texel * bpp + 1u), green ? value : 0u, TEST_LOCATION);
+          DALI_TEST_EQUALS(upload.pixels.at(texel * bpp + 2u), blue ? value : 0u, TEST_LOCATION);
+          if(bpp == 4u)
+          {
+            DALI_TEST_EQUALS(upload.pixels.at(texel * bpp + 3u), value, TEST_LOCATION);
+          }
+        }
+      }
+    }
+  }
   END_TEST;
 }

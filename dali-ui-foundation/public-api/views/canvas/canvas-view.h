@@ -48,12 +48,14 @@ class CanvasViewImpl;
  * shape.SetFillColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
  * canvasView.AddDrawable(shape);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_API CanvasView : public View
 {
 public:
   /**
    * @brief Property indices for CanvasView.
+   * @SINCE_3_0.0
    */
   struct Property
   {
@@ -68,12 +70,14 @@ public:
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized CanvasView handle.
+   * @SINCE_3_0.0
    */
   CanvasView();
 
   /**
    * @brief Creates an initialized CanvasView with a zero viewbox.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated CanvasView
    */
   static CanvasView New();
@@ -81,6 +85,7 @@ public: // Creation & Destruction
   /**
    * @brief Creates an initialized CanvasView with the given viewbox.
    *
+   * @SINCE_3_0.0
    * @param[in] viewBox The logical width and height of the canvas coordinate space
    * @return A handle to a newly allocated CanvasView
    */
@@ -90,12 +95,14 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~CanvasView();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] canvasView Handle to copy
    */
   CanvasView(const CanvasView& canvasView);
@@ -103,6 +110,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   CanvasView(CanvasView&& rhs) noexcept;
@@ -111,6 +119,7 @@ public: // Operators
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] canvasView Object to assign this to
    * @return Reference to this
    */
@@ -119,6 +128,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -133,6 +143,7 @@ public: // Static methods
    * If handle points to a CanvasView, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to a CanvasView or an uninitialized handle
    */
@@ -144,6 +155,7 @@ public: // Drawable management
    *
    * The drawable is rendered on the next rasterization pass.
    *
+   * @SINCE_3_0.0
    * @param[in] drawable The drawable to add
    * @return True if the drawable was successfully added, false otherwise
    */
@@ -152,6 +164,7 @@ public: // Drawable management
   /**
    * @brief Removes a drawable object from the canvas.
    *
+   * @SINCE_3_0.0
    * @param[in] drawable The drawable to remove
    * @return True if the drawable was found and removed, false otherwise
    */
@@ -160,6 +173,7 @@ public: // Drawable management
   /**
    * @brief Removes all drawable objects from the canvas.
    *
+   * @SINCE_3_0.0
    * @return True if all drawables were successfully removed, false otherwise
    */
   bool RemoveAllDrawables();
@@ -169,6 +183,7 @@ public: // Drawable management
    *
    * Backed by the ThorVG scene effect (tvg::SceneEffect::DropShadow).
    *
+   * @SINCE_3_0.0
    * @param[in] color      Shadow color (RGBA, each channel 0.0 ~ 1.0)
    * @param[in] offsetX    Shadow X offset in pixels (positive X is right)
    * @param[in] offsetY    Shadow Y offset in pixels (positive Y is down)
@@ -182,12 +197,14 @@ public: // Drawable management
 
   /**
    * @brief Removes the drop shadow set by SetDropShadow().
+   * @SINCE_3_0.0
    */
   void ClearDropShadow();
 
   /**
    * @brief Returns whether a drop shadow is currently set.
    *
+   * @SINCE_3_0.0
    * @return True if a drop shadow is set, false otherwise
    */
   bool HasDropShadow() const;
@@ -198,18 +215,21 @@ public: // Drawable management
    * Scene effects are mutually exclusive: setting a Gaussian blur replaces a drop shadow and
    * vice versa.
    *
+   * @SINCE_3_0.0
    * @param[in] blurRadius Blur radius in pixels (internally converted to sigma = blurRadius * 0.5)
    */
   void SetGaussianBlur(float blurRadius);
 
   /**
    * @brief Removes the Gaussian blur set by SetGaussianBlur().
+   * @SINCE_3_0.0
    */
   void ClearGaussianBlur();
 
   /**
    * @brief Returns whether a Gaussian blur is currently set.
    *
+   * @SINCE_3_0.0
    * @return True if a Gaussian blur is set, false otherwise
    */
   bool HasGaussianBlur() const;
@@ -221,6 +241,7 @@ public: // Drawable management
    * a larger buffer and scaled back into the view, so the content appears slightly smaller. When
    * disabled, size the CanvasView larger than its content to leave room for the effect.
    *
+   * @SINCE_3_0.0
    * @param[in] enable True to auto-pad, false otherwise
    */
   void SetEffectAutoPaddingEnabled(bool enable);
@@ -228,6 +249,7 @@ public: // Drawable management
   /**
    * @brief Returns whether automatic effect padding is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if auto-padding is enabled, false otherwise
    */
   bool IsEffectAutoPaddingEnabled() const;
@@ -236,6 +258,7 @@ public: // Rasterization control
   /**
    * @brief Sets the logical coordinate space (viewbox) of the canvas.
    *
+   * @SINCE_3_0.0
    * @param[in] viewBox The new width and height of the viewbox
    */
   void SetViewBox(const Vector2& viewBox);
@@ -243,6 +266,7 @@ public: // Rasterization control
   /**
    * @brief Gets the current viewbox.
    *
+   * @SINCE_3_0.0
    * @return The current viewbox size
    */
   Vector2 GetViewBox();
@@ -250,6 +274,7 @@ public: // Rasterization control
   /**
    * @brief Sets whether rasterization is performed synchronously on the main thread.
    *
+   * @SINCE_3_0.0
    * @param[in] synchronous True to rasterize synchronously, false for background thread
    */
   void SetSynchronousLoading(bool synchronous);
@@ -257,6 +282,7 @@ public: // Rasterization control
   /**
    * @brief Gets whether synchronous rasterization is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if rasterization is synchronous
    */
   bool IsSynchronousLoading() const;
@@ -267,6 +293,7 @@ public: // Rasterization control
    * When true, rasterization only happens when RequestRasterization() is called.
    * When false (default), rasterization is triggered automatically on canvas changes.
    *
+   * @SINCE_3_0.0
    * @param[in] manually True to require explicit RequestRasterization() calls
    */
   void SetRasterizationRequestManually(bool manually);
@@ -274,6 +301,7 @@ public: // Rasterization control
   /**
    * @brief Gets whether manual rasterization mode is active.
    *
+   * @SINCE_3_0.0
    * @return True if rasterization must be triggered manually
    */
   bool IsRasterizationRequestManually() const;
@@ -285,6 +313,7 @@ public: // Rasterization control
    * the canvas changes, so explicit calls are rarely needed.
    * In manual mode (RASTERIZATION_REQUEST_MANUALLY = true), this is the
    * only way to trigger a rasterize; call it after finishing all drawable updates.
+   * @SINCE_3_0.0
    */
   void RequestRasterization();
 

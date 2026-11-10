@@ -30,6 +30,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 
 namespace DALI_NAMESPACE
@@ -171,6 +172,8 @@ MarqueeBuilder::FeatureInfo MarqueeBuilder::CollectGradientFeatureInfo(const Mod
                                                                        bool                  textCutoutEnabled)
 {
   FeatureInfo info;
+  const auto* gradientSpanData = textModel.GetGradientSpanModelData();
+  info.hasMultipleTextColors   = gradientSpanData && !gradientSpanData->glyphPaintIndices.Empty();
 
   const Vector4* const          colorsBuffer        = textModel.GetColors();
   const Text::ColorIndex* const colorIndices        = textModel.GetColorIndices();

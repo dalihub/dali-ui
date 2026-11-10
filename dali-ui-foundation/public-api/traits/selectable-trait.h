@@ -55,6 +55,7 @@ class CoreInteractionObject;
  *
  * Internally both traits share the core interaction trait slot.
  *
+ * @SINCE_3_0.0
  * @note InteractiveTrait, SelectableTrait, and GroupSelectableTrait are facets of a
  * single shared interaction object on a View. Comparing handles with operator== compares
  * that same underlying object, and DownCast is presence-based (does the requested facet's
@@ -68,6 +69,7 @@ public:
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized SelectableTrait handle.
+   * @SINCE_3_0.0
    */
   SelectableTrait();
 
@@ -77,6 +79,7 @@ public: // Creation & Destruction
    * If the handle refers to a SelectableTrait (e.g. a trait from GetTrait),
    * the downcast produces a valid handle. Otherwise the returned handle is uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object stored in View's selectable trait slot
    * @return A handle to SelectableTrait or an uninitialized handle
    */
@@ -86,6 +89,7 @@ public: // Creation & Destruction
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    * @param[in] selectableTrait Handle to copy
    */
   SelectableTrait(const SelectableTrait& selectableTrait);
@@ -94,6 +98,7 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~SelectableTrait();
 
@@ -106,6 +111,7 @@ public: // Signals
    *
    * The callback signature is: void YourCallbackName(View view, bool selected)
    *
+   * @SINCE_3_0.0
    * @return The selection changed signal
    */
   Signal<void(View, bool, InputEvent)>& SelectionChangedSignal();
@@ -114,6 +120,7 @@ public: // API
   /**
    * @brief Returns whether this View is currently selected.
    *
+   * @SINCE_3_0.0
    * @return True if the View is selected
    */
   bool IsSelected() const;
@@ -124,6 +131,7 @@ public: // API
    * If the new state differs from the current state, the SelectionChangedSignal
    * is emitted.
    *
+   * @SINCE_3_0.0
    * @param[in] selected True to select, false to unselect
    */
   void SetSelected(bool selected);
@@ -133,6 +141,7 @@ public: // API
    *
    * When enabled, clicking the owner View toggles the selected state.
    *
+   * @SINCE_3_0.0
    * @return True if toggle-by-click is enabled
    */
   bool IsToggleByClickEnabled() const;
@@ -145,6 +154,7 @@ public: // API
    * disables automatic selection toggling; the inherited InteractiveTrait
    * behavior remains attached to the owner View.
    *
+   * @SINCE_3_0.0
    * @note While the View is a member of a SelectionGroup, a click on the already-selected
    * member is a no-op (it cannot unselect the winner and empty the group); other members
    * still select normally. Grouping does NOT change this toggle-by-click setting; the group
@@ -161,6 +171,7 @@ public: // Not intended for application developers
    * The returned handle stores a CoreInteractionObject and owns both interactive and selectable trait implementations.
    * Application developers should obtain this trait through View::AsSelectable().
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated SelectableTrait.
    */
   DALI_INTERNAL static SelectableTrait New();
@@ -168,6 +179,7 @@ public: // Not intended for application developers
   /**
    * @brief Creates a handle using the internal core interaction trait object.
    *
+   * @SINCE_3_0.0
    * @param[in] container The core interaction trait object
    * @return A handle to SelectableTrait
    */

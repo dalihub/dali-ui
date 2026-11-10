@@ -44,6 +44,7 @@ class ViewImpl;
  *
  * Custom layout algorithms can be implemented by subclassing LayoutManager
  * directly and using the provided protected helpers to traverse children.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API LayoutManager
 {
@@ -55,6 +56,7 @@ public:
 
   /**
    * @brief Virtual destructor.
+   * @SINCE_3_0.0
    */
   virtual ~LayoutManager();
 
@@ -64,6 +66,7 @@ public:
    * This method calculates the desired size of the view based on the
    * constraints and the sizes of its children.
    *
+   * @SINCE_3_0.0
    * @note The owning View caches the result and does NOT call this again while the
    * normalised constraint is unchanged and nothing has invalidated the owner's
    * layout. There is no measure counterpart to GetArrangePolicy(): measure
@@ -90,6 +93,7 @@ public:
    * This method positions and sizes the children within the given bounds
    * according to the layout algorithm.
    *
+   * @SINCE_3_0.0
    * @param[in] view The view whose children to arrange
    * @param[in] bounds The available bounds for arranging children (owner-local content area)
    */
@@ -114,6 +118,7 @@ public:
    * The default is ArrangePolicy::IF_CHANGED. A subclass can select
    * ArrangePolicy::ALWAYS through the protected SetArrangePolicy() method.
    *
+   * @SINCE_3_0.0
    * @return The active arrange execution policy
    * @note Internal: for use by this library only, and reserved for future change.
    */
@@ -125,6 +130,7 @@ public:
    * Called once by the framework from View::AttachLayoutManager. A manager can never
    * be replaced or detached, so there is no reverse edge.
    *
+   * @SINCE_3_0.0
    * @param[in] owner The attaching View
    * @note Internal: for use by this library only. See the DALI_INTERNAL note above.
    */
@@ -141,6 +147,7 @@ protected:
    * layout invalidation or performs work that must happen on every arrange pass.
    * The policy is inherited by subclasses and may be changed again by a subclass.
    *
+   * @SINCE_3_0.0
    * @param[in] policy The arrange execution policy
    */
   void SetArrangePolicy(ArrangePolicy policy);
@@ -160,6 +167,7 @@ protected:
    *
    * Safe before attach and after the owner is gone: a null owner makes it a no-op.
    *
+   * @SINCE_3_0.0
    * @note Call it from the SETTER, never from this manager's own Measure() or Arrange()
    * producer. Invalidating from inside layout processing is a contract violation and is
    * logged once for the owner View. The invalidation is retained in full -- the affected
@@ -184,6 +192,7 @@ protected:
    *
    * Safe before attach and after the owner is gone: a null owner makes it a no-op.
    *
+   * @SINCE_3_0.0
    * @note Same restriction and retained-but-parked behavior as
    * InvalidateOwnerMeasure(): calling it from inside this manager's own
    * Measure()/Arrange() producer (or other layout processing, such as a
@@ -194,12 +203,14 @@ protected:
 
   /**
    * @brief Default constructor.
+   * @SINCE_3_0.0
    */
   LayoutManager();
 
   /**
    * @brief Constructor for derived classes that provide their own implementation storage.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation storage (ownership transferred)
    * @note Internal: intended only for in-library layout managers and is not part of
    *       the public ABI. Externally derived layout managers must use the default
@@ -213,6 +224,7 @@ protected:
    * Excludes in-flight EXIT ghosts and non-View actor children, matching
    * Ui::View::GetChildViewCount().
    *
+   * @SINCE_3_0.0
    * @param[in] view The view to query
    * @return Number of child views
    */
@@ -224,6 +236,7 @@ protected:
    * Matches Ui::View::GetChildViewAt(): returns an empty handle if @p index
    * is out of range.
    *
+   * @SINCE_3_0.0
    * @param[in] view  The view to query
    * @param[in] index The child index, in [0, GetChildViewCount(view))
    * @return The child View handle, or an empty handle if out of range
@@ -236,6 +249,7 @@ protected:
    * Standalone children are measured and arranged by the framework outside
    * the layout manager's pass and should be skipped during child iteration.
    *
+   * @SINCE_3_0.0
    * @param[in] child The child view implementation
    * @return True if the child is STANDALONE
    */
@@ -244,6 +258,7 @@ protected:
   /**
    * @brief Gets the implementation storage as a derived implementation type.
    *
+   * @SINCE_3_0.0
    * @tparam LayoutManagerImplType The derived implementation type that was supplied to
    *         the LayoutManager(Impl*) constructor. Behaviour is undefined if a different
    *         type is requested.
@@ -261,6 +276,7 @@ protected:
   /**
    * @brief Gets the implementation storage as a derived implementation type (const overload).
    *
+   * @SINCE_3_0.0
    * @tparam LayoutManagerImplType The derived implementation type that was supplied to
    *         the LayoutManager(Impl*) constructor. Behaviour is undefined if a different
    *         type is requested.

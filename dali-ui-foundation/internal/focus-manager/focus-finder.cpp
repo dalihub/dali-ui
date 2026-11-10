@@ -397,10 +397,10 @@ struct FocusFinderWorkspace
 
 struct WorkspaceGuard
 {
-  explicit WorkspaceGuard(FocusFinderWorkspace& workspace)
-  : workspace(workspace)
+  explicit WorkspaceGuard(FocusFinderWorkspace& initWorkspace)
+  : workspace(initWorkspace)
   {
-    workspace.inUse = true;
+    initWorkspace.inUse = true;
   }
 
   ~WorkspaceGuard()

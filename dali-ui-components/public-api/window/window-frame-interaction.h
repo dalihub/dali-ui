@@ -31,34 +31,38 @@ namespace DALI_NAMESPACE::Ui
  * corner hit regions, because those need pointer hover feedback that touch and
  * remote-control input cannot provide. Any further resize direction must be
  * appended after the existing values.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameInteractionType
 {
-  NONE                = 0, ///< No move or resize interaction
-  MOVE                = 1, ///< Interactive window move
-  RESIZE_BOTTOM_LEFT  = 2, ///< Resize from the bottom-left handle
-  RESIZE_BOTTOM_RIGHT = 3  ///< Resize from the bottom-right handle
+  NONE                = 0, ///< No move or resize interaction @SINCE_3_0.0
+  MOVE                = 1, ///< Interactive window move @SINCE_3_0.0
+  RESIZE_BOTTOM_LEFT  = 2, ///< Resize from the bottom-left handle @SINCE_3_0.0
+  RESIZE_BOTTOM_RIGHT = 3  ///< Resize from the bottom-right handle @SINCE_3_0.0
 };
 
 /**
  * @brief Current lifecycle state of a decoration interaction.
+ * @SINCE_3_0.0
  */
 enum class WindowFrameInteractionState
 {
-  STARTED          = 0, ///< Native interaction request was dispatched
-  POINTER_RELEASED = 1, ///< Initiating pointer ended before native completion
-  COMPLETED        = 2, ///< Native move or resize completion was reported
-  CANCELLED        = 3  ///< Interaction tracking ended without completion
+  STARTED          = 0, ///< Native interaction request was dispatched @SINCE_3_0.0
+  POINTER_RELEASED = 1, ///< Initiating pointer ended before native completion @SINCE_3_0.0
+  COMPLETED        = 2, ///< Native move or resize completion was reported @SINCE_3_0.0
+  CANCELLED        = 3  ///< Interaction tracking ended without completion @SINCE_3_0.0
 };
 
 /**
  * @brief Snapshot of a move or resize interaction emitted by WindowFrame.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API WindowFrameInteraction
 {
 public:
   /**
    * @brief Creates an empty cancelled interaction.
+   * @SINCE_3_0.0
    */
   WindowFrameInteraction();
 
@@ -71,6 +75,7 @@ public:
   /**
    * @brief Returns the interaction type.
    *
+   * @SINCE_3_0.0
    * @return Interaction type
    */
   WindowFrameInteractionType GetType() const;
@@ -78,6 +83,7 @@ public:
   /**
    * @brief Returns the interaction lifecycle state.
    *
+   * @SINCE_3_0.0
    * @return Interaction state
    */
   WindowFrameInteractionState GetState() const;
@@ -86,6 +92,7 @@ public: // Not intended for application developers
   /**
    * @brief Creates an interaction snapshot.
    *
+   * @SINCE_3_0.0
    * @param[in] type Interaction type
    * @param[in] state Interaction lifecycle state
    */

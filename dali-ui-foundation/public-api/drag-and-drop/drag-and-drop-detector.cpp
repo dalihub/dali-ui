@@ -505,6 +505,8 @@ struct DALI_INTERNAL DragAndDropEvent::Impl
   DragAndDropTargetStatus targetStatus{DragAndDropTargetStatus::NONE};
   DragAndDropResult       result{DragAndDropResult::NONE};
   DragCancelReason        cancelReason{DragCancelReason::NONE};
+  Vector2                 previewRequestedPosition;
+  Vector2                 previewRequestedSize;
 };
 
 DragAndDropEvent::DragAndDropEvent()
@@ -527,7 +529,9 @@ DragAndDropEvent::DragAndDropEvent(Dali::Ui::View          source,
                                    DropProposal            dropProposal,
                                    DragAndDropTargetStatus targetStatus,
                                    DragAndDropResult       result,
-                                   DragCancelReason        cancelReason)
+                                   DragCancelReason        cancelReason,
+                                   Vector2                 previewRequestedPosition,
+                                   Vector2                 previewRequestedSize)
 : mImpl(MakeUnique<Impl>(Impl{std::move(source),
                               std::move(target),
                               std::move(candidateTarget),
@@ -543,7 +547,9 @@ DragAndDropEvent::DragAndDropEvent(Dali::Ui::View          source,
                               std::move(dropProposal),
                               targetStatus,
                               result,
-                              cancelReason}))
+                              cancelReason,
+                              previewRequestedPosition,
+                              previewRequestedSize}))
 {
 }
 
@@ -620,6 +626,26 @@ const Vector2& DragAndDropEvent::GetPreviewLocalPosition() const
 const Vector2& DragAndDropEvent::GetSourceAnchor() const
 {
   return GetValueImplementation(mImpl).sourceAnchor;
+}
+
+float DragAndDropEvent::GetPreviewRequestedX() const
+{
+  return GetValueImplementation(mImpl).previewRequestedPosition.x;
+}
+
+float DragAndDropEvent::GetPreviewRequestedY() const
+{
+  return GetValueImplementation(mImpl).previewRequestedPosition.y;
+}
+
+float DragAndDropEvent::GetPreviewRequestedWidth() const
+{
+  return GetValueImplementation(mImpl).previewRequestedSize.width;
+}
+
+float DragAndDropEvent::GetPreviewRequestedHeight() const
+{
+  return GetValueImplementation(mImpl).previewRequestedSize.height;
 }
 
 const DragPayload& DragAndDropEvent::GetPayload() const

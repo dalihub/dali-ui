@@ -35,53 +35,63 @@ class WebProfileImpl;
  *
  * A profile can be shared by multiple WebViews. Cache and cookie operations
  * therefore affect every WebView associated with the same profile.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API WebProfile : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized WebProfile handle.
+   * @SINCE_3_0.0
    */
   WebProfile();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~WebProfile();
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    */
   WebProfile(const WebProfile& profile);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    */
   WebProfile(WebProfile&& profile) noexcept;
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    */
   WebProfile& operator=(const WebProfile& profile);
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    */
   WebProfile& operator=(WebProfile&& profile) noexcept;
 
   /**
    * @brief Compares the underlying browsing profile identity.
+   * @SINCE_3_0.0
    */
   bool operator==(const WebProfile& rhs) const;
 
   /**
    * @brief Compares the underlying browsing profile identity.
+   * @SINCE_3_0.0
    */
   bool operator!=(const WebProfile& rhs) const;
 
   /**
    * @brief Downcasts a handle to WebProfile.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized WebProfile on success, otherwise an empty handle
    */
@@ -92,6 +102,7 @@ public:
    *
    * This method does nothing when the web engine does not provide a browsing
    * context.
+   * @SINCE_3_0.0
    */
   void ClearCache();
 
@@ -101,6 +112,7 @@ public:
    * The returned handle is initialized even when the backend does not support
    * cookie management. Its operations then do nothing.
    *
+   * @SINCE_3_0.0
    * @return The cookie manager associated with this profile
    */
   WebCookieManager GetCookieManager() const;

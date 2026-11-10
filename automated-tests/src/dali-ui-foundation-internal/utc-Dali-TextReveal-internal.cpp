@@ -15,7 +15,11 @@
  *
  */
 
+// Install the test callback before the task includes the adaptor declaration.
+#include <dali-ui/ui-event-thread-callback.h>
+
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
+#include <dali-ui-foundation/internal/text/async-text/text-loading-task.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
@@ -38,7 +42,6 @@
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-async-task-manager.h>
-#include <dali-ui/ui-event-thread-callback.h>
 #include <dali.h>
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/devel-api/text-abstraction/segmentation.h>
@@ -3147,12 +3150,16 @@ int UtcDaliTextRevealImageReplacementPlanP(void)
   asyncParameters.textRevealSequence                  = Reveal::Sequence::PER_LINE;
   asyncParameters.textRevealFadeDurationRatio         = UiText::Reveal::AUTO_FADE_DURATION_RATIO;
   asyncParameters.renderScale                         = 1.5f;
-  asyncParameters.maxTextureSize                      = 32;
-  UiText::AsyncTextLoader           scaledLoader      = UiText::AsyncTextLoader::New();
-  bool                              cachedNaturalSize = false;
-  const Size                        naturalSize       = scaledLoader.SetupRenderScale(asyncParameters, cachedNaturalSize);
-  const UiText::AsyncTextRenderInfo scaledInfo =
-    scaledLoader.RenderText(asyncParameters, cachedNaturalSize, naturalSize);
+  // Force height tiling even after the request falls back to a 1x raster.
+  asyncParameters.maxTextureSize = 16;
+  // The real task selects effective RenderScale 1 before loading and calls the
+  // loader once. Reveal/placement expectations match the unscaled plan above.
+  Ui::Internal::TextLoadingTaskPtr scaledTask =
+    new Ui::Internal::TextLoadingTask(1u, std::move(asyncParameters), nullptr);
+  scaledTask->mLoader = UiText::AsyncTextLoader::New();
+  scaledTask->Process();
+  DALI_TEST_EQUALS(scaledTask->mParameters.renderScale, 1.0f, TEST_LOCATION);
+  const auto& scaledInfo = scaledTask->mRenderInfo;
   DALI_TEST_CHECK(scaledInfo.isTextRevealEnabled);
   DALI_TEST_CHECK(scaledInfo.revealMetadataTiles.size() > 1u);
   DALI_TEST_EQUALS(scaledInfo.replacementPlacements.Count(), 1u, TEST_LOCATION);

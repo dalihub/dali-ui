@@ -240,12 +240,12 @@ struct GlyphData
 // Keep the two original truncations separate, including on early returns.
 struct LineVerticalAdvance
 {
-  LineVerticalAdvance(GlyphData& data, const LineRun& line, Alignment alignment)
-  : data(data),
+  LineVerticalAdvance(GlyphData& initData, const LineRun& line, Alignment alignment)
+  : data(initData),
     postOffset(-line.descender + GetPostOffsetVerticalLineAlignment(line, alignment))
   {
-    data.verticalOffsetValid = data.verticalOffsetValid &&
-                               Raster::AddCoordinate(data.verticalOffset, line.ascender + GetPreOffsetVerticalLineAlignment(line, alignment), data.verticalOffset);
+    initData.verticalOffsetValid = initData.verticalOffsetValid &&
+                                   Raster::AddCoordinate(initData.verticalOffset, line.ascender + GetPreOffsetVerticalLineAlignment(line, alignment), initData.verticalOffset);
   }
 
   ~LineVerticalAdvance()
@@ -306,17 +306,25 @@ Vector4 SampleGradient(const GradientRasterPaint& paint, float textureX, float t
   const Vector2 coordinate(localX, localY);
 
   float position = 0.0f;
-  if(data.type == Dali::Ui::Gradient::Type::RADIAL)
+  if(data.evaluationMode == Internal::Gradient::EvaluationMode::RADIAL)
   {
     const Vector2 delta = (coordinate - data.radialCenter) * data.radialScale;
     position            = delta.Length();
   }
-  else if(data.type == Dali::Ui::Gradient::Type::CONIC)
+  else if(data.evaluationMode >= Internal::Gradient::EvaluationMode::CONIC)
   {
-    constexpr float INV_TWO_PI = 0.15915494309189533577f;
-    const Vector2   delta      = (coordinate - data.conicCenter) * data.conicScale;
-    position                   = (std::atan2(delta.y, delta.x) - data.conicStartAngle) * INV_TWO_PI;
-    position -= std::floor(position);
+    if(data.evaluationMode == Internal::Gradient::EvaluationMode::LINEAR_USER_SPACE)
+    {
+      const Vector2 delta = coordinate - data.startPosition;
+      position            = delta.x * data.linearProjection.x + delta.y * data.linearProjection.y;
+    }
+    else
+    {
+      constexpr float INV_TWO_PI = 0.15915494309189533577f;
+      const Vector2   delta      = (coordinate - data.conicCenter) * data.conicScale;
+      position                   = (std::atan2(delta.y, delta.x) - data.conicStartAngle) * INV_TWO_PI;
+      position -= std::floor(position);
+    }
   }
   else
   {
@@ -739,11 +747,10 @@ void TypesetGradientGlyph(GlyphData& __restrict__ data,
       uint32_t      packedColor               = 0u;
       uint8_t* __restrict__ packedColorBuffer = reinterpret_cast<uint8_t*>(&packedColor);
       const float normalizedCoverage          = static_cast<float>(paintCoverage) / 255.0f;
-      const float effectiveCoverage           = normalizedCoverage * std::max(0.0f, std::min(1.0f, fallbackColor->a));
-      packedColorBuffer[0u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.r * effectiveCoverage)));
-      packedColorBuffer[1u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.g * effectiveCoverage)));
-      packedColorBuffer[2u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.b * effectiveCoverage)));
-      packedColorBuffer[3u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.a * effectiveCoverage)));
+      packedColorBuffer[0u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.r * normalizedCoverage)));
+      packedColorBuffer[1u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.g * normalizedCoverage)));
+      packedColorBuffer[2u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.b * normalizedCoverage)));
+      packedColorBuffer[3u]                   = static_cast<uint8_t>(255.0f * std::max(0.0f, std::min(1.0f, gradient.a * normalizedCoverage)));
 
       currentColor = packedColor;
     }
@@ -1284,7 +1291,7 @@ std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&         
     Vector4     bounds = contentBounds;
     if(source.boundsMode == GradientSpan::BoundsMode::VIEW_BOUND)
     {
-      bounds = source.style.units == Ui::Gradient::Units::USER_SPACE && gradientContext
+      bounds = gradientContext
                  ? gradientContext->viewBounds
                  : Vector4(0.0f, 0.0f, 1.0f, 1.0f);
     }
@@ -1309,7 +1316,8 @@ std::vector<GradientRasterPaint> ResolveGradientRasterPaints(ViewModel&         
       continue;
     }
     result[index].renderData = Internal::Gradient::ResolveRenderData(source.style, bounds, geometrySize);
-    if(!result[index].renderData.enabled && Internal::Gradient::IsRenderable(source.style))
+    if(!result[index].renderData.enabled &&
+       (Internal::Gradient::IsRenderable(source.style) || !Internal::Gradient::HasFiniteGeometry(source.style)))
     {
       // Rejected geometry has no paint. The existing empty-stop path stays transparent.
       continue;
@@ -1345,7 +1353,8 @@ template<bool RECORD_REVEAL, bool APPLY_GRADIENT_SPAN, bool PIXEL_REVEAL = false
 void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, GlyphData& glyphData, GlyphIndex& glyphIndex,
                                    const GlyphIndex elidedGlyphIndex, const GlyphInfo* glyphInfo, const bool addHyphen,
                                    const InputParameterForEachGlyph& inputParamsForGlyph,
-                                   OutputParameterForEachGlyph&      outputParamsForGlyph)
+                                   OutputParameterForEachGlyph&      outputParamsForGlyph,
+                                   const Vector4&                    defaultForegroundColor)
 {
   const GlyphIndex           styleGlyphIndex = inputParamsForGlyph.finalGlyphStyleSourceBuffer
                                                  ? ResolveFinalStyleSourceGlyph(inputParamsForGlyph.finalGlyphStyleSourceBuffer,
@@ -1518,7 +1527,7 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
   else
   {
     color = (inputParamsForGlyph.useDefaultColor || (0u == colorIndex))
-              ? inputParamsForGlyph.defaultColor
+              ? defaultForegroundColor
               : *(inputParamsForGlyph.colorsBuffer + (colorIndex - 1u));
   }
 
@@ -1737,7 +1746,7 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
     // clang-format on
 
     CreateImageBufferForEachGlyph<RECORD_REVEAL, APPLY_GRADIENT_SPAN, PIXEL_REVEAL>(
-      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph);
+      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph, inputParamsForGlyph.defaultColor);
 
     if(inputParamsForLine.hyphenIndices)
     {
@@ -1918,8 +1927,15 @@ void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient   
 
                                                      lastFontId};
 
+    // Global gradients preserve unstyled color glyphs with their original RGBA.
+    // Explicit foreground and gradient spans retain their existing raster policy.
+    const Vector4& defaultForegroundColor =
+      classification.isColorGlyph && !classification.hasExplicitColor && !usesGradientSpan
+        ? Color::WHITE
+        : inputParamsForGlyph.defaultColor;
+
     CreateImageBufferForEachGlyph<false, APPLY_GRADIENT_SPAN>(
-      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph);
+      fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen, inputParamsForGlyph, outputParamsForGlyph, defaultForegroundColor);
 
     if(inputParamsForLine.hyphenIndices)
     {
@@ -2028,13 +2044,13 @@ void Internal::Reveal::ExpandMetadataOwnership(uint8_t* metadata, uint32_t width
   uint32_t*             next       = current + width;
   const auto            collectRow = [metadata, width, rowBytes](uint32_t y, uint32_t* output)
   {
-    constexpr uint32_t PIXEL_SIZE = 4u;
+    constexpr uint32_t ROW_PIXEL_SIZE = 4u;
     memset(output, 0u, static_cast<size_t>(width) * sizeof(uint32_t));
     RowBounds      bounds{width, 0u};
     const uint8_t* row = metadata + static_cast<size_t>(y) * rowBytes;
     for(uint32_t x = 0u; x < width; ++x)
     {
-      const uint8_t* pixel = row + static_cast<size_t>(x) * PIXEL_SIZE;
+      const uint8_t* pixel = row + static_cast<size_t>(x) * ROW_PIXEL_SIZE;
       if(pixel[2u] == 0u)
       {
         continue;

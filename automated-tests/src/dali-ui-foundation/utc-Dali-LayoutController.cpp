@@ -16,13 +16,14 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
-#include <limits>
 #include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {
@@ -1381,7 +1382,7 @@ MeasuredSize RecordMeasureConstraint(View, float widthConstraint, float heightCo
 // already, and so is the parameter Measure() takes, so a root measured at its raw
 // requested size is run at a constraint 1/s too small.
 //
-// UiScaleManagerImpl keeps the scale in a process-wide singleton, so the incoming scale
+// LayoutScaleManagerImpl keeps the scale in a process-wide singleton, so the incoming scale
 // is recorded and restored.
 //
 // Non-vacuity (verified by mutation): dropping the * scale from the FIXED width branch
@@ -1391,8 +1392,8 @@ int UtcDaliLayoutControllerFixedRootMeasuredAtVisualConstraintP(void)
   UiTestApplication application;
   tet_infoline("A FIXED-size layout root is measured at a VISUAL constraint");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   gRecordedMeasureWidthConstraint  = -1.0f;
   gRecordedMeasureHeightConstraint = -1.0f;
@@ -1414,7 +1415,7 @@ int UtcDaliLayoutControllerFixedRootMeasuredAtVisualConstraintP(void)
   DALI_TEST_EQUALS(gRecordedMeasureHeightConstraint, 160.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -1426,8 +1427,8 @@ int UtcDaliLayoutControllerFixedRootConstraintUnchangedAtUnitScaleP(void)
   UiTestApplication application;
   tet_infoline("A FIXED-size layout root sees its requested size unchanged at scale 1");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(1.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(1.0f);
 
   gRecordedMeasureWidthConstraint  = -1.0f;
   gRecordedMeasureHeightConstraint = -1.0f;
@@ -1446,7 +1447,7 @@ int UtcDaliLayoutControllerFixedRootConstraintUnchangedAtUnitScaleP(void)
   DALI_TEST_EQUALS(gRecordedMeasureWidthConstraint, 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(gRecordedMeasureHeightConstraint, 80.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -1466,8 +1467,8 @@ int UtcDaliLayoutControllerFixedRootStandaloneChildGetsFullExtentP(void)
   UiTestApplication application;
   tet_infoline("A FIXED-size root hands its boundary child the full visual extent");
 
-  const float originalScale = UiScaleManager::Get().GetScale();
-  UiScaleManager::Get().SetScale(2.0f);
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
 
   Window window = application.GetWindow();
 
@@ -1492,7 +1493,7 @@ int UtcDaliLayoutControllerFixedRootStandaloneChildGetsFullExtentP(void)
   // 90 natural content at scale 2, and a boundary child that wraps it.
   DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 180.0f, TEST_LOCATION);
 
-  UiScaleManager::Get().SetScale(originalScale);
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -1726,28 +1727,5 @@ int UtcDaliLayoutControllerFailedBatchKeepsCompletedRootSnapshotsP(void)
   application.SendNotification();
   DALI_TEST_EQUALS(widths.size(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(finishes, 1, TEST_LOCATION);
-  END_TEST;
-}
-
-// The documented contract is a positive, finite, NORMAL scale. A subnormal scale is not
-// a usable display scale and would make the layout's reciprocal overflow, so it is
-// rejected together with the non-finite values rather than clamped.
-int UtcDaliUiScaleManagerSetScaleSubnormalRejectedN(void)
-{
-  UiTestApplication application;
-  tet_infoline("A subnormal or non-finite UI scale is rejected, leaving the previous scale in place");
-
-  const float originalScale = UiScaleManager::Get().GetScale();
-
-  UiScaleManager::Get().SetScale(1.0f);
-  DALI_TEST_EQUALS(UiScaleManager::Get().GetScale(), 1.0f, TEST_LOCATION);
-
-  UiScaleManager::Get().SetScale(std::numeric_limits<float>::denorm_min());
-  DALI_TEST_EQUALS(UiScaleManager::Get().GetScale(), 1.0f, TEST_LOCATION);
-
-  UiScaleManager::Get().SetScale(std::numeric_limits<float>::quiet_NaN());
-  DALI_TEST_EQUALS(UiScaleManager::Get().GetScale(), 1.0f, TEST_LOCATION);
-
-  UiScaleManager::Get().SetScale(originalScale);
   END_TEST;
 }

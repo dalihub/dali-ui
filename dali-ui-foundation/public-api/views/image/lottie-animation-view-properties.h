@@ -35,23 +35,26 @@ namespace Ui
  * It is shared between:
  *   - LottieAnimationView::Property  (public-api, for application code)
  *   - LottieAnimationViewImpl         (integration-api, for DALI_PROPERTY_REGISTRATION_EXTERNAL)
+ * @SINCE_3_0.0
  */
 struct LottieAnimationViewPropertyIndex
 {
   /**
    * @brief Enumeration for the start and end property ranges for this control.
+   * @SINCE_3_0.0
    */
   enum PropertyRange
   {
     PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_END_INDEX + 1,
-    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices. @SINCE_3_0.0
 
     ANIMATABLE_PROPERTY_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_END_INDEX + 1,
-    ANIMATABLE_PROPERTY_END_INDEX   = ANIMATABLE_PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+    ANIMATABLE_PROPERTY_END_INDEX   = ANIMATABLE_PROPERTY_START_INDEX + 1000, ///< Reserve property indices. @SINCE_3_0.0
   };
 
   /**
    * @brief Enumeration for the instance of properties belonging to the LottieAnimationView class.
+   * @SINCE_3_0.0
    */
   enum
   {
@@ -61,6 +64,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The URL of the Lottie JSON animation file.
+     * @SINCE_3_0.0
      * @details Name "image", type Property::STRING.
      * @note See also: LottieAnimationView::SetResourceUrl(), LottieAnimationView::GetResourceUrl().
      */
@@ -72,6 +76,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The number of times to loop. -1 for infinite.
+     * @SINCE_3_0.0
      * @details Name "loopCount", type Property::INTEGER.
      * @note See also: LottieAnimationView::SetLoopCount(), LottieAnimationView::GetLoopCount().
      */
@@ -79,6 +84,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The looping mode (RESTART or AUTO_REVERSE).
+     * @SINCE_3_0.0
      * @details Name "loopingMode", type Ui::LottieAnimation::LoopingMode (Property::INTEGER).
      * @note See also: LottieAnimationView::SetLoopingMode(), LottieAnimationView::GetLoopingMode().
      */
@@ -86,6 +92,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The behavior when the animation is stopped.
+     * @SINCE_3_0.0
      * @details Name "stopBehavior", type Ui::AnimatedImage::StopBehavior (Property::INTEGER).
      * @note See also: LottieAnimationView::SetStopBehavior(), LottieAnimationView::GetStopBehavior().
      */
@@ -93,6 +100,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Playback speed multiplier. 1.0 is normal speed.
+     * @SINCE_3_0.0
      * @details Name "frameSpeedFactor", type Property::FLOAT.
      * @note See also: LottieAnimationView::SetFrameSpeedFactor(), LottieAnimationView::GetFrameSpeedFactor().
      */
@@ -104,6 +112,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The color tint to apply to the rendered animation.
+     * @SINCE_3_0.0
      * @details Name "imageColor", type Property::VECTOR4.
      * @note See also: LottieAnimationView::SetImageColor(), LottieAnimationView::GetImageColor().
      */
@@ -115,6 +124,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The desired decoding width hint in pixels. 0 means no constraint.
+     * @SINCE_3_0.0
      * @details Name "desiredWidth", type Property::INTEGER.
      * @note See also: LottieAnimationView::SetDesiredWidth(), LottieAnimationView::GetDesiredWidth().
      */
@@ -122,6 +132,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The desired decoding height hint in pixels. 0 means no constraint.
+     * @SINCE_3_0.0
      * @details Name "desiredHeight", type Property::INTEGER.
      * @note See also: LottieAnimationView::SetDesiredHeight(), LottieAnimationView::GetDesiredHeight().
      */
@@ -129,6 +140,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Controls when the visual's texture resources are released.
+     * @SINCE_3_0.0
      * @details Name "releasePolicy", type Ui::Image::ReleasePolicy (Property::INTEGER).
      * @note See also: LottieAnimationView::SetReleasePolicy(), LottieAnimationView::GetReleasePolicy().
      */
@@ -136,6 +148,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Whether to load the animation synchronously on the event thread.
+     * @SINCE_3_0.0
      * @details Name "synchronousLoading", type Property::BOOLEAN.
      * @note See also: LottieAnimationView::SetSynchronousLoading(), LottieAnimationView::IsSynchronousLoading().
      */
@@ -147,6 +160,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Whether to redraw every frame when the view is being scaled down.
+     * @SINCE_3_0.0
      * @details Name "redrawInScalingDown", type Property::BOOLEAN.
      * @note See also: LottieAnimationView::SetRedrawOnScaleDown(), LottieAnimationView::IsRedrawOnScaleDown().
      */
@@ -154,6 +168,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Whether to redraw every frame when the view is being scaled up.
+     * @SINCE_3_0.0
      * @details Name "redrawInScalingUp", type Property::BOOLEAN.
      * @note See also: LottieAnimationView::SetRedrawOnScaleUp(), LottieAnimationView::IsRedrawOnScaleUp().
      */
@@ -161,6 +176,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Whether to notify ResourceReadySignal after each rasterization completes.
+     * @SINCE_3_0.0
      * @details Name "notifyAfterRasterization", type Property::BOOLEAN.
      * @note See also: LottieAnimationView::SetNotifyAfterRasterizationEnabled(), LottieAnimationView::IsNotifyAfterRasterizationEnabled().
      */
@@ -168,6 +184,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Scale factor applied to the rasterization size relative to the visual size.
+     * @SINCE_3_0.0
      * @details Name "renderScale", type Property::FLOAT.
      *          A value of 2.0 rasterizes at twice the visual dimensions for sharper output
      *          on high-density displays. Negative values flip the image.
@@ -178,6 +195,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Whether to enable aspect fit for AnimatedVectorImageVisual.
+     * @SINCE_3_0.0
      * @details Name "enableAspectFit", type Property::BOOLEAN.
      *          If this property is true, the vector image will be scaled to fit within the visual size
      *          while maintaining the aspect ratio. If false, the image will be stretched to fill the visual size.
@@ -191,6 +209,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The URL of the placeholder image shown while loading.
+     * @SINCE_3_0.0
      * @details Name "placeholderImage", type Property::STRING.
      * @note See also: LottieAnimationView::SetPlaceholderUrl(), LottieAnimationView::GetPlaceholderUrl().
      */
@@ -198,6 +217,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief When loading may start. Default: Image::LoadPolicy::ATTACHED.
+     * @SINCE_3_0.0
      * @details Name "loadPolicy", type Property::INTEGER.
      * ATTACHED waits for scene connection and on-scene visibility; IMMEDIATE allows off-scene loading.
      */
@@ -209,6 +229,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The UV sub-region of the texture to display, as (x, y, width, height) in [0,1] normalized coordinates.
+     * @SINCE_3_0.0
      * @details Name "pixelArea", type Property::VECTOR4 (animatable). Default is (0, 0, 1, 1) — full texture.
      * @note See also: LottieAnimationView::SetPixelArea(), LottieAnimationView::GetPixelArea().
      */

@@ -30,11 +30,12 @@ namespace Ui
  *
  * The selected engine is process-wide because all WebView instances share
  * the same web engine plugin library.
+ * @SINCE_3_0.0
  */
 enum class WebEngineType
 {
-  CHROMIUM = 0, ///< Chromium web engine
-  LWE      = 1  ///< Lightweight web engine
+  CHROMIUM = 0, ///< Chromium web engine @SINCE_3_0.0
+  LWE      = 1  ///< Lightweight web engine @SINCE_3_0.0
 };
 
 } // namespace Ui

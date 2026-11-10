@@ -329,6 +329,23 @@ public:
     data.isColorEmoji    = false;
     data.isColorBitmap   = false;
 
+    if(glyphIndex == Test::COLOR_EMOJI_GLYPH_INDEX)
+    {
+      data.format        = Pixel::BGRA8888;
+      data.isColorEmoji  = true;
+      data.buffer        = static_cast<uint8_t*>(malloc(data.width * data.height * 4u));
+      data.isBufferOwned = true;
+      for(uint32_t index = 0u; index < data.width * data.height; ++index)
+      {
+        data.buffer[index * 4u]      = 64u;
+        data.buffer[index * 4u + 1u] = 128u;
+        data.buffer[index * 4u + 2u] = 192u;
+        data.buffer[index * 4u + 3u] = index % 3u == 0u ? 0u : index % 3u == 1u ? 128u
+                                                                                : 255u;
+      }
+      return;
+    }
+
     uint8_t* newBuffer = (uint8_t*)malloc(data.width * data.height * Pixel::GetBytesPerPixel(data.format));
     // Keep the default opaque test glyph, with one explicitly reserved index
     // for deterministic half-coverage antialiasing tests.
@@ -404,7 +421,7 @@ public:
   }
   bool IsColorGlyph(FontId fontId, GlyphIndex glyphIndex)
   {
-    return false;
+    return glyphIndex == Test::COLOR_EMOJI_GLYPH_INDEX;
   }
   bool IsColorFont(FontId fontId)
   {

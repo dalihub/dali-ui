@@ -31,18 +31,21 @@ namespace Text
 
 /**
  * @brief Span payload that applies a background color behind text.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API BackgroundColorSpan : public Span
 {
 public:
   /**
    * @brief Creates an uninitialized BackgroundColorSpan handle.
+   * @SINCE_3_0.0
    */
   BackgroundColorSpan() = default;
 
   /**
    * @brief Creates a BackgroundColorSpan with the given color.
    *
+   * @SINCE_3_0.0
    * @param[in] color The background color
    * @return A new BackgroundColorSpan
    */
@@ -51,6 +54,7 @@ public:
   /**
    * @brief Downcasts a handle to BackgroundColorSpan.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized BackgroundColorSpan on success, otherwise empty
    */
@@ -59,6 +63,7 @@ public:
   /**
    * @brief Gets the background color payload.
    *
+   * @SINCE_3_0.0
    * @return The background color
    */
   UiColor GetColor() const;
@@ -67,6 +72,7 @@ private:
   /**
    * @brief Creates a BackgroundColorSpan handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit DALI_INTERNAL BackgroundColorSpan(BaseObject* impl);

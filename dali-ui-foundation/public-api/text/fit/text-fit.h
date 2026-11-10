@@ -36,6 +36,7 @@ namespace Text
  *
  * Text fit can be disabled, range-based, or candidate-based. This value
  * represents exactly one of those states and is returned by Label::GetTextFit().
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Fit
 {
@@ -44,19 +45,23 @@ public:
 
   /**
    * @brief The text fit configuration type.
+   * @SINCE_3_0.0
    */
   enum class Type : uint8_t
   {
     /**
      * @brief Text fit is disabled.
+     * @SINCE_3_0.0
      */
     NONE = 0u,
     /**
      * @brief Text fit uses a font size range.
+     * @SINCE_3_0.0
      */
     RANGE = 1u,
     /**
      * @brief Text fit uses a list of font size and line height candidates.
+     * @SINCE_3_0.0
      */
     CANDIDATES = 2u
   };
@@ -77,18 +82,21 @@ public:
    * height mode and value.
    *
    * This object is used to configure range-based text fit behavior.
+   * @SINCE_3_0.0
    */
   class DALI_UI_API Range
   {
   public:
     /**
      * @brief Creates a fit range with default values.
+     * @SINCE_3_0.0
      */
     Range();
 
     /**
      * @brief Creates a fit range with given parameters.
      *
+     * @SINCE_3_0.0
      * @param[in] minimumFontSize The minimum font size in pixels.
      * @param[in] maximumFontSize The maximum font size in pixels.
      * @param[in] fontSizeStep The font size step in pixels.
@@ -98,6 +106,7 @@ public:
     /**
      * @brief Creates a fit range by copying another fit range.
      *
+     * @SINCE_3_0.0
      * @param[in] rhs The fit range to copy.
      */
     Range(const Range& rhs);
@@ -105,6 +114,7 @@ public:
     /**
      * @brief Creates a fit range by moving another fit range.
      *
+     * @SINCE_3_0.0
      * @param[in] rhs The fit range to move.
      */
     Range(Range&& rhs) noexcept;
@@ -112,6 +122,7 @@ public:
     /**
      * @brief Copies another fit range to this object.
      *
+     * @SINCE_3_0.0
      * @param[in] rhs The fit range to copy.
      */
     Range& operator=(const Range& rhs);
@@ -119,12 +130,14 @@ public:
     /**
      * @brief Moves another fit range to this object.
      *
+     * @SINCE_3_0.0
      * @param[in] rhs The fit range to move.
      */
     Range& operator=(Range&& rhs) noexcept;
 
     /**
      * @brief Destructor.
+     * @SINCE_3_0.0
      */
     ~Range();
 
@@ -132,6 +145,7 @@ public:
     /**
      * @brief Sets the minimum font size.
      *
+     * @SINCE_3_0.0
      * @param[in] size The minimum font size in pixels.
      */
     void SetMinimumFontSize(float size);
@@ -139,6 +153,7 @@ public:
     /**
      * @brief Returns the minimum font size.
      *
+     * @SINCE_3_0.0
      * @return The minimum font size in pixels.
      */
     float GetMinimumFontSize() const;
@@ -146,6 +161,7 @@ public:
     /**
      * @brief Sets the maximum font size.
      *
+     * @SINCE_3_0.0
      * @param[in] size The maximum font size in pixels.
      */
     void SetMaximumFontSize(float size);
@@ -153,6 +169,7 @@ public:
     /**
      * @brief Returns the maximum font size.
      *
+     * @SINCE_3_0.0
      * @return The maximum font size in pixels.
      */
     float GetMaximumFontSize() const;
@@ -163,6 +180,7 @@ public:
      * The text fit algorithm decreases the font size by this step when
      * searching for the largest fitting size.
      *
+     * @SINCE_3_0.0
      * @param[in] step The font size step in pixels.
      */
     void SetFontSizeStep(float step);
@@ -170,6 +188,7 @@ public:
     /**
      * @brief Returns the font size step.
      *
+     * @SINCE_3_0.0
      * @return The font size step in pixels.
      */
     float GetFontSizeStep() const;
@@ -193,18 +212,21 @@ public:
    * The line height is specified as an absolute value.
    *
    * This object is used to configure candidate-based text fit behavior.
+   * @SINCE_3_0.0
    */
   class DALI_UI_API Candidate
   {
   public:
     /**
      * @brief Creates a fit candidate with default values.
+     * @SINCE_3_0.0
      */
     Candidate();
 
     /**
      * @brief Creates a fit candidate with given parameters.
      *
+     * @SINCE_3_0.0
      * @param[in] fontSize The font size in pixels.
      * @param[in] lineHeight The line height in pixels.
      */
@@ -213,6 +235,7 @@ public:
     /**
      * @brief Creates a fit candidate by copying another fit candidate.
      *
+     * @SINCE_3_0.0
      * @param[in] rhs The fit candidate to copy.
      */
     Candidate(const Candidate& rhs);
@@ -220,6 +243,7 @@ public:
     /**
      * @brief Creates a fit candidate by moving another fit candidate.
      *
+     * @SINCE_3_0.0
      * @param[in] rhs The fit candidate to move.
      */
     Candidate(Candidate&& rhs) noexcept;
@@ -227,6 +251,7 @@ public:
     /**
      * @brief Copies another fit candidate to this object.
      *
+     * @SINCE_3_0.0
      * @param[in] rhs The fit candidate to copy.
      */
     Candidate& operator=(const Candidate& rhs);
@@ -234,12 +259,14 @@ public:
     /**
      * @brief Moves another fit candidate to this object.
      *
+     * @SINCE_3_0.0
      * @param[in] rhs The fit candidate to move.
      */
     Candidate& operator=(Candidate&& rhs) noexcept;
 
     /**
      * @brief Destructor.
+     * @SINCE_3_0.0
      */
     ~Candidate();
 
@@ -247,6 +274,7 @@ public:
     /**
      * @brief Sets the font size.
      *
+     * @SINCE_3_0.0
      * @param[in] size The font size in pixels.
      */
     void SetFontSize(float size);
@@ -254,6 +282,7 @@ public:
     /**
      * @brief Returns the font size.
      *
+     * @SINCE_3_0.0
      * @return The font size in pixels.
      */
     float GetFontSize() const;
@@ -261,6 +290,7 @@ public:
     /**
      * @brief Sets the line height.
      *
+     * @SINCE_3_0.0
      * @param[in] height The line height in pixels.
      */
     void SetLineHeight(float height);
@@ -268,6 +298,7 @@ public:
     /**
      * @brief Returns the line height.
      *
+     * @SINCE_3_0.0
      * @return The line height in pixels.
      */
     float GetLineHeight() const;
@@ -282,12 +313,14 @@ public:
 
   /**
    * @brief Creates a fit configuration representing disabled text fit.
+   * @SINCE_3_0.0
    */
   Fit();
 
   /**
    * @brief Creates a fit configuration by copying another fit configuration.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The fit configuration to copy.
    */
   Fit(const Fit& rhs);
@@ -295,6 +328,7 @@ public:
   /**
    * @brief Creates a fit configuration by moving another fit configuration.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The fit configuration to move.
    */
   Fit(Fit&& rhs) noexcept;
@@ -302,6 +336,7 @@ public:
   /**
    * @brief Copies another fit configuration to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The fit configuration to copy.
    */
   Fit& operator=(const Fit& rhs);
@@ -309,12 +344,14 @@ public:
   /**
    * @brief Moves another fit configuration to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The fit configuration to move.
    */
   Fit& operator=(Fit&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Fit();
 
@@ -325,6 +362,7 @@ public:
    *
    * This value can be passed to SetTextFit() to clear text fit.
    *
+   * @SINCE_3_0.0
    * @return A shared immutable none fit configuration.
    */
   static const Fit& None();
@@ -332,6 +370,7 @@ public:
   /**
    * @brief Creates a range-based text fit configuration.
    *
+   * @SINCE_3_0.0
    * @param[in] range The range-based text fit configuration.
    * @return A range-based text fit configuration.
    */
@@ -342,6 +381,7 @@ public:
    *
    * If @p candidates is empty, this returns Text::Fit::None().
    *
+   * @SINCE_3_0.0
    * @param[in] candidates The candidate-based text fit configuration.
    * @return A candidate-based text fit configuration, or None() if @p candidates is empty.
    */
@@ -353,6 +393,7 @@ public:
   /**
    * @brief Returns the text fit configuration type.
    *
+   * @SINCE_3_0.0
    * @return The text fit configuration type.
    */
   Type GetType() const;
@@ -362,6 +403,7 @@ public:
    *
    * This function must only be called when GetType() returns Type::RANGE.
    *
+   * @SINCE_3_0.0
    * @return The range-based text fit configuration.
    */
   const Range& GetRange() const;
@@ -371,6 +413,7 @@ public:
    *
    * This function must only be called when GetType() returns Type::CANDIDATES.
    *
+   * @SINCE_3_0.0
    * @return The candidate-based text fit configuration.
    */
   const Dali::Vector<Candidate>& GetCandidates() const;

@@ -32,12 +32,14 @@ namespace DALI_NAMESPACE::Ui
  * Surface bounds use screen coordinates. Frame and content bounds use
  * surface-local coordinates, so application content never subtracts
  * decoration insets.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API WindowFrameGeometry
 {
 public:
   /**
    * @brief Creates an empty geometry value.
+   * @SINCE_3_0.0
    */
   WindowFrameGeometry();
   WindowFrameGeometry(const WindowFrameGeometry& rhs);
@@ -48,18 +50,21 @@ public:
 
   /**
    * @brief Returns window surface bounds in screen coordinates.
+   * @SINCE_3_0.0
    * @return Surface bounds
    */
   Dali::Ui::LayoutRect GetSurfaceBounds() const;
 
   /**
    * @brief Returns visible frame bounds in surface-local coordinates.
+   * @SINCE_3_0.0
    * @return Frame bounds
    */
   Dali::Ui::LayoutRect GetFrameBounds() const;
 
   /**
    * @brief Returns application content bounds in surface-local coordinates.
+   * @SINCE_3_0.0
    * @return Content bounds
    */
   Dali::Ui::LayoutRect GetContentBounds() const;
@@ -73,6 +78,7 @@ public:
    *
    * Use it to keep content that must stay readable, such as a header or a
    * primary action, clear of the decoration.
+   * @SINCE_3_0.0
    * @return Overlay decoration insets
    */
   Dali::Ui::Insets GetDecorationOverlayInsets() const;

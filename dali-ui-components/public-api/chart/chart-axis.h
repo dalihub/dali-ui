@@ -52,40 +52,46 @@ class ChartAxis;
  *   xAxis.SetLabels({"Jan", "Feb", "Mar", "Apr"});
  *   chart.SetXAxis(xAxis);
  * @endcode
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API ChartAxis : public Dali::BaseHandle
 {
 public:
   /**
    * @brief Axis side relative to the plot.
+   * @SINCE_3_0.0
    */
   enum class Position : uint32_t
   {
-    NEAR = 0u, ///< Bottom for X axes, left for Y axes.
-    FAR  = 1u  ///< Top for X axes, right for Y axes.
+    NEAR = 0u, ///< Bottom for X axes, left for Y axes. @SINCE_3_0.0
+    FAR  = 1u  ///< Top for X axes, right for Y axes. @SINCE_3_0.0
   };
   /**
    * @brief Supported coordinate mappings.
+   * @SINCE_3_0.0
    */
   enum class ScaleType : uint32_t
   {
-    LINEAR      = 0u, ///< Uniform spacing in data coordinates.
-    LOGARITHMIC = 1u  ///< Base-10 spacing; displayed coordinates must be positive.
+    LINEAR      = 0u, ///< Uniform spacing in data coordinates. @SINCE_3_0.0
+    LOGARITHMIC = 1u  ///< Base-10 spacing; displayed coordinates must be positive. @SINCE_3_0.0
   };
 
   /**
    * @brief Creates an uninitialized ChartAxis handle.
+   * @SINCE_3_0.0
    */
   ChartAxis();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~ChartAxis();
 
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    */
   ChartAxis(const ChartAxis& rhs);
@@ -93,6 +99,7 @@ public:
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   ChartAxis(ChartAxis&& rhs);
@@ -100,6 +107,7 @@ public:
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to copy
    * @return A reference to this handle
    */
@@ -108,6 +116,7 @@ public:
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return A reference to this handle
    */
@@ -116,6 +125,7 @@ public:
   /**
    * @brief Creates a new ChartAxis.
    *
+   * @SINCE_3_0.0
    * @return A handle to the new axis
    */
   static ChartAxis New();
@@ -123,6 +133,7 @@ public:
   /**
    * @brief Downcasts a handle to a ChartAxis handle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return A ChartAxis handle, or an uninitialized handle if the cast fails
    */
@@ -133,6 +144,7 @@ public:
    *
    * Replaces any existing labels.
    *
+   * @SINCE_3_0.0
    * @param[in] labels The labels, in axis order
    */
   void SetLabels(const Dali::Vector<Dali::String>& labels);
@@ -140,6 +152,7 @@ public:
   /**
    * @brief Sets the category labels drawn along the axis.
    *
+   * @SINCE_3_0.0
    * @param[in] labels The labels, in axis order
    */
   void SetLabels(std::initializer_list<Dali::String> labels)
@@ -156,6 +169,7 @@ public:
   /**
    * @brief Retrieves the category labels drawn along the axis.
    *
+   * @SINCE_3_0.0
    * @return The labels, in axis order
    */
   Dali::Vector<Dali::String> GetLabels() const;
@@ -166,6 +180,7 @@ public:
    * Also switches the axis out of auto-range mode (see IsAutoRangeEnabled()).
    * The default is 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] min The minimum value of the axis
    */
   void SetMinimumLimit(float min);
@@ -173,6 +188,7 @@ public:
   /**
    * @brief Retrieves the minimum value of the axis, in data coordinates.
    *
+   * @SINCE_3_0.0
    * @return The minimum value of the axis
    */
   float GetMinimumLimit() const;
@@ -183,6 +199,7 @@ public:
    * Also switches the axis out of auto-range mode (see IsAutoRangeEnabled()).
    * The default is 1.0.
    *
+   * @SINCE_3_0.0
    * @param[in] max The maximum value of the axis
    */
   void SetMaximumLimit(float max);
@@ -190,6 +207,7 @@ public:
   /**
    * @brief Retrieves the maximum value of the axis, in data coordinates.
    *
+   * @SINCE_3_0.0
    * @return The maximum value of the axis
    */
   float GetMaximumLimit() const;
@@ -201,6 +219,7 @@ public:
    * data changes. Calling SetMinimumLimit() or SetMaximumLimit() sets this to false.
    * The default is true.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to fit the range to the series data automatically
    */
   void SetAutoRangeEnabled(bool enabled);
@@ -208,6 +227,7 @@ public:
   /**
    * @brief Retrieves whether the axis automatically fits its range to the series data.
    *
+   * @SINCE_3_0.0
    * @return True if the range is fit to the series data automatically
    */
   bool IsAutoRangeEnabled() const;
@@ -217,6 +237,7 @@ public:
    *
    * The default is true.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to draw grid lines
    */
   void SetShowGridLinesEnabled(bool enabled);
@@ -224,6 +245,7 @@ public:
   /**
    * @brief Retrieves whether grid lines are drawn at this axis' tick positions.
    *
+   * @SINCE_3_0.0
    * @return True if grid lines are drawn
    */
   bool IsShowGridLinesEnabled() const;
@@ -233,6 +255,7 @@ public:
    *
    * The default is 11.0.
    *
+   * @SINCE_3_0.0
    * @param[in] size The point size of the tick labels
    */
   void SetLabelSize(float size);
@@ -240,6 +263,7 @@ public:
   /**
    * @brief Retrieves the point size of the tick labels.
    *
+   * @SINCE_3_0.0
    * @return The point size of the tick labels
    */
   float GetLabelSize() const;
@@ -250,6 +274,7 @@ public:
    * The title is drawn alongside the axis. An empty title (the default)
    * draws nothing.
    *
+   * @SINCE_3_0.0
    * @param[in] title The axis title
    */
   void SetTitle(const Dali::String& title);
@@ -257,6 +282,7 @@ public:
   /**
    * @brief Retrieves the axis title text.
    *
+   * @SINCE_3_0.0
    * @return The axis title
    */
   Dali::String GetTitle() const;
@@ -266,6 +292,7 @@ public:
    *
    * The default is (0.2, 0.2, 0.2, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the axis line
    */
   void SetAxisLineColor(const Vector4& color);
@@ -273,6 +300,7 @@ public:
   /**
    * @brief Retrieves the color of the axis line.
    *
+   * @SINCE_3_0.0
    * @return The color of the axis line
    */
   Vector4 GetAxisLineColor() const;
@@ -282,6 +310,7 @@ public:
    *
    * The default is 2.0.
    *
+   * @SINCE_3_0.0
    * @param[in] width The width of the axis line, in pixels
    */
   void SetAxisLineWidth(float width);
@@ -289,6 +318,7 @@ public:
   /**
    * @brief Retrieves the width of the axis line, in pixels.
    *
+   * @SINCE_3_0.0
    * @return The width of the axis line, in pixels
    */
   float GetAxisLineWidth() const;
@@ -299,6 +329,7 @@ public:
    * A gapLength of 0 draws a solid line. Defaults are dashLength 5.0,
    * gapLength 4.0.
    *
+   * @SINCE_3_0.0
    * @param[in] dashLength The length of each dash, in pixels
    * @param[in] gapLength The length of each gap between dashes, in pixels
    */
@@ -307,6 +338,7 @@ public:
   /**
    * @brief Retrieves the dash pattern of this axis' grid lines.
    *
+   * @SINCE_3_0.0
    * @param[out] dashLength The length of each dash, in pixels
    * @param[out] gapLength The length of each gap between dashes, in pixels
    */
@@ -317,6 +349,7 @@ public:
    *
    * The default is (0.8, 0.8, 0.8, 1.0).
    *
+   * @SINCE_3_0.0
    * @param[in] color The color of the grid lines
    */
   void SetGridColor(const Vector4& color);
@@ -324,6 +357,7 @@ public:
   /**
    * @brief Retrieves the color of this axis' grid lines.
    *
+   * @SINCE_3_0.0
    * @return The color of the grid lines
    */
   Vector4 GetGridColor() const;
@@ -334,6 +368,7 @@ public:
    * Negative values are clamped to 0. The default is 0.0, meaning the tick
    * spacing is chosen automatically with no minimum.
    *
+   * @SINCE_3_0.0
    * @param[in] step The minimum spacing between ticks, in data units
    */
   void SetMinimumStep(float step);
@@ -341,6 +376,7 @@ public:
   /**
    * @brief Retrieves the minimum spacing between ticks, in data units.
    *
+   * @SINCE_3_0.0
    * @return The minimum spacing between ticks, in data units
    */
   float GetMinimumStep() const;
@@ -352,6 +388,7 @@ public:
    * range before axis limits are computed. Only applies while IsAutoRangeEnabled()
    * is true. Negative values are clamped to 0. The default is 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] fraction The padding, as a fraction of the data range
    */
   void SetDataPadding(float fraction);
@@ -359,6 +396,7 @@ public:
   /**
    * @brief Retrieves the extra padding added to the auto-computed data range.
    *
+   * @SINCE_3_0.0
    * @return The padding, as a fraction of the data range
    */
   float GetDataPadding() const;
@@ -368,6 +406,7 @@ public:
    *
    * The default is 0.0.
    *
+   * @SINCE_3_0.0
    * @param[in] degrees The rotation angle, in degrees
    */
   void SetLabelsRotation(float degrees);
@@ -375,72 +414,84 @@ public:
   /**
    * @brief Retrieves the rotation applied to the tick labels.
    *
+   * @SINCE_3_0.0
    * @return The rotation angle, in degrees
    */
   float GetLabelsRotation() const;
 
   /**
    * @brief Selects the near or far side of the plot.
+   * @SINCE_3_0.0
    * @param[in] position The side of the axis; NEAR is the default
    */
   void SetPosition(Position position);
 
   /**
    * @brief Returns the configured axis side.
+   * @SINCE_3_0.0
    * @return The configured axis side
    */
   Position GetPosition() const;
 
   /**
    * @brief Selects linear or base-10 logarithmic coordinates.
+   * @SINCE_3_0.0
    * @param[in] scaleType The mapping; LINEAR is the default
    */
   void SetScaleType(ScaleType scaleType);
 
   /**
    * @brief Returns the configured coordinate mapping.
+   * @SINCE_3_0.0
    * @return The configured coordinate mapping
    */
   ScaleType GetScaleType() const;
 
   /**
    * @brief Sets whether axis tick labels are shown.
+   * @SINCE_3_0.0
    * @param[in] visible True to show labels; independent of grid and tick marks
    */
   void SetLabelsVisible(bool visible);
 
   /**
    * @brief Returns true when tick labels are shown.
+   * @SINCE_3_0.0
    * @return True when tick labels are shown
    */
   bool IsLabelsVisible() const;
 
   /**
    * @brief Sets whether short tick marks are drawn along the axis.
+   * @SINCE_3_0.0
    * @param[in] visible True to show marks; independent of labels and grid lines
    */
   void SetTickMarksVisible(bool visible);
 
   /**
    * @brief Returns true when tick marks are shown.
+   * @SINCE_3_0.0
    * @return True when tick marks are shown
    */
   bool IsTickMarksVisible() const;
 
   /**
    * @brief Sets the default color of axis tick labels.
+   * @SINCE_3_0.0
    * @param[in] color The color; explicit tick colors take precedence and tokens are retained
    */
   void SetLabelColor(const UiColor& color);
 
   /**
    * @brief Returns the authored default label color, including any theme identifier.
+   * @SINCE_3_0.0
    * @return The authored default label color, including any theme identifier
    */
   UiColor GetLabelColor() const;
 
   /**
    * @brief Adds or replaces a tick at an explicit value. Explicit ticks replace automatic ticks.
+   * @SINCE_3_0.0
    * @param[in] value The finite data coordinate
    * @param[in] text The label text, copied into owned storage
    * @param[in] color The explicit tick color, retaining any theme identifier
@@ -449,6 +500,7 @@ public:
 
   /**
    * @brief Restores automatic ticks.
+   * @SINCE_3_0.0
    */
   void ClearTickLabels();
 

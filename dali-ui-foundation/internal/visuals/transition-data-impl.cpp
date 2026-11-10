@@ -264,73 +264,73 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
       Property::Map animatorMap = value.Get<Property::Map>();
       for(Property::Map::SizeType animatorMapIdx = 0u; animatorMapIdx < animatorMap.Count(); ++animatorMapIdx)
       {
-        const KeyValuePair pair(animatorMap.GetKeyValue(animatorMapIdx));
+        const KeyValuePair animatorPair(animatorMap.GetKeyValue(animatorMapIdx));
 
-        if(pair.first.type == Property::Key::INDEX)
+        if(animatorPair.first.type == Property::Key::INDEX)
         {
           continue; // We don't consider index keys.
         }
 
-        const Dali::String&    key(pair.first.stringKey);
-        const Property::Value& value(pair.second);
+        const Dali::String&    animatorKey(animatorPair.first.stringKey);
+        const Property::Value& animatorValue(animatorPair.second);
 
-        if(key == TOKEN_ALPHA_FUNCTION)
+        if(animatorKey == TOKEN_ALPHA_FUNCTION)
         {
-          if(value.GetType() == Property::ARRAY)
+          if(animatorValue.GetType() == Property::ARRAY)
           {
-            ParseArray(animator, value.GetArray());
+            ParseArray(animator, animatorValue.GetArray());
           }
-          else if(value.GetType() == Property::VECTOR4)
+          else if(animatorValue.GetType() == Property::VECTOR4)
           {
-            Vector4 controlPoints = value.Get<Vector4>();
+            Vector4 controlPoints = animatorValue.Get<Vector4>();
             Vector2 controlPoint1(controlPoints.x, controlPoints.y);
             Vector2 controlPoint2(controlPoints.z, controlPoints.w);
             animator->alphaFunction = AlphaFunction(controlPoint1, controlPoint2);
           }
-          else if(value.GetType() == Property::STRING)
+          else if(animatorValue.GetType() == Property::STRING)
           {
-            ParseString(animator, ToStdString(value));
+            ParseString(animator, ToStdString(animatorValue));
           }
           else
           {
             animator->animate = false;
           }
         }
-        else if(key == TOKEN_TIME_PERIOD)
+        else if(animatorKey == TOKEN_TIME_PERIOD)
         {
-          Property::Map timeMap = value.Get<Property::Map>();
+          Property::Map timeMap = animatorValue.Get<Property::Map>();
           for(Property::Map::SizeType timeMapIdx = 0u; timeMapIdx < timeMap.Count(); ++timeMapIdx)
           {
-            const KeyValuePair pair(timeMap.GetKeyValue(timeMapIdx));
-            if(pair.first.type == Property::Key::INDEX)
+            const KeyValuePair timePair(timeMap.GetKeyValue(timeMapIdx));
+            if(timePair.first.type == Property::Key::INDEX)
             {
               continue;
             }
-            const Dali::String& key(pair.first.stringKey);
+            const Dali::String& timeKey(timePair.first.stringKey);
 
-            if(key == TOKEN_DELAY)
+            if(timeKey == TOKEN_DELAY)
             {
-              animator->timePeriodDelay = pair.second.Get<float>();
+              animator->timePeriodDelay = timePair.second.Get<float>();
             }
-            else if(key == TOKEN_DURATION)
+            else if(timeKey == TOKEN_DURATION)
             {
-              animator->timePeriodDuration = pair.second.Get<float>();
+              animator->timePeriodDuration = timePair.second.Get<float>();
             }
           }
         }
-        else if(key == TOKEN_ANIMATION_TYPE)
+        else if(animatorKey == TOKEN_ANIMATION_TYPE)
         {
-          if((value.GetType() == Property::STRING))
+          if((animatorValue.GetType() == Property::STRING))
           {
-            if(value.Get<Dali::String>() == "TO")
+            if(animatorValue.Get<Dali::String>() == "TO")
             {
               animator->animationType = AnimationType::TO;
             }
-            else if(value.Get<Dali::String>() == "BETWEEN")
+            else if(animatorValue.Get<Dali::String>() == "BETWEEN")
             {
               animator->animationType = AnimationType::BETWEEN;
             }
-            else if(value.Get<Dali::String>() == "BY")
+            else if(animatorValue.Get<Dali::String>() == "BY")
             {
               animator->animationType = AnimationType::BY;
             }

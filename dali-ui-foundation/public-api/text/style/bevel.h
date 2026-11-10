@@ -34,18 +34,21 @@ namespace Text
  *
  * This is a value-type object used to configure bevel appearance.
  * Bevel creates a 3D-like effect on text using light and shadow colors.
+ * @SINCE_3_0.0
  */
 class DALI_UI_API Bevel
 {
 public:
   /**
    * @brief Creates a bevel with default values.
+   * @SINCE_3_0.0
    */
   Bevel();
 
   /**
    * @brief Creates a bevel by copying another bevel.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The bevel to copy.
    */
   Bevel(const Bevel& rhs);
@@ -53,6 +56,7 @@ public:
   /**
    * @brief Creates a bevel by moving another bevel.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The bevel to move.
    */
   Bevel(Bevel&& rhs) noexcept;
@@ -60,6 +64,7 @@ public:
   /**
    * @brief Copies another bevel to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The bevel to copy.
    */
   Bevel& operator=(const Bevel& rhs);
@@ -67,12 +72,14 @@ public:
   /**
    * @brief Moves another bevel to this object.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The bevel to move.
    */
   Bevel& operator=(Bevel&& rhs) noexcept;
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~Bevel();
 
@@ -81,6 +88,7 @@ public:
    *
    * This value can be passed to SetTextBevel() to clear the bevel style.
    *
+   * @SINCE_3_0.0
    * @return A shared immutable none value.
    */
   static const Bevel& None();
@@ -88,6 +96,7 @@ public:
   /**
    * @brief Compares this bevel with another bevel.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The bevel to compare with.
    * @return true if both values are equal.
    */
@@ -96,6 +105,7 @@ public:
   /**
    * @brief Compares this bevel with another bevel.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs The bevel to compare with.
    * @return true if both values are not equal.
    */
@@ -108,6 +118,7 @@ public:
    * The direction vector determines the angle of the light source.
    * Typical values are (-1.0f, -1.0f) for top-left light or (1.0f, -1.0f) for top-right light.
    *
+   * @SINCE_3_0.0
    * @param[in] direction The bevel direction vector.
    */
   void SetDirection(const Vector2& direction);
@@ -115,6 +126,7 @@ public:
   /**
    * @brief Returns the bevel direction.
    *
+   * @SINCE_3_0.0
    * @return The bevel direction vector.
    */
   const Vector2& GetDirection() const;
@@ -124,6 +136,7 @@ public:
    *
    * Higher values create a more pronounced bevel effect.
    *
+   * @SINCE_3_0.0
    * @param[in] intensity The bevel intensity.
    */
   void SetIntensity(float intensity);
@@ -131,6 +144,7 @@ public:
   /**
    * @brief Returns the bevel intensity.
    *
+   * @SINCE_3_0.0
    * @return The bevel intensity.
    */
   float GetIntensity() const;
@@ -140,6 +154,7 @@ public:
    *
    * This color is applied to the highlighted side of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The light color.
    */
   void SetLightColor(const UiColor& color);
@@ -147,6 +162,7 @@ public:
   /**
    * @brief Returns the light color for the bevel effect.
    *
+   * @SINCE_3_0.0
    * @return The light color.
    */
   const UiColor& GetLightColor() const;
@@ -156,6 +172,7 @@ public:
    *
    * This color is applied to the shadowed side of the text.
    *
+   * @SINCE_3_0.0
    * @param[in] color The shadow color.
    */
   void SetShadowColor(const UiColor& color);
@@ -163,6 +180,7 @@ public:
   /**
    * @brief Returns the shadow color for the bevel effect.
    *
+   * @SINCE_3_0.0
    * @return The shadow color.
    */
   const UiColor& GetShadowColor() const;

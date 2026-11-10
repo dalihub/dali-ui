@@ -301,6 +301,26 @@ payload, terminal result가 유지된다. 공통 cleanup은 Ended callback에서
 있지만, 바깥 detach operation과의 재진입 충돌을 막기 위해 새 session은 callback
 반환 뒤 시작해야 한다.
 
+## DragAndDropDetector preview requested 단위
+
+drag preview를 다른 View와 같은 유효 스케일로 배치할 수 있도록 `DragAndDropEvent`에
+비가상 getter 네 개를 추가했다. 기존 `GetPreviewLocalPosition()`의 의미(preview
+parent의 local actor 좌표)는 바뀌지 않는다.
+
+| API | 값 |
+|---|---|
+| `GetPreviewRequestedX()`, `GetPreviewRequestedY()` | `GetPreviewLocalPosition()`의 x, y ÷ session preview 자신의 유효 스케일. preview가 없는 event(factory event, preview 없는 session)에서는 `GetPreviewLocalPosition()`과 같다 |
+| `GetPreviewRequestedWidth()`, `GetPreviewRequestedHeight()` | drag 시작 시 source의 렌더 크기 ÷ 렌더 당시 source의 유효 스케일. session 동안 고정 |
+
+앱 레시피는 preview에 `UiScalePolicy::DISABLED`를 주지 않고 네 값을
+`SetRequestedX/Y/Width/Height`에 그대로 넣는다.
+
+기본 배치(updater와 `DragPreviewPositionSignal`이 없을 때)도 preview의
+`UiScalePolicy`를 바꾸지 않고 `GetPreviewRequestedX()`/`GetPreviewRequestedY()`로 배치한다. 이전
+동작(배치하는 동안 `UiScalePolicy::DISABLED`)을 전제로 pixel 크기로 만든
+preview는 preview에 직접 `UiScalePolicy::DISABLED`를 지정하면 윈도우 스케일이
+없을 때 이전과 같다.
+
 ## ScrollView child drag 조정 API
 
 `ScrollView` 안의 child가 drag gesture를 소유하는 동안 일반 pan scrolling을
@@ -315,3 +335,83 @@ payload, terminal result가 유지된다. 공통 cleanup은 Ended callback에서
 pan scrolling을 비활성화해도 `ScrollTo()`를 포함한 programmatic scrolling은
 동작한다. 진행 중인 pan을 비활성화하면 fling 없이 interaction을 종료하며 child
 touch sequence를 더 이상 intercept하지 않는다.
+
+## UiScaleManager → LayoutScaleManager 이전
+
+`UiScaleManager`가 맡던 시스템 스케일(UI 스케일), 스케일링 스위치, 레이아웃 루트 등록을 새
+클래스 `Dali::Ui::Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`)가
+맡는다. 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API이며 앱 개발자용 공개 API 목록에는
+포함되지 않는다. `UiScaleManager`는 deprecated되었으며 문서 태그만 바뀌었다. 릴리스된 심볼과
+시그니처는 그대로 유지된다.
+
+| Before (`UiScaleManager`, deprecated) | After (`Extension::LayoutScaleManager`) |
+|---|---|
+| `UiScaleManager::Get()` | `Extension::LayoutScaleManager::Get()` |
+| `GetScale()` | `GetUiScale()` |
+| `SetScale(float)` | `SetUiScale(float)` |
+| `IsScalable()`, `SetScalable(bool)` | 변경 없음 (`IsScalable()`, `SetScalable(bool)`) |
+| `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | 공개 API 없음 (라이브러리가 내부에서 처리) |
+| 없음 | `GetWindowScale(Window)`, `SetWindowScale(Window, float)` (신규, 윈도우별 스케일) |
+
+두 클래스는 하나의 상태를 공유하므로 섞어 써도 되며, 마지막에 설정한 값이 적용된다. 두
+핸들은 서로 다른 객체라서 변환되지 않는다. 한쪽 핸들을 다른 쪽 `DownCast()`에 넘기면 빈
+핸들이 반환된다.
+
+## View::SetUiScalePolicy()/GetUiScalePolicy() → Extension::View
+
+`View`와 `ViewImpl`의 `SetUiScalePolicy()`/`GetUiScalePolicy()`는 deprecated되었으며 문서 태그만
+바뀌었다. 릴리스된 심볼과 시그니처는 그대로 유지된다. 대체 API는 extension API
+`Extension::View::SetUiScalePolicy(Ui::View, Extension::UiScalePolicy)`와
+`Extension::View::GetUiScalePolicy(Ui::View)`(`dali-ui-foundation/extension-api/view.h`)이다.
+두 함수는 `Extension::UiScalePolicy`를 받고 반환한다(아래 'UiScalePolicy → Extension::UiScalePolicy'
+참고). 라이브러리와 샘플은 새 함수를 사용한다.
+UTC는 deprecated 멤버도 계속 검증하고, Public API만 사용하는 text manual test
+(`manual-tests/dali-ui-text`)는 deprecated 멤버를 계속 사용한다.
+
+표의 After 열에서 `policy`는 `Extension::UiScalePolicy` 값이다.
+
+| Before (deprecated) | After |
+|---|---|
+| `view.SetUiScalePolicy(policy)` | `Extension::View::SetUiScalePolicy(view, policy)` |
+| `view.GetUiScalePolicy()` | `Extension::View::GetUiScalePolicy(view)` |
+| `ViewImpl::SetUiScalePolicy(policy)` | `Ui::Extension::View::SetUiScalePolicy(Ui::View::DownCast(Self()), policy)` |
+| `ViewImpl::GetUiScalePolicy()` | `Ui::Extension::View::GetUiScalePolicy(Ui::View::DownCast(Self()))` |
+
+## UiScalePolicy → Extension::UiScalePolicy
+
+`Dali::Ui::UiScalePolicy` 열거형은 deprecated되었으며 문서 태그만 바뀌었다. 열거형과 이를 받고
+반환하는 deprecated 멤버(`View`/`ViewImpl`의 `SetUiScalePolicy()`/`GetUiScalePolicy()`)의 릴리스된
+심볼, 시그니처, 동작은 그대로 유지된다. 대체 타입은 extension API
+`Dali::Ui::Extension::UiScalePolicy`(`dali-ui-foundation/extension-api/ui-scale-policy.h`)이며
+`Extension::View::SetUiScalePolicy()`/`GetUiScalePolicy()`가 이 타입을 받고 반환한다. 두 열거형은
+열거자 이름, 값, 기반 타입(`uint8_t`)이 같은 별개의 타입이라 서로 암묵적으로 변환되지 않는다. 같은
+이름의 열거자를 쓰거나 `static_cast`로 변환한다. `using namespace Dali::Ui;`를 쓰는 코드에서는
+`Extension::UiScalePolicy`처럼 한정해서 쓴다. `using Dali::Ui::Extension::UiScalePolicy;`나
+`using namespace Dali::Ui::Extension;`을 함께 쓰면 한정자 없는 `UiScalePolicy`가 모호해진다.
+`ViewImpl` 하위 클래스 안에서는 `Ui::Extension::UiScalePolicy`로 쓴다(한정자 없는 `Extension::`은
+`CustomActorImpl::Extension`을 가리킨다). 새 헤더를 포함한 `namespace Dali::Ui::Extension` 안의 코드에서는
+한정자 없는 `UiScalePolicy`가 `Extension::UiScalePolicy`를 가리키므로, 그 안에서 deprecated 멤버에 넘기는
+값은 `Ui::UiScalePolicy::DISABLED`처럼 한정한다(한정하지 않으면 변환 컴파일 오류가 난다). 라이브러리와
+샘플은 새 타입을 사용한다. UTC와 Public API만
+사용하는 text manual test(`manual-tests/dali-ui-text`)는 deprecated 멤버와 deprecated 열거형을 계속
+사용한다.
+
+| Before (deprecated) | After |
+|---|---|
+| `UiScalePolicy::INHERIT` | `Extension::UiScalePolicy::INHERIT` |
+| `UiScalePolicy::ENABLED` | `Extension::UiScalePolicy::ENABLED` |
+| `UiScalePolicy::DISABLED` | `Extension::UiScalePolicy::DISABLED` |
+| deprecated 멤버로 읽은 `UiScalePolicy policy` | `static_cast<Extension::UiScalePolicy>(policy)` |
+
+## ViewImpl::GetEffectiveScale() → Extension::View::GetEffectiveLayoutScale()
+
+`ViewImpl::GetEffectiveScale()`은 deprecated되었으며 문서 태그만 바뀌었다. 릴리스된 심볼과
+시그니처는 그대로 유지되고 같은 값을 반환한다. 대체 API는 extension API
+`Extension::View::GetEffectiveLayoutScale(const ViewImpl&)`(`dali-ui-foundation/extension-api/view.h`)이다.
+`ViewImpl` 하위 클래스 안에서는 `Ui::Extension::View::GetEffectiveLayoutScale(*this)`로 호출한다(한정자
+없는 `Extension::`은 `CustomActorImpl::Extension`을 가리킨다). 라이브러리, 테스트, 샘플, 문서는 새
+함수를 사용한다.
+
+| Before (deprecated) | After |
+|---|---|
+| `ViewImpl::GetEffectiveScale()` | `Extension::View::GetEffectiveLayoutScale(viewImpl)` |

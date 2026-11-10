@@ -38,18 +38,21 @@ class UiStyleImpl;
  *
  * Style objects may depend on the applied UiConfig. Create or resolve
  * initialized style objects only after UiConfig::Apply().
+ * @SINCE_3_0.0
  */
 class DALI_UI_API UiStyle : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized UiStyle handle.
+   * @SINCE_3_0.0
    */
   UiStyle() = default;
 
   /**
    * @brief Downcasts a handle to UiStyle.
    *
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An initialized UiStyle on success, otherwise empty
    */
@@ -58,6 +61,7 @@ public:
   /**
    * @brief Static downcasts a style already verified by UiStyleSheet.
    *
+   * @SINCE_3_0.0
    * @param[in] style The verified style handle
    * @return The same style handle
    */
@@ -70,6 +74,7 @@ protected:
   /**
    * @brief Creates a UiStyle handle from its implementation.
    *
+   * @SINCE_3_0.0
    * @param[in] impl The implementation object
    */
   explicit UiStyle(Extension::UiStyleImpl* impl);
@@ -88,6 +93,7 @@ protected:
  * Capture-less lambdas can be converted to UiStyleCreator. Capturing lambdas
  * and stateful callables are intentionally not supported by this API.
  *
+ * @SINCE_3_0.0
  * @return A style object
  */
 using UiStyleCreator = UiStyle (*)();

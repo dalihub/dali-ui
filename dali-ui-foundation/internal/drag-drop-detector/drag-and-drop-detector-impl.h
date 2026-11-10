@@ -298,7 +298,8 @@ private:
   void                       CreateDragPreview();
   void                       UpdateDragPreview();
   void                       UpdateCoordinateSnapshots(const Vector2& screenPosition);
-  void                       ApplyDefaultDragPreviewPosition();
+  Vector2                    ComputePreviewRequestedPosition() const;
+  void                       ApplyDefaultDragPreviewPosition(const Vector2& requestedPosition);
   void                       RestoreDragPreviewPositioningProperties(Dali::Ui::View visual);
   void                       FinalizeDragPreview(Dali::Ui::View visual, const Dali::Ui::DragAndDropEvent& event);
   void                       ResolveTarget(const Vector2& screenPosition, bool emitMoved);
@@ -376,12 +377,12 @@ private:
   Vector2                      mPreviewLocalPosition;
   Vector2                      mSourceGrabPosition;
   Vector2                      mSourceAnchor;
-  Vector2                      mScreenPosition; ///< The screen position of the drop location.
+  Vector2                      mPreviewRequestedSize; ///< The source's drag-start size in requested units (DragAndDropEvent::GetPreviewRequestedWidth() and DragAndDropEvent::GetPreviewRequestedHeight()).
+  Vector2                      mScreenPosition;       ///< The screen position of the drop location.
   Vector2                      mActivationOriginScreenPosition;
   Vector3                      mOriginalDragPreviewPivot;
   Vector3                      mOriginalDragPreviewParentOrigin;
   LayoutMode                   mOriginalDragPreviewLayoutMode;
-  UiScalePolicy                mOriginalDragPreviewUiScalePolicy;
   float                        mOriginalDragPreviewRequestedX;
   float                        mOriginalDragPreviewRequestedY;
   bool                         mOriginalDragPreviewPositionUsesPivot;

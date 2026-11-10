@@ -40,7 +40,7 @@ namespace Internal
  * coalesces duplicate registrations into a pending set -- so repeating it once the
  * root is already registered is pure cost, and it is not small: every level performs
  * two Actor::GetParent() calls and two handle DownCasts, and the root additionally
- * resolves its Window and re-registers with the UI scale manager. An application that
+ * resolves its Window and re-registers with LayoutScaleManager. An application that
  * touches a few hundred views before the next layout pass pays all of that per touch.
  *
  * A generation is what lets the second and subsequent walks be skipped SAFELY. Each view

@@ -152,22 +152,22 @@ Sampler CreateSampler(Dali::Ui::Gradient::SpreadMethod spread)
 
 namespace DALI_NAMESPACE::Ui::Integration::Text::Gradient
 {
-bool AtlasApplyState::Matches(uint64_t resourceId, uint64_t styleRevision, uint64_t lookupRevision) const
+bool AtlasApplyState::Matches(uint64_t targetResourceId, uint64_t targetStyleRevision, uint64_t targetLookupRevision) const
 {
   return initialized &&
-         this->resourceId == resourceId &&
-         this->styleRevision == styleRevision &&
-         this->lookupRevision == lookupRevision;
+         this->resourceId == targetResourceId &&
+         this->styleRevision == targetStyleRevision &&
+         this->lookupRevision == targetLookupRevision;
 }
 
-void AtlasApplyState::Set(AtlasApplyStatus status, bool enabled, uint64_t resourceId, uint64_t styleRevision, uint64_t lookupRevision)
+void AtlasApplyState::Set(AtlasApplyStatus newStatus, bool newEnabled, uint64_t newResourceId, uint64_t newStyleRevision, uint64_t newLookupRevision)
 {
-  this->status         = status;
+  this->status         = newStatus;
   this->initialized    = true;
-  this->enabled        = enabled;
-  this->resourceId     = resourceId;
-  this->styleRevision  = styleRevision;
-  this->lookupRevision = lookupRevision;
+  this->enabled        = newEnabled;
+  this->resourceId     = newResourceId;
+  this->styleRevision  = newStyleRevision;
+  this->lookupRevision = newLookupRevision;
 }
 
 bool AtlasApplyState::IsGradientApplied() const

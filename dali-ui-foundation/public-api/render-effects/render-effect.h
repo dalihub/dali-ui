@@ -42,6 +42,7 @@ class RenderEffectImpl;
  * Ui::View::ClearRenderEffect(). Each effect has a single owner View at a time; setting the same
  * effect on another View moves it, leaving the previous owner without an effect.
  *
+ * @SINCE_3_0.0
  * @note RenderEffect is interface class without constructor. Create resource by subclass.
  */
 class DALI_UI_API RenderEffect : public BaseHandle
@@ -49,23 +50,27 @@ class DALI_UI_API RenderEffect : public BaseHandle
 public:
   /**
    * @brief Creates an uninitialized effect.
+   * @SINCE_3_0.0
    */
   RenderEffect() = default;
 
   /**
    * @brief Destructor.
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~RenderEffect() = default;
 
   /**
    * @brief Copy constructor. Creates another handle that points to the same real object.
+   * @SINCE_3_0.0
    */
   RenderEffect(const RenderEffect& handle);
 
   /**
    * @brief Activates effect on owner View.
    *
+   * @SINCE_3_0.0
    * @pre The effect must be set on a View by Ui::View::SetRenderEffect() beforehand. This call has
    * no effect while the effect has no owner View.
    *
@@ -81,6 +86,7 @@ public:
    *
    * The effect stays set on its owner View, so it can be turned back on by Activate().
    * To remove the effect from the View entirely, use Ui::View::ClearRenderEffect().
+   * @SINCE_3_0.0
    */
   void Deactivate();
 
@@ -91,6 +97,7 @@ public:
    * activated if it can be activated now but is not yet, deactivated if it can no longer be
    * activated, and otherwise its offscreen rendering is refreshed in place.
    *
+   * @SINCE_3_0.0
    * @note This is called for you when the owner View is re-arranged, so an application rarely
    * needs it. It has no effect while the effect has no owner View.
    */
@@ -98,6 +105,7 @@ public:
 
   /**
    * @brief Retrieves whether this effect is currently activated.
+   * @SINCE_3_0.0
    * @return True if effect is activated. False otherwise.
    */
   bool IsActivated();

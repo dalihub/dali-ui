@@ -42,6 +42,7 @@ class InteractiveViewImpl;
  * such as Button and Checkbox. It can also be instantiated directly when
  * a plain interactive container is needed.
  *
+ * @SINCE_3_0.0
  * @see InteractiveTrait
  */
 class DALI_UI_API InteractiveView : public View
@@ -49,12 +50,14 @@ class DALI_UI_API InteractiveView : public View
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized InteractiveView handle.
+   * @SINCE_3_0.0
    */
   InteractiveView();
 
   /**
    * @brief Creates an initialized InteractiveView.
    *
+   * @SINCE_3_0.0
    * @return A handle to a newly allocated InteractiveView
    */
   static InteractiveView New();
@@ -65,6 +68,7 @@ public: // Creation & Destruction
    * If the handle refers to an InteractiveView, the downcast produces a valid handle.
    * Otherwise the returned handle is uninitialized.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Handle to an object
    * @return A handle to an InteractiveView or an uninitialized handle
    */
@@ -73,6 +77,7 @@ public: // Creation & Destruction
   /**
    * @brief Copy constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] view Handle to copy
    */
   InteractiveView(const InteractiveView& view);
@@ -80,6 +85,7 @@ public: // Creation & Destruction
   /**
    * @brief Move constructor.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Handle to move
    */
   InteractiveView(InteractiveView&& rhs) noexcept;
@@ -88,6 +94,7 @@ public: // Creation & Destruction
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   * @SINCE_3_0.0
    */
   ~InteractiveView();
 
@@ -95,6 +102,7 @@ public: // Operators
   /**
    * @brief Copy assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
@@ -103,6 +111,7 @@ public: // Operators
   /**
    * @brief Move assignment operator.
    *
+   * @SINCE_3_0.0
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
@@ -114,6 +123,7 @@ public: // Signals
   /**
    * @brief Emitted when the pressed state changes.
    *
+   * @SINCE_3_0.0
    * @return The pressed changed signal
    * @see InteractiveTrait::PressedChangedSignal
    */
@@ -122,6 +132,7 @@ public: // Signals
   /**
    * @brief Emitted when the pseudo disabled state changes.
    *
+   * @SINCE_3_0.0
    * @return The pseudo disabled changed signal
    * @see InteractiveTrait::PseudoDisabledChangedSignal
    */
@@ -130,6 +141,7 @@ public: // Signals
   /**
    * @brief Emitted when the view is clicked.
    *
+   * @SINCE_3_0.0
    * @return The clicked signal
    * @see InteractiveTrait::ClickedSignal
    */
@@ -138,6 +150,7 @@ public: // Signals
   /**
    * @brief Emitted when the view receives a long press gesture.
    *
+   * @SINCE_3_0.0
    * @return The long pressed signal
    * @see InteractiveTrait::LongPressedSignal
    */
@@ -146,6 +159,7 @@ public: // Signals
   /**
    * @brief Emitted when the hovered state changes.
    *
+   * @SINCE_3_0.0
    * @return The hovered changed signal
    * @see InteractiveTrait::HoveredChangedSignal
    */
@@ -155,6 +169,7 @@ public: // API
   /**
    * @brief Returns whether the view is currently in the pressed state.
    *
+   * @SINCE_3_0.0
    * @return True if pressed
    * @see InteractiveTrait::IsPressed
    */
@@ -163,6 +178,7 @@ public: // API
   /**
    * @brief Returns whether the view is in the pseudo disabled state.
    *
+   * @SINCE_3_0.0
    * @return True if pseudo disabled
    * @see InteractiveTrait::IsPseudoDisabled
    */
@@ -171,6 +187,7 @@ public: // API
   /**
    * @brief Returns whether the view is currently in the hovered state.
    *
+   * @SINCE_3_0.0
    * @return True if hovered
    * @see InteractiveTrait::IsHovered
    */
@@ -179,6 +196,7 @@ public: // API
   /**
    * @brief Sets the pseudo disabled state.
    *
+   * @SINCE_3_0.0
    * @param[in] pseudoDisabled True to set pseudo disabled
    * @see InteractiveTrait::SetPseudoDisabled
    */
@@ -187,6 +205,7 @@ public: // API
   /**
    * @brief Returns whether clicking is currently allowed.
    *
+   * @SINCE_3_0.0
    * @return True if clicking is allowed
    * @see InteractiveTrait::IsClickable
    */
@@ -201,6 +220,7 @@ public: // API
    * the touch stream while recognizing it. The View remains eligible for hit testing, and an
    * explicitly connected TouchEventSignal callback may still consume the event.
    *
+   * @SINCE_3_0.0
    * @param[in] clickable True to allow clicking
    * @see InteractiveTrait::SetClickable
    */
@@ -209,6 +229,7 @@ public: // API
   /**
    * @brief Returns whether long-press handling is enabled.
    *
+   * @SINCE_3_0.0
    * @return True if long-press handling is enabled
    * @see InteractiveTrait::IsLongPressEnabled
    */
@@ -220,6 +241,7 @@ public: // API
    * This controls both touch and key long-press recognition without disconnecting LongPressedSignal
    * handlers. It does not change the clickable setting.
    *
+   * @SINCE_3_0.0
    * @param[in] enabled True to enable long-press handling, false to disable it
    * @see InteractiveTrait::SetLongPressEnabled
    */
@@ -228,6 +250,7 @@ public: // API
   /**
    * @brief Returns the current key click policy.
    *
+   * @SINCE_3_0.0
    * @return The active KeyClickPolicy
    * @see InteractiveTrait::GetKeyClickPolicy
    */
@@ -236,6 +259,7 @@ public: // API
   /**
    * @brief Sets the key click policy.
    *
+   * @SINCE_3_0.0
    * @param[in] policy The KeyClickPolicy to apply
    * @see InteractiveTrait::SetKeyClickPolicy
    */
@@ -255,6 +279,7 @@ public: // Signal connection helpers
    * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
    * @endcode
    *
+   * @SINCE_3_0.0
    * @param[in] obj  The object to connect to (must implement ConnectionTrackerInterface for auto-disconnect)
    * @param[in] func Member function pointer or functor with signature void(View, InputEvent)
    */
@@ -270,6 +295,7 @@ public: // Signal connection helpers
    * The handler is called with @c pressed=true on press-down and @c pressed=false on release.
    * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
    *
+   * @SINCE_3_0.0
    * @param[in] obj  The object to connect to
    * @param[in] func Member function pointer or functor with signature void(View, bool, InputEvent)
    */
@@ -290,6 +316,7 @@ public: // Signal connection helpers
    *
    * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
    *
+   * @SINCE_3_0.0
    * @param[in] obj  The object to connect to
    * @param[in] func Member function pointer or functor with signature bool(View, InputEvent)
    */

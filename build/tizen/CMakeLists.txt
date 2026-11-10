@@ -151,6 +151,10 @@ ENDIF()
 STRING( REPLACE "\\" "/" dataReadOnlyDir "${dataReadOnlyDir}" )
 STRING( REPLACE "\\" "/" dataReadOnlyInstallDir "${dataReadOnlyInstallDir}" )
 
+# Default widget catalogs belong to the shared widget resources package.
+SET(WIDGET_VIEWER_LOCALE_DIR "${CMAKE_INSTALL_PREFIX}/share/widget_viewer_dali/locale" CACHE PATH "Widget viewer translation catalog directory")
+FILE(TO_CMAKE_PATH "${WIDGET_VIEWER_LOCALE_DIR}" WIDGET_VIEWER_LOCALE_DIR_NORMALIZED)
+
 IF( USE_DEFAULT_RESOURCE_DIR )
   ADD_COMPILE_DEFINITIONS( DALI_IMAGE_DIR="${dataReadOnlyDir}/ui/images/" )
   ADD_COMPILE_DEFINITIONS( DALI_DATA_READ_ONLY_DIR="${dataReadOnlyDir}" )

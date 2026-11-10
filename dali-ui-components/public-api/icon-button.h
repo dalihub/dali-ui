@@ -18,28 +18,33 @@ class IconButtonImpl;
  * IconButton uses the current default IconButtonStyle unless a style is
  * supplied when it is created. Its icon appearance can also be updated after
  * creation with the icon setter methods.
+ * @SINCE_3_0.0
  */
 class DALI_UI_COMPONENTS_API IconButton : public InteractiveView
 {
 public:
   /**
    * @brief Creates an uninitialized IconButton handle.
+   * @SINCE_3_0.0
    */
   IconButton();
 
   /**
    * @brief Destructor.
+   * @SINCE_3_0.0
    */
   ~IconButton();
 
   /**
    * @brief Creates an IconButton using the current default style.
+   * @SINCE_3_0.0
    * @return An initialized IconButton
    */
   static IconButton New();
 
   /**
    * @brief Creates an IconButton using @p style.
+   * @SINCE_3_0.0
    * @param[in] style The style to apply
    * @return An initialized IconButton
    * @pre @p style must be initialized.
@@ -48,6 +53,7 @@ public:
 
   /**
    * @brief Creates an IconButton using the current default style and @p iconUrl.
+   * @SINCE_3_0.0
    * @param[in] iconUrl The resource URL of the icon
    * @return An initialized IconButton
    */
@@ -55,6 +61,7 @@ public:
 
   /**
    * @brief Creates an IconButton using @p style and @p iconUrl.
+   * @SINCE_3_0.0
    * @param[in] iconUrl The resource URL of the icon
    * @param[in] style The style to apply
    * @return An initialized IconButton
@@ -64,6 +71,7 @@ public:
 
   /**
    * @brief Downcasts a base handle to IconButton.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to downcast
    * @return An IconButton handle, or an uninitialized handle if the types do not match
    */
@@ -71,18 +79,21 @@ public:
 
   /**
    * @brief Copy constructor.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to copy
    */
   IconButton(const IconButton& handle);
 
   /**
    * @brief Move constructor.
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    */
   IconButton(IconButton&& rhs) noexcept;
 
   /**
    * @brief Copy assignment operator.
+   * @SINCE_3_0.0
    * @param[in] handle The handle to copy
    * @return A reference to this handle
    */
@@ -90,6 +101,7 @@ public:
 
   /**
    * @brief Move assignment operator.
+   * @SINCE_3_0.0
    * @param[in] rhs The handle to move
    * @return A reference to this handle
    */
@@ -99,18 +111,21 @@ public:
 
   /**
    * @brief Sets the resource URL of the icon.
+   * @SINCE_3_0.0
    * @param[in] iconUrl The resource URL of the icon
    */
   void SetIconUrl(const Dali::String& iconUrl);
 
   /**
    * @brief Returns the resource URL of the icon.
+   * @SINCE_3_0.0
    * @return The icon resource URL
    */
   Dali::String GetIconUrl() const;
 
   /**
    * @brief Sets the icon's requested width.
+   * @SINCE_3_0.0
    * @param[in] width The size in logical pixels. Zero is an explicit size;
    * WRAP_CONTENT prefers the natural size (or 56 if unavailable), while MATCH_PARENT uses the parent constraint.
    * A positive size on one axis with WRAP_CONTENT on the other preserves the image's aspect ratio.
@@ -120,12 +135,14 @@ public:
 
   /**
    * @brief Returns the requested width of the icon.
+   * @SINCE_3_0.0
    * @return The requested logical-pixel value or layout sentinel, not the actual measured width.
    */
   float GetIconWidth() const;
 
   /**
    * @brief Sets the icon's requested height.
+   * @SINCE_3_0.0
    * @param[in] height The size in logical pixels. Zero is an explicit size;
    * WRAP_CONTENT prefers the natural size (or 56 if unavailable), while MATCH_PARENT uses the parent constraint.
    * @pre The size must be finite and non-negative or WRAP_CONTENT/MATCH_PARENT; a violation triggers an assertion.
@@ -134,24 +151,28 @@ public:
 
   /**
    * @brief Returns the requested height of the icon.
+   * @SINCE_3_0.0
    * @return The requested logical-pixel value or layout sentinel, not the actual measured height.
    */
   float GetIconHeight() const;
 
   /**
    * @brief Sets the color of the icon.
+   * @SINCE_3_0.0
    * @param[in] color The color to apply to the icon
    */
   void SetIconColor(const UiColor& color);
 
   /**
    * @brief Returns the color of the icon.
+   * @SINCE_3_0.0
    * @return The icon color
    */
   UiColor GetIconColor() const;
 
   /**
    * @brief Sets the corner radii of the icon.
+   * @SINCE_3_0.0
    * @param[in] radius The corner radii in top-left, top-right, bottom-right,
    * and bottom-left order
    * @pre Each component must be finite and non-negative; a violation triggers an assertion. Zero means no rounding.
@@ -160,6 +181,7 @@ public:
 
   /**
    * @brief Returns the corner radii of the icon.
+   * @SINCE_3_0.0
    * @return The icon corner radii
    */
   Vector4 GetIconCornerRadius() const;

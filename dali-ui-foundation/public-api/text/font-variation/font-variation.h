@@ -57,6 +57,7 @@ namespace Text
  * format, an empty axis list is returned. An empty input string also returns
  * an empty axis list.
  *
+ * @SINCE_3_0.0
  * @note Unsupported axis tags may be ignored depending on the selected font.
  * @note FontVariation::None() is the typed clear value for SetFontVariation().
  *       Passing an empty string to SetFontVariation(const Dali::String&) is
@@ -71,6 +72,7 @@ namespace FontVariation
  * This value can be passed to SetFontVariation() to clear font variation settings.
  * It is equivalent to passing an empty axis vector.
  *
+ * @SINCE_3_0.0
  * @return An empty font variation axis list.
  */
 DALI_UI_API const Dali::Vector<Axis>& None();
@@ -81,6 +83,7 @@ DALI_UI_API const Dali::Vector<Axis>& None();
  * The input string must follow one of the supported formats described
  * in this namespace documentation.
  *
+ * @SINCE_3_0.0
  * @param[in] settings The font variation settings string.
  * @return A vector of parsed font variation axes. Returns an empty
  *         vector if @p settings is empty or parsing fails.
@@ -93,6 +96,7 @@ DALI_UI_API Dali::Vector<Axis> FromString(const Dali::String& settings);
  * The returned string uses the canonical format:
  * - wght=700,wdth=90
  *
+ * @SINCE_3_0.0
  * @param[in] axes The font variation axes.
  * @return The font variation settings string. Returns an empty string if
  *         @p axes is empty.
