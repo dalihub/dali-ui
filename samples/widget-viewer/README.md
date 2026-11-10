@@ -60,7 +60,7 @@ constructing FontAttributes. Only explicitly set font attributes are applied.
 an empty source uses the default stage. `ClearCustomShader()` restores the
 standard shader. Framework code can use the Map properties in
 `integration-api/widget-view-integ.h`, including advanced shader options.
-The public WidgetView properties and setters do not expose these Map settings. `PERMANENT_DELETE` remains inert.
+The public WidgetView properties and setters do not expose these Map settings.
 
 `WRAP_CONTENT` measures the initial natural size supplied to New(), adjusted
 by UI scale and parent constraints. Arranging into a smaller or larger area

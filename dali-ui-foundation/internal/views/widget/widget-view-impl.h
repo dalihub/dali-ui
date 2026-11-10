@@ -183,7 +183,6 @@ private:
   bool mRetryTextEnabled{true};
   bool mRetryState{false};
   bool mKeepWidgetSize{false};
-  bool mPermanentDelete{false};
   bool mPausedManually{false};
   bool mAddedEmitted{false};
   bool mOnScene{false};

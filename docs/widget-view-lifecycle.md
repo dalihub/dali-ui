@@ -219,8 +219,6 @@ custom shader는 새 프레임 Visual에도 적용한다.
   있다. 주기 변경 이벤트에서는 저장값을 갱신한 뒤 Signal을 보낸다.
 - `PREVIEW`는 preview 사용 여부를 나타내는 BOOLEAN이다. 실제 표시 여부는 loading
   상태와 조상 visibility에도 영향을 받는다.
-- `PERMANENT_DELETE`는 호환성을 위해 남은 deprecated property이며 현재 동작을
-  추가하지 않는다.
 - `SetFrameUpdatedCallback()`과 `SetEventCallback()`은 adaptor의 내부
   WidgetEngineInstance API다. WidgetView 앱이 직접 등록하는 공개 Signal과 구분한다.
 

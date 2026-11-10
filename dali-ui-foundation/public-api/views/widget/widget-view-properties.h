@@ -45,7 +45,6 @@ struct WidgetViewPropertyIndex
     UPDATE_PERIOD,
     PREVIEW,
     WIDGET_STATE_FAULTED,
-    PERMANENT_DELETE,
     KEEP_WIDGET_SIZE,
   };
 };

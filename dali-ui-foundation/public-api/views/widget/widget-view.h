@@ -131,13 +131,6 @@ public:
       WIDGET_STATE_FAULTED = WidgetViewPropertyIndex::WIDGET_STATE_FAULTED,
 
       /**
-       * @brief name "permanentDelete", type boolean
-       * @SINCE_3_0.0
-       * @remarks We recommend not to use this enumeration directly because it was deprecated before.
-       */
-      PERMANENT_DELETE = WidgetViewPropertyIndex::PERMANENT_DELETE,
-
-      /**
        * @brief name "keepWidgetSize", type boolean
        * @SINCE_3_0.0
        * @see SetKeepWidgetSizeEnabled(), IsKeepWidgetSizeEnabled()

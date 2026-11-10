@@ -116,7 +116,6 @@ DALI_PROPERTY_REGISTRATION_EXTERNAL(Dali::Ui::Integration::WidgetView, Property,
 DALI_PROPERTY_REGISTRATION_EXTERNAL(Dali::Ui::Integration::WidgetView, Property, Dali::Ui::Internal, WidgetViewImpl, "updatePeriod", FLOAT, UPDATE_PERIOD)
 DALI_PROPERTY_REGISTRATION_EXTERNAL(Dali::Ui::Integration::WidgetView, Property, Dali::Ui::Internal, WidgetViewImpl, "preview", BOOLEAN, PREVIEW)
 DALI_PROPERTY_REGISTRATION_EXTERNAL(Dali::Ui::Integration::WidgetView, Property, Dali::Ui::Internal, WidgetViewImpl, "widgetStateFaulted", BOOLEAN, WIDGET_STATE_FAULTED)
-DALI_PROPERTY_REGISTRATION_EXTERNAL(Dali::Ui::Integration::WidgetView, Property, Dali::Ui::Internal, WidgetViewImpl, "permanentDelete", BOOLEAN, PERMANENT_DELETE)
 DALI_PROPERTY_REGISTRATION_EXTERNAL(Dali::Ui::Integration::WidgetView, Property, Dali::Ui::Internal, WidgetViewImpl, "keepWidgetSize", BOOLEAN, KEEP_WIDGET_SIZE)
 DALI_PROPERTY_REGISTRATION_EXTERNAL(Dali::Ui::Integration::WidgetView, Property, Dali::Ui::Internal, WidgetViewImpl, "loadingText", MAP, LOADING_TEXT)
 DALI_PROPERTY_REGISTRATION_EXTERNAL(Dali::Ui::Integration::WidgetView, Property, Dali::Ui::Internal, WidgetViewImpl, "retryText", MAP, RETRY_TEXT)
@@ -992,11 +991,6 @@ void WidgetViewImpl::SetProperty(BaseObject* object, Property::Index index, cons
       }
       break;
     }
-    case Dali::Ui::WidgetView::Property::PERMANENT_DELETE:
-    {
-      value.Get(impl.mPermanentDelete);
-      break;
-    }
     case Dali::Ui::WidgetView::Property::KEEP_WIDGET_SIZE:
     {
       bool keepWidgetSize;
@@ -1050,10 +1044,6 @@ Property::Value WidgetViewImpl::GetProperty(BaseObject* object, Property::Index 
     case Dali::Ui::WidgetView::Property::WIDGET_STATE_FAULTED:
     {
       return Property::Value(impl.IsWidgetFaulted());
-    }
-    case Dali::Ui::WidgetView::Property::PERMANENT_DELETE:
-    {
-      return Property::Value(impl.mPermanentDelete);
     }
     case Dali::Ui::WidgetView::Property::KEEP_WIDGET_SIZE:
     {
