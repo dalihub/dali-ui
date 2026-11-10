@@ -46,7 +46,6 @@ enum Type
   UPDATE_PERIOD        = Dali::Ui::WidgetView::Property::UPDATE_PERIOD,
   PREVIEW              = Dali::Ui::WidgetView::Property::PREVIEW,
   WIDGET_STATE_FAULTED = Dali::Ui::WidgetView::Property::WIDGET_STATE_FAULTED,
-  PERMANENT_DELETE     = Dali::Ui::WidgetView::Property::PERMANENT_DELETE,
   KEEP_WIDGET_SIZE     = Dali::Ui::WidgetView::Property::KEEP_WIDGET_SIZE,
 
   /**

@@ -197,13 +197,7 @@ int UtcDaliWidgetViewRegisteredPropertiesP(void)
   DALI_TEST_EQUALS(view.GetProperty<Dali::String>(WidgetView::Property::WIDGET_ID), view.GetWidgetId(), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetProperty<Dali::String>(WidgetView::Property::CONTENT_INFO), view.GetContentInfo(), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetProperty<Dali::String>(WidgetView::Property::TITLE), view.GetTitle(), TEST_LOCATION);
-  DALI_TEST_CHECK(!view.GetProperty<bool>(WidgetView::Property::PERMANENT_DELETE));
-  view.SetProperty(WidgetView::Property::PERMANENT_DELETE, true);
-  DALI_TEST_CHECK(view.GetProperty<bool>(WidgetView::Property::PERMANENT_DELETE));
-  view.SetProperty(WidgetView::Property::PERMANENT_DELETE, false);
-  DALI_TEST_CHECK(!view.GetProperty<bool>(WidgetView::Property::PERMANENT_DELETE));
   DALI_TEST_EQUALS(view.GetPropertyIndex("widgetStateFaulted"), static_cast<Property::Index>(WidgetView::Property::WIDGET_STATE_FAULTED), TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetPropertyIndex("permanentDelete"), static_cast<Property::Index>(WidgetView::Property::PERMANENT_DELETE), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetPropertyIndex("keepWidgetSize"), static_cast<Property::Index>(WidgetView::Property::KEEP_WIDGET_SIZE), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetPropertyIndex("loadingText"), static_cast<Property::Index>(Ui::Integration::WidgetView::Property::LOADING_TEXT), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetPropertyIndex("retryText"), static_cast<Property::Index>(Ui::Integration::WidgetView::Property::RETRY_TEXT), TEST_LOCATION);
