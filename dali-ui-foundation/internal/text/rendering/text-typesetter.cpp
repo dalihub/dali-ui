@@ -22,8 +22,10 @@
 #include <dali/public-api/common/constants.h>
 #include <dali/public-api/math/math-utils.h>
 #include <memory.h>
+#include <algorithm>
 #include <cmath>
 #include <unordered_map>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
@@ -32,11 +34,13 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
+#include <dali-ui-foundation/internal/text/rendering/text-cutout-render-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/text/text-trace.h>
 
 namespace DALI_NAMESPACE
@@ -75,24 +79,6 @@ inline uint8_t MultiplyAndNormalizeColor(const uint8_t x, const uint8_t y) noexc
 {
   const uint32_t xy = static_cast<const uint32_t>(x) * y;
   return ((xy << 15) + (xy << 7) + xy) >> 23;
-}
-
-/**
- * @brief Fast multiply & Summation & divide by 255.
- *
- * @param x1 The value between [0..255]
- * @param y1 The value between [0..255]
- * @param x2 The value between [0..255]
- * @param y2 The value between [0..255]
- * @return min(255, (x1*y1)/255 + (x2*y2)/255)
- */
-inline uint8_t MultiplyAndSummationAndNormalizeColor(const uint8_t x1, const uint8_t y1, const uint8_t x2,
-                                                     const uint8_t y2) noexcept
-{
-  const uint32_t xy1 = static_cast<const uint32_t>(x1) * y1;
-  const uint32_t xy2 = static_cast<const uint32_t>(x2) * y2;
-  const uint32_t res = std::min(65025u, xy1 + xy2); // 65025 is 255 * 255.
-  return ((res + ((res + 257) >> 8)) >> 8);         // fast divide by 255.
 }
 
 /**
@@ -465,29 +451,12 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
   return result ? PixelBuffer::Convert(result) : PixelData{};
 }
 
-PixelData Typesetter::RenderWithCutout(const Vector2& size, Direction textDirection,
-                                       PixelBuffer mask, RenderBehaviour behaviour,
-                                       bool ignoreHorizontalAlignment, Pixel::Format pixelFormat, float originAlpha,
-                                       const Vector2& originSize)
-{
-  PixelBuffer result =
-    RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
-  if(!result || !mask)
-  {
-    return {};
-  }
-  SetMaskForImageBuffer(mask, result, result.GetWidth(), result.GetHeight(), originAlpha);
-
-  PixelData pixelData = result ? PixelBuffer::Convert(result) : PixelData{};
-
-  return pixelData;
-}
-
 PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
                                               Direction       textDirection,
                                               RenderBehaviour behaviour, bool ignoreHorizontalAlignment,
                                               Pixel::Format pixelFormat, const Vector2& originSize,
-                                              const GradientRasterContext* gradientContext)
+                                              const GradientRasterContext* gradientContext,
+                                              const Vector2&               rasterOrigin)
 {
   uint32_t       bufferWidth, bufferHeight;
   const uint32_t bytesPerPixel = (behaviour == RENDER_NO_STYLES || behaviour == RENDER_MASK)
@@ -569,16 +538,15 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   if(isCutoutEnabled)
   {
     Vector2 offset = viewModel.GetOffsetWithCutout();
-    if(!Raster::Convert(offset.x, penX) || !Raster::Convert(offset.y, penY))
+    if(!Raster::Convert(offset.x, penX) || !Raster::Convert(offset.y, penY) ||
+       !Raster::AddCoordinate(penX, -rasterOrigin.x, penX) ||
+       !Raster::AddCoordinate(penY, -rasterOrigin.y, penY))
     {
       return {};
     }
   }
 
-  // Generate the image buffers of the text for each different style first,
-  // then combine all of them together as one final image buffer. We try to
-  // do all of these in CPU only, so that once the final texture is generated,
-  // no calculation is needed in GPU during each frame.
+  // Rasterize text and decorations. The owner background is composed by the cutout shader.
 
   const uint32_t bufferSizeInt  = bufferWidth * bufferHeight;
   const size_t   bufferSizeChar = sizeof(uint32_t) * static_cast<std::size_t>(bufferSizeInt);
@@ -689,19 +657,6 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
       CombineImageBuffer(imageBuffer, backgroundImageBuffer, bufferWidth, bufferHeight, true);
     }
 
-    // Generate the background_with_mask if enabled
-    const bool backgroundWithCutoutEnabled = viewModel.IsBackgroundWithCutoutEnabled();
-    if((backgroundWithCutoutEnabled) && RENDER_OVERLAY_STYLE != behaviour)
-    {
-      PixelBuffer backgroundImageBuffer;
-
-      backgroundImageBuffer =
-        CreateFullBackgroundBuffer(bufferWidth, bufferHeight, viewModel.GetBackgroundColorWithCutout());
-
-      // Combine the two buffers
-      CombineImageBuffer(imageBuffer, backgroundImageBuffer, bufferWidth, bufferHeight, true);
-    }
-
     if(RENDER_OVERLAY_STYLE == behaviour)
     {
       if(viewModel.IsUnderlineEnabled())
@@ -743,6 +698,206 @@ PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   }
 
   return imageBuffer;
+}
+
+bool Typesetter::RenderCutoutPlanes(const Vector2& size, CutoutRenderData& planes,
+                                    Pixel::Format glyphFormat, uint32_t maxTextureSize)
+{
+  int32_t widthValue, heightValue;
+  if((glyphFormat != Pixel::L8 && glyphFormat != Pixel::RGBA8888) ||
+     !Raster::Convert(size.width, widthValue) || !Raster::Convert(size.height, heightValue) ||
+     widthValue <= 0 || heightValue <= 0)
+  {
+    return false;
+  }
+  const uint32_t controlWidth  = static_cast<uint32_t>(widthValue);
+  const uint32_t controlHeight = static_cast<uint32_t>(heightValue);
+  auto&          model         = *mImpl->GetViewModel();
+  auto&          fontClient    = mImpl->GetFontClient();
+  model.ElideGlyphs(fontClient);
+  // Unsupported paints must already have selected ordinary rendering.
+  const auto* gradientSpans = model.GetGradientSpanModelData();
+  if(!model.IsCutoutEnabled() || (gradientSpans && !gradientSpans->characterRuns.Empty()))
+  {
+    return false;
+  }
+
+  int32_t    penX, penY;
+  const auto offset = model.GetOffsetWithCutout();
+  if(!Raster::Convert(offset.x, penX) || !Raster::Convert(offset.y, penY))
+  {
+    return false;
+  }
+  int32_t    baseline = penY;
+  int64_t    left     = controlWidth;
+  int64_t    top      = controlHeight;
+  int64_t    right    = 0;
+  int64_t    bottom   = 0;
+  const auto end      = model.GetEndIndexOfElidedGlyphs();
+  // Elision is complete; bitmap lookup does not mutate the final glyph model.
+  const auto  lineCount = model.GetNumberOfLines();
+  const auto* lines     = model.GetLines();
+  const auto* glyphs    = model.GetGlyphs();
+  const auto* positions = model.GetLayout();
+  for(LineIndex lineIndex = 0; lineIndex < lineCount; ++lineIndex)
+  {
+    const auto& line = lines[lineIndex];
+    int32_t     alignment;
+    if(!Raster::AddCoordinate(baseline, line.ascender + GetPreOffsetVerticalLineAlignment(line, model.GetVerticalLineAlignment()), baseline) ||
+       !Raster::Convert(line.ellipsis ? model.GetElidedOffset() : line.alignmentOffset, alignment))
+    {
+      return false;
+    }
+    // Background runs, decorations and inserted hyphens can extend beyond ink.
+    if(model.GetHyphensCount() || model.IsBackgroundEnabled() || model.IsMarkupBackgroundColorSet() ||
+       model.IsUnderlineEnabled() || model.IsStrikethroughEnabled() ||
+       model.IsMarkupUnderlineSet() || model.IsMarkupStrikethroughSet())
+    {
+      int32_t lineWidth, lineTop, lineBottom;
+      if(!Raster::Convert(std::ceil(line.width), lineWidth) ||
+         !Raster::Convert(static_cast<float>(std::floor(static_cast<double>(baseline) - line.ascender)), lineTop) ||
+         !Raster::Convert(static_cast<float>(std::ceil(static_cast<double>(baseline) - line.descender)), lineBottom))
+      {
+        return false;
+      }
+      const int64_t px = static_cast<int64_t>(penX) + alignment;
+      left             = std::min(left, px);
+      right            = std::max(right, px + lineWidth);
+      top              = std::min(top, static_cast<int64_t>(lineTop));
+      bottom           = std::max(bottom, static_cast<int64_t>(lineBottom));
+    }
+    for(GlyphIndex index = line.glyphRun.glyphIndex;
+        index < line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs && index <= end; ++index)
+    {
+      const auto& glyph = glyphs[index];
+      if(IsSyntheticReplacementGlyph(glyph))
+      {
+        return false;
+      }
+      TextAbstraction::GlyphBufferData bitmap;
+      int32_t                          glyphWidth, glyphHeight;
+      if(!Raster::Convert(glyph.width, glyphWidth) || !Raster::Convert(glyph.height, glyphHeight) ||
+         glyphWidth < 0 || glyphHeight < 0 ||
+         !Raster::GlyphBufferFits(static_cast<uint32_t>(glyphWidth), static_cast<uint32_t>(glyphHeight), 4u))
+      {
+        return false;
+      }
+      bitmap.width  = static_cast<uint32_t>(glyphWidth);
+      bitmap.height = static_cast<uint32_t>(glyphHeight);
+      fontClient.CreateBitmap(glyph.fontId, glyph.index, glyph.isItalicRequired, glyph.isBoldRequired, bitmap, 0);
+      if(bitmap.buffer && bitmap.width && bitmap.height)
+      {
+        int32_t x, y;
+        if(!Raster::Convert(positions[index].x, x) || !Raster::Convert(positions[index].y, y))
+        {
+          return false;
+        }
+        const int64_t px = static_cast<int64_t>(penX) + alignment + x;
+        const int64_t py = static_cast<int64_t>(baseline) + y;
+        left             = std::min(left, px);
+        top              = std::min(top, py);
+        right            = std::max(right, px + bitmap.width);
+        bottom           = std::max(bottom, py + bitmap.height);
+      }
+    }
+    if(!Raster::AddCoordinate(baseline, -line.descender + GetPostOffsetVerticalLineAlignment(line, model.GetVerticalLineAlignment()), baseline))
+    {
+      return false;
+    }
+  }
+  // Include decoration extents, blur support and a transparent filtering guard.
+  float decorationHeight = std::max(model.GetUnderlineHeight(), model.GetStrikethroughHeight());
+  for(UnderlineRunIndex i = 0; i < model.GetNumberOfUnderlineRuns(); ++i)
+  {
+    UnderlinedGlyphRun run;
+    model.GetUnderlineRuns(&run, i, 1u);
+    decorationHeight = std::max(decorationHeight, run.properties.height);
+  }
+  for(StrikethroughRunIndex i = 0; i < model.GetNumberOfStrikethroughRuns(); ++i)
+  {
+    StrikethroughGlyphRun run;
+    model.GetStrikethroughRuns(&run, i, 1u);
+    decorationHeight = std::max(decorationHeight, run.properties.height);
+  }
+  const auto  shadow      = model.GetShadowOffset();
+  const auto  outline     = model.GetOutlineOffset();
+  const float marginValue = 2.f + 3.f * std::max(0.f, decorationHeight) + (model.IsOutlineEnabled() ? 2.f * model.GetOutlineWidth() : 0.f) +
+                            (model.IsShadowEnabled() ? std::max(std::abs(shadow.x), std::abs(shadow.y)) + 3.f * model.GetShadowBlurRadius() : 0.f) +
+                            (model.IsOutlineEnabled() ? std::max(std::abs(outline.x), std::abs(outline.y)) + 3.f * model.GetOutlineBlurRadius() : 0.f);
+  int32_t margin;
+  if(!Raster::Convert(std::ceil(marginValue), margin) || margin < 0)
+  {
+    return false;
+  }
+  // Keep ink/decoration arithmetic signed and wide until it is clipped. Only
+  // coordinates inside the validated control extent become buffer indices.
+  const auto clipToControl = [](int64_t coordinate, uint32_t extent)
+  {
+    return static_cast<uint32_t>(std::clamp<int64_t>(coordinate, 0, extent));
+  };
+  uint32_t cropLeft   = clipToControl(left - margin, controlWidth);
+  uint32_t cropTop    = clipToControl(top - margin, controlHeight);
+  uint32_t cropRight  = clipToControl(right + margin, controlWidth);
+  uint32_t cropBottom = clipToControl(bottom + margin, controlHeight);
+  if(right <= left || bottom <= top || cropRight <= cropLeft || cropBottom <= cropTop)
+  {
+    cropLeft = cropTop = 0u;
+    cropRight = cropBottom = 1u;
+  }
+  const uint32_t width  = cropRight - cropLeft;
+  const uint32_t height = cropBottom - cropTop;
+  if(!Raster::BufferFits(width, height, 4u) ||
+     (maxTextureSize && (width > maxTextureSize || height > maxTextureSize)))
+  {
+    return false;
+  }
+  int32_t x, y;
+  if(!Raster::Add(penX, -static_cast<int64_t>(cropLeft), x) ||
+     !Raster::Add(penY, -static_cast<int64_t>(cropTop), y))
+  {
+    return false;
+  }
+  // The L8 rasterizer preserves the RGBA path's maximum-alpha overlap rule
+  // without an intermediate RGBA buffer.
+  auto coverage = mImpl->CreateImageBuffer(width, height, STYLE_NONE, false, glyphFormat, x, y, 0u, end);
+  if(!coverage)
+  {
+    return false;
+  }
+  const bool hasStyle = model.IsOutlineEnabled() || model.IsShadowEnabled() ||
+                        model.IsBackgroundEnabled() || model.IsMarkupBackgroundColorSet();
+  const Vector2 rasterSize(static_cast<float>(width), static_cast<float>(height));
+  const Vector2 origin(static_cast<float>(cropLeft), static_cast<float>(cropTop));
+  auto          style = hasStyle ? RenderWithPixelBuffer(rasterSize, Direction::LEFT_TO_RIGHT, RENDER_NO_TEXT,
+                                                         false, Pixel::RGBA8888, Size::ZERO, nullptr, origin)
+                                 : Impl::CreateTransparentImageBuffer(1u, 1u, Pixel::RGBA8888);
+  PixelBuffer   overlay;
+  const bool    hasOverlay = model.IsUnderlineEnabled() || model.IsStrikethroughEnabled() ||
+                          model.IsMarkupUnderlineSet() || model.IsMarkupStrikethroughSet();
+  if(hasOverlay)
+  {
+    overlay = RenderWithPixelBuffer(rasterSize, Direction::LEFT_TO_RIGHT, RENDER_OVERLAY_STYLE,
+                                    false, Pixel::RGBA8888, Size::ZERO, nullptr, origin);
+  }
+  if(!style || (hasOverlay && !overlay))
+  {
+    return false;
+  }
+  CutoutRenderData result;
+  result.controlSize = size;
+  result.rect        = Vector4(origin.x, origin.y, rasterSize.x, rasterSize.y);
+  result.coverage    = PixelBuffer::Convert(coverage);
+  result.style       = PixelBuffer::Convert(style);
+  if(overlay)
+  {
+    result.overlay = PixelBuffer::Convert(overlay);
+  }
+  if(!result.IsValid())
+  {
+    return false;
+  }
+  planes = std::move(result);
+  return true;
 }
 
 Internal::Reveal::Plan Typesetter::CreateFinalRevealPlan(const Internal::Reveal::Plan& sourcePlan,
@@ -1089,39 +1244,6 @@ PixelData Typesetter::RenderRuntimeBlurLine(const Vector2& size, LineIndex lineI
   return PixelBuffer::Convert(buffer);
 }
 
-PixelBuffer Typesetter::CreateFullBackgroundBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                                   const Vector4& backgroundColor)
-{
-  if(!Raster::BufferFits(bufferWidth, bufferHeight, 4u))
-  {
-    return {};
-  }
-
-  const uint32_t bufferSizeInt        = bufferWidth * bufferHeight;
-  uint8_t        backgroundColorAlpha = static_cast<uint8_t>(backgroundColor.a * 255.f);
-
-  PixelBuffer buffer = PixelBuffer::New(bufferWidth, bufferHeight, Pixel::RGBA8888);
-  if(bufferSizeInt == 0u)
-  {
-    return buffer;
-  }
-
-  uint32_t* bitmapBuffer = reinterpret_cast<uint32_t*>(buffer.GetBuffer());
-
-  uint32_t packedBackgroundColor       = 0u;
-  uint8_t* packedBackgroundColorBuffer = reinterpret_cast<uint8_t*>(&packedBackgroundColor);
-
-  // Write the color to the pixel buffer
-  *(packedBackgroundColorBuffer + 3u) = backgroundColorAlpha;
-  *(packedBackgroundColorBuffer + 2u) = static_cast<uint8_t>(backgroundColor.b * backgroundColorAlpha);
-  *(packedBackgroundColorBuffer + 1u) = static_cast<uint8_t>(backgroundColor.g * backgroundColorAlpha);
-  *(packedBackgroundColorBuffer)      = static_cast<uint8_t>(backgroundColor.r * backgroundColorAlpha);
-
-  std::fill(bitmapBuffer, bitmapBuffer + bufferSizeInt, packedBackgroundColor);
-
-  return buffer;
-}
-
 PixelBuffer Typesetter::ApplyUnderlineMarkupImageBuffer(PixelBuffer    topPixelBuffer,
                                                         const uint32_t bufferWidth, const uint32_t bufferHeight,
                                                         const bool          ignoreHorizontalAlignment,
@@ -1202,54 +1324,6 @@ PixelBuffer Typesetter::ApplyStrikethroughMarkupImageBuffer(
   }
 
   return topPixelBuffer;
-}
-
-void Typesetter::SetMaskForImageBuffer(PixelBuffer& __restrict__ topPixelBuffer,
-                                       PixelBuffer& __restrict__ bottomPixelBuffer, const uint32_t bufferWidth,
-                                       const uint32_t bufferHeight, float originAlpha)
-{
-  // Assume that we always combine two RGBA images
-  // Jump with 4bytes for optimize runtime.
-  uint32_t* topBuffer    = reinterpret_cast<uint32_t*>(topPixelBuffer.GetBuffer());
-  uint32_t* bottomBuffer = reinterpret_cast<uint32_t*>(bottomPixelBuffer.GetBuffer());
-
-  if(topBuffer == nullptr || bottomBuffer == nullptr)
-  {
-    // Nothing to do if one of both buffers are empty.
-    return;
-  }
-
-  const uint32_t bufferSizeInt = bufferWidth * bufferHeight;
-
-  for(uint32_t pixelIndex = 0; pixelIndex < bufferSizeInt; ++pixelIndex)
-  {
-    uint32_t topBufferColor                       = *(topBuffer);
-    uint32_t bottomBufferColor                    = *(bottomBuffer);
-    uint8_t* __restrict__ topBufferColorBuffer    = reinterpret_cast<uint8_t*>(&topBufferColor);
-    uint8_t* __restrict__ bottomBufferColorBuffer = reinterpret_cast<uint8_t*>(&bottomBufferColor);
-
-    // Return the transparency of the text to original.
-    uint8_t originAlphaInt = static_cast<uint8_t>(originAlpha * 255);
-
-    uint8_t topAlpha    = topBufferColorBuffer[3];
-    uint8_t bottomAlpha = 255 - topAlpha;
-
-    // Manual blending.
-    bottomBufferColorBuffer[0] = MultiplyAndSummationAndNormalizeColor(topBufferColorBuffer[0], originAlphaInt,
-                                                                       bottomBufferColorBuffer[0], bottomAlpha);
-    bottomBufferColorBuffer[1] = MultiplyAndSummationAndNormalizeColor(topBufferColorBuffer[1], originAlphaInt,
-                                                                       bottomBufferColorBuffer[1], bottomAlpha);
-    bottomBufferColorBuffer[2] = MultiplyAndSummationAndNormalizeColor(topBufferColorBuffer[2], originAlphaInt,
-                                                                       bottomBufferColorBuffer[2], bottomAlpha);
-    bottomBufferColorBuffer[3] = MultiplyAndSummationAndNormalizeColor(topBufferColorBuffer[3], originAlphaInt,
-                                                                       bottomBufferColorBuffer[3], bottomAlpha);
-
-    *(bottomBuffer) = bottomBufferColor;
-
-    // Increase each buffer's pointer.
-    ++topBuffer;
-    ++bottomBuffer;
-  }
 }
 
 Typesetter::Typesetter(const ModelInterface* const model)

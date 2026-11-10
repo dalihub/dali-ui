@@ -43,6 +43,7 @@ namespace Text
 class ModelInterface;
 class ViewModel;
 class Typesetter;
+struct CutoutRenderData;
 struct FinalElisionResult;
 struct MarqueeStartAnchor;
 struct MarqueeTextureAnchor;
@@ -231,32 +232,9 @@ public:
                                         const GradientRasterContext* gradientContext           = nullptr);
 
   /**
-   * @brief After the Render, use the pixel information of the given cutoutBuffer to make the part where the pixel is
-   * drawn transparent.
+   * @brief Rasterizes text and the requested styles into a pixel buffer.
    *
-   * @param[in] size The renderer size.
-   * @param[in] textDirection The direction of the text.
-   * @param[in] behaviour The behaviour of how to render the text (i.e. whether to render the text only or the styles
-   * only or both).
-   * @param[in] ignoreHorizontalAlignment Whether to ignore the horizontal alignment (i.e. always render as if
-   * HORIZONTAL_ALIGN_BEGIN).
-   * @param[in] pixelFormat The format of the pixel in the image that the text is rendered as (i.e. either
-   * Pixel::BGRA8888 or Pixel::L8).
-   * @param[in] originAlpha The original alpha of text.
-   * @param[in] originSize The origin size for calculating vertical alignment. (default) If zero, the control and
-   * renderer sizes are used.
-   *
-   * @return A pixel data with the text rendered.
-   */
-  PixelData RenderWithCutout(const Vector2& size, Direction textDirection,
-                             PixelBuffer cutoutBuffer, RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES,
-                             bool ignoreHorizontalAlignment = false, Pixel::Format pixelFormat = Pixel::RGBA8888,
-                             float originAlpha = 1.f, const Vector2& originSize = Size::ZERO);
-
-  /**
-   * @brief Renders the text, return as PixelBuffer.
-   *
-   * This function is used to obtain the PixelBuffer required for cutout.
+   * The optional raster origin permits cutout styles to share a cropped canvas.
    *
    * @param[in] size The renderer size.
    * @param[in] textDirection The direction of the text.
@@ -271,14 +249,27 @@ public:
    *
    * @param[in] gradientContext Request-local USER_SPACE coordinates, or nullptr for raster coordinates.
    *
-   * @return A pixel data with the text rendered.
+   * @param[in] rasterOrigin Full-control raster position of the cropped buffer origin.
+   * @return The rasterized pixel buffer, or an empty handle for invalid bounds.
    */
   PixelBuffer RenderWithPixelBuffer(const Vector2& size, Direction textDirection,
                                     RenderBehaviour              behaviour                 = RENDER_TEXT_AND_STYLES,
                                     bool                         ignoreHorizontalAlignment = false,
                                     Pixel::Format                pixelFormat               = Pixel::RGBA8888,
                                     const Vector2&               originSize                = Size::ZERO,
-                                    const GradientRasterContext* gradientContext           = nullptr);
+                                    const GradientRasterContext* gradientContext           = nullptr,
+                                    const Vector2&               rasterOrigin              = Vector2::ZERO);
+
+  /**
+   * @brief Rasterizes cropped cutout inputs without composing the control background.
+   * @param[in] size Full control raster size, including padding.
+   * @param[out] planes Glyphs, styles, overlay and crop from this layout.
+   * @param[in] glyphFormat L8 for single color; RGBA8888 to preserve glyph colors.
+   * @param[in] maxTextureSize Device limit, or zero for CPU-only callers.
+   * @return False for invalid/unsupported bounds; no partial payload is published.
+   */
+  bool RenderCutoutPlanes(const Vector2& size, CutoutRenderData& planes,
+                          Pixel::Format glyphFormat = Pixel::L8, uint32_t maxTextureSize = 0u);
 
   /**
    * @brief Projects source reveal semantics onto the current final glyph sequence.
@@ -382,33 +373,6 @@ public:
                                   uint32_t rasterOffsetY = 0u, uint32_t rasterHeight = 0u,
                                   uint32_t rasterOffsetX = 0u, uint32_t rasterWidth = 0u,
                                   const GradientRasterContext* gradientContext = nullptr);
-
-  /**
-   * @brief Create & draw the image buffer of single background color.
-   *
-   * @param[in] bufferWidth The width of the image buffer.
-   * @param[in] bufferHeight The height of the image buffer.
-   * @param[in] backgroundColor The backgroundColor of image buffer.
-   *
-   * @return An image buffer with the text.
-   */
-  PixelBuffer CreateFullBackgroundBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                         const Vector4& backgroundColor);
-
-  /**
-   * @brief Set Mask for two pixel buffer.
-   *
-   * The alpha value of bottomPixelBuffer is decreased as the alpha value of topPixelBuffer is higher.
-   *
-   * @param[in, out] topPixelBuffer The top layer buffer.
-   * @param[in, out] bottomPixelBuffer The bottom layer buffer.
-   * @param[in] bufferWidth The width of the image buffer.
-   * @param[in] bufferHeight The height of the image buffer.
-   * @param[in] originAlpha The original alpha value of the text.
-   */
-  void SetMaskForImageBuffer(PixelBuffer& __restrict__ topPixelBuffer,
-                             PixelBuffer& __restrict__ bottomPixelBuffer, const uint32_t bufferWidth,
-                             const uint32_t bufferHeight, float originAlpha);
 
 private:
   /**

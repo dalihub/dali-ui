@@ -27,6 +27,7 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/rendering/text-cutout-render-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/reveal/text-reveal.h>
@@ -173,8 +174,6 @@ public:
   bool IsRemoveFrontInset() const override { return false; }
   bool IsRemoveBackInset() const override { return false; }
   bool IsCutoutEnabled() const override { return false; }
-  const bool IsBackgroundWithCutoutEnabled() const override { return false; }
-  const Vector4& GetBackgroundColorWithCutout() const override { return mTransparentColor; }
   const Vector2& GetOffsetWithCutout() const override { return mZeroVector; }
   const Vector<UiText::CharacterDirection>& GetCharacterDirections() const override { return mCharacterDirections; }
 
@@ -391,6 +390,19 @@ private:
   Vector<UiText::CharacterDirection>       mCharacterDirections;
   UiText::Internal::GradientSpanModelData  mGradientSpanData;
   bool                                     mHasGradientSpan{false};
+};
+
+class CutoutModel : public MaskModel
+{
+public:
+  explicit CutoutModel(UiText::Length glyphCount = 1u)
+  : MaskModel(glyphCount)
+  {
+  }
+  bool IsCutoutEnabled() const override
+  {
+    return true;
+  }
 };
 
 PixelData RenderTextGradientMask(const MaskModel& model)
@@ -1113,7 +1125,6 @@ int UtcDaliTypesetterEmptyBufferP(void)
     }
     DALI_TEST_CHECK(typesetter->RenderTextGradientMask(size, UiText::Direction::LEFT_TO_RIGHT));
     DALI_TEST_CHECK(typesetter->RenderTextGradientPreserved(size, UiText::Direction::LEFT_TO_RIGHT));
-    DALI_TEST_CHECK(typesetter->CreateFullBackgroundBuffer(uint32_t(size.width), uint32_t(size.height), Color::BLUE));
     const auto plan = UiText::Internal::Reveal::BuildCharacterPlan(model, UiText::Reveal::AUTO_FADE_DURATION_RATIO);
     float fadeDuration = 0.0f;
     DALI_TEST_CHECK(typesetter->RenderTextRevealMetadata(size, UiText::Direction::LEFT_TO_RIGHT, plan, fadeDuration));
@@ -1485,6 +1496,83 @@ int UtcDaliTextGradientColorEmojiExplicitSpanCompatibilityP(void)
       const auto preserved = RenderTextGradientPreserved(model);
       DALI_TEST_EQUALS(std::memcmp(Integration::GetPixelDataBuffer(preserved).buffer, Integration::GetPixelDataBuffer(ordinary).buffer, ordinary.GetStrideBytes() * ordinary.GetHeight()), 0, TEST_LOCATION);
     }
+  }
+  END_TEST;
+}
+
+// Use the same fixed 2x4 glyph bitmap on every platform, including Windows.
+int UtcDaliCutoutRasterClippingP(void)
+{
+  UiTestApplication application;
+  CutoutModel       model;
+  auto              typesetter = UiText::Typesetter::New(&model);
+  struct Case
+  {
+    Vector2  position;
+    Vector4  crop;
+    uint64_t coverage;
+  };
+  const Case cases[] = {
+    {Vector2(4.f, 5.f), Vector4(2.f, 3.f, 6.f, 8.f), 8u * 255u},
+    {Vector2(-1.f, -2.f), Vector4(0.f, 0.f, 3.f, 4.f), 2u * 255u},
+    {Vector2(15.f, 14.f), Vector4(13.f, 12.f, 3.f, 4.f), 2u * 255u},
+  };
+  for(const auto& test : cases)
+  {
+    model.SetGlyphPosition(0u, test.position);
+    UiText::CutoutRenderData planes;
+    DALI_TEST_CHECK(typesetter->RenderCutoutPlanes(Vector2(16.f, 16.f), planes, Pixel::L8, 16u));
+    DALI_TEST_CHECK(planes.IsValid(16u));
+    DALI_TEST_EQUALS(planes.rect, test.crop, TEST_LOCATION);
+    DALI_TEST_EQUALS(SumMaskPixels(planes.coverage), test.coverage, TEST_LOCATION);
+  }
+  // Conservative filtering margins may retain transparent edge pixels even
+  // when the entire glyph is outside the control. They must never wrap into ink.
+  for(const auto& position : {Vector2(-8.f, 4.f), Vector2(24.f, 4.f), Vector2(4.f, -8.f), Vector2(4.f, 24.f),
+                              Vector2(-2147483648.f, 0.f), Vector2(2147483520.f, 0.f),
+                              Vector2(0.f, -2147483648.f), Vector2(0.f, 2147483520.f)})
+  {
+    model.SetGlyphPosition(0u, position);
+    UiText::CutoutRenderData planes;
+    DALI_TEST_CHECK(typesetter->RenderCutoutPlanes(Vector2(16.f, 16.f), planes, Pixel::L8, 16u));
+    DALI_TEST_CHECK(planes.IsValid(16u));
+    DALI_TEST_EQUALS(SumMaskPixels(planes.coverage), uint64_t(0u), TEST_LOCATION);
+  }
+  CutoutModel              empty(0u);
+  UiText::CutoutRenderData planes;
+  DALI_TEST_CHECK(UiText::Typesetter::New(&empty)->RenderCutoutPlanes(Vector2(16.f, 16.f), planes));
+  DALI_TEST_EQUALS(planes.rect, Vector4(0.f, 0.f, 1.f, 1.f), TEST_LOCATION);
+  DALI_TEST_EQUALS(SumMaskPixels(planes.coverage), uint64_t(0u), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCutoutRasterBoundsRejectionP(void)
+{
+  UiTestApplication application;
+  CutoutModel       model;
+  auto              typesetter = UiText::Typesetter::New(&model);
+  model.SetGlyphPosition(0u, Vector2(4.f, 5.f));
+  UiText::CutoutRenderData planes;
+  // A huge valid control only allocates its small ink crop.
+  DALI_TEST_CHECK(typesetter->RenderCutoutPlanes(Vector2(2147483520.f, 16.f), planes, Pixel::L8, 8u));
+  DALI_TEST_EQUALS(planes.rect, Vector4(2.f, 3.f, 6.f, 8.f), TEST_LOCATION);
+  DALI_TEST_EQUALS(SumMaskPixels(planes.coverage), uint64_t(8u * 255u), TEST_LOCATION);
+  const auto accepted = planes.coverage;
+  for(float invalid : {0.f, -1.f, 2147483648.f, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::quiet_NaN()})
+  {
+    DALI_TEST_CHECK(!typesetter->RenderCutoutPlanes(Vector2(invalid, 16.f), planes));
+    DALI_TEST_CHECK(!typesetter->RenderCutoutPlanes(Vector2(16.f, invalid), planes));
+    DALI_TEST_CHECK(planes.coverage == accepted);
+  }
+  DALI_TEST_CHECK(!typesetter->RenderCutoutPlanes(Vector2(16.f, 16.f), planes, Pixel::L8, 7u));
+  DALI_TEST_CHECK(planes.coverage == accepted);
+  for(float invalid : {2147483648.f, -2147483904.f, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::quiet_NaN()})
+  {
+    model.SetGlyphPosition(0u, Vector2(invalid, 0.f));
+    DALI_TEST_CHECK(!typesetter->RenderCutoutPlanes(Vector2(16.f, 16.f), planes));
+    model.SetGlyphPosition(0u, Vector2(0.f, invalid));
+    DALI_TEST_CHECK(!typesetter->RenderCutoutPlanes(Vector2(16.f, 16.f), planes));
+    DALI_TEST_CHECK(planes.coverage == accepted);
   }
   END_TEST;
 }

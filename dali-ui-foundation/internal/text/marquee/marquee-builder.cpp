@@ -216,7 +216,7 @@ MarqueeBuilder::FeatureInfo MarqueeBuilder::CollectGradientFeatureInfo(const Mod
 
   info.styleTextureEnabled = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
   info.isOverlayStyle      = HasOverlayStyle(textModel);
-  info.cutoutEnabled       = textCutoutEnabled || textModel.IsBackgroundWithCutoutEnabled();
+  info.cutoutEnabled       = textCutoutEnabled;
   return info;
 }
 

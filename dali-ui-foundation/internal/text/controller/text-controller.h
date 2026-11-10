@@ -1238,6 +1238,12 @@ public: // Default style & Input style
   void SetDefaultColor(const Vector4& color);
 
   /**
+   * @brief Updates a uniform-only cutout tint without invalidating its raster.
+   * @param[in] color The text color, including alpha.
+   */
+  void SetCutoutTextColor(const Vector4& color);
+
+  /**
    * @brief Retrieves the text's default color.
    *
    * @return The default color.
@@ -1947,34 +1953,6 @@ public: // Default style & Input style
   Vector2 GetLayoutOffsetWithPadding() const;
 
   /**
-   * @brief Sets whether background color with cutout is enabled.
-   *
-   * @param[in] enable True if enabled.
-   */
-  void SetBackgroundWithCutoutEnabled(bool enable);
-
-  /**
-   * @brief Whether background color with cutout is enabled.
-   *
-   * @return True if enabled.
-   */
-  bool IsBackgroundWithCutoutEnabled() const;
-
-  /**
-   * @brief Sets whether background color with cutout.
-   *
-   * @param[in] color The color to set.
-   */
-  void SetBackgroundColorWithCutout(const Vector4& color);
-
-  /**
-   * @brief Retrieves background color with cutout.
-   *
-   * @return The color.
-   */
-  const Vector4 GetBackgroundColorWithCutout() const;
-
-  /**
    * @brief Sets offset with cutout.
    *
    * @param[in] offset The offset.
@@ -2312,16 +2290,22 @@ public: // Queries & retrieves.
   void SetCursorInsetEnabled(bool enable);
 
   /**
-   * @brief Retrieves cutout value to model
-   * @return The value of cutout for the text
+   * @brief Retrieves the public cutout request, including while ordinary rendering is used.
+   * @return Whether the application requested text cutout.
    */
   bool IsTextCutout() const;
 
   /**
-   * @brief Sets cutout value to model
-   * @param[in] cutout The value of cutout for the text
+   * @brief Sets the public cutout request independently of the effective raster mode.
+   * @param[in] cutout Whether the application requests text cutout.
    */
   void SetTextCutout(bool cutout);
+
+  /**
+   * @brief Sets the effective raster mode without changing the public cutout request.
+   * @param[in] enabled Whether the current layout supports shader cutout.
+   */
+  void SetCutoutRenderingEnabled(bool enabled);
 
   /**
    * @brief Retrieves variation values from the model

@@ -237,8 +237,6 @@ void CopyTextProcessingProperties(const Model& source, Model& target)
 
   // Separately registered image visuals cannot contribute to the text cutout mask.
   targetVisual.SetCutoutEnabled(false);
-  targetVisual.SetBackgroundWithCutoutEnabled(false);
-  targetVisual.SetBackgroundColorWithCutout(source.GetBackgroundColorWithCutout());
   targetVisual.SetVerticalLineAlignment(source.GetVerticalLineAlignment());
 }
 

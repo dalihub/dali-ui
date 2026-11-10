@@ -114,6 +114,7 @@ exit 0
 %{app_exe_dir}/text-scale.example
 %{app_exe_dir}/text-font-variation.example
 %{app_exe_dir}/text-cutout-mask.example
+%{app_exe_dir}/text-cutout.example
 %{app_exe_dir}/text-gradient.example
 %{app_exe_dir}/text-input-gradient.example
 %{app_exe_dir}/text-styled-text.example

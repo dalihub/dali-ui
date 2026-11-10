@@ -1296,36 +1296,14 @@ private: // Implementation
   void SetCutoutEnabledInternal(bool enabled);
 
   /**
-   * @brief Sets whether the background of the view is enabled.
-   *
-   * @param[in] enabled True to enable the view background, false to disable it.
-   */
-  void SetViewBackgroundEnabled(bool enabled);
-
-  /**
-   * @brief Gets the current background color of the view.
-   *
-   * Extracts the color from the view's background visual if available.
-   *
-   * @param[out] backgroundColor The extracted background color.
-   * @return True if a background color was successfully retrieved, false otherwise.
-   */
-  bool GetViewBackgroundColor(Vector4& backgroundColor) const;
-
-  /**
    * @brief Handles background property changes related to cutout rendering.
    */
   void OnBackgroundPropertyChanged();
 
   /**
-   * @brief Updates dependent rendering state for cutout rendering.
-   *
-   * This synchronizes background and visual state after the cutout property
-   * has been applied through the property handler.
-   *
-   * @param[in] enabled True if cutout rendering is enabled, false otherwise.
+   * @brief Applies background ownership for the currently published text renderer.
    */
-  void UpdateCutoutState(bool enabled);
+  void UpdateCutoutBackgroundVisibility();
 
   /**
    * @brief Applies a localized text string to the label.
@@ -1463,9 +1441,9 @@ private:
   bool mHasA11yAnchors : 1;           // whether accessibility TextAnchor actors are attached.
   bool mIsVisible : 1;                // cached result of IsOnSceneVisible().
   bool mIsVisibleInitialized : 1;     // whether mIsVisible has been initialized.
-  bool mIsViewBackgroundEnabled : 1;  // whether the view background is enabled.
   bool mIsManualRenderInProgress : 1; // True while an async manual render request is in progress. Reset to false when completed.
   bool mIsManualRenderFinished : 1;   // True when an async manual render has completed. Reset to false on the next relayout.
+  bool mHasRequestedCutout : 1;       // Whether cutout has ever been requested; OFF may still have a pending cutout publication.
 
 protected:
   struct PropertyHandler;

@@ -3265,12 +3265,13 @@ int UtcDaliTextRevealImageReplacementPixelFragmentP(void)
   label.SetTextCutoutEnabled(true);
   application.SendNotification();
   application.Render();
-  DALI_TEST_CHECK(!Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label));
+  DALI_TEST_CHECK(label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(Dali::Ui::Internal::IsInlineReplacementRevealPixelSpatial(label));
   replacementVisual = FindInlineReplacementVisual(label);
   DALI_TEST_CHECK(replacementVisual);
-  DALI_TEST_CHECK(!Ui::GetImplementation(replacementVisual).IsUsingCustomShader());
+  DALI_TEST_CHECK(Ui::GetImplementation(replacementVisual).IsUsingCustomShader());
   DALI_TEST_EQUALS(Dali::Ui::Internal::GetInlineReplacementRevealConstraintCount(label),
-                   0u,
+                   1u,
                    TEST_LOCATION);
 
   label.SetTextCutoutEnabled(false);
