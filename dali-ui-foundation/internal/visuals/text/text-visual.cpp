@@ -29,7 +29,7 @@
 #include <dali/integration-api/texture-integ.h>
 #include <string.h>
 #include <cmath>
-#include <limits>
+#include <memory>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -43,6 +43,7 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-renderer-state.h>
+#include <dali-ui-foundation/internal/text/rendering/text-cutout-render-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-reveal-bridge.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
@@ -54,6 +55,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-trace.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-reveal-runtime-blur.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
@@ -323,6 +325,7 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mTextLoadingMaximumLinesRevision(0u),
   mNaturalSizeMaximumLinesRevision(0u),
   mHeightForWidthMaximumLinesRevision(0u),
+  mIsCutoutRenderer(false),
   mRendererUpdateNeeded(false),
   mApplyingFittingMode(false),
   mTextRequireRender(false),
@@ -501,22 +504,32 @@ void TextVisual::RemoveRenderer(Actor& actor, bool removeDefaultRenderer)
   {
     // Remove default renderer's textureset
     mImpl->mRenderer.RemoveTextures();
+    mIsCutoutRenderer = false;
   }
 
-  // Clear constraint, and keep default renderer's constraint only.
-  if(mColorConstraint)
+  // Retain the background and default color bindings, removing tiled colors
+  // even when the animatable color source was set after scene attachment.
+  if(mColorConstraint || !mColorConstraintList.empty())
   {
+    const auto backgroundConstraint = GetCutoutBackgroundConstraint();
     for(auto& constraint : mColorConstraintList)
     {
-      if(constraint && (constraint != mColorConstraint))
+      if(constraint && constraint != mColorConstraint && constraint != backgroundConstraint)
       {
         constraint.Remove();
       }
     }
     mColorConstraintList.clear();
-    mColorConstraintList.push_back(mColorConstraint);
+    if(backgroundConstraint)
+    {
+      mColorConstraintList.push_back(backgroundConstraint);
+    }
+    if(mColorConstraint)
+    {
+      mColorConstraintList.push_back(mColorConstraint);
+    }
   }
-  if(mOpacityConstraint)
+  if(mOpacityConstraint || !mOpacityConstraintList.empty())
   {
     for(auto& constraint : mOpacityConstraintList)
     {
@@ -526,7 +539,10 @@ void TextVisual::RemoveRenderer(Actor& actor, bool removeDefaultRenderer)
       }
     }
     mOpacityConstraintList.clear();
-    mOpacityConstraintList.push_back(mOpacityConstraint);
+    if(mOpacityConstraint)
+    {
+      mOpacityConstraintList.push_back(mOpacityConstraint);
+    }
   }
 }
 
@@ -543,8 +559,14 @@ void TextVisual::DoSetOffScene(Actor& actor)
   // Change the constraint as APPLY_ONCE if apply rate was always.
   if(mIsConstraintAppliedAlways)
   {
-    mColorConstraint.SetApplyRate(Dali::Constraint::APPLY_ONCE);
-    mOpacityConstraint.SetApplyRate(Dali::Constraint::APPLY_ONCE);
+    if(mColorConstraint)
+    {
+      mColorConstraint.SetApplyRate(Dali::Constraint::APPLY_ONCE);
+    }
+    if(mOpacityConstraint)
+    {
+      mOpacityConstraint.SetApplyRate(Dali::Constraint::APPLY_ONCE);
+    }
   }
 
   // Resets the control handle.
@@ -901,16 +923,33 @@ void TextVisual::UpdateRenderer()
   // TODO : Round the size and offset to avoid pixel alignment issues.
 
   auto textLengthUtf32 = mController->GetNumberOfCharacters();
-
   if((fabsf(relayoutSize.width) < Math::MACHINE_EPSILON_1000) ||
      (fabsf(relayoutSize.height) < Math::MACHINE_EPSILON_1000) || textLengthUtf32 == 0u)
   {
-    // Remove the texture set and any renderer previously set.
-    RemoveRenderer(control, true);
-
-    // Nothing else to do if the relayout size is zero.
-    ResourceReady(Ui::Visual::ResourceStatus::READY);
-    return;
+    bool cutoutEnabled = false;
+    if(mController->IsTextCutout())
+    {
+      cutoutEnabled = IsCutoutRenderingEnabled();
+      mController->SetCutoutRenderingEnabled(cutoutEnabled);
+      if(textLengthUtf32 == 0u && cutoutEnabled)
+      {
+        // Empty coverage still draws the owner's background across the control.
+        relayoutSize = mImpl->mControlSize;
+      }
+    }
+    if((fabsf(relayoutSize.width) < Math::MACHINE_EPSILON_1000) ||
+       (fabsf(relayoutSize.height) < Math::MACHINE_EPSILON_1000) ||
+       (textLengthUtf32 == 0u && !cutoutEnabled))
+    {
+      const bool wasCutoutRenderer = mIsCutoutRenderer;
+      RemoveRenderer(control, true);
+      if(wasCutoutRenderer)
+      {
+        UpdateCutoutBackgroundVisibility(Ui::View::DownCast(control));
+      }
+      ResourceReady(Ui::Visual::ResourceStatus::READY);
+      return;
+    }
   }
 
   Vector2 layoutConstraintSize = relayoutSize;
@@ -924,6 +963,14 @@ void TextVisual::UpdateRenderer()
   Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(control);
 
   const Text::Controller::UpdateTextType updateTextType = mController->Relayout(layoutConstraintSize, layoutDirection);
+  // Layout may rebuild a projected model. Resolve active cutout once for that
+  // model; ordinary text does not write cutout state or repeat eligibility work.
+  bool cutoutEnabled = false;
+  if(mController->IsTextCutout())
+  {
+    cutoutEnabled = IsCutoutRenderingEnabled();
+    mController->SetCutoutRenderingEnabled(cutoutEnabled);
+  }
   mTypesetter->SetModel(mController->GetRenderTextModel());
   mTypesetter->SetFinalElisionResult(mController->GetFinalElisionResult());
 
@@ -1006,23 +1053,25 @@ void TextVisual::UpdateRenderer()
       const bool outlineEnabled    = renderModel->IsOutlineEnabled();
       const bool backgroundEnabled = renderModel->IsBackgroundEnabled();
       // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
-      const bool underlineRunEnabled         = renderModel->IsMarkupUnderlineSet();
-      const bool strikethroughRunEnabled     = renderModel->IsMarkupStrikethroughSet();
-      const bool underlineEnabled            = renderModel->IsUnderlineEnabled() || underlineRunEnabled;
-      const bool strikethroughEnabled        = renderModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
-      const bool backgroundMarkupSet         = renderModel->IsMarkupBackgroundColorSet();
-      const bool cutoutEnabled               = mController->IsTextCutout();
-      const bool backgroundWithCutoutEnabled = renderModel->IsBackgroundWithCutoutEnabled();
-      const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
-      const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
-      const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
-      const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
-      const bool embossEnabled               = mController->IsEmbossEnabled();
+      const bool underlineRunEnabled     = renderModel->IsMarkupUnderlineSet();
+      const bool strikethroughRunEnabled = renderModel->IsMarkupStrikethroughSet();
+      const bool underlineEnabled        = renderModel->IsUnderlineEnabled() || underlineRunEnabled;
+      const bool strikethroughEnabled    = renderModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
+      const bool backgroundMarkupSet     = renderModel->IsMarkupBackgroundColorSet();
+      const bool styleTextureEnabled     = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
+      const bool styleBlocksTextGradient = cutoutEnabled;
+      const bool styleEnabled            = styleTextureEnabled || styleBlocksTextGradient;
+      const bool isOverlayStyle          = underlineEnabled || strikethroughEnabled;
+      const bool embossEnabled           = mController->IsEmbossEnabled();
 
-      // if background with cutout is enabled, This text visual must render the entire control size.
-
+      // Shader cutout composes the background across the full control quad.
       if(cutoutEnabled)
       {
+        if(!PrepareCutoutShader(control, containsColorGlyph || hasMultipleTextColors, isOverlayStyle))
+        {
+          return;
+        }
+
         if(mImpl->mTransformMapUsingDefault)
         {
           relayoutSize = mImpl->mControlSize;
@@ -1054,16 +1103,45 @@ void TextVisual::UpdateRenderer()
         }
       }
 
+      const bool wasCutoutRenderer = mIsCutoutRenderer;
       AddRenderer(control, relayoutSize, hasMultipleTextColors, containsColorGlyph, styleEnabled,
-                  styleTextureEnabled, styleBlocksTextGradient, isOverlayStyle, embossEnabled);
+                  styleTextureEnabled, styleBlocksTextGradient, isOverlayStyle, embossEnabled, cutoutEnabled);
+      // Scene attachment must finish preparing the owner's other visuals before
+      // relayout transfers ownership; disabling a new background here would
+      // defer its ResourceReady notification until cutout is switched off.
+      if((wasCutoutRenderer || mIsCutoutRenderer) && IsOnScene())
+      {
+        UpdateCutoutBackgroundVisibility(Ui::View::DownCast(control));
+      }
 
       // Text rendered and ready to display
-      ResourceReady(Ui::Visual::ResourceStatus::READY);
+      ResourceReady(cutoutEnabled && mRendererList.empty() ? Ui::Visual::ResourceStatus::FAILED
+                                                           : Ui::Visual::ResourceStatus::READY);
     }
   }
 }
 
-void TextVisual::AddTexture(TextureSet& textureSet, PixelData& data, Sampler& sampler, unsigned int textureSetIndex)
+bool TextVisual::PrepareCutoutShader(const Actor& control, bool coloredGlyphs, bool overlay)
+{
+  // Create the cutout shader before AddRenderer changes publication state.
+  // Its ObjectCreatedSignal may synchronously publish a newer result.
+  const auto renderRevision = mController->GetRenderRevision();
+  mTextVisualShaderFactory.GetCutoutShader(mFactoryCache, coloredGlyphs, overlay);
+  if(mControl.GetHandle() != control || !mRendererList.empty())
+  {
+    return false;
+  }
+  if(mController->GetRenderRevision() != renderRevision || !IsCutoutRenderingEnabled())
+  {
+    // No nested result was published. Rebuild the current request instead.
+    mRendererUpdateNeeded = true;
+    mController->RequestRelayout();
+    return false;
+  }
+  return true;
+}
+
+void TextVisual::AddTexture(TextureSet& textureSet, const PixelData& data, Sampler& sampler, unsigned int textureSetIndex)
 {
   Texture texture =
     Texture::New(Dali::TextureType::TEXTURE_2D, data.GetPixelFormat(), data.GetWidth(), data.GetHeight());
@@ -1373,7 +1451,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     return;
   }
   if(isRenderRequest && parameters.isTextRevealEnabled &&
-     (mController->IsMarqueeEnabled() || mController->IsTextCutout()))
+     (mController->IsMarqueeEnabled() || IsCutoutRenderingEnabled()))
   {
     // Marquee and cutout do not consume Reveal metadata. A result requested
     // before either mode was enabled must not replace their current renderer.
@@ -1408,7 +1486,17 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
   }
 
   Ui::Visual::ResourceStatus resourceStatus;
+  if(isRenderRequest &&
+     (parameters.isCutoutEnabled != static_cast<bool>(textInformation.renderInfo.cutout) ||
+      textInformation.renderInfo.isCutoutEnabled != static_cast<bool>(textInformation.renderInfo.cutout)))
+  {
+    loadingSuccess = false;
+  }
 
+  if(loadingSuccess && textInformation.renderInfo.cutout && !textInformation.renderInfo.cutout->IsValid(Dali::GetMaxTextureSize()))
+  {
+    loadingSuccess = false;
+  }
   if(loadingSuccess)
   {
     // The loader records the actual rejected raster dimensions, before conversion
@@ -1455,12 +1543,17 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       return;
     }
 
-    if(!renderInfo.textPixelData)
+    if(!renderInfo.textPixelData && !renderInfo.cutout)
     {
       // Other pixel-less results keep their existing removal/completion contract.
       if(!exceedsTextureLimit())
       {
+        const bool wasCutoutRenderer = mIsCutoutRenderer;
         RemoveRenderer(control, true);
+        if(wasCutoutRenderer)
+        {
+          UpdateCutoutBackgroundVisibility(Ui::View::DownCast(control));
+        }
       }
       mAsyncRenderUsesUserSpaceGradient = false;
       if(mTextLoadingTaskId != publicationTaskId ||
@@ -1493,6 +1586,13 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     Vector2 textControlSize(textWidth + (parameters.padding.start + parameters.padding.end),
                             textHeight + (parameters.padding.top + parameters.padding.bottom));
 
+    if(renderInfo.cutout && parameters.text.empty())
+    {
+      // Empty coverage only draws the current owner background. Preserve the
+      // request's callback dimensions separately in renderedSize.
+      textControlSize = mImpl->mControlSize;
+      renderInfo.size = textControlSize;
+    }
     bool isVerticalScroll = false;
     if(parameters.isMarqueeEnabled)
     {
@@ -1547,7 +1647,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
     // Reset cutout offset before call SetTransformAndSize.
     // (cutout offset will be set at OnSetTransform)
-    if(mController->IsTextCutout())
+    if(mController->IsTextCutout() && IsCutoutRenderingEnabled())
     {
       mController->SetOffsetWithCutout(Vector2::ZERO);
     }
@@ -1567,8 +1667,8 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
     // Get the maximum texture size.
     const int  maxTextureSize   = Dali::GetMaxTextureSize();
-    const bool isHeightTiling   = renderInfo.size.height > static_cast<float>(maxTextureSize);
-    const bool isCutoutEnabled  = renderInfo.isCutoutEnabled || parameters.isCutoutEnabled;
+    const bool isHeightTiling   = !renderInfo.cutout && renderInfo.size.height > static_cast<float>(maxTextureSize);
+    const bool isCutoutEnabled  = static_cast<bool>(renderInfo.cutout);
     const bool isMarqueeEnabled = parameters.isMarqueeEnabled;
     const bool textGradientStyleBlocksComposition =
       renderInfo.styleBlocksTextGradient ||
@@ -1613,7 +1713,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       .EnableTextReveal(textRevealEnabled);
 
     // Shader creation can reenter application code. Preserve a nested publication's cache.
-    Shader      shader        = mTextVisualShaderFactory.GetShader(mFactoryCache, featureBuilder);
+    Shader      shader        = renderInfo.cutout
+                                  ? mTextVisualShaderFactory.GetCutoutShader(mFactoryCache,
+                                                                             renderInfo.cutout->coverage.GetPixelFormat() == Pixel::RGBA8888,
+                                                                             static_cast<bool>(renderInfo.cutout->overlay))
+                                  : mTextVisualShaderFactory.GetShader(mFactoryCache, featureBuilder);
     const auto* currentReveal = GetTextVisualRevealData(mRevealData);
     if(!Dali::Adaptor::IsAvailable() || mControl.GetHandle() != control ||
        !mController->IsAsyncRendering() || mTextLoadingTaskId != publicationTaskId ||
@@ -1624,14 +1728,25 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     }
     mTextShaderFeatureCache = featureBuilder;
     SetRequireRender(isCutoutEnabled || (isMarqueeEnabled && textGradientMixedPixelDataAvailable));
-    if(!usesUserSpaceGradient)
+    // Cutout planes are ready to publish even when a USER_SPACE style remains
+    // configured. Retire the previous renderer list for this path as well.
+    if(!usesUserSpaceGradient || renderInfo.cutout)
     {
       mImpl->mRenderer.SetShader(shader);
       RemoveRenderer(control, false);
     }
 
-    // No tiling required. Use the default renderer.
-    if(renderInfo.size.height <= static_cast<float>(maxTextureSize))
+    const bool wasCutoutRenderer = mIsCutoutRenderer;
+    mIsCutoutRenderer            = false;
+    if(renderInfo.cutout)
+    {
+      auto textures = GetCutoutTexture(*renderInfo.cutout);
+      mImpl->mRenderer.SetTextures(textures);
+      mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
+      mRendererList.push_back(mImpl->mRenderer);
+    }
+    // Ordinary results retain the existing text and height-tiling paths.
+    else if(renderInfo.size.height <= static_cast<float>(maxTextureSize))
     {
       // Filter mode needs to be set to linear to produce better quality while scaling.
       Sampler sampler = Sampler::New();
@@ -1691,7 +1806,6 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
          !mTextShaderFeatureCache.IsEnabledMultiColor() &&
          !mTextShaderFeatureCache.IsEnabledAnyTextGradient())
       {
-        // Create a L8 texture as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
         AddTexture(textureSet, renderInfo.maskPixelData, sampler, textureSetIndex);
         ++textureSetIndex;
       }
@@ -1756,6 +1870,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         // The non-USER_SPACE path has already cleared the list, retaining its default renderer.
         control.RemoveRenderer(mImpl->mRenderer);
         RemoveRenderer(control, true);
+        if(wasCutoutRenderer)
+        {
+          UpdateCutoutBackgroundVisibility(Ui::View::DownCast(control));
+        }
         renderInfo.textPixelData.Reset();
         mAsyncRenderUsesUserSpaceGradient = false;
         if(mTextLoadingTaskId != publicationTaskId ||
@@ -2025,6 +2143,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     {
       mAsyncRenderUsesUserSpaceGradient = false;
     }
+    if(wasCutoutRenderer || mIsCutoutRenderer)
+    {
+      UpdateCutoutBackgroundVisibility(owner);
+    }
     if(mAsyncTextInterface)
     {
       mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
@@ -2155,10 +2277,6 @@ void TextVisual::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
 
 bool TextVisual::UsesDefaultMarqueeTextColor(bool containsColorGlyph, bool alphaChanged) const
 {
-  if(mController->IsTextCutout() || mController->IsBackgroundWithCutoutEnabled())
-  {
-    return true;
-  }
   const auto* gradientData = GetTextVisualGradientData(mGradientData);
   if(gradientData && Text::Internal::Gradient::IsRenderable(gradientData->mTextGradientStyle) &&
      !mController->IsEmbossEnabled())
@@ -2225,8 +2343,15 @@ void TextVisual::SetConstraintApplyAlways(bool applyAlways, bool notifyToConstra
     // Change apply rate only if it is scene on.
     if(mAnimatableTextColorPropertyIndex != Property::INVALID_INDEX && mControl.GetHandle())
     {
-      for(auto& constraint : mColorConstraintList)
+      auto colorBegin = mColorConstraintList.begin();
+      if(colorBegin != mColorConstraintList.end() && *colorBegin != mColorConstraint &&
+         colorBegin->GetTag() == TEXT_VISUAL_CUTOUT_BACKGROUND_CONSTRAINT_TAG)
       {
+        ++colorBegin;
+      }
+      for(auto iter = colorBegin; iter != mColorConstraintList.end(); ++iter)
+      {
+        auto& constraint = *iter;
         if(constraint)
         {
           constraint.SetApplyRate(mIsConstraintAppliedAlways ? Dali::Constraint::APPLY_ALWAYS
@@ -2525,7 +2650,7 @@ void TextVisual::ConfigureTextReveal(Text::Internal::Reveal::Unit            uni
   if(IsOnScene())
   {
     if(mController->IsAsyncRendering() && unit != Text::Internal::Reveal::Unit::DISABLED &&
-       !mController->IsMarqueeEnabled() && !mController->IsTextCutout() &&
+       !mController->IsMarqueeEnabled() && !mIsCutoutRenderer &&
        (!mTextShaderFeatureCache.IsEnabledTextReveal() || data->constraints.empty()))
     {
       // Keep the previous publication until the async replacement is ready.
@@ -2848,7 +2973,8 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
     return false;
   }
   if((fabsf(parameters.textWidth) < Math::MACHINE_EPSILON_1000) ||
-     (fabsf(parameters.textHeight) < Math::MACHINE_EPSILON_1000) || parameters.text.empty())
+     (fabsf(parameters.textHeight) < Math::MACHINE_EPSILON_1000) ||
+     (parameters.text.empty() && !parameters.isCutoutEnabled))
   {
     mAsyncRenderUsesUserSpaceGradient = false;
     if(mIsTextLoadingTaskRunning)
@@ -2858,8 +2984,13 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
     }
     mTextLoadingTaskId = 0u;
 
-    // Remove the texture set and any renderer previously set.
+    // Empty requests publish removal here without dispatching a worker.
+    const bool wasCutoutRenderer = mIsCutoutRenderer;
     RemoveRenderer(control, true);
+    if(wasCutoutRenderer)
+    {
+      UpdateCutoutBackgroundVisibility(Ui::View::DownCast(control));
+    }
 
     // Nothing else to do if the relayout size is zero.
     ResourceReady(Ui::Visual::ResourceStatus::READY);
@@ -2893,7 +3024,7 @@ bool TextVisual::PrepareAsyncRendererRequest(Actor& control, Text::AsyncTextPara
   // Get the maximum texture size.
   const int maxTextureSize = Dali::GetMaxTextureSize();
 
-  if(parameters.textWidth > maxTextureSize)
+  if(parameters.textWidth > maxTextureSize && (!parameters.isCutoutEnabled || parameters.isMarqueeEnabled))
   {
     DALI_LOG_DEBUG_INFO(
       "layoutSize(%f) > maxTextureSize(%d): To guarantee the behavior of Texture::New, layoutSize must not be bigger "
@@ -3337,7 +3468,7 @@ bool TextVisual::ApplyGradientTiling(const Text::Internal::Gradient::RenderData&
 
 void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultipleTextColors, bool containsColorGlyph,
                              bool styleEnabled, bool styleTextureEnabled, bool styleBlocksTextGradient,
-                             bool isOverlayStyle, bool embossEnabled)
+                             bool isOverlayStyle, bool embossEnabled, bool cutoutEnabled)
 {
   std::optional<Text::GradientRasterContext> gradientContext;
   if(Text::Internal::RequiresGradientRasterContext(mController->GetRenderTextModel()->GetGradientSpanModelData()))
@@ -3352,27 +3483,29 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
   // Get the maximum size.
   const int  maxTextureSize   = Dali::GetMaxTextureSize();
-  const bool isHeightTiling   = size.height >= static_cast<float>(maxTextureSize);
   const bool isMarqueeEnabled = mController->IsMarqueeEnabled();
+  // A cropped cutout uses one full-control quad even when the canvas is tall.
+  const bool isHeightTiling = size.height >= static_cast<float>(maxTextureSize) &&
+                              !cutoutEnabled;
   const bool textGradientStyleBlocksComposition =
     styleBlocksTextGradient ||
     (isMarqueeEnabled && (styleTextureEnabled || isOverlayStyle));
   const bool textGradientCompositionEnabled =
     IsTextGradientCompositionSupported(size, hasMultipleTextColors, containsColorGlyph, textGradientStyleBlocksComposition,
                                        isOverlayStyle, embossEnabled, isHeightTiling,
-                                       isMarqueeEnabled, mController->IsTextCutout());
+                                       isMarqueeEnabled, cutoutEnabled);
   const bool textGradientMixedCompositionEnabled =
     IsTextGradientMixedCompositionSupported(size, hasMultipleTextColors, containsColorGlyph, textGradientStyleBlocksComposition,
                                             styleTextureEnabled, isOverlayStyle, embossEnabled,
-                                            isMarqueeEnabled, mController->IsTextCutout());
+                                            isMarqueeEnabled, cutoutEnabled);
   const bool textGradientOverlayCompositionEnabled =
-    IsTextGradientOverlayCompositionSupported(size, isMarqueeEnabled, mController->IsTextCutout());
+    IsTextGradientOverlayCompositionSupported(size, isMarqueeEnabled, cutoutEnabled);
   const bool featureStyleEnabled =
     (textGradientCompositionEnabled || textGradientMixedCompositionEnabled) ? styleTextureEnabled
                                                                             : styleEnabled;
   const bool textRevealEnabled =
     revealData && revealData->unit != Text::Internal::Reveal::Unit::DISABLED &&
-    !isMarqueeEnabled && !mController->IsTextCutout();
+    !isMarqueeEnabled && !cutoutEnabled;
   if(revealData && revealData->unit != Text::Internal::Reveal::Unit::DISABLED && !textRevealEnabled)
   {
     DALI_LOG_DEBUG_INFO("Text::Reveal foreground rendering is disabled while marquee or cutout is active\n");
@@ -3398,7 +3531,8 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     .EnableTextGradientOverlay(textGradientOverlayCompositionEnabled)
     .EnableTextReveal(textRevealEnabled);
 
-  Shader shader = GetTextShader(mFactoryCache, featureBuilder);
+  Shader shader     = GetTextShader(mFactoryCache, featureBuilder);
+  mIsCutoutRenderer = false;
   mImpl->mRenderer.SetShader(shader);
 
   if(auto* gradientData = GetTextVisualGradientData(mGradientData))
@@ -3406,11 +3540,23 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     gradientData->mTextGradientMaskPixelData = PixelData();
   }
 
-  // No tiling required. Use the default renderer.
-  if(size.height < maxTextureSize)
-  {
-    TextureSet textureSet = GetTextTexture(size, context);
+  // Shader creation can reenter through ObjectRegistry callbacks. Resolve the
+  // current request again, then share that decision with texture preparation.
+  cutoutEnabled = mController->IsTextCutout() && IsCutoutRenderingEnabled();
 
+  // No tiling required. Use the default renderer.
+  if(size.height < maxTextureSize || cutoutEnabled)
+  {
+    TextureSet textureSet = GetTextTexture(size, context, cutoutEnabled);
+
+    if(!textureSet)
+    {
+      // UpdateRenderer retained the default renderer for reuse. A rejected
+      // crop must also retire its previous textures and shader from the actor.
+      actor.RemoveRenderer(mImpl->mRenderer);
+      RemoveRenderer(actor, true);
+      return;
+    }
     mImpl->mRenderer.SetTextures(textureSet);
     mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex, static_cast<float>(hasMultipleTextColors));
     mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
@@ -4017,7 +4163,7 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
                                               options.radius, prepared.blurDuration, std::move(sequences),
                                               !mTextShaderFeatureCache.IsEnabledMultiColor() && !mTextShaderFeatureCache.IsEnabledEmoji() &&
                                                 !mTextShaderFeatureCache.IsEnabledAnyTextGradient() && !mTextShaderFeatureCache.IsEnabledTextGradientOverlay() &&
-                                                !mController->IsTextCutout(),
+                                                !IsCutoutRenderingEnabled(),
                                               std::move(decorations), std::move(images), blurSettings);
   if(!runtimeBlur)
   {
@@ -4118,9 +4264,70 @@ void TextVisual::RefreshRevealBlurImages(Ui::Integration::Visual::Base visual)
   }
 }
 
-TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientRasterContext* gradientContext)
+bool TextVisual::IsCutoutRenderingEnabled() const
 {
-  const bool cutoutEnabled = mController->IsTextCutout();
+  if(!mController->IsTextCutout())
+  {
+    return false;
+  }
+  const auto* gradient      = GetTextVisualGradientData(mGradientData);
+  const auto* reveal        = GetTextVisualRevealData(mRevealData);
+  Ui::View    owner         = Ui::View::DownCast(mControl.GetHandle());
+  auto        background    = owner ? ViewDataImpl::Get(GetImpl(owner)).GetVisual(Ui::Integration::View::Property::BACKGROUND)
+                                    : Ui::Integration::Visual::Base();
+  const auto* gradientSpans = mController->GetLogicalTextModel()->GetGradientSpanModelData();
+  return Text::IsShaderCutoutSupported(gradientSpans && !gradientSpans->characterRuns.Empty(),
+                                       mController->IsMarqueeEnabled(),
+                                       gradient && Text::Internal::Gradient::IsRenderable(gradient->mTextGradientStyle),
+                                       gradient && Text::Internal::Gradient::IsRenderable(gradient->mTextGradientOverlayStyle),
+                                       reveal && reveal->unit != Text::Internal::Reveal::Unit::DISABLED,
+                                       mController->HasValidReplacementSource(),
+                                       mController->IsEmbossEnabled(),
+                                       background && Ui::GetImplementation(background).GetType() != Ui::Integration::InternalVisualType::COLOR);
+}
+
+bool TextVisual::CanUpdateCutoutTextColor(Ui::Integration::Visual::Base visual)
+{
+  auto& self = GetVisualObject(visual);
+  return self.mIsCutoutRenderer && !self.mIsTextLoadingTaskRunning && self.IsCutoutRenderingEnabled() &&
+         !self.mTextShaderFeatureCache.IsEnabledEmoji() && !self.mTextShaderFeatureCache.IsEnabledMultiColor() &&
+         !self.mTextShaderFeatureCache.IsEnabledOverlay() &&
+         !self.mController->GetRenderTextModel()->GetGradientSpanModelData();
+}
+
+TextureSet TextVisual::GetCutoutTexture(const Ui::Text::CutoutRenderData& data)
+{
+  auto sampler = Sampler::New();
+  sampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
+  sampler.SetWrapMode(WrapMode::CLAMP_TO_EDGE, WrapMode::CLAMP_TO_EDGE);
+  auto textures = TextureSet::New();
+  AddTexture(textures, data.coverage, sampler, 0u);
+  AddTexture(textures, data.style, sampler, 1u);
+  if(data.overlay)
+  {
+    AddTexture(textures, data.overlay, sampler, 2u);
+  }
+  mImpl->mRenderer.RegisterProperty("uCutoutRect", data.rect);
+  mImpl->mRenderer.RegisterProperty("uCutoutControlSize", data.controlSize);
+  mIsCutoutRenderer = true;
+  return textures;
+}
+
+TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientRasterContext* gradientContext, bool cutoutEnabled)
+{
+  if(cutoutEnabled)
+  {
+    Ui::Text::CutoutRenderData planes;
+    const auto                 format = mTextShaderFeatureCache.IsEnabledEmoji() || mTextShaderFeatureCache.IsEnabledMultiColor()
+                                          ? Pixel::RGBA8888
+                                          : Pixel::L8;
+    if(mTypesetter->RenderCutoutPlanes(size, planes, format, Dali::GetMaxTextureSize()))
+    {
+      return GetCutoutTexture(planes);
+    }
+    DALI_LOG_ERROR("Cutout raster bounds exceed the texture limit or are invalid\n");
+    return {};
+  }
 
   // Filter mode needs to be set to linear to produce better quality while scaling.
   Sampler sampler = Sampler::New();
@@ -4130,15 +4337,13 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientR
 
   // Create RGBA texture if the text contains emojis or multiple text colors, otherwise L8 texture
   Pixel::Format textPixelFormat =
-    (mTextShaderFeatureCache.IsEnabledEmoji() || mTextShaderFeatureCache.IsEnabledMultiColor() || cutoutEnabled)
+    (mTextShaderFeatureCache.IsEnabledEmoji() || mTextShaderFeatureCache.IsEnabledMultiColor())
       ? Pixel::RGBA8888
       : Pixel::L8;
 
   // Check the text direction
   Text::Direction textDirection   = mController->GetTextDirection();
   uint32_t        textureSetIndex = 0u;
-  PixelBuffer     cutoutData;
-  float           cutoutAlpha = mController->GetRenderTextModel()->GetDefaultColor().a;
 
   if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
   {
@@ -4161,26 +4366,11 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientR
   }
   else
   {
-    // Create a texture for the text without any styles
-    if(cutoutEnabled)
-    {
-      cutoutData = mTypesetter->RenderWithPixelBuffer(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false,
-                                                      textPixelFormat, Size::ZERO, gradientContext);
-
-      // Make transparent buffer.
-      // If the cutout is enabled, a separate texture is not used for the text.
-      PixelBuffer buffer = mTypesetter->CreateFullBackgroundBuffer(1, 1, Vector4(0.f, 0.f, 0.f, 0.f));
-      PixelData   data   = PixelBuffer::Convert(buffer);
-      AddTexture(textureSet, data, sampler, textureSetIndex);
-      ++textureSetIndex;
-    }
-    else
-    {
-      PixelData data =
-        mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat, Size::ZERO, gradientContext);
-      AddTexture(textureSet, data, sampler, textureSetIndex);
-      ++textureSetIndex;
-    }
+    // Create a texture for the text without any styles.
+    PixelData data =
+      mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat, Size::ZERO, gradientContext);
+    AddTexture(textureSet, data, sampler, textureSetIndex);
+    ++textureSetIndex;
 
     if(mTextShaderFeatureCache.IsEnabledTextGradient())
     {
@@ -4197,17 +4387,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientR
   if(mTextShaderFeatureCache.IsEnabledStyle())
   {
     // Create RGBA texture for all the text styles that render in the background (without the text itself)
-    PixelData styleData;
-
-    if(cutoutEnabled && cutoutData)
-    {
-      styleData = mTypesetter->RenderWithCutout(size, textDirection, cutoutData, Text::Typesetter::RENDER_NO_TEXT,
-                                                false, Pixel::RGBA8888, cutoutAlpha);
-    }
-    else
-    {
-      styleData = mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888);
-    }
+    PixelData styleData = mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888);
 
     AddTexture(textureSet, styleData, sampler, textureSetIndex);
     ++textureSetIndex;
@@ -4226,9 +4406,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientR
      mTextShaderFeatureCache.IsEnabledEmoji() &&
      !mTextShaderFeatureCache.IsEnabledMultiColor())
   {
-    // Create a L8 texture as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
     PixelData maskData = mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
-
     AddTexture(textureSet, maskData, sampler, textureSetIndex);
     ++textureSetIndex;
   }
@@ -4262,12 +4440,19 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size, const Text::GradientR
 Shader TextVisual::GetTextShader(VisualFactoryCache&                      factoryCache,
                                  TextVisualShaderFeature::FeatureBuilder& featureBuilder)
 {
-  // Cache feature builder informations.
-  mTextShaderFeatureCache = featureBuilder;
-  SetRequireRender(mController->IsTextCutout());
+  // Cache the features used by texture preparation and renderer constraints.
+  mTextShaderFeatureCache  = featureBuilder;
+  const bool cutoutEnabled = mController->IsTextCutout() && IsCutoutRenderingEnabled();
+  SetRequireRender(cutoutEnabled);
 
-  Shader shader = mTextVisualShaderFactory.GetShader(factoryCache, mTextShaderFeatureCache);
-  return shader;
+  if(cutoutEnabled)
+  {
+    return mTextVisualShaderFactory.GetCutoutShader(factoryCache,
+                                                    featureBuilder.IsEnabledEmoji() || featureBuilder.IsEnabledMultiColor(),
+                                                    featureBuilder.IsEnabledOverlay());
+  }
+
+  return mTextVisualShaderFactory.GetShader(factoryCache, mTextShaderFeatureCache);
 }
 
 void TextVisual::SetRequireRender(bool requireRender)

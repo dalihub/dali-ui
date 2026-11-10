@@ -296,8 +296,22 @@ bool LabelImpl::PropertyHandler::OnPropertySet(LabelImpl& impl, Dali::Property::
       const Vector4& textColor = propertyValue.Get<Vector4>();
       if(impl.mController->GetDefaultColor() != textColor)
       {
-        impl.mController->SetDefaultColor(textColor);
-        impl.RequestRendererUpdate();
+        const bool cutoutRequested = impl.mController->IsTextCutout();
+        if(cutoutRequested && (!impl.mController->IsAsyncRendering() || !impl.mIsAsyncRenderRequested) &&
+           Internal::TextVisual::CanUpdateCutoutTextColor(impl.mVisual))
+        {
+          impl.mController->SetCutoutTextColor(textColor);
+        }
+        else
+        {
+          impl.mController->SetDefaultColor(textColor);
+          impl.RequestRendererUpdate();
+          if(cutoutRequested && impl.mController->IsAsyncRendering() &&
+             Internal::TextVisual::IsCutoutRenderingEnabled(impl.mVisual) && !impl.mIsManualRenderInProgress)
+          {
+            impl.RequestAsyncRender();
+          }
+        }
 
         // Trigger constraint always.
         if(DALI_LIKELY(impl.mVisual))
@@ -305,11 +319,6 @@ bool LabelImpl::PropertyHandler::OnPropertySet(LabelImpl& impl, Dali::Property::
           Internal::TextVisual::SetConstraintApplyAlways(impl.mVisual, impl.mTextColorAnimatedCount, true);
         }
       }
-      return true;
-    }
-    case Ui::Text::LabelPropertyIndex::CUTOUT_ENABLED:
-    {
-      impl.UpdateCutoutState(propertyValue.Get<bool>());
       return true;
     }
     default:

@@ -521,20 +521,6 @@ public:
   virtual bool IsCutoutEnabled() const = 0;
 
   /**
-   * @brief Retrieves the background with cutout is enabled or not.
-   *
-   * @return boolean if it is enabled.
-   */
-  virtual const bool IsBackgroundWithCutoutEnabled() const = 0;
-
-  /**
-   * @brief Retrieves the color of the background with cutout.
-   *
-   * @return The color of the background with cutout.
-   */
-  virtual const Vector4& GetBackgroundColorWithCutout() const = 0;
-
-  /**
    * @brief Retrieves the left and top offset with cutout.
    *
    * @return The offset with cutout.

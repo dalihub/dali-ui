@@ -793,33 +793,6 @@ bool VisualModel::IsCutoutEnabled() const
   return mCutoutEnabled;
 }
 
-void VisualModel::SetBackgroundWithCutoutEnabled(bool enable)
-{
-  mBackgroundWithCutoutEnabled = enable;
-}
-
-bool VisualModel::IsBackgroundWithCutoutEnabled() const
-{
-  return mBackgroundWithCutoutEnabled;
-}
-
-void VisualModel::SetBackgroundColorWithCutout(const Vector4& color)
-{
-  if(mCutoutData || color != Vector4::ZERO)
-  {
-    if(!mCutoutData)
-    {
-      mCutoutData = new CutoutData();
-    }
-    mCutoutData->backgroundColor = color;
-  }
-}
-
-const Vector4& VisualModel::GetBackgroundColorWithCutout() const
-{
-  return mCutoutData ? mCutoutData->backgroundColor : Vector4::ZERO;
-}
-
 void VisualModel::SetOffsetWithCutout(const Vector2& offset)
 {
   if(mCutoutData || offset != Vector2::ZERO)
@@ -880,8 +853,7 @@ VisualModel::VisualModel()
   mStrikethroughEnabled(false),
   mStrikethroughColorSet(false),
   mCharacterSpacing(0.0f),
-  mCutoutEnabled(false),
-  mBackgroundWithCutoutEnabled(false)
+  mCutoutEnabled(false)
 {
 }
 

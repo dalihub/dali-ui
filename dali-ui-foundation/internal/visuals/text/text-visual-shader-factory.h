@@ -233,6 +233,15 @@ public:
   ~TextVisualShaderFactory();
 
   /**
+   * @brief Lazily creates or reuses the shader for a cutout plane combination.
+   * @param[in] factoryCache Shared cache that owns the shader variants.
+   * @param[in] coloredGlyphs True for RGBA glyphs; false for L8 coverage.
+   * @param[in] overlay Whether a separate decoration overlay is present.
+   * @return The cached cutout shader.
+   */
+  Shader GetCutoutShader(VisualFactoryCache& factoryCache, bool coloredGlyphs, bool overlay);
+
+  /**
    * @brief Get the standard text rendering shader.
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] featureBuilder Collection of current text shader's features

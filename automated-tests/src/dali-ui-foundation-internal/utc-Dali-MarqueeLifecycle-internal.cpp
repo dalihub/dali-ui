@@ -4992,3 +4992,55 @@ int UtcDaliAsyncMarqueeColorEmojiSpanRequestOrderP(void)
   }
   END_TEST;
 }
+
+// Ordinary marquee fallback must preserve the manual request color snapshot.
+int UtcDaliCutoutMarqueeManualColorSnapshotP(void)
+{
+  UiTestApplication application;
+  using Request            = void (Ui::Integration::LabelImpl::*)(float, float);
+  const Request requests[] = {&Ui::Integration::LabelImpl::RequestAsyncRenderWithFixedSize,
+                              &Ui::Integration::LabelImpl::RequestAsyncRenderWithFixedWidth,
+                              &Ui::Integration::LabelImpl::RequestAsyncRenderWithFixedHeight,
+                              &Ui::Integration::LabelImpl::RequestAsyncRenderWithConstraints};
+  for(auto request : requests)
+  {
+    Lifecycle test(application, true, false, false);
+    test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+    test.label.SetTextCutoutEnabled(true);
+    test.Drain();
+    test.Start();
+    auto& impl = static_cast<Ui::Integration::LabelImpl&>(test.label.GetImplementation());
+    (impl.*request)(120.0f, 40.0f);
+    auto tasks = test.Take();
+    DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
+    if(tasks.size() != 1u)
+    {
+      return 1;
+    }
+    auto first = tasks.front();
+    first->Process();
+    DALI_TEST_CHECK(first->mParameters.isMarqueeEnabled);
+    DALI_TEST_CHECK(!first->mRenderInfo.isCutoutEnabled && !first->mRenderInfo.cutout);
+    DALI_TEST_CHECK(test.label.IsTextCutoutEnabled());
+    const auto done = test.completed;
+    test.label.SetTextColor(Ui::UiColor(Vector4(1.0f, 1.0f, 1.0f, 0.5f)));
+    test.Frame();
+    DALI_TEST_CHECK(test.Take().empty());
+    DALI_TEST_EQUALS(first->mParameters.textColor.a, 1.0f, TEST_LOCATION);
+    test.Deliver(first);
+    DALI_TEST_CHECK(test.Take().empty());
+    DALI_TEST_EQUALS(test.completed, done + 1u, TEST_LOCATION);
+    test.Drain();
+    DALI_TEST_EQUALS(test.completed, done + 1u, TEST_LOCATION);
+    (impl.*request)(132.0f, 44.0f);
+    tasks = test.Take();
+    DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
+    if(tasks.size() == 1u)
+    {
+      DALI_TEST_EQUALS(tasks.front()->mParameters.textColor.a, 0.5f, TEST_LOCATION);
+      test.Complete(tasks.front());
+    }
+    DALI_TEST_EQUALS(test.completed, done + 2u, TEST_LOCATION);
+  }
+  END_TEST;
+}

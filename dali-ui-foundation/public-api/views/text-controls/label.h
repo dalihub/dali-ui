@@ -1181,21 +1181,27 @@ public: // Setters for chaining
   Dali::Vector<Text::FontVariation::Axis> GetFontVariation() const;
 
   /**
-   * @brief Sets whether the text is rendered as a cutout.
+   * @brief Requests text cutout rendering for supported text and solid-color backgrounds.
    *
-   * When enabled, the glyph shapes are cut out from the rendered content
-   * instead of being filled with the text color.
+   * Glyph shapes cut through the label's solid-color background while retaining text color and alpha.
+   * Foreground colors, color emoji, shadow, outline, underline, strikethrough and text backgrounds are supported.
+   * @note Active TextGradient, TextGradientOverlay, GradientSpan, marquee, reveal, inline replacements and bevel
+   * use ordinary text rendering without cutout. The requested setting is preserved and cutout resumes
+   * when these features are disabled.
+   * @note Solid-color backgrounds and no background are supported. Image, gradient and other non-color
+   * backgrounds use ordinary rendering without cutout.
    *
    * @SINCE_3_0.0
-   * @param[in] enabled True to render the text as a cutout, false to render it normally.
+   * @param[in] enabled True to request text cutout, false to use ordinary rendering.
    */
   void SetTextCutoutEnabled(bool enabled);
 
   /**
-   * @brief Gets whether the text is rendered as a cutout.
+   * @brief Gets the requested text cutout setting.
    *
+   * @note Unsupported feature combinations use ordinary rendering without changing this setting.
    * @SINCE_3_0.0
-   * @return True if the text is rendered as a cutout, otherwise false.
+   * @return True if text cutout is requested, including while ordinary rendering is used.
    */
   bool IsTextCutoutEnabled() const;
 

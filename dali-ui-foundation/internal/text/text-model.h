@@ -376,16 +376,6 @@ public:
   bool IsCutoutEnabled() const override;
 
   /**
-   * @copydoc ModelInterface::IsBackgroundWithCutoutEnabled()
-   */
-  const bool IsBackgroundWithCutoutEnabled() const override;
-
-  /**
-   * @copydoc ModelInterface::GetBackgroundColorWithCutout()
-   */
-  const Vector4& GetBackgroundColorWithCutout() const override;
-
-  /**
    * @copydoc ModelInterface::GetOffsetWithCutout()
    */
   const Vector2& GetOffsetWithCutout() const override;

@@ -1125,7 +1125,8 @@ int UtcDaliReplacementCutoutFallsBackWithoutMutatingLogicalModelP(void)
   Text::ModelPtr originalModel        = Text::Model::New();
   originalModel->mLogicalModel->mText = Utf32("AiconB");
   originalModel->mVisualModel->SetCutoutEnabled(true);
-  originalModel->mVisualModel->SetBackgroundWithCutoutEnabled(true);
+  originalModel->mVisualModel->SetOffsetWithCutout(Vector2(7.0f, 11.0f));
+  const auto originalText = originalModel->mLogicalModel->mText;
 
   Text::ReplacementSourceSnapshot source;
   source.runs.PushBack(Candidate(1u, 4u, 24.0f, 18.0f, 312u));
@@ -1142,9 +1143,17 @@ int UtcDaliReplacementCutoutFallsBackWithoutMutatingLogicalModelP(void)
   DALI_TEST_CHECK(Text::LayoutReplacementSourceForTest(*originalModel, source, services, options, result));
   DALI_TEST_CHECK(result.processingModel);
   DALI_TEST_CHECK(originalModel->IsCutoutEnabled());
-  DALI_TEST_CHECK(originalModel->IsBackgroundWithCutoutEnabled());
   DALI_TEST_CHECK(!result.processingModel->IsCutoutEnabled());
-  DALI_TEST_CHECK(!result.processingModel->IsBackgroundWithCutoutEnabled());
+  DALI_TEST_CHECK(result.processingModel != originalModel);
+  DALI_TEST_CHECK(result.processingModel->mLogicalModel != originalModel->mLogicalModel);
+  DALI_TEST_CHECK(!result.processingModel->mVisualModel->mCutoutData);
+  DALI_TEST_EQUALS(result.processingModel->GetOffsetWithCutout(), Vector2::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(originalModel->GetOffsetWithCutout(), Vector2(7.0f, 11.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(originalModel->mLogicalModel->mText.Count(), originalText.Count(), TEST_LOCATION);
+  for(Text::CharacterIndex index = 0u; index < originalText.Count(); ++index)
+  {
+    DALI_TEST_EQUALS(originalModel->mLogicalModel->mText[index], originalText[index], TEST_LOCATION);
+  }
 
   END_TEST;
 }

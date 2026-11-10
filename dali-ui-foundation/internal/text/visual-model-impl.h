@@ -53,7 +53,6 @@ struct HyphenInfo
 
 struct CutoutData
 {
-  Vector4 backgroundColor;
   Vector2 offset;
 };
 
@@ -711,34 +710,6 @@ public:
   bool IsCutoutEnabled() const;
 
   /**
-   * @brief Sets the background with cutout flag.
-   *
-   * @param[in] enable true if background enabled.
-   */
-  void SetBackgroundWithCutoutEnabled(bool enable);
-
-  /**
-   * @brief Returns whether the text is cutouted or not.
-   *
-   * @return True if enabled.
-   */
-  bool IsBackgroundWithCutoutEnabled() const;
-
-  /**
-   * @brief Sets the Color of background with cutout.
-   *
-   * @param[in] color The color to set.
-   */
-  void SetBackgroundColorWithCutout(const Vector4& color);
-
-  /**
-   * @brief Retrieves the Color of background with cutout.
-   *
-   * @return The color.
-   */
-  const Vector4& GetBackgroundColorWithCutout() const;
-
-  /**
    * @brief Sets the left and top offset with cutout.
    *
    * @param[in] offset The offset to set.
@@ -836,16 +807,15 @@ private:
   bool mTextElideEnabled : 1; ///< Whether the text's elide is enabled.
 
 public:
-  bool  mUnderlineEnabled : 1;            ///< Underline enabled flag
-  bool  mShadowEnabled : 1;               ///< Shadow enabled flag.
-  bool  mOutlineEnabled : 1;              ///< Outline enabled flag.
-  bool  mUnderlineColorSet : 1;           ///< Has the underline color been explicitly set?
-  bool  mBackgroundEnabled : 1;           ///< Background enabled flag
-  bool  mStrikethroughEnabled : 1;        ///< Strikethrough enabled flag
-  bool  mStrikethroughColorSet : 1;       ///< Has the strikethrough color been explicitly set?
-  float mCharacterSpacing;                ///< Contains the value of the character spacing.
-  bool  mCutoutEnabled : 1;               ///< Cutout enabled flag
-  bool  mBackgroundWithCutoutEnabled : 1; ///< Background with cutout enabled flag.
+  bool  mUnderlineEnabled : 1;      ///< Underline enabled flag
+  bool  mShadowEnabled : 1;         ///< Shadow enabled flag.
+  bool  mOutlineEnabled : 1;        ///< Outline enabled flag.
+  bool  mUnderlineColorSet : 1;     ///< Has the underline color been explicitly set?
+  bool  mBackgroundEnabled : 1;     ///< Background enabled flag
+  bool  mStrikethroughEnabled : 1;  ///< Strikethrough enabled flag
+  bool  mStrikethroughColorSet : 1; ///< Has the strikethrough color been explicitly set?
+  float mCharacterSpacing;          ///< Contains the value of the character spacing.
+  bool  mCutoutEnabled : 1;         ///< Cutout enabled flag
 };
 
 } // namespace Text

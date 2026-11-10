@@ -25,6 +25,7 @@
 #include <cstring>
 #include <ctime>
 #include <functional>
+#include <limits>
 #include <utility>
 
 // Install the callback mock before production headers.
@@ -42,14 +43,17 @@
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/internal/text/rendering/text-cutout-render-data.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
+#include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
@@ -67,6 +71,51 @@ namespace Dali::Ui::Internal
 {
 struct TextVisualTestAccessor
 {
+  static size_t RendererCount(Ui::Integration::Visual::Base visual)
+  {
+    return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject()).mRendererList.size();
+  }
+
+  static Constraint BackgroundConstraint(Ui::Integration::Visual::Base visual)
+  {
+    return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject()).GetCutoutBackgroundConstraint();
+  }
+
+  static size_t ColorConstraintCount(Ui::Integration::Visual::Base visual)
+  {
+    return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject()).mColorConstraintList.size();
+  }
+
+  static size_t ColorConstraintCapacity(Ui::Integration::Visual::Base visual)
+  {
+    return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject()).mColorConstraintList.capacity();
+  }
+
+  static Constraint FirstColorConstraint(Ui::Integration::Visual::Base visual)
+  {
+    return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject()).mColorConstraintList.front();
+  }
+
+  static size_t OpacityConstraintCount(Ui::Integration::Visual::Base visual)
+  {
+    return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject()).mOpacityConstraintList.size();
+  }
+
+  static bool HasOptionalTextState(Ui::Integration::Visual::Base visual)
+  {
+    auto& self = static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject());
+    return self.mGradientData || self.mRevealData;
+  }
+
+  static bool HasCutoutShader(Ui::Integration::Visual::Base visual)
+  {
+    auto& cache = static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject()).mFactoryCache;
+    return cache.GetShader(VisualFactoryCache::TEXT_SHADER_CUTOUT) ||
+           cache.GetShader(VisualFactoryCache::TEXT_SHADER_CUTOUT_COLOR) ||
+           cache.GetShader(VisualFactoryCache::TEXT_SHADER_CUTOUT_OVERLAY) ||
+           cache.GetShader(VisualFactoryCache::TEXT_SHADER_CUTOUT_COLOR_OVERLAY);
+  }
+
   static bool PublishBlur(Ui::Integration::Visual::Base visual, Actor owner, const PreparedRevealBlur& prepared, uint64_t revision,
                           const Vector<Ui::Text::ReplacementRevealTiming>& ordinaryTimings)
   {
@@ -894,7 +943,7 @@ int UtcDaliTextVisualMarqueeRejectsOlderRevealCompletionP(void)
   END_TEST;
 }
 
-int UtcDaliTextVisualCutoutRejectsOlderRevealCompletionP(void)
+int UtcDaliTextVisualCutoutAllowsRevealFallbackCompletionP(void)
 {
   UiTestApplication application;
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
@@ -909,8 +958,10 @@ int UtcDaliTextVisualCutoutRejectsOlderRevealCompletionP(void)
                 MakeRevealParameters("Reveal requested before cutout", 1u,
                                      UiText::Internal::Reveal::Unit::CHARACTER, 0.2f),
                 MakeRevealRenderInfo(32u, 16u));
-  DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
 
+  DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(rendered.visual));
+  DALI_TEST_CHECK(UiInternal::TextVisual::GetController(rendered.visual)->IsTextCutout());
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, nullptr);
   END_TEST;
 }
@@ -1067,12 +1118,12 @@ namespace
 int CheckAsyncRevealPendingOrdinary(UiTestApplication& application, bool blur, bool hidden)
 {
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
-  auto       rendered = CreateTextVisual(application);
+  auto rendered = CreateTextVisual(application);
   // Complete an ordinary async publication explicitly; this fixture is a View
   // with a TextVisual, not a Label that submits its controller layout itself.
-  auto ordinaryParameters = MakeParameters("initial ordinary publication");
+  auto ordinaryParameters             = MakeParameters("initial ordinary publication");
   ordinaryParameters.isMarqueeEnabled = false;
-  auto initialLoader = UiText::AsyncTextLoader::New();
+  auto initialLoader                  = UiText::AsyncTextLoader::New();
   PublishDirect(rendered, ordinaryParameters, initialLoader.RenderText(ordinaryParameters, false, Size::ZERO));
   application.SendNotification();
   application.Render();
@@ -1126,14 +1177,14 @@ int CheckAsyncRevealPendingOrdinary(UiTestApplication& application, bool blur, b
 int UtcDaliTextVisualAsyncRevealPendingOrdinaryP(void)
 {
   UiTestApplication application;
-  const int visible = CheckAsyncRevealPendingOrdinary(application, false, false);
+  const int         visible = CheckAsyncRevealPendingOrdinary(application, false, false);
   return visible == 0 ? CheckAsyncRevealPendingOrdinary(application, false, true) : visible;
 }
 
 int UtcDaliTextVisualAsyncBlurPendingOrdinaryP(void)
 {
   UiTestApplication application;
-  const int visible = CheckAsyncRevealPendingOrdinary(application, true, false);
+  const int         visible = CheckAsyncRevealPendingOrdinary(application, true, false);
   return visible == 0 ? CheckAsyncRevealPendingOrdinary(application, true, true) : visible;
 }
 
@@ -1214,17 +1265,17 @@ int UtcDaliTextVisualAsyncRevealPendingFullFadeP(void)
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
   for(const bool blur : {false, true})
   {
-    auto rendered = CreateTextVisual(application);
-    auto ordinary = MakeParameters("A completed ordinary publication");
+    auto rendered             = CreateTextVisual(application);
+    auto ordinary             = MakeParameters("A completed ordinary publication");
     ordinary.isMarqueeEnabled = false;
-    auto loader = UiText::AsyncTextLoader::New();
+    auto loader               = UiText::AsyncTextLoader::New();
     PublishDirect(rendered, ordinary, loader.RenderText(ordinary, false, Size::ZERO));
     application.SendNotification();
     application.Render();
-    const auto original = rendered.view.GetRendererAt(0u);
-    const auto textures = original.GetTextures();
-    const auto progress = rendered.view.RegisterProperty("testRevealProgress", 1.0f);
-    auto configure = [&](uint64_t revision, UiText::Internal::Reveal::Unit unit)
+    const auto original  = rendered.view.GetRendererAt(0u);
+    const auto textures  = original.GetTextures();
+    const auto progress  = rendered.view.RegisterProperty("testRevealProgress", 1.0f);
+    auto       configure = [&](uint64_t revision, UiText::Internal::Reveal::Unit unit)
     {
       UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, unit, 1.0f, progress, revision,
                                                   UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, blur ? 24.0f : 0.0f, 1.0f);
@@ -1275,10 +1326,10 @@ int UtcDaliTextVisualAsyncRevealPendingFullFadeP(void)
                        rendered.view.GetCurrentProperty<float>(progress), 0.0001f, TEST_LOCATION);
     }
     DALI_TEST_EQUALS(rendered.view.GetCurrentProperty<float>(progress), 0.0f, TEST_LOCATION);
-    auto parameters = MakeRevealParameters("A completed ordinary publication", 3u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
-    parameters.textRevealBlurRadius = blur ? 24.0f : 0.0f;
+    auto parameters                        = MakeRevealParameters("A completed ordinary publication", 3u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
+    parameters.textRevealBlurRadius        = blur ? 24.0f : 0.0f;
     parameters.textRevealBlurDurationRatio = 1.0f;
-    parameters.isTextRevealBlurRequested = blur;
+    parameters.isTextRevealBlurRequested   = blur;
     PublishDirect(rendered, parameters, loader.RenderText(parameters, false, Size::ZERO));
     application.SendNotification();
     application.Render();
@@ -1307,18 +1358,18 @@ int UtcDaliTextVisualAsyncRevealPendingNoneFullFadeP(void)
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
   for(bool blur : {false, true})
   {
-    auto rendered = CreateTextVisual(application);
+    auto       rendered = CreateTextVisual(application);
     const auto progress = rendered.view.RegisterProperty("testRevealProgress", 1.0f);
     UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::CHARACTER,
                                                 0.25f, progress, 1u, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f, blur ? 24.0f : 0.0f, 0.5f);
-    auto parameters = MakeRevealParameters("First line\nSecond line", 1u, UiText::Internal::Reveal::Unit::CHARACTER,
-                                           0.25f, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f);
-    parameters.isMultiLine = true;
-    parameters.isTextRevealBlurRequested = blur;
-    parameters.textRevealBlurRadius = blur ? 24.0f : 0.0f;
+    auto parameters                        = MakeRevealParameters("First line\nSecond line", 1u, UiText::Internal::Reveal::Unit::CHARACTER,
+                                                                  0.25f, UiText::Internal::Reveal::Sequence::PER_LINE, 0.25f);
+    parameters.isMultiLine                 = true;
+    parameters.isTextRevealBlurRequested   = blur;
+    parameters.textRevealBlurRadius        = blur ? 24.0f : 0.0f;
     parameters.textRevealBlurDurationRatio = 0.5f;
-    auto loader = UiText::AsyncTextLoader::New();
-    const auto result = loader.RenderText(parameters, false, Size::ZERO);
+    auto       loader                      = UiText::AsyncTextLoader::New();
+    const auto result                      = loader.RenderText(parameters, false, Size::ZERO);
     PublishDirect(rendered, parameters, result);
     application.SendNotification();
     application.Render();
@@ -1330,10 +1381,10 @@ int UtcDaliTextVisualAsyncRevealPendingNoneFullFadeP(void)
                                                 1.0f, progress, 3u, UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, blur ? 48.0f : 0.0f, 1.0f);
     DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 1u, TEST_LOCATION);
     const auto fallback = rendered.view.GetRendererAt(0u);
-    const auto texture = fallback.GetTextures().GetTexture(0u);
+    const auto texture  = fallback.GetTextures().GetTexture(0u);
     PublishDirect(rendered, parameters, result); // stale enabled completion
-    auto none = MakeParameters("First line\nSecond line");
-    none.isMarqueeEnabled = false;
+    auto none               = MakeParameters("First line\nSecond line");
+    none.isMarqueeEnabled   = false;
     none.textRevealRevision = 2u;
     PublishDirect(rendered, none, loader.RenderText(none, false, Size::ZERO));
     for(float value : {1.0f, 0.75f, 0.25f, 0.0f})
@@ -1410,19 +1461,19 @@ int UtcDaliTextVisualAsyncRevealPendingOpacityCompositionP(void)
 
 int UtcDaliTextVisualAsyncShutdownCompletionP(void)
 {
-  UiTestApplication application;
-  auto rendered = CreateTextVisual(application);
+  UiTestApplication       application;
+  auto                    rendered = CreateTextVisual(application);
   ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
   const auto progress = rendered.view.RegisterProperty("testRevealProgress", 1.0f);
   UiInternal::TextVisual::ConfigureTextReveal(rendered.visual, UiText::Internal::Reveal::Unit::PIXEL,
                                               1.0f, progress, 1u, UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, 24.0f, 1.0f);
-  auto parameters = MakeRevealParameters("Completion after shutdown", 1u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
+  auto parameters                      = MakeRevealParameters("Completion after shutdown", 1u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
   parameters.isTextRevealBlurRequested = true;
-  parameters.textRevealBlurRadius = 24.0f;
-  auto loader = UiText::AsyncTextLoader::New();
-  const auto result = loader.RenderText(parameters, false, Size::ZERO);
-  const auto tasks = application.GetScene().GetRenderTaskList();
+  parameters.textRevealBlurRadius      = 24.0f;
+  auto       loader                    = UiText::AsyncTextLoader::New();
+  const auto result                    = loader.RenderText(parameters, false, Size::ZERO);
+  const auto tasks                     = application.GetScene().GetRenderTaskList();
   application.GetAdaptor().Stop();
   PublishDirect(rendered, parameters, result);
   DALI_TEST_EQUALS(observer.mCompletionCount, 0u, TEST_LOCATION);
@@ -1442,34 +1493,34 @@ int UtcDaliTextVisualAsyncBlurConstructionReentryP(void)
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
   for(uint32_t mutation = 0u; mutation < 6u; ++mutation)
   {
-    auto rendered = CreateTextVisual(application);
-    const auto progress = rendered.view.RegisterProperty("testRevealProgress", 0.5f);
-    auto configure = [&](uint64_t revision, bool enabled, float radius)
+    auto       rendered  = CreateTextVisual(application);
+    const auto progress  = rendered.view.RegisterProperty("testRevealProgress", 0.5f);
+    auto       configure = [&](uint64_t revision, bool enabled, float radius)
     {
       UiInternal::TextVisual::ConfigureTextReveal(rendered.visual,
-        enabled ? UiText::Internal::Reveal::Unit::PIXEL : UiText::Internal::Reveal::Unit::DISABLED,
-        1.0f, progress, revision, UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, radius, 1.0f);
+                                                  enabled ? UiText::Internal::Reveal::Unit::PIXEL : UiText::Internal::Reveal::Unit::DISABLED,
+                                                  1.0f, progress, revision, UiText::Internal::Reveal::Sequence::WHOLE_TEXT, 0.0f, radius, 1.0f);
     };
     configure(1u, true, 24.0f);
-    auto parameters = MakeRevealParameters("Old source", 1u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
+    auto parameters                      = MakeRevealParameters("Old source", 1u, UiText::Internal::Reveal::Unit::PIXEL, 1.0f);
     parameters.isTextRevealBlurRequested = true;
-    parameters.textRevealBlurRadius = 24.0f;
-    auto loader = UiText::AsyncTextLoader::New();
-    auto oldResult = loader.RenderText(parameters, false, Size::ZERO);
-    auto next = parameters;
-    next.textRevealRevision = 2u;
-    next.textRevealBlurRadius = 48.0f;
+    parameters.textRevealBlurRadius      = 24.0f;
+    auto loader                          = UiText::AsyncTextLoader::New();
+    auto oldResult                       = loader.RenderText(parameters, false, Size::ZERO);
+    auto next                            = parameters;
+    next.textRevealRevision              = 2u;
+    next.textRevealBlurRadius            = 48.0f;
     if(mutation == 2u)
     {
       next.text = "Latest replacement source";
     }
-    auto nextResult = loader.RenderText(next, false, Size::ZERO);
-    Renderer latestForeground;
-    bool fired = false;
-    bool propertyCancelled = false;
-    bool inMutation = false;
+    auto                        nextResult = loader.RenderText(next, false, Size::ZERO);
+    Renderer                    latestForeground;
+    bool                        fired             = false;
+    bool                        propertyCancelled = false;
+    bool                        inMutation        = false;
     std::vector<WeakHandleBase> candidateActors;
-    ConnectionTracker tracker;
+    ConnectionTracker           tracker;
     application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle object)
     {
       if(!inMutation && Actor::DownCast(object))
@@ -1478,7 +1529,7 @@ int UtcDaliTextVisualAsyncBlurConstructionReentryP(void)
       }
       if(!fired && Actor::DownCast(object))
       {
-        fired = true;
+        fired      = true;
         inMutation = true;
         if(mutation == 0u)
         {
@@ -1500,8 +1551,8 @@ int UtcDaliTextVisualAsyncBlurConstructionReentryP(void)
         }
         else
         {
-          auto foreground = rendered.view.GetRendererAt(0u);
-          const auto fade = foreground.GetPropertyIndex("uTextRevealFadeDuration");
+          auto       foreground = rendered.view.GetRendererAt(0u);
+          const auto fade       = foreground.GetPropertyIndex("uTextRevealFadeDuration");
           foreground.PropertySetSignal().Connect(&tracker, [&, fade](Handle, Property::Index index, const Property::Value&)
           {
             if(!propertyCancelled && index == fade)
@@ -1612,9 +1663,9 @@ int UtcDaliTextVisualAsyncBlurWorkerPayloadP(void)
     parameters.textRevealBlurRadius      = 24.0f;
     parameters.renderScale               = scale;
     auto       loader                    = UiText::AsyncTextLoader::New();
-    bool cachedNaturalSize = false;
-    const auto naturalSize = loader.SetupRenderScale(parameters, cachedNaturalSize);
-    const auto result = loader.RenderText(parameters, cachedNaturalSize, naturalSize);
+    bool       cachedNaturalSize         = false;
+    const auto naturalSize               = loader.SetupRenderScale(parameters, cachedNaturalSize);
+    const auto result                    = loader.RenderText(parameters, cachedNaturalSize, naturalSize);
     DALI_TEST_CHECK(result.revealBlur);
     DALI_TEST_EQUALS(result.revealBlur->options.controlSize, result.renderedSize, TEST_LOCATION);
     DALI_TEST_CHECK(result.textPixelData && !result.revealMetadataTiles.empty());
@@ -1967,22 +2018,22 @@ int UtcDaliTextVisualUserSpaceScaleAllocationReentryP(void)
   UiInternal::TextVisual::SetTextGradientStyle(rendered.visual, UiText::Internal::Gradient::CreateStyle(gradient));
   ReentrantAsyncInterface observer(rendered.visual, rendered.view, CompletionAction::NONE);
   UiInternal::TextVisual::SetAsyncTextInterface(rendered.visual, &observer);
-  auto parameters = MakeParameters("Before allocation reentry");
-  parameters.isMarqueeEnabled = false;
+  auto parameters                    = MakeParameters("Before allocation reentry");
+  parameters.isMarqueeEnabled        = false;
   parameters.isTextGradientRequested = true;
-  parameters.hasUserSpaceGradient = true;
-  auto loader = UiText::AsyncTextLoader::New();
+  parameters.hasUserSpaceGradient    = true;
+  auto loader                        = UiText::AsyncTextLoader::New();
   PublishDirect(rendered, parameters, loader.RenderText(parameters, false, Size::ZERO));
   DALI_TEST_EQUALS(observer.mCompletionCount, 1u, TEST_LOCATION);
   auto oldRenderer = rendered.view.GetRendererAt(0u);
-  auto oldTexture = oldRenderer.GetTextures().GetTexture(0u);
-  parameters.text = "New text must not replace the previous texture during allocation reentry";
+  auto oldTexture  = oldRenderer.GetTextures().GetTexture(0u);
+  parameters.text  = "New text must not replace the previous texture during allocation reentry";
   // Force a new shader variant: texture/constraint allocation does not emit
   // ObjectCreated, whereas shader allocation is an actual application callback.
   UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.visual, UiText::Internal::Gradient::CreateStyle(gradient));
   parameters.isTextGradientOverlayRequested = true;
-  const auto candidate = loader.RenderText(parameters, false, Size::ZERO);
-  bool fired = false;
+  const auto        candidate               = loader.RenderText(parameters, false, Size::ZERO);
+  bool              fired                   = false;
   ConnectionTracker tracker;
   application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle object)
   {
@@ -2728,6 +2779,11 @@ struct PublishedVisual
   {
     DALI_TEST_EQUALS(label.GetRendererCount(), rendererCount, TEST_LOCATION);
     DALI_TEST_CHECK(label.GetRendererAt(0u) == renderer);
+    CheckRenderer();
+  }
+
+  void CheckRenderer() const
+  {
     DALI_TEST_CHECK(renderer.GetShader() == shader);
     DALI_TEST_CHECK(renderer.GetGeometry() == geometry);
     DALI_TEST_CHECK(renderer.GetTextures() == textures);
@@ -4500,5 +4556,1818 @@ int UtcDaliAsyncTextCandidateRequestSelectionP(void)
     DALI_TEST_EQUALS(controller->GetTextFitCandidates().Count(), count, TEST_LOCATION);
     DALI_TEST_EQUALS(controller->GetTextFitCandidates().Capacity(), capacity, TEST_LOCATION);
   }
+  END_TEST;
+}
+
+// Cutout coverage must be independent of control area and background/tint alpha.
+int UtcDaliCutoutShaderCroppedPayloadP(void)
+{
+  UiTestApplication application;
+  auto              loader = UiText::AsyncTextLoader::New();
+  Vector2           firstSize;
+  for(const auto& size : {Vector2(400.f, 100.f), Vector2(1920.f, 1080.f), Vector2(3840.f, 2160.f)})
+  {
+    auto p             = MakeParameters("HOLE");
+    p.isMarqueeEnabled = false;
+    p.isCutoutEnabled  = true;
+    p.textWidth        = size.x;
+    p.textHeight       = size.y;
+    p.textColor        = Vector4(.6f, .2f, .1f, 0.f);
+    p.isShadowEnabled  = true;
+    p.shadowOffset     = Vector2(4.f, 4.f);
+    p.shadowBlurRadius = 3.f;
+    p.shadowColor      = Color::RED;
+    p.isOutlineEnabled = true;
+    p.outlineWidth     = 2u;
+    auto info          = loader.RenderText(p, false, Size::ZERO);
+    DALI_TEST_CHECK(info.isCutoutEnabled && info.cutout);
+    DALI_TEST_CHECK(info.cutout->coverage && info.cutout->style);
+    DALI_TEST_EQUALS(info.cutout->coverage.GetPixelFormat(), Pixel::L8, TEST_LOCATION);
+    Vector2 actual(static_cast<float>(info.cutout->coverage.GetWidth()),
+                   static_cast<float>(info.cutout->coverage.GetHeight()));
+    DALI_TEST_CHECK(actual.x < 400.f && actual.y < 100.f);
+    if(firstSize == Vector2::ZERO)
+    {
+      firstSize = actual;
+    }
+    DALI_TEST_EQUALS(actual, firstSize, TEST_LOCATION);
+    DALI_TEST_EQUALS(info.cutout->rect.z, actual.x, TEST_LOCATION);
+    DALI_TEST_EQUALS(info.cutout->rect.w, actual.y, TEST_LOCATION);
+    DALI_TEST_EQUALS(info.cutout->controlSize, size, TEST_LOCATION);
+    DALI_TEST_CHECK(!info.textPixelData && !info.stylePixelData);
+    const auto bytes = Integration::GetPixelDataBuffer(info.cutout->coverage);
+    DALI_TEST_CHECK(std::any_of(bytes.buffer, bytes.buffer + bytes.bufferSize, [](uint8_t value)
+    { return value != 0u; }));
+  }
+  auto oversized             = MakeParameters("HOLE");
+  oversized.isMarqueeEnabled = false;
+  oversized.isCutoutEnabled  = true;
+  oversized.maxTextureSize   = 1;
+  auto rejected              = loader.RenderText(oversized, false, Size::ZERO);
+  DALI_TEST_CHECK(!rejected.cutout && !rejected.textPixelData && !rejected.stylePixelData);
+  for(int noLimit : {0, -1})
+  {
+    oversized.maxTextureSize = noLimit;
+    auto uncapped            = loader.RenderText(oversized, false, Size::ZERO);
+    DALI_TEST_CHECK(uncapped.cutout && uncapped.cutout->IsValid());
+  }
+  END_TEST;
+}
+
+// Reusing a worker for empty text must not retain glyphs from its previous request.
+int UtcDaliCutoutShaderEmptyWorkerReuseP(void)
+{
+  UiTestApplication application;
+  auto              loader = UiText::AsyncTextLoader::New();
+  auto              p      = MakeParameters("HOLE");
+  p.isMarqueeEnabled       = false;
+  p.isCutoutEnabled        = true;
+  DALI_TEST_CHECK(loader.RenderText(p, false, Size::ZERO).cutout);
+  p.text.clear();
+  auto empty = loader.RenderText(p, false, Size::ZERO);
+  DALI_TEST_CHECK(empty.isCutoutEnabled && empty.cutout);
+  DALI_TEST_EQUALS(empty.lineCount, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.cutout->coverage.GetWidth(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Integration::GetPixelDataBuffer(empty.cutout->coverage).buffer[0], uint8_t(0), TEST_LOCATION);
+  DALI_TEST_EQUALS(empty.renderedSize, Vector2(p.textWidth, p.textHeight), TEST_LOCATION);
+  p.requestType      = UiIntegrationText::Async::RENDER_FIXED_WIDTH;
+  p.textHeight       = std::numeric_limits<float>::max();
+  auto unconstrained = loader.RenderText(p, false, Size::ZERO);
+  DALI_TEST_CHECK(unconstrained.cutout);
+  DALI_TEST_EQUALS(unconstrained.renderedSize, Vector2(p.textWidth, 0.f), TEST_LOCATION);
+  p.requestType = UiIntegrationText::Async::RENDER_FIXED_SIZE;
+  p.textHeight  = VISUAL_HEIGHT;
+  p.text        = "B";
+  auto next     = loader.RenderText(p, false, Size::ZERO);
+  DALI_TEST_CHECK(next.cutout && next.cutout != empty.cutout);
+  DALI_TEST_CHECK(next.cutout->coverage.GetWidth() > 1u);
+  END_TEST;
+}
+
+// Public solid colors must update uniforms without replacing the accepted textures.
+int UtcDaliCutoutShaderDynamicUniformsP(void)
+{
+  CapturedPublication test;
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextColor(Ui::UiColor(Vector4(.6f, .2f, .1f, 0.f)));
+  test.label.SetTextCutoutEnabled(true);
+  test.Finish(test.Dispatch());
+  DALI_TEST_EQUALS(test.label.GetRendererCount(), 1u, TEST_LOCATION);
+  auto       renderer  = test.label.GetRendererAt(0u);
+  auto       textures  = renderer.GetTextures();
+  const auto completed = test.completed;
+  for(float alpha : {0.5f, 1.f, 0.f})
+  {
+    test.label.SetBackgroundColor(Ui::UiColor(Vector4(.8f, .1f, .2f, alpha)));
+    test.label.SetTextColor(Ui::UiColor(Vector4(.2f, .7f, .3f, alpha)));
+    test.application.SendNotification();
+    test.application.Render();
+    test.application.SendNotification();
+    test.application.Render();
+    DALI_TEST_CHECK(renderer.GetTextures() == textures);
+    DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+    DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+    const auto background = renderer.GetPropertyIndex("uCutoutBackground");
+    DALI_TEST_CHECK(background != Property::INVALID_INDEX);
+    DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(background),
+                     Vector4(.8f * alpha, .1f * alpha, .2f * alpha, alpha), .001f, TEST_LOCATION);
+  }
+  test.label.SetBackgroundColor(Ui::UiColor(Color::RED));
+  test.application.SendNotification();
+  test.application.Render();
+  test.application.SendNotification();
+  test.application.Render();
+  test.label.ClearBackground();
+  test.application.SendNotification();
+  test.application.Render();
+  test.application.SendNotification();
+  test.application.Render();
+  const auto background = renderer.GetPropertyIndex("uCutoutBackground");
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(background), Vector4::ZERO, .001f, TEST_LOCATION);
+  test.label.SetBackgroundColor(Ui::UiColor(Vector4(0.f, 0.f, 1.f, .5f)));
+  test.application.SendNotification();
+  test.application.Render();
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(background), Vector4(0.f, 0.f, .5f, .5f), .001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(test.label.GetRendererCount(), 1u, TEST_LOCATION);
+
+  // A rejected synchronous crop must not leave the previously published
+  // textures attached to a renderer whose shader has already changed.
+  test.label.SetAsyncRendering(false);
+  test.label.SetRequestedWidth(2.f * static_cast<float>(Dali::GetMaxTextureSize()));
+  test.label.SetMultiLine(false);
+  test.label.SetTextOverflowMode(UiText::OverflowMode::CLIP);
+  test.label.SetText(std::string(2000u, 'W').c_str());
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_EQUALS(test.label.GetRendererCount(), 1u, TEST_LOCATION); // Original background only.
+  DALI_TEST_CHECK(!renderer.GetTextures());
+  DALI_TEST_CHECK(UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label)).IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.label.SetText("Recovered small crop");
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_EQUALS(test.label.GetRendererCount(), 1u, TEST_LOCATION);
+
+  // GradientSpan falls back to ordinary text and restores the owner background.
+  auto builder = UiText::StyledTextBuilder::New("Fallback gradient");
+  DALI_TEST_CHECK(builder.SetSpan(UiText::GradientSpan::New(PublicationGradient()), 0u, 6u));
+  test.label.SetRequestedWidth(220.f);
+  test.label.SetStyledText(builder.Build());
+  test.label.SetAsyncRendering(true);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::RED));
+  auto fallback = test.Dispatch();
+  DALI_TEST_CHECK(fallback);
+  test.Finish(fallback);
+  DALI_TEST_CHECK(!fallback->mRenderInfo.cutout && !fallback->mRenderInfo.isCutoutEnabled);
+  DALI_TEST_CHECK(UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label)).IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.label.SetBackgroundColor(Ui::UiColor(Color::GREEN));
+  test.label.SetFontSize(23.f);
+  auto changed = test.Dispatch();
+  DALI_TEST_CHECK(changed);
+  test.Finish(changed);
+  END_TEST;
+}
+
+// The crop and textures must be accepted together, including empty completions.
+int UtcDaliCutoutShaderAsyncEmptyTransitionsP(void)
+{
+  CapturedPublication test;
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.Finish(test.Dispatch());
+  for(const char* text : {"", "HOLE", ""})
+  {
+    test.label.SetText(text);
+    test.Finish(test.Dispatch());
+    DALI_TEST_EQUALS(test.label.GetRendererCount(), 1u, TEST_LOCATION);
+    auto renderer = test.label.GetRendererAt(0u);
+    auto textures = renderer.GetTextures();
+    DALI_TEST_EQUALS(textures.GetTextureCount(), 2u, TEST_LOCATION);
+    if(!*text)
+    {
+      DALI_TEST_EQUALS(textures.GetTexture(0u).GetWidth(), 1u, TEST_LOCATION);
+    }
+    auto rect = renderer.GetProperty(renderer.GetPropertyIndex("uCutoutRect")).Get<Vector4>();
+    DALI_TEST_EQUALS(rect.z, float(textures.GetTexture(0u).GetWidth()), TEST_LOCATION);
+    DALI_TEST_EQUALS(rect.w, float(textures.GetTexture(0u).GetHeight()), TEST_LOCATION);
+  }
+  test.label.SetTextCutoutEnabled(false);
+  test.application.SendNotification();
+  test.application.Render();
+  test.application.SendNotification();
+  test.application.Render();
+  auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  END_TEST;
+}
+
+// Preserve intermediate publication while matching background ownership to its shader.
+int UtcDaliCutoutShaderPublicationModeOwnershipP(void)
+{
+  CapturedPublication test;
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetText("pending ordinary snapshot");
+  auto ordinary = test.Dispatch();
+  ordinary->Process();
+  test.label.SetTextCutoutEnabled(true);
+  const auto completed = test.completed;
+  test.Deliver(ordinary);
+  DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+  auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.Finish(test.Dispatch());
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.label.SetText("pending cutout snapshot");
+  auto cutout = test.Dispatch();
+  cutout->Process();
+  test.label.SetTextCutoutEnabled(false);
+  test.Deliver(cutout);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.Finish(test.Dispatch());
+  DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  END_TEST;
+}
+
+// Repeated measurement must keep the live binding, including animated colors.
+int UtcDaliCutoutBackgroundConstraintReuseP(void)
+{
+  CapturedPublication test;
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.Finish(test.Dispatch());
+  auto& data    = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual  = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  auto  binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+  DALI_TEST_CHECK(binding);
+  for(unsigned i = 0; i < 8; ++i)
+  {
+    test.label.InvalidateMeasure();
+    test.label.Measure(220.f, 80.f);
+    DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+  }
+  auto source    = binding.GetSourceAt(0u);
+  auto animation = Animation::New(1.f);
+  animation.AnimateTo(Dali::Property(source.object, source.propertyIndex), Vector4(.8f, .2f, .1f, .5f));
+  auto textures = test.label.GetRendererAt(0u).GetTextures();
+  animation.Play();
+  for(unsigned i = 0; i < 4u; ++i)
+  {
+    test.application.SendNotification();
+    test.application.Render(250u);
+    test.label.InvalidateMeasure();
+    test.label.Measure(220.f, 80.f);
+    DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == textures);
+  }
+  test.application.SendNotification();
+  test.application.Render();
+  auto       renderer = test.label.GetRendererAt(0u);
+  const auto color    = source.object.GetCurrentProperty<Vector4>(source.propertyIndex);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(renderer.GetPropertyIndex("uCutoutBackground")),
+                   Vector4(color.r * color.a, color.g * color.a, color.b * color.a, color.a), .001f, TEST_LOCATION);
+  test.label.ClearBackground();
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+  test.label.SetBackgroundColor(Ui::UiColor(Color::RED));
+  test.application.SendNotification();
+  test.application.Render();
+  auto next = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+  DALI_TEST_CHECK(next && next != binding);
+  END_TEST;
+}
+
+// Failed synchronous cutout must return background ownership, then recover.
+int UtcDaliCutoutFailureBackgroundRecoveryP(void)
+{
+  CapturedPublication test;
+  test.label.SetAsyncRendering(false);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.application.SendNotification();
+  test.application.Render();
+  auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  test.label.SetRequestedWidth(2.f * static_cast<float>(Dali::GetMaxTextureSize()));
+  test.label.SetMultiLine(false);
+  test.label.SetTextOverflowMode(UiText::OverflowMode::CLIP);
+  test.label.SetText(std::string(2000, 'W').c_str());
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_EQUALS(Ui::GetImplementation(visual).GetVisualObject().GetResourceStatus(), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+  DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.label.SetBackgroundColor(Ui::UiColor(Color::RED));
+  test.label.InvalidateMeasure();
+  test.label.Measure(220.f, 80.f);
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.label.SetAsyncRendering(true);
+  test.label.SetText("Rejected async recovery");
+  auto rejected = test.Dispatch();
+  rejected->Process();
+  DALI_TEST_CHECK(rejected->mRenderInfo.cutout);
+  rejected->mRenderInfo.cutout.reset();
+  rejected->mRenderInfo.textPixelData.Reset();
+  const auto completed = test.completed;
+  test.Deliver(rejected);
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::RendererCount(visual), 0u, TEST_LOCATION);
+  test.label.SetText("Recovered");
+  test.Finish(test.Dispatch());
+  DALI_TEST_EQUALS(Ui::GetImplementation(visual).GetVisualObject().GetResourceStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  END_TEST;
+}
+
+// Optimized colors remain authoritative for subsequent rendering paths.
+int UtcDaliCutoutTextColorTransitionsP(void)
+{
+  CapturedPublication test;
+  for(bool async : {false, true})
+  {
+    for(bool property : {false, true})
+    {
+      test.label.SetAsyncRendering(async);
+      test.label.SetText("Plain color transition");
+      test.label.SetTextShadow(UiText::Shadow::None());
+      test.label.SetTextOutline(UiText::Outline::None());
+      test.label.SetTextUnderline(UiText::Underline::None());
+      test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+      test.label.SetTextCutoutEnabled(true);
+      const auto publish = [&]
+      {
+        if(async)
+        {
+          test.Finish(test.Dispatch());
+        }
+        else
+        {
+          test.application.SendNotification();
+          test.application.Render();
+        }
+      };
+      publish();
+      auto& data       = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+      auto  visual     = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+      auto  controller = UiInternal::TextVisual::GetController(visual);
+      auto  textures   = test.label.GetRendererAt(0u).GetTextures();
+      for(float alpha : {0.f, .5f, 1.f, 0.f})
+      {
+        const Vector4 color(.1f, .8f, .25f, alpha);
+        if(property)
+        {
+          test.label.SetProperty(UiText::LabelPropertyIndex::TEXT_COLOR, color);
+        }
+        else
+        {
+          test.label.SetTextColor(Ui::UiColor(color));
+        }
+        test.application.SendNotification();
+        test.application.Render();
+        DALI_TEST_EQUALS(controller->GetDefaultColor(), color, TEST_LOCATION);
+        DALI_TEST_EQUALS(controller->GetRenderTextModel()->GetDefaultColor(), color, TEST_LOCATION);
+        DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == textures);
+        DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+      }
+      const Vector4 green(.1f, .8f, .25f, 0.f);
+      test.label.SetTextCutoutEnabled(false);
+      publish();
+      DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+      DALI_TEST_EQUALS(controller->GetRenderTextModel()->GetDefaultColor(), green, TEST_LOCATION);
+      test.label.SetTextCutoutEnabled(true);
+      UiText::Shadow shadow;
+      shadow.SetOffset(Vector2(3.f, 3.f));
+      UiText::Outline outline;
+      outline.SetWidth(2.f);
+      test.label.SetTextShadow(shadow);
+      test.label.SetTextOutline(outline);
+      test.label.SetStyledText(UiText::StyledText::FromMarkup("<u>Inherited underline</u>"));
+      publish();
+      DALI_TEST_EQUALS(controller->GetRenderTextModel()->GetUnderlineColor(), green, TEST_LOCATION);
+      auto builder = UiText::StyledTextBuilder::New("RED default");
+      builder.SetSpan(UiText::ForegroundColorSpan::New(Ui::UiColor(Color::RED)), 0u, 3u);
+      test.label.SetStyledText(builder.Build());
+      publish();
+      DALI_TEST_EQUALS(controller->GetDefaultColor(), green, TEST_LOCATION);
+      DALI_TEST_CHECK(!UiInternal::TextVisual::CanUpdateCutoutTextColor(visual));
+      test.label.SetAsyncRendering(!async);
+      if(!async)
+      {
+        auto next = test.Dispatch();
+        DALI_TEST_CHECK(next);
+        DALI_TEST_EQUALS(next->mParameters.textColor, green, TEST_LOCATION);
+        test.Finish(next);
+      }
+      else
+      {
+        test.application.SendNotification();
+        test.application.Render();
+        DALI_TEST_EQUALS(controller->GetRenderTextModel()->GetDefaultColor(), green, TEST_LOCATION);
+      }
+    }
+  }
+  test.label.SetAsyncRendering(true);
+  test.label.SetText("Plain before pending work");
+  test.label.SetTextShadow(UiText::Shadow::None());
+  test.label.SetTextOutline(UiText::Outline::None());
+  test.Finish(test.Dispatch());
+  auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  test.label.SetText("Pending work must snapshot the latest color");
+  auto pending = test.Dispatch();
+  DALI_TEST_CHECK(pending);
+  DALI_TEST_CHECK(!UiInternal::TextVisual::CanUpdateCutoutTextColor(visual));
+  const Vector4 latestColor(.9f, .2f, .1f, .5f);
+  test.label.SetProperty(UiText::LabelPropertyIndex::TEXT_COLOR, latestColor);
+  auto latest = test.Dispatch();
+  DALI_TEST_CHECK(latest && latest != pending);
+  DALI_TEST_EQUALS(latest->mParameters.textColor, latestColor, TEST_LOCATION);
+  test.Finish(latest);
+  DALI_TEST_EQUALS(UiInternal::TextVisual::GetController(visual)->GetDefaultColor(), latestColor, TEST_LOCATION);
+  END_TEST;
+}
+
+// Malformed or incomplete snapshots must preserve the accepted cutout result.
+int UtcDaliCutoutInvalidPayloadP(void)
+{
+  UiText::CutoutRenderData limits;
+  limits.coverage    = PixelData::New(new uint8_t[4]{}, 4u, 2u, 2u, Pixel::L8, PixelData::DELETE_ARRAY);
+  limits.style       = PixelData::New(new uint8_t[4]{}, 4u, 1u, 1u, Pixel::RGBA8888, PixelData::DELETE_ARRAY);
+  limits.controlSize = Vector2(2.f, 2.f);
+  limits.rect        = Vector4(0.f, 0.f, 2.f, 2.f);
+  DALI_TEST_CHECK(limits.IsValid(2u));
+  DALI_TEST_CHECK(!limits.IsValid(1u));
+
+  CapturedPublication test;
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.Finish(test.Dispatch());
+  auto&          data      = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto           visual    = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  auto           textures  = test.label.GetRendererAt(0u).GetTextures();
+  const unsigned completed = test.completed;
+  for(unsigned plane = 0; plane < 11; ++plane)
+  {
+    test.label.SetText(plane == 0 ? "Bad coverage" : plane == 1 ? "Bad style"
+                                                                : "Bad overlay");
+    auto task = test.Dispatch();
+    DALI_TEST_CHECK(task && task->IsReady());
+    task->Process();
+    DALI_TEST_CHECK(task->mRenderInfo.cutout);
+    auto broken = std::make_shared<UiText::CutoutRenderData>(*task->mRenderInfo.cutout);
+    if(plane == 0)
+    {
+      broken->coverage = PixelData::New(nullptr, 0u, 1u, 1u, Pixel::L8, PixelData::FREE);
+    }
+    else if(plane == 1)
+    {
+      broken->style.Reset();
+    }
+    else if(plane == 2)
+    {
+      broken->overlay = PixelData::New(nullptr, 0u, 1u, 1u, Pixel::RGBA8888, PixelData::FREE);
+    }
+    else if(plane == 3)
+    {
+      broken->rect.x = -1.f;
+    }
+    else if(plane == 4)
+    {
+      broken->rect.x = .5f;
+    }
+    else if(plane == 5)
+    {
+      broken->rect.x = broken->controlSize.x;
+    }
+    else if(plane == 6)
+    {
+      broken->rect.z += 1.f;
+    }
+    else
+    {
+      broken->controlSize.x = std::numeric_limits<float>::quiet_NaN();
+    }
+    task->mRenderInfo.cutout = std::move(broken);
+    if(plane == 8u || plane == 9u)
+    {
+      task->mRenderInfo.cutout.reset();
+      if(plane == 9u) task->mRenderInfo.textPixelData = CreatePixelData(4u, 4u, Pixel::L8);
+    }
+    if(plane == 10u) task->mRenderInfo.isCutoutEnabled = false;
+    test.Deliver(task);
+    DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+    DALI_TEST_EQUALS(data.GetVisualResourceStatus(UiText::LabelPropertyIndex::TEXT), Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+    DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == textures);
+    DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  }
+  test.label.SetText("Recovered immutable payload");
+  test.Finish(test.Dispatch());
+  DALI_TEST_EQUALS(data.GetVisualResourceStatus(UiText::LabelPropertyIndex::TEXT), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCutoutLazyConstraintStorageP(void)
+{
+  CapturedPublication test;
+  test.label.SetAsyncRendering(false);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  const auto frame = [&]
+  {
+    test.application.SendNotification();
+    test.application.Render();
+  };
+  frame();
+  auto&      data              = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto       visual            = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  const auto normalCount       = UiInternal::TextVisualTestAccessor::ColorConstraintCount(visual);
+  const auto normalCapacity    = UiInternal::TextVisualTestAccessor::ColorConstraintCapacity(visual);
+  const auto normalConnections = data.VisualResourceReadySignal().GetConnectionCount();
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::HasOptionalTextState(visual));
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::HasCutoutShader(visual));
+  for(unsigned cycle = 0u; cycle < 8u; ++cycle)
+  {
+    test.label.SetTextCutoutEnabled(true);
+    frame();
+    DALI_TEST_EQUALS(data.VisualResourceReadySignal().GetConnectionCount(), normalConnections, TEST_LOCATION);
+    auto binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+    DALI_TEST_CHECK(binding);
+    DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(visual), normalCount + 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::HasOptionalTextState(visual));
+    UiInternal::TextVisual::SetConstraintApplyAlways(visual, true, true);
+    UiInternal::TextVisual::SetConstraintApplyAlways(visual, false, true);
+    DALI_TEST_EQUALS(binding.GetApplyRate(), Constraint::APPLY_ALWAYS, TEST_LOCATION);
+    test.label.Unparent();
+    frame();
+    test.application.GetScene().Add(test.label);
+    frame();
+    DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(visual), normalCount + 1u, TEST_LOCATION);
+    auto                   textures = test.label.GetRendererAt(0u).GetTextures();
+    WeakHandle<TextureSet> weakTextures(textures);
+    textures.Reset();
+    WeakHandle<Constraint> weak(binding);
+    binding.Reset();
+    test.label.SetTextCutoutEnabled(false);
+    frame();
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(visual), normalCount, TEST_LOCATION);
+    DALI_TEST_CHECK(UiInternal::TextVisualTestAccessor::ColorConstraintCapacity(visual) <= normalCapacity);
+    DALI_TEST_CHECK(!weak.GetHandle());
+    DALI_TEST_CHECK(!weakTextures.GetHandle());
+    DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    DALI_TEST_EQUALS(data.VisualResourceReadySignal().GetConnectionCount(), normalConnections, TEST_LOCATION);
+  }
+  test.label.SetTextCutoutEnabled(true);
+  frame();
+  auto                   binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+  WeakHandle<Constraint> weak(binding);
+  binding.Reset();
+  test.label.Unparent();
+  frame();
+  visual.Reset();
+  test.label.Reset();
+  test.application.RunIdles();
+  frame();
+  DALI_TEST_CHECK(!weak.GetHandle());
+  END_TEST;
+}
+
+int UtcDaliCutoutLazyConstraintPendingPublicationP(void)
+{
+  CapturedPublication test;
+  for(unsigned route = 0u; route < 3u; ++route)
+  {
+    if(route != 0u)
+    {
+      // Each setter starts with a fresh Never-Cutout label in the same application.
+      test.label.Unparent();
+      test.label = Ui::Label::New("Fresh cutout request");
+      test.label.SetRequestedWidth(220.0f);
+      test.label.SetRequestedHeight(80.0f);
+      test.label.SetAsyncRendering(true);
+      test.application.GetScene().Add(test.label);
+      test.Finish(test.Dispatch());
+    }
+    test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+    auto&      data              = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+    auto       visual            = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+    const auto normalCapacity    = UiInternal::TextVisualTestAccessor::ColorConstraintCapacity(visual);
+    const auto normalConnections = data.VisualResourceReadySignal().GetConnectionCount();
+    if(route == 0u)
+    {
+      test.label.SetTextCutoutEnabled(true);
+    }
+    else if(route == 1u)
+    {
+      test.label.SetProperty(UiText::LabelPropertyIndex::CUTOUT_ENABLED, true);
+    }
+    else
+    {
+      // The registered internal setter can also be called without PropertySetSignal.
+      Ui::Integration::LabelImpl::SetProperty(&test.label.GetBaseObject(), UiText::LabelPropertyIndex::CUTOUT_ENABLED, true);
+    }
+    test.Finish(test.Dispatch());
+    auto                   binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+    WeakHandle<Constraint> weak(binding);
+    auto                   textures = test.label.GetRendererAt(0u).GetTextures();
+    WeakHandle<TextureSet> weakTextures(textures);
+    textures.Reset();
+    test.label.SetTextCutoutEnabled(false);
+    auto pending = test.Dispatch();
+    DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(weakTextures.GetHandle());
+    DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    DALI_TEST_EQUALS(data.VisualResourceReadySignal().GetConnectionCount(), normalConnections, TEST_LOCATION);
+    // Public background changes must update the still-published cutout while
+    // the OFF result is pending; no text publication is needed for these changes.
+    test.label.ClearBackground();
+    test.application.SendNotification();
+    test.application.Render();
+    DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    test.label.SetBackgroundColor(Ui::UiColor(Color::GREEN));
+    test.application.SendNotification();
+    test.application.Render();
+    auto replacement = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+    DALI_TEST_CHECK(replacement && replacement != binding);
+    DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+    replacement.Reset();
+    binding.Reset();
+    test.Finish(pending);
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(!weak.GetHandle());
+    DALI_TEST_CHECK(!weakTextures.GetHandle());
+    DALI_TEST_CHECK(UiInternal::TextVisualTestAccessor::ColorConstraintCapacity(visual) <= normalCapacity);
+    DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    DALI_TEST_EQUALS(data.VisualResourceReadySignal().GetConnectionCount(), normalConnections, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+// A direct TextVisual need not have an animatable color source.
+int UtcDaliCutoutConstraintWithoutTextColorP(void)
+{
+  UiTestApplication application;
+  auto              rendered   = CreateTextVisual(application);
+  auto              controller = UiInternal::TextVisual::GetController(rendered.visual);
+  controller->SetAsyncRendering(false);
+  controller->SetTextCutout(true);
+  rendered.view.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  auto& data       = UiInternal::ViewDataImpl::Get(Ui::GetImpl(rendered.view));
+  auto  background = data.GetVisual(Ui::Integration::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(rendered.visual), 0u, TEST_LOCATION);
+  UiInternal::TextVisual::SetCutoutBackground(rendered.visual, background);
+  auto binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(rendered.visual);
+  DALI_TEST_CHECK(binding);
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(rendered.visual), 1u, TEST_LOCATION);
+  rendered.view.Unparent();
+  application.SendNotification();
+  application.Render();
+  application.GetScene().Add(rendered.view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(rendered.visual));
+  UiInternal::TextVisual::SetCutoutBackground(rendered.visual, {});
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(rendered.visual));
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(rendered.visual), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCapacity(rendered.visual), 0u, TEST_LOCATION);
+
+  // A background may precede creation of the default color constraint.
+  UiInternal::TextVisual::SetCutoutBackground(rendered.visual, background);
+  binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(rendered.visual);
+  rendered.view.Unparent();
+  application.SendNotification();
+  application.Render();
+  const auto colorIndex = rendered.view.RegisterProperty("testTextColor", Color::GREEN);
+  UiInternal::TextVisual::SetAnimatableTextColorProperty(rendered.visual, colorIndex);
+  application.GetScene().Add(rendered.view);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(rendered.visual));
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(rendered.visual), 2u, TEST_LOCATION);
+  UiInternal::TextVisual::SetConstraintApplyAlways(rendered.visual, true, true);
+  UiInternal::TextVisual::SetConstraintApplyAlways(rendered.visual, false, true);
+  DALI_TEST_EQUALS(binding.GetApplyRate(), Constraint::APPLY_ALWAYS, TEST_LOCATION);
+  UiInternal::TextVisual::SetCutoutBackground(rendered.visual, {});
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(rendered.visual));
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(rendered.visual), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCutoutConstraintAfterLateColorSourceP(void)
+{
+  UiTestApplication application;
+  auto              rendered   = CreateTextVisual(application);
+  const auto        colorIndex = rendered.view.RegisterProperty("lateTextColor", Color::GREEN);
+  UiInternal::TextVisual::SetAnimatableTextColorProperty(rendered.visual, colorIndex);
+  auto parameters             = MakeParameters("Tiled ordinary text");
+  parameters.isMarqueeEnabled = false;
+  parameters.textWidth        = 2.f;
+  parameters.textHeight       = static_cast<float>(Dali::GetMaxTextureSize()) + 8.f;
+  UiText::AsyncTextRenderInfo info;
+  info.size = info.renderedSize = info.controlSize = Vector2(parameters.textWidth, parameters.textHeight);
+  info.textPixelData                               = CreatePixelData(2u, static_cast<uint32_t>(parameters.textHeight), Pixel::L8);
+  PublishDirect(rendered, parameters, info);
+  DALI_TEST_CHECK(rendered.view.GetRendererCount() > 1u);
+  DALI_TEST_CHECK(UiInternal::TextVisualTestAccessor::ColorConstraintCount(rendered.visual) > 0u);
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(rendered.visual));
+  UiInternal::TextVisual::SetConstraintApplyAlways(rendered.visual, true, true);
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::FirstColorConstraint(rendered.visual).GetApplyRate(), Constraint::APPLY_ALWAYS, TEST_LOCATION);
+  rendered.view.Unparent();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::ColorConstraintCount(rendered.visual), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::OpacityConstraintCount(rendered.visual), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCutoutBackgroundArrangeOnlyP(void)
+{
+  CapturedPublication test;
+  test.label.SetAsyncRendering(false);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.application.SendNotification();
+  test.application.Render();
+  auto&                  data    = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto                   visual  = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  auto                   binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+  WeakHandle<Constraint> background(binding);
+  auto                   sourceObject = binding.GetSourceAt(0u).object;
+  WeakHandle<Handle>     source(sourceObject);
+  sourceObject.Reset();
+  binding.Reset();
+  DALI_TEST_CHECK(background.GetHandle());
+  test.label.ClearBackground();
+  // Keep the event source alive until removal can retire the update constraint.
+  DALI_TEST_CHECK(source.GetHandle());
+  // ClearBackground schedules relayout. Measure/Arrange do not repair
+  // rendering state; the normal publication path releases the binding.
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+  DALI_TEST_CHECK(!background.GetHandle());
+  DALI_TEST_CHECK(!source.GetHandle());
+  test.application.SendNotification();
+  test.application.Render();
+  test.application.SendNotification();
+  test.application.Render();
+  auto renderer = test.label.GetRendererAt(0u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(renderer.GetPropertyIndex("uCutoutBackground")), Vector4::ZERO, .001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// Background changes need no deferred work, even while an old source stays alive.
+int UtcDaliCutoutBackgroundBindingLifetimeP(void)
+{
+  CapturedPublication test;
+  test.label.SetAsyncRendering(false);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  const auto frame = [&]
+  {
+    test.application.SendNotification();
+    test.application.Render();
+  };
+  frame();
+  auto& data       = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual     = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  auto  background = data.GetVisual(Ui::Integration::View::Property::BACKGROUND);
+  auto  source     = background.GetPropertyObject(Ui::Integration::Visual::Property::MIX_COLOR);
+  test.application.RunIdles();
+  frame();
+  const PublishedVisual ordinary(test.label);
+  source.object.SetProperty(source.propertyIndex, Vector4(.2f, .3f, .4f, 0.f));
+  frame();
+  frame();
+  test.application.RunIdles();
+  frame();
+  ordinary.Check(test.label);
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+
+  for(bool clear : {false, true})
+  {
+    source.object.SetProperty(source.propertyIndex, Color::BLUE);
+    test.label.SetTextCutoutEnabled(true);
+    frame();
+    frame();
+    test.application.RunIdles();
+    frame();
+    const PublishedVisual  published(test.label);
+    auto                   binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+    WeakHandle<Constraint> weakBinding(binding);
+    DALI_TEST_CHECK(binding);
+    DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    for(unsigned i = 0; i < 8; ++i)
+    {
+      test.label.InvalidateMeasure();
+      test.label.Measure(220.f, 80.f);
+      DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    }
+    for(const auto& color : {Vector4(.2f, .3f, .4f, 0.f), Vector4(.4f, .3f, .2f, 0.f), Color::BLUE})
+    {
+      source.object.SetProperty(source.propertyIndex, color);
+      frame();
+      frame();
+      test.application.RunIdles();
+      frame();
+      published.Check(test.label);
+      DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+      DALI_TEST_EQUALS(published.renderer.GetCurrentProperty<Vector4>(published.renderer.GetPropertyIndex("uCutoutBackground")),
+                       Vector4(color.r * color.a, color.g * color.a, color.b * color.a, color.a), .001f, TEST_LOCATION);
+    }
+    binding.Reset();
+    if(clear)
+    {
+      test.label.ClearBackground();
+    }
+    else
+    {
+      test.label.SetTextCutoutEnabled(false);
+    }
+    frame();
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    DALI_TEST_CHECK(!weakBinding.GetHandle());
+    if(!clear)
+    {
+      DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    }
+    test.application.RunIdles();
+    frame();
+    const PublishedVisual unbound(test.label);
+    const auto            index        = published.renderer.GetPropertyIndex("uCutoutBackground");
+    const auto            retiredColor = published.renderer.GetCurrentProperty<Vector4>(index);
+    // Keep the old source alive across unbinding and delayed disposal. Neither
+    // the current publication nor the retained renderer may follow it anymore.
+    for(const auto& color : {Vector4(.2f, .3f, .4f, 0.f), Color::BLUE})
+    {
+      source.object.SetProperty(source.propertyIndex, color);
+      frame();
+      frame();
+      test.application.RunIdles();
+      frame();
+      unbound.Check(test.label);
+      DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+      DALI_TEST_EQUALS(published.renderer.GetCurrentProperty<Vector4>(index), retiredColor, .001f, TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliCutoutBackgroundUpdateRetiredRendererP(void)
+{
+  CapturedPublication test;
+  test.label.SetAsyncRendering(false);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  const auto frame = [&]
+  {
+    test.application.SendNotification();
+    test.application.Render();
+  };
+  frame();
+  test.label.ClearBackground();
+  frame(); // Clear the currently published cutout background.
+  test.label.SetTextCutoutEnabled(false);
+  frame();
+  auto renderer = test.label.GetRendererAt(0u);
+  auto shader   = renderer.GetShader();
+  auto textures = renderer.GetTextures();
+  test.application.RunIdles();
+  frame();
+  DALI_TEST_CHECK(renderer.GetShader() == shader);
+  DALI_TEST_CHECK(renderer.GetTextures() == textures);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  frame();
+  test.label.ClearBackground();
+  frame();
+  WeakHandle<Renderer> weakRenderer(renderer);
+  renderer.Reset();
+  shader.Reset();
+  textures.Reset();
+  test.label.Unparent();
+  test.label.Reset();
+  test.application.RunIdles();
+  frame();
+  DALI_TEST_CHECK(!weakRenderer.GetHandle());
+  END_TEST;
+}
+
+// Direct L8 coverage must preserve the RGBA path's overlap/alpha semantics.
+int UtcDaliCutoutCoverageMatchesRgbaP(void)
+{
+  UiTestApplication application;
+  auto              fontClient = TextAbstraction::FontClient::Get();
+  for(const char* text : {"HOLE", "Arabic العربية", "a\u0301f\u0301i", ""})
+  {
+    auto label = Ui::Label::New(text);
+    label.SetRequestedWidth(220.f);
+    label.SetRequestedHeight(80.f);
+    label.SetTextColor(Ui::UiColor(Vector4(.2f, .4f, .8f, .3f)));
+    label.SetTextCutoutEnabled(true);
+    application.GetScene().Add(label);
+    application.SendNotification();
+    application.Render();
+    auto& data       = UiInternal::ViewDataImpl::Get(Ui::GetImpl(label));
+    auto  visual     = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+    auto  controller = UiInternal::TextVisual::GetController(visual);
+    auto  typesetter = UiText::Typesetter::New(controller->GetRenderTextModel());
+    typesetter->SetFontClient(fontClient);
+    UiText::CutoutRenderData l8, rgba;
+    DALI_TEST_CHECK(typesetter->RenderCutoutPlanes(Vector2(220.f, 80.f), l8, Pixel::L8));
+    DALI_TEST_CHECK(typesetter->RenderCutoutPlanes(Vector2(220.f, 80.f), rgba, Pixel::RGBA8888));
+    DALI_TEST_EQUALS(l8.rect, rgba.rect, TEST_LOCATION);
+    const auto coverage = Integration::GetPixelDataBuffer(l8.coverage);
+    const auto colored  = Integration::GetPixelDataBuffer(rgba.coverage);
+    DALI_TEST_EQUALS(colored.bufferSize, coverage.bufferSize * 4u, TEST_LOCATION);
+    for(uint32_t i = 0u; i < coverage.bufferSize; ++i)
+    {
+      DALI_TEST_EQUALS(coverage.buffer[i], colored.buffer[i * 4u + 3u], TEST_LOCATION);
+    }
+    label.Unparent();
+  }
+  END_TEST;
+}
+
+// Fallback color glyphs use the ordinary independent mask sampler.
+int UtcDaliCutoutFallbackEmojiMaskP(void)
+{
+  UiTestApplication application;
+  auto              rendered   = CreateTextVisual(application);
+  auto              loader     = UiText::AsyncTextLoader::New();
+  auto              parameters = MakeParameters("A😀B");
+  parameters.isCutoutEnabled   = true;
+  auto info                    = loader.RenderText(parameters, false, Size::ZERO);
+  DALI_TEST_CHECK(!info.isCutoutEnabled && !info.cutout);
+  // Mock fonts have no intrinsic color glyphs; native cases exercise their pixels.
+  info.containsColorGlyph = true;
+  info.maskPixelData      = CreatePixelData(info.textPixelData.GetWidth(), info.textPixelData.GetHeight(), Pixel::L8);
+  DALI_TEST_CHECK(!info.hasMultipleTextColors && !info.stylePixelData);
+  PublishDirect(rendered, parameters, info);
+  auto textures = rendered.view.GetRendererAt(0u).GetTextures();
+  DALI_TEST_EQUALS(textures.GetTextureCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(textures.GetTexture(0u) != textures.GetTexture(1u));
+  END_TEST;
+}
+
+// USER_SPACE fallback must retire old renderers, including empty requests.
+int UtcDaliCutoutUserSpaceRendererRetirementP(void)
+{
+  CapturedPublication test;
+  for(bool overlay : {false, true})
+  {
+    test.label.SetTextCutoutEnabled(true);
+    test.label.SetTextGradient(Ui::Gradient::Base::None());
+    test.label.SetTextGradientOverlay(Ui::Gradient::Base::None());
+    if(overlay)
+      test.label.SetTextGradientOverlay(PublicationGradient(true));
+    else
+      test.label.SetTextGradient(PublicationGradient(true));
+    auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+    auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+    for(const auto* text : {"First fallback", "", "Next fallback"})
+    {
+      test.label.SetText(text);
+      if(*text)
+      {
+        auto task = test.Dispatch();
+        DALI_TEST_CHECK(task && !task->mParameters.isCutoutEnabled);
+        test.Finish(task);
+        DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::RendererCount(visual), 1u, TEST_LOCATION);
+      }
+      else
+      {
+        test.application.SendNotification();
+        test.application.Render();
+        DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+        DALI_TEST_EQUALS(UiInternal::TextVisualTestAccessor::RendererCount(visual), 0u, TEST_LOCATION);
+      }
+      DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+      DALI_TEST_CHECK(test.label.IsTextCutoutEnabled());
+    }
+  }
+  END_TEST;
+}
+
+// Fallback must preserve actual ordinary raster bytes, including alpha and worker reuse.
+int UtcDaliCutoutFallbackWorkerPixelsP(void)
+{
+  UiTestApplication application;
+  auto              loader      = UiText::AsyncTextLoader::New();
+  const auto        checkPixels = [](const PixelData& actual, const PixelData& expected)
+  {
+    DALI_TEST_EQUALS(static_cast<bool>(actual), static_cast<bool>(expected), TEST_LOCATION);
+    if(actual && expected)
+    {
+      DALI_TEST_EQUALS(actual.GetWidth(), expected.GetWidth(), TEST_LOCATION);
+      DALI_TEST_EQUALS(actual.GetHeight(), expected.GetHeight(), TEST_LOCATION);
+      DALI_TEST_EQUALS(actual.GetPixelFormat(), expected.GetPixelFormat(), TEST_LOCATION);
+      const auto a = Integration::GetPixelDataBuffer(actual);
+      const auto b = Integration::GetPixelDataBuffer(expected);
+      DALI_TEST_EQUALS(a.bufferSize, b.bufferSize, TEST_LOCATION);
+      DALI_TEST_CHECK(a.bufferSize == b.bufferSize && std::memcmp(a.buffer, b.buffer, a.bufferSize) == 0);
+    }
+  };
+  for(unsigned feature = 0u; feature < 7u; ++feature)
+  {
+    for(float alpha : {0.0f, 0.5f, 1.0f})
+    {
+      auto ordinary                           = feature == 2u ? MakeGradientParameters("Gradient overlap") : MakeParameters("Fallback text");
+      ordinary.isMarqueeEnabled               = feature == 4u || feature == 5u;
+      ordinary.isEmbossEnabled                = feature == 6u;
+      ordinary.isTextGradientRequested        = feature == 0u;
+      ordinary.isTextGradientOverlayRequested = feature == 1u;
+      ordinary.isTextRevealEnabled            = feature == 3u;
+      ordinary.textRevealUnit                 = UiText::Internal::Reveal::Unit::CHARACTER;
+      ordinary.textRevealFadeDurationRatio    = 0.5f;
+      ordinary.textColor                      = Vector4(0.3f, 0.6f, 0.9f, alpha);
+      ordinary.isShadowEnabled                = true;
+      ordinary.shadowOffset                   = Vector2(2.0f, 3.0f);
+      ordinary.shadowColor                    = Color::GREEN;
+      ordinary.isOutlineEnabled               = true;
+      ordinary.outlineWidth                   = 1u;
+      if(feature == 5u)
+      {
+        ordinary.text               = "Vertical\nmarquee\ncontent\nlines";
+        ordinary.isMultiLine        = true;
+        ordinary.marqueeOrientation = UiText::MarqueeOrientation::VERTICAL;
+      }
+      auto fallback            = ordinary;
+      fallback.isCutoutEnabled = true;
+      auto expected            = ordinary.isMarqueeEnabled ? loader.RenderMarquee(ordinary, false, Size::ZERO) : loader.RenderText(ordinary, false, Size::ZERO);
+      auto actual              = fallback.isMarqueeEnabled ? loader.RenderMarquee(fallback, false, Size::ZERO) : loader.RenderText(fallback, false, Size::ZERO);
+      DALI_TEST_CHECK(!actual.cutout && !actual.isCutoutEnabled);
+      DALI_TEST_CHECK(actual.textPixelData);
+      DALI_TEST_EQUALS(actual.size, expected.size, TEST_LOCATION);
+      DALI_TEST_EQUALS(actual.renderedSize, expected.renderedSize, TEST_LOCATION);
+      checkPixels(actual.textPixelData, expected.textPixelData);
+      checkPixels(actual.stylePixelData, expected.stylePixelData);
+      checkPixels(actual.marqueePixelData, expected.marqueePixelData);
+      DALI_TEST_EQUALS(actual.revealMetadataTiles.size(), expected.revealMetadataTiles.size(), TEST_LOCATION);
+      for(size_t tile = 0u; tile < std::min(actual.revealMetadataTiles.size(), expected.revealMetadataTiles.size()); ++tile)
+      {
+        checkPixels(actual.revealMetadataTiles[tile], expected.revealMetadataTiles[tile]);
+      }
+    }
+  }
+  auto supported             = MakeParameters("Supported again");
+  supported.isMarqueeEnabled = false;
+  supported.isCutoutEnabled  = true;
+  DALI_TEST_CHECK(loader.RenderText(supported, false, Size::ZERO).cutout);
+  END_TEST;
+}
+
+// Pending text retains its publication. Only a COLOR background is composed
+// by cutout; a public non-COLOR replacement keeps its own rendering lifecycle.
+int UtcDaliCutoutFallbackPublicationOwnershipP(void)
+{
+  CapturedPublication test;
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.Finish(test.Dispatch());
+  auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  for(unsigned feature = 0u; feature < 4u; ++feature)
+  {
+    PublishedVisual previous(test.label);
+    if(feature == 0u) test.label.SetTextGradient(PublicationGradient());
+    if(feature == 1u) test.label.SetTextGradientOverlay(PublicationGradient());
+    if(feature == 2u)
+    {
+      auto builder = UiText::StyledTextBuilder::New("Gradient fallback");
+      DALI_TEST_CHECK(builder.SetSpan(UiText::GradientSpan::New(PublicationGradient()), 0u, 8u));
+      test.label.SetStyledText(builder.Build());
+    }
+    if(feature == 3u) test.label.SetBackgroundGradient(PublicationGradient());
+    auto fallback = test.Dispatch();
+    DALI_TEST_CHECK(fallback && !fallback->mParameters.isCutoutEnabled);
+    if(feature == 3u)
+    {
+      // The new background may add a renderer, but cannot replace the pending
+      // text's renderer or textures before the worker result is published.
+      bool attached = false;
+      for(unsigned i = 0u; i < test.label.GetRendererCount(); ++i)
+      {
+        attached |= test.label.GetRendererAt(i) == previous.renderer;
+      }
+      DALI_TEST_CHECK(attached);
+      previous.CheckRenderer();
+    }
+    else
+    {
+      previous.Check(test.label);
+    }
+    DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_EQUALS(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND), feature == 3u, TEST_LOCATION);
+    test.Finish(fallback);
+    DALI_TEST_CHECK(test.label.IsTextCutoutEnabled());
+    DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    if(feature == 0u) test.label.SetTextGradient(Ui::Gradient::Base::None());
+    if(feature == 1u) test.label.SetTextGradientOverlay(Ui::Gradient::Base::None());
+    if(feature == 2u) test.label.SetText("Supported again");
+    if(feature == 3u) test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+    auto cutout = test.Dispatch();
+    DALI_TEST_CHECK(cutout && cutout->mParameters.isCutoutEnabled);
+    DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    test.Finish(cutout);
+    DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  }
+  END_TEST;
+}
+
+int UtcDaliCutoutFallbackInactiveGradientStateP(void)
+{
+  CapturedPublication test;
+  test.label.SetTextGradientBoundsMode(UiText::GradientBoundsMode::VIEW_BOUND);
+  test.label.SetTextGradientOverlayBoundsMode(UiText::GradientBoundsMode::VIEW_BOUND);
+  test.label.SetTextCutoutEnabled(true);
+  test.Finish(test.Dispatch());
+  auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  auto builder = UiText::StyledTextBuilder::New("Foreground wins");
+  DALI_TEST_CHECK(builder.SetSpan(UiText::GradientSpan::New(PublicationGradient()), 0u, 15u));
+  DALI_TEST_CHECK(builder.SetSpan(UiText::ForegroundColorSpan::New(Ui::UiColor(Color::GREEN)), 0u, 15u));
+  test.label.SetStyledText(builder.Build());
+  test.Finish(test.Dispatch());
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  END_TEST;
+}
+
+int UtcDaliCutoutAutoMarqueeFallbackP(void)
+{
+  CapturedPublication test;
+  test.label.SetTextCutoutEnabled(true);
+  test.label.SetMarqueeTriggerPolicy(UiText::MarqueeTriggerPolicy::ON_OVERFLOW);
+  test.label.SetText(std::string(600u, 'W').c_str());
+  auto overflow = test.Dispatch();
+  DALI_TEST_CHECK(overflow);
+  test.Finish(overflow);
+  DALI_TEST_CHECK(test.label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(overflow->mRenderInfo.marqueePixelData && !overflow->mRenderInfo.cutout);
+  test.label.SetText("Hi");
+  test.Finish(test.Dispatch());
+  auto& data = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(data.GetVisual(UiText::LabelPropertyIndex::TEXT)));
+  END_TEST;
+}
+
+int UtcDaliCutoutRevealSyncBackgroundOwnershipP(void)
+{
+  CapturedPublication test;
+  test.label.SetAsyncRendering(false);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.application.SendNotification();
+  test.application.Render();
+  auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+
+  for(unsigned iteration = 0u; iteration < 3u; ++iteration)
+  {
+    UiText::Reveal reveal;
+    reveal.SetUnit(UiText::Reveal::Unit::CHARACTER);
+    test.label.SetTextReveal(reveal);
+    // Sync Reveal publishes directly from the setter, without a relayout.
+    DALI_TEST_CHECK(test.label.IsTextCutoutEnabled());
+    DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    for(float progress : {0.0f, 0.5f, 1.0f})
+    {
+      test.label.SetTextRevealProgress(progress);
+      test.application.SendNotification();
+      test.application.Render();
+      DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+      DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    }
+    test.label.SetTextReveal(UiText::Reveal::None());
+    DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    DALI_TEST_CHECK(UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    test.application.SendNotification();
+    test.application.Render();
+  }
+  DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+  END_TEST;
+}
+
+int UtcDaliCutoutRevealPendingModeSwitchOwnershipP(void)
+{
+  CapturedPublication test;
+  test.label.SetAsyncRendering(false);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.application.SendNotification();
+  test.application.Render();
+  auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+
+  // Requested OFF must not hide the still-published cutout from the setter.
+  test.label.SetTextCutoutEnabled(false);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  UiText::Reveal reveal;
+  reveal.SetUnit(UiText::Reveal::Unit::CHARACTER);
+  test.label.SetTextReveal(reveal);
+  DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+
+  test.label.SetTextReveal(UiText::Reveal::None());
+  test.label.SetTextCutoutEnabled(true);
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  test.label.SetAsyncRendering(true);
+  test.label.SetTextReveal(reveal);
+  // Pending Reveal keeps the published cutout and its background ownership.
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  DALI_TEST_CHECK(UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+  // Switching execution mode publishes Reveal directly, before any relayout.
+  test.label.SetAsyncRendering(false);
+  DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+  DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+  END_TEST;
+}
+
+int UtcDaliCutoutMarqueeFallbackStartPositionP(void)
+{
+  CapturedPublication test;
+  test.label.SetMarqueeStopMode(UiText::MarqueeStopMode::IMMEDIATE);
+  for(bool asynchronous : {false, true})
+  {
+    float ordinaryDelta = 0.0f;
+    for(bool cutout : {false, true})
+    {
+      test.label.StopMarquee();
+      test.label.SetAsyncRendering(asynchronous);
+      test.label.SetText("CUTOUT HORIZONTAL MOVING TEXT");
+      test.label.SetFontFamily("DejaVu Sans");
+      test.label.SetFontSize(32.0f);
+      UiText::Outline outline;
+      outline.SetWidth(2.0f);
+      outline.SetColor(Ui::UiColor(Color::GREEN));
+      test.label.SetTextOutline(outline);
+      test.label.SetTextCutoutEnabled(cutout);
+      test.label.SetMarqueeTriggerPolicy(UiText::MarqueeTriggerPolicy::MANUAL);
+      test.label.SetMarqueeLoopDelay(20.0f);
+      const auto publish = [&]
+      {
+        if(asynchronous)
+        {
+          test.Finish(test.Dispatch());
+        }
+        else
+        {
+          test.application.SendNotification();
+          test.application.Render();
+        }
+      };
+      publish();
+      test.label.StartMarquee();
+      publish();
+      auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+      auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+      DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+      DALI_TEST_EQUALS(test.label.IsTextCutoutEnabled(), cutout, TEST_LOCATION);
+      auto shader = test.label.GetRendererAt(0u).GetShader();
+      auto index  = shader.GetPropertyIndex("uDelta");
+      DALI_TEST_CHECK(index != Property::INVALID_INDEX);
+      const float delta = shader.GetProperty<float>(index);
+      if(cutout)
+      {
+        DALI_TEST_EQUALS(delta, ordinaryDelta, 0.001f, TEST_LOCATION);
+      }
+      else
+      {
+        ordinaryDelta = delta;
+        DALI_TEST_CHECK(std::abs(ordinaryDelta) > 0.01f);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliCutoutFallbackManualSnapshotP(void)
+{
+  CapturedPublication test;
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.Finish(test.Dispatch());
+  auto& impl    = static_cast<Ui::Integration::LabelImpl&>(test.label.GetImplementation());
+  auto& data    = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto  visual  = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  auto  builder = UiText::StyledTextBuilder::New("Manual gradient snapshot");
+  DALI_TEST_CHECK(builder.SetSpan(UiText::GradientSpan::New(PublicationGradient()), 0u, 6u));
+  test.label.SetStyledText(builder.Build());
+  impl.RequestAsyncRenderWithFixedSize(170.0f, 60.0f);
+  auto fallback = test.Dispatch();
+  DALI_TEST_CHECK(fallback && !fallback->mParameters.isCutoutEnabled);
+  fallback->Process();
+  test.label.SetTextColor(Ui::UiColor(Vector4(1.0f, 1.0f, 1.0f, 0.5f)));
+  DALI_TEST_EQUALS(fallback->mParameters.textColor.a, 1.0f, TEST_LOCATION);
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  const auto completed = test.completed;
+  test.Deliver(fallback);
+  DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(test.width, 170.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(test.label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.label.SetText("Supported text for the next explicit request");
+  impl.RequestAsyncRenderWithFixedSize(170.0f, 60.0f);
+  auto supported = test.Dispatch();
+  DALI_TEST_CHECK(supported && supported->mParameters.isCutoutEnabled);
+  test.Finish(supported);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  END_TEST;
+}
+
+// Bevel uses the ordinary emboss shader while retaining the public cutout request.
+int UtcDaliCutoutBevelFallbackPublicationP(void)
+{
+  CapturedPublication test;
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.label.SetTextCutoutEnabled(true);
+  test.Finish(test.Dispatch());
+  auto&         data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto          visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  UiText::Bevel bevel;
+  bevel.SetDirection(Vector2(-0.75f, 0.25f));
+  bevel.SetIntensity(2.5f);
+  const auto checkBevel = [&]()
+  {
+    DALI_TEST_CHECK(test.label.IsTextCutoutEnabled());
+    DALI_TEST_CHECK(test.label.GetTextBevel() == bevel);
+    DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    bool hasEmbossShader = false;
+    for(uint32_t i = 0u; i < test.label.GetRendererCount(); ++i)
+    {
+      auto        renderer = test.label.GetRendererAt(i);
+      auto        program  = renderer.GetShader().GetProperty<Property::Map>(Shader::Property::PROGRAM);
+      const auto* fragment = program.Find("fragment");
+      if(fragment && std::string(fragment->Get<Dali::String>().CStr()).find("#define IS_REQUIRED_EMBOSS") != std::string::npos)
+      {
+        hasEmbossShader = true;
+        DALI_TEST_EQUALS(renderer.GetProperty<float>(renderer.GetPropertyIndex("uEmbossStrength")), 2.5f, 0.001f, TEST_LOCATION);
+      }
+    }
+    DALI_TEST_CHECK(hasEmbossShader);
+  };
+  PublishedVisual previous(test.label);
+  test.label.SetTextBevel(bevel);
+  auto fallback = test.Dispatch();
+  DALI_TEST_CHECK(fallback && !fallback->mParameters.isCutoutEnabled && fallback->mParameters.isEmbossEnabled);
+  previous.Check(test.label);
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.Finish(fallback);
+  checkBevel();
+  test.label.SetTextBevel(UiText::Bevel::None());
+  auto cutout = test.Dispatch();
+  DALI_TEST_CHECK(cutout && cutout->mParameters.isCutoutEnabled);
+  DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  test.Finish(cutout);
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  test.label.SetAsyncRendering(false);
+  test.label.SetTextBevel(bevel);
+  test.application.SendNotification();
+  test.application.Render();
+  checkBevel();
+  test.label.SetTextBevel(UiText::Bevel::None());
+  test.application.SendNotification();
+  test.application.Render();
+  DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  DALI_TEST_CHECK(!data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+  END_TEST;
+}
+
+// Repeated requests still notify property observers, but must retain every texture.
+int UtcDaliCutoutRepeatedPropertyPreservesPublicationP(void)
+{
+  CapturedPublication test;
+  for(bool asynchronous : {false, true})
+  {
+    test.label.SetAsyncRendering(asynchronous);
+    test.label.SetTextCutoutEnabled(false);
+    test.label.SetText("CUTOUT");
+    test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+    const auto publish = [&]
+    {
+      if(asynchronous)
+      {
+        test.Finish(test.Dispatch());
+      }
+      else
+      {
+        test.application.SendNotification();
+        test.application.Render();
+      }
+    };
+    publish();
+    auto&             data       = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+    auto              visual     = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+    auto              controller = UiInternal::TextVisual::GetController(visual);
+    unsigned          signals    = 0u;
+    ConnectionTracker propertyTracker;
+    test.label.PropertySetSignal().Connect(&propertyTracker, [&](Handle handle, Property::Index index, const Property::Value& value)
+    {
+      if(index == UiText::LabelPropertyIndex::CUTOUT_ENABLED)
+      {
+        ++signals;
+        DALI_TEST_EQUALS(handle.GetProperty<bool>(index), value.Get<bool>(), TEST_LOCATION);
+        DALI_TEST_EQUALS(test.label.IsTextCutoutEnabled(), value.Get<bool>(), TEST_LOCATION);
+      }
+    });
+    for(bool enabled : {false, true, false, true})
+    {
+      if(test.label.IsTextCutoutEnabled() != enabled)
+      {
+        test.label.SetTextCutoutEnabled(enabled);
+        publish();
+      }
+      std::vector<Renderer>   renderers;
+      std::vector<TextureSet> textures;
+      for(uint32_t i = 0u; i < test.label.GetRendererCount(); ++i)
+      {
+        renderers.push_back(test.label.GetRendererAt(i));
+        textures.push_back(renderers.back().GetTextures());
+      }
+      const auto revision   = controller->GetRenderRevision();
+      const auto completed  = test.completed;
+      const auto signaled   = signals;
+      const auto background = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
+      test.label.SetTextCutoutEnabled(enabled);
+      test.label.SetProperty(UiText::LabelPropertyIndex::CUTOUT_ENABLED, enabled);
+      test.application.SendNotification();
+      test.application.Render();
+      test.application.SendNotification();
+      test.application.Render();
+      DALI_TEST_EQUALS(signals, signaled + 2u, TEST_LOCATION);
+      DALI_TEST_EQUALS(controller->GetRenderRevision(), revision, TEST_LOCATION);
+      DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+      DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+      DALI_TEST_EQUALS(test.label.GetRendererCount(), static_cast<uint32_t>(renderers.size()), TEST_LOCATION);
+      for(uint32_t i = 0u; i < test.label.GetRendererCount(); ++i)
+      {
+        DALI_TEST_CHECK(test.label.GetRendererAt(i) == renderers[i]);
+        DALI_TEST_CHECK(renderers[i].GetTextures() == textures[i]);
+      }
+      DALI_TEST_CHECK(UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual) == background);
+      DALI_TEST_EQUALS(UiInternal::TextVisual::HasCutoutRenderer(visual), enabled, TEST_LOCATION);
+      DALI_TEST_EQUALS(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND), !enabled, TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}
+
+// Nested property writes must leave the last requested mode authoritative.
+int UtcDaliCutoutNestedPropertyLatestRequestP(void)
+{
+  CapturedPublication test;
+  for(bool asynchronous : {false, true})
+  {
+    test.label.SetAsyncRendering(asynchronous);
+    test.label.SetTextCutoutEnabled(false);
+    test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+    bool              nested = false;
+    std::vector<bool> observed;
+    ConnectionTracker propertyTracker;
+    test.label.PropertySetSignal().Connect(&propertyTracker, [&](Handle handle, Property::Index index, const Property::Value& value)
+    {
+      if(index == UiText::LabelPropertyIndex::CUTOUT_ENABLED)
+      {
+        observed.push_back(value.Get<bool>());
+        DALI_TEST_EQUALS(handle.GetProperty<bool>(index), value.Get<bool>(), TEST_LOCATION);
+        DALI_TEST_EQUALS(test.label.IsTextCutoutEnabled(), value.Get<bool>(), TEST_LOCATION);
+        if(!nested)
+        {
+          nested = true;
+          test.label.SetProperty(index, false);
+        }
+      }
+    });
+    test.label.SetTextCutoutEnabled(true);
+    // Core suppresses recursive emission of the same signal; the nested setter still applies.
+    DALI_TEST_CHECK(observed == std::vector<bool>({true}));
+    DALI_TEST_CHECK(!test.label.IsTextCutoutEnabled());
+    DALI_TEST_CHECK(!test.label.GetProperty<bool>(UiText::LabelPropertyIndex::CUTOUT_ENABLED));
+    if(asynchronous)
+    {
+      test.Finish(test.Dispatch());
+    }
+    else
+    {
+      test.application.SendNotification();
+      test.application.Render();
+    }
+    auto& data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+    auto  visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+    DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+    DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+  }
+  END_TEST;
+}
+
+// A repeated request must not supersede an automatic or manual snapshot in flight.
+int UtcDaliCutoutRepeatedPendingSnapshotP(void)
+{
+  CapturedPublication test;
+  for(bool manual : {false, true})
+  {
+    test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+    test.label.SetTextCutoutEnabled(true);
+    test.Finish(test.Dispatch());
+    auto& impl       = static_cast<Ui::Integration::LabelImpl&>(test.label.GetImplementation());
+    auto& data       = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+    auto  visual     = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+    auto  controller = UiInternal::TextVisual::GetController(visual);
+    for(bool enabled : {true, false})
+    {
+      if(test.label.IsTextCutoutEnabled() != enabled)
+      {
+        test.label.SetTextCutoutEnabled(enabled);
+        test.Finish(test.Dispatch());
+      }
+      test.label.SetText(enabled ? "Pending cutout" : "Pending ordinary");
+      if(manual)
+      {
+        impl.RequestAsyncRenderWithFixedSize(170.0f, 60.0f);
+      }
+      auto pending = test.Dispatch();
+      DALI_TEST_CHECK(pending);
+      const auto taskId    = pending->GetId();
+      const auto revision  = controller->GetRenderRevision();
+      const auto completed = test.completed;
+      test.label.SetTextCutoutEnabled(enabled);
+      test.label.SetProperty(UiText::LabelPropertyIndex::CUTOUT_ENABLED, enabled);
+      test.application.SendNotification();
+      test.application.Render();
+      DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+      DALI_TEST_EQUALS(pending->GetId(), taskId, TEST_LOCATION);
+      DALI_TEST_EQUALS(controller->GetRenderRevision(), revision, TEST_LOCATION);
+      DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+      DALI_TEST_CHECK(UiInternal::TextVisual::IsAsyncRenderPending(visual));
+      test.Finish(pending);
+      DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+      DALI_TEST_EQUALS(UiInternal::TextVisual::HasCutoutRenderer(visual), enabled, TEST_LOCATION);
+      DALI_TEST_EQUALS(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND), !enabled, TEST_LOCATION);
+      DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+    }
+  }
+  END_TEST;
+}
+
+namespace
+{
+void SettlePublicationEvents(CapturedPublication& test)
+{
+  for(unsigned frame = 0u; frame < 4u; ++frame)
+  {
+    test.application.SendNotification();
+    test.application.Render();
+    auto tasks = Test::AsyncTaskManager::TakeCapturedTasks();
+    for(auto& task : tasks)
+    {
+      test.Finish(UiInternal::TextLoadingTaskPtr(static_cast<UiInternal::TextLoadingTask*>(task.Get())));
+    }
+  }
+}
+} //namespace
+
+int UtcDaliTextColorNestedLatestValueP(void)
+{
+  CapturedPublication test;
+  auto&               data       = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto                visual     = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  auto                controller = UiInternal::TextVisual::GetController(visual);
+  for(bool async : {false, true})
+  {
+    test.label.SetAsyncRendering(async);
+    for(bool cutout : {false, true})
+    {
+      test.label.SetTextCutoutEnabled(cutout);
+      test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+      SettlePublicationEvents(test);
+      for(bool outerProperty : {false, true})
+      {
+        for(bool innerProperty : {false, true})
+        {
+          test.label.SetTextColor(Ui::UiColor(Color::WHITE));
+          SettlePublicationEvents(test);
+          const Vector4     a(.8f, .1f, .2f, .7f), b(.1f, .8f, .3f, .4f);
+          unsigned          signals = 0u;
+          ConnectionTracker tracker;
+          test.label.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value&)
+          {
+            if(index == UiText::LabelPropertyIndex::TEXT_COLOR && ++signals == 1u)
+            {
+              if(innerProperty)
+                test.label.SetProperty(UiText::LabelPropertyIndex::TEXT_COLOR, b);
+              else
+                test.label.SetTextColor(Ui::UiColor(b));
+            }
+          });
+          if(outerProperty)
+            test.label.SetProperty(UiText::LabelPropertyIndex::TEXT_COLOR, a);
+          else
+            test.label.SetTextColor(Ui::UiColor(a));
+          DALI_TEST_EQUALS(signals, 1u, TEST_LOCATION);
+          DALI_TEST_EQUALS(test.label.GetProperty<Vector4>(UiText::LabelPropertyIndex::TEXT_COLOR), b, TEST_LOCATION);
+          DALI_TEST_EQUALS(test.label.GetTextColor().GetRgba(), b, TEST_LOCATION);
+          DALI_TEST_EQUALS(controller->GetDefaultColor(), b, TEST_LOCATION);
+          DALI_TEST_EQUALS(controller->GetRenderTextModel()->GetDefaultColor(), b, TEST_LOCATION);
+          auto& impl       = static_cast<Ui::Integration::LabelImpl&>(Ui::GetImpl(test.label));
+          auto  parameters = (impl.*GetRequestMember(CaptureRequest{}))(UiIntegrationText::Async::RENDER_FIXED_SIZE,
+                                                                       Vector2(220.f, 80.f), Insets{}, LayoutDirection::LEFT_TO_RIGHT);
+          DALI_TEST_EQUALS(parameters.textColor, b, TEST_LOCATION);
+          SettlePublicationEvents(test);
+          DALI_TEST_EQUALS(controller->GetRenderTextModel()->GetDefaultColor(), b, TEST_LOCATION);
+        }
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextColorNestedManualSnapshotP(void)
+{
+  CapturedPublication test;
+  auto&               impl       = static_cast<Ui::Integration::LabelImpl&>(Ui::GetImpl(test.label));
+  auto&               data       = UiInternal::ViewDataImpl::Get(impl);
+  auto                visual     = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  auto                controller = UiInternal::TextVisual::GetController(visual);
+  for(bool cutout : {false, true})
+  {
+    test.label.SetTextCutoutEnabled(cutout);
+    test.label.SetTextColor(Ui::UiColor(Color::WHITE));
+    SettlePublicationEvents(test);
+    impl.RequestAsyncRenderWithFixedSize(170.f, 60.f);
+    auto pending = test.Dispatch();
+    DALI_TEST_EQUALS(pending->mParameters.textColor, Color::WHITE, TEST_LOCATION);
+    unsigned          signals = 0u;
+    ConnectionTracker tracker;
+    test.label.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value&)
+    {
+      if(index == UiText::LabelPropertyIndex::TEXT_COLOR && ++signals == 1u)
+      {
+        test.label.SetTextColor(Ui::UiColor(Color::GREEN));
+      }
+    });
+    test.label.SetTextColor(Ui::UiColor(Color::RED));
+    DALI_TEST_EQUALS(controller->GetDefaultColor(), Color::GREEN, TEST_LOCATION);
+    DALI_TEST_EQUALS(pending->mParameters.textColor, Color::WHITE, TEST_LOCATION);
+    test.application.SendNotification();
+    test.application.Render();
+    DALI_TEST_CHECK(Test::AsyncTaskManager::TakeCapturedTasks().empty());
+    const unsigned completed = test.completed;
+    test.Finish(pending);
+    DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(test.width, 170.f, TEST_LOCATION);
+    impl.RequestAsyncRenderWithFixedSize(170.f, 60.f);
+    auto latest = test.Dispatch();
+    DALI_TEST_EQUALS(latest->mParameters.textColor, Color::GREEN, TEST_LOCATION);
+    test.Finish(latest);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextColorThemeAfterNestedSetP(void)
+{
+  CapturedPublication test;
+  auto&               data       = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto                controller = UiInternal::TextVisual::GetController(data.GetVisual(UiText::LabelPropertyIndex::TEXT));
+  auto                manager    = Ui::UiColorManager::Get();
+  struct ResetColorOverride
+  {
+    Ui::UiColorManager& manager;
+    ~ResetColorOverride()
+    {
+      manager.ClearColorOverride();
+    }
+  } resetColorOverride{manager};
+  manager.SetColorOverride([](StringView id, Vector4& color)
+  {
+    if(!(id == "CutoutAuditColor")) return false;
+    color = Color::GREEN;
+    return true;
+  });
+  unsigned signals = 0u;
+  {
+    ConnectionTracker tracker;
+    test.label.PropertySetSignal().Connect(&tracker, [&](Handle, Property::Index index, const Property::Value&)
+    {
+      if(index == UiText::LabelPropertyIndex::TEXT_COLOR && ++signals == 1u)
+      {
+        test.label.SetTextColor(Ui::UiColor("CutoutAuditColor"));
+      }
+    });
+    test.label.SetTextColor(Ui::UiColor(Color::RED));
+  }
+  DALI_TEST_EQUALS(signals, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(test.label.GetTextColor().HasColorId());
+  DALI_TEST_EQUALS(controller->GetDefaultColor(), Color::GREEN, TEST_LOCATION);
+  manager.SetColorOverride([](StringView id, Vector4& color)
+  {
+    if(!(id == "CutoutAuditColor")) return false;
+    color = Color::BLUE;
+    return true;
+  });
+  DALI_TEST_EQUALS(test.label.GetTextColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(test.label.GetProperty<Vector4>(UiText::LabelPropertyIndex::TEXT_COLOR), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(controller->GetDefaultColor(), Color::BLUE, TEST_LOCATION);
+  SettlePublicationEvents(test);
+  DALI_TEST_EQUALS(controller->GetRenderTextModel()->GetDefaultColor(), Color::BLUE, TEST_LOCATION);
+  test.label.SetTextColor(Ui::UiColor(Color::WHITE));
+  END_TEST;
+}
+
+int UtcDaliCutoutPublicBackgroundInvalidationP(void)
+{
+  CapturedPublication test;
+  auto&               data   = UiInternal::ViewDataImpl::Get(Ui::GetImpl(test.label));
+  auto                visual = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
+  for(bool async : {false, true})
+  {
+    test.label.SetAsyncRendering(async);
+    test.label.SetTextCutoutEnabled(true);
+    test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+    SettlePublicationEvents(test);
+
+    // Supported background setters schedule their own relayout. Direct internal
+    // slot registration does not carry that public setter contract.
+    test.label.SetBackgroundGradient(PublicationGradient());
+    SettlePublicationEvents(test);
+    DALI_TEST_CHECK(!UiInternal::TextVisual::HasCutoutRenderer(visual));
+    DALI_TEST_CHECK(data.IsVisualEnabled(Ui::Integration::View::Property::BACKGROUND));
+
+    test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+    SettlePublicationEvents(test);
+    DALI_TEST_CHECK(UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    test.label.ClearBackground();
+    SettlePublicationEvents(test);
+    DALI_TEST_CHECK(!UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
+    DALI_TEST_CHECK(UiInternal::TextVisual::HasCutoutRenderer(visual));
+  }
+
+  test.label.SetAsyncRendering(false);
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  SettlePublicationEvents(test);
+  unsigned          ready = 0u;
+  ConnectionTracker tracker;
+  test.label.ResourceReadySignal().Connect(&tracker, [&](Ui::View)
+  { ++ready; });
+  test.label.Unparent();
+  test.label.ClearBackground();
+  test.application.GetScene().Add(test.label);
+  SettlePublicationEvents(test);
+  const auto before = ready;
+
+  // Reconnecting must prepare the new background before cutout hides it.
+  // Otherwise its ready notification is postponed until OFF, causing another
+  // relayout and ordinary raster at that later transition.
+  test.label.Unparent();
+  test.label.SetBackgroundColor(Ui::UiColor(Color::BLUE));
+  test.application.GetScene().Add(test.label);
+  SettlePublicationEvents(test);
+  DALI_TEST_EQUALS(ready, before + 1u, TEST_LOCATION);
+  test.label.SetTextCutoutEnabled(false);
+  SettlePublicationEvents(test);
+  DALI_TEST_EQUALS(ready, before + 1u, TEST_LOCATION);
   END_TEST;
 }

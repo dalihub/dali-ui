@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager-impl.h>
 #include <dali-ui-foundation/internal/text/async-text/text-loading-task.h>
+#include <dali-ui-foundation/internal/text/rendering/text-cutout-render-data.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
@@ -485,10 +486,8 @@ int UtcDaliTextRenderScaleFinalLimitAfterEarlyCheckP(void)
     parameters.text = "Tall scrolling";
     if(cutout)
     {
-      parameters.padding                       = Insets(10, 10, 10, 10);
-      parameters.isCutoutEnabled               = true;
-      parameters.isBackgroundWithCutoutEnabled = true;
-      parameters.backgroundColorWithCutout     = Color::RED;
+      parameters.padding         = Insets(10, 10, 10, 10);
+      parameters.isCutoutEnabled = true;
     }
     else
     {
@@ -502,8 +501,11 @@ int UtcDaliTextRenderScaleFinalLimitAfterEarlyCheckP(void)
     {
       // Padding is known before Load, so this request renders once at RS1.
       DALI_TEST_EQUALS(actual->mParameters.renderScale, 1.0f, TEST_LOCATION);
-      SamePixels(actual->mRenderInfo.textPixelData, expected->mRenderInfo.textPixelData);
-      SamePixels(actual->mRenderInfo.stylePixelData, expected->mRenderInfo.stylePixelData);
+      DALI_TEST_CHECK(actual->mRenderInfo.cutout && expected->mRenderInfo.cutout);
+      SamePixels(actual->mRenderInfo.cutout->coverage, expected->mRenderInfo.cutout->coverage);
+      SamePixels(actual->mRenderInfo.cutout->style, expected->mRenderInfo.cutout->style);
+      DALI_TEST_EQUALS(actual->mRenderInfo.cutout->rect, expected->mRenderInfo.cutout->rect, TEST_LOCATION);
+      DALI_TEST_EQUALS(actual->mRenderInfo.cutout->controlSize, expected->mRenderInfo.cutout->controlSize, TEST_LOCATION);
       DALI_TEST_EQUALS(actual->mRenderInfo.size, expected->mRenderInfo.size, TEST_LOCATION);
     }
     else
@@ -2140,4 +2142,93 @@ int UtcDaliLabelGradientHeightTilingAsyncUniformReentryP(void)
 int UtcDaliLabelGradientHeightTilingRebindUniformReentryP(void)
 {
   return CheckGradientTileUniformReentry(false, true);
+}
+
+// A cropped cutout can fit even when padding pushes its full RS2 canvas over
+// the final raster limit. Keep the ordinary preflight fallback policy intact.
+int UtcDaliCutoutCroppedFinalRasterLimitP(void)
+{
+  UiTestApplication application;
+  auto              parameters = Parameters(60.0f, 40.0f, 2.0f);
+  parameters.text              = "Hi";
+  parameters.padding           = Insets(4, 4, 4, 4);
+  parameters.isCutoutEnabled   = true;
+  auto result                  = Run(parameters);
+  DALI_TEST_EQUALS(result->mParameters.renderScale, 2.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(result->mRenderInfo.cutout);
+  DALI_TEST_CHECK(parameters.maxTextureSize > 0);
+  const auto maximum = static_cast<uint32_t>(parameters.maxTextureSize);
+  DALI_TEST_CHECK(result->mRenderInfo.cutout->controlSize.x > static_cast<float>(maximum));
+  DALI_TEST_CHECK(result->mRenderInfo.cutout->IsValid(maximum));
+  DALI_TEST_CHECK(!result->mRenderInfo.textPixelData);
+  END_TEST;
+}
+
+// Exercise the same live Label across the independent tiled and cropped paths.
+int UtcDaliLabelHeightTilingCutoutTransitionsP(void)
+{
+  UiTestApplication application;
+  CapturedTasks     captured;
+  const uint32_t    maximum = Dali::GetMaxTextureSize();
+  std::string       lines;
+  for(uint32_t i = 0u; i < maximum / 8u + 100u; ++i)
+  {
+    lines += "Tile\n";
+  }
+  Ui::Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
+  Ui::Label label = Ui::Label::New(lines.c_str());
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(static_cast<float>(maximum + 100u));
+  label.SetMultiLine(true);
+  label.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
+  label.SetLineHeight(32.0f);
+  label.SetTextGradient(gradient);
+  label.SetTextGradientOverlay(gradient);
+  application.GetScene().Add(label);
+  for(bool async : {false, true})
+  {
+    label.SetAsyncRendering(async);
+    for(unsigned stage = 0u; stage < 5u; ++stage)
+    {
+      const bool cutout = stage == 1u || stage == 3u;
+      label.SetTextGradient(cutout ? Ui::Gradient::Base::None() : gradient);
+      label.SetTextGradientOverlay(cutout ? Ui::Gradient::Base::None() : gradient);
+      label.SetText(cutout ? "HOLE" : lines.c_str());
+      label.SetTextCutoutEnabled(stage > 0u && stage < 4u);
+      captured.Drain(application);
+      captured.Drain(application);
+      auto& data   = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(label));
+      auto  visual = data.GetVisual(Text::LabelPropertyIndex::TEXT);
+      DALI_TEST_EQUALS(Ui::Internal::TextVisual::HasCutoutRenderer(visual), cutout, TEST_LOCATION);
+      CheckTiles(label, maximum);
+      if(cutout)
+      {
+        DALI_TEST_EQUALS(label.GetRendererCount(), 1u, TEST_LOCATION);
+        auto renderer = label.GetRendererAt(0u);
+        DALI_TEST_EQUALS(renderer.GetTextures().GetTextureCount(), 2u, TEST_LOCATION);
+        DALI_TEST_CHECK(renderer.GetPropertyIndex("uCutoutRect") != Property::INVALID_INDEX);
+        const auto    size        = renderer.GetProperty<Vector2>(VisualRenderer::Property::TRANSFORM_SIZE);
+        const auto    mode        = renderer.GetProperty<Vector4>(VisualRenderer::Property::TRANSFORM_OFFSET_SIZE_MODE);
+        const auto    controlSize = label.GetCurrentSize();
+        const Vector2 quadSize(size.x * (controlSize.x * (1.0f - mode.z) + mode.z),
+                               size.y * (controlSize.y * (1.0f - mode.w) + mode.w));
+        DALI_TEST_EQUALS(quadSize, Vector2(120.0f, static_cast<float>(maximum + 100u)), TEST_LOCATION);
+        DALI_TEST_EQUALS(renderer.GetProperty<Vector2>(VisualRenderer::Property::TRANSFORM_OFFSET), Vector2::ZERO, TEST_LOCATION);
+      }
+      else
+      {
+        DALI_TEST_CHECK(label.GetRendererCount() > 1u);
+        auto textures = label.GetRendererAt(0u).GetTextures();
+        for(uint32_t i = 0u; i < label.GetRendererCount(); ++i)
+        {
+          auto renderer = label.GetRendererAt(i);
+          DALI_TEST_EQUALS(renderer.GetProperty<float>(renderer.GetPropertyIndex("visualTransformUseEffectiveScale")), 0.0f, TEST_LOCATION);
+          DALI_TEST_CHECK(renderer.GetTextures().GetTexture(1u) == textures.GetTexture(1u));
+          DALI_TEST_CHECK(renderer.GetTextures().GetTexture(2u) == textures.GetTexture(2u));
+        }
+      }
+    }
+  }
+  END_TEST;
 }

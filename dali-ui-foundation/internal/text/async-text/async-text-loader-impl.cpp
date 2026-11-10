@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <memory>
 #include <optional>
 #include <utility>
 
@@ -34,6 +35,7 @@
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
+#include <dali-ui-foundation/internal/text/rendering/text-cutout-render-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
@@ -496,7 +498,46 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // control size is used in ElideGlyphs in ViewModel.
   mTextModel->mVisualModel->mControlSize = Size(parameters.textWidth, parameters.textHeight);
 
-  // Update style properties.
+  mTextModel->mRemoveFrontInset = false;
+  mTextModel->mRemoveBackInset  = false;
+
+  if(parameters.hasStyledTextStyleSnapshot)
+  {
+    Dali::Ui::Internal::Text::StyledTextApplier::ApplySnapshotToLogicalModel(parameters.styledTextStyleSnapshot,
+                                                                             parameters.text,
+                                                                             *mTextModel->mLogicalModel);
+    // ApplySnapshotToLogicalModel updates logicalModel.mText; utf32Characters is a reference to it.
+    numberOfCharacters = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
+  }
+  else
+  {
+    textSize = static_cast<Dali::Ui::Text::Length>(parameters.text.size());
+
+    // This is a bit horrible but std::string returns a (signed) char*
+    utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Convert from utf8 to utf32
+    ////////////////////////////////////////////////////////////////////////////////
+
+    utf32Characters.Resize(textSize);
+
+    // Transform a text array encoded in utf8 into an array encoded in utf32.
+    // It returns the actual number of characters.
+    numberOfCharacters = Utf8ToUtf32(utf8, textSize, utf32Characters.Begin());
+    utf32Characters.Resize(numberOfCharacters);
+  }
+
+  if(parameters.isCutoutEnabled)
+  {
+    const auto* gradientSpans  = mTextModel->GetGradientSpanModelData();
+    parameters.isCutoutEnabled = IsShaderCutoutSupported(gradientSpans && !gradientSpans->characterRuns.Empty(), parameters.isMarqueeEnabled,
+                                                         parameters.isTextGradientRequested, parameters.isTextGradientOverlayRequested,
+                                                         parameters.isTextRevealEnabled, parameters.replacementSourceSnapshot.hasValidReplacementSource,
+                                                         parameters.isEmbossEnabled);
+  }
+
+  // Update style properties. Ordinary text retains its original scale path.
   mTextModel->mVisualModel->SetDecorationUiScale(parameters.decorationUiScale);
   mTextModel->mVisualModel->SetTextColor(parameters.textColor);
   // Requests carry resolved colors, also used by runs when global style is off.
@@ -551,37 +592,19 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   }
 
   mTextModel->mVisualModel->SetCutoutEnabled(parameters.isCutoutEnabled);
-  mTextModel->mVisualModel->SetBackgroundWithCutoutEnabled(parameters.isBackgroundWithCutoutEnabled);
-  mTextModel->mVisualModel->SetBackgroundColorWithCutout(parameters.backgroundColorWithCutout);
-
-  mTextModel->mRemoveFrontInset = false;
-  mTextModel->mRemoveBackInset  = false;
-
-  if(parameters.hasStyledTextStyleSnapshot)
+  if(parameters.isCutoutEnabled)
   {
-    Dali::Ui::Internal::Text::StyledTextApplier::ApplySnapshotToLogicalModel(parameters.styledTextStyleSnapshot,
-                                                                             parameters.text,
-                                                                             *mTextModel->mLogicalModel);
-    // ApplySnapshotToLogicalModel updates logicalModel.mText; utf32Characters is a reference to it.
-    numberOfCharacters = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
-  }
-  else
-  {
-    textSize = static_cast<Dali::Ui::Text::Length>(parameters.text.size());
-
-    // This is a bit horrible but std::string returns a (signed) char*
-    utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // Convert from utf8 to utf32
-    ////////////////////////////////////////////////////////////////////////////////
-
-    utf32Characters.Resize(textSize);
-
-    // Transform a text array encoded in utf8 into an array encoded in utf32.
-    // It returns the actual number of characters.
-    numberOfCharacters = Utf8ToUtf32(utf8, textSize, utf32Characters.Begin());
-    utf32Characters.Resize(numberOfCharacters);
+    // Only cropped cutout planes sample decorations in the supersampled canvas.
+    const float density = std::max(parameters.renderScale, 1.f);
+    mTextModel->mVisualModel->SetDecorationUiScale(parameters.decorationUiScale * density);
+    if(parameters.isShadowEnabled)
+    {
+      mTextModel->mVisualModel->SetShadowBlurRadius(parameters.shadowBlurRadius * density);
+    }
+    if(parameters.isOutlineEnabled)
+    {
+      mTextModel->mVisualModel->SetOutlineBlurRadius(parameters.outlineBlurRadius * density);
+    }
   }
 
   processingSource = MakeTextProcessingSource(*mTextModel);
@@ -1448,19 +1471,18 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool outlineEnabled    = renderModel->IsOutlineEnabled();
   const bool backgroundEnabled = renderModel->IsBackgroundEnabled();
   // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
-  const bool underlineRunEnabled         = renderModel->IsMarkupUnderlineSet();
-  const bool strikethroughRunEnabled     = renderModel->IsMarkupStrikethroughSet();
-  const bool underlineEnabled            = renderModel->IsUnderlineEnabled() || underlineRunEnabled;
-  const bool strikethroughEnabled        = renderModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
-  const bool backgroundMarkupSet         = renderModel->IsMarkupBackgroundColorSet();
-  const bool cutoutEnabled               = renderModel->IsCutoutEnabled();
-  const bool backgroundWithCutoutEnabled = renderModel->IsBackgroundWithCutoutEnabled();
-  const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
-  const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
-  const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
-  const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
-  const bool embossEnabled               = parameters.isEmbossEnabled;
-  const bool marqueeGradientCoverage     = parameters.isMarqueeEnabled && parameters.isTextGradientRequested &&
+  const bool underlineRunEnabled     = renderModel->IsMarkupUnderlineSet();
+  const bool strikethroughRunEnabled = renderModel->IsMarkupStrikethroughSet();
+  const bool underlineEnabled        = renderModel->IsUnderlineEnabled() || underlineRunEnabled;
+  const bool strikethroughEnabled    = renderModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
+  const bool backgroundMarkupSet     = renderModel->IsMarkupBackgroundColorSet();
+  const bool cutoutEnabled           = renderModel->IsCutoutEnabled();
+  const bool styleTextureEnabled     = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
+  const bool styleBlocksTextGradient = cutoutEnabled;
+  const bool styleEnabled            = styleTextureEnabled || styleBlocksTextGradient;
+  const bool isOverlayStyle          = underlineEnabled || strikethroughEnabled;
+  const bool embossEnabled           = parameters.isEmbossEnabled;
+  const bool marqueeGradientCoverage = parameters.isMarqueeEnabled && parameters.isTextGradientRequested &&
                                        !hasMultipleTextColors && !containsColorGlyph &&
                                        !styleBlocksTextGradient && !embossEnabled;
 
@@ -1490,14 +1512,15 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   if(cutoutEnabled)
   {
     // We need to store the offset including padding and vertical alignment.
-    float xOffset = parameters.padding.start;
-    float yOffset = parameters.padding.top + std::round((parameters.textHeight - layoutSize.y) *
-                                                        VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)]);
+    const float density = parameters.isMarqueeEnabled ? 1.f : std::max(parameters.renderScale, 1.f);
+    const float xOffset = std::round(parameters.padding.start * density);
+    const float yOffset = std::round(parameters.padding.top * density + (parameters.textHeight - layoutSize.y) *
+                                                                          VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)]);
     renderModel->mVisualModel->SetOffsetWithCutout(Vector2(xOffset, yOffset));
 
     // The layout size is set to the text control size including padding.
-    layoutSize.x = parameters.textWidth + (parameters.padding.start + parameters.padding.end);
-    layoutSize.y = parameters.textHeight + (parameters.padding.top + parameters.padding.bottom);
+    layoutSize.x = parameters.textWidth + (parameters.padding.start + parameters.padding.end) * density;
+    layoutSize.y = parameters.textHeight + (parameters.padding.top + parameters.padding.bottom) * density;
   }
 
   // Use the same return object on every path to preserve return-value elision.
@@ -1507,7 +1530,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   // scaled raster without losing content. Keep 1x height tiling, but reject a
   // scaled request before producing any bitmap if its raster needs tiling.
   // Marquee has already resolved its actual, capped raster size at this point.
-  if(parameters.maxTextureSize > 0 && (parameters.renderScale > 1.0f || parameters.isMarqueeEnabled))
+  if(!cutoutEnabled && parameters.maxTextureSize > 0 && (parameters.renderScale > 1.0f || parameters.isMarqueeEnabled))
   {
     int32_t width, height;
     if(!Raster::Convert(layoutSize.x, width) || !Raster::Convert(layoutSize.y, height) ||
@@ -1524,7 +1547,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   // Match the synchronous Label's width clipping. Height can use the existing
   // 1x tile path; there is no horizontal tiling path.
-  if(parameters.maxTextureSize > 0)
+  if(!cutoutEnabled && parameters.maxTextureSize > 0)
   {
     layoutSize.x = std::min(layoutSize.x, static_cast<float>(parameters.maxTextureSize));
   }
@@ -1607,23 +1630,26 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
 
-  PixelBuffer cutoutData;
   if(cutoutEnabled)
   {
-    cutoutData = mTypesetter->RenderWithPixelBuffer(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
-                                                    ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
-
-    // Make transparent buffer.
-    // If the cutout is enabled, a separate texture is not used for the text.
-    PixelBuffer buffer       = mTypesetter->CreateFullBackgroundBuffer(1, 1, Color::TRANSPARENT);
-    renderInfo.textPixelData = PixelBuffer::Convert(buffer);
-
-    // Set the flag of cutout.
-    renderInfo.isCutoutEnabled = cutoutEnabled && (cutoutData != nullptr);
+    auto       data   = std::make_shared<CutoutRenderData>();
+    const auto format = containsColorGlyph || hasMultipleTextColors ? Pixel::RGBA8888 : Pixel::L8;
+    // Like ordinary rendering, a nonpositive request limit means no device cap.
+    const uint32_t maxTextureSize = parameters.maxTextureSize > 0 ? static_cast<uint32_t>(parameters.maxTextureSize) : 0u;
+    if(mTypesetter->RenderCutoutPlanes(layoutSize, *data, format, maxTextureSize))
+    {
+      renderInfo.cutout          = std::move(data);
+      renderInfo.isCutoutEnabled = true;
+    }
+    else
+    {
+      DALI_LOG_ERROR("Cutout raster bounds exceed the texture limit or are invalid\n");
+      return renderInfo;
+    }
   }
   else
   {
-    // Create a pixel data for the text without any styles
+    // Create ordinary glyph pixels, including all unsupported cutout combinations.
     renderInfo.textPixelData =
       marqueeGradientCoverage
         ? mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, textPixelFormat)
@@ -1723,28 +1749,19 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     }
   }
 
-  if(styleEnabled)
+  if(styleEnabled && !renderInfo.cutout)
   {
-    if(renderInfo.isCutoutEnabled)
-    {
-      float cutoutAlpha         = renderModel->GetDefaultColor().a;
-      renderInfo.stylePixelData = mTypesetter->RenderWithCutout(
-        layoutSize, textDirection, cutoutData, Text::Typesetter::RENDER_NO_TEXT, ignoreHorizontalAlignment, Pixel::RGBA8888, cutoutAlpha);
-    }
-    else
-    {
-      // Create RGBA pixel data for all the text styles (without the text itself)
-      renderInfo.stylePixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT, ignoreHorizontalAlignment, Pixel::RGBA8888);
-    }
+    // Create RGBA pixel data for all the text styles (without the text itself).
+    renderInfo.stylePixelData =
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT, ignoreHorizontalAlignment, Pixel::RGBA8888);
   }
-  if(isOverlayStyle)
+  if(isOverlayStyle && !renderInfo.cutout)
   {
     // Create RGBA pixel data for all the overlay styles
     renderInfo.overlayStylePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE, ignoreHorizontalAlignment, Pixel::RGBA8888);
   }
-  if(containsColorGlyph && !hasMultipleTextColors)
+  if(containsColorGlyph && !hasMultipleTextColors && !cutoutEnabled)
   {
     // Create a L8 pixel data as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
     renderInfo.maskPixelData =
@@ -1782,7 +1799,6 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     !styleBlocksTextGradient &&
     !embossEnabled &&
     !cutoutEnabled &&
-    !backgroundWithCutoutEnabled &&
     (hasMixedColorTarget ? parameters.isTextGradientRequested
                          : (parameters.isTextGradientRequested || parameters.isTextGradientOverlayRequested));
   if(marqueeStylePayload)
@@ -1888,6 +1904,45 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                 const Size& naturalSize)
 {
+  if(parameters.text.empty() && parameters.isCutoutEnabled)
+  {
+    AsyncTextRenderInfo info;
+    auto                data     = std::make_shared<CutoutRenderData>();
+    auto                coverage = PixelBuffer::New(1u, 1u, Pixel::L8);
+    auto                style    = PixelBuffer::New(1u, 1u, Pixel::RGBA8888);
+    memset(coverage.GetBuffer(), 0, 1u);
+    memset(style.GetBuffer(), 0, 4u);
+    data->coverage     = PixelBuffer::Convert(coverage);
+    data->style        = PixelBuffer::Convert(style);
+    data->rect         = Vector4(0.f, 0.f, 1.f, 1.f);
+    const float width  = parameters.renderScale > 1.f ? parameters.renderScaleWidth : parameters.textWidth;
+    const float height = parameters.renderScale > 1.f ? parameters.renderScaleHeight : parameters.textHeight;
+    // Match the existing empty-request completion dimensions. Background drawing
+    // uses the owner's quad; no unconstrained dimension becomes a raster extent.
+    Size completedSize;
+    switch(parameters.requestType)
+    {
+      case Ui::Integration::Text::Async::RENDER_FIXED_SIZE:
+        completedSize = Size(width, height);
+        break;
+      case Ui::Integration::Text::Async::RENDER_FIXED_WIDTH:
+        completedSize = Size(width, 0.f);
+        break;
+      case Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT:
+        completedSize = Size(0.f, height);
+        break;
+      default:
+        completedSize = Size::ZERO;
+        break;
+    }
+    completedSize += Size(parameters.padding.start + parameters.padding.end,
+                          parameters.padding.top + parameters.padding.bottom);
+    info.size = info.controlSize = info.renderedSize = completedSize;
+    data->controlSize                                = completedSize;
+    info.cutout                                      = std::move(data);
+    info.isCutoutEnabled                             = true;
+    return info;
+  }
   Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
 
@@ -2159,6 +2214,12 @@ AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& paramet
 AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                    const Size& naturalSize)
 {
+  if(parameters.isCutoutEnabled)
+  {
+    parameters.isCutoutEnabled = false;
+    // Rebuild cached decoration scaling and model flags for ordinary scrolling.
+    useCachedNaturalSize = false;
+  }
   Size      controlSize(parameters.textWidth, parameters.textHeight);
   Size      verifiedSize;
   float     wrapGap               = 0.0f;
@@ -2217,11 +2278,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   }
   else // MarqueeOrientation::VERTICAL
   {
-    // Render() adds padding to cutout rasters. Reserve that space before
-    // laying out the capped scrolling content, including its ellipsis.
-    const float maxTextureHeight = parameters.isCutoutEnabled
-                                     ? std::max(static_cast<float>(maxTextureSize) - parameters.padding.top - parameters.padding.bottom, 0.0f)
-                                     : static_cast<float>(maxTextureSize);
+    const float maxTextureHeight = static_cast<float>(maxTextureSize);
     bool        layoutOnly       = useCachedNaturalSize;
     bool        useCachedHeight  = false;
     float       textHeight       = 0.0f;
