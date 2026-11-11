@@ -57,6 +57,14 @@ SET(COMPONENT_INTERNAL_TEST_SOURCES
     ../../../samples/chart-view/chart-additional-presenter.cpp
     ../../../dali-ui-components/integration-api/chart/chart-axis-impl.cpp
     ../../../dali-ui-components/integration-api/chart/chart-series-impl.cpp
+    # The ownership cases call the inline New() factories, which construct these
+    # implementations through constructors the library does not export.
+    ../../../dali-ui-components/integration-api/chart/bar-series-impl.cpp
+    ../../../dali-ui-components/integration-api/chart/chart-section-impl.cpp
+    ../../../dali-ui-components/integration-api/chart/line-series-impl.cpp
+    ../../../dali-ui-components/integration-api/chart/pie-series-impl.cpp
+    ../../../dali-ui-components/integration-api/chart/scatter-series-impl.cpp
+    ../../../dali-ui-components/integration-api/navigator/navigation-transition-spec-impl.cpp
     ../../../dali-ui-components/integration-api/chart/chart-color-palette.cpp
     ../../../dali-ui-components/integration-api/chart/chart-hit-tester.cpp
     ../../../dali-ui-components/integration-api/chart/chart-layout-manager.cpp
