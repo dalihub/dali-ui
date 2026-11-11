@@ -85,6 +85,7 @@ SET(TC_SOURCES
     utc-Dali-LayoutDirectionArrangeCache-internal.cpp
     utc-Dali-ArrangeCacheHit-internal.cpp
     utc-Dali-LayoutInvalidationGeneration-internal.cpp
+    utc-Dali-RefObjectOwnership-internal.cpp
 )
 
 # These tests load a Unix shared plugin through the real adaptor engine proxy.
