@@ -72,11 +72,6 @@ void GlView::RegisterGlCallbacks(Callback<void(const GlViewRenderInfo&)> initCal
                                      std::move(terminateCallback));
 }
 
-void GlView::BindTextureResources(Dali::Vector<Dali::Texture> textures)
-{
-  GetImpl(*this).BindTextureResources(std::move(textures));
-}
-
 void GlView::SetRenderingMode(GlView::RenderingMode mode)
 {
   GetImpl(*this).SetRenderingMode(mode);
