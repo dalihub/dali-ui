@@ -15,6 +15,11 @@ SET(core_name "dali${DALI_API_MAJOR}-core")
 SET(adaptor_name "dali${DALI_API_MAJOR}-adaptor")
 PROJECT(${name})
 
+# Enable shadow errors for GNU builds; validate other compilers separately.
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  ADD_COMPILE_OPTIONS(-Werror=shadow)
+ENDIF()
+
 SET(CMAKE_C_STANDARD 99)
 SET(CMAKE_CXX_STANDARD 17)
 SET(GCC_COMPILER_VERSION_REQUIRED "6")
