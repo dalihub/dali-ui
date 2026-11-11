@@ -24,6 +24,7 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/gl-view-direct-rendering.h>
 #include <dali-ui-foundation/internal/gl-view/gl-view-impl.h>
 
 namespace DALI_NAMESPACE
@@ -36,7 +37,7 @@ namespace
 {
 RenderCallback::ExecutionMode ToExecutionMode(GlView::BackendMode backendMode)
 {
-  return (backendMode == GlView::BackendMode::UNSAFE_DIRECT_RENDERING)
+  return (backendMode == Extension::GlViewDirectRendering::UNSAFE_DIRECT_RENDERING)
            ? RenderCallback::ExecutionMode::UNSAFE
            : RenderCallback::ExecutionMode::ISOLATED;
 }

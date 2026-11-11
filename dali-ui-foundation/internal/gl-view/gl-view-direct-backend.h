@@ -39,9 +39,9 @@ namespace Internal
  * DALi content around it and goes straight into the window surface. There is no
  * rendering thread of its own: the callbacks run on the DALi render thread.
  *
- * Serves both GlView::BackendMode::DIRECT_RENDERING and
- * GlView::BackendMode::UNSAFE_DIRECT_RENDERING, which differ only in whether the
- * callback gets an isolated EGL context.
+ * Serves both Extension::GlViewDirectRendering::DIRECT_RENDERING and
+ * Extension::GlViewDirectRendering::UNSAFE_DIRECT_RENDERING, which differ only in
+ * whether the callback gets an isolated EGL context.
  */
 class GlViewDirectBackend : public GlViewBackend
 {

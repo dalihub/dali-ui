@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/gl-view-direct-rendering.h>
 #include <dali-ui-foundation/public-api/views/gl/gl-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-event-thread-callback.h>
@@ -24,6 +25,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using namespace Dali::Ui::Extension;
 
 void utc_dali_glview_startup(void)
 {
@@ -57,7 +59,7 @@ struct GlCallbackRecorder
     ++frameCount;
     clippingBox          = info.GetClippingBox();
     worldColorMultiplier = info.GetWorldColorMultiplier();
-    boundTextureCount    = info.GetBoundTextureNativeHandles().Count();
+    boundTextureCount    = GlViewDirectRendering::GetBoundTextureNativeHandles(info).Count();
     return true;
   }
 
@@ -97,7 +99,7 @@ struct GlCallbackRecorder
 /// Builds a view that is on the scene and has been drawn at least once.
 GlView CreateDrawnGlView(UiTestApplication&  application,
                          GlCallbackRecorder& recorder,
-                         GlView::BackendMode backendMode = GlView::BackendMode::DIRECT_RENDERING)
+                         GlView::BackendMode backendMode = GlViewDirectRendering::DIRECT_RENDERING)
 {
   GlView view = GlView::New(backendMode);
   view.SetRequestedWidth(VIEW_SIZE);
@@ -128,16 +130,16 @@ int UtcDaliGlViewNewP(void)
 {
   UiTestApplication application;
 
-  GlView direct = GlView::New(GlView::BackendMode::DIRECT_RENDERING);
+  GlView direct = GlView::New(GlViewDirectRendering::DIRECT_RENDERING);
   DALI_TEST_CHECK(direct);
   DALI_TEST_EQUALS(static_cast<int>(direct.GetBackendMode()),
-                   static_cast<int>(GlView::BackendMode::DIRECT_RENDERING),
+                   static_cast<int>(GlViewDirectRendering::DIRECT_RENDERING),
                    TEST_LOCATION);
 
-  GlView unsafeDirect = GlView::New(GlView::BackendMode::UNSAFE_DIRECT_RENDERING);
+  GlView unsafeDirect = GlView::New(GlViewDirectRendering::UNSAFE_DIRECT_RENDERING);
   DALI_TEST_CHECK(unsafeDirect);
   DALI_TEST_EQUALS(static_cast<int>(unsafeDirect.GetBackendMode()),
-                   static_cast<int>(GlView::BackendMode::UNSAFE_DIRECT_RENDERING),
+                   static_cast<int>(GlViewDirectRendering::UNSAFE_DIRECT_RENDERING),
                    TEST_LOCATION);
 
   END_TEST;
@@ -147,7 +149,7 @@ int UtcDaliGlViewCopyAndAssignmentP(void)
 {
   UiTestApplication application;
 
-  GlView view = GlView::New(GlView::BackendMode::DIRECT_RENDERING);
+  GlView view = GlView::New(GlViewDirectRendering::DIRECT_RENDERING);
 
   GlView copy(view);
   DALI_TEST_CHECK(copy == view);
@@ -170,7 +172,7 @@ int UtcDaliGlViewDownCastP(void)
 {
   UiTestApplication application;
 
-  GlView     view   = GlView::New(GlView::BackendMode::DIRECT_RENDERING);
+  GlView     view   = GlView::New(GlViewDirectRendering::DIRECT_RENDERING);
   BaseHandle handle = view;
 
   GlView downCast = GlView::DownCast(handle);
@@ -202,7 +204,7 @@ int UtcDaliGlViewRenderingModeP(void)
 {
   UiTestApplication application;
 
-  GlView view = GlView::New(GlView::BackendMode::DIRECT_RENDERING);
+  GlView view = GlView::New(GlViewDirectRendering::DIRECT_RENDERING);
   DALI_TEST_EQUALS(static_cast<int>(view.GetRenderingMode()),
                    static_cast<int>(GlView::RenderingMode::CONTINUOUS),
                    TEST_LOCATION);
@@ -324,7 +326,7 @@ int UtcDaliGlViewBindTextureResourcesP(void)
   Dali::Vector<Dali::Texture> textures;
   textures.PushBack(Dali::Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 16u, 16u));
   textures.PushBack(Dali::Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 16u, 16u));
-  view.BindTextureResources(textures);
+  GlViewDirectRendering::BindTextureResources(view, textures);
 
   application.SendNotification();
   application.Render();
@@ -333,7 +335,7 @@ int UtcDaliGlViewBindTextureResourcesP(void)
   DALI_TEST_EQUALS(recorder.boundTextureCount, 2u, TEST_LOCATION);
 
   // An empty list unbinds.
-  view.BindTextureResources(Dali::Vector<Dali::Texture>());
+  GlViewDirectRendering::BindTextureResources(view, Dali::Vector<Dali::Texture>());
 
   application.SendNotification();
   application.Render();
@@ -433,7 +435,7 @@ int UtcDaliGlViewTerminateNeverDrawnP(void)
   GlCallbackRecorder recorder;
 
   // Never added to the scene, so none of the GL callbacks have run.
-  GlView view = GlView::New(GlView::BackendMode::DIRECT_RENDERING);
+  GlView view = GlView::New(GlViewDirectRendering::DIRECT_RENDERING);
   recorder.Register(view);
 
   application.SendNotification();

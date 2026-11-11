@@ -18,8 +18,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/common/dali-vector.h>
-#include <dali/public-api/rendering/texture.h>
 #include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
@@ -47,7 +45,7 @@ class GlViewImpl;
  * using namespace Dali;
  * using namespace Dali::Ui;
  *
- * GlView glView = GlView::New(GlView::BackendMode::UNSAFE_DIRECT_RENDERING);
+ * GlView glView = GlView::New();
  * glView.RegisterGlCallbacks(Dali::Callback<void(const GlViewRenderInfo&)>::New(this, &MyApp::OnGlInit),
  *                            Dali::Callback<bool(const GlViewRenderInfo&)>::New(this, &MyApp::OnGlRenderFrame),
  *                            Dali::Callback<void()>::New(this, &MyApp::OnGlTerminate));
@@ -67,43 +65,6 @@ public: // Types
   enum class BackendMode
   {
     /**
-     * @brief Executes on the DALi render thread using an isolated EGL context.
-     *
-     * The callback runs at the point in the frame where the view would be drawn, so its
-     * output composites with the DALi content around it, and it draws straight into the
-     * window surface rather than into an offscreen buffer.
-     *
-     * The application's GL code cannot corrupt DALi's render state, at the cost of two EGL
-     * context switches every frame.
-     *
-     * The context shares resources with DALi's, so DALi's textures and buffers are
-     * reachable, but context-local objects such as vertex array objects and framebuffer
-     * objects are not.
-     * @SINCE_3_0.0
-     */
-    DIRECT_RENDERING,
-
-    /**
-     * @brief Executes on the DALi render thread using DALi's window context directly.
-     *
-     * The callback runs at the point in the frame where the view would be drawn, so its
-     * output composites with the DALi content around it, and it draws straight into the
-     * window surface rather than into an offscreen buffer.
-     *
-     * There is no context switch, and the whole main context is available including
-     * context-local objects. The cost is that restoring GL state is entirely the
-     * application's responsibility - failing to restore it corrupts the rest of the
-     * DALi rendering in the same frame.
-     *
-     * @SINCE_3_0.0
-     * @warning The framework resets a baseline GL state before and after the callback,
-     *          but the following are NOT covered and must be restored by the application:
-     *          viewport and scissor box values, pixel store alignment, the bound program,
-     *          and the bound framebuffer.
-     */
-    UNSAFE_DIRECT_RENDERING,
-
-    /**
      * @brief Executes on a rendering thread of its own, into an offscreen buffer.
      *
      * The callback runs whenever that thread is ready rather than at a point in
@@ -114,15 +75,13 @@ public: // Types
      *
      * The whole context is the application's own, with no state to preserve and
      * no context switch per frame. That cuts both ways: nothing is set up for
-     * the application either, so it must set the viewport itself, which the
-     * direct backends inherit from DALi and forbid changing. The size to set it
-     * to is GlViewRenderInfo::GetSize().
+     * the application either, so it must set the viewport itself. The size to
+     * set it to is GlViewRenderInfo::GetSize().
      *
      * @SINCE_3_0.0
-     * @note The buffer is described by GlViewOffscreenConfig, which New() only
-     *       reads for this backend.
-     * @note GlViewRenderInfo describes the buffer rather than the screen here,
-     *       so its clipping box is the whole buffer: the view's own placement is
+     * @note The buffer is described by the GlViewOffscreenConfig given to New().
+     * @note GlViewRenderInfo describes the buffer rather than the screen, so its
+     *       clipping box is the whole buffer: the view's own placement is
      *       applied by DALi when it composites what was drawn.
      */
     OFFSCREEN_RENDERING,
@@ -151,12 +110,11 @@ public: // Creation & Destruction
    * @SINCE_3_0.0
    * @param[in] backendMode The backend used to execute the application's GL code
    * @param[in] offscreenConfig Describes the offscreen buffer. Only read for
-   *                            BackendMode::OFFSCREEN_RENDERING - the direct
-   *                            backends draw into the window surface, whose
-   *                            format the window already fixed
+   *                            BackendMode::OFFSCREEN_RENDERING
    * @return A handle to a newly allocated GlView
    */
-  static GlView New(BackendMode backendMode, const GlViewOffscreenConfig& offscreenConfig = {});
+  static GlView New(BackendMode                  backendMode     = BackendMode::OFFSCREEN_RENDERING,
+                    const GlViewOffscreenConfig& offscreenConfig = {});
 
   /**
    * @brief Destructor.
@@ -238,38 +196,12 @@ public: // Callback registration
    *
    * @note Register before adding the view to the scene. The rendering thread reads these
    *       once the view starts being drawn, so registering after that races with it.
-   * @note The callbacks run on a rendering thread. Which thread depends on the backend -
-   *       direct rendering backends run them on the DALi render thread, so blocking
-   *       inside a callback stalls the whole UI. Do not call DALi APIs from them.
+   * @note The callbacks run on a rendering thread, never the event thread. Which thread
+   *       depends on the backend. Do not call DALi APIs from them.
    */
   void RegisterGlCallbacks(Callback<void(const GlViewRenderInfo&)> initCallback,
                            Callback<bool(const GlViewRenderInfo&)> renderFrameCallback,
                            Callback<void()>                        terminateCallback);
-
-  /**
-   * @brief Makes DALi textures reachable from the GL callbacks.
-   *
-   * The GL callbacks run on a rendering thread that must not be blocked, so decoding and
-   * uploading an image from inside them is not an option. Binding a DALi texture instead
-   * lets the application reuse DALi's own asynchronous loading pipeline and pick the
-   * result up as a native handle.
-   *
-   * Read the handles back with GlViewRenderInfo::GetBoundTextureNativeHandles(). The
-   * position of a texture in @p textures is the only thing identifying it there, so keep
-   * the order stable.
-   *
-   * @SINCE_3_0.0
-   * @param[in] textures The textures to bind
-   *
-   * @note May be called at any time, including while the view is rendering, which is
-   *       where an asynchronous load usually finishes.
-   * @note The bound textures are kept alive for as long as they stay bound. Binding a
-   *       different list releases the previous one.
-   * @note Only the direct backends can do this. BackendMode::OFFSCREEN_RENDERING runs
-   *       on a context of its own that shares nothing with DALi's, so DALi's textures
-   *       have no name there to hand over, and this call is ignored.
-   */
-  void BindTextureResources(Dali::Vector<Dali::Texture> textures);
 
 public: // Rendering control
   /**
@@ -335,16 +267,13 @@ public: // Rendering control
    * @note @p onTerminated is invoked even when the terminate callback could not be - see
    *       the terminate callback conditions on RegisterGlCallbacks(). It is the reliable
    *       point to release client-side state; the terminate callback is only for GL.
-   * @note @p onTerminated is normally invoked on a later event, but is invoked before this
-   *       call returns if the Adaptor has already shut down - there is no rendering thread
-   *       left to hear back from then, and the terminate callback is not invoked at all.
+   * @note @p onTerminated is normally invoked on a later event, but can be invoked before
+   *       this call returns when there is no rendering side to hear back from - the view
+   *       was never shown, so its rendering thread never started, or the Adaptor has
+   *       already shut down. The terminate callback is not invoked at all then.
    * @note Where the rendering side never reports back, the sequence is completed when the
-   *       application shuts down, so @p onTerminated arrives late rather than not at all.
-   *       That covers a request the application then shuts down on top of, as well as the
-   *       configurations where the graphics backend refuses to run native rendering -
-   *       currently when the view is only ever drawn into an offscreen target, or where
-   *       the backend has no separate surface context. None of the registered callbacks
-   *       are invoked in the latter, so the view draws nothing to begin with.
+   *       application shuts down, so @p onTerminated arrives late rather than not at all -
+   *       that covers a request the application then shuts down on top of.
    * @note Destroying the last handle without calling this does not terminate the view.
    *       No callback registered here or on RegisterGlCallbacks() is invoked in that
    *       case, so no client code runs against a view the application has let go of, and

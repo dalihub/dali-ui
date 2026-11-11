@@ -59,6 +59,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/gl-view-direct-rendering.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -80,6 +81,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using namespace Dali::Ui::Extension;
 
 namespace
 {
@@ -166,42 +168,28 @@ const GLushort CUBE_INDICES[] = {
 
 const char* ToString(GlView::BackendMode mode)
 {
-  switch(mode)
+  if(mode == GlViewDirectRendering::UNSAFE_DIRECT_RENDERING)
   {
-    case GlView::BackendMode::UNSAFE_DIRECT_RENDERING:
-    {
-      return "UNSAFE_DIRECT_RENDERING";
-    }
-    case GlView::BackendMode::OFFSCREEN_RENDERING:
-    {
-      return "OFFSCREEN_RENDERING";
-    }
-    case GlView::BackendMode::DIRECT_RENDERING:
-    default:
-    {
-      return "DIRECT_RENDERING";
-    }
+    return "UNSAFE_DIRECT_RENDERING";
   }
+  if(mode == GlView::BackendMode::OFFSCREEN_RENDERING)
+  {
+    return "OFFSCREEN_RENDERING";
+  }
+  return "DIRECT_RENDERING";
 }
 
 GlView::BackendMode NextBackendMode(GlView::BackendMode mode)
 {
-  switch(mode)
+  if(mode == GlViewDirectRendering::DIRECT_RENDERING)
   {
-    case GlView::BackendMode::DIRECT_RENDERING:
-    {
-      return GlView::BackendMode::UNSAFE_DIRECT_RENDERING;
-    }
-    case GlView::BackendMode::UNSAFE_DIRECT_RENDERING:
-    {
-      return GlView::BackendMode::OFFSCREEN_RENDERING;
-    }
-    case GlView::BackendMode::OFFSCREEN_RENDERING:
-    default:
-    {
-      return GlView::BackendMode::DIRECT_RENDERING;
-    }
+    return GlViewDirectRendering::UNSAFE_DIRECT_RENDERING;
   }
+  if(mode == GlViewDirectRendering::UNSAFE_DIRECT_RENDERING)
+  {
+    return GlView::BackendMode::OFFSCREEN_RENDERING;
+  }
+  return GlViewDirectRendering::DIRECT_RENDERING;
 }
 
 const char* ToString(GlView::RenderingMode mode)
@@ -406,7 +394,7 @@ public:
     // The texture DALi loaded for us, if there is one this frame. An entry reads 0 until
     // its upload has been processed, and backends that render into an isolated context
     // report no textures at all, so both have to be handled.
-    const auto&    handles    = info.GetBoundTextureNativeHandles();
+    const auto&    handles    = GlViewDirectRendering::GetBoundTextureNativeHandles(info);
     const uint32_t boundCount = static_cast<uint32_t>(handles.Count());
     const GLuint   texture    = (boundCount > 0u) ? static_cast<GLuint>(handles[0]) : 0u;
 
@@ -789,7 +777,7 @@ private:
     {
       textures.PushBack(mTexture);
     }
-    mGlView.BindTextureResources(std::move(textures));
+    GlViewDirectRendering::BindTextureResources(mGlView, std::move(textures));
   }
 
   void OnKeyEvent(Window /*window*/, KeyEvent event)
@@ -903,7 +891,7 @@ private:
 
   void UpdateStatus()
   {
-    const bool unsafe = (mBackendMode == GlView::BackendMode::UNSAFE_DIRECT_RENDERING);
+    const bool unsafe = (mBackendMode == GlViewDirectRendering::UNSAFE_DIRECT_RENDERING);
 
     char text[640];
     snprintf(text, sizeof(text),
@@ -962,7 +950,7 @@ private:
 
   Texture mTexture;
 
-  GlView::BackendMode   mBackendMode{GlView::BackendMode::UNSAFE_DIRECT_RENDERING};
+  GlView::BackendMode   mBackendMode{GlViewDirectRendering::UNSAFE_DIRECT_RENDERING};
   GlView::RenderingMode mRenderingMode{GlView::RenderingMode::CONTINUOUS};
 
   float mW{0.0f};

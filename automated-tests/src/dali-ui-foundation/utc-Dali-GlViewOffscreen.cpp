@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/gl-view-direct-rendering.h>
 #include <dali-ui-foundation/public-api/views/gl/gl-view-offscreen-config.h>
 #include <dali-ui-foundation/public-api/views/gl/gl-view.h>
 #include <dali-ui-test-suite-utils.h>
@@ -26,6 +27,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using namespace Dali::Ui::Extension;
 
 void utc_dali_glview_offscreen_startup(void)
 {
@@ -62,7 +64,7 @@ struct GlCallbackRecorder
   bool OnRenderFrame(const GlViewRenderInfo& info)
   {
     ++frameCount;
-    boundTextureCount = info.GetBoundTextureNativeHandles().Count();
+    boundTextureCount = GlViewDirectRendering::GetBoundTextureNativeHandles(info).Count();
     return true;
   }
 
@@ -222,6 +224,13 @@ int UtcDaliGlViewOffscreenNewP(void)
                    static_cast<int>(GlView::BackendMode::OFFSCREEN_RENDERING),
                    TEST_LOCATION);
 
+  // The backend is optional too, and defaults to this one.
+  GlView defaulted = GlView::New();
+  DALI_TEST_CHECK(defaulted);
+  DALI_TEST_EQUALS(static_cast<int>(defaulted.GetBackendMode()),
+                   static_cast<int>(GlView::BackendMode::OFFSCREEN_RENDERING),
+                   TEST_LOCATION);
+
   GlViewOffscreenConfig config;
   config.SetDepthEnabled(true);
 
@@ -246,10 +255,10 @@ int UtcDaliGlViewOffscreenConfigIgnoredByDirectBackendsP(void)
 
   // Read only for the offscreen backend, so the direct backends are unaffected by a
   // configuration they cannot honour - they draw into the window surface.
-  GlView view = GlView::New(GlView::BackendMode::DIRECT_RENDERING, config);
+  GlView view = GlView::New(GlViewDirectRendering::DIRECT_RENDERING, config);
   DALI_TEST_CHECK(view);
   DALI_TEST_EQUALS(static_cast<int>(view.GetBackendMode()),
-                   static_cast<int>(GlView::BackendMode::DIRECT_RENDERING),
+                   static_cast<int>(GlViewDirectRendering::DIRECT_RENDERING),
                    TEST_LOCATION);
 
   END_TEST;
@@ -311,7 +320,7 @@ int UtcDaliGlViewOffscreenBindTextureResourcesN(void)
 
   Dali::Vector<Dali::Texture> textures;
   textures.PushBack(Dali::Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 16u, 16u));
-  view.BindTextureResources(textures);
+  GlViewDirectRendering::BindTextureResources(view, textures);
 
   application.SendNotification();
   application.Render();

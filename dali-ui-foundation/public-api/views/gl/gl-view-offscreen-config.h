@@ -31,10 +31,9 @@ namespace Ui
 /**
  * @brief Describes the offscreen buffer a GlView renders into.
  *
- * Only read by GlView::New(), and only for GlView::BackendMode::OFFSCREEN_RENDERING -
- * the direct backends draw into the window surface, whose format the window
- * already fixed. Everything here has to be decided before the buffer exists, so
- * there is no way to change it afterwards.
+ * Only read by GlView::New(), and only for GlView::BackendMode::OFFSCREEN_RENDERING.
+ * Everything here has to be decided before the buffer exists, so there is no way to
+ * change it afterwards.
  *
  * @code
  * GlViewOffscreenConfig config;

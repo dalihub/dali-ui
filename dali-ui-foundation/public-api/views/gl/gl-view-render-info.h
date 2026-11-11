@@ -45,14 +45,8 @@ struct GlViewRenderInfoImpl;
  * @code
  * bool OnRenderFrame(const GlViewRenderInfo& info)
  * {
- *   // Confine drawing to the view. The viewport is left alone - the placement of the
- *   // view is already carried by the MVP matrix, which expects it unchanged.
- *   const auto& box = info.GetClippingBox();
- *   glScissor(box.x, box.y, box.width, box.height);
- *   glEnable(GL_SCISSOR_TEST);
- *
- *   // GlView::BackendMode::OFFSCREEN_RENDERING is the exception: the surface and the
- *   // context are the application's own, so it has to set their viewport itself.
+ *   // The surface and the context are the application's own, so nothing sets their
+ *   // viewport for it: size it to the view.
  *   glViewport(0, 0, info.GetSize().width, info.GetSize().height);
  *
  *   // Vertices are in the view's own pixel space, origin at its centre.
@@ -131,17 +125,18 @@ public:
   /**
    * @brief Returns the region the view is allowed to draw into.
    *
-   * This is the view's bounds projected to screen coordinates and clipped to what is
-   * actually visible, in the convention glScissor() expects. Unlike GetSize() it accounts
-   * for the scale, rotation and parent transforms applied to the view.
+   * This is the view's bounds in the coordinates of the render target the callback draws
+   * into, clipped to what is actually visible there, in the convention glScissor()
+   * expects. Unlike GetSize() it accounts for the scale, rotation and parent transforms
+   * applied to the view.
    *
    * @SINCE_3_0.0
    * @return The clipping region
    *
-   * @note This is a scissor rectangle, not a viewport. Where the view sits on screen is
-   *       already carried by GetMvpMatrix(), which maps the view's local space to the
-   *       viewport that is current when the callback runs - so narrowing the viewport to
-   *       this rectangle would place the content twice.
+   * @note This is a scissor rectangle, not a viewport. Where the view sits is already
+   *       carried by GetMvpMatrix(), which maps the view's local space to the viewport
+   *       that is current when the callback runs - so narrowing the viewport to this
+   *       rectangle would place the content twice.
    */
   const BoundsInteger& GetClippingBox() const;
 
@@ -154,24 +149,6 @@ public:
    * @return The inherited world color multiplier
    */
   const Vector4& GetWorldColorMultiplier() const;
-
-  /**
-   * @brief Returns the native handles (GL texture names) of the bound textures.
-   *
-   * The handles are in the order the textures were passed to
-   * GlView::BindTextureResources(), so the position in this list is the only thing
-   * identifying which texture a handle belongs to.
-   *
-   * @SINCE_3_0.0
-   * @return The native handles of the bound textures
-   *
-   * @note An entry is 0 until DALi has created the GL texture behind it, and keeps its
-   *       position meanwhile. Check for 0 before using an entry.
-   * @note The texture target is not reported - use the one matching what was bound,
-   *       GL_TEXTURE_2D or GL_TEXTURE_EXTERNAL_OES.
-   * @see Dali::Ui::GlView::BindTextureResources()
-   */
-  const Dali::Vector<uint32_t>& GetBoundTextureNativeHandles() const;
 
 public: // Not intended for application developers
   /// @cond internal
@@ -186,6 +163,13 @@ public: // Not intended for application developers
    * @return The implementation
    */
   Internal::GlViewRenderInfoImpl& GetImplementation();
+
+  /**
+   * @brief Returns the implementation.
+   *
+   * @return The implementation
+   */
+  const Internal::GlViewRenderInfoImpl& GetImplementation() const;
   /// @endcond
 
 private:
