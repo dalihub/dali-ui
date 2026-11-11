@@ -38,6 +38,9 @@ namespace Ui
 {
 namespace Internal
 {
+class OffscreenRenderingImpl;
+using OffscreenRenderingImplPtr = IntrusivePtr<OffscreenRenderingImpl>;
+
 /**
  * @brief This effect renders all children(including self) at off screen framebuffer.
  * This effect is handleless, so initiate an instance through the View offscreen rendering API or property.
