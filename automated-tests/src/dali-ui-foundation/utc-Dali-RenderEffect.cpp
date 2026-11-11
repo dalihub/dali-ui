@@ -285,6 +285,59 @@ int UtcDaliRenderEffectOffscreenRenderingP(void)
   END_TEST;
 }
 
+namespace
+{
+uint32_t gOffscreenRenderingFinishedCount = 0u;
+
+void OnOffscreenRenderingFinishedDisable(View view)
+{
+  ++gOffscreenRenderingFinishedCount;
+  view.SetOffscreenRenderingEnabled(false);
+}
+} // namespace
+
+int UtcDaliRenderEffectOffscreenRenderingDisableInFinishedSignal(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliRenderEffectOffscreenRenderingDisableInFinishedSignal");
+
+  gOffscreenRenderingFinishedCount = 0u;
+
+  View     view          = CreateSizedView(application, 400.0f, 400.0f);
+  uint32_t baseTaskCount = GetRenderTaskCount(application);
+
+  view.OffscreenRenderingFinishedSignal().Connect(OnOffscreenRenderingFinishedDisable);
+  view.SetOffscreenRenderingRefreshRate(View::OffscreenRefreshRate::REFRESH_ONCE);
+  view.SetOffscreenRenderingEnabled(true);
+  DALI_TEST_EQUALS(GetRenderTaskCount(application), baseTaskCount + 1u, TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  // The handler disabled offscreen rendering while the signal was being emitted.
+  DALI_TEST_EQUALS(gOffscreenRenderingFinishedCount, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!view.IsOffscreenRenderingEnabled());
+  DALI_TEST_EQUALS(GetRenderTaskCount(application), baseTaskCount, TEST_LOCATION);
+
+  // Offscreen rendering can be enabled again, and finishes again.
+  view.SetOffscreenRenderingEnabled(true);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(gOffscreenRenderingFinishedCount, 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(!view.IsOffscreenRenderingEnabled());
+
+  END_TEST;
+}
+
 int UtcDaliRenderEffectBackgroundBlurIntermediateDownsampleP(void)
 {
   UiTestApplication application;

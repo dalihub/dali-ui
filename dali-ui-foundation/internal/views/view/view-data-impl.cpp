@@ -9885,7 +9885,7 @@ void ViewDataImpl::SetOffscreenRenderingEnabled(bool enabled)
   }
 
   RenderEffectData& renderEffectData  = EnsureRenderEffectData();
-  renderEffectData.offscreenRendering = std::make_unique<OffscreenRenderingImpl>(renderEffectData.offscreenRefreshRate);
+  renderEffectData.offscreenRendering = new OffscreenRenderingImpl(renderEffectData.offscreenRefreshRate);
   renderEffectData.offscreenRendering->SetOwnerView(Dali::Ui::View(mViewImpl.GetOwner()));
 
   if(DALI_LIKELY(CanUseVisuals()))
