@@ -210,6 +210,81 @@ Dali::Integration::HoverEvent GenerateFocusManagerHover(PointState::Type state, 
 }
 } // namespace
 
+int UtcDaliFocusManagerClearReentryKeepsWindowNotificationP(void)
+{
+  UiTestApplication application;
+  FocusManager      manager  = FocusManager::Get();
+  Window            window   = application.GetWindow();
+  View              previous = AddWindowFocusTarget(window);
+  View              latest   = AddWindowFocusTarget(window);
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(previous));
+
+  bool              reentered = false;
+  bool              accepted  = false;
+  ConnectionTracker tracker;
+  previous.FocusChangedSignal().Connect(&tracker, [&](View, bool focused)
+  {
+    if(!focused && !reentered)
+    {
+      reentered = true;
+      accepted  = manager.SetCurrentFocusView(latest);
+    }
+  });
+  WindowFocusRecorder recorder;
+  manager.WindowFocusChangedSignal().Connect(&recorder, [&](Window source, View oldView, View current)
+  {
+    if(source == window)
+    {
+      recorder.OnChanged(oldView, current);
+    }
+  });
+
+  manager.ClearFocus();
+
+  DALI_TEST_CHECK(reentered);
+  DALI_TEST_CHECK(accepted);
+  DALI_TEST_CHECK(manager.GetCurrentFocusView() == latest);
+  DALI_TEST_CHECK(manager.GetCurrentFocusView(window) == latest);
+  DALI_TEST_CHECK(UiExtension::FocusManager::IsKeyInputTarget(latest));
+  DALI_TEST_CHECK(latest.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!UiExtension::FocusManager::IsKeyInputTarget(previous));
+  DALI_TEST_CHECK(!previous.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_EQUALS(recorder.changes.size(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(recorder.changes.back().second == latest);
+  END_TEST;
+}
+
+int UtcDaliFocusManagerIndicationRejectsDisabledTargetP(void)
+{
+  UiConfig config = UiConfig::New();
+  GetImpl(config).SetFocusIndicationPolicy([](const UiExtension::FocusIndicationContext& context)
+  {
+    if(context.GetPreviousFocusView())
+    {
+      View target = context.GetFocusedView();
+      target.SetEnabled(false);
+    }
+    return context.IsFocusIndicationProposed();
+  });
+  UiTestApplication application(config);
+  FocusManager      manager  = FocusManager::Get();
+  Window            window   = application.GetWindow();
+  View              previous = AddWindowFocusTarget(window);
+  View              target   = AddWindowFocusTarget(window);
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(previous));
+
+  DALI_TEST_CHECK(!manager.SetCurrentFocusView(target));
+
+  DALI_TEST_CHECK(!target.IsEnabled());
+  DALI_TEST_CHECK(manager.GetCurrentFocusView() == previous);
+  DALI_TEST_CHECK(manager.GetCurrentFocusView(window) == previous);
+  DALI_TEST_CHECK(UiExtension::FocusManager::IsKeyInputTarget(previous));
+  DALI_TEST_CHECK(previous.GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!UiExtension::FocusManager::IsKeyInputTarget(target));
+  DALI_TEST_CHECK(!target.GetState().Contains(ViewState::FOCUSED));
+  END_TEST;
+}
+
 int UtcDaliFocusManagerReentrantRestorePreservesCallbackP(void)
 {
   UiTestApplication application;

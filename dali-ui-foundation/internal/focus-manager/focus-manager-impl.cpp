@@ -350,8 +350,9 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
     effectiveContext.focusIndicated = EvaluateFocusIndicationPolicy(previous, view, context.device, context.inputEvent,
                                                                     previousIndicated, ShouldIndicateFocus(context, previousIndicated));
   }
-  // Policy callbacks can disconnect the target or change its independent policy.
+  // Policy callbacks can invalidate the target or change its independent policy.
   if(!view.IsConnectedToScene() || Dali::Integration::SceneHolder::Get(view) != sceneHolder ||
+     !view.IsEnabled() || !view.IsFocusable() || view.HasAncestorBlockingFocus() ||
      independent != IsIndependentFocusEnabled(window) || (independent && !CanSetKeyInputFocus(view)))
   {
     return false;
@@ -1326,7 +1327,7 @@ void FocusManager::ClearFocus(View view, bool clearStoredFocus)
     view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
     Internal::KeyInputFocusManager::Get().RemoveFocus(view);
 
-    if(window)
+    if(window && !GetCurrentFocusView(window))
     {
       mWindowFocusChangedSignal.Emit(window, view, View());
     }
