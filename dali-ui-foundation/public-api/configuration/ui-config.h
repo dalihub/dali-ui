@@ -1211,8 +1211,8 @@ public: // Properties
   /**
    * @brief Sets the web engine used by WebView instances.
    *
-   * @deprecated Use WebView::SetWebEngineType() instead. This setting is used
-   * only if WebView::SetWebEngineType() has not been called.
+   * @deprecated Use WebView::SetWebEngineType() instead. This setting no longer
+   * affects WebView or WebProfile engine selection.
    *
    * @SINCE_3_0.0
    * @pre The config must not be frozen.
@@ -1223,8 +1223,8 @@ public: // Properties
   /**
    * @brief Gets the web engine used by WebView instances.
    *
-   * @deprecated This returns the UiConfig setting, which may differ from the
-   * engine selected through WebView::SetWebEngineType().
+   * @deprecated This returns the stored UiConfig setting, which is ignored by
+   * WebView and WebProfile. It does not report the selected web engine.
    *
    * @SINCE_3_0.0
    * @return The configured web engine type

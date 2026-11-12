@@ -92,3 +92,52 @@ View의 `GAINED`만으로 엔진 포커스 적용 성공을 판단하지 말고 
 
 위 내용은 실기기에서 확인할 **기대 결과**입니다. 이번 작업에서는 빌드나 TV 실행을
 수행하지 않았습니다.
+
+## 엔진 시작 인자와 프로필
+
+`WebView::New(argc, argv)`는 인자를 무시하고 기본 프로필로 뷰를 만듭니다.
+LWE를 사용하려면 인자 저장이나 프로필·뷰 생성 전에 `WebView::SetWebEngineType()`으로 선택합니다.
+선택하지 않으면 Chromium을 사용하며 deprecated된 `UiConfig` 엔진 설정은 무시합니다.
+인자 저장이나 프로필·뷰 생성의 첫 사용 이후에는 다른 엔진으로 변경할 수 없습니다.
+엔진 옵션은 애플리케이션 초기화와 `UiConfig::Apply()` 이후 이벤트 스레드에서
+`SetWebEngineArguments()`로 설정합니다. 프로필 생성도 엔진을 초기화할 수 있으므로
+설정은 프로필과 뷰를 만들기 전에 끝내야 합니다. 초기화 전 재호출은 설정 전체를 교체하며,
+초기화 시작 이후에는 실패한 초기화라도 설정을 변경할 수 없습니다.
+
+다음 코드는 Chromium의 독립 context 기능이 지원되는 환경에서 같은 비공개 세션을
+공유하는 뷰를 만드는 흐름입니다. void 이벤트 콜백 안에서 호출한다고 가정합니다.
+
+```cpp
+WebView::SetWebEngineType(WebEngineType::CHROMIUM);
+char program[] = "profile-example";
+char* arguments[] = {program};
+if(WebView::SetWebEngineArguments(1, arguments) != Ui::WebEngineArgumentsResult::SUCCESS)
+{
+  return;
+}
+
+auto profile = WebProfile::New("PrivateSession", true);
+if(!profile)
+{
+  return;
+}
+auto first = WebView::New(profile);
+auto second = WebView::New(profile);
+if(!first || !second)
+{
+  return;
+}
+auto sameProfile = WebProfile::GetProfile("PrivateSession");
+```
+
+이름은 대소문자를 구분하는 조회 키이며 저장소 경로가 아닙니다. 같은 이름으로
+`New()`를 반복하면 예외가 발생하므로 기존 프로필은 `GetProfile()`로 조회합니다.
+빈 이름과 `Default`는 사용자 프로필 이름으로 사용할 수 없습니다. 조회만으로는
+엔진이 시작되지 않습니다. 프로필, 뷰, 쿠키 매니저 중 하나라도 보유하면 프로필이
+유지되고, 모두 해제한 뒤에는 이름을 다시 사용할 수 있습니다. 일반 프로필의 해제가
+영구 데이터 삭제를 뜻하지 않으며, 서로 다른 일반 프로필의 영구 저장소 격리를
+보장하지는 않습니다.
+
+LWE는 기본 프로필을 사용하며 독립 이름 프로필, incognito, injected bundle을
+지원하지 않습니다. 해당 요청은 빈 핸들로 실패합니다. WV 구현이 context 또는
+context 지정 뷰 생성에 실패하는 환경에서도 기본 뷰로 대체하지 않고 실패를 반환합니다.

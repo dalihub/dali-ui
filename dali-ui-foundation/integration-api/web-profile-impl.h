@@ -18,8 +18,10 @@
  */
 
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
+#include <dali/devel-api/adaptor-framework/web-engine/web-engine-profile.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
+#include <dali/public-api/object/weak-handle.h>
 
 namespace DALI_NAMESPACE
 {
@@ -40,20 +42,26 @@ using WebProfileImplPtr = IntrusivePtr<WebProfileImpl>;
 class DALI_UI_API WebProfileImpl : public BaseObject
 {
 public:
-  static WebProfileImplPtr New(Dali::WebEngineContext* context, Dali::WebEngineCookieManager* cookieManager);
+  static WebProfile                New(const Dali::String& name, bool incognito, const Dali::String& bundlePath);
+  static WebProfile                GetProfile(const Dali::String& name);
+  static WebProfile                GetDefaultProfile();
+  Dali::String                     GetName() const;
+  bool                             IsIncognito() const;
+  const Dali::WebEngineProfilePtr& GetEngineProfile() const;
 
   void             ClearCache();
   WebCookieManager GetCookieManager() const;
   bool             IsEqual(const WebProfileImpl& rhs) const;
 
 protected:
-  WebProfileImpl(Dali::WebEngineContext* context, Dali::WebEngineCookieManager* cookieManager);
+  WebProfileImpl(const Dali::String& name, bool incognito, Dali::WebEngineProfilePtr profile);
   ~WebProfileImpl() override;
 
 private:
-  Dali::WebEngineContext*       mContext;
-  Dali::WebEngineCookieManager* mCookieManager;
-  mutable WebCookieManager      mWebCookieManager;
+  Dali::String                               mName;
+  bool                                       mIncognito;
+  Dali::WebEngineProfilePtr                  mProfile;
+  mutable Dali::WeakHandle<WebCookieManager> mWebCookieManager;
 };
 
 inline WebProfileImpl& GetImpl(WebProfile& profile)

@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <dali-ui-foundation/integration-api/web-settings-impl.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-settings.h>
 #include <utility>
@@ -26,21 +27,28 @@ namespace Ui
 namespace Integration
 {
 
-WebSettingsImplPtr WebSettingsImpl::New(Dali::WebEngine webEngine)
+WebSettingsImplPtr WebSettingsImpl::New(Dali::WebEngine webEngine, WebProfile profile)
 {
-  return new WebSettingsImpl(std::move(webEngine));
+  return new WebSettingsImpl(std::move(webEngine), profile);
 }
 
-WebSettingsImpl::WebSettingsImpl(Dali::WebEngine webEngine)
-: mWebEngine(webEngine)
+WebSettingsImpl::WebSettingsImpl(Dali::WebEngine webEngine, WebProfile profile)
+: mWebProfile(profile),
+  mWebEngine(webEngine)
 {
 }
 
 WebSettingsImpl::~WebSettingsImpl() = default;
 
+Dali::WebEngine WebSettingsImpl::GetWebEngine() const
+{
+  auto profile = mWebProfile.GetHandle();
+  return profile && GetImpl(profile).GetEngineProfile()->GetContext() ? mWebEngine.GetHandle() : Dali::WebEngine();
+}
+
 bool WebSettingsImpl::SetExtraFeatureValue(const Dali::String& feature, const Dali::String& value)
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   if(!webEngine || !webEngine.GetPlugin())
   {
     return false;
@@ -51,7 +59,7 @@ bool WebSettingsImpl::SetExtraFeatureValue(const Dali::String& feature, const Da
 
 Dali::String WebSettingsImpl::GetExtraFeatureValue(const Dali::String& feature) const
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   if(!webEngine || !webEngine.GetPlugin())
   {
     return Dali::String();
@@ -63,7 +71,7 @@ Dali::String WebSettingsImpl::GetExtraFeatureValue(const Dali::String& feature) 
 
 void WebSettingsImpl::SetSpatialNavigationEnabled(bool enabled)
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   if(webEngine && webEngine.GetPlugin())
   {
     webEngine.GetSettings().EnableSpatialNavigation(enabled);
@@ -72,13 +80,13 @@ void WebSettingsImpl::SetSpatialNavigationEnabled(bool enabled)
 
 uint32_t WebSettingsImpl::GetDefaultFontSize() const
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   return (webEngine && webEngine.GetPlugin()) ? webEngine.GetSettings().GetDefaultFontSize() : 0u;
 }
 
 void WebSettingsImpl::SetDefaultFontSize(uint32_t defaultFontSize)
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   if(webEngine && webEngine.GetPlugin())
   {
     webEngine.GetSettings().SetDefaultFontSize(defaultFontSize);
@@ -87,7 +95,7 @@ void WebSettingsImpl::SetDefaultFontSize(uint32_t defaultFontSize)
 
 void WebSettingsImpl::SetWebSecurityEnabled(bool enabled)
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   if(webEngine && webEngine.GetPlugin())
   {
     webEngine.GetSettings().EnableWebSecurity(enabled);
@@ -96,7 +104,7 @@ void WebSettingsImpl::SetWebSecurityEnabled(bool enabled)
 
 void WebSettingsImpl::SetExtraFeatureEnabled(const Dali::String& feature, bool enabled)
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   if(webEngine && webEngine.GetPlugin())
   {
     webEngine.GetSettings().SetExtraFeature(feature.CStr(), enabled);
@@ -105,7 +113,7 @@ void WebSettingsImpl::SetExtraFeatureEnabled(const Dali::String& feature, bool e
 
 bool WebSettingsImpl::IsExtraFeatureEnabled(const Dali::String& feature) const
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   return (webEngine && webEngine.GetPlugin()) ? webEngine.GetSettings().IsExtraFeatureEnabled(feature.CStr()) : false;
 }
 

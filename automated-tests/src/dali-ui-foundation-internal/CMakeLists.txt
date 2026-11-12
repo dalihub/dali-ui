@@ -127,6 +127,7 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/test-render-surface-if.cpp
     ../dali-test-suite-utils/dali-ui/ui-adaptor.cpp
     ../dali-test-suite-utils/dali-ui/ui-async-task-manager.cpp
+    ../dali-test-suite-utils/dali-ui/ui-web-engine.cpp
     ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
     ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
     ../dali-test-suite-utils/dali-ui/ui-icu.cpp

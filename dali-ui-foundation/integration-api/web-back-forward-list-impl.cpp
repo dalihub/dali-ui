@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/integration-api/web-back-forward-list-impl.h>
+#include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-back-forward-list-item.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-back-forward-list.h>
 #include <utility>
@@ -27,17 +28,24 @@ namespace Ui
 namespace Integration
 {
 
-WebBackForwardListImplPtr WebBackForwardListImpl::New(Dali::WebEngine webEngine)
+WebBackForwardListImplPtr WebBackForwardListImpl::New(Dali::WebEngine webEngine, WebProfile profile)
 {
-  return new WebBackForwardListImpl(std::move(webEngine));
+  return new WebBackForwardListImpl(std::move(webEngine), profile);
 }
 
-WebBackForwardListImpl::WebBackForwardListImpl(Dali::WebEngine webEngine)
-: mWebEngine(webEngine)
+WebBackForwardListImpl::WebBackForwardListImpl(Dali::WebEngine webEngine, WebProfile profile)
+: mWebProfile(profile),
+  mWebEngine(webEngine)
 {
 }
 
 WebBackForwardListImpl::~WebBackForwardListImpl() = default;
+
+Dali::WebEngine WebBackForwardListImpl::GetWebEngine() const
+{
+  auto profile = mWebProfile.GetHandle();
+  return profile && GetImpl(profile).GetEngineProfile()->GetContext() ? mWebEngine.GetHandle() : Dali::WebEngine();
+}
 
 WebBackForwardListItem WebBackForwardListImpl::CreateItem(std::unique_ptr<Dali::WebEngineBackForwardListItem> item) const
 {
@@ -54,38 +62,38 @@ WebBackForwardListItem WebBackForwardListImpl::CreateItem(std::unique_ptr<Dali::
 
 WebBackForwardListItem WebBackForwardListImpl::GetCurrentItem() const
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   return (webEngine && webEngine.GetPlugin()) ? CreateItem(webEngine.GetBackForwardList().GetCurrentItem()) : WebBackForwardListItem();
 }
 
 WebBackForwardListItem WebBackForwardListImpl::GetPreviousItem() const
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   return (webEngine && webEngine.GetPlugin()) ? CreateItem(webEngine.GetBackForwardList().GetPreviousItem()) : WebBackForwardListItem();
 }
 
 WebBackForwardListItem WebBackForwardListImpl::GetNextItem() const
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   return (webEngine && webEngine.GetPlugin()) ? CreateItem(webEngine.GetBackForwardList().GetNextItem()) : WebBackForwardListItem();
 }
 
 WebBackForwardListItem WebBackForwardListImpl::GetItemAtIndex(uint32_t index) const
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   return (webEngine && webEngine.GetPlugin()) ? CreateItem(webEngine.GetBackForwardList().GetItemAtIndex(index)) : WebBackForwardListItem();
 }
 
 uint32_t WebBackForwardListImpl::GetItemCount() const
 {
-  Dali::WebEngine webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine webEngine = GetWebEngine();
   return (webEngine && webEngine.GetPlugin()) ? webEngine.GetBackForwardList().GetItemCount() : 0u;
 }
 
 Dali::Vector<WebBackForwardListItem> WebBackForwardListImpl::GetBackwardItems(int32_t limit) const
 {
   Dali::Vector<WebBackForwardListItem> result;
-  Dali::WebEngine                      webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine                      webEngine = GetWebEngine();
   if(!webEngine || !webEngine.GetPlugin())
   {
     return result;
@@ -107,7 +115,7 @@ Dali::Vector<WebBackForwardListItem> WebBackForwardListImpl::GetBackwardItems(in
 Dali::Vector<WebBackForwardListItem> WebBackForwardListImpl::GetForwardItems(int32_t limit) const
 {
   Dali::Vector<WebBackForwardListItem> result;
-  Dali::WebEngine                      webEngine = mWebEngine.GetHandle();
+  Dali::WebEngine                      webEngine = GetWebEngine();
   if(!webEngine || !webEngine.GetPlugin())
   {
     return result;
