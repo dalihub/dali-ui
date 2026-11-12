@@ -11012,9 +11012,9 @@ int UtcDaliViewChildOrderUnchangedDoesNotInvalidateP(void)
 //
 // (1) A reorder among NON-View actor children while the parent has no View child at
 //     all is delivered to nothing. It must be a harmless no-op -- which is the same
-//     fact that makes deferring the connection sound: the handler rebuilds the View
-//     sequence out of views ALREADY in mChildren, so with none there it compares equal
-//     and returns.
+//     fact that makes deferring the connection sound: the handler keeps only views
+//     ALREADY in mChildren, so with none there its order check passes at once and it
+//     returns.
 // (2) The connection must be live by the time a real View reorder is possible, so the
 //     View child order still resyncs to the actor order afterwards. GetChildViewAt is
 //     the public read of exactly that sequence.
