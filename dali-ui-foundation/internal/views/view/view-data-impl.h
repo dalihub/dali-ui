@@ -1422,11 +1422,14 @@ private:
   /**
    * @brief Makes mChildren follow the actor order of this view's View children.
    *
-   * Rebuilds the logical order from Actor::GetChildAt(), keeping only views already in
-   * mChildren (so non-View actors and EXIT ghosts stay out). Returns without doing anything
-   * when the rebuilt sequence equals mChildren; otherwise (a different order, or a view in
-   * mChildren that is no longer an actor child) assigns it, tags every logical child REORDERED
-   * when a LayoutTransition is attached to this view and invalidates this view's measure.
+   * The logical order to follow is the actor order of the views already in mChildren (so
+   * non-View actors and EXIT ghosts stay out). One pass over Actor::GetChildAt(), without
+   * allocating, first checks whether mChildren already is that order -- a subsequence of the
+   * actor children, in order -- and returns without doing anything if so. Otherwise (a different
+   * order, or a view in mChildren that is no longer an actor child) it rebuilds mChildren in that
+   * order, with a hash set for the membership test, tags every logical child REORDERED when a
+   * LayoutTransition is attached to this view and invalidates this view's measure. Both paths are
+   * linear in the number of actor and logical children (the rebuild in expectation, as it hashes).
    * Called by OnChildOrderChanged (unless a ...PreservingLayout() call is running) and by
    * OnChildAdded for a fresh insert that is not the last actor child.
    *

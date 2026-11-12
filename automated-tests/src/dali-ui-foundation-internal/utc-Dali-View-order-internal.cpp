@@ -581,6 +581,9 @@ int UtcDaliViewInsertBelowFreshChildSkipsExitGhostInternalP(void)
   // The ghost still occupies actor index 0, so the two orders differ by one.
   DALI_TEST_EQUALS(VisualIndexOf(parent, d), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<Dali::Actor>(parent).GetChildCount(), 4u, TEST_LOCATION);
+
+  // The orders agreed apart from the ghost, so the insert tags nothing REORDERED.
+  DALI_TEST_CHECK(ViewDataImpl::Get(GetImpl(parent)).TakePendingLayoutTransitionChanges().reorderedChildren.empty());
   END_TEST;
 }
 
@@ -1513,6 +1516,102 @@ int UtcDaliViewFreshMidInsertInSyncDoesNotTagReorderedInternalP(void)
   END_TEST;
 }
 
+int UtcDaliViewInsertBelowFreshChildAtFrontRepeatedInternalP(void)
+{
+  // A fresh InsertBelow() in front of the first child, repeated. The newcomer is never the last
+  // actor child, so OnChildAdded synchronises the whole order every time; as the two orders agree,
+  // SyncChildrenWithActorOrder() finds nothing to change. Every newcomer lands at the front of
+  // both orders, nothing is tagged REORDERED and each insert records only the newcomer's ENTER
+  // marker. The raw actor child behind the views stays untracked.
+  UiTestApplication application;
+  OrderFixture      f   = MakeOrderFixture();
+  Dali::Actor       raw = Dali::Actor::New();
+  Dali::Ui::Integration::View::AddActorChild(f.parent, raw); // Actor order [a, b, c, raw].
+
+  f.parent.SetLayoutTransition(LayoutTransition::New());
+  ViewDataImpl& data = ViewDataImpl::Get(GetImpl(f.parent));
+  data.TakePendingLayoutTransitionChanges(); // Drops the ENTER markers the attach seeds for a, b and c.
+
+  View d = View::New();
+  f.parent.InsertBelow(d, f.a); // Actor order [d, a, b, c, raw].
+  auto afterD = data.TakePendingLayoutTransitionChanges();
+
+  View e = View::New();
+  f.parent.InsertBelow(e, d); // Actor order [e, d, a, b, c, raw].
+  auto afterE = data.TakePendingLayoutTransitionChanges();
+
+  View g = View::New();
+  f.parent.InsertBelow(g, e); // Actor order [g, e, d, a, b, c, raw].
+  auto afterG = data.TakePendingLayoutTransitionChanges();
+
+  DALI_TEST_CHECK(ActorOrderIs(f.parent, {g, e, d, f.a, f.b, f.c, raw}));
+  DALI_TEST_CHECK(LogicalOrderIs(f.parent, {g, e, d, f.a, f.b, f.c}));
+  DALI_TEST_CHECK(afterD.reorderedChildren.empty());
+  DALI_TEST_CHECK(afterE.reorderedChildren.empty());
+  DALI_TEST_CHECK(afterG.reorderedChildren.empty());
+  DALI_TEST_EQUALS(afterD.enterChildren.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(afterD.enterChildren.count(&GetImpl(d)), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(afterE.enterChildren.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(afterE.enterChildren.count(&GetImpl(e)), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(afterG.enterChildren.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(afterG.enterChildren.count(&GetImpl(g)), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInsertBelowFreshChildAtFrontResyncSkipsUntrackedInternalP(void)
+{
+  // A fresh InsertBelow() in front of the first child of a parent whose orders a
+  // ...PreservingLayout() call left apart: the logical order is rebuilt from the actor order. The
+  // rebuild keeps only logical children, so neither a raw actor child nor an in-flight EXIT ghost
+  // gets in, and every logical child -- not the ghost -- is tagged REORDERED.
+  UiTestApplication application;
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View        a   = View::New();
+  View        b   = View::New();
+  View        c   = View::New();
+  Dali::Actor raw = Dali::Actor::New();
+  parent.Add(a);
+  Dali::Ui::Integration::View::AddActorChild(parent, raw);
+  parent.Add(b);
+  parent.Add(c);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.5f));
+  transition.SetExitVisualSpec(exitSpec);
+  parent.SetLayoutTransition(transition);
+
+  // c becomes a ghost: dropped from the logical children, kept under the parent Actor until the
+  // EXIT animation finishes. The long duration and Render(0) keep it in flight.
+  parent.Remove(c, RemovePolicy::ANIMATE_EXIT);
+  application.SendNotification();
+  application.Render(0);
+
+  Ui::Extension::View::RaiseToTopPreservingLayout(a); // Actor order [raw, b, ghost c, a]; logical order [a, b].
+  ViewDataImpl& data = ViewDataImpl::Get(GetImpl(parent));
+  data.TakePendingLayoutTransitionChanges(); // Drops the markers left by the attach and the removal.
+
+  View d = View::New();
+  parent.InsertBelow(d, raw); // Actor order [d, raw, b, ghost c, a].
+  auto changes = data.TakePendingLayoutTransitionChanges();
+
+  DALI_TEST_CHECK(ActorOrderIs(parent, {d, raw, b, c, a}));
+  DALI_TEST_CHECK(LogicalOrderIs(parent, {d, b, a}));
+  DALI_TEST_EQUALS(parent.IndexOfChildView(c), -1, TEST_LOCATION);
+  DALI_TEST_EQUALS(changes.reorderedChildren.size(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(changes.reorderedChildren.count(&GetImpl(d)), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(changes.reorderedChildren.count(&GetImpl(b)), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(changes.reorderedChildren.count(&GetImpl(a)), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(changes.enterChildren.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(changes.enterChildren.count(&GetImpl(d)), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliViewChildRemovedDuringSetParentNotTrackedInternalP(void)
 {
   // dali-core reports an add to OnChildAdd even when a callback run from
@@ -1554,5 +1653,49 @@ int UtcDaliViewChildRemovedDuringSetParentNotTrackedInternalP(void)
   DALI_TEST_EQUALS(parent.GetChildViewCount(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(parent.IndexOfChildView(child), 0, TEST_LOCATION);
   DALI_TEST_EQUALS(parentData.TakePendingLayoutTransitionChanges().enterChildren.count(&GetImpl(child)), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewFreshInsertWhileChildInTransitDropsItInternalP(void)
+{
+  // dali-core takes a removed child out of the actor children BEFORE the callbacks of
+  // Actor::SetParent(nullptr) run and reports the removal to OnChildRemove only after them, so
+  // in such a callback the departing child is still a logical child but no actor child. A fresh
+  // insert in front made there makes the logical order follow the actor order, which drops the
+  // departing child at once (the known gap documented at SyncChildrenWithActorOrder()).
+  UiTestApplication application;
+  bool              inserted        = false; // Declared before the views so they outlive the connected child.
+  uint32_t          countInCallback = 0u;
+  int32_t           indexInCallback = 0;
+  View              parent          = View::New();
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  View b = View::New();
+  View c = View::New();
+  View d = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+
+  c.SceneDisconnectedSignal().Connect(&application, [&inserted, &countInCallback, &indexInCallback, &parent, &a, &d](Dali::Actor departing)
+  {
+    if(!inserted)
+    {
+      inserted = true;
+      parent.InsertBelow(d, a); // Actor order [d, a, b]: c has left the actor children, not yet mChildren.
+      countInCallback = parent.GetChildViewCount();
+      indexInCallback = parent.IndexOfChildView(View::DownCast(departing));
+    }
+  });
+
+  parent.Remove(c);
+
+  DALI_TEST_CHECK(inserted);
+  DALI_TEST_EQUALS(countInCallback, 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(indexInCallback, -1, TEST_LOCATION);
+  DALI_TEST_CHECK(!c.GetParent());
+  DALI_TEST_CHECK(ActorOrderIs(parent, {d, a, b}));
+  DALI_TEST_CHECK(LogicalOrderIs(parent, {d, a, b}));
   END_TEST;
 }

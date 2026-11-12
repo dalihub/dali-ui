@@ -51,6 +51,7 @@
 #include <cstring>
 #include <limits>
 #include <typeinfo>
+#include <unordered_set>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -4037,10 +4038,9 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // the logical-index sync above exists in the first place.
     //
     // Nothing is lost before the connection either: mChildren grows ONLY at the insert
-    // above, and SyncChildrenWithActorOrder()'s rebuild copies only views already in
-    // mChildren, so with mChildren empty the handler rebuilds an empty list, compares
-    // equal and returns without touching anything. A reorder among non-View actor
-    // children is exactly that case.
+    // above, and SyncChildrenWithActorOrder() keeps only views already in mChildren, so
+    // with mChildren empty its order check passes at once and the handler returns
+    // without touching anything. A reorder among non-View actor children is exactly that case.
     if(!mChildOrderSignalConnected)
     {
       DevelActor::ChildOrderChangedSignal(mViewImpl.Self()).Connect(this, &ViewDataImpl::OnChildOrderChanged);
@@ -4245,7 +4245,8 @@ void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
     // A fresh Actor::InsertAbove / InsertBelow that left the child in the MIDDLE of the actor
     // children makes the whole logical order follow the actor order, as a reorder of an existing
     // child does. The child already sits at its counted index, so for a parent whose two orders
-    // agreed the rebuilt sequence equals mChildren and nothing is reordered, tagged or
+    // agreed SyncChildrenWithActorOrder() only confirms that in one pass over the actor children,
+    // without rebuilding or allocating, and nothing is reordered, tagged or
     // invalidated. Only when a ...PreservingLayout() call (or a reorder dali-core could not
     // report) left the orders apart do pre-existing children move; they are then tagged
     // REORDERED and this view re-measures, like any other reorder. This is not suppressed while
@@ -7336,51 +7337,75 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
 
 void ViewDataImpl::SyncChildrenWithActorOrder()
 {
-  Actor                           self            = mViewImpl.Self();
-  uint32_t                        actorChildCount = self.GetChildCount();
-  IntegrationView::ChildContainer newChildren;
-  newChildren.Reserve(actorChildCount);
+  Actor          self            = mViewImpl.Self();
+  const uint32_t actorChildCount = self.GetChildCount();
+  const uint32_t logicalCount    = static_cast<uint32_t>(mChildren.Count());
 
-  for(uint32_t i = 0; i < actorChildCount; ++i)
-  {
-    Ui::View view = Ui::View::DownCast(self.GetChildAt(i));
-    if(view)
-    {
-      auto it = std::find(mChildren.begin(), mChildren.end(), view);
-      if(it != mChildren.end())
-      {
-        // Copied rather than moved out of mChildren, so mChildren still holds the
-        // PREVIOUS order for the comparison below. The move-assignment further
-        // down releases the old container anyway.
-        newChildren.PushBack(*it);
-      }
-    }
-  }
-
+  // Order check first, in one pass and without allocating. The rebuild below would give back
+  // mChildren unchanged exactly when mChildren is a subsequence of the actor children, in order:
+  // an actor is a child only once, so the rebuild then keeps exactly those children, in that
+  // order, and drops every other actor child (non-View actors, EXIT ghosts, a view not added to
+  // mChildren yet). A walk that moves on to the next logical child at every match finds such a
+  // subsequence whenever there is one. A different order, a view in mChildren that is no longer
+  // an actor child, or a view held twice (re-added from a callback of its own removal, before
+  // OnChildRemove) leaves it short. It stops once every logical child is matched: no later actor
+  // child can be one.
+  //
   // dali-core does NOT suppress every reorder signal that moves nothing. RaiseToTop /
   // LowerToBottom do gate their emit on an actual move, but RaiseChildAbove and
   // LowerChildBelow set their `raised` / `lowered` flag OUTSIDE the guard that performs
   // the move (ActorParentImpl::RaiseChildAbove / LowerChildBelow), so asking to raise a
   // child above one it is already above emits all the same. Convergence for the
   // repeat-every-pass callers (RecyclerViewImpl::OnArrange raises its scroll bar to the
-  // top on every arrange) therefore rests on THIS guard, not on an external invariant.
+  // top on every arrange) therefore rests on THIS check, not on an external invariant.
   //
-  // The guard also catches what dali-core could not suppress in any case: a reorder among
+  // The check also catches what dali-core could not suppress in any case: a reorder among
   // the NON-View actor children, which really does move an actor while leaving the
-  // View-only sequence rebuilt above identical to mChildren.
+  // order of the tracked Views identical to mChildren.
   //
   // Skipping the reorder tagging as well as the invalidation is intentional: no
   // View moved, so no View's dispatch should be tagged REORDERED.
   //
-  // From OnChildAdded (a fresh insert that is not the last actor child) the same
-  // check leaves a parent whose two orders already agree untouched: the newcomer
-  // already sits at its counted index, so the rebuilt sequence equals mChildren.
-  if(newChildren.Count() == mChildren.Count() &&
-     std::equal(newChildren.Begin(), newChildren.End(), mChildren.Begin()))
+  // From OnChildAdded (a fresh insert that is not the last actor child) the same check leaves a
+  // parent whose two orders already agree untouched: the newcomer already sits at its counted
+  // index. So the sync of such an insert, a fresh InsertBelow() in front of the first child
+  // included, costs this one pass and nothing more.
+  uint32_t matchedCount = 0u;
+  for(uint32_t i = 0u; i < actorChildCount && matchedCount < logicalCount; ++i)
+  {
+    if(self.GetChildAt(i) == mChildren[matchedCount])
+    {
+      ++matchedCount;
+    }
+  }
+  if(matchedCount == logicalCount)
   {
     return;
   }
 
+  // Rebuild the logical order from the actor order, keeping only views already in mChildren (so
+  // non-View actors and EXIT ghosts stay out). Membership is a hash lookup rather than a search of
+  // mChildren, which keeps the rebuild linear too; the keys are only compared, never dereferenced.
+  std::unordered_set<const ViewImpl*> logicalChildren;
+  logicalChildren.reserve(logicalCount);
+  for(const auto& childView : mChildren)
+  {
+    logicalChildren.insert(&GetImpl(childView));
+  }
+
+  IntegrationView::ChildContainer newChildren;
+  newChildren.Reserve(actorChildCount);
+  for(uint32_t i = 0; i < actorChildCount; ++i)
+  {
+    Ui::View view = Ui::View::DownCast(self.GetChildAt(i));
+    if(view && logicalChildren.count(&GetImpl(view)) != 0u)
+    {
+      newChildren.PushBack(view);
+    }
+  }
+
+  // The order check returned for every case in which this sequence equals mChildren, so it
+  // differs here: no comparison is needed before taking it.
   mChildren = std::move(newChildren);
 
   // Tag every child as reordered so the layout transition dispatcher can
