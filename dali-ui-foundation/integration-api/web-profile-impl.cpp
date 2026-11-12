@@ -17,6 +17,8 @@
 
 #include <dali-ui-foundation/integration-api/web-cookie-manager-impl.h>
 #include <dali-ui-foundation/integration-api/web-profile-impl.h>
+#include <dali-ui-foundation/integration-api/web-view-impl.h>
+#include <dali-ui-foundation/internal/web-profile-registry.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-context.h>
 
 namespace DALI_NAMESPACE
@@ -26,14 +28,74 @@ namespace Ui
 namespace Integration
 {
 
-WebProfileImplPtr WebProfileImpl::New(Dali::WebEngineContext* context, Dali::WebEngineCookieManager* cookieManager)
+namespace
 {
-  return new WebProfileImpl(context, cookieManager);
+Internal::WebProfileRegistry& Profiles()
+{
+  static Internal::WebProfileRegistry profiles;
+  return profiles;
+}
+} //namespace
+
+WebProfile WebProfileImpl::New(const Dali::String& name, bool incognito, const Dali::String& bundlePath)
+{
+  DALI_ASSERT_ALWAYS(!name.Empty() && name != "Default" && "Profile name must be nonempty and not Default");
+  DALI_ASSERT_ALWAYS(!GetProfile(name) && "A live profile already uses this name");
+  if(!WebViewImpl::EnsureEngineType())
+  {
+    return {};
+  }
+  auto nativeProfile = Dali::WebEngineRuntime::CreateProfile(incognito, bundlePath.CStr());
+  if(!nativeProfile)
+  {
+    return {};
+  }
+  WebProfile profile(*new WebProfileImpl(name, incognito, std::move(nativeProfile)));
+  Internal::RegisterWebProfile(Profiles(), profile);
+  return profile;
 }
 
-WebProfileImpl::WebProfileImpl(Dali::WebEngineContext* context, Dali::WebEngineCookieManager* cookieManager)
-: mContext(context),
-  mCookieManager(cookieManager)
+WebProfile WebProfileImpl::GetProfile(const Dali::String& name)
+{
+  auto& profiles = Profiles();
+  auto  found    = profiles.find(name.CStr());
+  if(found == profiles.end())
+  {
+    return {};
+  }
+  auto profile = found->second.GetHandle();
+  if(!profile)
+  {
+    profiles.erase(found);
+  }
+  return profile;
+}
+
+WebProfile WebProfileImpl::GetDefaultProfile()
+{
+  auto profile = GetProfile("Default");
+  if(profile)
+  {
+    return profile;
+  }
+  if(!WebViewImpl::EnsureEngineType())
+  {
+    return {};
+  }
+  auto nativeProfile = Dali::WebEngineRuntime::GetDefaultProfile();
+  if(!nativeProfile)
+  {
+    return {};
+  }
+  profile = WebProfile(*new WebProfileImpl("Default", false, std::move(nativeProfile)));
+  Internal::RegisterWebProfile(Profiles(), profile);
+  return profile;
+}
+
+WebProfileImpl::WebProfileImpl(const Dali::String& name, bool incognito, Dali::WebEngineProfilePtr profile)
+: mName(name),
+  mIncognito(incognito),
+  mProfile(std::move(profile))
 {
 }
 
@@ -41,27 +103,43 @@ WebProfileImpl::~WebProfileImpl() = default;
 
 void WebProfileImpl::ClearCache()
 {
-  if(mContext)
+  if(auto* context = mProfile->GetContext())
   {
-    mContext->ClearCache();
+    context->ClearCache();
   }
 }
 
 WebCookieManager WebProfileImpl::GetCookieManager() const
 {
-  if(!mWebCookieManager)
+  auto cookies = mWebCookieManager.GetHandle();
+  if(!cookies)
   {
-    WebCookieManagerImplPtr impl = WebCookieManagerImpl::New(mCookieManager);
-    mWebCookieManager            = WebCookieManager(*impl);
+    WebProfile profile(*const_cast<WebProfileImpl*>(this));
+    auto       impl   = WebCookieManagerImpl::New(profile);
+    cookies           = WebCookieManager(*impl);
+    mWebCookieManager = Dali::WeakHandle<WebCookieManager>(cookies);
   }
-  return mWebCookieManager;
+  return cookies;
 }
 
 bool WebProfileImpl::IsEqual(const WebProfileImpl& rhs) const
 {
-  return mContext == rhs.mContext;
+  return mProfile == rhs.mProfile;
+}
+
+Dali::String WebProfileImpl::GetName() const
+{
+  return mName;
+}
+bool WebProfileImpl::IsIncognito() const
+{
+  return mIncognito;
+}
+const Dali::WebEngineProfilePtr& WebProfileImpl::GetEngineProfile() const
+{
+  return mProfile;
 }
 
 } // namespace Integration
 } // namespace Ui
-} //namespace DALI_NAMESPACE
+} // namespace DALI_NAMESPACE

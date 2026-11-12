@@ -45,6 +45,8 @@
 #include <dali/public-api/object/property-map.h>
 #include <string.h>
 #include <memory>
+#include <climits>
+#include <dali/devel-api/adaptor-framework/web-engine/web-engine-profile.h>
 
 #include <ui-web-engine.h>
 #include <ui-timer.h>
@@ -224,6 +226,7 @@ public:
 
   void ClearCache() override
   {
+    ++Test::WebEngine::GetRuntimeState().cacheClearCalls;
   }
 
   bool DeleteApplicationCache(Dali::WebEngineSecurityOrigin& origin) override
@@ -389,6 +392,7 @@ public:
 
   void ClearCookies() override
   {
+    ++Test::WebEngine::GetRuntimeState().cookieClearCalls;
   }
 
   void SetPersistentStorage(const std::string& path, Dali::WebEngineCookieManager::CookiePersistentStorage storage) override
@@ -1764,6 +1768,8 @@ public:
 class WebEngine : public Dali::BaseObject
 {
 public:
+  Dali::WebEngineProfilePtr mRuntimeProfile;
+  bool mIncognito = false;
   WebEngine()
   : mUrl(),
     mCurrentPlusOnePos(0),
@@ -2791,6 +2797,7 @@ void WebEngine::Create(uint32_t width, uint32_t height, uint32_t argc, char** ar
 
 void WebEngine::Destroy()
 {
+  Internal::Adaptor::GetImplementation(*this).mRuntimeProfile.reset();
 }
 
 WebEngineSettings& WebEngine::GetSettings() const
@@ -2840,7 +2847,7 @@ NativeImageInterfacePtr WebEngine::GetNativeImageInterface()
 
 bool WebEngine::IsIncognito() const
 {
-  return false;
+  return Internal::Adaptor::GetImplementation(*this).mIncognito;
 }
 
 void WebEngine::ChangeOrientation(int orientation)
@@ -3409,3 +3416,166 @@ bool GetLastFocus(const Dali::WebEngine& webEngine)
   return Dali::Internal::Adaptor::GetImplementation(webEngine).mFocused;
 }
 } // namespace Test::WebEngine
+
+namespace Test
+{
+namespace WebEngine
+{
+RuntimeState& GetRuntimeState()
+{
+  static RuntimeState state;
+  return state;
+}
+
+void TerminateRuntime()
+{
+  GetRuntimeState().available = false;
+}
+} // namespace WebEngine
+} // namespace Test
+
+namespace DALI_NAMESPACE
+{
+namespace
+{
+class MockRuntimeProfile : public WebEngineProfile
+{
+public:
+  MockRuntimeProfile(bool privateMode, bool owned)
+  : incognito(privateMode), mOwned(owned)
+  {
+    if(owned)
+    {
+      ++Test::WebEngine::GetRuntimeState().profileCreates;
+    }
+  }
+  ~MockRuntimeProfile() override
+  {
+    if(mOwned)
+    {
+      ++Test::WebEngine::GetRuntimeState().profileReleases;
+    }
+  }
+  WebEngineContext* GetContext() const override
+  {
+    return Test::WebEngine::GetRuntimeState().available ? &mContext : nullptr;
+  }
+  WebEngineCookieManager* GetCookieManager() const override
+  {
+    return Test::WebEngine::GetRuntimeState().available ? &mCookies : nullptr;
+  }
+  bool incognito;
+private:
+  bool mOwned;
+  mutable Internal::Adaptor::MockWebEngineContext mContext;
+  mutable Internal::Adaptor::MockWebEngineCookieManager mCookies;
+};
+
+bool InitializeMockRuntime()
+{
+  auto& state = Test::WebEngine::GetRuntimeState();
+  if(state.backendUnavailable)
+  {
+    return false;
+  }
+  if(!state.started)
+  {
+    state.started = true;
+    ++state.initializationCalls;
+    state.initializedArguments = state.arguments;
+    state.available = !state.failInitialization;
+  }
+  return state.available;
+}
+}
+
+bool WebEngineRuntime::SelectType(int32_t type)
+{
+  auto& state = Test::WebEngine::GetRuntimeState();
+  if(state.started && state.type != type)
+  {
+    return false;
+  }
+  state.type = type;
+  return true;
+}
+
+bool WebEngineRuntime::HasInitializationStarted()
+{
+  return Test::WebEngine::GetRuntimeState().started;
+}
+
+WebEngineArgumentsResult WebEngineRuntime::SetArguments(uint32_t argc, char** argv)
+{
+  auto& state = Test::WebEngine::GetRuntimeState();
+  if(state.started)
+  {
+    return WebEngineArgumentsResult::ALREADY_INITIALIZED;
+  }
+  if(argc > INT_MAX || (argc && !argv))
+  {
+    return WebEngineArgumentsResult::INVALID_ARGUMENT;
+  }
+  for(uint32_t i = 0; i < argc; ++i)
+  {
+    if(!argv[i])
+    {
+      return WebEngineArgumentsResult::INVALID_ARGUMENT;
+    }
+  }
+  if(state.backendUnavailable)
+  {
+    return WebEngineArgumentsResult::BACKEND_UNAVAILABLE;
+  }
+  std::vector<std::string> values;
+  for(uint32_t i = 0; i < argc; ++i)
+  {
+    values.emplace_back(argv[i]);
+  }
+  state.arguments = std::move(values);
+  return WebEngineArgumentsResult::SUCCESS;
+}
+
+WebEngineProfilePtr WebEngineRuntime::GetDefaultProfile()
+{
+  static std::weak_ptr<WebEngineProfile> cached;
+  if(!InitializeMockRuntime())
+  {
+    return {};
+  }
+  auto profile = cached.lock();
+  if(!profile)
+  {
+    profile = std::make_shared<MockRuntimeProfile>(false, false);
+    cached = profile;
+  }
+  return profile;
+}
+
+WebEngineProfilePtr WebEngineRuntime::CreateProfile(bool incognito, const char* bundlePath)
+{
+  auto& state = Test::WebEngine::GetRuntimeState();
+  if(!InitializeMockRuntime() || state.failProfile || state.type == 1)
+  {
+    return {};
+  }
+  state.lastIncognito = incognito;
+  state.lastBundlePath = bundlePath;
+  return std::make_shared<MockRuntimeProfile>(incognito, true);
+}
+
+bool WebEngineRuntime::CreateView(WebEngine engine, const WebEngineProfilePtr& profile, uint32_t, uint32_t)
+{
+  auto& state = Test::WebEngine::GetRuntimeState();
+  if(!engine || !profile || !profile->GetContext() || state.failView)
+  {
+    return false;
+  }
+  auto& impl = Internal::Adaptor::GetImplementation(engine);
+  impl.mRuntimeProfile = profile;
+  impl.mIncognito = std::static_pointer_cast<MockRuntimeProfile>(profile)->incognito;
+  state.lastViewContext = profile->GetContext();
+  ++state.viewCreates;
+  return true;
+}
+} // namespace DALI_NAMESPACE

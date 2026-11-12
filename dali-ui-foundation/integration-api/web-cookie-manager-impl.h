@@ -18,6 +18,7 @@
  */
 
 #include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
+#include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 
@@ -39,17 +40,17 @@ using WebCookieManagerImplPtr = IntrusivePtr<WebCookieManagerImpl>;
 class DALI_UI_API WebCookieManagerImpl : public BaseObject
 {
 public:
-  static WebCookieManagerImplPtr New(Dali::WebEngineCookieManager* cookieManager);
+  static WebCookieManagerImplPtr New(const WebProfile& profile);
 
   void ClearAllCookies();
   bool IsEqual(const WebCookieManagerImpl& rhs) const;
 
 protected:
-  explicit WebCookieManagerImpl(Dali::WebEngineCookieManager* cookieManager);
+  explicit WebCookieManagerImpl(const WebProfile& profile);
   ~WebCookieManagerImpl() override;
 
 private:
-  Dali::WebEngineCookieManager* mCookieManager;
+  WebProfile mProfile;
 };
 
 inline WebCookieManagerImpl& GetImpl(WebCookieManager& manager)

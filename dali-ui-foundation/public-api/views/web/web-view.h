@@ -36,6 +36,15 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
+/** @brief Result of configuring process-wide web engine arguments. @SINCE_3_0.0 */
+enum class WebEngineArgumentsResult : uint8_t
+{
+  SUCCESS,             ///< Settings stored; engine initialization and switch support are not guaranteed.
+  INVALID_ARGUMENT,    ///< Invalid count, array, or argument pointer.
+  ALREADY_INITIALIZED, ///< Initialization has started, including a failed attempt.
+  BACKEND_UNAVAILABLE  ///< Plugin loading or required feature access failed.
+};
+
 namespace Integration DALI_INTERNAL
 {
 class WebViewImpl;
@@ -151,22 +160,13 @@ public: // Creation & Destruction
   static WebView New(const Dali::String& url);
 
   /**
-   * @brief Creates an initialized WebView with application arguments.
-   *
-   * The argc/argv pair is forwarded to the underlying web engine so that
-   * engine-specific command-line options can be parsed during creation.
-   *
-   * @deprecated Passing engine startup arguments during WebView creation is deprecated
-   * because it couples engine configuration to view creation.
-   *
+   * @brief Creates a view with the default profile; all arguments are ignored.
    * @SINCE_3_0.0
-   * @note In the Chromium backend, engine command-line arguments are process-wide.
-   * Only the first argument-setting call is applied; later calls do not reconfigure
-   * the engine. This overload does not provide independent per-view engine arguments.
-   *
-   * @param[in] argc The count of application arguments
-   * @param[in] argv The string array of application arguments
-   * @return A handle to a newly allocated Dali resource
+   * @deprecated Use SetWebEngineArguments() before engine initialization and
+   * WebProfile::New() with WebView::New(profile) for private browsing.
+   * @param[in] argc Ignored
+   * @param[in] argv Ignored
+   * @return A new WebView, or an empty handle on backend failure
    */
   static WebView New(uint32_t argc, char** argv);
 
@@ -937,14 +937,41 @@ public: // Additional APIs
   /**
    * @brief Selects the process-wide web engine for WebView instances.
    *
-   * Call this before creating the first WebView. Once a WebView has been
-   * created, selecting a different engine triggers an assertion, even if
-   * that WebView has been destroyed.
+   * Call before SetWebEngineArguments(), WebView::New() or WebProfile::New().
+   * Their first use fixes the engine type, defaulting to Chromium if unset,
+   * even if argument storage or backend creation fails. Afterwards, selecting
+   * a different engine triggers an assertion, even if no engine was started
+   * or every view and profile has been destroyed. Selecting the same type is allowed.
+   * The deprecated UiConfig web engine setting is ignored.
    *
    * @SINCE_3_0.0
    * @param[in] type The web engine type
    */
   static void SetWebEngineType(WebEngineType type);
+
+  /**
+   * @brief Replaces process-wide startup arguments before engine initialization begins.
+   *
+   * Call on the DALi event thread after UiConfig::Apply(). Profile creation can
+   * initialize the engine before any view exists. This call fixes the engine
+   * type but does not start it.
+   * argv[0] is the program name. argc == 0 clears settings and permits null argv.
+   * Failed calls preserve existing arguments; calls after initialization starts
+   * return ALREADY_INITIALIZED, even when initialization failed.
+   * @SINCE_3_0.0
+   * @param[in] argc Argument count, within the native int range
+   * @param[in] argv Argument array with argc non-null entries when argc > 0
+   * @return The storage result
+   */
+  static WebEngineArgumentsResult SetWebEngineArguments(uint32_t argc, char** argv);
+
+  /**
+   * @brief Creates a view using the specified profile, retained for the view's lifetime.
+   * @SINCE_3_0.0
+   * @param[in] profile An initialized profile; an empty handle is an assertion error
+   * @return The new view, or an empty handle on backend failure; no default fallback
+   */
+  static WebView New(const WebProfile& profile);
 
 public: // Not intended for application developers
   /// @cond internal

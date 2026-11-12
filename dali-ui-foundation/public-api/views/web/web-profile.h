@@ -19,6 +19,7 @@
 
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/base-handle.h>
 
 namespace DALI_NAMESPACE
@@ -116,6 +117,46 @@ public:
    * @return The cookie manager associated with this profile
    */
   WebCookieManager GetCookieManager() const;
+
+  /**
+   * @brief Creates a named profile after application initialization and UiConfig::Apply().
+   *
+   * Call on the DALi event thread. This may initialize the web engine, fixing its
+   * type and arguments. Names are case-sensitive; empty, Default and live duplicate
+   * names are assertion errors. A released name may be reused. Incognito sessions
+   * live as long as the profile or a dependent view/cookie manager is retained.
+   * Normal profile destruction does not delete persistent browsing data.
+   * @SINCE_3_0.0
+   * @param[in] name The lookup key, not a native storage path
+   * @param[in] incognito Whether browsing data is private
+   * @return The new profile, or an empty handle on backend failure/unsupported profiles
+   */
+  static WebProfile New(const Dali::String& name, bool incognito = false);
+
+  /**
+   * @brief Creates a named profile with an injected bundle path.
+   * @SINCE_3_0.0
+   * @param[in] name The case-sensitive lookup key
+   * @param[in] incognito Whether browsing data is private
+   * @param[in] injectedBundlePath The bundle path, or an empty string for no bundle
+   * @return The new profile, or an empty handle on failure; no default fallback
+   * @see New(const Dali::String&, bool)
+   */
+  static WebProfile New(const Dali::String& name, bool incognito, const Dali::String& injectedBundlePath);
+
+  /**
+   * @brief Looks up a live profile without initializing the engine or creating a context.
+   * @SINCE_3_0.0
+   * @param[in] name The case-sensitive lookup key (Default for an existing default profile)
+   * @return The existing profile, or an empty handle when absent
+   */
+  static WebProfile GetProfile(const Dali::String& name);
+
+  /** @brief Gets the lookup key. @SINCE_3_0.0 */
+  Dali::String GetName() const;
+
+  /** @brief Gets the private browsing mode fixed at creation. @SINCE_3_0.0 */
+  bool IsIncognito() const;
 
 public: // Not intended for application developers
   /// @cond internal

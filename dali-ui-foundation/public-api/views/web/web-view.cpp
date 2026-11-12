@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/integration-api/web-view-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali/devel-api/adaptor-framework/web-engine/web-engine-profile.h>
 
 namespace DALI_NAMESPACE
 {
@@ -55,30 +56,51 @@ WebView::~WebView()
 
 WebView WebView::New()
 {
-  Integration::WebViewImplPtr impl = Integration::WebViewImpl::New();
-  WebView                     view(*impl);
+  auto impl = Integration::WebViewImpl::New();
+  if(!impl)
+  {
+    return {};
+  }
+  WebView view(*impl);
   impl->Initialize();
   return view;
 }
 
 WebView WebView::New(const Dali::String& url)
 {
-  Integration::WebViewImplPtr impl = Integration::WebViewImpl::New();
-  WebView                     view(*impl);
-  impl->Initialize();
-  if(!url.Empty())
+  auto view = New();
+  if(view && !url.Empty())
   {
     view.LoadUrl(url);
   }
   return view;
 }
 
-WebView WebView::New(uint32_t argc, char** argv)
+WebView WebView::New(uint32_t /*argc*/, char** /*argv*/)
 {
-  Integration::WebViewImplPtr impl = Integration::WebViewImpl::New(argc, argv);
-  WebView                     view(*impl);
+  return New();
+}
+
+WebView WebView::New(const WebProfile& profile)
+{
+  DALI_ASSERT_ALWAYS(profile && "WebView requires an initialized profile");
+  auto impl = Integration::WebViewImpl::New(profile);
+  if(!impl)
+  {
+    return {};
+  }
+  WebView view(*impl);
   impl->Initialize();
   return view;
+}
+
+WebEngineArgumentsResult WebView::SetWebEngineArguments(uint32_t argc, char** argv)
+{
+  if(!Integration::WebViewImpl::EnsureEngineType())
+  {
+    return WebEngineArgumentsResult::BACKEND_UNAVAILABLE;
+  }
+  return static_cast<WebEngineArgumentsResult>(Dali::WebEngineRuntime::SetArguments(argc, argv));
 }
 
 WebView WebView::DownCast(BaseHandle handle)
