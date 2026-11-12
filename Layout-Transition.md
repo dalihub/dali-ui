@@ -98,6 +98,21 @@ depending on which slot consumes it. `LayoutBoundsEffects::SlideFrom` and
 `SlideTo` therefore return identical descriptors. The same applies to
 `ExpandFrom` / `ShrinkTo`.
 
+Bounds-effect lengths use three units. `LayoutBoundsLength::Pixel()` is in natural
+units, like a margin: the dispatcher multiplies it by the effective scale of the view
+that enters or exits (`Extension::View::GetEffectiveLayoutScale()`, see
+[UI Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale)), so at an
+effective scale of `2.0`,
+`SlideFrom(LayoutBoundsEdge::BOTTOM, LayoutBoundsLength::Pixel(40.0f), timing)`
+starts 80 rendered pixels below the final bounds. A `SUBTREE` owner's ENTER / EXIT
+uses the scale of the descendant it animates, not the owner's. `SelfFraction()` and
+`ParentFraction()` are fractions of rendered sizes and are not scaled again:
+`SelfFraction()` of the view's own size (its final bounds for an ENTER, its current
+bounds for an EXIT), which carries the view's scale, and `ParentFraction()` of the
+parent's arranged size, which carries the parent's scale, not the view's. Earlier
+releases added `Pixel()` offsets as rendered pixels, so at an effective scale other
+than `1.0` the same value now moves the view `effectiveScale` times as far.
+
 ---
 
 ## Quick start (animator mode)
