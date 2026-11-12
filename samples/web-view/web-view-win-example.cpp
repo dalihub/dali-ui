@@ -61,10 +61,10 @@
  *
  * #  | Plugin API                  | Trigger     | Verify
  * ---|-----------------------------|-------------|------------------------------------------
- * 1  | Create(w,h,locale,timezone) | N/A         | Not used — this sample uses the argc/argv constructor (#17)
+ * 1  | Create(w,h,locale,timezone) | N/A         | Not used by the default-profile creation path
  * 2  | Destroy()                   | ESC/BACK    | [V] App exits / WebView destroyed
  * 14 | SetFocus(focused)           | auto + key 6 R2 | [L] "SetFocus verified" (WebView receives keys)
- * 17 | Create(w,h,argc,argv)       | auto        | [V] WebView appears on screen (creation via argc/argv constructor)
+ * 17 | Create(w,h,argc,argv)       | auto        | [V] WebView appears after startup configuration and default-profile creation
  * 18 | GetNativeImage()            | auto        | [V] Page content renders on screen
  * 19 | SetSize(w,h)                | auto        | [V] WebView fills the screen correctly
  * 20 | UpdateDisplayArea(bounds)   | auto        | [V] WebView positioned at (0,0) correctly
@@ -170,16 +170,25 @@ private:
     auto   windowSize = window.GetPositionSize();
     window.SetBackgroundColor(Color::BLACK);
 
-    // [API #17] Create(w,h,argc,argv) — use the argc/argv constructor to pass
-    //   --prefer-platform-version to the web engine. This calls
-    //   WebEnginePlugin::Create(w,h,argc,argv) internally (see
-    //   WebViewImpl::New() in web-view-impl.cpp).
-    //   Note: [API #1] Create(w,h,locale,timezone) is NOT used by this sample.
-    static char arg0[]    = "web-view-win-example";
-    static char arg1[]    = "--prefer-platform-version";
-    char*       webArgs[] = {arg0, arg1};
-    uint32_t    webArgc   = 2;
-    mWebView              = WebView::New(webArgc, webArgs);
+    // Store process-wide startup options before creating a profile or view.
+    // Version preference is a Tizen LWE option; Windows keeps its existing
+    // option handling and does not interpret it as a Chromium switch.
+    char program[] = "web-view-win-example";
+    char preference[] = "--prefer-platform-version";
+    char* webArgs[] = {program, preference};
+    if(WebView::SetWebEngineArguments(2, webArgs) != Ui::WebEngineArgumentsResult::SUCCESS)
+    {
+      DALI_LOG_ERROR("Cannot configure the web engine\n");
+      application.Quit();
+      return;
+    }
+    mWebView = WebView::New();
+    if(!mWebView)
+    {
+      DALI_LOG_ERROR("Cannot create the web view\n");
+      application.Quit();
+      return;
+    }
     // [API #19] SetSize(w,h) — use a smaller size centered on screen
     //   so the focus indicator is visible around the WebView.
     float viewW = static_cast<float>(windowSize.width) * 0.6f;

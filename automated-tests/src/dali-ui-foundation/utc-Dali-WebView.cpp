@@ -22,6 +22,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali-ui-foundation/internal/web-profile-registry.h>
 #include <ui-web-engine.h>
 
 #define private public
@@ -114,7 +115,7 @@ int UtcDaliWebViewUiConfigWebEngineTypeP(void)
 
 int UtcDaliWebViewNewWithoutAppliedUiConfigN(void)
 {
-  DALI_TEST_ASSERTION(WebView::New(), "UiConfig::Apply() must be called before WebView::New()");
+  DALI_TEST_ASSERTION(WebView::New(), "UiConfig::Apply() must be called before using the web engine");
   END_TEST;
 }
 
@@ -140,7 +141,7 @@ int UtcDaliWebViewSetWebEngineTypeAfterCreationN(void)
   }
 
   WebView::SetWebEngineType(WebEngineType::CHROMIUM);
-  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Web engine cannot be changed after a WebView has been created");
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
   END_TEST;
 }
 
@@ -1576,5 +1577,393 @@ int UtcDaliWebViewVerboseDiagnosticsP(void)
   DALI_TEST_CHECK(!impl.mVisualChangeRequired);
   DALI_TEST_CHECK(emptyTouchHandled);
   DALI_TEST_CHECK(touchHandled);
+  END_TEST;
+}
+
+int UtcDaliWebViewEngineArgumentsReplacementP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  {
+    char program[] = "browser";
+    char option[] = "--incognito";
+    char* arguments[] = {program, option};
+    DALI_TEST_CHECK(WebView::SetWebEngineArguments(2, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
+    option[2] = 'X';
+  }
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_EQUALS(state.arguments[1], std::string("--incognito"), TEST_LOCATION);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, nullptr) == Ui::WebEngineArgumentsResult::INVALID_ARGUMENT);
+  char* invalid[] = {nullptr};
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, invalid) == Ui::WebEngineArgumentsResult::INVALID_ARGUMENT);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(UINT32_MAX, invalid) == Ui::WebEngineArgumentsResult::INVALID_ARGUMENT);
+  DALI_TEST_EQUALS(state.arguments.size(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::SUCCESS);
+  DALI_TEST_CHECK(state.arguments.empty());
+  DALI_TEST_CHECK(!state.started);
+  END_TEST;
+}
+
+int UtcDaliWebViewLegacyArgumentsIgnoredP(void)
+{
+  UiTestApplication application;
+  char program[] = "browser";
+  char option[] = "--incognito";
+  char* arguments[] = {program, option};
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(2, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
+  auto view = WebView::New(UINT32_MAX, reinterpret_cast<char**>(1));
+  DALI_TEST_CHECK(view);
+  DALI_TEST_CHECK(!view.GetProfile().IsIncognito());
+  DALI_TEST_EQUALS(view.GetProfile().GetName(), Dali::String("Default"), TEST_LOCATION);
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_EQUALS(state.initializedArguments[1], std::string("--incognito"), TEST_LOCATION);
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::ALREADY_INITIALIZED);
+  END_TEST;
+}
+
+int UtcDaliWebProfileLookupDoesNotInitializeP(void)
+{
+  UiTestApplication application;
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Default"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Missing"));
+  DALI_TEST_CHECK(!Test::WebEngine::GetRuntimeState().started);
+  DALI_TEST_ASSERTION(WebProfile::New(""), "Profile name must be nonempty and not Default");
+  DALI_TEST_ASSERTION(WebProfile::New("Default"), "Profile name must be nonempty and not Default");
+  DALI_TEST_CHECK(!Test::WebEngine::GetRuntimeState().started);
+  END_TEST;
+}
+
+int UtcDaliWebProfileCreationInitializesEngineP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Private", true, "/bundle.so");
+  DALI_TEST_CHECK(profile);
+  DALI_TEST_CHECK(profile.IsIncognito());
+  DALI_TEST_EQUALS(profile.GetName(), Dali::String("Private"), TEST_LOCATION);
+  DALI_TEST_CHECK(profile == WebProfile::GetProfile("Private"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("private"));
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.viewCreates, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.lastBundlePath, std::string("/bundle.so"), TEST_LOCATION);
+  DALI_TEST_CHECK(state.lastIncognito);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::ALREADY_INITIALIZED);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  DALI_TEST_ASSERTION(WebProfile::New("Private", true), "A live profile already uses this name");
+  DALI_TEST_ASSERTION(WebProfile::New("Private", false), "A live profile already uses this name");
+  END_TEST;
+}
+
+int UtcDaliWebProfileSharedViewsRetainContextP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  auto profile = WebProfile::New("Session", true);
+  DALI_TEST_EQUALS(state.lastBundlePath, std::string(""), TEST_LOCATION);
+  auto copy = profile;
+  const void* context;
+  {
+    auto first = WebView::New(profile);
+    context = state.lastViewContext;
+    auto second = WebView::New(copy);
+    DALI_TEST_CHECK(first && second);
+    DALI_TEST_CHECK(state.lastViewContext == context);
+    DALI_TEST_CHECK(first.GetProfile() == profile);
+    DALI_TEST_CHECK(second.GetProfile() == profile);
+    auto independent = WebProfile::New("Independent", true);
+    auto otherView = WebView::New(independent);
+    DALI_TEST_CHECK(state.lastViewContext != context);
+    DALI_TEST_CHECK(otherView.GetProfile() != profile);
+  }
+  DALI_TEST_EQUALS(state.profileReleases, 1, TEST_LOCATION);
+  auto recreated = WebView::New(profile);
+  DALI_TEST_CHECK(recreated);
+  DALI_TEST_CHECK(state.lastViewContext == context);
+  profile.Reset();
+  copy.Reset();
+  DALI_TEST_CHECK(WebProfile::GetProfile("Session"));
+  recreated.Reset();
+  DALI_TEST_EQUALS(state.profileReleases, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Session"));
+  auto newSession = WebProfile::New("Session", true);
+  DALI_TEST_CHECK(newSession);
+  DALI_TEST_EQUALS(state.profileCreates, 3, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileCookieOnlyRetainsNameP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  WebCookieManager cookies;
+  {
+    auto profile = WebProfile::New("Cookies", true);
+    cookies = profile.GetCookieManager();
+    DALI_TEST_CHECK(cookies == profile.GetCookieManager());
+  }
+  DALI_TEST_EQUALS(state.profileReleases, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(WebProfile::GetProfile("Cookies"));
+  DALI_TEST_ASSERTION(WebProfile::New("Cookies"), "A live profile already uses this name");
+  cookies.ClearAllCookies();
+  DALI_TEST_EQUALS(state.cookieClearCalls, 1, TEST_LOCATION);
+  cookies.Reset();
+  DALI_TEST_EQUALS(state.profileReleases, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Cookies"));
+  DALI_TEST_CHECK(WebProfile::New("Cookies"));
+  END_TEST;
+}
+
+int UtcDaliWebProfileFailureDoesNotReserveNameP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.failProfile = true;
+  DALI_TEST_CHECK(!WebProfile::New("Retry"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Retry"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Default"));
+  state.failProfile = false;
+  DALI_TEST_CHECK(WebProfile::New("Retry"));
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileInitializationFailureFreezesSettingsP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.failInitialization = true;
+  DALI_TEST_CHECK(!WebProfile::New("Failed"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Failed"));
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::ALREADY_INITIALIZED);
+  state.failInitialization = false;
+  DALI_TEST_CHECK(!WebView::New());
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewProfileFailureNoFallbackP(void)
+{
+  UiTestApplication application;
+  WebProfile empty;
+  DALI_TEST_ASSERTION(WebView::New(empty), "WebView requires an initialized profile");
+  auto profile = WebProfile::New("Selected", true);
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.failView = true;
+  DALI_TEST_CHECK(!WebView::New(profile));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Default"));
+  DALI_TEST_EQUALS(state.viewCreates, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(WebProfile::GetProfile("Selected") == profile);
+  state.failView = false;
+  DALI_TEST_CHECK(WebView::New(profile));
+  END_TEST;
+}
+
+int UtcDaliWebViewBackendUnavailableP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.backendUnavailable = true;
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::BACKEND_UNAVAILABLE);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  DALI_TEST_CHECK(!WebProfile::New("Unavailable"));
+  DALI_TEST_CHECK(!WebView::New());
+  DALI_TEST_CHECK(!state.started);
+  END_TEST;
+}
+
+int UtcDaliWebViewLweDefaultAndUnsupportedProfilesP(void)
+{
+  UiTestApplication application;
+  char program[] = "browser";
+  char* arguments[] = {program};
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_CHECK(!WebProfile::New("Unsupported", true, "/bundle.so"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Unsupported"));
+  auto view = WebView::New();
+  DALI_TEST_CHECK(view);
+  DALI_TEST_CHECK(!view.GetProfile().IsIncognito());
+  DALI_TEST_EQUALS(state.initializedArguments[0], std::string("browser"), TEST_LOCATION);
+  view.Reset();
+  DALI_TEST_EQUALS(state.profileReleases, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileRetainedAfterTerminationP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Retained", true);
+  auto cookies = profile.GetCookieManager();
+  auto view = WebView::New(profile);
+  auto settings = view.GetSettings();
+  auto history = view.GetBackForwardList();
+  auto& state = Test::WebEngine::GetRuntimeState();
+  Test::WebEngine::TerminateRuntime();
+  profile.ClearCache();
+  cookies.ClearAllCookies();
+  DALI_TEST_EQUALS(state.cacheClearCalls, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.cookieClearCalls, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!WebView::New(profile));
+  DALI_TEST_EQUALS(settings.GetDefaultFontSize(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(history.GetItemCount(), 0u, TEST_LOCATION);
+  view.LoadUrl("https://example.com");
+  DALI_TEST_CHECK(view.GetUrl().Empty());
+  view.Reset();
+  profile.Reset();
+  cookies.Reset();
+  DALI_TEST_EQUALS(state.profileReleases, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewDefaultTypeIgnoresUiConfigP(void)
+{
+  UiConfig config = UiConfig::New();
+  config.SetWebEngineType(WebEngineType::LWE);
+  UiTestApplication application(config);
+  auto view = WebView::New();
+  DALI_TEST_CHECK(view);
+  DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().type, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewArgumentsFixDefaultTypeP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::SUCCESS);
+  DALI_TEST_EQUALS(state.type, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.initializationCalls, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!state.started);
+  WebView::SetWebEngineType(WebEngineType::CHROMIUM);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  char program[] = "replacement";
+  char* arguments[] = {program};
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_CHECK(WebView::New());
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.initializedArguments[0], std::string("replacement"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewArgumentsFixExplicitTypeP(void)
+{
+  UiTestApplication application;
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  WebView::SetWebEngineType(WebEngineType::CHROMIUM);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::SUCCESS);
+  DALI_TEST_EQUALS(state.type, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.initializationCalls, 0, TEST_LOCATION);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::CHROMIUM), "Cannot change engine type after first web engine API use");
+  DALI_TEST_EQUALS(state.type, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_CHECK(WebView::New());
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewInvalidArgumentsFixTypeP(void)
+{
+  UiTestApplication application;
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, nullptr) == Ui::WebEngineArgumentsResult::INVALID_ARGUMENT);
+  DALI_TEST_CHECK(!Test::WebEngine::GetRuntimeState().started);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::SUCCESS);
+  END_TEST;
+}
+
+int UtcDaliWebViewUnavailableCreationFixesTypeP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.backendUnavailable = true;
+  DALI_TEST_CHECK(!WebView::New());
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  state.backendUnavailable = false;
+  DALI_TEST_CHECK(WebView::New());
+  DALI_TEST_EQUALS(state.type, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileUnavailableCreationFixesTypeP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.backendUnavailable = true;
+  DALI_TEST_CHECK(!WebProfile::New("Unavailable"));
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  state.backendUnavailable = false;
+  DALI_TEST_CHECK(WebProfile::New("Unavailable"));
+  DALI_TEST_EQUALS(state.type, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileRegistryPrunesExpiredNamesP(void)
+{
+  UiTestApplication application;
+  Dali::Ui::Internal::WebProfileRegistry profiles;
+  auto live = WebProfile::New("Live");
+  Dali::Ui::Internal::RegisterWebProfile(profiles, live);
+  for(unsigned int index = 0; index < 1000; ++index)
+  {
+    auto name = std::string("Temporary") + std::to_string(index);
+    auto profile = WebProfile::New(name.c_str());
+    Dali::Ui::Internal::RegisterWebProfile(profiles, profile);
+    DALI_TEST_EQUALS(profiles.size(), size_t(2), TEST_LOCATION);
+    DALI_TEST_CHECK(profiles.at("Live").GetHandle() == live);
+  }
+  DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().profileReleases, 1000, TEST_LOCATION);
+  auto reused = WebProfile::New("Temporary0");
+  Dali::Ui::Internal::RegisterWebProfile(profiles, reused);
+  DALI_TEST_EQUALS(profiles.size(), size_t(2), TEST_LOCATION);
+  DALI_TEST_CHECK(WebProfile::GetProfile("Temporary0") == reused);
+  END_TEST;
+}
+
+int UtcDaliWebProfileRegistrySweepPreservesOwnersP(void)
+{
+  UiTestApplication application;
+  auto view = WebView::New(WebProfile::New("ViewOwned"));
+  auto cookies = WebProfile::New("CookieOwned").GetCookieManager();
+  for(unsigned int index = 0; index < 1000; ++index)
+  {
+    auto name = std::string("Temporary") + std::to_string(index);
+    DALI_TEST_CHECK(WebProfile::New(name.c_str()));
+  }
+  auto defaultView = WebView::New();
+  DALI_TEST_CHECK(defaultView);
+  DALI_TEST_CHECK(WebProfile::GetProfile("ViewOwned") == view.GetProfile());
+  DALI_TEST_CHECK(WebProfile::GetProfile("CookieOwned").GetCookieManager() == cookies);
+  DALI_TEST_ASSERTION(WebProfile::New("ViewOwned"), "A live profile already uses this name");
+  DALI_TEST_ASSERTION(WebProfile::New("CookieOwned"), "A live profile already uses this name");
+  view.Reset();
+  cookies.Reset();
+  DALI_TEST_CHECK(WebProfile::New("ViewOwned"));
+  DALI_TEST_CHECK(WebProfile::New("CookieOwned"));
+  END_TEST;
+}
+
+int UtcDaliWebProfileRegistryDefaultRegistrationPrunesP(void)
+{
+  UiTestApplication application;
+  Dali::Ui::Internal::WebProfileRegistry profiles;
+  {
+    auto expired = WebProfile::New("Expired");
+    Dali::Ui::Internal::RegisterWebProfile(profiles, expired);
+  }
+  auto view = WebView::New();
+  Dali::Ui::Internal::RegisterWebProfile(profiles, view.GetProfile());
+  DALI_TEST_EQUALS(profiles.size(), size_t(1), TEST_LOCATION);
+  DALI_TEST_CHECK(profiles.at("Default").GetHandle() == view.GetProfile());
+  view.Reset();
+  DALI_TEST_CHECK(!profiles.at("Default").GetHandle());
   END_TEST;
 }
