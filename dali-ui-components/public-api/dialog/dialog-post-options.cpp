@@ -31,8 +31,8 @@ class DialogPostOptions::Impl
 {
 public:
   bool                     mAnimated{true};
-  DialogContainerStyle     mContainerStyle;
-  NavigationTransitionSpec mTransitionSpec;
+  DialogContainerStyle     mContainerStyle{};
+  NavigationTransitionSpec mTransitionSpec{};
 };
 
 DialogPostOptions::DialogPostOptions()

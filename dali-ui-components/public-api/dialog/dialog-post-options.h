@@ -54,68 +54,117 @@ enum class DialogDismissReason : uint32_t
  * Reposting to the same Navigator does not replace an active session's options.
  * For a custom scrim view or complex scrim composition, use a separate manual
  * DialogContainer instead; do not mix that ownership path with Post/Dismiss.
- * @SINCE_3_0.0
+ * @SINCE_3_0.1
  */
 class DALI_UI_COMPONENTS_API DialogPostOptions
 {
 public:
   /**
    * @brief Creates options with default values.
+   *
    * Animation is enabled, and the style and transition handles are empty.
-   * @SINCE_3_0.0
+   * @SINCE_3_0.1
    */
   DialogPostOptions();
 
-  /// @brief Copy constructor.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Creates options by copying other options.
+   *
+   * @SINCE_3_0.1
+   * @param[in] rhs The options to copy.
+   */
   DialogPostOptions(const DialogPostOptions& rhs);
 
-  /// @brief Move constructor. The moved-from object must not be used except for assignment or destruction.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Creates options by moving other options.
+   *
+   * The moved-from object must not be used except for assignment or destruction.
+   *
+   * @SINCE_3_0.1
+   * @param[in] rhs The options to move.
+   */
   DialogPostOptions(DialogPostOptions&& rhs) noexcept;
 
-  /// @brief Copy assignment.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Copies other options to this object.
+   *
+   * @SINCE_3_0.1
+   * @param[in] rhs The options to copy.
+   */
   DialogPostOptions& operator=(const DialogPostOptions& rhs);
 
-  /// @brief Move assignment. The moved-from object must not be used except for assignment or destruction.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Moves other options to this object.
+   *
+   * The moved-from object must not be used except for assignment or destruction.
+   *
+   * @SINCE_3_0.1
+   * @param[in] rhs The options to move.
+   */
   DialogPostOptions& operator=(DialogPostOptions&& rhs) noexcept;
 
-  /// @brief Destructor.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Destructor.
+   * @SINCE_3_0.1
+   */
   ~DialogPostOptions();
 
-  /// @brief Sets whether to use the Navigator's modal enter transition. The default is true.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Sets whether to use the Navigator's modal enter transition.
+   *
+   * The default is true.
+   *
+   * @SINCE_3_0.1
+   * @param[in] animated True to use the modal enter transition.
+   */
   void SetAnimated(bool animated);
 
-  /// @brief Gets whether to use the Navigator's modal enter transition.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Returns whether to use the Navigator's modal enter transition.
+   *
+   * @SINCE_3_0.1
+   * @return True if the modal enter transition is used.
+   */
   bool IsAnimated() const;
 
   /**
-   * @brief Sets the style of the internally generated scrim; empty selects DialogContainerStyle::Default().
+   * @brief Sets the style of the internally generated scrim.
+   *
+   * An empty style selects DialogContainerStyle::Default().
    * Use DialogContainerStyle::NoScrimPreset() to remove tint and blur while
    * retaining background input blocking and the Dialog's dismiss policy.
-   * @SINCE_3_0.0
+   *
+   * @SINCE_3_0.1
+   * @param[in] style The scrim style.
    */
   void SetContainerStyle(const DialogContainerStyle& style);
 
-  /// @brief Gets the style of the internally generated scrim. May be an empty handle.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Returns the style of the internally generated scrim.
+   *
+   * @SINCE_3_0.1
+   * @return The scrim style. It may be an empty handle.
+   */
   const DialogContainerStyle& GetContainerStyle() const;
 
   /**
-   * @brief Sets an optional content transition; empty uses the Navigator's modal default.
+   * @brief Sets an optional content transition.
+   *
+   * An empty specification uses the Navigator's modal default.
    * Animator and snap callbacks receive the Dialog, not its DialogContainer.
    * Navigator independently fades the scrim on the same animation timeline.
-   * @SINCE_3_0.0
+   *
+   * @SINCE_3_0.1
+   * @param[in] spec The content transition specification.
    */
   void SetTransitionSpec(const NavigationTransitionSpec& spec);
 
-  /// @brief Gets the content transition. May be an empty handle.
-  /// @SINCE_3_0.0
+  /**
+   * @brief Returns the content transition.
+   *
+   * @SINCE_3_0.1
+   * @return The content transition specification. It may be an empty handle.
+   */
   const NavigationTransitionSpec& GetTransitionSpec() const;
 
 private:
