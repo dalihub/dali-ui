@@ -119,23 +119,19 @@ protected: // Construction & Destruction
 
 public: // Creation
   /**
-   * @brief Creates a new WebViewImpl with no engine arguments.
+   * @brief Creates a new WebViewImpl with the default profile.
    *
    * @return An intrusive pointer to the newly allocated WebViewImpl
    */
   static WebViewImplPtr New();
 
   /**
-   * @brief Creates a new WebViewImpl with application arguments forwarded to the web engine.
-   *
-   * The argc/argv pair is passed to WebEngine::Create(width, height, argc, argv)
-   * so that engine-specific command-line options can be parsed during creation.
-   *
-   * @param[in] argc The count of application arguments
-   * @param[in] argv The string array of application arguments
-   * @return An intrusive pointer to the newly allocated WebViewImpl
+   * @brief Creates a view using an initialized profile.
+   * @param[in] profile The profile retained by the view
+   * @return An implementation, or an empty pointer on backend failure
    */
-  static WebViewImplPtr New(uint32_t argc, char** argv);
+  static WebViewImplPtr New(const WebProfile& profile);
+  static bool           EnsureEngineType();
 
   /**
    * @copydoc Dali::Ui::WebView::SetWebEngineType
@@ -668,18 +664,9 @@ private: // Internal conversion helpers
    */
   static WebViewPageLoadErrorType ToUiPageLoadErrorType(Dali::WebEngineLoadError::ErrorType type);
 
-private: // Internal factory helper
-  /**
-   * @brief Creates a WebViewImpl instance and initializes its WebEngine.
-   *
-   * Shared by both New() overloads. The caller is responsible for invoking
-   * the appropriate WebEngine::Create() overload afterwards.
-   *
-   * @return An intrusive pointer to the newly allocated WebViewImpl
-   */
-  static WebViewImplPtr CreateWithEngine();
-
 private:
+  bool IsWebEngineAvailable() const;
+
   // Not copyable or movable
   WebViewImpl(const WebViewImpl&)            = delete;
   WebViewImpl(WebViewImpl&&)                 = delete;

@@ -17,6 +17,7 @@
  *
  */
 
+#include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali-ui-foundation/public-api/views/web/web-settings.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine.h>
 #include <dali/public-api/common/intrusive-ptr.h>
@@ -42,7 +43,7 @@ public:
   /**
    * @brief Creates settings bound weakly to a web engine.
    */
-  static WebSettingsImplPtr New(Dali::WebEngine webEngine);
+  static WebSettingsImplPtr New(Dali::WebEngine webEngine, WebProfile profile);
 
   bool         SetExtraFeatureValue(const Dali::String& feature, const Dali::String& value);
   Dali::String GetExtraFeatureValue(const Dali::String& feature) const;
@@ -54,10 +55,12 @@ public:
   bool         IsExtraFeatureEnabled(const Dali::String& feature) const;
 
 protected:
-  explicit WebSettingsImpl(Dali::WebEngine webEngine);
+  explicit WebSettingsImpl(Dali::WebEngine webEngine, WebProfile profile);
   ~WebSettingsImpl() override;
 
 private:
+  Dali::WebEngine                   GetWebEngine() const;
+  Dali::WeakHandle<WebProfile>      mWebProfile;
   Dali::WeakHandle<Dali::WebEngine> mWebEngine;
 };
 

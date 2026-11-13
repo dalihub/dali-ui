@@ -18,6 +18,7 @@
  */
 
 #include <dali-ui-foundation/public-api/views/web/web-back-forward-list.h>
+#include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
@@ -42,7 +43,7 @@ using WebBackForwardListImplPtr = IntrusivePtr<WebBackForwardListImpl>;
 class DALI_UI_API WebBackForwardListImpl : public BaseObject
 {
 public:
-  static WebBackForwardListImplPtr New(Dali::WebEngine webEngine);
+  static WebBackForwardListImplPtr New(Dali::WebEngine webEngine, WebProfile profile);
 
   WebBackForwardListItem               GetCurrentItem() const;
   WebBackForwardListItem               GetPreviousItem() const;
@@ -53,13 +54,15 @@ public:
   Dali::Vector<WebBackForwardListItem> GetForwardItems(int32_t limit) const;
 
 protected:
-  explicit WebBackForwardListImpl(Dali::WebEngine webEngine);
+  explicit WebBackForwardListImpl(Dali::WebEngine webEngine, WebProfile profile);
   ~WebBackForwardListImpl() override;
 
 private:
   WebBackForwardListItem CreateItem(std::unique_ptr<Dali::WebEngineBackForwardListItem> item) const;
 
 private:
+  Dali::WebEngine                   GetWebEngine() const;
+  Dali::WeakHandle<WebProfile>      mWebProfile;
   Dali::WeakHandle<Dali::WebEngine> mWebEngine;
 };
 
