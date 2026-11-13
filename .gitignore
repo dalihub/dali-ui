@@ -72,6 +72,7 @@ samples/accessibility-localized-name/res/locale/*/LC_MESSAGES/*.mo
 
 /dali-ui-foundation/internal/graphics/generated
 /build/tizen/dali-ui-foundation/dali-ui-shader-generator
+/build/tizen/dali-ui-foundation/dali*-ui-shader-generator
 
 # Documentation build artifacts (Ignore contents, not the directory itself to allow exceptions)
 /build/doc/*

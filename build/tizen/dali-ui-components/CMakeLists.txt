@@ -44,7 +44,7 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_LIB_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${ROOT_SRC_DIR}>
-    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:${DALI_EXPORT_INCLUDE_DIR}>
   PRIVATE
     ${DALICORE_INCLUDE_DIRS}
     ${DALIADAPTOR_INCLUDE_DIRS}
@@ -114,6 +114,14 @@ IF( ENABLE_PKG_CONFIGURE )
   SET( PKG_CFG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_LIB_NAME}.pc )
   CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/dali-ui-components.pc.in ${PKG_CFG_FILE} @ONLY )
   INSTALL( FILES ${PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
+  dali_legacy_pkgconfig_alias(${PKG_CFG_FILE} dali2-ui-components)
+ENDIF()
+
+# DALi 2.x names as links to the files above (DALI_LEGACY_ALIASES=ON only).
+dali_legacy_library_alias(${PROJECT_LIB_NAME} dali2-ui-components 2)
+dali_legacy_include_alias(${PROJECT_NAME})
+IF(INSTALL_CMAKE_MODULES)
+  dali_legacy_cmake_package_alias(${PROJECT_LIB_NAME} dali2-ui-components)
 ENDIF()
 
 # Install resources

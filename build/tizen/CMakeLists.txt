@@ -4,16 +4,24 @@ IF(POLICY CMP0177)
   CMAKE_POLICY(SET CMP0177 NEW) # install() DESTINATION paths are normalized.
 ENDIF()
 
-# API major version (Not DALi release version). It also names the libraries,
-# the pkg-config files and the CMake packages (dali<major>-ui-foundation,
-# dali<major>-ui-components), and selects dali<major>-core and dali<major>-adaptor.
-IF(NOT DALI_API_MAJOR)
-  SET(DALI_API_MAJOR 3)
-ENDIF()
+# API major version (Not DALi release version). It names the libraries, the
+# pkg-config files and the CMake packages (dali<major>-ui-foundation,
+# dali<major>-ui-components), selects dali<major>-core and dali<major>-adaptor,
+# and fixes the install layout (same rule as dali-core): include/dali<major>,
+# share/dali<major>, dali<major>-<tool>, the gettext catalog, and the widget
+# viewer's data directory. The 2.x names are available as links through
+# DALI_LEGACY_ALIASES (see dali-legacy-aliases.cmake).
+SET(DALI_API_MAJOR 3)
 SET(name "dali${DALI_API_MAJOR}-ui")
 SET(core_name "dali${DALI_API_MAJOR}-core")
 SET(adaptor_name "dali${DALI_API_MAJOR}-adaptor")
 PROJECT(${name})
+SET(DALI_INCLUDE_SUBDIR "dali${DALI_API_MAJOR}")
+SET(DALI_EXPORT_INCLUDE_DIR "include/${DALI_INCLUDE_SUBDIR}")
+SET(DALI_TOOL_PREFIX "dali${DALI_API_MAJOR}-")
+SET(DALI_DATA_DIR_NAME "dali${DALI_API_MAJOR}")
+SET(DALI_WIDGET_VIEWER_NAME "dali${DALI_API_MAJOR}-widget-viewer")
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/dali-legacy-aliases.cmake)
 
 # Enable shadow errors for GNU builds; validate other compilers separately.
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -130,16 +138,25 @@ SET( VCPKG_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include"
 SET( PREFIX ${CMAKE_INSTALL_PREFIX})
 SET( EXEC_PREFIX ${CMAKE_INSTALL_PREFIX})
 
-IF( DEFINED ENV{DALI_DATA_RW_DIR} )
-  SET( dataReadWriteDir $ENV{DALI_DATA_RW_DIR} )
+# The data directories come from -D (cached, so a re-run of cmake inside the
+# build directory keeps them even if the environment changed since) or,
+# failing that, from the environment.
+IF( NOT DALI_DATA_RW_DIR AND DEFINED ENV{DALI_DATA_RW_DIR} )
+  SET( DALI_DATA_RW_DIR $ENV{DALI_DATA_RW_DIR} )
+ENDIF()
+IF( DALI_DATA_RW_DIR )
+  SET( dataReadWriteDir ${DALI_DATA_RW_DIR} )
 ELSE()
-  SET( dataReadWriteDir ${CMAKE_INSTALL_PREFIX}/share/dali/ )
+  SET( dataReadWriteDir ${CMAKE_INSTALL_PREFIX}/share/${DALI_DATA_DIR_NAME}/ )
 ENDIF()
 
-IF( DEFINED ENV{DALI_DATA_RO_DIR} )
-  SET( dataReadOnlyDir $ENV{DALI_DATA_RO_DIR} )
+IF( NOT DALI_DATA_RO_DIR AND DEFINED ENV{DALI_DATA_RO_DIR} )
+  SET( DALI_DATA_RO_DIR $ENV{DALI_DATA_RO_DIR} )
+ENDIF()
+IF( DALI_DATA_RO_DIR )
+  SET( dataReadOnlyDir ${DALI_DATA_RO_DIR} )
 ELSE()
-  SET( dataReadOnlyDir ${CMAKE_INSTALL_PREFIX}/share/dali/ )
+  SET( dataReadOnlyDir ${CMAKE_INSTALL_PREFIX}/share/${DALI_DATA_DIR_NAME}/ )
 ENDIF()
 
 IF( DEFINED ENV{DALI_DATA_RO_INSTALL_DIR} )
@@ -156,8 +173,9 @@ ENDIF()
 STRING( REPLACE "\\" "/" dataReadOnlyDir "${dataReadOnlyDir}" )
 STRING( REPLACE "\\" "/" dataReadOnlyInstallDir "${dataReadOnlyInstallDir}" )
 
-# Default widget catalogs belong to the shared widget resources package.
-SET(WIDGET_VIEWER_LOCALE_DIR "${CMAKE_INSTALL_PREFIX}/share/widget_viewer_dali/locale" CACHE PATH "Widget viewer translation catalog directory")
+# Default widget catalogs belong to the widget viewer's resources package,
+# whose data directory carries the API major as well (see widget-viewer-dali).
+SET(WIDGET_VIEWER_LOCALE_DIR "${CMAKE_INSTALL_PREFIX}/share/${DALI_WIDGET_VIEWER_NAME}/locale" CACHE PATH "Widget viewer translation catalog directory")
 FILE(TO_CMAKE_PATH "${WIDGET_VIEWER_LOCALE_DIR}" WIDGET_VIEWER_LOCALE_DIR_NORMALIZED)
 
 IF( USE_DEFAULT_RESOURCE_DIR )
@@ -221,6 +239,7 @@ ENDIF()
 IF( NOT INCLUDE_DIR )
   SET( INCLUDE_DIR ${PREFIX}/include )
 ENDIF()
+SET( INCLUDE_DIR ${INCLUDE_DIR}/${DALI_INCLUDE_SUBDIR} )
 
 # Set up the lib dir
 SET( LIB_DIR $ENV{libdir} )
@@ -405,6 +424,7 @@ MESSAGE( STATUS "Trace:                         " ${ENABLE_TRACE} )
 MESSAGE( STATUS "Data Dir (Read/Write):         " ${dataReadWriteDir} )
 MESSAGE( STATUS "Data Dir (Read Only):          " ${dataReadOnlyDir} )
 MESSAGE( STATUS "Use pkg configure:             " ${ENABLE_PKG_CONFIGURE} )
+MESSAGE( STATUS "Legacy (dali2) aliases:        " ${DALI_LEGACY_ALIASES} )
 MESSAGE( STATUS "GPU memory profiling:          " ${ENABLE_GPU_MEMORY_PROFILE} )
 MESSAGE( STATUS "CXXFLAGS:                      " ${CMAKE_CXX_FLAGS} )
 MESSAGE( STATUS "LDFLAGS:                       " ${CMAKE_SHARED_LINKER_FLAGS_INIT}${CMAKE_SHARED_LINKER_FLAGS} )

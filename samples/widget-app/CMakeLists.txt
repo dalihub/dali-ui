@@ -10,9 +10,8 @@ IF(NOT TIZEN)
   RETURN()
 ENDIF()
 
-IF(NOT DALI_API_MAJOR)
-  SET(DALI_API_MAJOR 3)
-ENDIF()
+# API major of the DALi libraries this sample builds against.
+SET(DALI_API_MAJOR 3)
 
 FIND_PACKAGE(PkgConfig REQUIRED)
 PKG_CHECK_MODULES(DALICORE           REQUIRED dali${DALI_API_MAJOR}-core)
