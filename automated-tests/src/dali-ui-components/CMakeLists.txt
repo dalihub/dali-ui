@@ -25,6 +25,7 @@ SET(TC_SOURCES
     utc-Dali-Navigator.cpp
     utc-Dali-Dialog.cpp
     utc-Dali-DialogPresentation.cpp
+    utc-Dali-DialogPostOptions.cpp
     utc-Dali-DialogTransitionSample.cpp
     utc-Dali-DialogContainer.cpp
     utc-Dali-AlertDialog.cpp
