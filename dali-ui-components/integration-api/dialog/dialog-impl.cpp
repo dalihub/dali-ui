@@ -68,7 +68,8 @@ Ui::Dialog DialogImpl::New(Ui::DialogStyle style)
 }
 
 DialogImpl::DialogImpl()
-: ViewImpl(), mPresentation(new Internal::DialogPresentationData())
+: ViewImpl(),
+  mPresentation(new Internal::DialogPresentationData())
 {
 }
 
@@ -90,10 +91,10 @@ bool DialogImpl::Post(Ui::Navigator navigator, const DialogPostOptions& options)
   DALI_ASSERT_ALWAYS(mPresentation->nextId != std::numeric_limits<uint64_t>::max());
   // Reserve the preparing session before style resolution can invoke app code.
   // A nested Post must not register another container for this same Dialog.
-  auto session = std::make_shared<Internal::DialogPresentationSession>(++mPresentation->nextId, dialog, Ui::DialogContainer(), navigator);
+  auto session           = std::make_shared<Internal::DialogPresentationSession>(++mPresentation->nextId, dialog, Ui::DialogContainer(), navigator);
   mPresentation->current = session;
-  auto container = Ui::DialogContainer::New(options.containerStyle ? options.containerStyle : Ui::DialogContainerStyle::Default());
-  session->container = WeakHandle<Ui::DialogContainer>(container);
+  auto container         = Ui::DialogContainer::New(options.GetContainerStyle() ? options.GetContainerStyle() : Ui::DialogContainerStyle::Default());
+  session->container     = WeakHandle<Ui::DialogContainer>(container);
   if(!session->Register(options))
   {
     session->Complete(DialogDismissReason::PROGRAMMATIC);

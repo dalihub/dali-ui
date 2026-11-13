@@ -49,9 +49,9 @@ alert.Post(navigator);
 
 ```cpp
 DialogPostOptions options;
-options.animated = false;
-options.containerStyle = DialogContainerStyle::NoScrimPreset();
-// options.transitionSpec = customModalTransition;
+options.SetAnimated(false);
+options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
+// options.SetTransitionSpec(customModalTransition);
 alert.Post(navigator, options);
 ```
 

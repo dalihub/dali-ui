@@ -198,10 +198,10 @@ private:
     }
     const float restingY = DialogTransitionSample::CenteredY(mAlert, Vector2(size.x, size.y));
     DialogPostOptions options;
-    options.animated = mAnimated;
-    if(mNoScrim) options.containerStyle = DialogContainerStyle::NoScrimPreset();
-    options.transitionSpec = DialogTransitionSample::CreateSpec(this,
-      static_cast<DialogTransitionSample::Mode>(mModeIndex), mSlow ? 1.4f : 0.35f, restingY);
+    options.SetAnimated(mAnimated);
+    if(mNoScrim) options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
+    options.SetTransitionSpec(DialogTransitionSample::CreateSpec(this,
+      static_cast<DialogTransitionSample::Mode>(mModeIndex), mSlow ? 1.4f : 0.35f, restingY));
     // Back and scrim use Navigator's switch; button Dismiss also passes the flag.
     mNavigator.SetModalTransitionAnimationEnabled(mAnimated);
     if(!mAlert.IsPosted()) mPhase = "Posting";

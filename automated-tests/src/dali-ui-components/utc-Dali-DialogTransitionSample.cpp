@@ -63,15 +63,15 @@ int UtcDaliDialogTransitionSampleModes(void)
     auto dialog = NewCenteredDialog();
     // Obtain the reference from the real layout, independently of the helper.
     DialogPostOptions options;
-    options.animated = false;
+    options.SetAnimated(false);
     DALI_TEST_CHECK(dialog.Post(navigator, options));
     Finish(application);
     const auto expectedPosition = dialog.GetCurrentProperty<Vector3>(Actor::Property::POSITION);
     dialog.Dismiss(false);
     const float restingY = DialogTransitionSample::CenteredY(dialog, Vector2(480.0f, 800.0f));
     DALI_TEST_EQUALS(restingY, expectedPosition.y, 0.01f, TEST_LOCATION);
-    options.animated = true;
-    options.transitionSpec = DialogTransitionSample::CreateSpec(&tracker, mode, 1.0f, restingY);
+    options.SetAnimated(true);
+    options.SetTransitionSpec(DialogTransitionSample::CreateSpec(&tracker, mode, 1.0f, restingY));
     DALI_TEST_CHECK(dialog.Post(navigator, options));
     auto container = DialogContainer::DownCast(dialog.GetParent());
     auto scrim = container.GetScrim();
@@ -111,7 +111,7 @@ int UtcDaliDialogTransitionSampleModes(void)
     DALI_TEST_CHECK(dialog.IsPosted());
     Finish(application);
     DALI_TEST_CHECK(!dialog.IsPosted());
-    options.animated = false;
+    options.SetAnimated(false);
     DALI_TEST_CHECK(dialog.Post(navigator, options));
     Finish(application);
     DALI_TEST_EQUALS(dialog.GetCurrentProperty<Vector3>(Actor::Property::POSITION), expectedPosition, 0.01f, TEST_LOCATION);
@@ -142,9 +142,9 @@ int UtcDaliDialogTransitionSampleTimingAndNoScrim(void)
       dialog.ShownSignal().Connect(&signals, [&](Dialog) { ++shown; });
       dialog.HiddenSignal().Connect(&signals, [&](Dialog, DialogDismissReason) { ++hidden; });
       DialogPostOptions options;
-      options.animated = animated;
-      options.containerStyle = DialogContainerStyle::NoScrimPreset();
-      options.transitionSpec = DialogTransitionSample::CreateSpec(&tracker, DialogTransitionSample::Mode::SLIDE, duration, restingY);
+      options.SetAnimated(animated);
+      options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
+      options.SetTransitionSpec(DialogTransitionSample::CreateSpec(&tracker, DialogTransitionSample::Mode::SLIDE, duration, restingY));
       navigator.SetModalTransitionAnimationEnabled(animated);
       DALI_TEST_CHECK(dialog.Post(navigator, options));
       auto scrim = DialogContainer::DownCast(dialog.GetParent()).GetScrim();
