@@ -9,7 +9,7 @@ SET_PROPERTY(SOURCE ${FOUNDATION_ROOT_SRC_DIR}/internal/views/widget/widget-view
 # ---------------------------------------------------------
 # 1. Shader Generator Configuration
 # ---------------------------------------------------------
-SET(SHADER_GENERATOR_NAME dali-ui-shader-generator)
+SET(SHADER_GENERATOR_NAME ${DALI_TOOL_PREFIX}ui-shader-generator)
 SET(SHADER_GENERATOR_SOURCES ${FOUNDATION_ROOT_SRC_DIR}/shader-generator/shader-generator.cpp)
 
 # Build shader generator executable for host
@@ -66,13 +66,29 @@ OPTION(ENABLE_INVOKE_METHOD_WRAPPERS "Generate InvokeMethod wrappers for exporte
 
 IF(ENABLE_INVOKE_METHOD_WRAPPERS)
   FIND_PACKAGE(Python3 COMPONENTS Interpreter REQUIRED)
-  FIND_PROGRAM(INVOKE_METHOD_GENERATOR
-               NAMES dali-invoke-method-generator dali-invoke-method-generator.py
-               PATHS ${BIN_DIR} $ENV{DESKTOP_PREFIX}/bin ${ROOT_SRC_DIR}/../dali-core/scripts)
+  # The installed dali-core publishes where its generator is (the name carries
+  # the API major): the CMake package sets <core>_INVOKE_METHOD_GENERATOR and
+  # the pkg-config file has an invoke_method_generator variable. Only a
+  # sibling dali-core source tree is accepted as a fallback.
+  SET(INVOKE_METHOD_GENERATOR_INSTALLED "")
+  IF(DEFINED ${core_name}_INVOKE_METHOD_GENERATOR)
+    SET(INVOKE_METHOD_GENERATOR_INSTALLED ${${core_name}_INVOKE_METHOD_GENERATOR})
+  ELSEIF(PKG_CONFIG_FOUND)
+    PKG_GET_VARIABLE(INVOKE_METHOD_GENERATOR_INSTALLED ${core_name} invoke_method_generator)
+  ENDIF()
+  IF(INVOKE_METHOD_GENERATOR_INSTALLED AND EXISTS ${INVOKE_METHOD_GENERATOR_INSTALLED})
+    SET(INVOKE_METHOD_GENERATOR ${INVOKE_METHOD_GENERATOR_INSTALLED})
+  ELSE()
+    FIND_PROGRAM(INVOKE_METHOD_GENERATOR
+                 NAMES dali-invoke-method-generator.py
+                 PATHS ${ROOT_SRC_DIR}/../dali-core/scripts
+                 NO_DEFAULT_PATH)
+  ENDIF()
 
   IF(NOT INVOKE_METHOD_GENERATOR)
-    MESSAGE(FATAL_ERROR "dali-invoke-method-generator not found. Build and install dali-core first.")
+    MESSAGE(FATAL_ERROR "${DALI_TOOL_PREFIX}invoke-method-generator not found. Build and install ${core_name} first.")
   ENDIF()
+  MESSAGE(STATUS "Invoke-method generator: ${INVOKE_METHOD_GENERATOR}")
 
   SET(INVOKE_METHOD_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/invoke-method)
   SET(INVOKE_METHOD_PUBLIC_API_CPP ${INVOKE_METHOD_GENERATED_DIR}/public-api-invoke-methods.cpp)
@@ -155,7 +171,7 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_LIB_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${ROOT_SRC_DIR}>
-    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:${DALI_EXPORT_INCLUDE_DIR}>
   PRIVATE
     ${FOUNDATION_ROOT_SRC_DIR}/third-party
     ${FOUNDATION_ROOT_SRC_DIR}/internal
@@ -251,6 +267,16 @@ IF( ENABLE_PKG_CONFIGURE )
   CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/dali-ui-foundation-integration.pc.in ${INTEGRATION_PKG_CFG_FILE} @ONLY )
   INSTALL( FILES ${PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
   INSTALL( FILES ${INTEGRATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
+  dali_legacy_pkgconfig_alias(${PKG_CFG_FILE} dali2-ui-foundation)
+  dali_legacy_pkgconfig_alias(${INTEGRATION_PKG_CFG_FILE} dali2-ui-foundation-integration)
+ENDIF()
+
+# DALi 2.x names as links to the files above (DALI_LEGACY_ALIASES=ON only).
+dali_legacy_library_alias(${PROJECT_LIB_NAME} dali2-ui-foundation 2)
+dali_legacy_include_alias(${PROJECT_NAME})
+dali_legacy_alias(${DALI_UI_INSTALL_BIN_DIR}/dali-ui-shader-generator ${SHADER_GENERATOR_NAME})
+IF(INSTALL_CMAKE_MODULES)
+  dali_legacy_cmake_package_alias(${PROJECT_LIB_NAME} dali2-ui-foundation)
 ENDIF()
 
 # Install resources

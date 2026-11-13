@@ -3,6 +3,9 @@ param(
   [ValidateSet("Debug", "Release")]
   [string]$Configuration = "Debug",
   [string]$VcpkgRoot = "",
+  # Windows applications still load the DALi 2.x names (dali2-ui-*.dll, dali2-ui-* configs), so
+  # they are installed by default as copies of the dali3 files.
+  [switch]$NoLegacyAliases,
   [switch]$Clean,
   [int]$Jobs = 8
 )
@@ -28,6 +31,7 @@ Assert-DaliPaths -Paths @(
 ) -Description "prerequisite package; build dali-core and dali-adaptor first"
 
 $Arguments = (Get-DaliCommonCMakeArguments -Context $Context -Configuration $Configuration) + @(
+  "-DDALI_LEGACY_ALIASES=$(if($NoLegacyAliases) { 'OFF' } else { 'ON' })",
   "-DENABLE_PKG_CONFIGURE=OFF",
   "-DINSTALL_CMAKE_MODULES=ON",
   "-DENABLE_VECTOR_BASED_TEXT_RENDERING=OFF",
