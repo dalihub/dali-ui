@@ -427,12 +427,13 @@ void VideoViewImpl::ConnectGeometrySync()
     mScaleNotification.NotifySignal().Connect(this, &VideoViewImpl::OnGeometryChanged);
   }
 
-  if(!mWindow)
+  if(!mWindow.GetHandle())
   {
-    mWindow = Dali::Window::Get(self);
-    if(mWindow)
+    Dali::Window window = Dali::Window::Get(self);
+    if(window)
     {
-      mWindow.ResizedSignal().Connect(this, &VideoViewImpl::OnWindowResized);
+      mWindow = window;
+      window.ResizedSignal().Connect(this, &VideoViewImpl::OnWindowResized);
     }
   }
 }
@@ -451,9 +452,10 @@ void VideoViewImpl::DisconnectGeometrySync()
     mScaleNotification.Reset();
   }
 
-  if(mWindow)
+  Dali::Window window = mWindow.GetHandle();
+  if(window)
   {
-    mWindow.ResizedSignal().Disconnect(this, &VideoViewImpl::OnWindowResized);
+    window.ResizedSignal().Disconnect(this, &VideoViewImpl::OnWindowResized);
     mWindow.Reset();
   }
 }
