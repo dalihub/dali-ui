@@ -58,7 +58,7 @@ int CheckFatalPresentationMixing(unsigned operation)
   auto dialog = Dialog::New();
   auto newParent = View::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   unsigned hidden = 0u;
   dialog.HiddenSignal().Connect(&tracker, [&](Dialog, DialogDismissReason) { ++hidden; });
   DALI_TEST_CHECK(dialog.Post(navigator, options));
@@ -102,7 +102,7 @@ int CheckPresentationContentSetterMixing(bool clear)
   auto navigator = Navigator::New();
   auto dialog = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   unsigned hidden = 0u;
   dialog.HiddenSignal().Connect(&tracker, [&](Dialog, DialogDismissReason) { ++hidden; });
   DALI_TEST_CHECK(dialog.Post(navigator, options));
@@ -131,7 +131,7 @@ int UtcDaliDialogPresentationOffSceneAndShownOnce(void)
   auto navigator = Navigator::New();
   auto dialog = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   unsigned shown = 0;
   unsigned hidden = 0;
   dialog.ShownSignal().Connect(&tracker, [&](Dialog) { ++shown; });
@@ -189,7 +189,7 @@ int UtcDaliDialogPresentationExternalRemoval(void)
   auto navigator = Navigator::New();
   auto dialog = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   unsigned hidden = 0;
   bool restored = true;
   dialog.HiddenSignal().Connect(&tracker, [&](Dialog value, DialogDismissReason reason) {
@@ -217,7 +217,7 @@ int UtcDaliDialogPresentationClearRepost(void)
   auto first = Dialog::New();
   auto second = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   bool reposted = false;
   unsigned hidden = 0;
   first.HiddenSignal().Connect(&tracker, [&](Dialog value, DialogDismissReason) {
@@ -241,7 +241,7 @@ int UtcDaliDialogPresentationHostDestroyed(void)
   auto dialog = Dialog::New();
   dialog.SetAccessibilityModal(true);
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   unsigned hidden = 0;
   bool reasonMatches = false;
   dialog.HiddenSignal().Connect(&tracker, [&](Dialog value, DialogDismissReason reason) {
@@ -356,7 +356,7 @@ int UtcDaliDialogPresentationBasicPost(void)
   auto navigator = Navigator::New();
   auto dialog = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   DALI_TEST_CHECK(dialog.Post(navigator, options));
   DALI_TEST_CHECK(dialog.IsPosted());
   DALI_TEST_EQUALS(navigator.GetModalStackCount(), 1u, TEST_LOCATION);
@@ -380,7 +380,7 @@ int UtcDaliDialogPresentationHiddenRepost(void)
   auto navigator = Navigator::New();
   auto dialog = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   unsigned hiddenCount = 0;
   bool reposted = false;
   bool cleaned = false;
@@ -410,7 +410,7 @@ int UtcDaliDialogPresentationDismissCovered(void)
   auto first = Dialog::New();
   auto second = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   DALI_TEST_CHECK(first.Post(navigator, options));
   DALI_TEST_CHECK(second.Post(navigator, options));
   auto top = navigator.GetModalStackItem(1u);
@@ -431,7 +431,7 @@ int UtcDaliDialogPresentationParentAndRepost(void)
   auto parent = View::New();
   auto dialog = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   parent.Add(dialog);
   bool postAsserted = false;
   bool dismissAsserted = false;
@@ -464,7 +464,7 @@ int UtcDaliDialogPresentationInternalRemovalIsTargetScoped(void)
   auto first = Dialog::New();
   auto second = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   first.Post(navigator, options);
   second.Post(navigator, options);
   auto firstContainer = first.GetParent();
@@ -487,7 +487,7 @@ int UtcDaliDialogPresentationPagePushReentry(void)
   auto dialog = Dialog::New();
   auto page = View::New();
   DialogPostOptions options;
-  options.animated = true;
+  options.SetAnimated(true);
   unsigned shown = 0u;
   dialog.ShownSignal().Connect(&application, [&](Dialog) { ++shown; });
   navigator.PageWillAppearSignal().Connect(&application, [&](Navigator, View value, bool) {
@@ -511,7 +511,7 @@ int UtcDaliDialogPresentationPagePopReentry(void)
   navigator.Push(page, false);
   auto dialog = Dialog::New();
   DialogPostOptions options;
-  options.animated = true;
+  options.SetAnimated(true);
   unsigned shown = 0u;
   dialog.ShownSignal().Connect(&application, [&](Dialog) { ++shown; });
   navigator.PageWillDisappearSignal().Connect(&application, [&](Navigator, View value, bool) {
@@ -534,7 +534,7 @@ int UtcDaliDialogPresentationDetachReentry(void)
   auto first = Dialog::New();
   auto second = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   unsigned hidden = 0u;
   first.HiddenSignal().Connect(&application, [&](Dialog, DialogDismissReason) { ++hidden; });
   first.Post(navigator, options);
@@ -567,8 +567,8 @@ int UtcDaliDialogPresentationNoScrimInput(void)
   auto dialog = Dialog::New();
   dialog.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, 40, 40)));
   DialogPostOptions options;
-  options.animated = false;
-  options.containerStyle = DialogContainerStyle::NoScrimPreset();
+  options.SetAnimated(false);
+  options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
   unsigned hidden = 0u;
   DialogDismissReason reason = DialogDismissReason::PROGRAMMATIC;
   dialog.HiddenSignal().Connect(&application, [&](Dialog, DialogDismissReason value) { ++hidden; reason = value; });
@@ -637,7 +637,7 @@ int UtcDaliDialogPresentationLayoutParity(void)
     container.SetModalContent(manual);
     manualHost.PushModal(container, false);
     DialogPostOptions options;
-    options.animated = false;
+    options.SetAnimated(false);
     managed.Post(managedHost, options);
     for(float width : {400.0f, 800.0f})
     {
@@ -705,7 +705,7 @@ int UtcDaliDialogPresentationLifecycleClearRepost(void)
     auto incoming = Dialog::New();
     auto replacement = Dialog::New();
     DialogPostOptions options;
-    options.animated = false;
+    options.SetAnimated(false);
     first.Post(navigator, options);
     bool invoked = false;
     unsigned shown = 0u;
@@ -755,7 +755,7 @@ int UtcDaliDialogPresentationFocusParity(void)
   auto manualFocusAfter = focus.GetCurrentFocusView();
   container.SetModalContent({});
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   manual.Post(navigator, options);
   Advance(application);
   DALI_TEST_CHECK(focus.SetCurrentFocusView(content));
@@ -772,15 +772,15 @@ int UtcDaliDialogPresentationCoveredRepostPreservesOptions(void)
   auto dialog = Dialog::New();
   auto upper = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
-  options.containerStyle = DialogContainerStyle::Default().Configure()
-    .SetScrimColor(UiColor(Color::BLUE)).SetScrimBlurRadius(0.0f).Build();
+  options.SetAnimated(false);
+  options.SetContainerStyle(DialogContainerStyle::Default().Configure()
+    .SetScrimColor(UiColor(Color::BLUE)).SetScrimBlurRadius(0.0f).Build());
   DALI_TEST_CHECK(dialog.Post(navigator, options));
   auto container = DialogContainer::DownCast(dialog.GetParent());
   DALI_TEST_EQUALS(container.GetScrim().GetBackgroundColor().GetRgba(), Color::BLUE, TEST_LOCATION);
   DALI_TEST_CHECK(upper.Post(navigator, options));
   auto top = navigator.GetCurrentView();
-  options.containerStyle = DialogContainerStyle::NoScrimPreset();
+  options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
   // Replacing options or moving the covered entry would break this contract.
   DALI_TEST_CHECK(dialog.Post(navigator, options));
   DALI_TEST_EQUALS(navigator.GetModalStackCount(), 2u, TEST_LOCATION);
@@ -851,7 +851,7 @@ int UtcDaliDialogPresentationTransitionCallbackRejectsPost(void)
   // Failed registration must release ownership so a later valid Post succeeds.
   Advance(application);
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   DALI_TEST_CHECK(dialog.Post(navigator, options));
   dialog.Dismiss(false);
   DALI_TEST_EQUALS(hidden, 1u, TEST_LOCATION);
@@ -874,8 +874,8 @@ int UtcDaliDialogPresentationCustomExitTransition(void)
   });
   dialog.HiddenSignal().Connect(&application, [&](Dialog, DialogDismissReason) { ++hidden; });
   DialogPostOptions options;
-  options.animated = false;
-  options.transitionSpec = spec;
+  options.SetAnimated(false);
+  options.SetTransitionSpec(spec);
   DALI_TEST_CHECK(dialog.Post(navigator, options));
   dialog.Dismiss(true);
   DALI_TEST_EQUALS(exits, 1u, TEST_LOCATION);
@@ -913,7 +913,7 @@ int UtcDaliDialogPresentationTransitionTargetsContent(void)
   spec.SnapIncomingSignal().Connect(&application, [&](View view) { snapped = view; });
   navigator.PageDidAppearSignal().Connect(&application, [&](Navigator, View view, bool) { appeared = view; });
   DialogPostOptions options;
-  options.transitionSpec = spec;
+  options.SetTransitionSpec(spec);
   DALI_TEST_CHECK(dialog.Post(navigator, options));
   auto container = dialog.GetParent();
   DALI_TEST_EQUALS(entered, dialog, TEST_LOCATION);
@@ -985,8 +985,8 @@ int UtcDaliDialogPresentationExitRestoredBeforeRepost(void)
     animation.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f);
   });
   DialogPostOptions options;
-  options.animated = false;
-  options.transitionSpec = spec;
+  options.SetAnimated(false);
+  options.SetTransitionSpec(spec);
   bool reposted = false;
   bool restored = false;
   dialog.HiddenSignal().Connect(&application, [&](Dialog view, DialogDismissReason) {
@@ -1020,12 +1020,12 @@ int UtcDaliDialogPresentationUnanimatedContentSnap(void)
   spec.EnterSignal().Connect(&tracker, [&](Animation&, View) { ++animated; });
   spec.SnapIncomingSignal().Connect(&tracker, [&](View view) { snapped = view; });
   DialogPostOptions options;
-  options.transitionSpec = spec;
-  options.containerStyle = DialogContainerStyle::NoScrimPreset();
+  options.SetTransitionSpec(spec);
+  options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
   for(bool disabled : {false, true})
   {
     navigator.SetModalTransitionAnimationEnabled(!disabled);
-    options.animated = disabled;
+    options.SetAnimated(disabled);
     DALI_TEST_CHECK(dialog.Post(navigator, options));
     DALI_TEST_EQUALS(snapped, dialog, TEST_LOCATION);
     auto container = DialogContainer::DownCast(dialog.GetParent());
@@ -1044,7 +1044,7 @@ int UtcDaliDialogPresentationNestedScrimIsNotRestarted(void)
   auto lower = Dialog::New();
   auto upper = Dialog::New();
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   DALI_TEST_CHECK(lower.Post(navigator, options));
   auto lowerScrim = DialogContainer::DownCast(lower.GetParent()).GetScrim();
   lowerScrim.SetProperty(Actor::Property::OPACITY, 0.4f);
@@ -1110,7 +1110,7 @@ int UtcDaliDialogPresentationScrimAndContentShareCompletion(void)
   unsigned shown = 0u;
   dialog.ShownSignal().Connect(&tracker, [&](Dialog) { ++shown; });
   DialogPostOptions options;
-  options.transitionSpec = spec;
+  options.SetTransitionSpec(spec);
   DALI_TEST_CHECK(dialog.Post(navigator, options));
   auto scrim = DialogContainer::DownCast(dialog.GetParent()).GetScrim();
   application.SendNotification();
@@ -1140,7 +1140,7 @@ int UtcDaliDialogPresentationDestroyRestoresTransitionContent(void)
   {
     auto navigator = Navigator::New();
     DialogPostOptions options;
-    options.transitionSpec = spec;
+    options.SetTransitionSpec(spec);
     DALI_TEST_CHECK(dialog.Post(navigator, options));
   }
   DALI_TEST_CHECK(!dialog.IsPosted());
@@ -1161,7 +1161,7 @@ int UtcDaliDialogPresentationReentrantPageSnap(void)
     if(view == page)
     {
       DialogPostOptions options;
-      options.animated = false;
+      options.SetAnimated(false);
       dialog.Post(navigator, options);
     }
   });
@@ -1187,8 +1187,8 @@ int UtcDaliDialogPresentationRevealedContentDefaultSnap(void)
     animation.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
   });
   DialogPostOptions options;
-  options.animated = false;
-  options.transitionSpec = spec;
+  options.SetAnimated(false);
+  options.SetTransitionSpec(spec);
   DALI_TEST_CHECK(lower.Post(navigator, options));
   Advance(application);
   DALI_TEST_CHECK(upper.Post(navigator));
@@ -1220,8 +1220,8 @@ int UtcDaliDialogPresentationRemoveAnimatedCoveredContent(void)
       animation.AnimateTo(Property(view, Actor::Property::SCALE), Vector3(0.1f, 0.1f, 1.0f));
     });
     DialogPostOptions options;
-    options.animated = false;
-    options.transitionSpec = spec;
+    options.SetAnimated(false);
+    options.SetTransitionSpec(spec);
     DALI_TEST_CHECK(lower.Post(navigator, options));
     Advance(application);
     Vector3 hiddenScale;
@@ -1257,7 +1257,7 @@ int UtcDaliDialogPresentationRemoveKeepsHostAlive(void)
   lower.HiddenSignal().Connect(&tracker, [&](Dialog, DialogDismissReason) { ++lowerHidden; });
   upper.HiddenSignal().Connect(&tracker, [&](Dialog, DialogDismissReason) { ++upperHidden; });
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   DALI_TEST_CHECK(lower.Post(navigator, options));
   auto container = View::DownCast(lower.GetParent());
   DALI_TEST_CHECK(upper.Post(navigator));
@@ -1287,8 +1287,8 @@ int UtcDaliDialogPresentationRemoveSettlesReplacementTransition(void)
   });
   lower.SetProperty(Actor::Property::SCALE, Vector3(0.9f, 0.9f, 1.0f));
   DialogPostOptions options;
-  options.animated = false;
-  options.transitionSpec = spec;
+  options.SetAnimated(false);
+  options.SetTransitionSpec(spec);
   DALI_TEST_CHECK(lower.Post(navigator, options));
   Advance(application);
   DALI_TEST_CHECK(upper.Post(navigator));
@@ -1333,7 +1333,7 @@ int UtcDaliDialogPresentationAccessibilityRestorePaths(void)
       const auto originalRole = dialog.GetAccessibilityRole();
       const auto originalName = dialog.GetAccessibilityName();
       DialogPostOptions options;
-      options.animated = false;
+      options.SetAnimated(false);
       unsigned hidden = 0u;
       bool restoredAtSignal = false;
       dialog.HiddenSignal().Connect(&tracker, [&](Dialog value, DialogDismissReason reason) {
@@ -1379,13 +1379,13 @@ int UtcDaliDialogPresentationStyleCreatorReentry(void)
   bool nestedAccepted = true;
   gContainerStyleHook = [&]() {
     DialogPostOptions nested;
-    nested.animated = false;
+    nested.SetAnimated(false);
     // Avoid recursive style lookup: exercise Post reentry, not style recursion.
-    nested.containerStyle = DialogContainerStyle::NoScrimPreset();
+    nested.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
     nestedAccepted = dialog.Post(navigator, nested);
   };
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   const bool accepted = dialog.Post(navigator, options);
   gContainerStyleHook = {};
   DALI_TEST_CHECK(accepted);

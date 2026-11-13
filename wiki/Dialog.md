@@ -53,9 +53,9 @@ PopModal/Remove/Clear, and host destruction bypass user-request vetoes.
 
 ```cpp
 DialogPostOptions options;
-options.animated = false;
-options.containerStyle = DialogContainerStyle::NoScrimPreset();
-// options.transitionSpec = customModalTransition;
+options.SetAnimated(false);
+options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
+// options.SetTransitionSpec(customModalTransition);
 alert.Post(navigator, options);
 ```
 
@@ -68,7 +68,7 @@ automatic centering nor a new size clamp, focus trap, or scroll wrapper.
 ### Do not mix ownership paths
 
 Prefer Post/Dismiss for ordinary dialogs, including tint/blur changes through
-`DialogPostOptions::containerStyle`. Use the manual path below when you need a
+`DialogPostOptions::SetContainerStyle()`. Use the manual path below when you need a
 custom scrim View or complex scrim composition owned by the application.
 Do not obtain and customize the internal container of a posted Dialog.
 
@@ -117,8 +117,8 @@ alert.SetMessage("This action cannot be undone.");
 alert.AddActionButton("Cancel");
 
 DialogPostOptions options;
-options.containerStyle = DialogContainerStyle::Default().Configure()
-  .SetScrimColor(UiColor(0x000000u, 0.6f)).Build();
+options.SetContainerStyle(DialogContainerStyle::Default().Configure()
+  .SetScrimColor(UiColor(0x000000u, 0.6f)).Build());
 alert.Post(navigator, options);
 ```
 
@@ -405,8 +405,8 @@ alert.SetLayoutParams(AbsoluteLayoutParams::New()
 ## Modal Transition
 
 Dialog transitions use Navigator in both paths. For the recommended managed
-path, select a per-session transition with `DialogPostOptions::transitionSpec`
-and use `options.animated` / `Dismiss(animated)` for animation choice. The
+path, select a per-session transition with `DialogPostOptions::SetTransitionSpec()`
+and use `options.SetAnimated()` / `Dismiss(animated)` for animation choice. The
 following lower-level examples are for manually owned containers only.
 
 ```cpp

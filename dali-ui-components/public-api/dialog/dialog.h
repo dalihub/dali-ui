@@ -43,7 +43,7 @@ class DialogImpl;
  *
  * Prefer Post(navigator) and Dismiss() for modal presentation. Post creates and
  * registers the DialogContainer internally, preserving the Dialog's layout
- * parameters. Use DialogPostOptions::containerStyle for scrim color, blur, or
+ * parameters. Use DialogPostOptions::SetContainerStyle for scrim color, blur, or
  * DialogContainerStyle::NoScrimPreset() without manually creating a container.
  *
  * For a custom scrim view or complex scrim composition, assemble a separate

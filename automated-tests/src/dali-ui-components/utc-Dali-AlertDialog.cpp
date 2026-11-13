@@ -101,7 +101,7 @@ int UtcDaliAlertDialogOneUiLayoutGeometryP(void)
   auto first = dialog.AddActionButton("Cancel");
   auto second = dialog.AddActionButton("OK");
   DialogPostOptions options;
-  options.animated = false;
+  options.SetAnimated(false);
   float shortHeight = 0.0f;
   float shortTitleHeight = 0.0f;
   for(bool longText : {false, true})

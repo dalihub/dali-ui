@@ -21,7 +21,7 @@
 //   - Push Page / Pop Page : Navigator::Push / Navigator::Pop
 //   - Fade Page            : Navigator::SetPageTransitionSpec for one page
 //   - Show Dialog          : Dialog::Post with modal default animation
-//   - Per-modal Custom Ani : DialogPostOptions::transitionSpec for one session.
+//   - Per-modal Custom Ani : DialogPostOptions::SetTransitionSpec for one session.
 //                            Tap an action button OR tap the scrim to
 //                            dismiss it.
 //   - Back / Escape        : Navigator::NavigateBack (dismisses modal, else pops;
@@ -378,10 +378,10 @@ private:
                             .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
 
     DialogPostOptions options;
-    options.animated = mModalAnimationEnabled;
+    options.SetAnimated(mModalAnimationEnabled);
     if(usePerModalAnimation)
     {
-      options.transitionSpec = CreatePerModalBounceTransitionSpec();
+      options.SetTransitionSpec(CreatePerModalBounceTransitionSpec());
     }
 
     alert.Post(mNavigator, options);

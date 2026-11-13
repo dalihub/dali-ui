@@ -46,6 +46,9 @@ enum class DialogDismissReason : uint32_t
 
 /**
  * @brief Options applied when a new Dialog presentation is registered.
+ *
+ * This is a value-type object. Dialog::Post() reads the values at the time of the call,
+ * so changing the object afterwards does not affect an already posted Dialog.
  * Empty style and transition handles use the existing defaults. LayoutParams
  * on the Dialog determine placement exactly as in a manually built container.
  * Reposting to the same Navigator does not replace an active session's options.
@@ -53,24 +56,71 @@ enum class DialogDismissReason : uint32_t
  * DialogContainer instead; do not mix that ownership path with Post/Dismiss.
  * @SINCE_3_0.0
  */
-struct DialogPostOptions
+class DALI_UI_COMPONENTS_API DialogPostOptions
 {
-  /// Whether to use the Navigator's modal enter transition.
-  bool animated{true};
+public:
   /**
-   * @brief Style of the internally generated scrim; empty selects Default().
+   * @brief Creates options with default values.
+   * Animation is enabled, and the style and transition handles are empty.
+   * @SINCE_3_0.0
+   */
+  DialogPostOptions();
+
+  /// @brief Copy constructor.
+  /// @SINCE_3_0.0
+  DialogPostOptions(const DialogPostOptions& rhs);
+
+  /// @brief Move constructor. The moved-from object must not be used except for assignment or destruction.
+  /// @SINCE_3_0.0
+  DialogPostOptions(DialogPostOptions&& rhs) noexcept;
+
+  /// @brief Copy assignment.
+  /// @SINCE_3_0.0
+  DialogPostOptions& operator=(const DialogPostOptions& rhs);
+
+  /// @brief Move assignment. The moved-from object must not be used except for assignment or destruction.
+  /// @SINCE_3_0.0
+  DialogPostOptions& operator=(DialogPostOptions&& rhs) noexcept;
+
+  /// @brief Destructor.
+  /// @SINCE_3_0.0
+  ~DialogPostOptions();
+
+  /// @brief Sets whether to use the Navigator's modal enter transition. The default is true.
+  /// @SINCE_3_0.0
+  void SetAnimated(bool animated);
+
+  /// @brief Gets whether to use the Navigator's modal enter transition.
+  /// @SINCE_3_0.0
+  bool IsAnimated() const;
+
+  /**
+   * @brief Sets the style of the internally generated scrim; empty selects DialogContainerStyle::Default().
    * Use DialogContainerStyle::NoScrimPreset() to remove tint and blur while
    * retaining background input blocking and the Dialog's dismiss policy.
    * @SINCE_3_0.0
    */
-  DialogContainerStyle containerStyle;
+  void SetContainerStyle(const DialogContainerStyle& style);
+
+  /// @brief Gets the style of the internally generated scrim. May be an empty handle.
+  /// @SINCE_3_0.0
+  const DialogContainerStyle& GetContainerStyle() const;
+
   /**
-   * @brief Optional content transition; empty uses the Navigator's modal default.
+   * @brief Sets an optional content transition; empty uses the Navigator's modal default.
    * Animator and snap callbacks receive the Dialog, not its DialogContainer.
    * Navigator independently fades the scrim on the same animation timeline.
    * @SINCE_3_0.0
    */
-  NavigationTransitionSpec transitionSpec;
+  void SetTransitionSpec(const NavigationTransitionSpec& spec);
+
+  /// @brief Gets the content transition. May be an empty handle.
+  /// @SINCE_3_0.0
+  const NavigationTransitionSpec& GetTransitionSpec() const;
+
+private:
+  class Impl;
+  Impl* mImpl{nullptr};
 };
 } // namespace Ui
 } // namespace DALI_NAMESPACE
