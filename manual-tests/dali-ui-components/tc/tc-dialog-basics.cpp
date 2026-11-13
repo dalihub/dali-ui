@@ -241,7 +241,7 @@ private:
     mPosted.ShownSignal().Connect(this, [this](Dialog) { ++mShownCount; UpdateStatus(); });
     mPosted.HiddenSignal().Connect(this, [this](Dialog, DialogDismissReason) { ++mHiddenCount; UpdateStatus(); });
     DialogPostOptions options;
-    if(noScrim) options.containerStyle = DialogContainerStyle::NoScrimPreset();
+    if(noScrim) options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
     mPosted.Post(mNavigator, options);
   }
 
