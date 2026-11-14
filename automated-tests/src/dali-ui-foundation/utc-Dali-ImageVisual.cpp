@@ -429,6 +429,41 @@ int UtcDaliImageVisualFastTrackYuvPlaneUploadP(void)
   END_TEST;
 }
 
+int UtcDaliImageVisualYuvPlaneTextureManagerUploadP(void)
+{
+  Dali::EnvironmentVariable::SetTestEnvironmentVariable("DALI_LOAD_IMAGE_YUV_PLANES", "1");
+  Dali::EnvironmentVariable::SetTestEnvironmentVariable("DALI_ENABLE_DECODE_JPEG_TO_YUV_420", "1");
+  UiTestApplication application;
+
+  for(bool synchronous : {false, true})
+  {
+    ImageVisual visual = ImageVisual::New();
+    visual.SetResourceUrl(synchronous ? "../samples/image-view/res/landscape-sample.jpg" : "../samples/image-view/res/sample.jpg");
+    visual.SetSynchronousLoading(synchronous);
+
+    View view = View::New();
+    view.SetRequestedWidth(128.0f);
+    view.SetRequestedHeight(96.0f);
+    DALI_TEST_CHECK(view.AddVisual(visual, Visual::DepthLayer::BACKGROUND));
+    application.GetScene().Add(view);
+    application.SendNotification();
+    application.Render();
+
+    if(!synchronous)
+    {
+      DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5, true));
+      application.SendNotification();
+      application.Render();
+    }
+
+    DALI_TEST_CHECK(view.IsResourceReady());
+    DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+    DALI_TEST_EQUALS(view.GetRendererAt(0u).GetTextures().GetTextureCount(), 3u, TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
 int UtcDaliImageVisualGpuMaskRatioAndFailureP(void)
 {
   UiTestApplication application;

@@ -143,17 +143,20 @@ CompositionCandidates GetCompositionCandidates(const MarqueeBuilder::Composition
 
 void UploadTextScrollTexture(Texture texture, PixelData data)
 {
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
   {
-    // Keep Label text out of this general content-building boundary. Do not add
-    // runtime GetText/string plumbing only to enrich the GPU memory profile label;
-    // a stable category label is enough for text-scroll texture uploads.
-    std::string profilingLabel("Text marquee");
-    Dali::Integration::TextureUploadWithContent(texture, data, Dali::Integration::ToDaliString(std::move(profilingLabel)), Dali::Integration::TextureContextTypeHint::TEXT_SCROLL);
+    {
+      // Keep Label text out of this general content-building boundary. Do not add
+      // runtime GetText/string plumbing only to enrich the GPU memory profile label;
+      // a stable category label is enough for text-scroll texture uploads.
+      std::string profilingLabel("Text marquee");
+      Dali::Integration::TextureUploadWithContent(texture, data, Dali::Integration::ToDaliString(std::move(profilingLabel)), Dali::Integration::TextureContextTypeHint::TEXT_SCROLL);
+    }
   }
-#else
-  texture.Upload(data);
-#endif
+  else
+  {
+    texture.Upload(data);
+  }
 }
 
 } // namespace

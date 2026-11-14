@@ -129,8 +129,9 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
     ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
-    ../dali-test-suite-utils/dali-ui/ui-trigger-event-factory.cpp
+    ../dali-test-suite-utils/dali-ui/ui-texture-upload-manager.cpp
     ../dali-test-suite-utils/dali-ui/ui-timer.cpp
+    ../dali-test-suite-utils/dali-ui/ui-trigger-event-factory.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-animation-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-image-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-window.cpp
