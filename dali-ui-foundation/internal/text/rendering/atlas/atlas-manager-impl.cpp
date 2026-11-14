@@ -91,11 +91,14 @@ Ui::AtlasManager::AtlasId AtlasManager::CreateAtlas(const Ui::AtlasManager::Atla
   memset(background, 0, bufferSize);
   PixelData backgroundPixels =
     PixelData::New(background, bufferSize, width, height, pixelformat, PixelData::DELETE_ARRAY);
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-  Dali::Integration::TextureUploadWithContent(atlas, backgroundPixels, "(TextAtlas)", Dali::Integration::TextureContextTypeHint::TEXT_ATLAS);
-#else
-  atlas.Upload(backgroundPixels, 0u, 0u, 0u, 0u, width, height);
-#endif
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+  {
+    Dali::Integration::TextureUploadWithContent(atlas, backgroundPixels, "(TextAtlas)", Dali::Integration::TextureContextTypeHint::TEXT_ATLAS);
+  }
+  else
+  {
+    atlas.Upload(backgroundPixels, 0u, 0u, 0u, 0u, width, height);
+  }
 
   AtlasDescriptor atlasDescriptor;
   atlasDescriptor.mAtlas           = atlas;

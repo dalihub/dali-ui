@@ -1067,15 +1067,18 @@ void TextVisual::AddTexture(TextureSet& textureSet, PixelData& data, Sampler& sa
 {
   Texture texture =
     Texture::New(Dali::TextureType::TEXTURE_2D, data.GetPixelFormat(), data.GetWidth(), data.GetHeight());
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
   {
-    std::string text;
-    mController->GetText(text);
-    Dali::Integration::TextureUploadWithContent(texture, data, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SIMPLE_LABEL);
+    {
+      std::string text;
+      mController->GetText(text);
+      Dali::Integration::TextureUploadWithContent(texture, data, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SIMPLE_LABEL);
+    }
   }
-#else
-  texture.Upload(data);
-#endif
+  else
+  {
+    texture.Upload(data);
+  }
 
   textureSet.SetTexture(textureSetIndex, texture);
   textureSet.SetSampler(textureSetIndex, sampler);
@@ -3887,13 +3890,17 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
         {
           return false;
         }
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-        std::string text;
-        mController->GetText(text);
-        const bool uploaded = Dali::Integration::TextureUploadWithContent(texture, pixels, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SIMPLE_LABEL);
-#else
-        const bool uploaded = texture.Upload(pixels);
-#endif
+        bool uploaded = false;
+        if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+        {
+          std::string text;
+          mController->GetText(text);
+          uploaded = Dali::Integration::TextureUploadWithContent(texture, pixels, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SIMPLE_LABEL);
+        }
+        else
+        {
+          uploaded = texture.Upload(pixels);
+        }
         if(!uploaded)
         {
           return false;

@@ -41,11 +41,14 @@ Dali::Ui::ImageUrl GeneratePixelDataUrl(Dali::PixelData pixelData, bool preMulti
   // the flag on the texture yet when the url snapshots it.
   Dali::Integration::SetTextureAlphaPreMultiplied(texture, preMultiplied);
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-  Dali::Integration::TextureUploadWithContent(texture, pixelData, imageUrl.GetUrl(), Dali::Integration::TextureContextTypeHint::EXTERNAL_IMAGE);
-#else
-  texture.Upload(pixelData);
-#endif
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+  {
+    Dali::Integration::TextureUploadWithContent(texture, pixelData, imageUrl.GetUrl(), Dali::Integration::TextureContextTypeHint::EXTERNAL_IMAGE);
+  }
+  else
+  {
+    texture.Upload(pixelData);
+  }
   return imageUrl;
 }
 } // unnamed namespace

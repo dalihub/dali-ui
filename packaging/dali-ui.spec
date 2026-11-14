@@ -205,7 +205,6 @@ cmake \
       -DENABLE_LOW_SPEC_MEMORY_MANAGEMENT=ON \
 %endif
 %if 0%{?enable_gpu_memory_profile}
-      -DENABLE_GPU_MEMORY_PROFILE=ON \
 %endif
       -DCMAKE_INSTALL_PREFIX=%{_prefix} \
       -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
@@ -228,7 +227,6 @@ cmake -S . -B %{dali2_build_dir} \
       -DENABLE_LOW_SPEC_MEMORY_MANAGEMENT=ON \
 %endif
 %if 0%{?enable_gpu_memory_profile}
-      -DENABLE_GPU_MEMORY_PROFILE=ON \
 %endif
       -DCMAKE_INSTALL_PREFIX=%{_prefix} \
       -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
