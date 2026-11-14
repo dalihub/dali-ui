@@ -26,6 +26,7 @@ SET(TC_SOURCES
     utc-Dali-InteractiveView-internal.cpp
     utc-Dali-SelectableTrait-internal.cpp
     utc-Dali-LayoutDependencyScope-internal.cpp
+    utc-Dali-GpuMemoryProfile-internal.cpp
     utc-Dali-GradientTextureCache-internal.cpp
     utc-Dali-GradientFactory-internal.cpp
     utc-Dali-ShaderFactory-internal.cpp
@@ -137,6 +138,7 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
     ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
+    ../dali-test-suite-utils/dali-ui/ui-texture-upload-manager.cpp
     ../dali-test-suite-utils/dali-ui/ui-timer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-animation-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-window.cpp

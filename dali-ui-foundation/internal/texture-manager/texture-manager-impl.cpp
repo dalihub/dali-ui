@@ -192,9 +192,7 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
     else
     {
       Texture maskTexture;
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-      bool maskApplied = false;
-#endif
+      bool    maskApplied = false;
       if(alphaMaskId != INVALID_TEXTURE_ID)
       {
         TextureCacheIndex maskCacheIndex = mTextureCacheManager.GetCacheIndexFromId(alphaMaskId);
@@ -207,6 +205,10 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
             if(maskTextureInfo.textures.size() > TEXTURE_INDEX)
             {
               maskTexture = maskTextureInfo.textures[TEXTURE_INDEX];
+              if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+              {
+                Dali::Integration::TextureUploadWithContent(maskTexture, PixelData(), ToDaliString(maskTextureInfo.url.GetUrl()), Dali::Integration::TextureContextTypeHint::MASKING_IMAGE, true);
+              }
             }
             else
             {
@@ -218,24 +220,12 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
             PixelBuffer maskPixelBuffer = maskTextureInfo.pixelBuffer;
             if(maskPixelBuffer)
             {
-              if(!maskInfo->mPreappliedMasking)
+              DALI_ASSERT_DEBUG(maskInfo->mPreappliedMasking && "KEEP_PIXEL_BUFFER is only used for preapplied masking");
+              DALI_ASSERT_DEBUG(pixelBuffers.size() == 1u && "Always has a single pixel buffer");
+              DevelPixelBufferOperations::ApplyMask(pixelBuffers[0], maskPixelBuffer, maskInfo->mContentScaleFactor, maskInfo->mCropToMask);
+              if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
               {
-                PixelData maskPixelData = PixelBuffer::Convert(maskPixelBuffer); // takes ownership of buffer
-                maskTexture             = Texture::New(Dali::TextureType::TEXTURE_2D, maskPixelData.GetPixelFormat(),
-                                                       maskPixelData.GetWidth(), maskPixelData.GetHeight());
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-                Dali::Integration::TextureUploadWithContent(maskTexture, maskPixelData, ToDaliString(maskTextureInfo.url.GetUrl()), Dali::Integration::TextureContextTypeHint::MASKING_IMAGE);
-#else
-                maskTexture.Upload(maskPixelData);
-#endif
-              }
-              else
-              {
-                DALI_ASSERT_DEBUG(pixelBuffers.size() == 1u && "Always has a single pixel buffer");
-                DevelPixelBufferOperations::ApplyMask(pixelBuffers[0], maskPixelBuffer, maskInfo->mContentScaleFactor, maskInfo->mCropToMask);
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
                 maskApplied = true;
-#endif
               }
             }
             else
@@ -260,16 +250,19 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
         PixelData pixelData = PixelBuffer::Convert(pixelBuffers[i]); // takes ownership of buffer
         Texture   texture   = Texture::New(Dali::TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(),
                                            pixelData.GetHeight());
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-        std::string stdUrl = url.GetUrl();
-        if(pixelBuffers.size() >= 3)
+        if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
         {
-          stdUrl += std::string("(") + ("YUVA"[i]) + ")";
+          std::string stdUrl = url.GetUrl();
+          if(pixelBuffers.size() >= 3)
+          {
+            stdUrl += std::string("(") + ("YUVA"[i]) + ")";
+          }
+          Dali::Integration::TextureUploadWithContent(texture, pixelData, ToDaliString(std::move(stdUrl)), maskApplied ? Dali::Integration::TextureContextTypeHint::CPU_MASKED_IMAGE : Dali::Integration::TextureContextTypeHint::STANDARD_IMAGE);
         }
-        Dali::Integration::TextureUploadWithContent(texture, pixelData, ToDaliString(std::move(stdUrl)), maskApplied ? Dali::Integration::TextureContextTypeHint::CPU_MASKED_IMAGE : Dali::Integration::TextureContextTypeHint::STANDARD_IMAGE);
-#else
-        texture.Upload(pixelData);
-#endif
+        else
+        {
+          texture.Upload(pixelData);
+        }
         textureSet.SetTexture(i, texture);
       }
     }
@@ -1346,16 +1339,19 @@ void TextureManager::UploadTextures(std::vector<PixelBuffer>&    pixelBuffers,
       Texture   texture   = Texture::New(Dali::TextureType::TEXTURE_2D, pixelBuffer.GetPixelFormat(),
                                          pixelBuffer.GetWidth(), pixelBuffer.GetHeight());
       PixelData pixelData = PixelBuffer::Convert(pixelBuffer);
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-      std::string stdUrl = textureInfo.url.GetUrl();
-      if(pixelBuffers.size() >= 3)
+      if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
       {
-        stdUrl += std::string("(") + ("YUVA"[textureInfo.textures.size()]) + ")";
+        std::string stdUrl = textureInfo.url.GetUrl();
+        if(pixelBuffers.size() >= 3)
+        {
+          stdUrl += std::string("(") + ("YUVA"[textureInfo.textures.size()]) + ")";
+        }
+        Dali::Integration::TextureUploadWithContent(texture, pixelData, ToDaliString(std::move(stdUrl)), (textureInfo.loadState == TextureManager::LoadState::MASK_APPLIED) ? Dali::Integration::TextureContextTypeHint::CPU_MASKED_IMAGE : Dali::Integration::TextureContextTypeHint::STANDARD_IMAGE);
       }
-      Dali::Integration::TextureUploadWithContent(texture, pixelData, ToDaliString(std::move(stdUrl)), (textureInfo.loadState == TextureManager::LoadState::MASK_APPLIED) ? Dali::Integration::TextureContextTypeHint::CPU_MASKED_IMAGE : Dali::Integration::TextureContextTypeHint::STANDARD_IMAGE);
-#else
-      texture.Upload(pixelData);
-#endif
+      else
+      {
+        texture.Upload(pixelData);
+      }
       textureInfo.textures.push_back(texture);
     }
   }
