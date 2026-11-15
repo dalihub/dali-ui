@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/border-visual.h>
@@ -31,15 +32,19 @@
 #include <dali.h>
 
 // Implement of VisualBase
+#include <dali-ui-foundation/integration-api/text/reveal-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/border-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
-#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
-#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
-#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/mesh-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/text-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -126,6 +131,47 @@ int UtcDaliVisualBaseCreateAndOwner(void)
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetDepthLayer(), Visual::DepthLayer::NONE, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliVisualBaseMeshTextureUpload(void)
+{
+  UiTestApplication application;
+  Property::Map     meshProperties;
+  meshProperties.Insert(Ui::Integration::Visual::Property::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::MESH));
+  meshProperties.Insert(Ui::Integration::MeshVisual::Property::OBJECT_URL, "src/dali-ui-foundation/resources/profile-mesh.obj");
+  meshProperties.Insert(Ui::Integration::MeshVisual::Property::MATERIAL_URL, "src/dali-ui-foundation/resources/profile-mesh.mtl");
+  meshProperties.Insert(Ui::Integration::MeshVisual::Property::TEXTURES_PATH, "../samples/image-view/res/");
+  Ui::Integration::Visual::Base meshVisual = Ui::Integration::VisualFactory::Get().CreateVisual(meshProperties);
+  Ui::View                      mesh       = Ui::View::New();
+  mesh.SetRequestedWidth(200.0f);
+  mesh.SetRequestedHeight(200.0f);
+  application.GetScene().Add(mesh);
+  meshVisual.SetTransformAndSize(Property::Map(), Size(200.0f, 200.0f), 1.0f);
+  meshVisual.SetOnScene(mesh);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(mesh.GetRendererCount() > 0u);
+  END_TEST;
+}
+
+int UtcDaliVisualBaseTextRevealMetadataUpload(void)
+{
+  UiTestApplication application;
+  Ui::Label         label = Ui::Label::New("Text reveal metadata upload");
+  label.SetRequestedWidth(300.0f);
+  label.SetRequestedHeight(90.0f);
+  Ui::Text::Reveal reveal;
+  Ui::Integration::Text::Reveal::SetBlurRadius(reveal, 16.0f);
+  Ui::Integration::Text::Reveal::SetBlurDurationRatio(reveal, 0.5f);
+  label.SetTextReveal(reveal);
+  label.SetTextRevealProgress(0.5f);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(label.GetTextRevealProgress(), 0.5f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -675,8 +721,8 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
 
   tet_infoline("Test that visual update without newly create Visual::Base for GradientVisual\n");
 
-  View           view           = View::New();
-  GradientVisual gradientVisual = GradientVisual::New();
+  View                 view           = View::New();
+  GradientVisual       gradientVisual = GradientVisual::New();
   Ui::Gradient::Linear initialGradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
   initialGradient.SetStopNodes({
     {0.0f, UiColor("#000000")},
