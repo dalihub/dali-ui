@@ -1089,6 +1089,13 @@ void TextVisual::AddTilingTexture(TextureSet& textureSet, TilingInfo& tilingInfo
 {
   Texture texture =
     Texture::New(Dali::TextureType::TEXTURE_2D, data.GetPixelFormat(), tilingInfo.width, tilingInfo.height);
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+  {
+    std::string text;
+    mController->GetText(text);
+    text += " : (" + std::to_string(tilingInfo.offsetHeight) + ")";
+    Dali::Integration::TextureUploadWithContent(texture, PixelData(), ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SIMPLE_LABEL, true);
+  }
   DevelTexture::UploadSubPixelData(texture, data, 0u, tilingInfo.offsetHeight, tilingInfo.width, tilingInfo.height);
 
   textureSet.SetTexture(textureSetIndex, texture);
@@ -4079,7 +4086,19 @@ bool TextVisual::PublishPreparedRevealBlur(Actor actor, const PreparedRevealBlur
   }
   // No observable allocations or property writes follow the final metadata
   // upload. Cancelled construction therefore leaves the ordinary plane intact.
-  if(!metadataTexture.Upload(prepared.metadata))
+  bool metadataUploaded;
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+  {
+    std::string text;
+    mController->GetText(text);
+    text += " : TextRevealMetadata";
+    metadataUploaded = Dali::Integration::TextureUploadWithContent(metadataTexture, prepared.metadata, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SIMPLE_LABEL);
+  }
+  else
+  {
+    metadataUploaded = metadataTexture.Upload(prepared.metadata);
+  }
+  if(!metadataUploaded)
   {
     return cancel();
   }
