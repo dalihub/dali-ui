@@ -15,7 +15,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 #include <cstdlib>
+#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/reveal-integ.h>
@@ -104,6 +106,35 @@ int UtcDaliUiGpuMemoryProfileVisuals(void)
     application.Render();
   }
   DALI_TEST_CHECK(true);
+  END_TEST;
+}
+
+int UtcDaliUiGpuMemoryProfileTextTiling(void)
+{
+  UiTestApplication application;
+  const uint32_t    maxTextureSize = static_cast<uint32_t>(Dali::GetMaxTextureSize());
+  DALI_TEST_CHECK(maxTextureSize > 0u);
+
+  std::string    text;
+  const uint32_t lineCount = maxTextureSize / 4u + 64u;
+  text.reserve(lineCount * 2u);
+  for(uint32_t line = 0u; line < lineCount; ++line)
+  {
+    text += "X\n";
+  }
+
+  Ui::Label label = Ui::Label::New(Dali::String(text.c_str()));
+  label.SetMultiLine(true);
+  label.SetFontSize(32.0f);
+  label.SetRequestedWidth(96.0f);
+  label.SetRequestedHeight(static_cast<float>(maxTextureSize + 64u));
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(label.GetRendererCount() >= 2u);
   END_TEST;
 }
 
@@ -230,6 +261,10 @@ int UtcDaliUiGpuMemoryProfileAdditionalImages(void)
   Ui::Label blurred = Ui::Label::New("GPU memory profile reveal blur");
   blurred.SetRequestedWidth(300.0f);
   blurred.SetRequestedHeight(90.0f);
+  Ui::Text::Shadow shadow;
+  shadow.SetColor(Ui::UiColor(0xEE2255, 0.6f));
+  shadow.SetOffset(Vector2(4.0f, 3.0f));
+  blurred.SetTextShadow(shadow);
   Ui::Text::Reveal reveal;
   Ui::Integration::Text::Reveal::SetBlurRadius(reveal, 16.0f);
   Ui::Integration::Text::Reveal::SetBlurDurationRatio(reveal, 0.5f);
