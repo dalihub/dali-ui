@@ -7,7 +7,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 #include <dali-ui-foundation/public-api/views/view-impl.h>
-#include <limits>
 #include "layout-validation-transition-fixtures.h"
 using namespace LayoutValidation;
 using namespace LayoutValidation::TransitionFixtures;
@@ -57,8 +56,7 @@ void CheckAllLeafTargets(Run& r, const PerformanceState& state, const char* pref
     const auto leaf = i < state.leaves.size() ? state.leaves[i] : View{};
     std::snprintf(id, sizeof(id), "%s.leaf-%u.identity-order", prefix, i);
     r.Truth(id, leaf && state.root.GetChildViewAt(i) == leaf);
-    const float invalid = std::numeric_limits<float>::quiet_NaN();
-    LayoutRect  actual(invalid, invalid, invalid, invalid);
+    LayoutRect actual = NaNRect();
     if(leaf)
     {
       // This existing const getter copies the completed logical result. It does
