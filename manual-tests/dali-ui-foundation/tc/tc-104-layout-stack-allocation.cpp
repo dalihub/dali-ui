@@ -43,11 +43,11 @@ public:
         const float width = vertical ? 80 : 300, height = vertical ? 300 : 80;
         Fixed(s, width, height);
         View stage = Mount(r, s, width, height);
-        r.AfterRender({stage, s, a, b, c}, [=](Run& r) {
+        r.AfterRender({stage, s, a, b, c}, [=](Run& done) {
           LayoutRect ea(0, 0, 60, 10), eb(70, 0, 220.0f / 3, 20), ec(80 + 220.0f / 3, 0, 440.0f / 3, 30);
-          r.Rendered("fixed", a, vertical ? SwapAxes(ea) : ea);
-          r.Rendered("weight1", b, vertical ? SwapAxes(eb) : eb);
-          r.Rendered("weight2", c, vertical ? SwapAxes(ec) : ec);
+          done.Rendered("fixed", a, vertical ? SwapAxes(ea) : ea);
+          done.Rendered("weight1", b, vertical ? SwapAxes(eb) : eb);
+          done.Rendered("weight2", c, vertical ? SwapAxes(ec) : ec);
         });
       }));
     }
@@ -60,8 +60,8 @@ public:
         p->view.SetLayoutParams(StackLayoutParams::New().SetAlignment(aligns[alignment]));
         s.Add(p->view);
         View stage = Mount(r, s, 100, 60);
-        r.AfterRender({stage, s, p->view}, [=](Run& r) {
-          r.Rendered("aligned", p->view, LayoutRect(0, alignment == 1 ? 25 : alignment == 2 ? 50 : 0, 20, alignment == 3 ? 60 : 10));
+        r.AfterRender({stage, s, p->view}, [=](Run& done) {
+          done.Rendered("aligned", p->view, LayoutRect(0, alignment == 1 ? 25 : alignment == 2 ? 50 : 0, 20, alignment == 3 ? 60 : 10));
         });
       }));
     out.push_back(Single("S04.fill-fixed-child", "FILL does not expand a child with a fixed cross size", 8, [](Run& r) {
@@ -78,9 +78,9 @@ public:
       s.Add(fixed);
       s.Add(wrap);
       View stage = Mount(r, s, 100, 60);
-      r.AfterRender({stage, s, fixed, wrap}, [=](Run& r) {
-        r.Rendered("fixed-keeps-size", fixed, LayoutRect(0, 0, 20, 10));
-        r.Rendered("wrap-fills", wrap, LayoutRect(20, 0, 30, 60));
+      r.AfterRender({stage, s, fixed, wrap}, [=](Run& done) {
+        done.Rendered("fixed-keeps-size", fixed, LayoutRect(0, 0, 20, 10));
+        done.Rendered("wrap-fills", wrap, LayoutRect(20, 0, 30, 60));
       });
     }));
     out.push_back(Single("S05.margin-gap-overflow", "Margins and negative free space", 8, [](Run& r) {
@@ -92,9 +92,9 @@ public:
       s.Add(a);
       s.Add(b);
       View stage = Mount(r, s, 40, 50);
-      r.AfterRender({stage, s, a, b}, [=](Run& r) {
-        r.Rendered("margin", a, LayoutRect(2, 4, 30, 10));
-        r.Rendered("overflow", b, LayoutRect(42, 0, 20, 15));
+      r.AfterRender({stage, s, a, b}, [=](Run& done) {
+        done.Rendered("margin", a, LayoutRect(2, 4, 30, 10));
+        done.Rendered("overflow", b, LayoutRect(42, 0, 20, 15));
       });
     }));
     // FILL on the determined 300 cross extent measures the WRAP_CONTENT child EXACTLY at 300, which
@@ -115,19 +115,19 @@ public:
          s->stack.Add(s->b);
          s->stage = Mount(r, s->stack, 300, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-           r.Size("a", s->a.GetMeasuredSize(), MeasuredSize(120, 20));
-           r.Rendered("a.rendered", s->a, LayoutRect(0, 0, 120, 20));
-           r.Rendered("b.rendered", s->b, LayoutRect(0, 20, 50, 10));
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+           done.Size("a", s->a.GetMeasuredSize(), MeasuredSize(120, 20));
+           done.Rendered("a.rendered", s->a, LayoutRect(0, 0, 120, 20));
+           done.Rendered("b.rendered", s->b, LayoutRect(0, 20, 50, 10));
          });
        }},
       {"rtl", 12, [](Run& r) {
          auto s = r.State<FillMaximum>();
          s->stack.SetLayoutDirection(Dali::LayoutDirection::RIGHT_TO_LEFT);
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-           r.Rendered("a.rtl", s->a, LayoutRect(180, 0, 120, 20));
-           r.Rect("a.logical", ArrangedBounds(s->a), LayoutRect(0, 0, 120, 20));
-           r.Rendered("b.rtl", s->b, LayoutRect(250, 20, 50, 10));
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+           done.Rendered("a.rtl", s->a, LayoutRect(180, 0, 120, 20));
+           done.Rect("a.logical", ArrangedBounds(s->a), LayoutRect(0, 0, 120, 20));
+           done.Rendered("b.rtl", s->b, LayoutRect(250, 20, 50, 10));
          });
        }},
     }));
@@ -141,11 +141,11 @@ public:
       View stage = Mount(r, s, 300, 200);
       // c: cross EXACTLY at 300 - 10 - 20 = 270; d: cross EXACTLY at 300, main AT_MOST (minimum 0),
       // laid out at the available 200 below c (y = 5 + 20), overflowing the stack.
-      r.AfterRender({stage, s, c, d}, [=](Run& r) {
-        r.Size("c", c.GetMeasuredSize(), MeasuredSize(270, 20));
-        r.Rendered("c.rendered", c, LayoutRect(10, 5, 270, 20));
-        r.Size("d", d.GetMeasuredSize(), MeasuredSize(300, 0));
-        r.Rendered("d.rendered", d, LayoutRect(0, 25, 300, 200));
+      r.AfterRender({stage, s, c, d}, [=](Run& done) {
+        done.Size("c", c.GetMeasuredSize(), MeasuredSize(270, 20));
+        done.Rendered("c.rendered", c, LayoutRect(10, 5, 270, 20));
+        done.Size("d", d.GetMeasuredSize(), MeasuredSize(300, 0));
+        done.Rendered("d.rendered", d, LayoutRect(0, 25, 300, 200));
       });
     }));
     out.push_back(Single("S12.weight-exact-share", "A weight child is measured exactly at its share in Measure", 7, [](Run& r) {
@@ -159,10 +159,10 @@ public:
       s.Add(b->view);
       View stage = Mount(r, s, 300, 80);
       // Share = 300 - 60 - 10 = 230 (main EXACTLY); the cross axis keeps the probe's 19.
-      r.AfterRender({stage, s, a, b->view}, [=](Run& r) {
-        r.Size("b", b->view.GetMeasuredSize(), MeasuredSize(230, 19));
-        r.Rendered("b.rendered", b->view, LayoutRect(70, 0, 230, 19));
-        r.Near("b.last-width", b->lastWidth, 230);
+      r.AfterRender({stage, s, a, b->view}, [=](Run& done) {
+        done.Size("b", b->view.GetMeasuredSize(), MeasuredSize(230, 19));
+        done.Rendered("b.rendered", b->view, LayoutRect(70, 0, 230, 19));
+        done.Near("b.last-width", b->lastWidth, 230);
       });
     }));
     return out;

@@ -65,14 +65,14 @@ public:
                             s = r.State<Directed>();
                           }
                           s->stack.SetLayoutDirection(rtl ? Dali::LayoutDirection::RIGHT_TO_LEFT : Dali::LayoutDirection::LEFT_TO_RIGHT);
-                          r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-                            r.Rendered(Id("a", phase).c_str(), s->a, LayoutRect(rtl ? 180 : 0, 0, 20, 10));
-                            r.Rendered(Id("b", phase).c_str(), s->b, LayoutRect(rtl ? 143 : 27, 0, 30, 15));
+                          r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+                            done.Rendered(Id("a", phase).c_str(), s->a, LayoutRect(rtl ? 180 : 0, 0, 20, 10));
+                            done.Rendered(Id("b", phase).c_str(), s->b, LayoutRect(rtl ? 143 : 27, 0, 30, 15));
                             if(rtl)
                             {
                               // The completion report carries the final (post-RTL) actor bounds.
-                              r.Rect("a.reported", r.Snapshot(s->a), LayoutRect(180, 0, 20, 10));
-                              r.Rect("b.reported", r.Snapshot(s->b), LayoutRect(143, 0, 30, 15));
+                              done.Rect("a.reported", done.Snapshot(s->a), LayoutRect(180, 0, 20, 10));
+                              done.Rect("b.reported", done.Snapshot(s->b), LayoutRect(143, 0, 30, 15));
                             }
                           });
                         }});
@@ -88,9 +88,9 @@ public:
       root.Add(child);
       root.SetLayoutDirection(Dali::LayoutDirection::RIGHT_TO_LEFT);
       View stage = Mount(r, root, 300, 100);
-      r.AfterRender({stage, root, child, leaf}, [=](Run& r) {
-        r.Rendered("child-mirrored-by-parent", child, LayoutRect(200, 0, 100, 50));
-        r.Rendered("leaf-explicit-ltr", leaf, LayoutRect(0, 0, 20, 10));
+      r.AfterRender({stage, root, child, leaf}, [=](Run& done) {
+        done.Rendered("child-mirrored-by-parent", child, LayoutRect(200, 0, 100, 50));
+        done.Rendered("leaf-explicit-ltr", leaf, LayoutRect(0, 0, 20, 10));
       });
     }));
     for(unsigned kind = 0; kind < 5; ++kind)
@@ -149,10 +149,10 @@ public:
                            if(phase == 2) s->container.InvalidateArrange();
                            if(phase == 3) s->container.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
                            const bool rtl = phase == 1 || phase == 2;
-                           r.AfterRender({s->stage, s->container, s->a, s->b, s->standalone}, [=](Run& r) {
-                             r.Rendered(Id("a", phase).c_str(), s->a, rtl ? Mirrored(la) : la);
-                             r.Rendered(Id("b", phase).c_str(), s->b, rtl ? Mirrored(lb) : lb);
-                             r.Rendered(Id("standalone", phase).c_str(), s->standalone, ls);
+                           r.AfterRender({s->stage, s->container, s->a, s->b, s->standalone}, [=](Run& done) {
+                             done.Rendered(Id("a", phase).c_str(), s->a, rtl ? Mirrored(la) : la);
+                             done.Rendered(Id("b", phase).c_str(), s->b, rtl ? Mirrored(lb) : lb);
+                             done.Rendered(Id("standalone", phase).c_str(), s->standalone, ls);
                            });
                          }});
       out.push_back(Steps(Id("C15.standalone-replay", kind), "Standalone children are excluded from the mirror and the cache-hit replay keeps mirrored geometry", steps));
@@ -176,35 +176,35 @@ public:
          s->stage.Add(s->p);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) {
-           r.Size("ltr.measured", s->c.GetMeasuredSize(), MeasuredSize(120, 80));
-           r.Rendered("ltr.rendered", s->c, LayoutRect(10, 20, 120, 80));
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& done) {
+           done.Size("ltr.measured", s->c.GetMeasuredSize(), MeasuredSize(120, 80));
+           done.Rendered("ltr.rendered", s->c, LayoutRect(10, 20, 120, 80));
          });
        }},
       {"rtl", 14, [](Run& r) {
          auto s = r.State<ClampedMirror>();
          s->p.SetLayoutDirection(Dali::LayoutDirection::RIGHT_TO_LEFT);
-         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) {
-           r.Rendered("rtl.rendered", s->c, LayoutRect(170, 20, 120, 80));
-           r.Rect("rtl.logical", ArrangedBounds(s->c), LayoutRect(10, 20, 120, 80));
-           r.Rect("rtl.reported", r.Snapshot(s->c), LayoutRect(170, 20, 120, 80));
-           r.Size("rtl.measured", s->c.GetMeasuredSize(), MeasuredSize(120, 80));
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& done) {
+           done.Rendered("rtl.rendered", s->c, LayoutRect(170, 20, 120, 80));
+           done.Rect("rtl.logical", ArrangedBounds(s->c), LayoutRect(10, 20, 120, 80));
+           done.Rect("rtl.reported", done.Snapshot(s->c), LayoutRect(170, 20, 120, 80));
+           done.Size("rtl.measured", s->c.GetMeasuredSize(), MeasuredSize(120, 80));
          });
        }},
       {"parent-replay", 4, [](Run& r) {
          auto s = r.State<ClampedMirror>();
          s->sibling.SetRequestedWidth(11);
-         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) { r.Rendered("parent-replay.rendered", s->c, LayoutRect(170, 20, 120, 80)); });
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& done) { done.Rendered("parent-replay.rendered", s->c, LayoutRect(170, 20, 120, 80)); });
        }},
       {"child-replay", 4, [](Run& r) {
          auto s = r.State<ClampedMirror>();
          s->p.InvalidateArrange();
-         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) { r.Rendered("child-replay.rendered", s->c, LayoutRect(170, 20, 120, 80)); });
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& done) { done.Rendered("child-replay.rendered", s->c, LayoutRect(170, 20, 120, 80)); });
        }},
       {"ltr-again", 4, [](Run& r) {
          auto s = r.State<ClampedMirror>();
          s->p.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
-         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& r) { r.Rendered("ltr-again.rendered", s->c, LayoutRect(10, 20, 120, 80)); });
+         r.AfterRender({s->stage, s->p, s->c, s->sibling}, [=](Run& done) { done.Rendered("ltr-again.rendered", s->c, LayoutRect(10, 20, 120, 80)); });
        }},
     }));
     return out;

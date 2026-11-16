@@ -67,9 +67,9 @@ public:
          probe->view.SetRequestedWidth(MATCH_PARENT);
          probe->view.SetRequestedHeight(MATCH_PARENT);
          auto s = MountStack(r, probe);
-         r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& done) {
            s->measures = s->probe->measures;
-           r.Rendered("before.slot", s->probe->view, LayoutRect(0, 0, 200, 80));
+           done.Rendered("before.slot", s->probe->view, LayoutRect(0, 0, 200, 80));
          });
        }},
       {"external", 9, [](Run& r) {
@@ -78,12 +78,12 @@ public:
          r.Equal("external.producer", s->probe->measures, s->measures + 1);
          r.Size("external.constraint", MeasuredSize(s->probe->lastWidth, s->probe->lastHeight), MeasuredSize(70, 40));
          s->Nudge();
-         r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& done) {
            // The next pass has to measure the child at its 200x80 slot again. Whether the out-of-band
            // Measure cleared the ancestor caches is internal state and is not observed here: the child's
            // own arrange entry is dropped as well, which alone makes the parent re-measure it.
-           r.Size("restored.constraint", MeasuredSize(s->probe->lastWidth, s->probe->lastHeight), MeasuredSize(200, 80));
-           r.Rendered("restored", s->probe->view, LayoutRect(0, 0, 200, 80));
+           done.Size("restored.constraint", MeasuredSize(s->probe->lastWidth, s->probe->lastHeight), MeasuredSize(200, 80));
+           done.Rendered("restored", s->probe->view, LayoutRect(0, 0, 200, 80));
            s->measures = s->probe->measures;
          });
        }},
@@ -91,7 +91,7 @@ public:
          // The restoring pass published fresh caches again, so a sibling-only pass runs no child producer.
          auto s = r.State<OutOfBand>();
          s->Nudge();
-         r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& r) { r.Equal("repeat.no-producer", s->probe->measures, s->measures); });
+         r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& done) { done.Equal("repeat.no-producer", s->probe->measures, s->measures); });
        }},
     }));
     out.push_back(Steps("K14.external-standalone-measure", "A standalone slot corrected out of band is consumed by the parent's next Arrange", {
@@ -101,10 +101,10 @@ public:
          probe->view.SetRequestedX(7);
          probe->view.SetRequestedY(9);
          auto s = MountStack(r, probe);
-         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& done) {
            s->measures = s->probe->measures;
-           r.Rendered("before.slot", s->probe->view, StandaloneSlot(r));
-           r.Equal("mount.producer-once", s->probe->measures, 1);
+           done.Rendered("before.slot", s->probe->view, StandaloneSlot(done));
+           done.Equal("mount.producer-once", s->probe->measures, 1);
          });
        }},
       // Every path measures the probe at the same window key: the parent's measure
@@ -114,8 +114,8 @@ public:
       {"warmup", 4, [](Run& r) {
          auto s = r.State<OutOfBand>();
          s->Nudge();
-         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) {
-           r.Rendered("warmup.slot", s->probe->view, StandaloneSlot(r));
+         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& done) {
+           done.Rendered("warmup.slot", s->probe->view, StandaloneSlot(done));
            s->measures = s->probe->measures;
          });
        }},
@@ -123,25 +123,25 @@ public:
          auto s = r.State<OutOfBand>();
          r.Size("external.measure-result", s->probe->view.Measure(70, 40), MeasuredSize(70, 40));
          s->Nudge();
-         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& done) {
            // The external Measure plus exactly one corrective measure at the parent's slot.
-           r.Equal("corrective-child-producer", s->probe->measures, s->measures + 2);
-           r.Rendered("corrected.slot", s->probe->view, StandaloneSlot(r));
+           done.Equal("corrective-child-producer", s->probe->measures, s->measures + 2);
+           done.Rendered("corrected.slot", s->probe->view, StandaloneSlot(done));
          });
        }},
       {"repeat", 1, [](Run& r) {
          auto s = r.State<OutOfBand>();
          s->Nudge();
-         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) { r.Equal("repeat.no-child-producer", s->probe->measures, s->measures + 2); });
+         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& done) { done.Equal("repeat.no-child-producer", s->probe->measures, s->measures + 2); });
        }},
       // The slot does not depend on which path measured last: the parent's own measure pass
       // measures the probe at the same window key (a cache hit) and places it at the same slot.
       {"path-independence", 5, [](Run& r) {
          auto s = r.State<OutOfBand>();
          s->parent.InvalidateMeasure();
-         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& r) {
-           r.Rendered("path-independence.slot", s->probe->view, StandaloneSlot(r));
-           r.Equal("path-independence.no-producer", s->probe->measures, s->measures + 2);
+         r.AfterRender({s->stage, s->parent, s->sibling}, [=](Run& done) {
+           done.Rendered("path-independence.slot", s->probe->view, StandaloneSlot(done));
+           done.Equal("path-independence.no-producer", s->probe->measures, s->measures + 2);
          });
        }},
     }));
@@ -160,9 +160,9 @@ public:
          s->stage.Add(s->parent);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->parent, s->a, s->b, s->sibling}, [=](Run& r) {
-           r.Rendered("a", s->a, LayoutRect(0, 0, 20, 10));
-           r.Rendered("b", s->b, LayoutRect(20, 0, 30, 10));
+         r.AfterRender({s->stage, s->parent, s->a, s->b, s->sibling}, [=](Run& done) {
+           done.Rendered("a", s->a, LayoutRect(0, 0, 20, 10));
+           done.Rendered("b", s->b, LayoutRect(20, 0, 30, 10));
          });
        }},
       {"external-arrange", 8, [](Run& r) {
@@ -170,7 +170,7 @@ public:
          s->b.Arrange(LayoutRect(75, 20, 10, 5));
          r.Rect("external", LayoutValidation::Bounds(s->b), LayoutRect(75, 20, 10, 5));
          s->Nudge();
-         r.AfterRender({s->stage, s->parent, s->a, s->b, s->sibling}, [=](Run& r) { r.Rendered("restored", s->b, LayoutRect(20, 0, 30, 10)); });
+         r.AfterRender({s->stage, s->parent, s->a, s->b, s->sibling}, [=](Run& done) { done.Rendered("restored", s->b, LayoutRect(20, 0, 30, 10)); });
        }},
     }));
     return out;

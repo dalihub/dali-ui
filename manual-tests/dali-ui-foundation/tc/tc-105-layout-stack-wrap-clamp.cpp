@@ -43,10 +43,10 @@ public:
         s.Add(a);
         s.Add(b);
         View stage = Mount(r, s, 200, 60);
-        r.AfterRender({stage, s, a, b}, [=](Run& r) {
-          r.Size("measured", a.GetMeasuredSize(), MeasuredSize(maximum ? 60 : 120, 10));
-          r.Rendered("allocated-a", a, LayoutRect(0, 0, maximum ? 60 : 120, 10));
-          r.Rendered("allocated-b", b, LayoutRect(100, 0, 100, 10));
+        r.AfterRender({stage, s, a, b}, [=](Run& done) {
+          done.Size("measured", a.GetMeasuredSize(), MeasuredSize(maximum ? 60 : 120, 10));
+          done.Rendered("allocated-a", a, LayoutRect(0, 0, maximum ? 60 : 120, 10));
+          done.Rendered("allocated-b", b, LayoutRect(100, 0, 100, 10));
         });
       }));
     out.push_back(Steps("S06.wrap-weight", "Wrap intrinsic fallback, then a minimum width on the wrapping stack", {
@@ -61,17 +61,17 @@ public:
          s->stack.Add(s->b);
          s->stage = Mount(r, s->stack, 300, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-           r.Size("wrap", s->stack.GetMeasuredSize(), MeasuredSize(60, 15));
-           r.Rendered("wrap.rendered", s->stack, LayoutRect(0, 0, 60, 15));
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+           done.Size("wrap", s->stack.GetMeasuredSize(), MeasuredSize(60, 15));
+           done.Rendered("wrap.rendered", s->stack, LayoutRect(0, 0, 60, 15));
          });
        }},
       {"minimum", 6, [](Run& r) {
          auto s = r.State<Stacked>();
          s->stack.SetMinimumWidth(100);
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-           r.Size("minimum", s->stack.GetMeasuredSize(), MeasuredSize(100, 15));
-           r.Rendered("minimum.rendered", s->stack, LayoutRect(0, 0, 100, 15));
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+           done.Size("minimum", s->stack.GetMeasuredSize(), MeasuredSize(100, 15));
+           done.Rendered("minimum.rendered", s->stack, LayoutRect(0, 0, 100, 15));
          });
        }},
     }));
@@ -86,12 +86,12 @@ public:
          s->stack.Add(s->b);
          s->stage = Mount(r, s->stack, 100, 40);
          r.SetState(s);
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) { r.Rendered("unweighted", s->b, LayoutRect(20, 0, 100, 10)); });
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) { done.Rendered("unweighted", s->b, LayoutRect(20, 0, 100, 10)); });
        }},
       {"weighted", 4, [](Run& r) {
          auto s = r.State<Stacked>();
          s->b.SetLayoutParams(StackLayoutParams::New().SetWeight(1));
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) { r.Rendered("weighted", s->b, LayoutRect(20, 0, 80, 10)); });
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) { done.Rendered("weighted", s->b, LayoutRect(20, 0, 80, 10)); });
        }},
     }));
     out.push_back(Single("S15.clamped-container", "A stack laid out inside its own maximum places its children in the clamped bounds", 16, [](Run& r) {
@@ -104,12 +104,12 @@ public:
       s.Add(g);
       s.Add(h);
       View stage = Mount(r, s, 300, 200);
-      r.AfterRender({stage, s, g, h}, [=](Run& r) {
-        r.Rendered("s", s, LayoutRect(0, 0, 120, 200));
-        r.Size("s.measured", s.GetMeasuredSize(), MeasuredSize(120, 200));
-        r.Rendered("g", g, LayoutRect(0, 0, 120, 30));
-        r.Size("g.measured", g.GetMeasuredSize(), MeasuredSize(120, 30));
-        r.Rendered("h", h, LayoutRect(70, 30, 50, 40));
+      r.AfterRender({stage, s, g, h}, [=](Run& done) {
+        done.Rendered("s", s, LayoutRect(0, 0, 120, 200));
+        done.Size("s.measured", s.GetMeasuredSize(), MeasuredSize(120, 200));
+        done.Rendered("g", g, LayoutRect(0, 0, 120, 30));
+        done.Size("g.measured", g.GetMeasuredSize(), MeasuredSize(120, 30));
+        done.Rendered("h", h, LayoutRect(70, 30, 50, 40));
       });
     }));
     out.push_back(Single("S16.weighted-wrap-exact", "A stretched wrapping stack distributes its weights in Measure", 14, [](Run& r) {
@@ -131,11 +131,11 @@ public:
       inner.Add(f);
       outer.Add(inner);
       View stage = Mount(r, outer, 200, 100);
-      r.AfterRender({stage, outer, inner, a, f, third}, [=](Run& r) {
-        r.Size("inner", inner.GetMeasuredSize(), MeasuredSize(200, 20));
-        r.Rendered("inner.rendered", inner, LayoutRect(0, 0, 200, 20));
-        r.Rendered("f.rendered", f, LayoutRect(120, 0, 80, 20));
-        r.Rendered("f.third", third, LayoutRect(0, 10, 40, 10));
+      r.AfterRender({stage, outer, inner, a, f, third}, [=](Run& done) {
+        done.Size("inner", inner.GetMeasuredSize(), MeasuredSize(200, 20));
+        done.Rendered("inner.rendered", inner, LayoutRect(0, 0, 200, 20));
+        done.Rendered("f.rendered", f, LayoutRect(120, 0, 80, 20));
+        done.Rendered("f.third", third, LayoutRect(0, 10, 40, 10));
       });
     }));
     out.push_back(Single("S17.two-step-match", "A MATCH_PARENT cross child of a wrapping stack is re-measured exactly at the resolved cross extent", 12, [](Run& r) {
@@ -150,11 +150,11 @@ public:
       outer.Add(seed);
       outer.Add(wf);
       View stage = Mount(r, outer, 200, 100);
-      r.AfterRender({stage, outer, seed, wf}, [=](Run& r) {
-        r.Size("outer", outer.GetMeasuredSize(), MeasuredSize(100, 20));
-        r.Rendered("outer.rendered", outer, LayoutRect(0, 0, 100, 20));
-        r.Size("wf", wf.GetMeasuredSize(), MeasuredSize(100, 20));
-        r.Rendered("wf.rendered", wf, LayoutRect(0, 0, 100, 20));
+      r.AfterRender({stage, outer, seed, wf}, [=](Run& done) {
+        done.Size("outer", outer.GetMeasuredSize(), MeasuredSize(100, 20));
+        done.Rendered("outer.rendered", outer, LayoutRect(0, 0, 100, 20));
+        done.Size("wf", wf.GetMeasuredSize(), MeasuredSize(100, 20));
+        done.Rendered("wf.rendered", wf, LayoutRect(0, 0, 100, 20));
       });
     }));
     out.push_back(Single("S17.two-step-stretched", "A stretched wrapping child whose content follows its width is re-measured exactly at the resolved cross extent", 16, [](Run& r) {
@@ -172,12 +172,12 @@ public:
       outer.Add(seed);
       outer.Add(c);
       View stage = Mount(r, outer, 200, 100);
-      r.AfterRender({stage, outer, seed, c, wf}, [=](Run& r) {
-        r.Size("outer", outer.GetMeasuredSize(), MeasuredSize(100, 20));
-        r.Rendered("outer.rendered", outer, LayoutRect(0, 0, 100, 20));
-        r.Size("c", c.GetMeasuredSize(), MeasuredSize(100, 20));
-        r.Rendered("c.rendered", c, LayoutRect(0, 0, 100, 20));
-        r.Rendered("wf.rendered", wf, LayoutRect(0, 0, 100, 20));
+      r.AfterRender({stage, outer, seed, c, wf}, [=](Run& done) {
+        done.Size("outer", outer.GetMeasuredSize(), MeasuredSize(100, 20));
+        done.Rendered("outer.rendered", outer, LayoutRect(0, 0, 100, 20));
+        done.Size("c", c.GetMeasuredSize(), MeasuredSize(100, 20));
+        done.Rendered("c.rendered", c, LayoutRect(0, 0, 100, 20));
+        done.Rendered("wf.rendered", wf, LayoutRect(0, 0, 100, 20));
       });
     }));
     return out;

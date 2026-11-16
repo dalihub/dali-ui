@@ -207,10 +207,10 @@ public:
       s->ids.insert(s->ids.begin(), 8888);
       s->heights.insert(s->heights.begin(), 20);
       s->adapter.NotifyItemInserted(0);
-      AfterRelayout(r, s, [](Run& done, AdapterFixture& s) {
-        done.Near("insert.range", s.layouter.ComputeScrollRange(), 284);
-        done.Equal("insert.count", s.adapter.GetItemCount(), 13);
-        CheckBoundIds(done, s, "insert");
+      AfterRelayout(r, s, [](Run& done, AdapterFixture& fixture) {
+        done.Near("insert.range", fixture.layouter.ComputeScrollRange(), 284);
+        done.Equal("insert.count", fixture.adapter.GetItemCount(), 13);
+        CheckBoundIds(done, fixture, "insert");
       });
     }},
                                                                                                                     {"move", 9, [](Run& r)
@@ -223,10 +223,10 @@ public:
       s->ids.insert(s->ids.begin() + 2, id);
       s->heights.insert(s->heights.begin() + 2, height);
       s->adapter.NotifyItemMoved(0, 2);
-      AfterRelayout(r, s, [](Run& done, AdapterFixture& s) {
-        done.Near("move.range", s.layouter.ComputeScrollRange(), 284);
-        done.Equal("move.count", s.adapter.GetItemCount(), 13);
-        CheckBoundIds(done, s, "move");
+      AfterRelayout(r, s, [](Run& done, AdapterFixture& fixture) {
+        done.Near("move.range", fixture.layouter.ComputeScrollRange(), 284);
+        done.Equal("move.count", fixture.adapter.GetItemCount(), 13);
+        CheckBoundIds(done, fixture, "move");
       });
     }},
                                                                                                                     {"remove", 9, [](Run& r)
@@ -235,10 +235,10 @@ public:
       s->ids.erase(s->ids.begin());
       s->heights.erase(s->heights.begin());
       s->adapter.NotifyItemRemoved(0);
-      AfterRelayout(r, s, [](Run& done, AdapterFixture& s) {
-        done.Near("remove.range", s.layouter.ComputeScrollRange(), 262);
-        done.Equal("remove.count", s.adapter.GetItemCount(), 12);
-        CheckBoundIds(done, s, "remove");
+      AfterRelayout(r, s, [](Run& done, AdapterFixture& fixture) {
+        done.Near("remove.range", fixture.layouter.ComputeScrollRange(), 262);
+        done.Equal("remove.count", fixture.adapter.GetItemCount(), 12);
+        CheckBoundIds(done, fixture, "remove");
       });
     }},
                                                                                                                     {"size-change", 9, [](Run& r)
@@ -246,10 +246,10 @@ public:
       auto s        = r.State<AdapterFixture>();
       s->heights[0] = 30;
       s->adapter.NotifyItemChanged(0);
-      AfterRelayout(r, s, [](Run& done, AdapterFixture& s) {
-        done.Rendered("size.changed", s.bound.at(0), LayoutRect(0, 0, 120, 30));
-        done.Rendered("size.next.offset", s.bound.at(1), LayoutRect(0, 32, 120, 20));
-        done.Near("size.range.estimated", s.layouter.ComputeScrollRange(), 272);
+      AfterRelayout(r, s, [](Run& done, AdapterFixture& fixture) {
+        done.Rendered("size.changed", fixture.bound.at(0), LayoutRect(0, 0, 120, 30));
+        done.Rendered("size.next.offset", fixture.bound.at(1), LayoutRect(0, 32, 120, 20));
+        done.Near("size.range.estimated", fixture.layouter.ComputeScrollRange(), 272);
       });
     }},
                                                                                                                     {"full-data-empty", 4, [](Run& r)
@@ -258,11 +258,11 @@ public:
       s->ids.clear();
       s->heights.clear();
       s->adapter.NotifyDataSetChanged();
-      AfterRelayout(r, s, [](Run& done, AdapterFixture& s) {
-        done.Near("empty.range", s.layouter.ComputeScrollRange(), 0);
-        done.Equal("empty.bound", s.bound.size(), 0);
-        done.Equal("empty.count", s.adapter.GetItemCount(), 0);
-        done.Truth("recycle.used", s.recycles > 0);
+      AfterRelayout(r, s, [](Run& done, AdapterFixture& fixture) {
+        done.Near("empty.range", fixture.layouter.ComputeScrollRange(), 0);
+        done.Equal("empty.bound", fixture.bound.size(), 0);
+        done.Equal("empty.count", fixture.adapter.GetItemCount(), 0);
+        done.Truth("recycle.used", fixture.recycles > 0);
       });
     }},
                                                                                                                     {"replace", 2, [](Run& r)
@@ -270,18 +270,18 @@ public:
       auto s           = r.State<AdapterFixture>();
       auto replacement = MakeAdapterFixture(r, 2);
       s->view.SetAdapter(replacement->adapter);
-      AfterRelayout(r, s, [](Run& done, AdapterFixture& s) {
-        done.Equal("replace.count", s.view.GetAdapter().GetItemCount(), 2);
-        done.Near("replace.range", s.layouter.ComputeScrollRange(), 42);
+      AfterRelayout(r, s, [](Run& done, AdapterFixture& fixture) {
+        done.Equal("replace.count", fixture.view.GetAdapter().GetItemCount(), 2);
+        done.Near("replace.range", fixture.layouter.ComputeScrollRange(), 42);
       });
     }},
                                                                                                                     {"clear", 2, [](Run& r)
     {
       auto s = r.State<AdapterFixture>();
       s->view.ClearAdapter();
-      AfterRelayout(r, s, [](Run& done, AdapterFixture& s) {
-        done.Truth("clear.adapter", !s.view.GetAdapter());
-        done.Near("clear.range", s.layouter.ComputeScrollRange(), 0);
+      AfterRelayout(r, s, [](Run& done, AdapterFixture& fixture) {
+        done.Truth("clear.adapter", !fixture.view.GetAdapter());
+        done.Near("clear.range", fixture.layouter.ComputeScrollRange(), 0);
       });
     }}}},
       {"window-viewport", "Real Window completion fence and viewport resize", {{"attach", 8, [](Run& r)

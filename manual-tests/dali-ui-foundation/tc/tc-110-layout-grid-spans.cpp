@@ -28,9 +28,9 @@ public:
       g.SetColumnSpacing(7);
       View a = Cell(g, 0, 0, 2, 2), b = Cell(g, 1, 1, 2, 2);
       View stage = Mount(r, g, 200, 150);
-      r.AfterRender({stage, g, a, b}, [=](Run& r) {
-        r.Rendered("span00", a, LayoutRect(0, 0, 87, 55));
-        r.Rendered("span11", b, LayoutRect(37, 25, 127, 75));
+      r.AfterRender({stage, g, a, b}, [=](Run& done) {
+        done.Rendered("span00", a, LayoutRect(0, 0, 87, 55));
+        done.Rendered("span11", b, LayoutRect(37, 25, 127, 75));
       });
     }));
     out.push_back(Single("G06.auto-deficit", "Span deficit distributed to AUTO tracks", 8, [](Run& r) {
@@ -44,9 +44,9 @@ public:
       Fixed(b, 30, 10);
       Fixed(span, 100, 10);
       View stage = Mount(r, g, 200, 40);
-      r.AfterRender({stage, g, a, b, span}, [=](Run& r) {
-        r.Rendered("auto-a", a, LayoutRect(0, 0, 40, 20));
-        r.Rendered("auto-b", b, LayoutRect(50, 0, 50, 20));
+      r.AfterRender({stage, g, a, b, span}, [=](Run& done) {
+        done.Rendered("auto-a", a, LayoutRect(0, 0, 40, 20));
+        done.Rendered("auto-b", b, LayoutRect(50, 0, 50, 20));
       });
     }));
     for(unsigned mode = 0; mode < 4; ++mode)
@@ -58,8 +58,8 @@ public:
         const LayoutAlignment al[] = {LayoutAlignment::START, LayoutAlignment::CENTER, LayoutAlignment::END, LayoutAlignment::FILL};
         a.SetLayoutParams(GridLayoutParams::New().SetHorizontalAlignment(al[mode]).SetVerticalAlignment(al[mode]));
         View stage = Mount(r, g, 100, 60);
-        r.AfterRender({stage, g, a}, [=](Run& r) {
-          r.Rendered("aligned", a, LayoutRect(mode == 1 ? 40 : mode == 2 ? 80 : 0, mode == 1 ? 25 : mode == 2 ? 50 : 0, mode == 3 ? 100 : 20, mode == 3 ? 60 : 10));
+        r.AfterRender({stage, g, a}, [=](Run& done) {
+          done.Rendered("aligned", a, LayoutRect(mode == 1 ? 40 : mode == 2 ? 80 : 0, mode == 1 ? 25 : mode == 2 ? 50 : 0, mode == 3 ? 100 : 20, mode == 3 ? 60 : 10));
         });
       }));
     out.push_back(Single("G10.padding-margin", "Padding and cell-local margins", 4, [](Run& r) {
@@ -69,7 +69,7 @@ public:
       View a = Cell(g, 0, 0);
       a.SetMargin(Insets(2, 4, 6, 8));
       View stage = Mount(r, g, 120, 80);
-      r.AfterRender({stage, g, a}, [=](Run& r) { r.Rendered("cell", a, LayoutRect(5, 13, 106, 48)); });
+      r.AfterRender({stage, g, a}, [=](Run& done) { done.Rendered("cell", a, LayoutRect(5, 13, 106, 48)); });
     }));
     // A 80x40 probe with maximum 60x30 in the 100x50 ABSOLUTE cell: its constraint is clamped to 60x30
     // before the producer (FILL: measured EXACTLY at the cell, reported clamped), and the grid aligns
@@ -87,11 +87,11 @@ public:
         g.Add(a->view);
         View b     = Cell(g, 0, 1);
         View stage = Mount(r, g, 320, 80);
-        r.AfterRender({stage, g, a->view, b}, [=](Run& r) {
+        r.AfterRender({stage, g, a->view, b}, [=](Run& done) {
           const LayoutRect aligned[] = {LayoutRect(0, 0, 60, 30), LayoutRect(20, 10, 60, 30), LayoutRect(40, 20, 60, 30), LayoutRect(0, 0, 60, 30)};
-          r.Size("a", a->view.GetMeasuredSize(), MeasuredSize(60, 30));
-          r.Rendered("a.rendered", a->view, aligned[mode]);
-          r.Rendered("b.rendered", b, LayoutRect(100, 0, 200, 50));
+          done.Size("a", a->view.GetMeasuredSize(), MeasuredSize(60, 30));
+          done.Rendered("a.rendered", a->view, aligned[mode]);
+          done.Rendered("b.rendered", b, LayoutRect(100, 0, 200, 50));
         });
       }));
     // A wrapping grid with a 100 minimum: the STAR column shares max(30, 100) - 30 = 70. The 150-wide
@@ -108,12 +108,12 @@ public:
       b->view.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
       g.Add(b->view);
       View stage = Mount(r, g, 200, 60);
-      r.AfterRender({stage, g, a, b->view}, [=](Run& r) {
-        r.Size("grid", g.GetMeasuredSize(), MeasuredSize(100, 30));
-        r.Rendered("a.rendered", a, LayoutRect(0, 0, 30, 30));
-        r.Size("b", b->view.GetMeasuredSize(), MeasuredSize(70, 19));
-        r.Near("b.last-width", b->lastWidth, 70);
-        r.Rendered("b.rendered", b->view, LayoutRect(30, 0, 70, 30));
+      r.AfterRender({stage, g, a, b->view}, [=](Run& done) {
+        done.Size("grid", g.GetMeasuredSize(), MeasuredSize(100, 30));
+        done.Rendered("a.rendered", a, LayoutRect(0, 0, 30, 30));
+        done.Size("b", b->view.GetMeasuredSize(), MeasuredSize(70, 19));
+        done.Near("b.last-width", b->lastWidth, 70);
+        done.Rendered("b.rendered", b->view, LayoutRect(30, 0, 70, 30));
       });
     }));
     return out;

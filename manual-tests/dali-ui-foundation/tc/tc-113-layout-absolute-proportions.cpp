@@ -39,9 +39,9 @@ public:
         c.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.25f, 0.5f, 0.5f, 0.25f)).SetFlags(static_cast<AbsoluteLayoutFlags>(bits)));
         a.Add(c);
         View stage = Mount(r, a, 200, 100);
-        r.AfterRender({stage, a, c}, [=](Run& r) {
+        r.AfterRender({stage, a, c}, [=](Run& done) {
           const float w = bits & 4 ? 100 : 0.5f, h = bits & 8 ? 25 : 0.25f, x = bits & 1 ? (200 - w) * 0.25f : 0.25f, y = bits & 2 ? (100 - h) * 0.5f : 0.5f;
-          r.Rendered("flags", c, LayoutRect(x, y, w, h));
+          done.Rendered("flags", c, LayoutRect(x, y, w, h));
         });
       }));
     for(float position : {-0.25f, 0.0f, 0.5f, 1.0f, 1.25f})
@@ -55,14 +55,14 @@ public:
            s->layout.Add(s->child);
            s->stage = Mount(r, s->layout, 300, 100);
            r.SetState(s);
-           r.AfterRender({s->stage, s->layout, s->child}, [=](Run& r) { r.Rendered("ltr", s->child, LayoutRect(200 * position, 0, 100, 20)); });
+           r.AfterRender({s->stage, s->layout, s->child}, [=](Run& done) { done.Rendered("ltr", s->child, LayoutRect(200 * position, 0, 100, 20)); });
          }},
         {"rtl", 8, [position](Run& r) {
            auto s = r.State<Absolute>();
            s->layout.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-           r.AfterRender({s->stage, s->layout, s->child}, [=](Run& r) {
-             r.Rect("rtl.reported", r.Snapshot(s->child), LayoutRect(200 - 200 * position, 0, 100, 20));
-             r.Rendered("rtl", s->child, LayoutRect(200 - 200 * position, 0, 100, 20));
+           r.AfterRender({s->stage, s->layout, s->child}, [=](Run& done) {
+             done.Rect("rtl.reported", done.Snapshot(s->child), LayoutRect(200 - 200 * position, 0, 100, 20));
+             done.Rendered("rtl", s->child, LayoutRect(200 - 200 * position, 0, 100, 20));
            });
          }},
       }));
@@ -73,7 +73,7 @@ public:
       c.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.5f, 0.5f, 0.5f, 0.5f)).SetFlags(AbsoluteLayoutFlags::ALL));
       a.Add(c);
       View stage = Mount(r, a, 200, 100);
-      r.AfterRender({stage, a, c}, [=](Run& r) { r.Rendered("all", c, LayoutRect(50, 25, 100, 50)); });
+      r.AfterRender({stage, a, c}, [=](Run& done) { done.Rendered("all", c, LayoutRect(50, 25, 100, 50)); });
     }));
     out.push_back(Steps("A06.wrap-circularity", "Wrap keeps the determinate extent and drops only the circular contribution", {
       {"position-only", 6, [](Run& r) {
@@ -84,17 +84,17 @@ public:
          s->layout.Add(s->child);
          s->stage = Mount(r, s->layout, 200, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& r) {
-           r.Size("position-only", s->layout.GetMeasuredSize(), MeasuredSize(40, 20));
-           r.Rendered("position-only.rendered", s->layout, LayoutRect(0, 0, 40, 20));
+         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& done) {
+           done.Size("position-only", s->layout.GetMeasuredSize(), MeasuredSize(40, 20));
+           done.Rendered("position-only.rendered", s->layout, LayoutRect(0, 0, 40, 20));
          });
        }},
       {"size-circular", 6, [](Run& r) {
          auto s = r.State<Absolute>();
          s->child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, 0.5f, 20)).SetFlags(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL));
-         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& r) {
-           r.Size("size-circular", s->layout.GetMeasuredSize(), MeasuredSize(0, 20));
-           r.Rendered("size-circular.rendered", s->layout, LayoutRect(0, 0, 0, 20));
+         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& done) {
+           done.Size("size-circular", s->layout.GetMeasuredSize(), MeasuredSize(0, 20));
+           done.Rendered("size-circular.rendered", s->layout, LayoutRect(0, 0, 0, 20));
          });
        }},
     }));
@@ -114,11 +114,11 @@ public:
       layout.Add(a);
       layout.Add(b);
       View stage = Mount(r, layout, 300, 200);
-      r.AfterRender({stage, layout, a, b}, [=](Run& r) {
-        r.Size("a", a.GetMeasuredSize(), MeasuredSize(100, 20));
-        r.Rendered("a.rendered", a, LayoutRect(0, 0, 100, 20));
-        r.Size("b", b.GetMeasuredSize(), MeasuredSize(100, 20));
-        r.Rendered("b.rendered", b, LayoutRect(150, 30, 100, 20));
+      r.AfterRender({stage, layout, a, b}, [=](Run& done) {
+        done.Size("a", a.GetMeasuredSize(), MeasuredSize(100, 20));
+        done.Rendered("a.rendered", a, LayoutRect(0, 0, 100, 20));
+        done.Size("b", b.GetMeasuredSize(), MeasuredSize(100, 20));
+        done.Rendered("b.rendered", b, LayoutRect(150, 30, 100, 20));
       });
     }));
     // A wrapping layout resolves its width from its other children (b: 100) first and only then
@@ -131,11 +131,11 @@ public:
       layout.Add(a->view);
       layout.Add(b);
       View stage = Mount(r, layout, 200, 100);
-      r.AfterRender({stage, layout, a->view, b}, [=](Run& r) {
-        r.Near("a.last-width", a->lastWidth, 50);
-        r.Size("a", a->view.GetMeasuredSize(), MeasuredSize(50, 19));
-        r.Rendered("a.rendered", a->view, LayoutRect(0, 0, 50, 19));
-        r.Size("layout", layout.GetMeasuredSize(), MeasuredSize(100, 19));
+      r.AfterRender({stage, layout, a->view, b}, [=](Run& done) {
+        done.Near("a.last-width", a->lastWidth, 50);
+        done.Size("a", a->view.GetMeasuredSize(), MeasuredSize(50, 19));
+        done.Rendered("a.rendered", a->view, LayoutRect(0, 0, 50, 19));
+        done.Size("layout", layout.GetMeasuredSize(), MeasuredSize(100, 19));
       });
     }));
     return out;

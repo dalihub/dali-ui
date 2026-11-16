@@ -126,10 +126,10 @@ Scenario ApplicationMeasureCase(unsigned kind)
   return Steps(Id("K11.application-measure", kind), "An application Measure with the pass's numbers derives the pass's modes and is served from the cache", {
     {"pass", 7, [kind](Run& r) {
        auto s = MountApplicationMeasure(r, kind);
-       r.AfterRender({s->stage, s->container, s->probe->view}, [=](Run& r) {
-         r.Size("measured", s->probe->view.GetMeasuredSize(), s->measured);
-         r.Equal("producer-once", s->probe->measures, 1);
-         r.Rendered("rendered", s->probe->view, s->rendered);
+       r.AfterRender({s->stage, s->container, s->probe->view}, [=](Run& done) {
+         done.Size("measured", s->probe->view.GetMeasuredSize(), s->measured);
+         done.Equal("producer-once", s->probe->measures, 1);
+         done.Rendered("rendered", s->probe->view, s->rendered);
        });
      }},
     {"app-hit", 3, [](Run& r) {
@@ -156,24 +156,24 @@ public:
     out.push_back(Steps("K01.same-key", "Cold miss, identical-key hit through an unrelated pass, and a height-key miss", {
       {"cold", 7, [](Run& r) {
          auto s = MountProbe(r, 100, 50);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Size("cold", s->probe->view.GetMeasuredSize(), MeasuredSize(37, 19));
-           r.Equal("producer-once", s->probe->measures, 1);
-           r.Rendered("cold.rendered", s->probe->view, LayoutRect(0, 0, 37, 19));
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Size("cold", s->probe->view.GetMeasuredSize(), MeasuredSize(37, 19));
+           done.Equal("producer-once", s->probe->measures, 1);
+           done.Rendered("cold.rendered", s->probe->view, LayoutRect(0, 0, 37, 19));
          });
        }},
       {"hit", 3, [](Run& r) {
          auto s = r.State<Cached>();
          s->Nudge();
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Size("hit", s->probe->view.GetMeasuredSize(), MeasuredSize(37, 19));
-           r.Equal("hit-producer", s->probe->measures, 1);
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Size("hit", s->probe->view.GetMeasuredSize(), MeasuredSize(37, 19));
+           done.Equal("hit-producer", s->probe->measures, 1);
          });
        }},
       {"height-key", 1, [](Run& r) {
          auto s = r.State<Cached>();
          s->stage.SetRequestedHeight(51);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) { r.Equal("height-key", s->probe->measures, 2); });
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) { done.Equal("height-key", s->probe->measures, 2); });
        }},
     }));
     out.push_back(Steps("K02.normalized-key", "Different raw constraints normalize to one key", {
@@ -181,50 +181,50 @@ public:
          auto s = MountProbe(r, 40, 100);
          s->probe->view.SetMinimumWidth(120);
          s->probe->view.SetMaximumHeight(30);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Near("normalized-width", s->probe->lastWidth, 120);
-           r.Near("normalized-height", s->probe->lastHeight, 30);
-           r.Size("clamped-result", s->probe->view.GetMeasuredSize(), MeasuredSize(120, 19));
-           r.Rendered("clamped.rendered", s->probe->view, LayoutRect(0, 0, 120, 19));
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Near("normalized-width", s->probe->lastWidth, 120);
+           done.Near("normalized-height", s->probe->lastHeight, 30);
+           done.Size("clamped-result", s->probe->view.GetMeasuredSize(), MeasuredSize(120, 19));
+           done.Rendered("clamped.rendered", s->probe->view, LayoutRect(0, 0, 120, 19));
          });
        }},
       {"resize", 1, [](Run& r) {
          auto s = r.State<Cached>();
          s->stage.SetRequestedWidth(50);
          s->stage.SetRequestedHeight(200);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) { r.Equal("producer-once", s->probe->measures, 1); });
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) { done.Equal("producer-once", s->probe->measures, 1); });
        }},
     }));
     out.push_back(Steps("K03.explicit-invalidation", "External content requires an explicit invalidation to reach the screen", {
       {"mount", 5, [](Run& r) {
          auto s = MountProbe(r, 100, 50);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Equal("producer", s->probe->measures, 1);
-           r.Rendered("initial", s->probe->view, LayoutRect(0, 0, 37, 19));
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Equal("producer", s->probe->measures, 1);
+           done.Rendered("initial", s->probe->view, LayoutRect(0, 0, 37, 19));
          });
        }},
       {"stale", 3, [](Run& r) {
          auto s          = r.State<Cached>();
          s->probe->width = 53;
          s->Nudge();
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Size("cached", s->probe->view.GetMeasuredSize(), MeasuredSize(37, 19));
-           r.Equal("unchanged-producer", s->probe->measures, 1);
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Size("cached", s->probe->view.GetMeasuredSize(), MeasuredSize(37, 19));
+           done.Equal("unchanged-producer", s->probe->measures, 1);
          });
        }},
       {"invalidated", 7, [](Run& r) {
          auto s = r.State<Cached>();
          s->probe->view.InvalidateMeasure();
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Size("invalidated", s->probe->view.GetMeasuredSize(), MeasuredSize(53, 19));
-           r.Equal("fresh-producer", s->probe->measures, 2);
-           r.Rendered("invalidated.rendered", s->probe->view, LayoutRect(0, 0, 53, 19));
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Size("invalidated", s->probe->view.GetMeasuredSize(), MeasuredSize(53, 19));
+           done.Equal("fresh-producer", s->probe->measures, 2);
+           done.Rendered("invalidated.rendered", s->probe->view, LayoutRect(0, 0, 53, 19));
          });
        }},
       {"fresh-cache", 1, [](Run& r) {
          auto s = r.State<Cached>();
          s->Nudge();
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) { r.Equal("fresh-cache", s->probe->measures, 2); });
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) { done.Equal("fresh-cache", s->probe->measures, 2); });
        }},
     }));
     out.push_back(Steps("K04.sibling-isolation", "One dirty child preserves the clean sibling cache", {
@@ -237,21 +237,21 @@ public:
          s->stack.Add(s->second->view);
          s->stage = Mount(r, s->stack, 200, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->stack, s->probe->view, s->second->view}, [=](Run& r) {
+         r.AfterRender({s->stage, s->stack, s->probe->view, s->second->view}, [=](Run& done) {
            s->measures       = s->probe->measures;
            s->secondMeasures = s->second->measures;
-           r.Rendered("root", s->stack, LayoutRect(0, 0, 50, 10));
+           done.Rendered("root", s->stack, LayoutRect(0, 0, 50, 10));
          });
        }},
       {"dirty-a", 8, [](Run& r) {
          auto s          = r.State<Cached>();
          s->probe->width = 40;
          s->probe->view.InvalidateMeasure();
-         r.AfterRender({s->stage, s->stack, s->probe->view, s->second->view}, [=](Run& r) {
-           r.Size("root", s->stack.GetMeasuredSize(), MeasuredSize(70, 10));
-           r.Equal("dirty-producer", s->probe->measures, s->measures + 1);
-           r.Equal("clean-producer", s->second->measures, s->secondMeasures);
-           r.Rendered("root.rendered", s->stack, LayoutRect(0, 0, 70, 10));
+         r.AfterRender({s->stage, s->stack, s->probe->view, s->second->view}, [=](Run& done) {
+           done.Size("root", s->stack.GetMeasuredSize(), MeasuredSize(70, 10));
+           done.Equal("dirty-producer", s->probe->measures, s->measures + 1);
+           done.Equal("clean-producer", s->second->measures, s->secondMeasures);
+           done.Rendered("root.rendered", s->stack, LayoutRect(0, 0, 70, 10));
          });
        }},
     }));
@@ -269,9 +269,9 @@ public:
          s->stage = r.StageOnWindow(100, 60);
          s->stage.Add(s->probe->view);
          r.SetState(s);
-         r.AfterRender({s->probe->view}, [=](Run& r) {
-           r.Size("measured", s->probe->view.GetMeasuredSize(), MeasuredSize(100, 60));
-           r.Rendered("rendered", s->probe->view, LayoutRect(0, 0, 100, 60));
+         r.AfterRender({s->probe->view}, [=](Run& done) {
+           done.Size("measured", s->probe->view.GetMeasuredSize(), MeasuredSize(100, 60));
+           done.Rendered("rendered", s->probe->view, LayoutRect(0, 0, 100, 60));
          });
        }},
       {"invalidate", 3, [](Run& r) {
@@ -280,9 +280,9 @@ public:
          auto s      = r.State<Cached>();
          s->measures = s->probe->measures;
          s->probe->view.InvalidateMeasure();
-         r.AfterRender({s->probe->view}, [=](Run& r) {
-           r.Equal("measure-producer", s->probe->measures, s->measures + 1);
-           r.Size("measured", s->probe->view.GetMeasuredSize(), MeasuredSize(100, 60));
+         r.AfterRender({s->probe->view}, [=](Run& done) {
+           done.Equal("measure-producer", s->probe->measures, s->measures + 1);
+           done.Size("measured", s->probe->view.GetMeasuredSize(), MeasuredSize(100, 60));
          });
        }},
     }));

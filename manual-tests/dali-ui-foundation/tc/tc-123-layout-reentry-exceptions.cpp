@@ -69,7 +69,7 @@ public:
     out.push_back(Steps("K18.measure-throw", "A throwing measure producer rolls back publication and permits a retry on screen", {
       {"mount", 4, [](Run& r) {
          auto s = MountProbe(r);
-         r.AfterRender(s->Fence(), [=](Run& r) { r.Rendered("initial", s->probe->view, LayoutRect(0, 0, 37, 19)); });
+         r.AfterRender(s->Fence(), [=](Run& done) { done.Rendered("initial", s->probe->view, LayoutRect(0, 0, 37, 19)); });
        }},
       {"throw", 7, [](Run& r) {
          auto s              = r.State<Faulty>();
@@ -87,9 +87,9 @@ public:
          s->probe->onMeasure = {};
          s->probe->width     = 53;
          s->probe->view.InvalidateMeasure();
-         r.AfterRender(s->Fence(), [=](Run& r) {
-           r.Size("retry", s->probe->view.GetMeasuredSize(), MeasuredSize(53, 19));
-           r.Rendered("retry.rendered", s->probe->view, LayoutRect(0, 0, 53, 19));
+         r.AfterRender(s->Fence(), [=](Run& done) {
+           done.Size("retry", s->probe->view.GetMeasuredSize(), MeasuredSize(53, 19));
+           done.Rendered("retry.rendered", s->probe->view, LayoutRect(0, 0, 53, 19));
          });
        }},
     }));
@@ -97,9 +97,9 @@ public:
       {"mount", 4, [](Run& r) {
          auto s = MountProbe(r);
          s->probe->view.SetMargin(Insets(1, 0, 2, 0));
-         r.AfterRender(s->Fence(), [=](Run& r) {
+         r.AfterRender(s->Fence(), [=](Run& done) {
            s->arranges = s->probe->arranges;
-           r.Rendered("initial", s->probe->view, LayoutRect(1, 2, 37, 19));
+           done.Rendered("initial", s->probe->view, LayoutRect(1, 2, 37, 19));
          });
        }},
       {"throw", 9, [](Run& r) {
@@ -120,27 +120,27 @@ public:
          auto s      = r.State<Faulty>();
          s->arranges = s->probe->arranges; // producer calls so far, whatever passes ran in between
          s->probe->view.InvalidateArrange();
-         r.AfterRender(s->Fence(), [=](Run& r) {
-           r.Rendered("retry", s->probe->view, LayoutRect(7, 9, 53, 29));
-           r.Equal("retry-producer", s->probe->arranges, s->arranges + 1);
+         r.AfterRender(s->Fence(), [=](Run& done) {
+           done.Rendered("retry", s->probe->view, LayoutRect(7, 9, 53, 29));
+           done.Equal("retry-producer", s->probe->arranges, s->arranges + 1);
          });
        }},
       {"cache", 5, [](Run& r) {
          auto s      = r.State<Faulty>();
          s->arranges = s->probe->arranges;
          s->Nudge();
-         r.AfterRender(s->Fence(), [=](Run& r) {
-           r.Rendered("retry-cache", s->probe->view, LayoutRect(7, 9, 53, 29));
-           r.Equal("retry-cache-producer", s->probe->arranges, s->arranges);
+         r.AfterRender(s->Fence(), [=](Run& done) {
+           done.Rendered("retry-cache", s->probe->view, LayoutRect(7, 9, 53, 29));
+           done.Equal("retry-cache-producer", s->probe->arranges, s->arranges);
          });
        }},
     }));
     out.push_back(Steps("K18.measure-reentry", "Reentry terminates and does not publish a reusable poisoned result", {
       {"mount", 4, [](Run& r) {
          auto s = MountProbe(r);
-         r.AfterRender(s->Fence(), [=](Run& r) {
+         r.AfterRender(s->Fence(), [=](Run& done) {
            s->measures = s->probe->measures;
-           r.Rendered("initial", s->probe->view, LayoutRect(0, 0, 37, 19));
+           done.Rendered("initial", s->probe->view, LayoutRect(0, 0, 37, 19));
          });
        }},
       {"reenter", 2, [](Run& r) {
@@ -169,9 +169,9 @@ public:
       {"recover", 6, [](Run& r) {
          auto s = r.State<Faulty>();
          s->probe->view.InvalidateMeasure();
-         r.AfterRender(s->Fence(), [=](Run& r) {
-           r.Size("recovered", s->probe->view.GetMeasuredSize(), MeasuredSize(37, 19));
-           r.Rendered("recovered.rendered", s->probe->view, LayoutRect(0, 0, 37, 19));
+         r.AfterRender(s->Fence(), [=](Run& done) {
+           done.Size("recovered", s->probe->view.GetMeasuredSize(), MeasuredSize(37, 19));
+           done.Rendered("recovered.rendered", s->probe->view, LayoutRect(0, 0, 37, 19));
          });
        }},
     }));

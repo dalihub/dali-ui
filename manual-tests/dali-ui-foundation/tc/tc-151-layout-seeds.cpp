@@ -82,13 +82,13 @@ public:
         auto fence = s->Fence();
         fence.push_back(v);
         fence.insert(fence.end(), s->swapped.begin(), s->swapped.end());
-        r.AfterRender(fence, [=](Run& r) {
-          r.Size("intrinsic", s->primary.GetMeasuredSize(), MeasuredSize(s->total, s->maxCross));
+        r.AfterRender(fence, [=](Run& done) {
+          done.Size("intrinsic", s->primary.GetMeasuredSize(), MeasuredSize(s->total, s->maxCross));
           float position = 0;
           for(unsigned i = 0; i < 16; ++i)
           {
-            r.Rendered(Id("horizontal", i).c_str(), s->children[i], LayoutRect(position, 0, s->widths[i], s->heights[i]));
-            r.Rendered(Id("vertical", i).c_str(), s->swapped[i], LayoutRect(0, position, s->heights[i], s->widths[i]));
+            done.Rendered(Id("horizontal", i).c_str(), s->children[i], LayoutRect(position, 0, s->widths[i], s->heights[i]));
+            done.Rendered(Id("vertical", i).c_str(), s->swapped[i], LayoutRect(0, position, s->heights[i], s->widths[i]));
             position += s->widths[i] + 3;
           }
         });
@@ -136,11 +136,11 @@ public:
            s->stage.Add(f);
            s->stage.Add(v);
            r.SetState(s);
-           r.AfterRender(s->Fence(), [=](Run& r) {
+           r.AfterRender(s->Fence(), [=](Run& done) {
              float x = 0;
              for(unsigned i = 0; i < 8; ++i)
              {
-               r.Rendered(Id("flex.forward", i).c_str(), s->children[i], LayoutRect(x, 0, s->widths[i] + 15, s->heights[i]));
+               done.Rendered(Id("flex.forward", i).c_str(), s->children[i], LayoutRect(x, 0, s->widths[i] + 15, s->heights[i]));
                x += s->widths[i] + 15;
              }
            });
@@ -148,11 +148,11 @@ public:
         {"reverse", 32, [](Run& r) {
            auto s = r.State<Seeded>();
            FlexLayout::DownCast(s->primary).SetDirection(FlexDirection::ROW_REVERSE);
-           r.AfterRender(s->Fence(), [=](Run& r) {
+           r.AfterRender(s->Fence(), [=](Run& done) {
              float x = 0;
              for(unsigned i = 0; i < 8; ++i)
              {
-               r.Rendered(Id("flex.reverse", i).c_str(), s->children[i], LayoutRect(s->total - x - s->widths[i] - 15, 0, s->widths[i] + 15, s->heights[i]));
+               done.Rendered(Id("flex.reverse", i).c_str(), s->children[i], LayoutRect(s->total - x - s->widths[i] - 15, 0, s->widths[i] + 15, s->heights[i]));
                x += s->widths[i] + 15;
              }
            });
@@ -160,21 +160,21 @@ public:
         {"reverse-rtl", 32, [flexForward](Run& r) {
            auto s = r.State<Seeded>();
            s->primary.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-           r.AfterRender(s->Fence(), [=](Run& r) { flexForward(r, s, "flex.reverse-rtl"); });
+           r.AfterRender(s->Fence(), [=](Run& done) { flexForward(done, s, "flex.reverse-rtl"); });
          }},
         {"translated-parent", 32, [flexForward](Run& r) {
            auto s = r.State<Seeded>();
            s->primary.SetMargin(Insets(31, 0, 17, 0));
-           r.AfterRender(s->Fence(), [=](Run& r) { flexForward(r, s, "flex.translated-parent"); });
+           r.AfterRender(s->Fence(), [=](Run& done) { flexForward(done, s, "flex.translated-parent"); });
          }},
         {"transposed", 32, [](Run& r) {
            auto s = r.State<Seeded>();
            s->transposed.InvalidateArrange(); // guarantees a pass that arranges (replays) the transposed tree
-           r.AfterRender(s->TransposedFence(), [=](Run& r) {
+           r.AfterRender(s->TransposedFence(), [=](Run& done) {
              float x = 0;
              for(unsigned i = 0; i < 8; ++i)
              {
-               r.Rendered(Id("flex.transposed", i).c_str(), s->swapped[i], LayoutRect(0, x, s->heights[i], s->widths[i] + 15));
+               done.Rendered(Id("flex.transposed", i).c_str(), s->swapped[i], LayoutRect(0, x, s->heights[i], s->widths[i] + 15));
                x += s->widths[i] + 15;
              }
            });
@@ -226,39 +226,39 @@ public:
            s->stage.Add(g);
            s->stage.Add(transpose);
            r.SetState(s);
-           r.AfterRender(s->Fence(), [=](Run& r) {
-             for(unsigned i = 0; i < 12; ++i) r.Rendered(Id("grid.ltr", i).c_str(), s->children[i], s->expected[i]);
+           r.AfterRender(s->Fence(), [=](Run& done) {
+             for(unsigned i = 0; i < 12; ++i) done.Rendered(Id("grid.ltr", i).c_str(), s->children[i], s->expected[i]);
            });
          }},
         {"rtl", 48, [](Run& r) {
            auto s = r.State<Seeded>();
            s->primary.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-           r.AfterRender(s->Fence(), [=](Run& r) {
+           r.AfterRender(s->Fence(), [=](Run& done) {
              for(unsigned i = 0; i < 12; ++i)
              {
                auto e = s->expected[i];
                e.x    = s->width - e.x - e.width;
-               r.Rendered(Id("grid.rtl", i).c_str(), s->children[i], e);
+               done.Rendered(Id("grid.rtl", i).c_str(), s->children[i], e);
              }
            });
          }},
         {"translated-parent", 48, [](Run& r) {
            auto s = r.State<Seeded>();
            s->primary.SetMargin(Insets(31, 0, 17, 0));
-           r.AfterRender(s->Fence(), [=](Run& r) {
+           r.AfterRender(s->Fence(), [=](Run& done) {
              for(unsigned i = 0; i < 12; ++i)
              {
                auto e = s->expected[i];
                e.x    = s->width - e.x - e.width;
-               r.Rendered(Id("grid.translated-parent", i).c_str(), s->children[i], e);
+               done.Rendered(Id("grid.translated-parent", i).c_str(), s->children[i], e);
              }
            });
          }},
         {"transposed", 48, [](Run& r) {
            auto s = r.State<Seeded>();
            s->transposed.InvalidateArrange(); // guarantees a pass that arranges (replays) the transposed tree
-           r.AfterRender(s->TransposedFence(), [=](Run& r) {
-             for(unsigned i = 0; i < 12; ++i) r.Rendered(Id("grid.transposed", i).c_str(), s->swapped[i], SwapAxes(s->expected[i]));
+           r.AfterRender(s->TransposedFence(), [=](Run& done) {
+             for(unsigned i = 0; i < 12; ++i) done.Rendered(Id("grid.transposed", i).c_str(), s->swapped[i], SwapAxes(s->expected[i]));
            });
          }},
       }));
@@ -291,34 +291,34 @@ public:
            s->stage.Add(a);
            s->stage.Add(transpose);
            r.SetState(s);
-           r.AfterRender(s->Fence(), [=](Run& r) {
-             for(unsigned i = 0; i < 12; ++i) r.Rendered(Id("absolute.ltr", i).c_str(), s->children[i], s->expected[i]);
+           r.AfterRender(s->Fence(), [=](Run& done) {
+             for(unsigned i = 0; i < 12; ++i) done.Rendered(Id("absolute.ltr", i).c_str(), s->children[i], s->expected[i]);
            });
          }},
         {"translated-parent", 48, [](Run& r) {
            auto s = r.State<Seeded>();
            s->primary.SetMargin(Insets(31, 0, 17, 0));
-           r.AfterRender(s->Fence(), [=](Run& r) {
-             for(unsigned i = 0; i < 12; ++i) r.Rendered(Id("absolute.translated-parent", i).c_str(), s->children[i], s->expected[i]);
+           r.AfterRender(s->Fence(), [=](Run& done) {
+             for(unsigned i = 0; i < 12; ++i) done.Rendered(Id("absolute.translated-parent", i).c_str(), s->children[i], s->expected[i]);
            });
          }},
         {"rtl", 48, [](Run& r) {
            auto s = r.State<Seeded>();
            s->primary.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-           r.AfterRender(s->Fence(), [=](Run& r) {
+           r.AfterRender(s->Fence(), [=](Run& done) {
              for(unsigned i = 0; i < 12; ++i)
              {
                auto e = s->expected[i];
                e.x    = 200 - e.x - e.width;
-               r.Rendered(Id("absolute.rtl", i).c_str(), s->children[i], e);
+               done.Rendered(Id("absolute.rtl", i).c_str(), s->children[i], e);
              }
            });
          }},
         {"transposed", 48, [](Run& r) {
            auto s = r.State<Seeded>();
            s->transposed.InvalidateArrange(); // guarantees a pass that arranges (replays) the transposed tree
-           r.AfterRender(s->TransposedFence(), [=](Run& r) {
-             for(unsigned i = 0; i < 12; ++i) r.Rendered(Id("absolute.transposed", i).c_str(), s->swapped[i], SwapAxes(s->expected[i]));
+           r.AfterRender(s->TransposedFence(), [=](Run& done) {
+             for(unsigned i = 0; i < 12; ++i) done.Rendered(Id("absolute.transposed", i).c_str(), s->swapped[i], SwapAxes(s->expected[i]));
            });
          }},
       }));
