@@ -4,6 +4,10 @@
 
 `ImageView`는 이미지 리소스를 표시하는 뷰입니다. 다양한 이미지 포맷을 지원하며, 이미지 맞춤(Fitting), 샘플링, 마스킹, 로딩 정책, N-patch 테두리 등을 제어할 수 있습니다.
 
+`ImageView`는 PNG, JPEG, BMP, GIF, WebP, ICO, WBMP, SVG 등의 정적 이미지와 지원되는 KTX 1, ASTC, PKM 텍스처 표시에 권장합니다. Animated GIF와 WebP는 첫 프레임만 표시하며, SVG 내부 애니메이션 재생은 지원하지 않습니다.
+
+Animated GIF/WebP 및 비트맵 프레임 목록 재생에는 `AnimatedImageView`, Lottie JSON 재생에는 `LottieAnimationView`를 사용합니다. 포맷별 지원표, 빌드 조건 및 제한 사항은 [이미지 포맷 지원](https://github.sec.samsung.net/NUI/dali-ui/wiki/Image-Format-Support-(kr)) 문서를 참고하세요.
+
 ---
 
 ## 목차
