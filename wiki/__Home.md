@@ -39,6 +39,7 @@ and **framework library developers** who extend or integrate the toolkit itself.
 * [State Management](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management)
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
   * Text and Mutiligual Management
+  * [Image Format Support](https://github.sec.samsung.net/NUI/dali-ui/wiki/Image-Format-Support)
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView)
 * Navigation
 * [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView)

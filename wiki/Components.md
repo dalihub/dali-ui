@@ -17,6 +17,9 @@ name | desc. | sample
 <br/>
 
 #### Basics
+
+For image formats, animation playback, and the recommended image Views, see [Image Format Support](https://github.sec.samsung.net/NUI/dali-ui/wiki/Image-Format-Support).
+
 `dali-ui-foundation`
 name | desc. | sample
 -- | -- | --
