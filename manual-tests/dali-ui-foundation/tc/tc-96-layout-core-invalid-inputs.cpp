@@ -51,9 +51,9 @@ public:
         r.Near("minimum-height", a.GetMinimumHeight(), 2, 0);
         r.Near("maximum-height", a.GetMaximumHeight(), 80, 0);
         View stage = Mount(r, a, 200, 100);
-        r.AfterRender({stage, a}, [=](Run& r) {
-          r.Size("preserved-measure", a.GetMeasuredSize(), MeasuredSize(37, 19));
-          r.Rendered("preserved-rendered", a, LayoutRect(0, 0, 37, 19));
+        r.AfterRender({stage, a}, [=](Run& done) {
+          done.Size("preserved-measure", a.GetMeasuredSize(), MeasuredSize(37, 19));
+          done.Rendered("preserved-rendered", a, LayoutRect(0, 0, 37, 19));
         });
       }));
     for(float requested : {20.0f, 70.0f, 150.0f})
@@ -64,9 +64,9 @@ public:
         a.SetMinimumHeight(90);
         a.SetMaximumHeight(30);
         View stage = Mount(r, a, 300, 300);
-        r.AfterRender({stage, a}, [=](Run& r) {
-          r.Size("maximum-wins", a.GetMeasuredSize(), MeasuredSize(40, 30));
-          r.Rendered("maximum-wins.rendered", a, LayoutRect(0, 0, 40, 30));
+        r.AfterRender({stage, a}, [=](Run& done) {
+          done.Size("maximum-wins", a.GetMeasuredSize(), MeasuredSize(40, 30));
+          done.Rendered("maximum-wins.rendered", a, LayoutRect(0, 0, 40, 30));
         });
       }));
     for(float sentinel : {WRAP_CONTENT, MATCH_PARENT})
@@ -79,7 +79,7 @@ public:
         View       stage    = Mount(r, a, 200, 100);
         const bool match    = sentinel == MATCH_PARENT;
         LayoutRect expected = match ? LayoutRect(0, 0, 200, 100) : LayoutRect(0, 0, 0, 0);
-        r.AfterRender({stage, a}, [=](Run& r) { r.Rendered("sentinel.rendered", a, expected); });
+        r.AfterRender({stage, a}, [=](Run& done) { done.Rendered("sentinel.rendered", a, expected); });
       }));
     out.push_back(Single("R03.negative-flex-factors", "Negative flex factors normalize to zero", 2, [](Run& r) {
       auto p = FlexLayoutParams::New().SetFlexGrow(-1).SetFlexShrink(-2);
@@ -117,7 +117,7 @@ public:
            const LayoutRect actual = LayoutValidation::Bounds(s->probe->view);
            r.Truth("invalid-result-contained", caught || (actual.x == 7 && actual.y == 9 && actual.width == 53 && actual.height == 29));
            s->probe->view.InvalidateArrange();
-           r.AfterRender({s->stage, s->probe->view}, [=](Run& r) { r.Rendered("safe-actor", s->probe->view, LayoutRect(7, 9, 53, 29)); });
+           r.AfterRender({s->stage, s->probe->view}, [=](Run& done) { done.Rendered("safe-actor", s->probe->view, LayoutRect(7, 9, 53, 29)); });
          }},
         {"recovered", 4, [](Run& r) {
            auto s            = r.State<ReturnedRect>();
@@ -129,7 +129,7 @@ public:
            s->probe->view.SetRequestedWidth(61);
            s->probe->view.SetRequestedHeight(31);
            s->probe->view.SetMargin(Insets(11, 0, 13, 0));
-           r.AfterRender({s->stage, s->probe->view}, [=](Run& r) { r.Rendered("recovered", s->probe->view, LayoutRect(11, 13, 61, 31)); });
+           r.AfterRender({s->stage, s->probe->view}, [=](Run& done) { done.Rendered("recovered", s->probe->view, LayoutRect(11, 13, 61, 31)); });
          }},
       }));
     out.push_back(Single("R04.unbounded-exact", "A detached MATCH_PARENT view is measured exactly at a bounded constraint; an unbounded, threshold or negative constraint stays a budget", 10, [](Run& r) {
@@ -155,9 +155,9 @@ public:
       a.SetMinimumHeight(90);
       a.SetMaximumHeight(30);
       View stage = Mount(r, a, 300, 300);
-      r.AfterRender({stage, a}, [=](Run& r) {
-        r.Size("maximum-wins", a.GetMeasuredSize(), MeasuredSize(40, 30));
-        r.Rendered("maximum-wins.rendered", a, LayoutRect(0, 0, 40, 30));
+      r.AfterRender({stage, a}, [=](Run& done) {
+        done.Size("maximum-wins", a.GetMeasuredSize(), MeasuredSize(40, 30));
+        done.Rendered("maximum-wins.rendered", a, LayoutRect(0, 0, 40, 30));
       });
     }));
     return out;

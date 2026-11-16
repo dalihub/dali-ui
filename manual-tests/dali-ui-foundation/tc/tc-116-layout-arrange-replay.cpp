@@ -55,13 +55,13 @@ public:
          s->stage.Add(s->a->view);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->a->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->a->view, s->sibling}, [=](Run& done) {
            s->arrangesA = s->a->arranges;
            Actor raw    = s->a->view;
-           r.Rendered("initial", s->a->view, LayoutRect(7, 9, 37, 19));
-           r.Near("pivot-x", raw.GetProperty<Vector3>(Actor::Property::PIVOT).x, 0.5);
-           r.Truth("placement-ignores-pivot", !raw.GetProperty<bool>(Actor::Property::POSITION_USES_PIVOT));
-           r.Near("origin-x", raw.GetProperty<Vector3>(Actor::Property::PARENT_ORIGIN).x, 0);
+           done.Rendered("initial", s->a->view, LayoutRect(7, 9, 37, 19));
+           done.Near("pivot-x", raw.GetProperty<Vector3>(Actor::Property::PIVOT).x, 0.5);
+           done.Truth("placement-ignores-pivot", !raw.GetProperty<bool>(Actor::Property::POSITION_USES_PIVOT));
+           done.Near("origin-x", raw.GetProperty<Vector3>(Actor::Property::PARENT_ORIGIN).x, 0);
          });
        }},
       {"clobber-and-replay", 5, [](Run& r) {
@@ -70,9 +70,9 @@ public:
          raw.SetProperty(Actor::Property::POSITION, Vector3(90, 80, 0));
          raw.SetProperty(Actor::Property::SIZE, Vector3(1, 2, 0));
          s->Nudge();
-         r.AfterRender({s->stage, s->a->view, s->sibling}, [=](Run& r) {
-           r.Rendered("repaired", s->a->view, LayoutRect(7, 9, 37, 19));
-           r.Equal("producer-once", s->a->arranges, s->arrangesA);
+         r.AfterRender({s->stage, s->a->view, s->sibling}, [=](Run& done) {
+           done.Rendered("repaired", s->a->view, LayoutRect(7, 9, 37, 19));
+           done.Equal("producer-once", s->a->arranges, s->arrangesA);
          });
        }},
     }));
@@ -91,11 +91,11 @@ public:
          s->stage.Add(s->root);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->root, s->a->view, s->b->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->root, s->a->view, s->b->view, s->sibling}, [=](Run& done) {
            s->arrangesA = s->a->arranges;
            s->arrangesB = s->b->arranges;
-           r.Rendered("initial-a", s->a->view, LayoutRect(0, 0, 20, 10));
-           r.Rendered("initial-b", s->b->view, LayoutRect(20, 0, 30, 15));
+           done.Rendered("initial-a", s->a->view, LayoutRect(0, 0, 20, 10));
+           done.Rendered("initial-b", s->b->view, LayoutRect(20, 0, 30, 15));
          });
        }},
       {"clobber-and-replay", 10, [](Run& r) {
@@ -103,11 +103,11 @@ public:
          Actor raw = s->b->view;
          raw.SetProperty(Actor::Property::POSITION, Vector3(99, 88, 0));
          s->Nudge();
-         r.AfterRender({s->stage, s->root, s->a->view, s->b->view, s->sibling}, [=](Run& r) {
-           r.Rendered("a", s->a->view, LayoutRect(0, 0, 20, 10));
-           r.Rendered("b", s->b->view, LayoutRect(20, 0, 30, 15));
-           r.Equal("a-producer", s->a->arranges, s->arrangesA);
-           r.Equal("b-producer", s->b->arranges, s->arrangesB);
+         r.AfterRender({s->stage, s->root, s->a->view, s->b->view, s->sibling}, [=](Run& done) {
+           done.Rendered("a", s->a->view, LayoutRect(0, 0, 20, 10));
+           done.Rendered("b", s->b->view, LayoutRect(20, 0, 30, 15));
+           done.Equal("a-producer", s->a->arranges, s->arrangesA);
+           done.Equal("b-producer", s->b->arranges, s->arrangesB);
          });
        }},
     }));
@@ -122,18 +122,18 @@ public:
          s->stage.Add(s->a->view);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->a->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->a->view, s->sibling}, [=](Run& done) {
            s->arrangesA = s->a->arranges;
-           r.Rect("returned", r.Snapshot(s->a->view), LayoutRect(11, 13, 53, 29));
-           r.Rendered("returned.rendered", s->a->view, LayoutRect(11, 13, 53, 29));
+           done.Rect("returned", done.Snapshot(s->a->view), LayoutRect(11, 13, 53, 29));
+           done.Rendered("returned.rendered", s->a->view, LayoutRect(11, 13, 53, 29));
          });
        }},
       {"hit", 5, [](Run& r) {
          auto s = r.State<Replay>();
          s->Nudge();
-         r.AfterRender({s->stage, s->a->view, s->sibling}, [=](Run& r) {
-           r.Rendered("hit", s->a->view, LayoutRect(11, 13, 53, 29));
-           r.Equal("producer", s->a->arranges, s->arrangesA);
+         r.AfterRender({s->stage, s->a->view, s->sibling}, [=](Run& done) {
+           done.Rendered("hit", s->a->view, LayoutRect(11, 13, 53, 29));
+           done.Equal("producer", s->a->arranges, s->arrangesA);
          });
        }},
     }));
@@ -159,10 +159,10 @@ public:
          s->stage.Add(s->c->view);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->c->view, s->sibling}, [=](Run& r) {
-           r.Rect("received", *s->received, LayoutRect(0, 0, 120, 80));
-           r.Size("measured", s->c->view.GetMeasuredSize(), MeasuredSize(120, 80));
-           r.Rendered("c", s->c->view, LayoutRect(0, 0, 120, 80));
+         r.AfterRender({s->stage, s->c->view, s->sibling}, [=](Run& done) {
+           done.Rect("received", *s->received, LayoutRect(0, 0, 120, 80));
+           done.Size("measured", s->c->view.GetMeasuredSize(), MeasuredSize(120, 80));
+           done.Rendered("c", s->c->view, LayoutRect(0, 0, 120, 80));
          });
        }},
       {"external-hit", 10, [](Run& r) {
@@ -180,9 +180,9 @@ public:
       {"pass", 5, [](Run& r) {
          auto s = r.State<ClampedHit>();
          s->sibling.SetRequestedWidth(s->nudge += 1);
-         r.AfterRender({s->stage, s->c->view, s->sibling}, [=](Run& r) {
-           r.Rendered("c", s->c->view, LayoutRect(0, 0, 120, 80));
-           r.Equal("pass.no-arrange-producer", s->c->arranges, s->arranges);
+         r.AfterRender({s->stage, s->c->view, s->sibling}, [=](Run& done) {
+           done.Rendered("c", s->c->view, LayoutRect(0, 0, 120, 80));
+           done.Equal("pass.no-arrange-producer", s->c->arranges, s->arranges);
          });
        }},
     }));

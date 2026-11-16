@@ -41,10 +41,10 @@ public:
         f.Add(a);
         f.Add(b);
         View stage = Mount(r, f, width, 50);
-        r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.AfterRender({stage, f, a, b}, [=](Run& done) {
           const float aw = shrink ? 90 : 50, bw = shrink ? 160 : 100;
-          r.Rendered("a", a, LayoutRect(0, 0, aw, 10));
-          r.Rendered("b", b, LayoutRect(aw, 0, bw, 10));
+          done.Rendered("a", a, LayoutRect(0, 0, aw, 10));
+          done.Rendered("b", b, LayoutRect(aw, 0, bw, 10));
         });
       }));
     for(bool shrink : {false, true})
@@ -63,11 +63,11 @@ public:
         f.Add(a);
         f.Add(b);
         View stage = Mount(r, f, width, 50);
-        r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.AfterRender({stage, f, a, b}, [=](Run& done) {
           const float w = shrink ? 50 : 100;
-          r.Size("measured-a", a.GetMeasuredSize(), MeasuredSize(shrink ? 80 : 60, 10));
-          r.Rendered("allocated-a", a, LayoutRect(0, 0, shrink ? 80 : 60, 10));
-          r.Rendered("allocated-b", b, LayoutRect(w, 0, w, 10));
+          done.Size("measured-a", a.GetMeasuredSize(), MeasuredSize(shrink ? 80 : 60, 10));
+          done.Rendered("allocated-a", a, LayoutRect(0, 0, shrink ? 80 : 60, 10));
+          done.Rendered("allocated-b", b, LayoutRect(w, 0, w, 10));
         });
       }));
     out.push_back(Single("F09.match-grow", "MATCH_PARENT consumes the remaining share", 4, [](Run& r) {
@@ -79,7 +79,7 @@ public:
       f.Add(a);
       f.Add(b);
       View stage = Mount(r, f, 200, 50);
-      r.AfterRender({stage, f, a, b}, [=](Run& r) { r.Rendered("match", b, LayoutRect(50, 0, 150, 10)); });
+      r.AfterRender({stage, f, a, b}, [=](Run& done) { done.Rendered("match", b, LayoutRect(50, 0, 150, 10)); });
     }));
     out.push_back(Single("F08.zero-basis", "Zero basis is not intrinsic basis", 8, [](Run& r) {
       auto f = FlexLayout::New();
@@ -91,9 +91,9 @@ public:
       f.Add(a);
       f.Add(b);
       View stage = Mount(r, f, 100, 50);
-      r.AfterRender({stage, f, a, b}, [=](Run& r) {
-        r.Rendered("zero", a, LayoutRect(0, 0, 0, 10));
-        r.Rendered("growing", b, LayoutRect(0, 0, 100, 10));
+      r.AfterRender({stage, f, a, b}, [=](Run& done) {
+        done.Rendered("zero", a, LayoutRect(0, 0, 0, 10));
+        done.Rendered("growing", b, LayoutRect(0, 0, 100, 10));
       });
     }));
     out.push_back(Single("F15.shrink-clamp", "Individual shrink clamps at zero without redistribution", 8, [](Run& r) {
@@ -106,9 +106,9 @@ public:
       f.Add(a);
       f.Add(b);
       View stage = Mount(r, f, 10, 50);
-      r.AfterRender({stage, f, a, b}, [=](Run& r) {
-        r.Rendered("clamped", a, LayoutRect(0, 0, 0, 10));
-        r.Rendered("remaining", b, LayoutRect(0, 0, 54.5f, 10));
+      r.AfterRender({stage, f, a, b}, [=](Run& done) {
+        done.Rendered("clamped", a, LayoutRect(0, 0, 0, 10));
+        done.Rendered("remaining", b, LayoutRect(0, 0, 54.5f, 10));
       });
     }));
     out.push_back(Single("F16.margin-padding", "Container padding and child margin shrink the growing child's rendered slot", 4, [](Run& r) {
@@ -121,7 +121,7 @@ public:
       a.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1));
       f.Add(a);
       View stage = Mount(r, f, 120, 80);
-      r.AfterRender({stage, f, a}, [=](Run& r) { r.Rendered("padded-margin", a, LayoutRect(5, 13, 106, 48)); });
+      r.AfterRender({stage, f, a}, [=](Run& done) { done.Rendered("padded-margin", a, LayoutRect(5, 13, 106, 48)); });
     }));
     out.push_back(Single("F17.wrap-minimum-grow", "A minimum width extends a WRAP_CONTENT flex and the extra space is distributed at arrange time", 10, [](Run& r) {
       auto f = FlexLayout::New();
@@ -134,10 +134,10 @@ public:
       f.Add(a);
       f.Add(b);
       View stage = Mount(r, f, 200, 30);
-      r.AfterRender({stage, f, a, b}, [=](Run& r) {
-        r.Size("minimum.measured", f.GetMeasuredSize(), MeasuredSize(100, 30));
-        r.Rendered("minimum.a", a, LayoutRect(0, 0, 45, 10));
-        r.Rendered("minimum.b", b, LayoutRect(45, 0, 55, 10));
+      r.AfterRender({stage, f, a, b}, [=](Run& done) {
+        done.Size("minimum.measured", f.GetMeasuredSize(), MeasuredSize(100, 30));
+        done.Rendered("minimum.a", a, LayoutRect(0, 0, 45, 10));
+        done.Rendered("minimum.b", b, LayoutRect(45, 0, 55, 10));
       });
     }));
     out.push_back(Steps("F10.grow-maximum-kept", "A MATCH_PARENT grow share assigned in Measure is clamped by its maximum and not given to the sibling", {
@@ -156,19 +156,19 @@ public:
          f.Add(s->b);
          s->stage = Mount(r, f, 300, 50);
          r.SetState(s);
-         r.AfterRender({s->stage, s->flex, s->a, s->b}, [=](Run& r) {
-           r.Rendered("a", s->a, LayoutRect(0, 0, 180, 20));
-           r.Rendered("b", s->b, LayoutRect(180, 0, 50, 20));
-           r.Size("b.measured", s->b.GetMeasuredSize(), MeasuredSize(50, 20));
+         r.AfterRender({s->stage, s->flex, s->a, s->b}, [=](Run& done) {
+           done.Rendered("a", s->a, LayoutRect(0, 0, 180, 20));
+           done.Rendered("b", s->b, LayoutRect(180, 0, 50, 20));
+           done.Size("b.measured", s->b.GetMeasuredSize(), MeasuredSize(50, 20));
          });
        }},
       {"arrange-only", 10, [](Run& r) {
          auto s = r.State<GrowKept>();
          s->flex.InvalidateArrange();
-         r.AfterRender({s->stage, s->flex, s->a, s->b}, [=](Run& r) {
-           r.Rendered("a", s->a, LayoutRect(0, 0, 180, 20));
-           r.Rendered("b", s->b, LayoutRect(180, 0, 50, 20));
-           r.Size("b.measured", s->b.GetMeasuredSize(), MeasuredSize(50, 20));
+         r.AfterRender({s->stage, s->flex, s->a, s->b}, [=](Run& done) {
+           done.Rendered("a", s->a, LayoutRect(0, 0, 180, 20));
+           done.Rendered("b", s->b, LayoutRect(180, 0, 50, 20));
+           done.Size("b.measured", s->b.GetMeasuredSize(), MeasuredSize(50, 20));
          });
        }},
     }));
@@ -184,11 +184,11 @@ public:
       f.Add(b);
       View stage = Mount(r, f, 100, 50);
       // Line 80 + 60 = 140 in 100: deficit 40 weighted 80:60 -> a 80 - 40 * 80 / 140 = 400/7, b 300/7.
-      r.AfterRender({stage, f, a->view, b}, [=](Run& r) {
-        r.Size("a", a->view.GetMeasuredSize(), MeasuredSize(400.0f / 7, 19));
-        r.Near("a.last-width", a->lastWidth, 400.0 / 7);
-        r.Rendered("a.rendered", a->view, LayoutRect(0, 0, 400.0f / 7, 19));
-        r.Rendered("b.rendered", b, LayoutRect(400.0f / 7, 0, 300.0f / 7, 10));
+      r.AfterRender({stage, f, a->view, b}, [=](Run& done) {
+        done.Size("a", a->view.GetMeasuredSize(), MeasuredSize(400.0f / 7, 19));
+        done.Near("a.last-width", a->lastWidth, 400.0 / 7);
+        done.Rendered("a.rendered", a->view, LayoutRect(0, 0, 400.0f / 7, 19));
+        done.Rendered("b.rendered", b, LayoutRect(400.0f / 7, 0, 300.0f / 7, 10));
       });
     }));
     return out;

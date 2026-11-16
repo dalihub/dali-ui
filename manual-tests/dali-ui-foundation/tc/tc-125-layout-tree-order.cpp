@@ -68,10 +68,10 @@ std::shared_ptr<Ordered> MountThree(Run& r)
 void MountChecked(Run& r)
 {
   auto s = MountThree(r);
-  r.AfterRender(s->Fence(), [=](Run& r) {
-    r.Rendered("initial-a", s->a, LayoutRect(0, 0, 20, 10));
-    r.Rendered("initial-b", s->b, LayoutRect(20, 0, 30, 10));
-    r.Rendered("initial-c", s->c, LayoutRect(50, 0, 40, 10));
+  r.AfterRender(s->Fence(), [=](Run& done) {
+    done.Rendered("initial-a", s->a, LayoutRect(0, 0, 20, 10));
+    done.Rendered("initial-b", s->b, LayoutRect(20, 0, 30, 10));
+    done.Rendered("initial-c", s->c, LayoutRect(50, 0, 40, 10));
   });
 }
 /// 2 + 6n rows for n children: both child counts, the layout order and the Actor order of every
@@ -127,9 +127,9 @@ public:
       out.push_back(Steps(preserve ? "ORDER.preserve" : "ORDER.update", "Plain RaiseAbove versus RaiseAbovePreservingLayout, rendered on screen", {
         {"mount", 8, [](Run& r) {
            auto s = MountThree(r);
-           r.AfterRender(s->Fence(), [=](Run& r) {
-             r.Rendered("initial-a", s->a, LayoutRect(0, 0, 20, 10));
-             r.Rendered("initial-b", s->b, LayoutRect(20, 0, 30, 10));
+           r.AfterRender(s->Fence(), [=](Run& done) {
+             done.Rendered("initial-a", s->a, LayoutRect(0, 0, 20, 10));
+             done.Rendered("initial-b", s->b, LayoutRect(20, 0, 30, 10));
            });
          }},
         {"raise-a-above-c", 10, [preserve](Run& r) {
@@ -139,11 +139,11 @@ public:
            else
              s->a.RaiseAbove(s->c);
            s->Nudge();
-           r.AfterRender(s->Fence(), [=](Run& r) {
-             Identity(r, "first", s->stack.GetChildViewAt(0), preserve ? s->a : s->b);
-             Identity(r, "last", s->stack.GetChildViewAt(2), preserve ? s->c : s->a);
-             r.Rendered("a", s->a, LayoutRect(preserve ? 0 : 70, 0, 20, 10));
-             r.Rendered("b", s->b, LayoutRect(preserve ? 20 : 0, 0, 30, 10));
+           r.AfterRender(s->Fence(), [=](Run& done) {
+             Identity(done, "first", s->stack.GetChildViewAt(0), preserve ? s->a : s->b);
+             Identity(done, "last", s->stack.GetChildViewAt(2), preserve ? s->c : s->a);
+             done.Rendered("a", s->a, LayoutRect(preserve ? 0 : 70, 0, 20, 10));
+             done.Rendered("b", s->b, LayoutRect(preserve ? 20 : 0, 0, 30, 10));
            });
          }},
       }));
@@ -160,17 +160,17 @@ public:
       r.Equal("actor", s->stack.GetChildCount(), 3);
       r.Truth("out-of-range", !s->stack.GetChildViewAt(2));
       s->stage = Mount(r, s->stack, 100, 50);
-      r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) { r.Rendered("b", s->b, LayoutRect(20, 0, 30, 10)); });
+      r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) { done.Rendered("b", s->b, LayoutRect(20, 0, 30, 10)); });
     }));
     const char* const preserveIds[] = {"ORDER.preserve-raise", "ORDER.preserve-lower", "ORDER.preserve-lower-below", "ORDER.preserve-raise-to-top", "ORDER.preserve-lower-to-bottom", "ORDER.preserve-raise-above"};
     for(unsigned operation = 0; operation < 6; ++operation)
       out.push_back(Steps(preserveIds[operation], "A ...PreservingLayout() call changes the actual Actor order while retaining all logical slots", {
         {"mount", 12, [](Run& r) {
            auto s = MountThree(r);
-           r.AfterRender(s->Fence(), [=](Run& r) {
-             r.Rendered("initial-a", s->a, LayoutRect(0, 0, 20, 10));
-             r.Rendered("initial-b", s->b, LayoutRect(20, 0, 30, 10));
-             r.Rendered("initial-c", s->c, LayoutRect(50, 0, 40, 10));
+           r.AfterRender(s->Fence(), [=](Run& done) {
+             done.Rendered("initial-a", s->a, LayoutRect(0, 0, 20, 10));
+             done.Rendered("initial-b", s->b, LayoutRect(20, 0, 30, 10));
+             done.Rendered("initial-c", s->c, LayoutRect(50, 0, 40, 10));
            });
          }},
         {"reorder", 20, [operation](Run& r) {
@@ -197,19 +197,19 @@ public:
                break;
            }
            s->Nudge();
-           r.AfterRender(s->Fence(), [=](Run& r) {
+           r.AfterRender(s->Fence(), [=](Run& done) {
              const View logical[]   = {s->a, s->b, s->c};
              const View visual[][3] = {{s->b, s->a, s->c}, {s->a, s->c, s->b}, {s->c, s->a, s->b}, {s->b, s->c, s->a}, {s->c, s->a, s->b}, {s->b, s->c, s->a}};
-             r.Equal("logical.count", s->stack.GetChildViewCount(), 3);
-             r.Equal("actor.count", s->stack.GetChildCount(), 3);
+             done.Equal("logical.count", s->stack.GetChildViewCount(), 3);
+             done.Equal("actor.count", s->stack.GetChildCount(), 3);
              for(unsigned i = 0; i < 3; ++i)
              {
-               Identity(r, Id("logical.order", i).c_str(), s->stack.GetChildViewAt(i), logical[i]);
-               r.Truth(Id("actor.order", i).c_str(), s->stack.GetChildAt(i) == visual[operation][i]);
+               Identity(done, Id("logical.order", i).c_str(), s->stack.GetChildViewAt(i), logical[i]);
+               done.Truth(Id("actor.order", i).c_str(), s->stack.GetChildAt(i) == visual[operation][i]);
              }
-             r.Rendered("preserved.a", s->a, LayoutRect(0, 0, 20, 10));
-             r.Rendered("preserved.b", s->b, LayoutRect(20, 0, 30, 10));
-             r.Rendered("preserved.c", s->c, LayoutRect(50, 0, 40, 10));
+             done.Rendered("preserved.a", s->a, LayoutRect(0, 0, 20, 10));
+             done.Rendered("preserved.b", s->b, LayoutRect(20, 0, 30, 10));
+             done.Rendered("preserved.c", s->c, LayoutRect(50, 0, 40, 10));
            });
          }},
       }));
@@ -231,13 +231,13 @@ public:
            else
              Dali::Ui::Extension::View::RaisePreservingLayout(s->a);
            s->Nudge();
-           r.AfterRender(s->Fence(), [=](Run& r) { CheckOrders(r, s, rule.toTop ? "bca" : "bac", "abc"); });
+           r.AfterRender(s->Fence(), [=](Run& done) { CheckOrders(done, s, rule.toTop ? "bca" : "bac", "abc"); });
          }},
         {rule.action, rule.checks, [rule](Run& r) {
            auto s = r.State<Ordered>();
            rule.call(*s);
            s->Nudge();
-           r.AfterRender(s->Fence(rule.logical), [=](Run& r) { CheckOrders(r, s, rule.actor, rule.logical); });
+           r.AfterRender(s->Fence(rule.logical), [=](Run& done) { CheckOrders(done, s, rule.actor, rule.logical); });
          }},
       }));
     return out;

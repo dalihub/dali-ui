@@ -39,7 +39,7 @@ public:
         g.SetColumnSpacing(7);
         View a     = Cell(g, index, index);
         View stage = Mount(r, g, 100, 70);
-        r.AfterRender({stage, g, a}, [=](Run& r) { r.Rendered("cell", a, index == 0 ? LayoutRect(0, 0, 30, 20) : LayoutRect(37, 25, 50, 30)); });
+        r.AfterRender({stage, g, a}, [=](Run& done) { done.Rendered("cell", a, index == 0 ? LayoutRect(0, 0, 30, 20) : LayoutRect(37, 25, 50, 30)); });
       }));
     for(uint32_t span : {0u, 1u, 2u, UINT32_MAX})
       out.push_back(Single(Id("G12.span", span).c_str(), "Minimum and clamped span", 6, [span](Run& r) {
@@ -52,7 +52,7 @@ public:
         r.Truth("params", a.TryGetLayoutParams(p));
         r.Equal("normalized-span", p.GetRowSpan(), span == 0 ? 1 : span);
         View stage = Mount(r, g, 100, 70);
-        r.AfterRender({stage, g, a}, [=](Run& r) { r.Rendered("span", a, span <= 1 ? LayoutRect(0, 0, 30, 20) : LayoutRect(0, 0, 87, 55)); });
+        r.AfterRender({stage, g, a}, [=](Run& done) { done.Rendered("span", a, span <= 1 ? LayoutRect(0, 0, 30, 20) : LayoutRect(0, 0, 87, 55)); });
       }));
     out.push_back(Steps("G13.definition-clear", "Clear and restore tracks", {
       {"defined", 4, [](Run& r) {
@@ -63,13 +63,13 @@ public:
          s->a     = Cell(s->grid, UINT32_MAX, UINT32_MAX);
          s->stage = Mount(r, s->grid, 100, 60);
          r.SetState(s);
-         r.AfterRender({s->stage, s->grid, s->a}, [=](Run& r) { r.Rendered("defined", s->a, LayoutRect(0, 0, 30, 20)); });
+         r.AfterRender({s->stage, s->grid, s->a}, [=](Run& done) { done.Rendered("defined", s->a, LayoutRect(0, 0, 30, 20)); });
        }},
       {"cleared", 4, [](Run& r) {
          auto s = r.State<Gridded>();
          s->grid.ClearRowDefinitions();
          s->grid.ClearColumnDefinitions();
-         r.AfterRender({s->stage, s->grid, s->a}, [=](Run& r) { r.Rendered("cleared", s->a, LayoutRect(0, 0, 100, 60)); });
+         r.AfterRender({s->stage, s->grid, s->a}, [=](Run& done) { done.Rendered("cleared", s->a, LayoutRect(0, 0, 100, 60)); });
        }},
     }));
     return out;

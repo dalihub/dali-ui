@@ -61,22 +61,22 @@ public:
          s->stage.Add(s->left);
          s->stage.Add(s->right);
          r.SetState(s);
-         r.AfterRender({s->stage, s->left, s->right, s->a, s->b, s->c}, [=](Run& r) {
-           r.Rendered("left", s->left, LayoutRect(0, 0, 57, 15));
-           r.Rendered("right", s->right, LayoutRect(0, 50, 40, 20));
+         r.AfterRender({s->stage, s->left, s->right, s->a, s->b, s->c}, [=](Run& done) {
+           done.Rendered("left", s->left, LayoutRect(0, 0, 57, 15));
+           done.Rendered("right", s->right, LayoutRect(0, 50, 40, 20));
          });
        }},
       {"reparent", 12, [](Run& r) {
          auto s = r.State<Roots>();
          s->right.Add(s->b);
-         r.AfterRender({s->stage, s->left, s->right, s->a, s->b, s->c}, [=](Run& r) {
-           r.Size("old-root", s->left.GetMeasuredSize(), MeasuredSize(20, 10));
-           r.Size("new-root", s->right.GetMeasuredSize(), MeasuredSize(75, 20));
-           r.Equal("old-count", s->left.GetChildViewCount(), 1);
-           r.Equal("new-count", s->right.GetChildViewCount(), 2);
-           r.Rendered("moved", s->b, LayoutRect(45, 0, 30, 15));
-           Identity(r, "parent", View::DownCast(s->b.GetParent()), s->right);
-           Identity(r, "left-child", s->left.GetChildViewAt(0), s->a);
+         r.AfterRender({s->stage, s->left, s->right, s->a, s->b, s->c}, [=](Run& done) {
+           done.Size("old-root", s->left.GetMeasuredSize(), MeasuredSize(20, 10));
+           done.Size("new-root", s->right.GetMeasuredSize(), MeasuredSize(75, 20));
+           done.Equal("old-count", s->left.GetChildViewCount(), 1);
+           done.Equal("new-count", s->right.GetChildViewCount(), 2);
+           done.Rendered("moved", s->b, LayoutRect(45, 0, 30, 15));
+           Identity(done, "parent", View::DownCast(s->b.GetParent()), s->right);
+           Identity(done, "left-child", s->left.GetChildViewAt(0), s->a);
          });
        }},
     }));
@@ -90,17 +90,17 @@ public:
          s->root.Add(s->child);
          s->stage = Mount(r, s->root, 100, 60);
          r.SetState(s);
-         r.AfterRender({s->stage, s->root, s->child}, [=](Run& r) {
-           r.Size("attached-to-root", s->root.GetMeasuredSize(), MeasuredSize(44, 28));
-           r.Rendered("attached.rendered", s->root, LayoutRect(0, 0, 44, 28));
+         r.AfterRender({s->stage, s->root, s->child}, [=](Run& done) {
+           done.Size("attached-to-root", s->root.GetMeasuredSize(), MeasuredSize(44, 28));
+           done.Rendered("attached.rendered", s->root, LayoutRect(0, 0, 44, 28));
          });
        }},
       {"remove", 6, [](Run& r) {
          auto s = r.State<Roots>();
          s->root.Remove(s->child);
-         r.AfterRender({s->stage, s->root}, [=](Run& r) {
-           r.Size("empty", s->root.GetMeasuredSize(), MeasuredSize(0, 0));
-           r.Rendered("empty.rendered", s->root, LayoutRect(0, 0, 0, 0));
+         r.AfterRender({s->stage, s->root}, [=](Run& done) {
+           done.Size("empty", s->root.GetMeasuredSize(), MeasuredSize(0, 0));
+           done.Rendered("empty.rendered", s->root, LayoutRect(0, 0, 0, 0));
          });
        }},
       {"detached", 2, [](Run& r) {
@@ -110,10 +110,10 @@ public:
       {"reattach", 10, [](Run& r) {
          auto s = r.State<Roots>();
          s->root.Add(s->child);
-         r.AfterRender({s->stage, s->root, s->child}, [=](Run& r) {
-           r.Size("reattached", s->root.GetMeasuredSize(), MeasuredSize(44, 28));
-           r.Rendered("reattached.rendered", s->root, LayoutRect(0, 0, 44, 28));
-           r.Rendered("child", s->child, LayoutRect(7, 9, 37, 19));
+         r.AfterRender({s->stage, s->root, s->child}, [=](Run& done) {
+           done.Size("reattached", s->root.GetMeasuredSize(), MeasuredSize(44, 28));
+           done.Rendered("reattached.rendered", s->root, LayoutRect(0, 0, 44, 28));
+           done.Rendered("child", s->child, LayoutRect(7, 9, 37, 19));
          });
        }},
     }));
@@ -138,10 +138,10 @@ public:
          ColorizeTree(s->parent);
          s->stage.Add(s->parent);
          r.SetState(s);
-         r.AfterRender({s->parent, s->probe->view}, [=](Run& r) {
-           const MeasuredSize bound = WindowBound(r);
-           r.Rendered("probe", s->probe->view, LayoutRect(7, 9, bound.width, bound.height));
-           r.Size("probe.measured", s->probe->view.GetMeasuredSize(), bound);
+         r.AfterRender({s->parent, s->probe->view}, [=](Run& done) {
+           const MeasuredSize bound = WindowBound(done);
+           done.Rendered("probe", s->probe->view, LayoutRect(7, 9, bound.width, bound.height));
+           done.Size("probe.measured", s->probe->view.GetMeasuredSize(), bound);
          });
        }},
       {"detach", 8, [](Run& r) {
@@ -156,10 +156,10 @@ public:
       {"reattach", 6, [](Run& r) {
          auto s = r.State<Offscene>();
          r.GetWindow().Add(s->stage);
-         r.AfterRender({s->parent, s->probe->view}, [=](Run& r) {
-           const MeasuredSize bound = WindowBound(r);
-           r.Rendered("probe", s->probe->view, LayoutRect(7, 9, bound.width, bound.height));
-           r.Size("probe.measured", s->probe->view.GetMeasuredSize(), bound);
+         r.AfterRender({s->parent, s->probe->view}, [=](Run& done) {
+           const MeasuredSize bound = WindowBound(done);
+           done.Rendered("probe", s->probe->view, LayoutRect(7, 9, bound.width, bound.height));
+           done.Size("probe.measured", s->probe->view.GetMeasuredSize(), bound);
          });
        }},
     }));

@@ -60,18 +60,18 @@ public:
            s->stage.Add(s->probe->view);
            s->stage.Add(s->sibling);
            r.SetState(s);
-           r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
+           r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
              s->measures = s->probe->measures;
-             r.Truth("mounted-producer", s->measures >= 1);
-             r.Rendered("probe", s->probe->view, LayoutRect(0, 0, 37, 19));
+             done.Truth("mounted-producer", s->measures >= 1);
+             done.Rendered("probe", s->probe->view, LayoutRect(0, 0, 37, 19));
            });
          }},
         {"changed", 2, [change = changes[i]](Run& r) {
            auto s = r.State<Tracked>();
            change(s->probe->view);
-           r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-             r.Equal("changed-producer", s->probe->measures, s->measures + 1);
-             r.Near("measured-width", s->probe->view.GetMeasuredSize().width, 37);
+           r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+             done.Equal("changed-producer", s->probe->measures, s->measures + 1);
+             done.Near("measured-width", s->probe->view.GetMeasuredSize().width, 37);
              s->measures = s->probe->measures;
            });
          }},
@@ -79,7 +79,7 @@ public:
            auto s = r.State<Tracked>();
            change(s->probe->view);
            s->sibling.SetRequestedWidth(s->nudge += 1);
-           r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) { r.Equal("same-producer", s->probe->measures, s->measures); });
+           r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) { done.Equal("same-producer", s->probe->measures, s->measures); });
          }},
       }));
     out.push_back(Steps("C19.hidden-participates", "Visibility does not collapse layout participation on screen", {
@@ -94,18 +94,18 @@ public:
          s->stack.Add(s->b);
          s->stage = Mount(r, s->stack, 200, 50);
          r.SetState(s);
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-           r.Rendered("visible-a", s->a, LayoutRect(0, 0, 20, 10));
-           r.Rendered("visible-b", s->b, LayoutRect(27, 0, 30, 15));
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+           done.Rendered("visible-a", s->a, LayoutRect(0, 0, 20, 10));
+           done.Rendered("visible-b", s->b, LayoutRect(27, 0, 30, 15));
          });
        }},
       {"hidden", 8, [](Run& r) {
          auto s = r.State<Hidden>();
          s->a.SetVisible(false);
          s->stack.InvalidateMeasure();
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-           r.Rendered("hidden-a", s->a, LayoutRect(0, 0, 20, 10));
-           r.Rendered("hidden-b", s->b, LayoutRect(27, 0, 30, 15));
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+           done.Rendered("hidden-a", s->a, LayoutRect(0, 0, 20, 10));
+           done.Rendered("hidden-b", s->b, LayoutRect(27, 0, 30, 15));
          });
        }},
     }));
@@ -123,21 +123,21 @@ public:
          s->stage.Add(s->probe->view);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
            s->measures = s->probe->measures;
-           r.Equal("mounted-producer", s->probe->measures, 1);
-           r.Size("mounted", s->probe->view.GetMeasuredSize(), MeasuredSize(200, 19));
-           r.Rendered("mounted.rendered", s->probe->view, LayoutRect(0, 0, 200, 19));
+           done.Equal("mounted-producer", s->probe->measures, 1);
+           done.Size("mounted", s->probe->view.GetMeasuredSize(), MeasuredSize(200, 19));
+           done.Rendered("mounted.rendered", s->probe->view, LayoutRect(0, 0, 200, 19));
          });
        }},
       {"maximum", 8, [](Run& r) {
          auto s = r.State<Tracked>();
          s->probe->view.SetMaximumWidth(120);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Equal("changed-producer", s->probe->measures, s->measures + 1);
-           r.Near("last-width", s->probe->lastWidth, 120);
-           r.Size("changed", s->probe->view.GetMeasuredSize(), MeasuredSize(120, 19));
-           r.Rendered("changed.rendered", s->probe->view, LayoutRect(0, 0, 120, 19));
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Equal("changed-producer", s->probe->measures, s->measures + 1);
+           done.Near("last-width", s->probe->lastWidth, 120);
+           done.Size("changed", s->probe->view.GetMeasuredSize(), MeasuredSize(120, 19));
+           done.Rendered("changed.rendered", s->probe->view, LayoutRect(0, 0, 120, 19));
            s->measures = s->probe->measures;
          });
        }},
@@ -145,9 +145,9 @@ public:
          auto s = r.State<Tracked>();
          s->probe->view.SetMaximumWidth(120);
          s->sibling.SetRequestedWidth(s->nudge += 1);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Equal("same-producer", s->probe->measures, s->measures);
-           r.Rendered("same.rendered", s->probe->view, LayoutRect(0, 0, 120, 19));
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Equal("same-producer", s->probe->measures, s->measures);
+           done.Rendered("same.rendered", s->probe->view, LayoutRect(0, 0, 120, 19));
          });
        }},
     }));

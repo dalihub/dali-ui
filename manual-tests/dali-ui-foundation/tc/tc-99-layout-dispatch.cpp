@@ -112,9 +112,9 @@ public:
          root.SetMeasureCallback({});
          s->stage = Mount(r, root, 200, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, root}, [=](Run& r) {
-           r.Size("default-before-attach", s->probe->view.GetMeasuredSize(), MeasuredSize(30, 15));
-           r.Rendered("default.rendered", s->probe->view, LayoutRect(0, 0, 30, 15));
+         r.AfterRender({s->stage, root}, [=](Run& done) {
+           done.Size("default-before-attach", s->probe->view.GetMeasuredSize(), MeasuredSize(30, 15));
+           done.Rendered("default.rendered", s->probe->view, LayoutRect(0, 0, 30, 15));
          });
        }},
       {"callback", 6, [](Run& r) {
@@ -123,9 +123,9 @@ public:
          root.AttachLayoutManager(Dali::UniquePtr<LayoutManager>(new StackLayoutManager(StackOrientation::HORIZONTAL, 7)));
          root.SetMeasureCallback(MeasureCallback::New(s->probe.get(), &Probe::Measure));
          root.InvalidateMeasure();
-         r.AfterRender({s->stage, root}, [=](Run& r) {
-           r.Size("callback-priority", s->probe->view.GetMeasuredSize(), MeasuredSize(7, 9));
-           r.Rendered("callback.rendered", s->probe->view, LayoutRect(0, 0, 7, 9));
+         r.AfterRender({s->stage, root}, [=](Run& done) {
+           done.Size("callback-priority", s->probe->view.GetMeasuredSize(), MeasuredSize(7, 9));
+           done.Rendered("callback.rendered", s->probe->view, LayoutRect(0, 0, 7, 9));
          });
        }},
       {"manager", 6, [](Run& r) {
@@ -133,9 +133,9 @@ public:
          View root = s->probe->view;
          root.SetMeasureCallback({});
          root.InvalidateMeasure();
-         r.AfterRender({s->stage, root}, [=](Run& r) {
-           r.Size("manager-after-remove", s->probe->view.GetMeasuredSize(), MeasuredSize(57, 15));
-           r.Rendered("manager.rendered", s->probe->view, LayoutRect(0, 0, 57, 15));
+         r.AfterRender({s->stage, root}, [=](Run& done) {
+           done.Size("manager-after-remove", s->probe->view.GetMeasuredSize(), MeasuredSize(57, 15));
+           done.Rendered("manager.rendered", s->probe->view, LayoutRect(0, 0, 57, 15));
          });
        }},
     }));
@@ -162,9 +162,9 @@ public:
           expected.width  = 200;
           expected.height = 100;
         }
-        r.AfterRender({stage, a, b, ca, cb}, [=](Run& r) {
-          r.Rendered("container", ca, expected);
-          r.Rendered("attached", cb, expected);
+        r.AfterRender({stage, a, b, ca, cb}, [=](Run& done) {
+          done.Rendered("container", ca, expected);
+          done.Rendered("attached", cb, expected);
         });
       }));
     out.push_back(Steps("C19.custom-manager", "Application-defined LayoutManager: dispatch, manager-owned state invalidation and cache behaviour on screen", {
@@ -189,53 +189,53 @@ public:
          s->stage.Add(s->root);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->root, s->a, s->b, s->c}, [=](Run& r) {
-           r.Size("custom.measured", s->root.GetMeasuredSize(), MeasuredSize(90, 45));
-           r.Rendered("custom.a", s->a, LayoutRect(0, 0, 20, 10));
-           r.Rendered("custom.b", s->b, LayoutRect(20, 10, 30, 15));
-           r.Rendered("custom.c", s->c, LayoutRect(50, 25, 40, 20));
+         r.AfterRender({s->stage, s->root, s->a, s->b, s->c}, [=](Run& done) {
+           done.Size("custom.measured", s->root.GetMeasuredSize(), MeasuredSize(90, 45));
+           done.Rendered("custom.a", s->a, LayoutRect(0, 0, 20, 10));
+           done.Rendered("custom.b", s->b, LayoutRect(20, 10, 30, 15));
+           done.Rendered("custom.c", s->c, LayoutRect(50, 25, 40, 20));
            s->Snapshot();
          });
        }},
       {"step-1.5", 16, [](Run& r) {
          auto s = r.State<CustomManaged>();
          s->manager->SetStep(1.5f); // InvalidateOwnerMeasure() must schedule the pass by itself
-         r.AfterRender({s->stage, s->root, s->a, s->b, s->c}, [=](Run& r) {
-           r.Equal("step.measure-delta", s->manager->measures - s->measures, 1);
-           r.Equal("step.arrange-delta", s->manager->arranges - s->arranges, 1);
-           r.Size("step.measured", s->root.GetMeasuredSize(), MeasuredSize(90, 45));
-           r.Rendered("step.a", s->a, LayoutRect(0, 0, 20, 10));
-           r.Rendered("step.b", s->b, LayoutRect(30, 15, 30, 15));
-           r.Rendered("step.c", s->c, LayoutRect(75, 37.5f, 40, 20));
+         r.AfterRender({s->stage, s->root, s->a, s->b, s->c}, [=](Run& done) {
+           done.Equal("step.measure-delta", s->manager->measures - s->measures, 1);
+           done.Equal("step.arrange-delta", s->manager->arranges - s->arranges, 1);
+           done.Size("step.measured", s->root.GetMeasuredSize(), MeasuredSize(90, 45));
+           done.Rendered("step.a", s->a, LayoutRect(0, 0, 20, 10));
+           done.Rendered("step.b", s->b, LayoutRect(30, 15, 30, 15));
+           done.Rendered("step.c", s->c, LayoutRect(75, 37.5f, 40, 20));
            s->Snapshot();
          });
        }},
       {"same-value", 6, [](Run& r) {
          auto s = r.State<CustomManaged>();
          s->manager->SetStep(1.5f); // unchanged value: no invalidation, no pass
-         r.Delay(300, [=](Run& r) {
-           r.Equal("same.measure-delta", s->manager->measures - s->measures, 0);
-           r.Equal("same.arrange-delta", s->manager->arranges - s->arranges, 0);
-           r.Rendered("same.c", s->c, LayoutRect(75, 37.5f, 40, 20));
+         r.Delay(300, [=](Run& done) {
+           done.Equal("same.measure-delta", s->manager->measures - s->measures, 0);
+           done.Equal("same.arrange-delta", s->manager->arranges - s->arranges, 0);
+           done.Rendered("same.c", s->c, LayoutRect(75, 37.5f, 40, 20));
          });
        }},
       {"sibling-pass", 6, [](Run& r) {
          auto s = r.State<CustomManaged>();
          s->sibling.SetRequestedWidth(11); // a pass over the stage: the custom manager is served from its caches
-         r.AfterRender({s->stage, s->sibling}, [=](Run& r) {
-           r.Equal("sibling.measure-delta", s->manager->measures - s->measures, 0);
-           r.Equal("sibling.arrange-delta", s->manager->arranges - s->arranges, 0);
-           r.Rendered("sibling.c", s->c, LayoutRect(75, 37.5f, 40, 20));
+         r.AfterRender({s->stage, s->sibling}, [=](Run& done) {
+           done.Equal("sibling.measure-delta", s->manager->measures - s->measures, 0);
+           done.Equal("sibling.arrange-delta", s->manager->arranges - s->arranges, 0);
+           done.Rendered("sibling.c", s->c, LayoutRect(75, 37.5f, 40, 20));
          });
        }},
       {"step-1.0", 14, [](Run& r) {
          auto s = r.State<CustomManaged>();
          s->manager->SetStep(1.0f);
-         r.AfterRender({s->stage, s->root, s->a, s->b, s->c}, [=](Run& r) {
-           r.Size("restore.measured", s->root.GetMeasuredSize(), MeasuredSize(90, 45));
-           r.Rendered("restore.a", s->a, LayoutRect(0, 0, 20, 10));
-           r.Rendered("restore.b", s->b, LayoutRect(20, 10, 30, 15));
-           r.Rendered("restore.c", s->c, LayoutRect(50, 25, 40, 20));
+         r.AfterRender({s->stage, s->root, s->a, s->b, s->c}, [=](Run& done) {
+           done.Size("restore.measured", s->root.GetMeasuredSize(), MeasuredSize(90, 45));
+           done.Rendered("restore.a", s->a, LayoutRect(0, 0, 20, 10));
+           done.Rendered("restore.b", s->b, LayoutRect(20, 10, 30, 15));
+           done.Rendered("restore.c", s->c, LayoutRect(50, 25, 40, 20));
          });
        }},
     }));
@@ -259,22 +259,22 @@ public:
          ColorizeTree(s->root);
          s->stage.Add(s->root);
          r.SetState(s);
-         r.AfterRender({s->stage, s->root, s->a, s->d}, [=](Run& r) {
-           r.Size("budget.d", s->d.GetMeasuredSize(), MeasuredSize(6, 4));
-           r.Size("budget.root", s->root.GetMeasuredSize(), MeasuredSize(26, 14));
-           r.Rendered("budget.d.rendered", s->d, LayoutRect(20, 10, 6, 4));
-           r.Rendered("budget.a.rendered", s->a, LayoutRect(0, 0, 20, 10));
+         r.AfterRender({s->stage, s->root, s->a, s->d}, [=](Run& done) {
+           done.Size("budget.d", s->d.GetMeasuredSize(), MeasuredSize(6, 4));
+           done.Size("budget.root", s->root.GetMeasuredSize(), MeasuredSize(26, 14));
+           done.Rendered("budget.d.rendered", s->d, LayoutRect(20, 10, 6, 4));
+           done.Rendered("budget.a.rendered", s->a, LayoutRect(0, 0, 20, 10));
          });
        }},
       {"exact", 12, [](Run& r) {
          auto s = r.State<CustomModes>();
          s->root.SetRequestedWidth(MATCH_PARENT);
          s->root.SetRequestedHeight(MATCH_PARENT);
-         r.AfterRender({s->stage, s->root, s->a, s->d}, [=](Run& r) {
-           r.Size("exact.d", s->d.GetMeasuredSize(), MeasuredSize(180, 90));
-           r.Size("exact.root", s->root.GetMeasuredSize(), MeasuredSize(200, 100));
-           r.Rendered("exact.d.rendered", s->d, LayoutRect(20, 10, 180, 90));
-           r.Rendered("exact.a.rendered", s->a, LayoutRect(0, 0, 20, 10));
+         r.AfterRender({s->stage, s->root, s->a, s->d}, [=](Run& done) {
+           done.Size("exact.d", s->d.GetMeasuredSize(), MeasuredSize(180, 90));
+           done.Size("exact.root", s->root.GetMeasuredSize(), MeasuredSize(200, 100));
+           done.Rendered("exact.d.rendered", s->d, LayoutRect(20, 10, 180, 90));
+           done.Rendered("exact.a.rendered", s->a, LayoutRect(0, 0, 20, 10));
          });
        }},
     }));

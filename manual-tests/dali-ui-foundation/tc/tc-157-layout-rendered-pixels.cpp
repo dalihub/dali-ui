@@ -80,15 +80,15 @@ public:
           expected.emplace_back(x, y, 40, 30);
         }
         View stage = Mount(r, container, 200, 100);
-        r.AfterRender({stage, container, boxes[0], boxes[1], boxes[2]}, [=](Run& r) {
+        r.AfterRender({stage, container, boxes[0], boxes[1], boxes[2]}, [=](Run& done) {
           std::vector<PixelProbe> probes;
           for(unsigned i = 0; i < 3; ++i)
           {
-            r.Rendered(Id("box", i).c_str(), boxes[i], expected[i]);
+            done.Rendered(Id("box", i).c_str(), boxes[i], expected[i]);
             probes.push_back({Id("box", i), expected[i].x + 20, expected[i].y + 15, Palette(i)});
           }
           probes.push_back({"container", 195, 95, FixtureColor(kind)});
-          r.CapturePixels(stage, probes, [](Run&) {});
+          done.CapturePixels(stage, probes, [](Run&) {});
         });
       }));
     out.push_back({"P02.same-geometry-color", "A new color must reach a fresh frame without a layout change", {{"mount", 5, [](Run& r)

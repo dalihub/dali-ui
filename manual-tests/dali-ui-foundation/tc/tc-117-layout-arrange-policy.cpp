@@ -60,19 +60,19 @@ public:
         {"mount", 4, [always](Run& r) {
            auto s = MountProbe(r, false);
            s->a->view.SetArrangeCallback(ArrangeCallback::New(s->a.get(), &Probe::Arrange), always ? ArrangePolicy::ALWAYS : ArrangePolicy::IF_CHANGED);
-           r.AfterRender(s->Fence(), [=](Run& r) { r.Rendered("bounds", s->a->view, LayoutRect(0, 0, 37, 19)); });
+           r.AfterRender(s->Fence(), [=](Run& done) { done.Rendered("bounds", s->a->view, LayoutRect(0, 0, 37, 19)); });
          }},
         {"second-pass", 1, [always](Run& r) {
            auto s = r.State<Policy>();
            s->Nudge();
-           r.AfterRender(s->Fence(), [=](Run& r) { r.Equal("second-producer", s->a->arranges, always ? 2 : 1); });
+           r.AfterRender(s->Fence(), [=](Run& done) { done.Equal("second-producer", s->a->arranges, always ? 2 : 1); });
          }},
         {"third-pass", 5, [always](Run& r) {
            auto s = r.State<Policy>();
            s->Nudge();
-           r.AfterRender(s->Fence(), [=](Run& r) {
-             r.Equal("producer", s->a->arranges, always ? 3 : 1);
-             r.Rendered("bounds-after-passes", s->a->view, LayoutRect(0, 0, 37, 19));
+           r.AfterRender(s->Fence(), [=](Run& done) {
+             done.Equal("producer", s->a->arranges, always ? 3 : 1);
+             done.Rendered("bounds-after-passes", s->a->view, LayoutRect(0, 0, 37, 19));
            });
          }},
       }));
@@ -92,48 +92,48 @@ public:
          s->stage.Add(s->root);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender(s->Fence(), [=](Run& r) {
+         r.AfterRender(s->Fence(), [=](Run& done) {
            s->arrangesA = s->a->arranges;
            s->arrangesB = s->b->arranges;
-           r.Rendered("initial-a", s->a->view, LayoutRect(0, 0, 20, 10));
-           r.Rendered("initial-b", s->b->view, LayoutRect(20, 0, 30, 10));
+           done.Rendered("initial-a", s->a->view, LayoutRect(0, 0, 20, 10));
+           done.Rendered("initial-b", s->b->view, LayoutRect(20, 0, 30, 10));
          });
        }},
       {"extra-pass", 10, [](Run& r) {
          auto s = r.State<Policy>();
          s->Nudge();
-         r.AfterRender(s->Fence(), [=](Run& r) {
-           r.Equal("always-runs", s->a->arranges, s->arrangesA + 1);
-           r.Equal("clean-sibling-hit", s->b->arranges, s->arrangesB);
-           r.Rendered("a", s->a->view, LayoutRect(0, 0, 20, 10));
-           r.Rendered("b", s->b->view, LayoutRect(20, 0, 30, 10));
+         r.AfterRender(s->Fence(), [=](Run& done) {
+           done.Equal("always-runs", s->a->arranges, s->arrangesA + 1);
+           done.Equal("clean-sibling-hit", s->b->arranges, s->arrangesB);
+           done.Rendered("a", s->a->view, LayoutRect(0, 0, 20, 10));
+           done.Rendered("b", s->b->view, LayoutRect(20, 0, 30, 10));
          });
        }},
     }));
     out.push_back(Steps("K16.policy-change", "Replacing the callback changes the policy and invalidates", {
       {"mount", 1, [](Run& r) {
          auto s = MountProbe(r, true);
-         r.AfterRender(s->Fence(), [=](Run& r) { r.Equal("initial-producer", s->a->arranges, 1); });
+         r.AfterRender(s->Fence(), [=](Run& done) { done.Equal("initial-producer", s->a->arranges, 1); });
        }},
       {"set-always", 1, [](Run& r) {
          auto s = r.State<Policy>();
          s->a->view.SetArrangeCallback(ArrangeCallback::New(s->a.get(), &Probe::Arrange), ArrangePolicy::ALWAYS);
-         r.AfterRender(s->Fence(), [=](Run& r) { r.Equal("always-after-replace", s->a->arranges, 2); });
+         r.AfterRender(s->Fence(), [=](Run& done) { done.Equal("always-after-replace", s->a->arranges, 2); });
        }},
       {"always-pass", 1, [](Run& r) {
          auto s = r.State<Policy>();
          s->Nudge();
-         r.AfterRender(s->Fence(), [=](Run& r) { r.Equal("always-total", s->a->arranges, 3); });
+         r.AfterRender(s->Fence(), [=](Run& done) { done.Equal("always-total", s->a->arranges, 3); });
        }},
       {"set-if-changed", 1, [](Run& r) {
          auto s = r.State<Policy>();
          s->a->view.SetArrangeCallback(ArrangeCallback::New(s->a.get(), &Probe::Arrange));
-         r.AfterRender(s->Fence(), [=](Run& r) { r.Equal("if-changed-after-replace", s->a->arranges, 4); });
+         r.AfterRender(s->Fence(), [=](Run& done) { done.Equal("if-changed-after-replace", s->a->arranges, 4); });
        }},
       {"if-changed-pass", 1, [](Run& r) {
          auto s = r.State<Policy>();
          s->Nudge();
-         r.AfterRender(s->Fence(), [=](Run& r) { r.Equal("if-changed-total", s->a->arranges, 4); });
+         r.AfterRender(s->Fence(), [=](Run& done) { done.Equal("if-changed-total", s->a->arranges, 4); });
        }},
     }));
     return out;

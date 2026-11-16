@@ -31,10 +31,10 @@ public:
         f.Add(a);
         f.Add(b);
         View stage = Mount(r, f, 140, 60);
-        r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.AfterRender({stage, f, a, b}, [=](Run& done) {
           const float ax[] = {0, 80, 40, 0, 20, 80.0f / 3}, bx[] = {20, 100, 60, 100, 80, 20 + 160.0f / 3};
-          r.Rendered("a", a, LayoutRect(ax[mode], 0, 20, 10));
-          r.Rendered("b", b, LayoutRect(bx[mode], 0, 40, 10));
+          done.Rendered("a", a, LayoutRect(ax[mode], 0, 20, 10));
+          done.Rendered("b", b, LayoutRect(bx[mode], 0, 40, 10));
         });
       }));
     for(unsigned mode = 0; mode < 5; ++mode)
@@ -48,10 +48,10 @@ public:
         f.Add(a);
         f.Add(b);
         View stage = Mount(r, f, 140, 60);
-        r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.AfterRender({stage, f, a, b}, [=](Run& done) {
           const float y = mode == 0 || mode == 2 ? 50 : mode == 3 ? 25 : 0;
-          r.Rendered("self", a, LayoutRect(0, y, 20, mode == 4 ? 60 : 10));
-          r.Rendered("inherited", b, LayoutRect(20, 50, 40, 10));
+          done.Rendered("self", a, LayoutRect(0, y, 20, mode == 4 ? 60 : 10));
+          done.Rendered("inherited", b, LayoutRect(20, 50, 40, 10));
         });
       }));
     for(unsigned direction = 0; direction < 4; ++direction)
@@ -65,10 +65,10 @@ public:
         f.Add(a);
         f.Add(b);
         View stage = Mount(r, f, 100, 100);
-        r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.AfterRender({stage, f, a, b}, [=](Run& done) {
           LayoutRect ea(reverse ? 80 : 0, 0, 20, 10), eb(reverse ? 50 : 20, 0, 30, 10);
-          r.Rendered("a", a, vertical ? SwapAxes(ea) : ea);
-          r.Rendered("b", b, vertical ? SwapAxes(eb) : eb);
+          done.Rendered("a", a, vertical ? SwapAxes(ea) : ea);
+          done.Rendered("b", b, vertical ? SwapAxes(eb) : eb);
         });
       }));
     for(unsigned reverse = 0; reverse < 2; ++reverse)
@@ -82,14 +82,14 @@ public:
         f.Add(a);
         f.Add(b);
         View stage = Mount(r, f, 100, 100);
-        r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.AfterRender({stage, f, a, b}, [=](Run& done) {
           const LayoutRect la(reverse ? 80 : 0, 0, 20, 10), lb(reverse ? 50 : 20, 0, 30, 10);
           // Logical (pre-RTL) rects la/lb; the completion report and the render carry the mirrored rects.
           const LayoutRect ma(100 - la.x - la.width, 0, 20, 10), mb(100 - lb.x - lb.width, 0, 30, 10);
-          r.Rect("a.reported", r.Snapshot(a), ma);
-          r.Rect("b.reported", r.Snapshot(b), mb);
-          r.Rendered("a", a, ma);
-          r.Rendered("b", b, mb);
+          done.Rect("a.reported", done.Snapshot(a), ma);
+          done.Rect("b.reported", done.Snapshot(b), mb);
+          done.Rendered("a", a, ma);
+          done.Rendered("b", b, mb);
         });
       }));
     for(unsigned mode : {3u, 4u, 5u})
@@ -104,10 +104,10 @@ public:
         f.Add(a);
         f.Add(b);
         View stage = Mount(r, f, 40, 50);
-        r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.AfterRender({stage, f, a, b}, [=](Run& done) {
           const float start = mode == 3 ? 0 : -10;
-          r.Rendered("a", a, LayoutRect(start, 0, 30, 10));
-          r.Rendered("b", b, LayoutRect(start + 30, 0, 30, 10));
+          done.Rendered("a", a, LayoutRect(start, 0, 30, 10));
+          done.Rendered("b", b, LayoutRect(start + 30, 0, 30, 10));
         });
       }));
     // STRETCH on the determined 100 cross extent measures both WRAP_CONTENT heights EXACTLY at 100;
@@ -124,11 +124,11 @@ public:
       f.Add(a);
       f.Add(b);
       View stage = Mount(r, f, 300, 100);
-      r.AfterRender({stage, f, a, b}, [=](Run& r) {
-        r.Size("a", a.GetMeasuredSize(), MeasuredSize(60, 40));
-        r.Rendered("a.rendered", a, LayoutRect(0, 0, 60, 40));
-        r.Size("b", b.GetMeasuredSize(), MeasuredSize(60, 100));
-        r.Rendered("b.rendered", b, LayoutRect(60, 0, 60, 100));
+      r.AfterRender({stage, f, a, b}, [=](Run& done) {
+        done.Size("a", a.GetMeasuredSize(), MeasuredSize(60, 40));
+        done.Rendered("a.rendered", a, LayoutRect(0, 0, 60, 40));
+        done.Size("b", b.GetMeasuredSize(), MeasuredSize(60, 100));
+        done.Rendered("b.rendered", b, LayoutRect(60, 0, 60, 100));
       });
     }));
     return out;

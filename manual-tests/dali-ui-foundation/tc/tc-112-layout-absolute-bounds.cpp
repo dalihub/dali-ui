@@ -42,17 +42,17 @@ public:
          s->layout.Add(s->child);
          s->stage = Mount(r, s->layout, 300, 220);
          r.SetState(s);
-         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& r) {
-           r.Rendered("parent", s->layout, LayoutRect(70, 90, 200, 100));
-           r.Rendered("child", s->child, LayoutRect(11, 13, 37, 19));
+         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& done) {
+           done.Rendered("parent", s->layout, LayoutRect(70, 90, 200, 100));
+           done.Rendered("child", s->child, LayoutRect(11, 13, 37, 19));
          });
        }},
       {"move-parent", 8, [](Run& r) {
          auto s = r.State<Absolute>();
          s->layout.SetMargin(Insets(100, 0, 120, 0));
-         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& r) {
-           r.Rendered("parent-moved", s->layout, LayoutRect(100, 120, 200, 100));
-           r.Rendered("moved-parent", s->child, LayoutRect(11, 13, 37, 19));
+         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& done) {
+           done.Rendered("parent-moved", s->layout, LayoutRect(100, 120, 200, 100));
+           done.Rendered("moved-parent", s->child, LayoutRect(11, 13, 37, 19));
          });
        }},
     }));
@@ -64,7 +64,7 @@ public:
         c.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(-20, 7, extent, 19)));
         a.Add(c);
         View stage = Mount(r, a, 100, 60);
-        r.AfterRender({stage, a, c}, [=](Run& r) { r.Rendered("explicit", c, LayoutRect(-20, 7, extent, 19)); });
+        r.AfterRender({stage, a, c}, [=](Run& done) { done.Rendered("explicit", c, LayoutRect(-20, 7, extent, 19)); });
       }));
     out.push_back(Steps("A03.intrinsic-match", "Negative extent delegates to the requested size, then to MATCH_PARENT", {
       {"intrinsic", 4, [](Run& r) {
@@ -76,12 +76,12 @@ public:
          s->layout.Add(s->child);
          s->stage = Mount(r, s->layout, 100, 60);
          r.SetState(s);
-         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& r) { r.Rendered("intrinsic", s->child, LayoutRect(5, 7, 37, 19)); });
+         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& done) { done.Rendered("intrinsic", s->child, LayoutRect(5, 7, 37, 19)); });
        }},
       {"match", 4, [](Run& r) {
          auto s = r.State<Absolute>();
          Fixed(s->child, MATCH_PARENT, MATCH_PARENT);
-         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& r) { r.Rendered("match", s->child, LayoutRect(5, 7, 100, 60)); });
+         r.AfterRender({s->stage, s->layout, s->child}, [=](Run& done) { done.Rendered("match", s->child, LayoutRect(5, 7, 100, 60)); });
        }},
     }));
     out.push_back(Single("A07.wrap-negative-position", "Wrap uses the positive far edge", 6, [](Run& r) {
@@ -90,9 +90,9 @@ public:
       c.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(-20, -5, 100, 20)));
       a.Add(c);
       View stage = Mount(r, a, 300, 100);
-      r.AfterRender({stage, a, c}, [=](Run& r) {
-        r.Size("wrap", a.GetMeasuredSize(), MeasuredSize(80, 15));
-        r.Rendered("wrap.rendered", a, LayoutRect(0, 0, 80, 15));
+      r.AfterRender({stage, a, c}, [=](Run& done) {
+        done.Size("wrap", a.GetMeasuredSize(), MeasuredSize(80, 15));
+        done.Rendered("wrap.rendered", a, LayoutRect(0, 0, 80, 15));
       });
     }));
     // An explicit bounds extent is assigned EXACTLY (the 37x19 probe is measured at 70x30 and
@@ -108,13 +108,13 @@ public:
       a.Add(c->view);
       a.Add(m);
       View stage = Mount(r, a, 200, 100);
-      r.AfterRender({stage, a, c->view, m}, [=](Run& r) {
-        r.Size("c", c->view.GetMeasuredSize(), MeasuredSize(70, 30));
-        r.Near("c.last-width", c->lastWidth, 70);
-        r.Near("c.last-height", c->lastHeight, 30);
-        r.Rendered("c.rendered", c->view, LayoutRect(10, 20, 70, 30));
-        r.Size("m", m.GetMeasuredSize(), MeasuredSize(200, 100));
-        r.Rendered("m.rendered", m, LayoutRect(5, 7, 200, 100));
+      r.AfterRender({stage, a, c->view, m}, [=](Run& done) {
+        done.Size("c", c->view.GetMeasuredSize(), MeasuredSize(70, 30));
+        done.Near("c.last-width", c->lastWidth, 70);
+        done.Near("c.last-height", c->lastHeight, 30);
+        done.Rendered("c.rendered", c->view, LayoutRect(10, 20, 70, 30));
+        done.Size("m", m.GetMeasuredSize(), MeasuredSize(200, 100));
+        done.Rendered("m.rendered", m, LayoutRect(5, 7, 200, 100));
       });
     }));
     return out;

@@ -63,17 +63,17 @@ public:
          s->stack.Add(s->b);
          s->stage = Mount(r, s->stack, 200, 50);
          r.SetState(s);
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-           r.Rendered("a", s->a, LayoutRect(0, 0, 100, 50));
-           r.Rendered("b", s->b, LayoutRect(100, 0, 100, 50));
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+           done.Rendered("a", s->a, LayoutRect(0, 0, 100, 50));
+           done.Rendered("b", s->b, LayoutRect(100, 0, 100, 50));
          });
        }},
       {"reassign-a", 8, [](Run& r) {
          auto s = r.State<Weighted>();
          s->a.SetLayoutParams(StackLayoutParams::New().SetWeight(3));
-         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& r) {
-           r.Rendered("a-reweighted", s->a, LayoutRect(0, 0, 150, 50));
-           r.Rendered("b-reweighted", s->b, LayoutRect(150, 0, 50, 50));
+         r.AfterRender({s->stage, s->stack, s->a, s->b}, [=](Run& done) {
+           done.Rendered("a-reweighted", s->a, LayoutRect(0, 0, 150, 50));
+           done.Rendered("b-reweighted", s->b, LayoutRect(150, 0, 50, 50));
          });
        }},
     }));

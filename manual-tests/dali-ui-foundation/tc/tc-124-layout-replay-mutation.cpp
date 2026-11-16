@@ -58,29 +58,29 @@ public:
          s->c = Leaf(40, 10, "c");
          s->stack.Add(s->a);
          s->stack.Add(s->b);
-         r.AfterRender({s->stage, s->stack, s->a, s->b, s->sibling}, [=](Run& r) {
-           r.Rendered("initial-a", s->a, LayoutRect(0, 0, 20, 10));
-           r.Rendered("initial-b", s->b, LayoutRect(27, 0, 30, 10));
+         r.AfterRender({s->stage, s->stack, s->a, s->b, s->sibling}, [=](Run& done) {
+           done.Rendered("initial-a", s->a, LayoutRect(0, 0, 20, 10));
+           done.Rendered("initial-b", s->b, LayoutRect(27, 0, 30, 10));
          });
        }},
       {"swap", 10, [](Run& r) {
          auto s = r.State<Mutation>();
          s->stack.Remove(s->a);
          s->stack.Add(s->c);
-         r.AfterRender({s->stage, s->stack, s->b, s->c, s->sibling}, [=](Run& r) {
-           r.Equal("child-count", s->stack.GetChildViewCount(), 2);
-           Identity(r, "first", s->stack.GetChildViewAt(0), s->b);
-           r.Rendered("b", s->b, LayoutRect(0, 0, 30, 10));
-           r.Rendered("c", s->c, LayoutRect(37, 0, 40, 10));
+         r.AfterRender({s->stage, s->stack, s->b, s->c, s->sibling}, [=](Run& done) {
+           done.Equal("child-count", s->stack.GetChildViewCount(), 2);
+           Identity(done, "first", s->stack.GetChildViewAt(0), s->b);
+           done.Rendered("b", s->b, LayoutRect(0, 0, 30, 10));
+           done.Rendered("c", s->c, LayoutRect(37, 0, 40, 10));
          });
        }},
       {"remove-all", 4, [](Run& r) {
          auto s = r.State<Mutation>();
          s->stack.RemoveAll();
-         r.AfterRender({s->stage, s->stack, s->sibling}, [=](Run& r) {
-           r.Size("empty", s->stack.GetMeasuredSize(), MeasuredSize(200, 60));
-           r.Equal("empty-count", s->stack.GetChildViewCount(), 0);
-           r.Truth("out-of-range", !s->stack.GetChildViewAt(0));
+         r.AfterRender({s->stage, s->stack, s->sibling}, [=](Run& done) {
+           done.Size("empty", s->stack.GetMeasuredSize(), MeasuredSize(200, 60));
+           done.Equal("empty-count", s->stack.GetChildViewCount(), 0);
+           done.Truth("out-of-range", !s->stack.GetChildViewAt(0));
          });
        }},
     }));
@@ -100,16 +100,16 @@ public:
              host.Add(late);
            }
          };
-         r.AfterRender({s->stage, s->stack, s->pa->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->stack, s->pa->view, s->sibling}, [=](Run& done) {
            s->pa->onMeasure = {};
-           r.Truth("added", *added);
-           r.Equal("children", s->stack.GetChildViewCount(), 2);
+           done.Truth("added", *added);
+           done.Equal("children", s->stack.GetChildViewCount(), 2);
          });
        }},
       {"later-pass", 4, [](Run& r) {
          auto s = r.State<Mutation>();
          s->Nudge();
-         r.AfterRender({s->stage, s->stack, s->pa->view, s->b, s->sibling}, [=](Run& r) { r.Rendered("later-child", s->b, LayoutRect(20, 0, 30, 10)); });
+         r.AfterRender({s->stage, s->stack, s->pa->view, s->b, s->sibling}, [=](Run& done) { done.Rendered("later-child", s->b, LayoutRect(20, 0, 30, 10)); });
        }},
     }));
     return out;

@@ -47,17 +47,17 @@ public:
          s->p.Add(s->a);
          s->stage = Mount(r, s->p, 300, 270);
          r.SetState(s);
-         r.AfterRender({s->stage, s->p, s->a}, [=](Run& r) {
-           r.Rendered("parent", s->p, LayoutRect(70, 90, 200, 150));
-           r.Rendered("child", s->a, LayoutRect(16, 26, 37, 19));
+         r.AfterRender({s->stage, s->p, s->a}, [=](Run& done) {
+           done.Rendered("parent", s->p, LayoutRect(70, 90, 200, 150));
+           done.Rendered("child", s->a, LayoutRect(16, 26, 37, 19));
          });
        }},
       {"move-parent", 8, [](Run& r) {
          auto s = r.State<Tree>();
          s->p.SetMargin(Insets(100, 0, 120, 0));
-         r.AfterRender({s->stage, s->p, s->a}, [=](Run& r) {
-           r.Rendered("parent-moved", s->p, LayoutRect(100, 120, 200, 150));
-           r.Rendered("child-after-parent-move", s->a, LayoutRect(16, 26, 37, 19));
+         r.AfterRender({s->stage, s->p, s->a}, [=](Run& done) {
+           done.Rendered("parent-moved", s->p, LayoutRect(100, 120, 200, 150));
+           done.Rendered("child-after-parent-move", s->a, LayoutRect(16, 26, 37, 19));
          });
        }},
     }));
@@ -75,18 +75,18 @@ public:
          s->p.Add(s->b);
          s->stage = Mount(r, s->p, 200, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->p, s->a, s->b}, [=](Run& r) {
-           r.Size("wrap", s->p.GetMeasuredSize(), MeasuredSize(70, 35));
-           r.Rendered("wrap.rendered", s->p, LayoutRect(0, 0, 70, 35));
+         r.AfterRender({s->stage, s->p, s->a, s->b}, [=](Run& done) {
+           done.Size("wrap", s->p.GetMeasuredSize(), MeasuredSize(70, 35));
+           done.Rendered("wrap.rendered", s->p, LayoutRect(0, 0, 70, 35));
          });
        }},
       {"widen-b", 10, [](Run& r) {
          auto s = r.State<Tree>();
          s->b.SetRequestedWidth(40);
-         r.AfterRender({s->stage, s->p, s->a, s->b}, [=](Run& r) {
-           r.Size("changed", s->p.GetMeasuredSize(), MeasuredSize(80, 35));
-           r.Rendered("changed.rendered", s->p, LayoutRect(0, 0, 80, 35));
-           r.Rendered("b", s->b, LayoutRect(40, 20, 40, 15));
+         r.AfterRender({s->stage, s->p, s->a, s->b}, [=](Run& done) {
+           done.Size("changed", s->p.GetMeasuredSize(), MeasuredSize(80, 35));
+           done.Rendered("changed.rendered", s->p, LayoutRect(0, 0, 80, 35));
+           done.Rendered("b", s->b, LayoutRect(40, 20, 40, 15));
          });
        }},
     }));
@@ -96,9 +96,9 @@ public:
       c.SetMargin(Insets(2, 4, 6, 8));
       p.Add(c);
       View stage = Mount(r, p, 100, 60);
-      r.AfterRender({stage, p, c}, [=](Run& r) {
-        r.Size("exact-slot", c.GetMeasuredSize(), MeasuredSize(86, 28));
-        r.Rendered("match-slot", c, LayoutRect(5, 13, 86, 28));
+      r.AfterRender({stage, p, c}, [=](Run& done) {
+        done.Size("exact-slot", c.GetMeasuredSize(), MeasuredSize(86, 28));
+        done.Rendered("match-slot", c, LayoutRect(5, 13, 86, 28));
       });
     }));
     out.push_back(Steps("C06.wrap-match", "A match child contributes its minimum to a wrapping parent", {
@@ -111,17 +111,17 @@ public:
          s->p.Add(s->a);
          s->stage = Mount(r, s->p, 200, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->p, s->a}, [=](Run& r) {
-           r.Size("wrap-minimum", s->p.GetMeasuredSize(), MeasuredSize(30, 20));
-           r.Rendered("wrap-minimum.rendered", s->p, LayoutRect(0, 0, 30, 20));
+         r.AfterRender({s->stage, s->p, s->a}, [=](Run& done) {
+           done.Size("wrap-minimum", s->p.GetMeasuredSize(), MeasuredSize(30, 20));
+           done.Rendered("wrap-minimum.rendered", s->p, LayoutRect(0, 0, 30, 20));
          });
        }},
       {"reduce-minimum", 6, [](Run& r) {
          auto s = r.State<Tree>();
          s->a.SetMinimumWidth(10);
-         r.AfterRender({s->stage, s->p, s->a}, [=](Run& r) {
-           r.Size("reduced-minimum", s->p.GetMeasuredSize(), MeasuredSize(10, 20));
-           r.Rendered("reduced-minimum.rendered", s->p, LayoutRect(0, 0, 10, 20));
+         r.AfterRender({s->stage, s->p, s->a}, [=](Run& done) {
+           done.Size("reduced-minimum", s->p.GetMeasuredSize(), MeasuredSize(10, 20));
+           done.Rendered("reduced-minimum.rendered", s->p, LayoutRect(0, 0, 10, 20));
          });
        }},
     }));
@@ -131,9 +131,9 @@ public:
       child.SetMargin(Insets(3, 3, 3, 3));
       parent.Add(child);
       View stage = Mount(r, parent, 10, 10);
-      r.AfterRender({stage, parent, child}, [=](Run& r) {
-        r.Size("zero-measure", child.GetMeasuredSize(), MeasuredSize(0, 0));
-        r.Rendered("zero-content", child, LayoutRect(11, 11, 0, 0));
+      r.AfterRender({stage, parent, child}, [=](Run& done) {
+        done.Size("zero-measure", child.GetMeasuredSize(), MeasuredSize(0, 0));
+        done.Rendered("zero-content", child, LayoutRect(11, 11, 0, 0));
       });
     }));
     out.push_back(Steps("C06.two-step", "A MATCH_PARENT child of a wrapping parent is re-measured exactly at the width the parent resolves", {
@@ -150,23 +150,23 @@ public:
          s->p.Add(s->m);
          s->stage = Mount(r, s->p, 200, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->p, s->seed, s->m, s->inner->view}, [=](Run& r) {
-           r.Size("p", s->p.GetMeasuredSize(), MeasuredSize(30, 38));
-           r.Rendered("p.rendered", s->p, LayoutRect(0, 0, 30, 38));
-           r.Size("m", s->m.GetMeasuredSize(), MeasuredSize(30, 38));
-           r.Rendered("m.rendered", s->m, LayoutRect(0, 0, 30, 38));
-           r.Rendered("inner.rendered", s->inner->view, LayoutRect(0, 0, 30, 38));
+         r.AfterRender({s->stage, s->p, s->seed, s->m, s->inner->view}, [=](Run& done) {
+           done.Size("p", s->p.GetMeasuredSize(), MeasuredSize(30, 38));
+           done.Rendered("p.rendered", s->p, LayoutRect(0, 0, 30, 38));
+           done.Size("m", s->m.GetMeasuredSize(), MeasuredSize(30, 38));
+           done.Rendered("m.rendered", s->m, LayoutRect(0, 0, 30, 38));
+           done.Rendered("inner.rendered", s->inner->view, LayoutRect(0, 0, 30, 38));
          });
        }},
       {"widen-seed", 16, [](Run& r) {
          auto s = r.State<TwoStep>();
          s->seed.SetRequestedWidth(50);
-         r.AfterRender({s->stage, s->p, s->seed, s->m, s->inner->view}, [=](Run& r) {
-           r.Size("p", s->p.GetMeasuredSize(), MeasuredSize(50, 19));
-           r.Rendered("p.rendered", s->p, LayoutRect(0, 0, 50, 19));
-           r.Size("m", s->m.GetMeasuredSize(), MeasuredSize(50, 19));
-           r.Rendered("m.rendered", s->m, LayoutRect(0, 0, 50, 19));
-           r.Rendered("inner.rendered", s->inner->view, LayoutRect(0, 0, 37, 19));
+         r.AfterRender({s->stage, s->p, s->seed, s->m, s->inner->view}, [=](Run& done) {
+           done.Size("p", s->p.GetMeasuredSize(), MeasuredSize(50, 19));
+           done.Rendered("p.rendered", s->p, LayoutRect(0, 0, 50, 19));
+           done.Size("m", s->m.GetMeasuredSize(), MeasuredSize(50, 19));
+           done.Rendered("m.rendered", s->m, LayoutRect(0, 0, 50, 19));
+           done.Rendered("inner.rendered", s->inner->view, LayoutRect(0, 0, 37, 19));
          });
        }},
     }));
@@ -177,12 +177,12 @@ public:
       inner->wrapping = true;
       p.Add(inner->view);
       View stage = Mount(r, p, 200, 100);
-      r.AfterRender({stage, p, inner->view}, [=](Run& r) {
-        r.Size("p", p.GetMeasuredSize(), MeasuredSize(60, 50));
-        r.Rendered("p.rendered", p, LayoutRect(0, 0, 60, 50));
-        r.Near("inner.last-width", inner->lastWidth, 60);
-        r.Size("inner", inner->view.GetMeasuredSize(), MeasuredSize(37, 19));
-        r.Rendered("inner.rendered", inner->view, LayoutRect(0, 0, 37, 19));
+      r.AfterRender({stage, p, inner->view}, [=](Run& done) {
+        done.Size("p", p.GetMeasuredSize(), MeasuredSize(60, 50));
+        done.Rendered("p.rendered", p, LayoutRect(0, 0, 60, 50));
+        done.Near("inner.last-width", inner->lastWidth, 60);
+        done.Size("inner", inner->view.GetMeasuredSize(), MeasuredSize(37, 19));
+        done.Rendered("inner.rendered", inner->view, LayoutRect(0, 0, 37, 19));
       });
     }));
     return out;
