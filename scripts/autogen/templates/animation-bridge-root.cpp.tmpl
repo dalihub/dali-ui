@@ -37,6 +37,16 @@ namespace Ui
 {
 }
 
+{{BRIDGE_CLASS}}::~{{BRIDGE_CLASS}}() = default;
+
+{{BRIDGE_CLASS}}::{{BRIDGE_CLASS}}(const {{BRIDGE_CLASS}}& rhs) = default;
+
+{{BRIDGE_CLASS}}& {{BRIDGE_CLASS}}::operator=(const {{BRIDGE_CLASS}}& rhs) = default;
+
+{{BRIDGE_CLASS}}::{{BRIDGE_CLASS}}({{BRIDGE_CLASS}}&& rhs) noexcept = default;
+
+{{BRIDGE_CLASS}}& {{BRIDGE_CLASS}}::operator=({{BRIDGE_CLASS}}&& rhs) noexcept = default;
+
 {{METHOD_IMPLEMENTATIONS}}
 
 } // namespace Ui

@@ -51,6 +51,45 @@ namespace Ui
 class DALI_UI_API {{BRIDGE_CLASS}}
 {
 public:
+  // The copy, move and destruction of a bridge are defined by the library, not
+  // inline, so that the library keeps control of the data members below.
+
+  /**
+   * @brief Destructor.
+   * {{LIFECYCLE_SINCE}}
+   */
+  ~{{BRIDGE_CLASS}}();
+
+  /**
+   * @brief Copy constructor.
+   * {{LIFECYCLE_SINCE}}
+   * @param[in] rhs The bridge to copy
+   */
+  {{BRIDGE_CLASS}}(const {{BRIDGE_CLASS}}& rhs);
+
+  /**
+   * @brief Copy assignment operator.
+   * {{LIFECYCLE_SINCE}}
+   * @param[in] rhs The bridge to copy
+   * @return A reference to this
+   */
+  {{BRIDGE_CLASS}}& operator=(const {{BRIDGE_CLASS}}& rhs);
+
+  /**
+   * @brief Move constructor.
+   * {{LIFECYCLE_SINCE}}
+   * @param[in] rhs The bridge to move from
+   */
+  {{BRIDGE_CLASS}}({{BRIDGE_CLASS}}&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   * {{LIFECYCLE_SINCE}}
+   * @param[in] rhs The bridge to move from
+   * @return A reference to this
+   */
+  {{BRIDGE_CLASS}}& operator=({{BRIDGE_CLASS}}&& rhs) noexcept;
+
 {{METHODS}}
 
 protected:
