@@ -36,7 +36,15 @@ namespace Integration
 class ChartSection : public Dali::BaseObject
 {
 public:
-  ChartSection();
+  /**
+   * @brief Creates a reference-counted ChartSection implementation.
+   * @SINCE_3_0.0
+   * @return An intrusive pointer owning the implementation
+   */
+  static IntrusivePtr<ChartSection> New()
+  {
+    return IntrusivePtr<ChartSection>(new ChartSection());
+  }
 
   void SetXMin(float v)
   {
@@ -119,6 +127,15 @@ public:
   float          cornerRadius{0.0f};
   bool           patternEnabled{false};
   Signal<void()> mChanged;
+
+protected:
+  ChartSection();
+
+  /**
+   * @brief Releases the implementation through reference counting.
+   * @SINCE_3_0.0
+   */
+  ~ChartSection() override = default;
 };
 
 } // namespace Integration

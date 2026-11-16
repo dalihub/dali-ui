@@ -566,6 +566,12 @@ public:
   void                      LowerToBottom(LayoutOrderPolicy policy);
   void                      RaiseAbove(View target, LayoutOrderPolicy policy);
   void                      LowerBelow(View target, LayoutOrderPolicy policy);
+  void                      RaisePreservingLayout();
+  void                      LowerPreservingLayout();
+  void                      RaiseToTopPreservingLayout();
+  void                      LowerToBottomPreservingLayout();
+  void                      RaiseAbovePreservingLayout(View target);
+  void                      LowerBelowPreservingLayout(View target);
 
   void SetMeasureCallback(MeasureCallback callback);
   void SetArrangeCallback(ArrangeCallback callback);
@@ -1401,7 +1407,7 @@ private:
   void         RelayoutDefault(const Vector2& size, RelayoutContainer& container);
   View         ResolveDefaultFocusRequest();
   bool         ActivateAccessibilityDefault();
-  uint32_t     ComputeLogicalChildIndex(const Actor& child) const;
+  uint32_t     ComputeLogicalChildIndex(const Actor& child, bool& isLastActorChild) const;
   void         OnChildAdded(Actor& child, bool allowNonViewChild);
   void         OnChildRemoved(Actor& child);
   void         OnViewSceneConnection();
@@ -1412,6 +1418,33 @@ private:
   void         OnAnimateAnimatableProperty(Animation& animation, Property::Index index, Animation::State state);
   void         OnConstraintAnimatableProperty(Constraint& constraint, Property::Index index, bool applied);
   void         OnChildOrderChanged(Actor parent, Actor orderChangedChild);
+
+  /**
+   * @brief Makes mChildren follow the actor order of this view's View children.
+   *
+   * The logical order to follow is the actor order of the views already in mChildren (so
+   * non-View actors and EXIT ghosts stay out). One pass over Actor::GetChildAt(), without
+   * allocating, first checks whether mChildren already is that order -- a subsequence of the
+   * actor children, in order -- and returns without doing anything if so. Otherwise (a different
+   * order, or a view in mChildren that is no longer an actor child) it rebuilds mChildren in that
+   * order, with a hash set for the membership test, tags every logical child REORDERED when a
+   * LayoutTransition is attached to this view and invalidates this view's measure. Both paths are
+   * linear in the number of actor and logical children (the rebuild in expectation, as it hashes).
+   * Called by OnChildOrderChanged (unless a ...PreservingLayout() call is running) and by
+   * OnChildAdded for a fresh insert that is not the last actor child.
+   *
+   * Known gap: a view dropped here because it is no longer an actor child skips the
+   * bookkeeping of OnChildRemoved. This happens while a removal is in transit: dali-core erases
+   * the child from the actor children, runs the callbacks of Actor::SetParent(nullptr) (scene
+   * disconnection) and calls OnChildRemove only afterwards. Actor::RemoveAll() takes every
+   * child out of the actor children before it notifies the first one, so during its callbacks
+   * all the children not notified yet are in transit. If such a callback reorders this view's
+   * children or makes a fresh insert that is not the last actor child, this rebuild drops the
+   * departing views, and OnChildRemoved, which no longer finds them, neither erases their
+   * pending ENTER / REORDERED markers (only looked up, never dereferenced), nor records the
+   * pending child removal (the SIBLING_REMOVED cause), nor resets their caches.
+   */
+  void SyncChildrenWithActorOrder();
 
   /**
    * @brief Drops the layout caches and raises both dirty bits on this view and on
@@ -1882,7 +1915,7 @@ private:
     RenderEffectImplPtr renderEffect;
 
     // Unlike renderEffect, this handleless effect is created by the offscreen rendering API or property.
-    std::unique_ptr<OffscreenRenderingImpl>    offscreenRendering;
+    OffscreenRenderingImplPtr                  offscreenRendering;
     View::OffscreenRefreshRate                 offscreenRefreshRate{View::OffscreenRefreshRate::REFRESH_ALWAYS};
     View::OffscreenRenderingFinishedSignalType offscreenRenderingFinishedSignal;
   };
@@ -2097,7 +2130,7 @@ private:
   AccessibleObjectCreator            mAccessibleObjectCreator;
   int32_t                            mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2; ///< Frequently touched accessibility-related value kept here to avoid AccessibilityData creation.
 
-  bool         mSkipChildrenUpdate : 1;
+  bool         mSkipChildrenUpdate : 1;                           ///< True while a ...PreservingLayout() call on a child of this view runs (ScopedSkipChildrenUpdate); suppresses OnChildOrderChanged only.
   bool         mMeasureCacheValid : 1;                            ///< True when mLastMeasureConstraint + the scale key + mMeasuredSize hold a usable cache entry. Cleared ONLY via DropMeasureCacheEntry(), which also retracts the record sharing the KEY slot.
   bool         mMeasureDirty : 1;                                 ///< True when invalidated since the last measure.
   bool         mMeasureInProgress : 1;                            ///< True while this view's own Measure() is on the stack.
@@ -2188,7 +2221,12 @@ private:
   /// costs exactly one byte.
   bool mKeyEventDispatchInProgress; ///< True while this view's key event dispatch is on the stack; guards unsupported same-view re-entrancy.
 
-  static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG)>::value + 1;
+  /// Width of the mFlags bit-field, anchored on the HIGHEST ViewBehaviour flag:
+  /// one bit per defined flag, plus one spare bit because ViewBehaviour has no
+  /// fixed underlying type, so the bit-field may be signed on some ABIs and the
+  /// top flag must not occupy the sign bit. Update the anchor when a higher
+  /// flag is added.
+  static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::DISABLE_VISUALS)>::value + 2;
   ViewImpl::ViewBehaviour   mFlags : VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
 
   // Property registrations access private methods and data of ViewImpl and ViewDataImpl.

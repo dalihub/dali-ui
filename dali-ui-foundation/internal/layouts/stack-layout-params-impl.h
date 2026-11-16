@@ -39,12 +39,6 @@ namespace Internal
 class StackLayoutParamsImpl : public TraitObject
 {
 public:
-  explicit StackLayoutParamsImpl(const StackLayoutParams& params)
-  : mWeight(params.GetWeight()),
-    mAlignment(params.GetAlignment())
-  {
-  }
-
   /**
    * @brief Gets the layout weight.
    * @return The weight value.
@@ -60,6 +54,14 @@ public:
   }
 
   /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<StackLayoutParamsImpl> New(const StackLayoutParams& params)
+  {
+    return IntrusivePtr<StackLayoutParamsImpl>(new StackLayoutParamsImpl(params));
+  }
+
+  /**
    * @brief Retrieves the StackLayoutParams trait attached to a view, if any.
    * @param[in] viewImpl The view implementation to query.
    * @return Pointer to the params, or nullptr if not attached.
@@ -72,6 +74,12 @@ public:
   }
 
 protected:
+  explicit StackLayoutParamsImpl(const StackLayoutParams& params)
+  : mWeight(params.GetWeight()),
+    mAlignment(params.GetAlignment())
+  {
+  }
+
   ~StackLayoutParamsImpl() override = default;
 
 private:

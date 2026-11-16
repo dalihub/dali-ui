@@ -288,7 +288,7 @@ Dali::Texture CreateLookupTexture(const Style& style)
   }
 
   Dali::IntrusivePtr<Dali::Ui::Internal::LinearGradient> gradient =
-    new Dali::Ui::Internal::LinearGradient(style.linearStart, style.linearEnd, nullptr);
+    Dali::Ui::Internal::LinearGradient::New(style.linearStart, style.linearEnd, nullptr);
   gradient->SetUnits(style.units);
   gradient->SetSpreadMethod(style.spreadMethod);
 

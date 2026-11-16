@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
@@ -1583,29 +1584,27 @@ int UtcDaliViewColorMultiplierAnimationP(void)
     .ColorMultiplierBy(Vector4(0.05f, 0.05f, 0.05f, 0.05f), Duration(0.1f));
   DALI_TEST_EQUALS(bridgeAnimation.GetDuration(), 0.1f, TEST_LOCATION);
 
-  // Legacy alias names on the bridge animate the same multiplier property.
-  const Vector4 legacyTarget(0.4f, 0.3f, 0.2f, 1.0f);
-  Animation     legacyToAnimation = Animation::New(0.0f);
-  view.Animate(legacyToAnimation).Color(legacyTarget, Duration(0.1f));
-  legacyToAnimation.Play();
+  // Playing a bridge animation updates the multiplier property.
+  const Vector4 target(0.4f, 0.3f, 0.2f, 1.0f);
+  Animation     toAnimation = Animation::New(0.0f);
+  view.Animate(toAnimation).ColorMultiplier(target, Duration(0.1f));
+  toAnimation.Play();
   application.SendNotification();
   application.Render(200);
-  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), legacyTarget, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), target, 0.001f, TEST_LOCATION);
 
-  const Vector4 legacyDelta(0.1f, 0.1f, 0.1f, 0.0f);
-  Animation     legacyByAnimation = Animation::New(0.0f);
-  view.Animate(legacyByAnimation).ColorBy(legacyDelta, Duration(0.1f));
-  legacyByAnimation.Play();
+  const Vector4 delta(0.1f, 0.1f, 0.1f, 0.0f);
+  Animation     byAnimation = Animation::New(0.0f);
+  view.Animate(byAnimation).ColorMultiplierBy(delta, Duration(0.1f));
+  byAnimation.Play();
   application.SendNotification();
   application.Render(200);
-  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), legacyTarget + legacyDelta, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentColorMultiplier().GetRgba(), target + delta, 0.001f, TEST_LOCATION);
 
-  // Legacy alias entries on the spec reach the same apply path as the multiplier entries.
+  // Spec entries reach the multiplier apply path.
   ViewAnimationSpec spec = View::NewAnimationSpec();
   spec.ColorMultiplier(Vector4(0.6f, 0.5f, 0.4f, 1.0f), Duration(0.1f))
-    .ColorMultiplierBy(Vector4(0.1f, 0.1f, 0.1f, 0.0f), Duration(0.1f))
-    .Color(Vector4(0.2f, 0.2f, 0.2f, 1.0f), Duration(0.1f))
-    .ColorBy(Vector4(0.05f, 0.05f, 0.05f, 0.0f), Duration(0.1f));
+    .ColorMultiplierBy(Vector4(0.1f, 0.1f, 0.1f, 0.0f), Duration(0.1f));
 
   Animation specAnimation = Animation::New(0.0f);
   spec.ApplyTo(specAnimation, view);
@@ -2568,6 +2567,44 @@ int UtcDaliViewSetRequestedHeightMatchesPropertyRouteP(void)
   DALI_TEST_CHECK(viaSetter.GetRequestedHeight() == MATCH_PARENT);
   DALI_TEST_CHECK(viaProperty.GetRequestedHeight() == MATCH_PARENT);
 
+  END_TEST;
+}
+
+// The parentless-leaf immediate write is the size the layout pass will give the view:
+// the requested size clamped by its own minimum/maximum, times its effective scale.
+int UtcDaliViewSetRequestedSizeImmediateWriteFollowsScaleP(void)
+{
+  UiTestApplication application;
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  // Off scene: no window term, so the effective scale is the UI scale 2.
+  View view = View::New();
+  view.SetMaximumWidth(80.0f);
+  view.SetMinimumHeight(70.0f);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(50.0f);
+  // min(100, 80) * 2 = 160, max(50, 70) * 2 = 140 (before: the raw 100 and 50).
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 160.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 140.0f, TEST_LOCATION);
+
+  // The property route shares the same write.
+  View viaProperty = View::New();
+  viaProperty.SetProperty(View::Property::REQUESTED_WIDTH, 30.0f);
+  DALI_TEST_EQUALS(viaProperty.GetProperty<float>(Actor::Property::SIZE_WIDTH), 60.0f, TEST_LOCATION);
+
+  // The layout pass gives the same size.
+  application.GetWindow().Add(view);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 160.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 140.0f, TEST_LOCATION);
+
+  // On scene (its parent is the root layer, not a View) a new request is written at once.
+  view.SetRequestedWidth(30.0f);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 60.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -5243,6 +5280,78 @@ int UtcDaliViewExtensionGetUiScalePolicyEmptyHandleN(void)
   tet_infoline("UtcDaliViewExtensionGetUiScalePolicyEmptyHandleN - an empty View asserts");
 
   DALI_TEST_ASSERTION(Ui::Extension::View::GetUiScalePolicy(View()), "view");
+
+  END_TEST;
+}
+
+// === Extension::View sibling order that keeps the layout order ===
+
+// The six ...PreservingLayout() functions move the view in the actor order exactly like the
+// inherited Actor calls and leave the parent's layout order as it is; the next reorder made
+// through an inherited Actor call makes the layout order follow the actor order again.
+int UtcDaliViewExtensionPreservingLayoutP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionPreservingLayoutP - the ...PreservingLayout() functions change the actor order only");
+
+  View parent = View::New();
+  View a      = View::New();
+  View b      = View::New();
+  View c      = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+
+  auto actorOrderIs = [&parent](const View& first, const View& second, const View& third)
+  {
+    return parent.GetChildCount() == 3u && parent.GetChildAt(0u) == first && parent.GetChildAt(1u) == second && parent.GetChildAt(2u) == third;
+  };
+
+  Ui::Extension::View::RaisePreservingLayout(a);
+  DALI_TEST_CHECK(actorOrderIs(b, a, c));
+  Ui::Extension::View::RaiseToTopPreservingLayout(b);
+  DALI_TEST_CHECK(actorOrderIs(a, c, b));
+  Ui::Extension::View::LowerPreservingLayout(c);
+  DALI_TEST_CHECK(actorOrderIs(c, a, b));
+  Ui::Extension::View::LowerToBottomPreservingLayout(b);
+  DALI_TEST_CHECK(actorOrderIs(b, c, a));
+  Ui::Extension::View::RaiseAbovePreservingLayout(c, a);
+  DALI_TEST_CHECK(actorOrderIs(b, a, c));
+  Ui::Extension::View::LowerBelowPreservingLayout(c, b);
+  DALI_TEST_CHECK(actorOrderIs(c, b, a));
+
+  // The layout order is still the order of the adds.
+  DALI_TEST_EQUALS(parent.GetChildViewCount(), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(parent.GetChildViewAt(0u) == a);
+  DALI_TEST_CHECK(parent.GetChildViewAt(1u) == b);
+  DALI_TEST_CHECK(parent.GetChildViewAt(2u) == c);
+  DALI_TEST_EQUALS(parent.IndexOfChildView(c), 2, TEST_LOCATION);
+
+  // An inherited Actor reorder: actor order [c, b, a] -> [c, a, b], and the layout order follows it.
+  a.Lower();
+  DALI_TEST_CHECK(actorOrderIs(c, a, b));
+  DALI_TEST_CHECK(parent.GetChildViewAt(0u) == c);
+  DALI_TEST_CHECK(parent.GetChildViewAt(1u) == a);
+  DALI_TEST_CHECK(parent.GetChildViewAt(2u) == b);
+
+  END_TEST;
+}
+
+int UtcDaliViewExtensionPreservingLayoutEmptyHandleN(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionPreservingLayoutEmptyHandleN - an empty View asserts, whatever the target");
+
+  View target = View::New();
+
+  DALI_TEST_ASSERTION(Ui::Extension::View::RaisePreservingLayout(View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::LowerPreservingLayout(View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::RaiseToTopPreservingLayout(View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::LowerToBottomPreservingLayout(View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::RaiseAbovePreservingLayout(View(), target), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::LowerBelowPreservingLayout(View(), target), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::RaiseAbovePreservingLayout(View(), View()), "view");
+  DALI_TEST_ASSERTION(Ui::Extension::View::LowerBelowPreservingLayout(View(), View()), "view");
 
   END_TEST;
 }
@@ -7930,6 +8039,120 @@ int UtcDaliViewRemoveThenWindowAddRelayoutsSubtreeAtNewScaleP(void)
   // D re-measures at the new effective scale 2.0: fixed 50 x 2.0 = 100. A torn
   // subtree (stale scale 1.0) would leave it at 50.
   DALI_TEST_EQUALS(d.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
+// RequestedX/Y of a child in a plain View (no LayoutManager) are the child's natural units,
+// scaled by the CHILD's effective scale like its margin -- the STANDALONE and AbsoluteLayout
+// convention -- and the WRAP_CONTENT container measures the same extent.
+int UtcDaliViewRequestedPositionUsesDisabledChildScaleP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  View parent = View::New(); // WRAP_CONTENT, scale 2
+
+  View child = View::New(); // scale 1
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::DISABLED);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetRequestedX(100.0f);
+  child.SetRequestedY(20.0f);
+  child.SetMargin(Insets(10.0f, 0.0f, 5.0f, 0.0f));
+  parent.Add(child);
+
+  View twin = View::New(); // the same request as a STANDALONE child
+  twin.SetLayoutMode(LayoutMode::STANDALONE);
+  Ui::Extension::View::SetUiScalePolicy(twin, Ui::Extension::UiScalePolicy::DISABLED);
+  twin.SetRequestedWidth(40.0f);
+  twin.SetRequestedHeight(30.0f);
+  twin.SetRequestedX(100.0f);
+  twin.SetRequestedY(20.0f);
+  twin.SetMargin(Insets(10.0f, 0.0f, 5.0f, 0.0f));
+  parent.Add(twin);
+
+  window.Add(parent);
+  SettleLayout(application);
+
+  // x = 10 * 1 + 100 * 1 = 110, y = 5 * 1 + 20 * 1 = 25 (the container's scale gave 210, 45).
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 110.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 25.0f, TEST_LOCATION);
+  // STANDALONE: (100 + 10) * 1, (20 + 5) * 1.
+  DALI_TEST_EQUALS(twin.GetProperty<float>(Actor::Property::POSITION_X), 110.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(twin.GetProperty<float>(Actor::Property::POSITION_Y), 25.0f, TEST_LOCATION);
+  // (100 * 1/2 + 10 / 2 + 40 / 2) * 2 = 150 = 110 + 40; (20 * 1/2 + 5 / 2 + 30 / 2) * 2 = 55 = 25 + 30.
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 150.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 55.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
+int UtcDaliViewRequestedPositionUsesEnabledChildScaleP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  View parent = View::New(); // WRAP_CONTENT, scale 1
+  Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::DISABLED);
+
+  View child = View::New(); // scale 2, 80 x 60 rendered
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::ENABLED);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetRequestedX(100.0f);
+  child.SetRequestedY(20.0f);
+  child.SetMargin(Insets(10.0f, 0.0f, 5.0f, 0.0f));
+  parent.Add(child);
+
+  window.Add(parent);
+  SettleLayout(application);
+
+  // x = 10 * 2 + 100 * 2 = 220, y = 5 * 2 + 20 * 2 = 50 (the container's scale gave 120, 30).
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 220.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 50.0f, TEST_LOCATION);
+  // 100 * 2 + 10 * 2 + 80 = 300 = 220 + 80; 20 * 2 + 5 * 2 + 60 = 110 = 50 + 60.
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 300.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 110.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
+int UtcDaliViewRequestedPositionInheritChildUnchangedAtScaleP(void)
+{
+  // An INHERIT child has its container's scale, so nothing moves.
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  View parent = View::New();
+  View child  = View::New();
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetRequestedX(30.0f);
+  child.SetRequestedY(10.0f);
+  child.SetMargin(Insets(10.0f, 0.0f, 5.0f, 0.0f));
+  parent.Add(child);
+
+  window.Add(parent);
+  SettleLayout(application);
+
+  // x = 10 * 2 + 30 * 2 = 80, y = 5 * 2 + 10 * 2 = 30; (30 + 10 + 40) * 2 = 160, (10 + 5 + 30) * 2 = 90.
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_WIDTH), 160.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 90.0f, TEST_LOCATION);
 
   LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
@@ -10789,9 +11012,9 @@ int UtcDaliViewChildOrderUnchangedDoesNotInvalidateP(void)
 //
 // (1) A reorder among NON-View actor children while the parent has no View child at
 //     all is delivered to nothing. It must be a harmless no-op -- which is the same
-//     fact that makes deferring the connection sound: the handler rebuilds the View
-//     sequence out of views ALREADY in mChildren, so with none there it compares equal
-//     and returns.
+//     fact that makes deferring the connection sound: the handler keeps only views
+//     ALREADY in mChildren, so with none there its order check passes at once and it
+//     returns.
 // (2) The connection must be live by the time a real View reorder is possible, so the
 //     View child order still resyncs to the actor order afterwards. GetChildViewAt is
 //     the public read of exactly that sequence.
@@ -11976,6 +12199,26 @@ protected:
 
 Dali::TypeRegistration onInitializeBackgroundViewTypeReg(
   typeid(OnInitializeBackgroundViewImpl), typeid(ViewImpl), nullptr);
+
+// A SizeNegotiatedViewImpl subclass that keeps the base OnRelayout, whose ViewDataImpl::RelayoutDefault
+// places the actor children of a parentless view.
+class LegacyRelayoutViewImpl : public Dali::Ui::Integration::SizeNegotiatedViewImpl
+{
+public:
+  static IntrusivePtr<LegacyRelayoutViewImpl> New()
+  {
+    return IntrusivePtr<LegacyRelayoutViewImpl>(new LegacyRelayoutViewImpl());
+  }
+
+protected:
+  LegacyRelayoutViewImpl()
+  : SizeNegotiatedViewImpl()
+  {
+  }
+};
+
+Dali::TypeRegistration legacyRelayoutViewTypeReg(
+  typeid(LegacyRelayoutViewImpl), typeid(Dali::Ui::View), nullptr);
 } // namespace
 
 int UtcDaliViewImplConstructorSetBackgroundColorIgnoredP(void)
@@ -12158,5 +12401,34 @@ int UtcDaliViewRegistrationFacadeNamed(void)
   BaseHandle empty = typeInfo.CreateInstance();
   DALI_TEST_CHECK(!empty);
 
+  END_TEST;
+}
+
+int UtcDaliViewLegacyRelayoutScalesPaddingAndMarginP(void)
+{
+  UiTestApplication application;
+  tet_infoline("The legacy relayout offsets actor children by the scaled padding and margin");
+
+  const float originalScale = LayoutScaleManager::Get().GetUiScale();
+  LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  IntrusivePtr<LegacyRelayoutViewImpl> impl = LegacyRelayoutViewImpl::New();
+  View                                 view(*impl);
+  impl->Initialize();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(50.0f);
+  view.SetPadding(Insets(10.0f, 6.0f, 5.0f, 3.0f));
+  view.SetMargin(Insets(3.0f, 0.0f, 4.0f, 0.0f));
+
+  Actor child = Actor::New();
+  IntegrationView::AddActorChild(view, child); // a raw Actor: not laid out, placed by RelayoutDefault
+  application.GetWindow().Add(view);
+  SettleLayout(application);
+
+  // ((3 + 10) * 2, (4 + 5) * 2); the unscaled path gave (13, 9).
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 26.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 18.0f, TEST_LOCATION);
+
+  LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }

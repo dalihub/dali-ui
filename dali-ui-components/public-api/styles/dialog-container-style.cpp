@@ -73,7 +73,7 @@ DialogContainerStyle DialogContainerStyle::StaticDownCast(UiStyle style)
 }
 DialogContainerStyle::Builder DialogContainerStyle::Configure() const
 {
-  return Builder(DialogContainerStyle(new Internal::DialogContainerStyleImpl(GetStyleImpl(*this))));
+  return Builder(DialogContainerStyle(Internal::DialogContainerStyleImpl::NewForBaseHandle(GetStyleImpl(*this))));
 }
 DialogContainerStyle::DialogContainerStyle(Extension::UiStyleImpl* impl)
 : UiStyle(impl)
@@ -90,7 +90,7 @@ float DialogContainerStyle::GetScrimBlurRadius() const
 }
 
 DialogContainerStyle::Builder::Builder()
-: mStyle(DialogContainerStyle(new Internal::DialogContainerStyleImpl()))
+: mStyle(DialogContainerStyle(Internal::DialogContainerStyleImpl::NewForBaseHandle()))
 {
 }
 DialogContainerStyle::Builder::Builder(UiStyle style)

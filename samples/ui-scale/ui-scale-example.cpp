@@ -41,6 +41,9 @@
  *    - Green box: ENABLED  → bypasses DISABLED parent → DOES scale
  *    - Blue box:  ENABLED  → same as green
  *    Observe: Red stays 60×60. Green/Blue grow as scale increases.
+ *    Plain View row: a View with no LayoutManager holds a red INHERIT and a
+ *    green ENABLED box, both at RequestedX 100. Each is placed at its own
+ *    scale: at x2.00 the green box starts at 200 px, the red one at 100 px.
  *
  *  [Zone C] DISABLED subtree inside normal INHERIT parent
  *    - Orange box: INHERIT inside INHERIT zone → scales
@@ -49,6 +52,8 @@
  *      - Orange-red child: ENABLED → scales despite DISABLED parent
  *
  *  [Zone D] Corner radius (ABSOLUTE & RELATIVE) and borderline width vs. UiScale
+ *    - "Border 20 px outside" box: a 20 px border (offset 1) around a RELATIVE
+ *      0.25 corner radius; the band keeps the same corner shape at every scale
  *
  *  [Zone E] VisualBase transform and decoration properties vs. UiScale
  *
@@ -64,6 +69,8 @@
  *    - "Unparent" removes the box from its parent → excluded from scale tracking
  *    - Change system scale while the box is unparented (no overhead)
  *    - "Re-add" puts it back → new scale is applied correctly
+ *    - "④ Leaf size" shows the actor width a parentless leaf View gets at once
+ *      from SetRequestedWidth(100) with a maximum width of 80
  *
  *  [Zone I] A second Window at a DIFFERENT window scale, side by side
  *    - "비교 Window 열기" opens a second Window next to this one at win x2.00
@@ -708,6 +715,27 @@ private:
       "The container (yellow background) expands to accommodate them but its own "
       "padding/spacing remain at 1.0 scale."));
 
+    // A plain View (no layout manager) places each child at its requested position,
+    // multiplied by the child's own effective scale, like its margin. Both boxes ask for
+    // X = 100: the red INHERIT box follows this DISABLED zone, the green ENABLED box the
+    // system scale.
+    View positioned = View::New();
+    positioned.SetRequestedWidth(340.0f);
+    positioned.SetRequestedHeight(230.0f);
+    positioned.SetBackgroundColor(UiColor(0xFFFDE7));
+    View inheritBox = MakePolicyBox("X 100", UiColor(C_RED), Ui::Extension::UiScalePolicy::INHERIT, 40.0f);
+    inheritBox.SetRequestedX(100.0f);
+    inheritBox.SetRequestedY(10.0f);
+    View enabledBox = MakePolicyBox("X 100", UiColor(C_GREEN), Ui::Extension::UiScalePolicy::ENABLED, 40.0f);
+    enabledBox.SetRequestedX(100.0f);
+    enabledBox.SetRequestedY(70.0f);
+    positioned.Add(inheritBox);
+    positioned.Add(enabledBox);
+    zone.Add(positioned);
+    zone.Add(MakeDesc(
+      "Plain View row: both boxes ask for X 100. At x2.00 the green ENABLED box starts at "
+      "200 px, twice as far as the red INHERIT box (100 px)."));
+
     return zone;
   }
 
@@ -867,6 +895,23 @@ private:
     }
 
     zone.Add(rowBorder);
+
+    // Box G: a thick border outside a RELATIVE corner radius. The border's own corner radius
+    // follows the box size and the border width, both in rendered pixels, so the band keeps the
+    // same corner shape at every scale (outer corners 48 px at x1.00, 96 px at x2.00). The margin
+    // leaves room for the outside border.
+    {
+      StackLayout rowOutside = MakeHStack();
+      View        box        = MakeDecoBox(UiColor(C_DEEP_ORG), DECO_BOX_SIZE);
+      box.SetMargin(Insets(20.0f, 20.0f, 20.0f, 20.0f));
+      box.SetCornerRadius(0.25f);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      box.SetBorderlineWidth(20.0f);
+      box.SetBorderlineOffset(1.0f);
+      box.SetBorderlineColor(UiColor(C_DARK_TEXT));
+      rowOutside.Add(MakeLabeled(box, "Border 20 px outside\n+RELATIVE\nradius 0.25"));
+      zone.Add(rowOutside);
+    }
 
     zone.Add(MakeDesc(
       "Change scale and verify: boxes grow/shrink, but corner roundness and "
@@ -1687,8 +1732,41 @@ private:
       }
     });
 
+    // A View with no View parent, no children and no layout writes its requested size to
+    // the actor at once: the request clamped by its own minimum/maximum, times its
+    // effective scale. The leaf is measured where the box above is: while the box is in
+    // the window, right under this window's root layer -- still without a View parent --
+    // so this window's scale is in it; after ① Unparent, off scene, where it has none.
+    InteractiveView leafBtn = MakeButton("④ Leaf size", UiColor(0x6A1B9A));
+    leafBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    leafBtn.ConnectClickedSignal(this, [this](View, const InputEvent&)
+    {
+      View leaf = View::New();
+      leaf.SetMaximumWidth(80.0f);
+
+      // Added BEFORE the request, so the immediate write already sees this window, and
+      // removed again in this same handler, before anything is rendered.
+      const bool inWindow = mIsParented;
+      if(inWindow)
+      {
+        mWindow.Add(leaf);
+      }
+      leaf.SetRequestedWidth(100.0f);
+      const float width = leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+      const float scale = Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(leaf));
+      if(inWindow)
+      {
+        leaf.Unparent();
+      }
+
+      std::string s = std::string("parentless leaf SIZE_WIDTH (") + (inWindow ? "Window 안" : "Window 밖") + "): " +
+                      Fmt(width) + " (min(100, max 80) x " + Fmt(scale) + ")";
+      mHStatusLabel.SetText(s.c_str());
+    });
+
     btnRow.Add(unparentBtn);
     btnRow.Add(readdBtn);
+    btnRow.Add(leafBtn);
     zone.Add(btnRow);
 
     zone.Add(MakeDesc(

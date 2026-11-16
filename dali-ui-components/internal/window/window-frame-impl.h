@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#include <utility>
 #include "window-frame-interaction-controller.h"
 #include "window-frame-layout-engine.h"
 #include "window-frame-overlay-controller.h"
@@ -42,11 +43,6 @@ namespace Internal
 class WindowFrameImpl : public Dali::BaseObject, public Dali::ConnectionTracker
 {
 public:
-  WindowFrameImpl(Dali::Window                            window,
-                  WindowFrame::CloseCallback              closeCallback,
-                  const WindowFrameOptions&               options,
-                  std::unique_ptr<WindowOperationAdapter> windowOperations = {});
-
   WindowFrameImpl(const WindowFrameImpl&)            = delete;
   WindowFrameImpl(WindowFrameImpl&&)                 = delete;
   WindowFrameImpl& operator=(const WindowFrameImpl&) = delete;
@@ -63,6 +59,31 @@ public:
   bool                            IsMaximized() const;
   bool                            IsMinimized() const;
   WindowFrameGeometry             GetGeometry() const;
+
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL WindowFrameImpl* NewForBaseHandle(Dali::Window                            window,
+                                                         WindowFrame::CloseCallback              closeCallback,
+                                                         const WindowFrameOptions&               options,
+                                                         std::unique_ptr<WindowOperationAdapter> windowOperations = {})
+  {
+    return new WindowFrameImpl(std::move(window), std::move(closeCallback), options, std::move(windowOperations));
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<WindowFrameImpl> New(Dali::Window                            window,
+                                           WindowFrame::CloseCallback              closeCallback,
+                                           const WindowFrameOptions&               options,
+                                           std::unique_ptr<WindowOperationAdapter> windowOperations = {})
+  {
+    return IntrusivePtr<WindowFrameImpl>(new WindowFrameImpl(std::move(window), std::move(closeCallback), options, std::move(windowOperations)));
+  }
 
   /**
    * @brief Returns the decoration insets a layout actually produced.
@@ -115,6 +136,11 @@ public:
   WindowFrame::CommandProcessedSignalType&            CommandProcessedSignal();
 
 protected:
+  WindowFrameImpl(Dali::Window                            window,
+                  WindowFrame::CloseCallback              closeCallback,
+                  const WindowFrameOptions&               options,
+                  std::unique_ptr<WindowOperationAdapter> windowOperations = {});
+
   ~WindowFrameImpl() override;
 
 private:

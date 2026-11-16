@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 
 using namespace Dali;
@@ -33,6 +34,9 @@ using namespace Dali::Ui;
  *   - Tap "Click to CHANGE": toggle every child's requested
  *     height between 80 and 160.
  *   - Up / Down keys: same as ENTER / EXIT buttons.
+ *   - p key: append a gray child with its own ENTER, a 1 s slide up from
+ *     LayoutBoundsLength::Pixel(80.0f) below its slot (its own height).
+ *   - q / w / e / r / t keys: UI scale 0.8 / 1.0 / 1.2 / 1.5 / 2.0.
  *   - Esc / Back: quit.
  */
 class LayoutTransitionSpecController : public ConnectionTracker
@@ -179,6 +183,28 @@ public:
     mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
+  // A child with its own ENTER (a self transition): a 1 s slide up from 80 natural units below
+  // its slot. LayoutBoundsLength::Pixel is multiplied by the child's effective scale like its
+  // 80-unit height, so at every UI scale the slide starts one child height below.
+  void AppendSlidingChild()
+  {
+    LayoutTransitionTiming timing{Duration(1.0f),
+                                  AlphaFunction(AlphaFunction::EASE_OUT),
+                                  Duration()};
+
+    LayoutTransition slide = LayoutTransition::New();
+    slide.SetEnterBoundsEffect(LayoutBoundsEffects::SlideFrom(LayoutBoundsEdge::BOTTOM,
+                                                              LayoutBoundsLength::Pixel(80.0f),
+                                                              timing));
+
+    View child = View::New();
+    child.SetBackgroundColor(Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+    child.SetRequestedWidth(MATCH_PARENT);
+    child.SetRequestedHeight(80.0f);
+    child.SetSelfLayoutTransition(slide);
+    mStack.Add(child);
+  }
+
   bool OnEnterTouched(Actor /*actor*/, TouchEvent touch)
   {
     if(touch.GetState(0) != PointState::STARTED)
@@ -233,6 +259,30 @@ public:
     else if(IsKey(event, Dali::DALI_KEY_CURSOR_DOWN))
     {
       RemoveLastChild();
+    }
+    else if(event.GetKeyName() == "p")
+    {
+      AppendSlidingChild();
+    }
+    else if(event.GetKeyName() == "q")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
+    }
+    else if(event.GetKeyName() == "e")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
+    }
+    else if(event.GetKeyName() == "r")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+    }
+    else if(event.GetKeyName() == "t")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
   }
 

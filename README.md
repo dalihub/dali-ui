@@ -62,6 +62,10 @@ cd <workspace>\dali-ui
 .\build\windows\build.ps1
 ```
 
+The DALi 2.x names (dali2-ui-foundation.dll, dali2-ui-components.dll and their
+packages) are installed by default as copies of the dali3 files;
+`-NoLegacyAliases` turns that off.
+
 To run samples, first apply the runtime environment to your PowerShell session:
 
 ```powershell
@@ -97,6 +101,10 @@ cd dali-ui/build/tizen
 cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX .
 make install -j
 ```
+
+Every repository takes `-DDALI_LEGACY_ALIASES=ON` to also install the DALi 2.x
+names as links to the dali3 files (see "Install layout and the DALi 2.x
+names" in the dali-core README).
 
 ##### Sample hello-world
 ```

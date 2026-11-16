@@ -474,6 +474,183 @@ DALI_UI_API Extension::UiScalePolicy GetUiScalePolicy(Ui::View view);
  */
 DALI_UI_API float GetEffectiveLayoutScale(const ViewImpl& viewImpl);
 
+/**
+ * @brief Raises the view one step above its next sibling without changing its parent's layout
+ * order.
+ *
+ * A Ui::View keeps two orders of its children. The actor order (Dali::Actor::GetChildAt(),
+ * Dali::DevelActor::Property::SIBLING_ORDER) decides the draw and hit-test order. The layout
+ * order (Ui::View::GetChildViewAt(), Ui::View::IndexOfChildView()) is the order in which the
+ * parent's layout measures and arranges its children. A reorder made through the inherited
+ * Dali::Actor calls changes the actor order and makes the layout order follow it. This function
+ * changes the actor order exactly like Dali::Actor::Raise() and leaves the layout order as it is,
+ * so it requests no measure or layout pass. When the parent is not a Ui::View it is the same as
+ * Dali::Actor::Raise(); without a parent it does nothing, like Dali::Actor::Raise().
+ *
+ * The layout order keeps this state until the next call on the same parent that makes it follow
+ * the actor order again. That call undoes the effect of every earlier ...PreservingLayout() call
+ * on the parent. When it changes the layout order, the parent re-measures; with a
+ * LayoutTransition attached to the parent itself, the CHANGE transitions of the children that
+ * move then report LayoutChangeCause::REORDERED, while a newly inserted child keeps its ENTER
+ * handling. These calls make the layout order follow the actor order:
+ * - Dali::Actor::Raise(), Lower(), RaiseToTop(), LowerToBottom(), RaiseAbove() and LowerBelow()
+ *   on a child, and a write of Dali::DevelActor::Property::SIBLING_ORDER, whenever dali-core
+ *   reports them through Dali::DevelActor::ChildOrderChangedSignal(). RaiseAbove() and
+ *   LowerBelow() report whenever the target is a sibling and the child is not already the
+ *   top-most (bottom-most) child, even when the child does not move.
+ * - Dali::Actor::InsertAbove() and InsertBelow() of a child the parent already has, relative to
+ *   another child of the parent. They always report, even when the child stays where it is, so
+ *   re-inserting a child at its current position makes the layout order follow the actor order.
+ * - Dali::Actor::InsertAbove() and InsertBelow() of a child the parent does not have yet (a new
+ *   view, or one taken from another parent), when the child does not end up as the last child.
+ *   This also applies to such an insert made from a Dali::DevelActor::ChildOrderChangedSignal()
+ *   callback while a ...PreservingLayout() call on one of the parent's children is running, which
+ *   undoes that call's effect at once.
+ * These calls leave the layout order as it is:
+ * - Raise(), RaiseToTop() and RaiseAbove() on the top-most child, Lower(), LowerToBottom() and
+ *   LowerBelow() on the bottom-most child, RaiseAbove() and LowerBelow() with a target that is not
+ *   a sibling, and InsertAbove() and InsertBelow() with a target that is not a child of the
+ *   parent: dali-core changes and reports nothing.
+ * - Dali::Actor::Add(), and an InsertAbove() or InsertBelow() of a new child that leaves it as the
+ *   last child: the child is appended to both orders.
+ * - Removing a child (Dali::Actor::Remove(), Ui::View::Remove() and the like): the child leaves
+ *   the layout order and the other children keep theirs.
+ *
+ * A reorder of the parent's children made from inside a callback connected to the parent's
+ * Dali::DevelActor::ChildOrderChangedSignal() is not reported, because a signal is not emitted
+ * again while it is being emitted. Whether the layout order still follows such a reorder depends
+ * on the order in which the handlers connected to that signal run and on which call emitted the
+ * signal, so do not rely on either outcome: make such reorders outside the callback.
+ *
+ * While the two orders differ, Dali::Actor::GetChildAt() and SIBLING_ORDER report the actor order,
+ * and Ui::View::GetChildViewAt() and Ui::View::IndexOfChildView() the layout order. The focus
+ * finder and the accessibility child list read the actor order. This function emits
+ * Dali::DevelActor::ChildOrderChangedSignal() as Dali::Actor::Raise() does.
+ * Dali::Actor::Property::DEPTH_INDEX is independent of both orders: it changes only the draw and
+ * hit-test order among siblings.
+ *
+ * This replaces the deprecated Ui::View::Raise(LayoutOrderPolicy) and
+ * ViewImpl::Raise(Ui::LayoutOrderPolicy) called with Ui::LayoutOrderPolicy::PRESERVE.
+ *
+ * @SINCE_3_0.0
+ * @param[in] view The view to raise; it must not be empty
+ * @see Dali::Actor::Raise()
+ */
+DALI_UI_API void RaisePreservingLayout(Ui::View view);
+
+/**
+ * @brief Lowers the view one step below its previous sibling without changing its parent's
+ * layout order.
+ *
+ * Changes the actor order exactly like Dali::Actor::Lower() and leaves the parent's layout order
+ * as it is; see RaisePreservingLayout() for the two orders, how long the effect lasts and what
+ * differs while they differ.
+ *
+ * When the two orders differ, a later Dali::Actor::InsertAbove() or InsertBelow() on the parent
+ * makes its layout order follow the actor order again, as does a reorder of one of its children
+ * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
+ * appended without that. RaisePreservingLayout() lists the exact cases.
+ *
+ * This replaces the deprecated Ui::View::Lower(LayoutOrderPolicy) and
+ * ViewImpl::Lower(Ui::LayoutOrderPolicy) called with Ui::LayoutOrderPolicy::PRESERVE.
+ *
+ * @SINCE_3_0.0
+ * @param[in] view The view to lower; it must not be empty
+ * @see Dali::Actor::Lower()
+ */
+DALI_UI_API void LowerPreservingLayout(Ui::View view);
+
+/**
+ * @brief Raises the view to the top of its siblings without changing its parent's layout order.
+ *
+ * Changes the actor order exactly like Dali::Actor::RaiseToTop() and leaves the parent's layout
+ * order as it is; see RaisePreservingLayout() for the two orders, how long the effect lasts and
+ * what differs while they differ.
+ *
+ * When the two orders differ, a later Dali::Actor::InsertAbove() or InsertBelow() on the parent
+ * makes its layout order follow the actor order again, as does a reorder of one of its children
+ * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
+ * appended without that. RaisePreservingLayout() lists the exact cases.
+ *
+ * This replaces the deprecated Ui::View::RaiseToTop(LayoutOrderPolicy) and
+ * ViewImpl::RaiseToTop(Ui::LayoutOrderPolicy) called with Ui::LayoutOrderPolicy::PRESERVE.
+ *
+ * @SINCE_3_0.0
+ * @param[in] view The view to raise; it must not be empty
+ * @see Dali::Actor::RaiseToTop()
+ */
+DALI_UI_API void RaiseToTopPreservingLayout(Ui::View view);
+
+/**
+ * @brief Lowers the view to the bottom of its siblings without changing its parent's layout
+ * order.
+ *
+ * Changes the actor order exactly like Dali::Actor::LowerToBottom() and leaves the parent's
+ * layout order as it is; see RaisePreservingLayout() for the two orders, how long the effect
+ * lasts and what differs while they differ.
+ *
+ * When the two orders differ, a later Dali::Actor::InsertAbove() or InsertBelow() on the parent
+ * makes its layout order follow the actor order again, as does a reorder of one of its children
+ * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
+ * appended without that. RaisePreservingLayout() lists the exact cases.
+ *
+ * This replaces the deprecated Ui::View::LowerToBottom(LayoutOrderPolicy) and
+ * ViewImpl::LowerToBottom(Ui::LayoutOrderPolicy) called with Ui::LayoutOrderPolicy::PRESERVE.
+ *
+ * @SINCE_3_0.0
+ * @param[in] view The view to lower; it must not be empty
+ * @see Dali::Actor::LowerToBottom()
+ */
+DALI_UI_API void LowerToBottomPreservingLayout(Ui::View view);
+
+/**
+ * @brief Raises the view directly above @p target without changing its parent's layout order.
+ *
+ * Changes the actor order exactly like Dali::Actor::RaiseAbove() and leaves the parent's layout
+ * order as it is; see RaisePreservingLayout() for the two orders, how long the effect lasts and
+ * what differs while they differ. The view moves only when it is below @p target; otherwise it
+ * stays where it is. Unlike Dali::Actor::RaiseAbove(), an empty @p target is ignored.
+ *
+ * When the two orders differ, a later Dali::Actor::InsertAbove() or InsertBelow() on the parent
+ * makes its layout order follow the actor order again, as does a reorder of one of its children
+ * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
+ * appended without that. RaisePreservingLayout() lists the exact cases.
+ *
+ * This replaces the deprecated Ui::View::RaiseAbove(View, LayoutOrderPolicy) and
+ * ViewImpl::RaiseAbove(Ui::View, Ui::LayoutOrderPolicy) called with
+ * Ui::LayoutOrderPolicy::PRESERVE.
+ *
+ * @SINCE_3_0.0
+ * @param[in] view The view to raise; it must not be empty
+ * @param[in] target The sibling to raise the view above; an empty handle does nothing
+ * @see Dali::Actor::RaiseAbove()
+ */
+DALI_UI_API void RaiseAbovePreservingLayout(Ui::View view, Ui::View target);
+
+/**
+ * @brief Lowers the view directly below @p target without changing its parent's layout order.
+ *
+ * Changes the actor order exactly like Dali::Actor::LowerBelow() and leaves the parent's layout
+ * order as it is; see RaisePreservingLayout() for the two orders, how long the effect lasts and
+ * what differs while they differ. The view moves only when it is above @p target; otherwise it
+ * stays where it is. Unlike Dali::Actor::LowerBelow(), an empty @p target is ignored.
+ *
+ * When the two orders differ, a later Dali::Actor::InsertAbove() or InsertBelow() on the parent
+ * makes its layout order follow the actor order again, as does a reorder of one of its children
+ * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
+ * appended without that. RaisePreservingLayout() lists the exact cases.
+ *
+ * This replaces the deprecated Ui::View::LowerBelow(View, LayoutOrderPolicy) and
+ * ViewImpl::LowerBelow(Ui::View, Ui::LayoutOrderPolicy) called with
+ * Ui::LayoutOrderPolicy::PRESERVE.
+ *
+ * @SINCE_3_0.0
+ * @param[in] view The view to lower; it must not be empty
+ * @param[in] target The sibling to lower the view below; an empty handle does nothing
+ * @see Dali::Actor::LowerBelow()
+ */
+DALI_UI_API void LowerBelowPreservingLayout(Ui::View view, Ui::View target);
+
 } // namespace View
 } // namespace Extension
 } // namespace Ui

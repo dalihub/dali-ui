@@ -91,7 +91,9 @@ DALI_UI_API LayoutBoundsEffect SlideTo(LayoutBoundsEdge              edge,
 /**
  * @brief Slide using a custom distance. The @c value of @p distance is
  * treated as a signed magnitude; negative values reverse the direction
- * implied by @p edge.
+ * implied by @p edge. A @c LayoutBoundsUnit::PIXEL distance is in natural
+ * units and is multiplied by the effective scale of the view that enters or
+ * exits; see @c LayoutBoundsLength.
  * @SINCE_3_0.0
  */
 DALI_UI_API LayoutBoundsEffect SlideFrom(LayoutBoundsEdge              edge,

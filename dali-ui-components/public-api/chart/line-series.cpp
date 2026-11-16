@@ -39,8 +39,8 @@ LineSeries::~LineSeries()
 
 LineSeries LineSeries::New()
 {
-  Integration::LineSeries* impl = new Integration::LineSeries();
-  return LineSeries(impl);
+  auto impl = Integration::LineSeries::New();
+  return LineSeries(impl.Get());
 }
 
 LineSeries::LineSeries(const LineSeries& rhs)

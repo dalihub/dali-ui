@@ -198,6 +198,36 @@ float GetEffectiveLayoutScale(const ViewImpl& viewImpl)
   return Ui::Internal::ViewDataImpl::GetEffectiveLayoutScaleOf(viewImpl);
 }
 
+void RaisePreservingLayout(Ui::View view)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).RaisePreservingLayout();
+}
+
+void LowerPreservingLayout(Ui::View view)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).LowerPreservingLayout();
+}
+
+void RaiseToTopPreservingLayout(Ui::View view)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).RaiseToTopPreservingLayout();
+}
+
+void LowerToBottomPreservingLayout(Ui::View view)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).LowerToBottomPreservingLayout();
+}
+
+void RaiseAbovePreservingLayout(Ui::View view, Ui::View target)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).RaiseAbovePreservingLayout(target);
+}
+
+void LowerBelowPreservingLayout(Ui::View view, Ui::View target)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).LowerBelowPreservingLayout(target);
+}
+
 } // namespace View
 } // namespace Extension
 } // namespace Ui

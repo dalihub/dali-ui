@@ -48,9 +48,9 @@ void TextureAsyncLoadingHelper::LoadAnimatedImage(const TextureManager::TextureI
                                                   const Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad,
                                                   const bool                                     loadYuvPlanes)
 {
-  LoadingTaskPtr loadingTask = new LoadingTask(++mLoadTaskId, animatedImageLoading, frameIndex, desiredSize,
-                                               samplingMode, preMultiplyOnLoad, loadYuvPlanes,
-                                               MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
+  LoadingTaskPtr loadingTask = LoadingTask::New(++mLoadTaskId, animatedImageLoading, frameIndex, desiredSize,
+                                                samplingMode, preMultiplyOnLoad, loadYuvPlanes,
+                                                MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
   loadingTask->SetTextureId(textureId);
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
 }
@@ -64,15 +64,15 @@ void TextureAsyncLoadingHelper::Load(const TextureManager::TextureId textureId, 
   LoadingTaskPtr loadingTask;
   if(DALI_UNLIKELY(url.IsBufferResource()))
   {
-    loadingTask = new LoadingTask(++mLoadTaskId, mTextureManager.GetEncodedImageBuffer(url), desiredSize,
-                                  samplingMode, orientationCorrection, preMultiplyOnLoad,
-                                  MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
+    loadingTask = LoadingTask::New(++mLoadTaskId, mTextureManager.GetEncodedImageBuffer(url), desiredSize,
+                                   samplingMode, orientationCorrection, preMultiplyOnLoad,
+                                   MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
   }
   else
   {
-    loadingTask = new LoadingTask(++mLoadTaskId, url, desiredSize, samplingMode, orientationCorrection,
-                                  preMultiplyOnLoad, loadYuvPlanes,
-                                  MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
+    loadingTask = LoadingTask::New(++mLoadTaskId, url, desiredSize, samplingMode, orientationCorrection,
+                                   preMultiplyOnLoad, loadYuvPlanes,
+                                   MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
   }
 
   loadingTask->SetTextureId(textureId);
@@ -85,8 +85,8 @@ void TextureAsyncLoadingHelper::ApplyMask(const TextureManager::TextureId textur
                                           const Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask =
-    new LoadingTask(++mLoadTaskId, pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad,
-                    MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
+    LoadingTask::New(++mLoadTaskId, pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad,
+                     MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
   loadingTask->SetTextureId(textureId);
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
 }

@@ -71,7 +71,7 @@ Dali::Ui::Text::Backend Backend::Get()
     }
     else // create and register the object
     {
-      backendHandle = Dali::Ui::Text::Backend(new Backend);
+      backendHandle = Dali::Ui::Text::Backend(Backend::NewForBaseHandle());
       service.Register(gSingletonTypeInfoId, backendHandle);
     }
   }

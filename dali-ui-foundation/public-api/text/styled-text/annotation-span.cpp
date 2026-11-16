@@ -30,7 +30,7 @@ namespace Text
 
 AnnotationSpan AnnotationSpan::New(const Dali::String& key, const Dali::String& value)
 {
-  return AnnotationSpan(new Internal::Text::AnnotationSpan(key, value));
+  return AnnotationSpan(Internal::Text::AnnotationSpan::NewForBaseHandle(key, value));
 }
 
 AnnotationSpan AnnotationSpan::DownCast(BaseHandle handle)

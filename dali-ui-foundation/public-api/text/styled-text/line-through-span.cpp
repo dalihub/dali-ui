@@ -30,7 +30,7 @@ namespace Text
 
 LineThroughSpan LineThroughSpan::New(const Text::LineThrough& lineThrough)
 {
-  return LineThroughSpan(new Internal::Text::LineThroughSpan(lineThrough));
+  return LineThroughSpan(Internal::Text::LineThroughSpan::NewForBaseHandle(lineThrough));
 }
 
 LineThroughSpan LineThroughSpan::DownCast(BaseHandle handle)

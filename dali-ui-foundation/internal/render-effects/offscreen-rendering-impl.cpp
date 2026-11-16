@@ -212,6 +212,9 @@ void OffscreenRenderingImpl::OnRenderFinished(Dali::RenderTask task)
     Ui::View view = GetOwnerView();
     if(view)
     {
+      // Keep ourselves alive during the emit; a handler may disable offscreen rendering.
+      OffscreenRenderingImplPtr self(this);
+
       mTexture = mFrameBuffer.GetColorTexture();
 
       view.OffscreenRenderingFinishedSignal().Emit(view);

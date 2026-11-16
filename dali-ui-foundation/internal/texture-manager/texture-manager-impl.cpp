@@ -538,6 +538,24 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
                   url.GetUrl().c_str(), desiredSize.GetWidth(), desiredSize.GetHeight(), observer,
                   cacheIndex.GetIndex(), textureId, maskTextureId, previousTextureId);
     textureInfo.loadState = TextureManager::LoadState::NOT_STARTED;
+    if(!synchronousLoading && mLoadingQueueTextureId == textureId && observer)
+    {
+      // A forced reload replaces this observer's pending completion. Other
+      // observers must still receive the texture that has just finished loading.
+      for(auto iterator = textureInfo.observerList.Begin(); iterator != textureInfo.observerList.End();)
+      {
+        if(*iterator == observer)
+        {
+          iterator = textureInfo.observerList.Erase(iterator);
+          DALI_LOG_INFO(gTextureManagerLogFilter, Debug::Verbose, "  Disconnect DestructionSignal to observer:%p\n", observer);
+          observer->DestructionSignal().Disconnect(this, &TextureManager::ObserverDestroyed);
+        }
+        else
+        {
+          ++iterator;
+        }
+      }
+    }
   }
 
   if(!synchronousLoading)
@@ -897,6 +915,18 @@ void TextureManager::LoadOrQueueTexture(TextureManager::TextureInfo& textureInfo
 
 void TextureManager::QueueLoadTexture(const TextureManager::TextureInfo& textureInfo, TextureUploadObserver* observer)
 {
+  if(observer)
+  {
+    for(const auto& element : mLoadQueue)
+    {
+      if(element.mTextureId == textureInfo.textureId && element.mObserver == observer)
+      {
+        DALI_LOG_INFO(gTextureManagerLogFilter, Debug::Verbose, "Skipping observer queue (already exists) (textureId:%d, observer:%p)\n", textureInfo.textureId, observer);
+        return;
+      }
+    }
+  }
+
   DALI_LOG_INFO(gTextureManagerLogFilter, Debug::Verbose,
                 "Add observer to observer queue (textureId:%d, observer:%p)\n", textureInfo.textureId, observer);
 

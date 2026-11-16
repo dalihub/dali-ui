@@ -25,12 +25,6 @@ namespace DALI_NAMESPACE
 {
 namespace Ui
 {
-namespace
-{
-/// An offscreen backend has no bound textures to report.
-const Dali::Vector<uint32_t> EMPTY_TEXTURE_BINDINGS{};
-} // namespace
-
 GlViewRenderInfo::GlViewRenderInfo()
 : mImpl(MakeUnique<Internal::GlViewRenderInfoImpl>())
 {
@@ -39,6 +33,11 @@ GlViewRenderInfo::GlViewRenderInfo()
 GlViewRenderInfo::~GlViewRenderInfo() = default;
 
 Internal::GlViewRenderInfoImpl& GlViewRenderInfo::GetImplementation()
+{
+  return *mImpl;
+}
+
+const Internal::GlViewRenderInfoImpl& GlViewRenderInfo::GetImplementation() const
 {
   return *mImpl;
 }
@@ -74,11 +73,6 @@ const Vector4& GlViewRenderInfo::GetWorldColorMultiplier() const
   // An offscreen backend's output is composited by DALi, whose shader applies the
   // inherited colour - so the application must not apply it a second time.
   return mImpl->input ? mImpl->input->worldColorMultiplier : Vector4::ONE;
-}
-
-const Dali::Vector<uint32_t>& GlViewRenderInfo::GetBoundTextureNativeHandles() const
-{
-  return mImpl->input ? mImpl->input->textureBindings : EMPTY_TEXTURE_BINDINGS;
 }
 
 } // namespace Ui

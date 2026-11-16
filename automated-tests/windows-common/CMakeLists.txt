@@ -70,11 +70,11 @@ TARGET_COMPILE_DEFINITIONS(dali-ui-foundation-test-objects PRIVATE
   NOMINMAX
   WIN32_LEAN_AND_MEAN
   __restrict__=__restrict
-  DALI_IMAGE_DIR="${CMAKE_INSTALL_PREFIX}/share/dali/ui/images/"
-  DALI_DATA_READ_ONLY_DIR="${CMAKE_INSTALL_PREFIX}/share/dali"
-  DALI_SOUND_DIR="${CMAKE_INSTALL_PREFIX}/share/dali/toolkit/sounds/"
-  DALI_STYLE_DIR="${CMAKE_INSTALL_PREFIX}/share/dali/toolkit/styles/"
-  DALI_STYLE_IMAGE_DIR="${CMAKE_INSTALL_PREFIX}/share/dali/toolkit/styles/images/"
+  DALI_IMAGE_DIR="${CMAKE_INSTALL_PREFIX}/share/dali3/ui/images/"
+  DALI_DATA_READ_ONLY_DIR="${CMAKE_INSTALL_PREFIX}/share/dali3"
+  DALI_SOUND_DIR="${CMAKE_INSTALL_PREFIX}/share/dali3/toolkit/sounds/"
+  DALI_STYLE_DIR="${CMAKE_INSTALL_PREFIX}/share/dali3/toolkit/styles/"
+  DALI_STYLE_IMAGE_DIR="${CMAKE_INSTALL_PREFIX}/share/dali3/toolkit/styles/images/"
 )
 TARGET_COMPILE_OPTIONS(dali-ui-foundation-test-objects PRIVATE
   /FI "${DALI_WINDOWS_DEPENDENCIES_INCLUDE_DIR}/dali-windows-dependencies.h"

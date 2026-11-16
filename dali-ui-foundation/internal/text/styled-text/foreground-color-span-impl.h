@@ -36,10 +36,30 @@ namespace Text
 class ForegroundColorSpan : public Span
 {
 public:
-  explicit ForegroundColorSpan(const UiColor& color);
-  ~ForegroundColorSpan() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL ForegroundColorSpan* NewForBaseHandle(const UiColor& color)
+  {
+    return new ForegroundColorSpan(color);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<ForegroundColorSpan> New(const UiColor& color)
+  {
+    return IntrusivePtr<ForegroundColorSpan>(new ForegroundColorSpan(color));
+  }
 
   const UiColor& GetColor() const;
+
+protected:
+  explicit ForegroundColorSpan(const UiColor& color);
+  ~ForegroundColorSpan() override;
 
 private:
   UiColor mColor;

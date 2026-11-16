@@ -49,11 +49,6 @@ class KeyInputFocusManagerImpl : public Dali::BaseObject, public Dali::Connectio
 {
 public:
   /**
-   * Construct a new KeyInputFocusManagerImpl.
-   */
-  KeyInputFocusManagerImpl();
-
-  /**
    * @copydoc KeyInputFocusManager::SetFocus(View)
    */
   void SetFocus(Ui::View view);
@@ -90,6 +85,26 @@ public:
   KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
 
   /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL KeyInputFocusManagerImpl* NewForBaseHandle()
+  {
+    return new KeyInputFocusManagerImpl();
+  }
+
+  /**
+   * Construct a new KeyInputFocusManagerImpl.
+   */
+
+  static IntrusivePtr<KeyInputFocusManagerImpl> New()
+  {
+    return IntrusivePtr<KeyInputFocusManagerImpl>(new KeyInputFocusManagerImpl());
+  }
+
+  /**
    * Connects a callback function with the object's signals.
    * @param[in] object The object providing the signal.
    * @param[in] tracker Used to disconnect the signal.
@@ -103,10 +118,12 @@ public:
                               FunctorDelegate* functor);
 
 protected:
+  KeyInputFocusManagerImpl();
+
   /**
    * Destructor
    */
-  virtual ~KeyInputFocusManagerImpl();
+  ~KeyInputFocusManagerImpl() override;
 
 private:
   /**
@@ -161,8 +178,6 @@ private:
    * Gets the current native window id
    */
   uint32_t GetCurrentWindowId() const;
-
-private:
   // Undefined
   KeyInputFocusManagerImpl(const KeyInputFocusManagerImpl&);
 
@@ -173,9 +188,10 @@ private:
   KeyInputFocusManager::KeyInputFocusChangedSignalType mKeyInputFocusChangedSignal;
 
   SlotDelegate<KeyInputFocusManagerImpl> mSlotDelegate;
-
-  Ui::View mCurrentFocusView; ///< The current focused view
-  uint32_t mCurrentWindowId;  ///< The native window id of current focused view
+  Ui::View                               mCurrentFocusView;
+  ///< The current focused view
+  uint32_t mCurrentWindowId;
+  ///< The native window id of current focused view
 
   struct WindowKeyTarget
   {

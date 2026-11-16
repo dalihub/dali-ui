@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/internal/text/styled-text/span-impl.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/styled-text/gradient-span.h>
+#include <utility>
 
 namespace DALI_NAMESPACE
 {
@@ -37,11 +38,31 @@ namespace Text
 class GradientSpan : public Span
 {
 public:
-  GradientSpan(const Dali::Ui::Gradient::Base& gradient, Dali::Ui::Text::GradientSpan::BoundsMode boundsMode);
-  ~GradientSpan() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL GradientSpan* NewForBaseHandle(const Dali::Ui::Gradient::Base& gradient, Dali::Ui::Text::GradientSpan::BoundsMode boundsMode)
+  {
+    return new GradientSpan(gradient, std::move(boundsMode));
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<GradientSpan> New(const Dali::Ui::Gradient::Base& gradient, Dali::Ui::Text::GradientSpan::BoundsMode boundsMode)
+  {
+    return IntrusivePtr<GradientSpan>(new GradientSpan(gradient, std::move(boundsMode)));
+  }
 
   const Dali::Ui::Gradient::Base&          GetGradient() const;
   Dali::Ui::Text::GradientSpan::BoundsMode GetBoundsMode() const;
+
+protected:
+  GradientSpan(const Dali::Ui::Gradient::Base& gradient, Dali::Ui::Text::GradientSpan::BoundsMode boundsMode);
+  ~GradientSpan() override;
 
 private:
   Dali::Ui::Gradient::Base                 mGradient;

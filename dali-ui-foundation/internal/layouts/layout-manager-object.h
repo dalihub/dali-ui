@@ -19,6 +19,7 @@
 
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali/public-api/common/unique-ptr.h>
+#include <utility>
 
 namespace DALI_NAMESPACE
 {
@@ -43,11 +44,18 @@ namespace Internal
 class LayoutManagerObject : public TraitObject
 {
 public:
-  explicit LayoutManagerObject(Dali::UniquePtr<LayoutManager> layoutManager);
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<LayoutManagerObject> New(Dali::UniquePtr<LayoutManager> layoutManager)
+  {
+    return IntrusivePtr<LayoutManagerObject>(new LayoutManagerObject(std::move(layoutManager)));
+  }
 
   LayoutManager* GetLayoutManager();
 
 protected:
+  explicit LayoutManagerObject(Dali::UniquePtr<LayoutManager> layoutManager);
   ~LayoutManagerObject() override;
 
 private:

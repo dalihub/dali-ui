@@ -36,37 +36,20 @@ namespace Internal
 class MarkdownViewStyleImpl : public Extension::UiStyleImpl
 {
 public:
-  MarkdownViewStyleImpl() = default;
-  MarkdownViewStyleImpl(const MarkdownViewStyleImpl& rhs)
-  : mTextFontFamily(rhs.mTextFontFamily),
-    mHeadingFontFamily(rhs.mHeadingFontFamily),
-    mCodeFontFamily(rhs.mCodeFontFamily),
-    mTextFontSize(rhs.mTextFontSize),
-    mHeading1FontSize(rhs.mHeading1FontSize),
-    mHeading2FontSize(rhs.mHeading2FontSize),
-    mHeading3FontSize(rhs.mHeading3FontSize),
-    mHeading4FontSize(rhs.mHeading4FontSize),
-    mHeading5FontSize(rhs.mHeading5FontSize),
-    mHeading6FontSize(rhs.mHeading6FontSize),
-    mCodeBlockFontSize(rhs.mCodeBlockFontSize),
-    mCodeBlockTitleFontSize(rhs.mCodeBlockTitleFontSize),
-    mTextColor(rhs.mTextColor),
-    mHeadingTextColor(rhs.mHeadingTextColor),
-    mQuoteTextColor(rhs.mQuoteTextColor),
-    mCodeTextColor(rhs.mCodeTextColor),
-    mCodeBlockTitleTextColor(rhs.mCodeBlockTitleTextColor),
-    mInlineCodeBackgroundColor(rhs.mInlineCodeBackgroundColor),
-    mCodeBlockBackgroundColor(rhs.mCodeBlockBackgroundColor),
-    mCodeBlockTitleBackgroundColor(rhs.mCodeBlockTitleBackgroundColor),
-    mQuoteBarColor(rhs.mQuoteBarColor),
-    mThematicBreakColor(rhs.mThematicBreakColor),
-    mTableRuleColor(rhs.mTableRuleColor),
-    mTaskCheckBoxIconGenerator(rhs.mTaskCheckBoxIconGenerator),
-    mTaskCheckBoxIconColor(rhs.mTaskCheckBoxIconColor),
-    mTaskCheckBoxSelectedIconColor(rhs.mTaskCheckBoxSelectedIconColor),
-    mHasTaskCheckBoxIconColor(rhs.mHasTaskCheckBoxIconColor),
-    mHasTaskCheckBoxSelectedIconColor(rhs.mHasTaskCheckBoxSelectedIconColor)
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<MarkdownViewStyleImpl> New()
   {
+    return IntrusivePtr<MarkdownViewStyleImpl>(new MarkdownViewStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<MarkdownViewStyleImpl> New(const MarkdownViewStyleImpl& rhs)
+  {
+    return IntrusivePtr<MarkdownViewStyleImpl>(new MarkdownViewStyleImpl(rhs));
   }
 
 #define DALI_MARKDOWN_STYLE_STRING_PROPERTY(Name) \
@@ -177,6 +160,39 @@ public:
   }
 
 protected:
+  MarkdownViewStyleImpl() = default;
+  MarkdownViewStyleImpl(const MarkdownViewStyleImpl& rhs)
+  : mTextFontFamily(rhs.mTextFontFamily),
+    mHeadingFontFamily(rhs.mHeadingFontFamily),
+    mCodeFontFamily(rhs.mCodeFontFamily),
+    mTextFontSize(rhs.mTextFontSize),
+    mHeading1FontSize(rhs.mHeading1FontSize),
+    mHeading2FontSize(rhs.mHeading2FontSize),
+    mHeading3FontSize(rhs.mHeading3FontSize),
+    mHeading4FontSize(rhs.mHeading4FontSize),
+    mHeading5FontSize(rhs.mHeading5FontSize),
+    mHeading6FontSize(rhs.mHeading6FontSize),
+    mCodeBlockFontSize(rhs.mCodeBlockFontSize),
+    mCodeBlockTitleFontSize(rhs.mCodeBlockTitleFontSize),
+    mTextColor(rhs.mTextColor),
+    mHeadingTextColor(rhs.mHeadingTextColor),
+    mQuoteTextColor(rhs.mQuoteTextColor),
+    mCodeTextColor(rhs.mCodeTextColor),
+    mCodeBlockTitleTextColor(rhs.mCodeBlockTitleTextColor),
+    mInlineCodeBackgroundColor(rhs.mInlineCodeBackgroundColor),
+    mCodeBlockBackgroundColor(rhs.mCodeBlockBackgroundColor),
+    mCodeBlockTitleBackgroundColor(rhs.mCodeBlockTitleBackgroundColor),
+    mQuoteBarColor(rhs.mQuoteBarColor),
+    mThematicBreakColor(rhs.mThematicBreakColor),
+    mTableRuleColor(rhs.mTableRuleColor),
+    mTaskCheckBoxIconGenerator(rhs.mTaskCheckBoxIconGenerator),
+    mTaskCheckBoxIconColor(rhs.mTaskCheckBoxIconColor),
+    mTaskCheckBoxSelectedIconColor(rhs.mTaskCheckBoxSelectedIconColor),
+    mHasTaskCheckBoxIconColor(rhs.mHasTaskCheckBoxIconColor),
+    mHasTaskCheckBoxSelectedIconColor(rhs.mHasTaskCheckBoxSelectedIconColor)
+  {
+  }
+
   ~MarkdownViewStyleImpl() override = default;
 
 private:

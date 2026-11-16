@@ -1908,3 +1908,16 @@ int UtcDaliImageSpanHandleAndSnapshotSemanticsP(void)
 
   END_TEST;
 }
+
+int UtcDaliStyledTextFactoryReleasesLastReference(void)
+{
+  UiTestApplication application;
+  StyledText text = StyledText::New(Dali::String("owned text"));
+  DALI_TEST_EQUALS(text.GetBaseObject().ReferenceCount(), 1, TEST_LOCATION);
+
+  WeakHandleBase weak(text);
+  DALI_TEST_CHECK(weak.GetBaseHandle());
+  text.Reset();
+  DALI_TEST_CHECK(!weak.GetBaseHandle());
+  END_TEST;
+}

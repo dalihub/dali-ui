@@ -44,7 +44,15 @@ struct SliceInfo
 class PieSeries : public ChartSeries
 {
 public:
-  PieSeries();
+  /**
+   * @brief Creates a reference-counted PieSeries implementation.
+   * @SINCE_3_0.0
+   * @return An intrusive pointer owning the implementation
+   */
+  static IntrusivePtr<PieSeries> New()
+  {
+    return IntrusivePtr<PieSeries>(new PieSeries());
+  }
 
   void AddSlice(const Dali::String& label, float value, const Vector4& color);
   void ClearSlices();
@@ -109,6 +117,8 @@ public:
   }
 
 protected:
+  PieSeries();
+
   ~PieSeries() override = default;
 
 private:

@@ -132,7 +132,7 @@ private:
   Dali::NativeImagePtr                mNativeImagePtr;
   Dali::Ui::Integration::Visual::Base mNativeImageVisual;
 
-  Dali::Window                   mWindow;
+  Dali::WeakHandle<Dali::Window> mWindow; ///< Weak to avoid a reference cycle: impl -> window -> scene -> actor -> impl
   Dali::WeakHandle<Dali::Window> mRenderingTargetWindow;
   Dali::PropertyNotification     mPositionNotification;
   Dali::PropertyNotification     mSizeNotification;

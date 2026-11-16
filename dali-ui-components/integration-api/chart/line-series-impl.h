@@ -36,7 +36,15 @@ namespace Integration
 class LineSeries : public ChartSeries
 {
 public:
-  LineSeries();
+  /**
+   * @brief Creates a reference-counted LineSeries implementation.
+   * @SINCE_3_0.0
+   * @return An intrusive pointer owning the implementation
+   */
+  static IntrusivePtr<LineSeries> New()
+  {
+    return IntrusivePtr<LineSeries>(new LineSeries());
+  }
 
 public: /// ChartSeries overrides
   Vector4 GetColor() const override
@@ -160,6 +168,8 @@ public:
   bool                 mHasStrokeGradient{false};
 
 protected:
+  LineSeries();
+
   ~LineSeries() override;
 
 private:

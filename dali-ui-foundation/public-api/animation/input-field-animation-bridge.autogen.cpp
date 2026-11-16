@@ -264,18 +264,6 @@ InputFieldAnimationBridge& InputFieldAnimationBridge::ColorMultiplierBy(const Ve
   return *this;
 }
 
-InputFieldAnimationBridge& InputFieldAnimationBridge::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::Color(target, duration, alpha, delay);
-  return *this;
-}
-
-InputFieldAnimationBridge& InputFieldAnimationBridge::ColorBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::ColorBy(relative, duration, alpha, delay);
-  return *this;
-}
-
 InputFieldAnimationBridge& InputFieldAnimationBridge::Opacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::Opacity(target, duration, alpha, delay);

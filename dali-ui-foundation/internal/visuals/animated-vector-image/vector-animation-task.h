@@ -141,12 +141,11 @@ public:
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    */
-  VectorAnimationTask(VisualFactoryCache& factoryCache);
 
-  /**
-   * @brief Destructor.
-   */
-  ~VectorAnimationTask() override;
+  static IntrusivePtr<VectorAnimationTask> New(VisualFactoryCache& factoryCache)
+  {
+    return IntrusivePtr<VectorAnimationTask>(new VectorAnimationTask(factoryCache));
+  }
 
   /**
    * @brief Finalizes the task.
@@ -300,6 +299,14 @@ public: // Implementation of AsyncTask
   {
     return Dali::StringView("VectorAnimationTask");
   }
+
+protected:
+  VectorAnimationTask(VisualFactoryCache& factoryCache);
+
+  /**
+   * @brief Destructor.
+   */
+  ~VectorAnimationTask() override;
 
 private:
   /**

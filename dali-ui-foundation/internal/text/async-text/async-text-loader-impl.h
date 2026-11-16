@@ -54,12 +54,11 @@ public:
   /**
    * Constructor
    */
-  AsyncTextLoader();
 
-  /**
-   * Destructor
-   */
-  ~AsyncTextLoader();
+  static IntrusivePtr<AsyncTextLoader> New()
+  {
+    return IntrusivePtr<AsyncTextLoader>(new AsyncTextLoader());
+  }
 
   /**
    * @copydoc Dali::AsyncTextLoader::SetLocale()
@@ -153,6 +152,15 @@ public:
   {
     return mReplacementData ? &mReplacementData->renderState : nullptr;
   }
+
+protected:
+  AsyncTextLoader();
+
+  /**
+   * Destructor
+   */
+
+  ~AsyncTextLoader() override;
 
 private:
   struct ReplacementData
@@ -278,7 +286,6 @@ private:
    * private method
    */
 
-private:
   // Undefined copy constructor.
   AsyncTextLoader(const AsyncTextLoader&);
 
@@ -302,9 +309,11 @@ private:
   TextAbstraction::FontPathList mCustomFonts;
 
   Length mNumberOfCharacters;
-  bool   mFitActualEllipsis : 1; // Used to store actual ellipses during TextFit calculations. Do not use it in other
-                                 // sections.
-  bool mIsTextDirectionRTL : 1;  // The direction of the first line after layout completion.
+  bool   mFitActualEllipsis : 1;
+  // Used to store actual ellipses during TextFit calculations. Do not use it in other
+  // sections.
+  bool mIsTextDirectionRTL : 1;
+  // The direction of the first line after layout completion.
   bool mIsTextMirrored : 1;
   // Accessed under the manager's pool mutex or while the UI owns the loader
   // exclusively. Keep separate storage from the worker-owned bitfields above.

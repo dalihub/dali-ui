@@ -31,6 +31,7 @@
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/images/pixel-buffer.h>
 #include <dali/public-api/object/ref-object.h>
+#include <utility>
 
 namespace DALI_NAMESPACE
 {
@@ -56,8 +57,12 @@ public:
    * alpha or if the image need to be applied alpha mask.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
+
+  static IntrusivePtr<LoadingTask> New(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
+                                       Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
+  {
+    return IntrusivePtr<LoadingTask>(new LoadingTask(id, std::move(animatedImageLoading), frameIndex, std::move(preMultiplyOnLoad), callback));
+  }
 
   /**
    * Constructor.
@@ -72,10 +77,14 @@ public:
    * @param [in] loadPlanes true to load image planes or false to load bitmap image.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-              Dali::ImageDimensions dimensions, Dali::SamplingMode::Type samplingMode,
-              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad,
-              bool loadPlanes, CallbackBase* callback);
+
+  static IntrusivePtr<LoadingTask> New(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
+                                       Dali::ImageDimensions dimensions, Dali::SamplingMode::Type samplingMode,
+                                       Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad,
+                                       bool loadPlanes, CallbackBase* callback)
+  {
+    return IntrusivePtr<LoadingTask>(new LoadingTask(id, std::move(animatedImageLoading), frameIndex, std::move(dimensions), samplingMode, std::move(preMultiplyOnLoad), loadPlanes, callback));
+  }
 
   /**
    * Constructor.
@@ -90,9 +99,13 @@ public:
    * @param [in] loadPlanes true to load image planes or false to load bitmap image.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions,
-              SamplingMode::Type samplingMode, bool orientationCorrection,
-              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes, CallbackBase* callback);
+
+  static IntrusivePtr<LoadingTask> New(uint32_t id, const VisualUrl& url, ImageDimensions dimensions,
+                                       SamplingMode::Type samplingMode, bool orientationCorrection,
+                                       Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes, CallbackBase* callback)
+  {
+    return IntrusivePtr<LoadingTask>(new LoadingTask(id, url, std::move(dimensions), samplingMode, orientationCorrection, std::move(preMultiplyOnLoad), loadPlanes, callback));
+  }
 
   /**
    * Constructor.
@@ -106,9 +119,13 @@ public:
    * alpha or if the image need to be applied alpha mask.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  LoadingTask(uint32_t id, const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
-              SamplingMode::Type samplingMode, bool orientationCorrection,
-              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
+
+  static IntrusivePtr<LoadingTask> New(uint32_t id, const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
+                                       SamplingMode::Type samplingMode, bool orientationCorrection,
+                                       Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
+  {
+    return IntrusivePtr<LoadingTask>(new LoadingTask(id, encodedImageBuffer, std::move(dimensions), samplingMode, orientationCorrection, std::move(preMultiplyOnLoad), callback));
+  }
 
   /**
    * Constructor.
@@ -121,13 +138,12 @@ public:
    * alpha.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  LoadingTask(uint32_t id, PixelBuffer pixelBuffer, PixelBuffer maskPixelBuffer, float contentScale,
-              bool cropToMask, Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
 
-  /**
-   * Destructor.
-   */
-  ~LoadingTask() override;
+  static IntrusivePtr<LoadingTask> New(uint32_t id, PixelBuffer pixelBuffer, PixelBuffer maskPixelBuffer, float contentScale,
+                                       bool cropToMask, Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
+  {
+    return IntrusivePtr<LoadingTask>(new LoadingTask(id, std::move(pixelBuffer), std::move(maskPixelBuffer), contentScale, cropToMask, std::move(preMultiplyOnLoad), callback));
+  }
 
   /**
    * @brief Set the Texture Id
@@ -171,26 +187,59 @@ private:
   void MultiplyAlpha();
 
 public:
-  std::vector<PixelBuffer> pixelBuffers{};          ///< pixelBuffer handle after successful load
-                                                    ///< or pixelBuffer to be masked image in the mask task
-  VisualUrl                     url;                ///< url of the image to load
-  EncodedImageBuffer            encodedImageBuffer; ///< encoded buffer of the image to load
-  uint32_t                      id;                 ///< The unique id associated with this task.
-  TextureManagerType::TextureId textureId;          ///< textureId for loading
-  ImageDimensions               dimensions;         ///< dimensions to load
-  SamplingMode::Type            samplingMode;       ///< sampling options
+  std::vector<PixelBuffer> pixelBuffers{};
+  ///< pixelBuffer handle after successful load
+  ///< or pixelBuffer to be masked image in the mask task
+  VisualUrl url;
+  ///< url of the image to load
+  EncodedImageBuffer encodedImageBuffer;
+  ///< encoded buffer of the image to load
+  uint32_t id;
+  ///< The unique id associated with this task.
+  TextureManagerType::TextureId textureId;
+  ///< textureId for loading
+  ImageDimensions dimensions;
+  ///< dimensions to load
+  SamplingMode::Type samplingMode;
+  ///< sampling options
   Dali::Ui::Integration::PreMultiplyOnLoad
-    preMultiplyOnLoad; ///< if the image's color should be multiplied by it's alpha
+    preMultiplyOnLoad;
+  ///< if the image's color should be multiplied by it's alpha
 
-  PixelBuffer                maskPixelBuffer; ///< pixelBuffer of mask image
-  float                      contentScale;    ///< The factor to scale the content
+  PixelBuffer maskPixelBuffer;
+  ///< pixelBuffer of mask image
+  float contentScale;
+  ///< The factor to scale the content
   Dali::AnimatedImageLoading animatedImageLoading;
   uint32_t                   frameIndex;
+  bool                       orientationCorrection : 1;
+  ///< if orientation correction is needed
+  bool isMaskTask : 1;
+  ///< whether this task is for mask or not
+  bool cropToMask : 1;
+  ///< Whether to crop the content to the mask size
+  bool loadPlanes : 1;
 
-  bool orientationCorrection : 1; ///< if orientation correction is needed
-  bool isMaskTask : 1;            ///< whether this task is for mask or not
-  bool cropToMask : 1;            ///< Whether to crop the content to the mask size
-  bool loadPlanes : 1;            ///< Whether to load image planes
+protected:
+  LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
+              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
+  LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
+              Dali::ImageDimensions dimensions, Dali::SamplingMode::Type samplingMode,
+              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad,
+              bool loadPlanes, CallbackBase* callback);
+  LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions,
+              SamplingMode::Type samplingMode, bool orientationCorrection,
+              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes, CallbackBase* callback);
+  LoadingTask(uint32_t id, const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
+              SamplingMode::Type samplingMode, bool orientationCorrection,
+              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
+  LoadingTask(uint32_t id, PixelBuffer pixelBuffer, PixelBuffer maskPixelBuffer, float contentScale,
+              bool cropToMask, Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
+
+  /**
+   * Destructor.
+   */
+  ~LoadingTask() override;
 };
 
 } // namespace Internal

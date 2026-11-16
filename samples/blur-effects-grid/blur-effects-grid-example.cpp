@@ -45,10 +45,10 @@ private:
     mWindow.SetBackgroundColor(Color::BLACK);
 
     const PositionSize windowSize = mWindow.GetPositionSize();
-    const float        halfWidth  = windowSize.width * 0.5f;
-    const float        halfHeight = windowSize.height * 0.5f;
+    const float        halfWidth  = static_cast<float>(windowSize.width) * 0.5f;
+    const float        halfHeight = static_cast<float>(windowSize.height) * 0.5f;
 
-    mRoot = CreateView(0.0f, 0.0f, windowSize.width, windowSize.height);
+    mRoot = CreateView(0.0f, 0.0f, static_cast<float>(windowSize.width), static_cast<float>(windowSize.height));
     mWindow.Add(mRoot);
 
     mGaussianOnceImage     = CreateImage(0.0f, 0.0f, halfWidth, halfHeight);

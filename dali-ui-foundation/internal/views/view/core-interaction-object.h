@@ -46,7 +46,13 @@ namespace Internal
 class CoreInteractionObject : public TraitObject
 {
 public:
-  CoreInteractionObject();
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<CoreInteractionObject> New()
+  {
+    return IntrusivePtr<CoreInteractionObject>(new CoreInteractionObject());
+  }
 
   InteractiveTraitImpl&     EnsureInteractiveTraitImpl();
   SelectableTraitImpl&      EnsureSelectableTraitImpl();
@@ -71,6 +77,7 @@ public:
   void FinalizeTouchEventDispatch(View view, const TouchEvent& event);
 
 protected:
+  CoreInteractionObject();
   ~CoreInteractionObject() override;
 
   void OnAttached(TraitId id, View& view) override;

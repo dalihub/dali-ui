@@ -450,27 +450,6 @@ public:
   LabelAnimationBridge& ColorMultiplierBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
   /**
-   * @brief Animates the color.
-   *
-   * @SINCE_3_0.0
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  LabelAnimationBridge& Color(const Vector4& target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the color by a relative amount.
-   *
-   * @SINCE_3_0.0
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  LabelAnimationBridge& ColorBy(const Vector4& relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
    * @brief Animates the opacity.
    *
    * @SINCE_3_0.0

@@ -6,6 +6,7 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 # Keep the test source declarations at the top so the Windows runner can
 # include this file in source-list-only mode without configuring Unix targets.
 SET(TC_SOURCES
+    utc-Dali-TextureManager-internal.cpp
     utc-Dali-TextRenderScaleFallback-internal.cpp
     utc-Dali-AsyncTextLoaderOwnership-internal.cpp
     utc-Dali-BidirectionalSupport-internal.cpp
@@ -85,6 +86,7 @@ SET(TC_SOURCES
     utc-Dali-LayoutDirectionArrangeCache-internal.cpp
     utc-Dali-ArrangeCacheHit-internal.cpp
     utc-Dali-LayoutInvalidationGeneration-internal.cpp
+    utc-Dali-RefObjectOwnership-internal.cpp
 )
 
 # These tests load a Unix shared plugin through the real adaptor engine proxy.
@@ -269,7 +271,7 @@ INCLUDE_DIRECTORIES(
 IF(DEFINED ENV{DALI_DATA_RO_DIR})
     SET(dataReadOnlyDir $ENV{DALI_DATA_RO_DIR})
 ELSE()
-    SET(dataReadOnlyDir ${CMAKE_INSTALL_PREFIX}/share/dali)
+    SET(dataReadOnlyDir ${CMAKE_INSTALL_PREFIX}/share/dali3)
 ENDIF()
 
 ADD_COMPILE_DEFINITIONS(

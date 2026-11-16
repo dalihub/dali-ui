@@ -30,7 +30,7 @@ namespace Text
 
 ForegroundColorSpan ForegroundColorSpan::New(const UiColor& color)
 {
-  return ForegroundColorSpan(new Internal::Text::ForegroundColorSpan(color));
+  return ForegroundColorSpan(Internal::Text::ForegroundColorSpan::NewForBaseHandle(color));
 }
 
 ForegroundColorSpan ForegroundColorSpan::DownCast(BaseHandle handle)

@@ -351,17 +351,6 @@ void ViewAnimationSpecImpl::ApplyColorMultiplierBy(Animation& animation, View vi
   animation.AnimateBy(Property(view, Actor::Property::COLOR_MULTIPLIER), entry.value, entry.alpha, period);
 }
 
-// Temporary compatibility aliases until applications migrate to ColorMultiplier.
-void ViewAnimationSpecImpl::ApplyColorTo(Animation& animation, View view, const Entry& entry)
-{
-  ApplyColorMultiplierTo(animation, view, entry);
-}
-
-void ViewAnimationSpecImpl::ApplyColorBy(Animation& animation, View view, const Entry& entry)
-{
-  ApplyColorMultiplierBy(animation, view, entry);
-}
-
 void ViewAnimationSpecImpl::ApplyOpacityTo(Animation& animation, View view, const Entry& entry)
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());

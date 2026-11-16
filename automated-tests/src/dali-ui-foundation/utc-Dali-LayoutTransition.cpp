@@ -18,6 +18,8 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
@@ -2645,6 +2647,188 @@ int UtcDaliLayoutBoundsEffectsTimingPreservedP(void)
   DALI_TEST_EQUALS(static_cast<int>(effect.GetTiming().GetAlpha().GetBuiltinFunction()),
                    static_cast<int>(AlphaFunction::EASE_IN),
                    TEST_LOCATION);
+  END_TEST;
+}
+
+// ─── PIXEL bounds lengths follow the effective scale ───────────────────
+//
+// LayoutBoundsUnit::PIXEL is in natural units: the dispatcher multiplies it by
+// the effective scale of the view that enters or exits. The fractions read the
+// arranged (already scaled) sizes and are not scaled again.
+
+int UtcDaliLayoutTransitionEnterPixelOffsetFollowsEffectiveScaleP(void)
+{
+  // At UI scale 2 the ENTER starts 2 x (40, -30) away from the final bounds.
+  // Before the fix it started (40, -30) away.
+  UiTestApplication application;
+
+  const float originalScale = Ui::Extension::LayoutScaleManager::Get().GetUiScale();
+  Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutBoundsEffect effect;
+  effect.SetTiming(LayoutTransitionTiming{Duration(1.0f), AlphaFunction(AlphaFunction::LINEAR), Duration()})
+    .SetOffset(LayoutBoundsLength::Pixel(40.0f), LayoutBoundsLength::Pixel(-30.0f));
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetEnterBoundsEffect(effect);
+  parent.SetLayoutTransition(transition);
+
+  View child = View::New();
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(40.0f);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  // Final bounds (the animation target): (0, 0), 100 x 40 natural = 200 x 80 rendered.
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, 0.5f, TEST_LOCATION);
+  // First frame of the 1 s LINEAR ENTER: the endpoint (0 + 40 * 2, 0 - 30 * 2).
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::POSITION_X), 80.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::POSITION_Y), -60.0f, 0.5f, TEST_LOCATION);
+
+  Ui::Extension::LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionExitPixelOffsetFollowsWindowScaleP(void)
+{
+  // The window term of the effective scale applies too: at window scale 2 the
+  // EXIT endpoint is 2 x (-25, 50) away from the current bounds. Before the fix
+  // it was (-25, 50) away.
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  const float originalWindowScale = Ui::Extension::LayoutScaleManager::Get().GetWindowScale(window);
+  Ui::Extension::LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  View child = View::New();
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(40.0f);
+  parent.Add(child);
+  window.Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutBoundsEffect effect;
+  effect.SetTiming(LayoutTransitionTiming{Duration(1.0f), AlphaFunction(AlphaFunction::LINEAR), Duration()})
+    .SetOffset(LayoutBoundsLength::Pixel(-25.0f), LayoutBoundsLength::Pixel(50.0f));
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetExitBoundsEffect(effect);
+  parent.SetLayoutTransition(transition);
+
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+
+  // The ghost stays under the parent and animates from (0, 0, 200, 80) to the
+  // endpoint (0 - 25 * 2, 0 + 50 * 2); Play() publishes that target at once.
+  DALI_TEST_CHECK(child.GetParent() == parent);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), -50.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_Y), 100.0f, 0.5f, TEST_LOCATION);
+
+  Ui::Extension::LayoutScaleManager::Get().SetWindowScale(window, originalWindowScale);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionMixedPixelSelfFractionUsesChildScaleP(void)
+{
+  // ENABLED child (scale 2) under a DISABLED parent (scale 1) at UI scale 2: the
+  // PIXEL axis takes the CHILD's scale (the parent's would give 40, as before the
+  // fix), and the SELF_FRACTION axis reads the scaled height once (80 if scaled twice).
+  UiTestApplication application;
+
+  const float originalScale = Ui::Extension::LayoutScaleManager::Get().GetUiScale();
+  Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::DISABLED);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutBoundsEffect effect;
+  effect.SetTiming(LayoutTransitionTiming{Duration(1.0f), AlphaFunction(AlphaFunction::LINEAR), Duration()})
+    .SetOffset(LayoutBoundsLength::Pixel(40.0f), LayoutBoundsLength::SelfFraction(0.5f));
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetEnterBoundsEffect(effect);
+  parent.SetLayoutTransition(transition);
+
+  View child = View::New();
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::ENABLED);
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(40.0f);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  // The child is laid out at its own scale: 200 x 80 at (0, 0).
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 80.0f, 0.5f, TEST_LOCATION);
+  // Start: x = 0 + 40 * 2, y = 0 + 0.5 * 80.
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::POSITION_X), 80.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetCurrentProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  Ui::Extension::LayoutScaleManager::Get().SetUiScale(originalScale);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeExitPixelOffsetUsesDescendantScaleP(void)
+{
+  // Inherited SUBTREE EXIT: the effect comes from the owner, the geometry from
+  // the direct parent, the PIXEL scale from the exiting descendant. At UI scale 2
+  // the owner and the card are scale 1 (DISABLED owner), the ENABLED grand-child 2.
+  UiTestApplication application;
+
+  const float originalScale = Ui::Extension::LayoutScaleManager::Get().GetUiScale();
+  Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  Ui::Extension::View::SetUiScalePolicy(a, Ui::Extension::UiScalePolicy::DISABLED);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View g = View::New();
+  Ui::Extension::View::SetUiScalePolicy(g, Ui::Extension::UiScalePolicy::ENABLED);
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+  a.Add(b);
+
+  LayoutBoundsEffect effect;
+  effect.SetTiming(LayoutTransitionTiming{Duration(1.0f), AlphaFunction(AlphaFunction::LINEAR), Duration()})
+    .SetOffset(LayoutBoundsLength::Pixel(0.0f), LayoutBoundsLength::Pixel(30.0f));
+  LayoutTransition tA = LayoutTransition::New();
+  tA.SetExitBoundsEffect(effect).SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  b.Remove(g, RemovePolicy::ANIMATE_EXIT);
+
+  // g is 100 x 100 at (0, 0) in b; the endpoint is (0, 0 + 30 * 2). The owner's
+  // or the card's scale (1) would give 30, as before the fix.
+  DALI_TEST_CHECK(g.GetParent() == b);
+  DALI_TEST_EQUALS(g.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(g.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(g.GetProperty<float>(Actor::Property::POSITION_Y), 60.0f, 0.5f, TEST_LOCATION);
+
+  Ui::Extension::LayoutScaleManager::Get().SetUiScale(originalScale);
   END_TEST;
 }
 

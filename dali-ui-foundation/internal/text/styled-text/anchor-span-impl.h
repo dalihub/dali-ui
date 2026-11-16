@@ -36,10 +36,30 @@ namespace Text
 class AnchorSpan : public Span
 {
 public:
-  explicit AnchorSpan(const Dali::Ui::Text::AnchorAttributes& attributes);
-  ~AnchorSpan() override;
+  /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL AnchorSpan* NewForBaseHandle(const Dali::Ui::Text::AnchorAttributes& attributes)
+  {
+    return new AnchorSpan(attributes);
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<AnchorSpan> New(const Dali::Ui::Text::AnchorAttributes& attributes)
+  {
+    return IntrusivePtr<AnchorSpan>(new AnchorSpan(attributes));
+  }
 
   const Dali::Ui::Text::AnchorAttributes& GetAnchorAttributes() const;
+
+protected:
+  explicit AnchorSpan(const Dali::Ui::Text::AnchorAttributes& attributes);
+  ~AnchorSpan() override;
 
 private:
   Dali::Ui::Text::AnchorAttributes mAttributes;

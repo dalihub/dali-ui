@@ -63,9 +63,24 @@ public:
   };
 
   /**
+   * @brief Creates an unreferenced implementation only for BaseHandle construction.
+   * @warning Pass the result directly to a BaseHandle-derived handle constructor.
+   * The constructor must acquire its first reference (the returned reference count is zero).
+   * Use New() when an IntrusivePtr owner is required.
+   */
+  static DALI_INTERNAL AtlasGlyphManager* NewForBaseHandle()
+  {
+    return new AtlasGlyphManager();
+  }
+
+  /**
    * @brief Constructor
    */
-  AtlasGlyphManager();
+
+  static IntrusivePtr<AtlasGlyphManager> New()
+  {
+    return IntrusivePtr<AtlasGlyphManager>(new AtlasGlyphManager());
+  }
 
   /**
    * @copydoc Ui::AtlasGlyphManager::Add
@@ -135,7 +150,7 @@ protected:
   /**
    * A reference counted object may only be deleted by calling Unreference()
    */
-  virtual ~AtlasGlyphManager();
+  ~AtlasGlyphManager() override;
 
 public:
   /**
@@ -145,6 +160,9 @@ public:
    * and if Adaptor is available.
    */
   void EnsureLocaleChangedConnection();
+
+protected:
+  AtlasGlyphManager();
 
 private:
   /**

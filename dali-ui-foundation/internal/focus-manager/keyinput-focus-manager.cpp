@@ -61,7 +61,7 @@ KeyInputFocusManager KeyInputFocusManager::Get()
     if(!manager)
     {
       // If not, create the focus manager and register it as a singleton
-      manager = KeyInputFocusManager(new KeyInputFocusManagerImpl());
+      manager = KeyInputFocusManager(KeyInputFocusManagerImpl::NewForBaseHandle());
       singletonService.Register(gSingletonTypeInfoId, manager);
     }
   }

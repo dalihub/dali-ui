@@ -98,6 +98,10 @@ effect.SetOffset(offset);
   example).
 - **Down arrow**: same as the EXIT button (Toggle layout in the subtree
   example).
+- **p**: in the spec example, append a gray child with its own ENTER, a
+  1 s slide up from `LayoutBoundsLength::Pixel(80.0f)` below its slot.
+- **q / w / e / r / t**: in the spec example, UI scale 0.8 / 1.0 / 1.2 /
+  1.5 / 2.0.
 - **Esc / Back**: quit.
 
 The remaining children also reflow on every add / remove; their

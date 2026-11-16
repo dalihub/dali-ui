@@ -36,8 +36,21 @@ namespace Internal
 class CheckBoxStyleImpl : public Extension::UiStyleImpl
 {
 public:
-  CheckBoxStyleImpl();
-  CheckBoxStyleImpl(const CheckBoxStyleImpl& rhs);
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<CheckBoxStyleImpl> New()
+  {
+    return IntrusivePtr<CheckBoxStyleImpl>(new CheckBoxStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<CheckBoxStyleImpl> New(const CheckBoxStyleImpl& rhs)
+  {
+    return IntrusivePtr<CheckBoxStyleImpl>(new CheckBoxStyleImpl(rhs));
+  }
 
   void   SetMinimumWidth(float width);
   float  GetMinimumWidth() const;
@@ -80,6 +93,8 @@ public:
   StateEffect GetStateEffect() const;
 
 protected:
+  CheckBoxStyleImpl();
+  CheckBoxStyleImpl(const CheckBoxStyleImpl& rhs);
   ~CheckBoxStyleImpl() override;
 
 private:

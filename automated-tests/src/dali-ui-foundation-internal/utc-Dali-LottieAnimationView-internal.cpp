@@ -790,7 +790,7 @@ int UtcDaliVectorAnimationTaskPlaybackAndRangeP(void)
   auto& cache = Dali::Ui::GetImplementation(factory).GetFactoryCache();
   using Task = Dali::Ui::Internal::VectorAnimationTask;
 
-  Dali::Ui::Internal::VectorAnimationTaskPtr failed(new Task(cache));
+  Dali::Ui::Internal::VectorAnimationTaskPtr failed(Task::New(cache));
   failed->RequestLoad(Dali::Ui::Internal::VisualUrl("invalid.json"), Dali::EncodedImageBuffer(), true);
   DALI_TEST_CHECK(failed->mLoadFailed);
   DALI_TEST_CHECK(!failed->Rasterize());
@@ -799,7 +799,7 @@ int UtcDaliVectorAnimationTaskPlaybackAndRangeP(void)
   failed->GetMarkerInfo(unavailable);
   DALI_TEST_CHECK(unavailable.Empty());
 
-  Dali::Ui::Internal::VectorAnimationTaskPtr task(new Task(cache));
+  Dali::Ui::Internal::VectorAnimationTaskPtr task(Task::New(cache));
   task->RequestLoad(Dali::Ui::Internal::VisualUrl("animation.json"), Dali::EncodedImageBuffer(), true);
   DALI_TEST_EQUALS(task->GetTotalFrameCount(), 5u, TEST_LOCATION);
   task->SetSize(32u, 24u);

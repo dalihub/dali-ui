@@ -245,21 +245,32 @@ private:
  * Bounds effect offsets and slide distances are expressed in one of three
  * units. The unit determines what the @c value field of a
  * @c LayoutBoundsLength is multiplied by when the dispatcher resolves the
- * effect into pixel coordinates each frame.
+ * effect into rendered coordinates as the ENTER or EXIT transition starts.
  * @SINCE_3_0.0
  */
 enum class LayoutBoundsUnit : uint8_t
 {
-  PIXEL           = 0, ///< DALi coordinate units (1 unit = 1 pixel after scaling) @SINCE_3_0.0
+  PIXEL           = 0, ///< Natural units, like a margin: multiplied by the effective scale of the view that enters or exits @SINCE_3_0.0
   SELF_FRACTION   = 1, ///< Fraction of the child's own arranged width/height @SINCE_3_0.0
   PARENT_FRACTION = 2  ///< Fraction of the parent's arranged width/height @SINCE_3_0.0
 };
 
 /**
- * @brief A scalar length expressed in pixels, child fraction, or parent fraction.
+ * @brief A scalar length expressed in natural units, child fraction, or parent fraction.
  *
  * Negative values are permitted — they encode a direction (e.g. a slide
  * starts from the negative side of an edge).
+ *
+ * A PIXEL length is in natural units: the dispatcher multiplies it by the
+ * effective scale of the view that enters or exits
+ * (Extension::View::GetEffectiveLayoutScale()), the scale its margin and requested
+ * size follow, so Pixel(40.0f) moves the view
+ * 80 rendered pixels at an effective scale of 2.0. For an ENTER or EXIT inherited
+ * from a LayoutReflowScope::SUBTREE owner the scale is the descendant's, not the
+ * owner's. The fractions are fractions of rendered sizes and are not scaled again:
+ * SELF_FRACTION of the view's own size (its final bounds for an ENTER, its current
+ * bounds for an EXIT), which carries the view's scale, and PARENT_FRACTION of the
+ * parent's arranged size, which carries the parent's scale, not the view's.
  *
  * @SINCE_3_0.0
  * @note The public value and unit fields form a fixed ABI representation.
@@ -268,7 +279,7 @@ enum class LayoutBoundsUnit : uint8_t
  * Finite-value validation occurs when the containing effect is registered.
  *
  * @code
- *   LayoutBoundsLength::Pixel(40.0f);          // 40px
+ *   LayoutBoundsLength::Pixel(40.0f);          // 40 natural units (x the view's effective scale)
  *   LayoutBoundsLength::SelfFraction(1.0f);    // one child width/height
  *   LayoutBoundsLength::ParentFraction(0.5f);  // half of parent width/height
  * @endcode

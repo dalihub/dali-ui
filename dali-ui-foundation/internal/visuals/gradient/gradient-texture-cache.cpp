@@ -184,14 +184,11 @@ private:
     // Finish removing the ID before dropping the last Texture handle: its
     // destruction observers may reenter Acquire() and reuse this slot.
     Texture retiredTexture = std::move(entry.texture);
-    auto    bucket         = mHashIds.find(entry.hash);
-    auto&   ids            = bucket->second;
-    auto    found          = std::find(ids.begin(), ids.end(), id);
-    std::iter_swap(found, ids.end() - 1);
-    ids.pop_back();
+    auto&   ids            = mHashIds[entry.hash];
+    ids.erase(std::remove(ids.begin(), ids.end(), id), ids.end());
     if(ids.empty())
     {
-      mHashIds.erase(bucket);
+      mHashIds.erase(entry.hash);
     }
 
     // Update the moved entry's ID mapping before swapping it into the hole.

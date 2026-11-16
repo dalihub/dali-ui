@@ -73,14 +73,10 @@ public:
     SizeType mBlock;       // Block within atlas used for image
   };
 
-  AtlasManager();
-
   /**
    * Create a new AtlasManager
    */
   static AtlasManagerPtr New();
-
-  virtual ~AtlasManager();
 
   /**
    * @copydoc: Ui::AtlasManager::CreateAtlas
@@ -162,11 +158,19 @@ public:
    */
   void SetTextures(AtlasId atlas, TextureSet& textureSet);
 
+protected:
+  AtlasManager();
+  ~AtlasManager() override;
+
 private:
-  std::vector<AtlasDescriptor>    mAtlasList;     // List of atlases created
-  Vector<AtlasSlotDescriptor>     mImageList;     // List of bitmaps stored in atlases
-  Ui::AtlasManager::AtlasSize     mNewAtlasSize;  // Atlas size to use in next creation
-  Ui::AtlasManager::AddFailPolicy mAddFailPolicy; // Policy for failing to add an Image
+  std::vector<AtlasDescriptor> mAtlasList;
+  // List of atlases created
+  Vector<AtlasSlotDescriptor> mImageList;
+  // List of bitmaps stored in atlases
+  Ui::AtlasManager::AtlasSize mNewAtlasSize;
+  // Atlas size to use in next creation
+  Ui::AtlasManager::AddFailPolicy mAddFailPolicy;
+  // Policy for failing to add an Image
 
   SizeType CheckAtlas(SizeType atlas, SizeType width, SizeType height, Pixel::Format pixelFormat);
 

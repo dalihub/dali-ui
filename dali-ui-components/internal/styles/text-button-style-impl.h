@@ -32,8 +32,21 @@ namespace Internal
 class TextButtonStyleImpl : public Extension::UiStyleImpl
 {
 public:
-  TextButtonStyleImpl();
-  TextButtonStyleImpl(const TextButtonStyleImpl& rhs);
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<TextButtonStyleImpl> New()
+  {
+    return IntrusivePtr<TextButtonStyleImpl>(new TextButtonStyleImpl());
+  }
+
+  /**
+   * @brief Creates a reference-counted implementation.
+   */
+  static IntrusivePtr<TextButtonStyleImpl> New(const TextButtonStyleImpl& rhs)
+  {
+    return IntrusivePtr<TextButtonStyleImpl>(new TextButtonStyleImpl(rhs));
+  }
 
   void  SetMinimumWidth(float width);
   float GetMinimumWidth() const;
@@ -84,6 +97,8 @@ public:
   Text::Underline GetTextUnderline() const;
 
 protected:
+  TextButtonStyleImpl();
+  TextButtonStyleImpl(const TextButtonStyleImpl& rhs);
   ~TextButtonStyleImpl() override;
 
 private:

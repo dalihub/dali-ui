@@ -159,7 +159,7 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&        
 : Visual::Base(factoryCache, Ui::Integration::InternalVisualType::LOTTIE_ANIMATION, Visual::DecorationCapability::CORNER_RADIUS | Visual::DecorationCapability::BORDERLINE),
   mImageUrl(imageUrl),
   mAnimationData(),
-  mVectorAnimationTask(new VectorAnimationTask(factoryCache)),
+  mVectorAnimationTask(VectorAnimationTask::New(factoryCache)),
   mImageVisualShaderFactory(shaderFactory),
   mVisualSize(),
   mVisualScale(Vector2::ONE),

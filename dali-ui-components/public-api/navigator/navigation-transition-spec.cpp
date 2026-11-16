@@ -30,7 +30,8 @@ NavigationTransitionSpec::NavigationTransitionSpec() = default;
 
 NavigationTransitionSpec NavigationTransitionSpec::New()
 {
-  return NavigationTransitionSpec(new Integration::NavigationTransitionSpecImpl());
+  auto impl = Integration::NavigationTransitionSpecImpl::New();
+  return NavigationTransitionSpec(impl.Get());
 }
 
 NavigationTransitionSpec::NavigationTransitionSpec(const NavigationTransitionSpec& other) = default;
