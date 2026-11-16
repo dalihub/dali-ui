@@ -44,6 +44,7 @@
 #include <iostream>
 #include <limits>
 #include <type_traits>
+#include <utility>
 #include <vector>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 
@@ -1544,6 +1545,107 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   view.SetShadow(Shadow::None());
   DALI_TEST_EQUALS(view.GetVisualCount(Visual::DepthLayer::BACKGROUND_EFFECT), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetVisualAt(Visual::DepthLayer::BACKGROUND_EFFECT, 0u), visual, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAnimationBridgeCopyConstructorP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  application.GetWindow().Add(view);
+
+  Animation           animation = Animation::New(0.0f);
+  ViewAnimationBridge bridge    = view.Animate(animation);
+  ViewAnimationBridge copy(bridge);
+
+  const Vector4 cornerRadius(4.0f, 3.0f, 2.0f, 1.0f);
+  copy.Opacity(0.25f, Duration(0.1f));
+  bridge.CornerRadius(cornerRadius, Duration(0.1f));
+  DALI_TEST_EQUALS(animation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(200);
+
+  DALI_TEST_EQUALS(view.GetCurrentProperty<Vector4>(View::Property::CORNER_RADIUS), cornerRadius, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAnimationBridgeCopyAssignmentP(void)
+{
+  UiTestApplication application;
+  View              view      = View::New();
+  View              otherView = View::New();
+  application.GetWindow().Add(view);
+  application.GetWindow().Add(otherView);
+
+  Animation           animation      = Animation::New(0.0f);
+  Animation           otherAnimation = Animation::New(0.0f);
+  ViewAnimationBridge bridge         = view.Animate(animation);
+  ViewAnimationBridge copy           = otherView.Animate(otherAnimation);
+
+  ViewAnimationBridge& result = (copy = bridge);
+  DALI_TEST_CHECK(&result == &copy);
+  copy.Opacity(0.25f, Duration(0.1f));
+  DALI_TEST_EQUALS(animation.GetDuration(), 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(otherAnimation.GetDuration(), 0.0f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(200);
+
+  DALI_TEST_EQUALS(view.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(otherView.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAnimationBridgeMoveConstructorP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  application.GetWindow().Add(view);
+
+  Animation           animation = Animation::New(0.0f);
+  ViewAnimationBridge bridge    = view.Animate(animation);
+  ViewAnimationBridge moved(std::move(bridge));
+
+  moved.Opacity(0.25f, Duration(0.1f));
+  DALI_TEST_EQUALS(animation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(200);
+
+  DALI_TEST_EQUALS(view.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAnimationBridgeMoveAssignmentP(void)
+{
+  UiTestApplication application;
+  View              view      = View::New();
+  View              otherView = View::New();
+  application.GetWindow().Add(view);
+  application.GetWindow().Add(otherView);
+
+  Animation           animation      = Animation::New(0.0f);
+  Animation           otherAnimation = Animation::New(0.0f);
+  ViewAnimationBridge bridge         = view.Animate(animation);
+  ViewAnimationBridge moved          = otherView.Animate(otherAnimation);
+
+  ViewAnimationBridge& result = (moved = std::move(bridge));
+  DALI_TEST_CHECK(&result == &moved);
+  moved.Opacity(0.25f, Duration(0.1f));
+  DALI_TEST_EQUALS(animation.GetDuration(), 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(otherAnimation.GetDuration(), 0.0f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(200);
+
+  DALI_TEST_EQUALS(view.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(otherView.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 

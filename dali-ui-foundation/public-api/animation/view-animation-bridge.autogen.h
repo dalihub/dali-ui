@@ -51,6 +51,45 @@ namespace Ui
 class DALI_UI_API ViewAnimationBridge
 {
 public:
+  // The copy, move and destruction of a bridge are defined by the library, not
+  // inline, so that the library keeps control of the data members below.
+
+  /**
+   * @brief Destructor.
+   * @SINCE_3_0.1
+   */
+  ~ViewAnimationBridge();
+
+  /**
+   * @brief Copy constructor.
+   * @SINCE_3_0.1
+   * @param[in] rhs The bridge to copy
+   */
+  ViewAnimationBridge(const ViewAnimationBridge& rhs);
+
+  /**
+   * @brief Copy assignment operator.
+   * @SINCE_3_0.1
+   * @param[in] rhs The bridge to copy
+   * @return A reference to this
+   */
+  ViewAnimationBridge& operator=(const ViewAnimationBridge& rhs);
+
+  /**
+   * @brief Move constructor.
+   * @SINCE_3_0.1
+   * @param[in] rhs The bridge to move from
+   */
+  ViewAnimationBridge(ViewAnimationBridge&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   * @SINCE_3_0.1
+   * @param[in] rhs The bridge to move from
+   * @return A reference to this
+   */
+  ViewAnimationBridge& operator=(ViewAnimationBridge&& rhs) noexcept;
+
   ////////////////////////////////////////////////////////////////////////////
   // Own properties
   ////////////////////////////////////////////////////////////////////////////

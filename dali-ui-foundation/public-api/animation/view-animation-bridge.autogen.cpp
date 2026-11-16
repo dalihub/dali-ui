@@ -37,6 +37,16 @@ ViewAnimationBridge::ViewAnimationBridge(Animation animation, View view)
 {
 }
 
+ViewAnimationBridge::~ViewAnimationBridge() = default;
+
+ViewAnimationBridge::ViewAnimationBridge(const ViewAnimationBridge& rhs) = default;
+
+ViewAnimationBridge& ViewAnimationBridge::operator=(const ViewAnimationBridge& rhs) = default;
+
+ViewAnimationBridge::ViewAnimationBridge(ViewAnimationBridge&& rhs) noexcept = default;
+
+ViewAnimationBridge& ViewAnimationBridge::operator=(ViewAnimationBridge&& rhs) noexcept = default;
+
 ViewAnimationBridge& ViewAnimationBridge::CornerRadius(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
