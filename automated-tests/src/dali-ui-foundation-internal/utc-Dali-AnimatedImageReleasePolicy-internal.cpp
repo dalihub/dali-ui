@@ -226,6 +226,8 @@ int UtcDaliAnimatedImageVisualUrlAndInstancePropertiesP(void)
   animated.UpdateShader();
   DALI_TEST_CHECK(animated.OnGetPropertyObject(
     Dali::Property::Key(UiIntegration::ImageVisual::Property::PIXEL_AREA), false).propertyIndex != Dali::Property::INVALID_INDEX);
+  DALI_TEST_CHECK(animated.OnGetPropertyObject(
+    Dali::Property::Key("pixelArea"), false).propertyIndex != Dali::Property::INVALID_INDEX);
   END_TEST;
 }
 

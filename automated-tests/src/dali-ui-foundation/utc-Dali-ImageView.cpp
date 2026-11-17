@@ -15,13 +15,15 @@
  *
  */
 
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/rendering/frame-buffer-devel.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
-#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <test-native-image.h>
 
 using namespace Dali;
@@ -936,5 +938,47 @@ int UtcDaliImageViewRenderedPropertyChangesP(void)
   application.Render();
   DALI_TEST_CHECK(view.IsPreMultiplyAlphaOnLoadEnabled());
   DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  END_TEST;
+}
+
+
+int UtcDaliImageViewAnimatePixelArea(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New("../samples/image-view/res/sample.jpg");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  application.GetScene().Add(view);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+  const Vector4 firstTarget(0.0f, 0.0f, 0.5f, 1.0f);
+  Animation     animation = Animation::New(1.0f);
+  animation.AnimateTo(Ui::Integration::View::GetVisualProperty(view, ImageView::Property::IMAGE, Ui::Integration::ImageVisual::Property::PIXEL_AREA), firstTarget);
+  animation.Play();
+  application.SendNotification();
+  application.Render(0u);
+  application.Render(500u);
+
+  Renderer   renderer       = view.GetRendererAt(0u);
+  const auto pixelAreaIndex = renderer.GetPropertyIndex("pixelArea");
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), Vector4(0.0f, 0.0f, 0.75f, 1.0f), TEST_LOCATION);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), firstTarget, TEST_LOCATION);
+
+  const Vector4 secondTarget(0.25f, 0.0f, 0.75f, 1.0f);
+  animation = Animation::New(1.0f);
+  animation.AnimateTo(Ui::Integration::View::GetVisualProperty(view, ImageView::Property::IMAGE, "pixelArea"), secondTarget);
+  animation.Play();
+  application.SendNotification();
+  application.Render(0u);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), Vector4(0.125f, 0.0f, 0.625f, 1.0f), TEST_LOCATION);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), secondTarget, TEST_LOCATION);
   END_TEST;
 }

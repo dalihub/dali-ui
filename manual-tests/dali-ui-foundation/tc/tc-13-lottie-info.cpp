@@ -117,7 +117,7 @@ private:
     // Show the key (layer name) of the first entry
     Dali::String  firstName;
     Property::Key key = map.GetKeyAt(0);
-    if(key.type == Property::Key::STRING)
+    if(key.type == Property::Key::Type::STRING)
     {
       firstName = key.stringKey;
     }
@@ -138,7 +138,7 @@ private:
 
     Dali::String  firstName;
     Property::Key key = map.GetKeyAt(0);
-    if(key.type == Property::Key::STRING)
+    if(key.type == Property::Key::Type::STRING)
     {
       firstName = key.stringKey;
     }

@@ -61,11 +61,11 @@ const char* BUILDER_JSON = R"JSON({
     }
   }
 })JSON";
-}
+} //namespace
 
 int UtcDaliBuilderStylePropertyExtractionP(void)
 {
-  UiTestApplication application(UiConfig::New());
+  UiTestApplication              application(UiConfig::New());
   Dali::Ui::Integration::Builder builder = Dali::Ui::Integration::Builder::New();
   auto& impl = Dali::Ui::GetImpl(builder);
   Property::Map properties;
@@ -285,6 +285,8 @@ int UtcDaliVisualBaseInstancePropertyMapsP(void)
 
   ColorVisual color = ColorVisual::New();
   DALI_TEST_CHECK(getInstanceMap(color).Empty());
+  auto colorVisual = GetImplementation(color).GetVisual();
+  DALI_TEST_CHECK(colorVisual.GetPropertyObject(Property::Key("blurRadius")).propertyIndex != Property::INVALID_INDEX);
 
   TextVisual text = TextVisual::New();
   text.SetText("instance text");
@@ -305,6 +307,9 @@ int UtcDaliVisualBaseInstancePropertyMapsP(void)
   DALI_TEST_CHECK(imageType && imageWidth);
   DALI_TEST_EQUALS(imageType->Get<int>(), static_cast<int>(Dali::Ui::Integration::InternalVisualType::IMAGE), TEST_LOCATION);
   DALI_TEST_EQUALS(imageWidth->Get<int>(), 64, TEST_LOCATION);
+  auto imageVisual = GetImplementation(image).GetVisual();
+  DALI_TEST_CHECK(imageVisual.GetPropertyObject(Property::Key("pixelArea")).propertyIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(imageVisual.GetPropertyObject(Property::Key(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA)).propertyIndex != Property::INVALID_INDEX);
 
   AnimatedImageVisual animated = AnimatedImageVisual::New();
   animated.SetResourceUrl("../samples/visual-base/res/animatedLoading.gif");

@@ -719,7 +719,7 @@ int UtcDaliLottieAnimationViewAsyncDeferredLoadCompletes(void)
 {
   UiTestApplication application;
   Test::UiVectorAnimationRenderer::ResetLoadCount();
-  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  LottieAnimationView view       = LottieAnimationView::New("animation.json");
   int                 readyCount = 0;
   view.ResourceReadySignal().Connect(&application, ResourceReadyCounter{readyCount});
   view.SetDesiredWidth(64);

@@ -766,7 +766,7 @@ void AnimatedImageVisual::DoSetProperties(const Property::Map& propertyMap)
   for(Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
   {
     KeyValuePair keyValue = propertyMap.GetKeyValue(iter);
-    if(keyValue.first.type == Property::Key::INDEX)
+    if(keyValue.first.type == Property::Key::Type::INDEX)
     {
       DoSetProperty(keyValue.first.indexKey, keyValue.second);
     }
@@ -1278,8 +1278,8 @@ Shader AnimatedImageVisual::GenerateShader() const
 
 Dali::Property AnimatedImageVisual::OnGetPropertyObject(Dali::Property::Key key, bool changeProperties)
 {
-  if((key.type == Property::Key::INDEX && key.indexKey == Ui::Integration::ImageVisual::Property::PIXEL_AREA) ||
-     (key.type == Property::Key::STRING && key.stringKey == PIXEL_AREA_UNIFORM_NAME))
+  if((key.type == Property::Key::Type::INDEX && key.indexKey == Ui::Integration::ImageVisual::Property::PIXEL_AREA) ||
+     (key.type == Property::Key::Type::STRING && key.stringKey == PIXEL_AREA_UNIFORM_NAME))
   {
     if(DALI_LIKELY(mImpl->mRenderer))
     {
