@@ -30,9 +30,15 @@
 #include <dali-ui-foundation/internal/text/font-description-run.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
+#include <dali-ui-foundation/internal/text/styled-text/anchor-span-impl.h>
+#include <dali-ui-foundation/internal/text/styled-text/background-color-span-impl.h>
+#include <dali-ui-foundation/internal/text/styled-text/font-span-impl.h>
+#include <dali-ui-foundation/internal/text/styled-text/foreground-color-span-impl.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
+#include <dali-ui-foundation/internal/text/styled-text/line-through-span-impl.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
+#include <dali-ui-foundation/internal/text/styled-text/underline-span-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
@@ -102,12 +108,14 @@ void ConvertUtf8TextToUtf32(const std::string& text, Dali::Vector<Dali::Ui::Text
 
 void SortAttachmentsByInsertionOrder(std::vector<const SpanAttachment*>& attachments)
 {
-  std::stable_sort(attachments.begin(),
-                   attachments.end(),
-                   [](const SpanAttachment* lhs, const SpanAttachment* rhs)
+  const auto precedes = [](const SpanAttachment* lhs, const SpanAttachment* rhs)
   {
     return lhs->insertionOrder < rhs->insertionOrder;
-  });
+  };
+  if(!std::is_sorted(attachments.begin(), attachments.end(), precedes))
+  {
+    std::stable_sort(attachments.begin(), attachments.end(), precedes);
+  }
 }
 
 Dali::Ui::Text::UnderlineStyleProperties ToUnderlineStyleProperties(const Dali::Ui::Text::Underline& underline)
@@ -708,7 +716,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
 
     snapshot.foregroundColorRuns.push_back(ToColorRunSnapshot(attachment->startIndex,
                                                               attachment->endIndex,
-                                                              foregroundColorSpan.GetColor().GetRgba(),
+                                                              static_cast<const ForegroundColorSpan*>(foregroundColorSpan.GetObjectPtr())->GetColor().GetRgba(),
                                                               attachment->insertionOrder));
   }
 
@@ -751,7 +759,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
 
     snapshot.backgroundColorRuns.push_back(ToColorRunSnapshot(attachment->startIndex,
                                                               attachment->endIndex,
-                                                              backgroundColorSpan.GetColor().GetRgba()));
+                                                              static_cast<const BackgroundColorSpan*>(backgroundColorSpan.GetObjectPtr())->GetColor().GetRgba()));
   }
 
   snapshot.fontRuns.reserve(orderedFontAttachments.size());
@@ -763,7 +771,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
       continue;
     }
 
-    const Dali::Ui::Text::FontAttributes attributes = fontSpan.GetFontAttributes();
+    const auto& attributes = static_cast<const FontSpan*>(fontSpan.GetObjectPtr())->GetFontAttributes();
     if(!attributes.HasAttributes())
     {
       continue;
@@ -781,7 +789,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
       continue;
     }
 
-    const Dali::Ui::Text::Underline underline = underlineSpan.GetUnderline();
+    const auto& underline = static_cast<const UnderlineSpan*>(underlineSpan.GetObjectPtr())->GetUnderline();
     if(underline == Dali::Ui::Text::Underline::None())
     {
       continue;
@@ -801,7 +809,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
       continue;
     }
 
-    const Dali::Ui::Text::LineThrough lineThrough = lineThroughSpan.GetLineThrough();
+    const auto& lineThrough = static_cast<const LineThroughSpan*>(lineThroughSpan.GetObjectPtr())->GetLineThrough();
     if(lineThrough == Dali::Ui::Text::LineThrough::None())
     {
       continue;
@@ -821,7 +829,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
       continue;
     }
 
-    const Dali::Ui::Text::AnchorAttributes attributes = anchorSpan.GetAnchorAttributes();
+    const auto& attributes = static_cast<const AnchorSpan*>(anchorSpan.GetObjectPtr())->GetAnchorAttributes();
     if(!attributes.Has(Dali::Ui::Text::AnchorAttributes::Attribute::HREF))
     {
       continue;

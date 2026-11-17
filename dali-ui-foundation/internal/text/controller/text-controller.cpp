@@ -356,6 +356,12 @@ void Controller::GetVariationsMap(Property::Map& map)
   }
 }
 
+const Property::Map* Controller::GetVariationsMap() const
+{
+  const auto* map = mImpl->mModel->mLogicalModel->GetVariationsMap();
+  return map && !map->Empty() ? map : nullptr;
+}
+
 void Controller::SetVariationsMap(const Property::Map& map)
 {
   auto& logicalModel = *mImpl->mModel->mLogicalModel;

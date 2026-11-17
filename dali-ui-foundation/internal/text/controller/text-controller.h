@@ -2330,6 +2330,12 @@ public: // Queries & retrieves.
   void GetVariationsMap(Property::Map& map);
 
   /**
+   * @brief Reads variation values without constructing an empty map.
+   * @return The nonempty map, or nullptr. Valid until the model is modified.
+   */
+  const Property::Map* GetVariationsMap() const;
+
+  /**
    * @brief Sets variation values to the model
    * @param[in] map The font variation map
    */

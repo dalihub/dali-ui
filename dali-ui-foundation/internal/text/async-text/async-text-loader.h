@@ -38,6 +38,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -235,7 +236,7 @@ struct AsyncTextParameters
 
   Insets padding; ///< The padding of the boundaries where the text is going to be laid-out.
 
-  Property::Map                      variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
+  std::optional<Property::Map>       variationsMap; ///< Owned variation values, absent when the request has no variable font axes.
   Dali::Vector<Text::Fit::Candidate> textFitCandidates;
   Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot
                                        styledTextStyleSnapshot;   ///< Copy-safe StyledText style run snapshot for async rendering.

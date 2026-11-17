@@ -1274,9 +1274,9 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
   {
     return;
   }
-  Text::AsyncTextParameters parameters          = textInformation.parameters;
-  const auto                publicationRevision = mController->GetRenderRevision();
-  const auto                publicationTaskId   = mTextLoadingTaskId;
+  const Text::AsyncTextParameters& parameters          = textInformation.parameters;
+  const auto                       publicationRevision = mController->GetRenderRevision();
+  const auto                       publicationTaskId   = mTextLoadingTaskId;
 
   const bool isRenderRequest = IsAsyncRenderRequest(parameters.requestType);
   // Current styles may have switched from BBOX to USER_SPACE since dispatch.
@@ -1474,17 +1474,14 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     // The size of the text after it has been laid-out, size of pixel data buffer.
     Size layoutSize = renderInfo.size;
 
-    // Set textWidth, textHeight to the original size requested for rendering.
-    bool isRenderScale = parameters.renderScale > 1.0f ? true : false;
-    if(isRenderScale)
-    {
-      parameters.textWidth  = parameters.renderScaleWidth;
-      parameters.textHeight = parameters.renderScaleHeight;
-    }
+    // Restore display dimensions without changing the completed request.
+    const bool  isRenderScale = parameters.renderScale > 1.0f;
+    const float textWidth     = isRenderScale ? parameters.renderScaleWidth : parameters.textWidth;
+    const float textHeight    = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;
 
     // Size of the text control including padding.
-    Vector2 textControlSize(parameters.textWidth + (parameters.padding.start + parameters.padding.end),
-                            parameters.textHeight + (parameters.padding.top + parameters.padding.bottom));
+    Vector2 textControlSize(textWidth + (parameters.padding.start + parameters.padding.end),
+                            textHeight + (parameters.padding.top + parameters.padding.bottom));
 
     bool isVerticalScroll = false;
     if(parameters.isMarqueeEnabled)
@@ -1494,11 +1491,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       // padding.
       if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
       {
-        layoutSize.width = parameters.textWidth;
+        layoutSize.width = textWidth;
       }
       else
       {
-        layoutSize.height = parameters.textHeight;
+        layoutSize.height = textHeight;
         isVerticalScroll  = true;
       }
     }
@@ -1507,7 +1504,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     Vector2 alignmentOffset;
     alignmentOffset.x = 0.0f;
     alignmentOffset.y = isVerticalScroll ? 0.0f
-                                         : (parameters.textHeight - layoutSize.y) *
+                                         : (textHeight - layoutSize.y) *
                                              VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)];
 
     Vector2 visualTransformOffset;

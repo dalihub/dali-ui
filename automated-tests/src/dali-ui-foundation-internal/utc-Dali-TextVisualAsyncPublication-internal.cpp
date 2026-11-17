@@ -85,6 +85,28 @@ namespace UiInternal        = Dali::Ui::Internal;
 namespace UiIntegrationText = Dali::Ui::Integration::Text;
 namespace UiText            = Dali::Ui::Text;
 
+template<class Tag, typename Tag::Type member>
+struct RequestAccess
+{
+  friend typename Tag::Type GetRequestMember(Tag)
+  {
+    return member;
+  }
+};
+
+struct CaptureRequest
+{
+  using Type = UiText::AsyncTextParameters (Ui::Integration::LabelImpl::*)(Ui::Integration::Text::Async::RequestType, const Vector2&, const Insets&, LayoutDirection::Type);
+  friend Type GetRequestMember(CaptureRequest);
+};
+struct RequestController
+{
+  using Type = UiText::ControllerPtr Ui::Integration::LabelImpl::*;
+  friend Type                        GetRequestMember(RequestController);
+};
+template struct RequestAccess<CaptureRequest, &Ui::Integration::LabelImpl::GetAsyncTextParameters>;
+template struct RequestAccess<RequestController, &Ui::Integration::LabelImpl::mController>;
+
 struct RenderedTextVisual
 {
   Dali::Ui::View                      view;
@@ -4404,6 +4426,79 @@ int UtcDaliTextVisualGradientTilingCallbackRetirementP(void)
       DALI_TEST_EQUALS(rendered.view.GetRendererCount(), 0u, TEST_LOCATION);
     }
     tracker.DisconnectAll();
+  }
+  END_TEST;
+}
+
+int UtcDaliAsyncTextCandidateRequestSelectionP(void)
+{
+  UiTestApplication application;
+  auto              label = Ui::Label::New("Candidates with equal font sizes and different line heights");
+  label.SetMultiLine(true);
+  auto&                                impl       = static_cast<Ui::Integration::LabelImpl&>(Ui::GetImpl(label));
+  auto                                 controller = impl.*GetRequestMember(RequestController{});
+  Dali::Vector<UiText::Fit::Candidate> candidates;
+  candidates.PushBack(UiText::Fit::Candidate(24.0f, 30.0f));
+  candidates.PushBack(UiText::Fit::Candidate(12.0f, 26.0f));
+  candidates.PushBack(UiText::Fit::Candidate(12.0f, 16.0f));
+  candidates.PushBack(UiText::Fit::Candidate(18.0f, 22.0f));
+  for(int state = 0; state < 6; ++state)
+  {
+    if(state == 1 || state == 4)
+    {
+      label.SetTextFit(UiText::Fit::None());
+    }
+    else if(state == 2)
+    {
+      label.SetTextFit(UiText::Fit::Range(10.0f, 24.0f, 2.0f));
+    }
+    else
+    {
+      label.SetTextFit(candidates);
+    }
+    label.SetRenderScale(state % 2 ? 2.0f : 1.0f);
+    label.SetMaximumLines(state % 2 ? 1 : 2);
+    const auto count    = controller->GetTextFitCandidates().Count();
+    const auto capacity = controller->GetTextFitCandidates().Capacity();
+    for(int type = 0; type < 6; ++type)
+    {
+      auto       request         = (impl.*GetRequestMember(CaptureRequest{}))(static_cast<Ui::Integration::Text::Async::RequestType>(type), Vector2(160.0f, 80.0f), Insets(), LayoutDirection::LEFT_TO_RIGHT);
+      const bool needsCandidates = controller->IsTextFitCandidatesEnabled() && type <= Ui::Integration::Text::Async::RENDER_CONSTRAINT;
+      DALI_TEST_EQUALS(request.textFitCandidates.Count(), needsCandidates ? count : 0u, TEST_LOCATION);
+      if(!needsCandidates)
+      {
+        DALI_TEST_EQUALS(request.textFitCandidates.Capacity(), 0u, TEST_LOCATION);
+      }
+      DALI_TEST_CHECK(request.isTextFitEnabled == controller->IsTextFitEnabled());
+      DALI_TEST_CHECK(request.isTextFitCandidatesEnabled == controller->IsTextFitCandidatesEnabled());
+      auto previous              = request;
+      previous.textFitCandidates = controller->GetTextFitCandidates();
+      const auto load            = [](UiText::AsyncTextParameters& parameters)
+      {
+        auto loader = UiText::AsyncTextLoader::New();
+        if(parameters.requestType == Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE)
+        {
+          return loader.GetNaturalSize(parameters);
+        }
+        if(parameters.requestType == Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH)
+        {
+          return loader.GetHeightForWidth(parameters);
+        }
+        if(parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled)
+        {
+          return loader.RenderTextFit(parameters, false, Size::ZERO);
+        }
+        return loader.RenderText(parameters, false, Size::ZERO);
+      };
+      auto expected = load(previous);
+      auto actual   = load(request);
+      DALI_TEST_EQUALS(actual.renderedSize, expected.renderedSize, 0.001f, TEST_LOCATION);
+      DALI_TEST_CHECK(actual.lineCount == expected.lineCount);
+      DALI_TEST_EQUALS(request.fontSize, previous.fontSize, 0.001f, TEST_LOCATION);
+      DALI_TEST_EQUALS(request.minLineSize, previous.minLineSize, 0.001f, TEST_LOCATION);
+    }
+    DALI_TEST_EQUALS(controller->GetTextFitCandidates().Count(), count, TEST_LOCATION);
+    DALI_TEST_EQUALS(controller->GetTextFitCandidates().Capacity(), capacity, TEST_LOCATION);
   }
   END_TEST;
 }
