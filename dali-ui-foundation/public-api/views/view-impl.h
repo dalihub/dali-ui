@@ -109,17 +109,8 @@ public:
 
 public:
   // ============================================================
-  // public: ABI-frozen virtual API
+  // public: ABI-frozen virtual API.
   // WARNING: Do NOT add, reorder, remove, or change signatures.
-  //
-  // The vtable is a single frozen set: the declaration order of every
-  // virtual in this class -- public and protected sections alike --
-  // defines the slot order, and the base class list (order included)
-  // is part of the same frozen ABI.
-  //
-  // The object layout is frozen with it: mImpl is the ONLY data member,
-  // because subclass member offsets depend on sizeof(ViewImpl). Never
-  // add a data member here; extend Internal::ViewDataImpl instead.
   // ============================================================
 
   // Resource & offscreen-rendering queries
@@ -1210,13 +1201,16 @@ public:
    *
    * The overrides above fill dali-core base-class slots and introduce none,
    * so this is the LAST virtual of this class: the final slot of the frozen
-   * vtable. Keep it last. Until the release that first ships this class
-   * (DALi 3.0.0) freezes the vtable, a new virtual hook is added to its
-   * category section above, since every repo rebuilds together. After the
-   * freeze NO virtual may be added anywhere in this class, not even appended
-   * after this one: the appended slot would collide with the first own
-   * virtual of any subclass binary that has not been rebuilt. Post-freeze
-   * hooks go on the Extension interface returned here.
+   * vtable. Keep it last. The set of virtual hooks above is final: NO
+   * virtual may be added anywhere in this class, not even appended after
+   * this one, because the appended slot would collide with the first own
+   * virtual of any subclass binary that has not been rebuilt. Any new hook
+   * goes on the Extension interface returned here.
+   *
+   * The name differs from CustomActorImpl::GetExtension() on purpose. A
+   * same-named virtual returning ViewImpl::Extension* would be an override
+   * with a non-covariant return type, which does not compile, and it would
+   * hide the base slot. Each class with its own extension needs its own name.
    *
    * @SINCE_3_0.0
    * @return The extension if available, nullptr otherwise

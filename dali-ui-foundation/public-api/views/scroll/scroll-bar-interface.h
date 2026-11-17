@@ -39,6 +39,13 @@ namespace Ui
 class DALI_UI_API ScrollBarInterface
 {
 public:
+  class Extension; ///< Forward declare future extension interface
+
+  // ============================================================
+  // ABI-frozen virtual API.
+  // WARNING: Do NOT add, reorder, remove, or change signatures.
+  // ============================================================
+
   /**
    * @brief Virtual destructor.
    * @SINCE_3_0.0
@@ -104,6 +111,31 @@ public:
    * @SINCE_3_0.0
    */
   virtual void HideBar() = 0;
+
+  // Extension: keep this the last virtual of the class
+
+  /**
+   * @brief Retrieves the extension for this interface.
+   *
+   * This is the LAST virtual of this class: the final slot of the frozen
+   * vtable. Keep it last. The set of virtual hooks above is final: NO
+   * virtual may be added anywhere in this class, not even appended after
+   * this one, because the appended slot would collide with the first own
+   * virtual of any implementation binary that has not been rebuilt. Any
+   * new hook goes on the Extension interface returned here.
+   *
+   * The name is not GetExtension() on purpose. This interface is meant to
+   * be mixed into other classes, and in a ViewImpl-derived implementation a
+   * same-named virtual would make every GetExtension() call ambiguous with
+   * CustomActorImpl::GetExtension().
+   *
+   * @SINCE_3_0.1
+   * @return The extension if available, nullptr otherwise
+   */
+  virtual Extension* GetScrollBarExtension()
+  {
+    return nullptr;
+  }
 };
 
 } // namespace Ui

@@ -42,6 +42,13 @@ class ViewImpl;
 class DALI_UI_API TraitObject : public BaseObject
 {
 public:
+  class Extension; ///< Forward declare future extension interface
+
+  // ============================================================
+  // ABI-frozen virtual API.
+  // WARNING: Do NOT add, reorder, remove, or change signatures.
+  // ============================================================
+
   /**
    * @brief Called after this trait is attached to a View.
    * @SINCE_3_0.0
@@ -59,6 +66,27 @@ public:
    * @SINCE_3_0.0
    */
   virtual void OnViewDestroying(ViewImpl* viewImpl);
+
+  // Extension: keep this the last virtual of the class
+
+  /**
+   * @brief Retrieves the extension for this trait.
+   *
+   * The protected destructor below only overrides a BaseObject slot and
+   * introduces none, so this is the LAST virtual of this class: the final
+   * slot of the frozen vtable. Keep it last. The set of virtual hooks above
+   * is final: NO virtual may be added anywhere in this class, not even
+   * appended after this one, because the appended slot would collide with
+   * the first own virtual of any trait binary that has not been rebuilt.
+   * Any new hook goes on the Extension interface returned here.
+   *
+   * @SINCE_3_0.1
+   * @return The extension if available, nullptr otherwise
+   */
+  virtual Extension* GetExtension()
+  {
+    return nullptr;
+  }
 
 protected:
   TraitObject();

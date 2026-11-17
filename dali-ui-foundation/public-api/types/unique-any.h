@@ -36,14 +36,34 @@ namespace Ui
  * and move-only value types.
  *
  * @SINCE_3_0.0
- * @note Use a stable namespace-scope type as the stored value type. Local types
- * and anonymous-namespace types should not be used when the value may be
- * retrieved from another translation unit, because they may not have a stable
- * cross-translation-unit type identity.
+ * @warning The stored value type must have a unique name at namespace scope.
+ * Values are matched by their demangled type name, so two different types with
+ * the same name, such as a type in an anonymous namespace or a local type that
+ * more than one translation unit defines, are taken for the same type, and
+ * Get<T>() then returns a pointer to a value of the other type. Never store a
+ * value of such a type when another translation unit may retrieve it.
  */
 class DALI_UI_API UniqueAny
 {
 public:
+  // ============================================================
+  // ABI-frozen class layout.
+  // The inline templates (constructor, Get, Detach, IsType,
+  // GetTypeId) are compiled into application binaries:
+  // - mHolder is read and written inline, so it stays the only
+  //   data member;
+  // - Holder<T> is instantiated in application code and deleted
+  //   by the library through HolderBase, so HolderBase's virtual
+  //   functions (destructor, GetType) and its lack of data
+  //   members are fixed;
+  // - GetTypeId<T>() builds type identities in application code,
+  //   so its recipe (DemangleTypeName() hashed with HashFNV1a
+  //   into a TypeInfoId) must stay identical to the library's.
+  // WARNING: Do NOT add, reorder, or remove data members, do NOT
+  // change HolderBase's virtual functions or add members to it,
+  // and do NOT change how GetTypeId<T>() builds a type identity.
+  // ============================================================
+
   /**
    * @brief Creates an empty UniqueAny.
    * @SINCE_3_0.0

@@ -51,6 +51,8 @@ namespace Ui
 class DALI_UI_API PageScrollableInterface
 {
 public:
+  class Extension; ///< Forward declare future extension interface
+
   /**
    * @brief Signal type emitted when the active page changes.
    *
@@ -67,6 +69,11 @@ public:
    * @SINCE_3_0.0
    */
   using DestroyingSignalType = Dali::Signal<void()>;
+
+  // ============================================================
+  // ABI-frozen virtual API.
+  // WARNING: Do NOT add, reorder, remove, or change signatures.
+  // ============================================================
 
   /**
    * @brief Virtual destructor.
@@ -114,6 +121,30 @@ public:
    * @SINCE_3_0.0
    */
   virtual DestroyingSignalType& DestroyingSignal() = 0;
+
+  // Extension: keep this the last virtual of the class
+
+  /**
+   * @brief Retrieves the extension for this interface.
+   *
+   * This is the LAST virtual of this class: the final slot of the frozen
+   * vtable. Keep it last. The set of virtual hooks above is final: NO
+   * virtual may be added anywhere in this class, not even appended after
+   * this one, because the appended slot would collide with the first own
+   * virtual of any implementation binary that has not been rebuilt. Any
+   * new hook goes on the Extension interface returned here.
+   *
+   * The name is not GetExtension() on purpose. This interface is mixed into
+   * ViewImpl-derived classes, where a same-named virtual would make every
+   * GetExtension() call ambiguous with CustomActorImpl::GetExtension().
+   *
+   * @SINCE_3_0.1
+   * @return The extension if available, nullptr otherwise
+   */
+  virtual Extension* GetPageScrollableExtension()
+  {
+    return nullptr;
+  }
 };
 
 } // namespace Ui
