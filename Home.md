@@ -91,6 +91,7 @@ For details about the class structure and extensibility of `View`, see [here](ht
 * [Create New Component](https://github.sec.samsung.net/NUI/dali-ui/wiki/Create-New-Component)
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
   * [Text](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text)
+  * [Image Format Support](https://github.sec.samsung.net/NUI/dali-ui/wiki/Image-Format-Support)
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView)
   * [VideoView](https://github.sec.samsung.net/NUI/dali-ui/wiki/VideoView)
   * [MediaView](https://github.sec.samsung.net/NUI/dali-ui/wiki/MediaView)

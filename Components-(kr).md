@@ -19,6 +19,8 @@ Dialog·AlertDialog는 [Post/Dismiss 관리형 표시](Dialog-(kr).md#기본-사
 
 #### 기본 뷰
 
+이미지 포맷별 지원 범위, 애니메이션 재생 여부 및 권장 View는 [이미지 포맷 지원](https://github.sec.samsung.net/NUI/dali-ui/wiki/Image-Format-Support-(kr)) 문서를 참고하세요.
+
 `dali-ui-foundation`
 
 이름 | 설명 | 샘플
