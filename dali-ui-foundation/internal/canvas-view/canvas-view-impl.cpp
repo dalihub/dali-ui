@@ -27,7 +27,7 @@
 #include <dali/integration-api/texture-integ.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>

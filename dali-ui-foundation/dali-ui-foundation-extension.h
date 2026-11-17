@@ -27,7 +27,6 @@
 #include <dali-ui-foundation/extension-api/interactive-view-impl.h>
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/extension-api/progress-view-impl.h>
-#include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/extension-api/selectable-view-impl.h>
 #include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>

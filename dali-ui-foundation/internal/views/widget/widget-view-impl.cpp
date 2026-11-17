@@ -17,7 +17,7 @@
 
 #include <dali-ui-foundation/internal/views/widget/widget-view-impl.h>
 
-#include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>

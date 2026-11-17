@@ -42,7 +42,7 @@
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
-#include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>

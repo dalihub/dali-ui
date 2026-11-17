@@ -31,8 +31,8 @@ namespace Ui
 /**
  * @brief Property index definitions for ChartView.
  *
- * Shared between ChartView::Property (public-api) and ChartViewImpl
- * (integration-api, for DALI_PROPERTY_REGISTRATION_EXTERNAL).
+ * Shared between ChartView::Property (public-api) and the view
+ * implementation's property registration.
  * @SINCE_3_0.0
  */
 struct ChartViewPropertyIndex
