@@ -2834,6 +2834,48 @@ int UtcDaliScrollViewKeyScrollStepFollowsScaleP(void)
   END_TEST;
 }
 
+// The key scroll step moves the content by the same scaled distance in every direction: at a UI
+// scale of 2 a step of 70 is 140 rendered pixels. A 200 x 200 view (400 rendered) over a 700 x 700
+// content (1400 rendered) rests at (500, 500): UP reaches 500 - 140 = 360 on the y axis, LEFT the
+// same on the x axis. An unscaled step would give 430.
+int UtcDaliScrollViewKeyScrollStepUpAndLeftFollowScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Both);
+  scrollView.SetKeyScrollEnabled(true);
+  scrollView.SetKeyScrollStep(70.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(700.0f);
+  content.SetRequestedHeight(700.0f);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  auto& impl = GetScrollImpl(scrollView);
+
+  scrollView.ScrollTo(Vector2(500.0f, 500.0f), false);
+  impl.ScrollByKeyDirection(FocusDirection::UP);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().x, 500.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 360.0f, 0.001f, TEST_LOCATION);
+
+  // A non-animated scroll cancels the running key scroll and rests at the given position again.
+  scrollView.ScrollTo(Vector2(500.0f, 500.0f), false);
+  impl.ScrollByKeyDirection(FocusDirection::LEFT);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().x, 360.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 500.0f, 0.001f, TEST_LOCATION);
+  impl.CancelScrollAnimation();
+  END_TEST;
+}
+
 // The focus scroll peek is a design length: at a UI scale of 2 a peek of 12 is 24 rendered pixels.
 // A 200 x 200 view (400 rendered) over 700 of content makes an item at 600 (1200 rendered, 80 tall)
 // visible at the end edge: 1200 - (400 - 80) = 880, plus the peek 24 = 904.
@@ -2868,6 +2910,93 @@ int UtcDaliScrollViewFocusScrollPeekFollowsScaleP(void)
   scrollView.ScrollTo(item, false, ScrollToPosition::MakeVisible);
   DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 904.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -904.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// The focus scroll peek also applies toward the start edge: at a UI scale of 2 a peek of 12 is 24
+// rendered pixels. A 200 x 200 view (400 rendered) over 700 of content is scrolled to 600, past an
+// item at 100 (200 rendered, 80 tall). Making the item visible aligns its start edge and keeps the
+// peek before it: 200 - 24 = 176. An unscaled peek would give 188.
+int UtcDaliScrollViewFocusScrollPeekStartEdgeFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetFocusScrollPeek(12.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(700.0f);
+  View item = View::New();
+  item.SetRequestedWidth(40.0f);
+  item.SetRequestedHeight(40.0f);
+  item.SetRequestedY(100.0f);
+  content.Add(item);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  scrollView.ScrollToY(600.0f, false);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 600.0f, 0.001f, TEST_LOCATION);
+
+  scrollView.ScrollTo(item, false, ScrollToPosition::MakeVisible);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 176.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -176.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// With both axes scrollable the peek extends the scroll on every axis that moves, toward the end
+// edge and toward the start edge alike. At a UI scale of 2 a 200 x 200 view (400 rendered) over a
+// 700 x 700 content (1400 rendered) holds an item at (300, 300) (600 rendered, 80 wide and tall).
+// From 0 the item's end edges need 680 - 400 = 280, plus the peek 24 = 304 on each axis. From 900
+// its start edges need 600, minus the peek 24 = 576. An unscaled peek would give 292 and 588.
+int UtcDaliScrollViewFocusScrollPeekBothAxesFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Both);
+  scrollView.SetFocusScrollPeek(12.0f);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+
+  View content = View::New();
+  content.SetRequestedWidth(700.0f);
+  content.SetRequestedHeight(700.0f);
+  View item = View::New();
+  item.SetRequestedWidth(40.0f);
+  item.SetRequestedHeight(40.0f);
+  item.SetRequestedX(300.0f);
+  item.SetRequestedY(300.0f);
+  content.Add(item);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(item.GetProperty<float>(Actor::Property::POSITION_X), 600.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(item.GetProperty<float>(Actor::Property::POSITION_Y), 600.0f, 0.001f, TEST_LOCATION);
+
+  scrollView.ScrollTo(item, false, ScrollToPosition::MakeVisible);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().x, 304.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 304.0f, 0.001f, TEST_LOCATION);
+
+  scrollView.ScrollTo(Vector2(900.0f, 900.0f), false);
+  scrollView.ScrollTo(item, false, ScrollToPosition::MakeVisible);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().x, 576.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 576.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_X), -576.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.GetProperty<float>(Actor::Property::POSITION_Y), -576.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2923,6 +3052,32 @@ int UtcDaliBounceEdgeEffectPullLimitFollowsScaleP(void)
   END_TEST;
 }
 
+// The push-out limit of an absorbed fling is a design length too: at a UI scale of 2 the 80 limit
+// is 160 rendered pixels. A velocity of 4000 asks for 4000 x 0.05 = 200 and is held at 160. The
+// effect records that offset at once, so a pull that follows (resistance 1) continues from it:
+// 160 + 10 = 170. An unscaled limit would give 80 + 10 = 90.
+int UtcDaliBounceEdgeEffectAbsorbLimitFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  View             source = View::New();
+  BounceEdgeEffect effect = BounceEdgeEffect::New(ScrollDirection::Vertical);
+  effect.SetSource(source);
+  effect.SetPullResistance(1.0f);
+
+  effect.OnAbsorb(4000.0f);
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::RECEDE);
+
+  effect.OnPull(10.0f, 10.0f);
+  DALI_TEST_CHECK(effect.GetState() == EdgeEffect::State::PULL);
+  DALI_TEST_EQUALS(source.GetProperty<float>(Actor::Property::POSITION_Y), 170.0f, 0.001f, TEST_LOCATION);
+
+  effect.Finish();
+  DALI_TEST_EQUALS(source.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
 // The keyboard edge bump is a design length expressed as a synthetic absorb velocity: at a UI scale
 // of 2 it is 1200 instead of 600 (a 60 rendered pixel bump with the built-in effect instead of 30).
 // Fails before this change: the effects absorbed +-600.
@@ -2945,6 +3100,33 @@ int UtcDaliScrollViewKeyEdgeFeedbackFollowsScaleP(void)
   auto& impl = GetScrollImpl(scrollView);
   impl.TriggerKeyEdgeFeedback(FocusDirection::UP);
   impl.TriggerKeyEdgeFeedback(FocusDirection::DOWN);
+  DALI_TEST_EQUALS(startVelocity, 1200.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(endVelocity, -1200.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+// The keyboard edge bump follows the scale on the horizontal axis too: LEFT bumps the start edge
+// and RIGHT the end edge with a synthetic absorb velocity of 600 x 2 = 1200 at a UI scale of 2.
+// An unscaled bump would absorb +-600.
+int UtcDaliScrollViewKeyEdgeFeedbackHorizontalFollowsScaleP(void)
+{
+  UiTestApplication application;
+  ScopedUiScale     uiScale(2.0f);
+
+  ScrollView scrollView = ScrollView::New();
+  EdgeEffect start      = EdgeEffect::New();
+  EdgeEffect end        = EdgeEffect::New();
+  scrollView.SetStartEdgeEffect(start);
+  scrollView.SetEndEdgeEffect(end);
+
+  float startVelocity = 0.0f;
+  float endVelocity   = 0.0f;
+  start.AbsorbSignal().Connect(&application, [&startVelocity](float velocity) { startVelocity = velocity; });
+  end.AbsorbSignal().Connect(&application, [&endVelocity](float velocity) { endVelocity = velocity; });
+
+  auto& impl = GetScrollImpl(scrollView);
+  impl.TriggerKeyEdgeFeedback(FocusDirection::LEFT);
+  impl.TriggerKeyEdgeFeedback(FocusDirection::RIGHT);
   DALI_TEST_EQUALS(startVelocity, 1200.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(endVelocity, -1200.0f, 0.001f, TEST_LOCATION);
   END_TEST;
