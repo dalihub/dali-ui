@@ -75,6 +75,7 @@ int UtcDaliTransitionDataMapRoundTripP(void)
   DALI_TEST_CHECK(roundTrip.Find("initialValue"));
   DALI_TEST_CHECK(roundTrip.Find("targetValue"));
   DALI_TEST_CHECK(roundTrip.Find("animator"));
+  DALI_TEST_EQUALS(roundTrip.Find("property")->Get<Dali::String>(), Dali::String("position"), TEST_LOCATION);
   END_TEST;
 }
 
@@ -107,6 +108,7 @@ int UtcDaliTransitionDataArrayAndAlphaFunctionsP(void)
   TransitionDataPtr plain = TransitionData::New(noAnimator);
   DALI_TEST_CHECK(!(*plain->Begin())->animate);
   Property::Map plainRoundTrip = plain->GetAnimatorAt(0u);
+  DALI_TEST_EQUALS(plainRoundTrip.Find("property")->Get<int>(), 12, TEST_LOCATION);
   DALI_TEST_CHECK(!plainRoundTrip.Find("initialValue"));
   DALI_TEST_CHECK(!plainRoundTrip.Find("targetValue"));
   DALI_TEST_CHECK(!plainRoundTrip.Find("animator"));

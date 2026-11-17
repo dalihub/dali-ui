@@ -21,6 +21,8 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-dynamic-property.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
 #include <dali-ui/ui-event-thread-callback.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
@@ -908,5 +910,48 @@ int UtcDaliLottieAnimationViewLegacyPlaybackRange(void)
   view.GetPlaybackRange(startFrame, endFrame);
   DALI_TEST_EQUALS(startFrame, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(endFrame, view.GetTotalFrameCount(), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLottieAnimationVisualAnimatePixelArea(void)
+{
+  UiTestApplication application;
+
+  LottieAnimationView view = LottieAnimationView::New("animation.json");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  application.GetScene().Add(view);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+
+  const Vector4 firstTarget(0.0f, 0.0f, 0.5f, 1.0f);
+  Animation     animation         = Animation::New(1.0f);
+  auto          pixelAreaProperty = Ui::Integration::View::GetVisualProperty(view, LottieAnimationView::Property::IMAGE, "pixelArea");
+  Renderer      renderer          = Renderer::DownCast(pixelAreaProperty.object);
+  DALI_TEST_CHECK(renderer);
+  animation.AnimateTo(pixelAreaProperty, firstTarget);
+  animation.Play();
+  application.SendNotification();
+  application.Render(0u);
+  application.Render(500u);
+
+  const auto pixelAreaIndex = renderer.GetPropertyIndex("pixelArea");
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), Vector4(0.0f, 0.0f, 0.75f, 1.0f), TEST_LOCATION);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), firstTarget, TEST_LOCATION);
+
+  const Vector4 secondTarget(0.25f, 0.0f, 0.75f, 1.0f);
+  animation = Animation::New(1.0f);
+  animation.AnimateTo(Ui::Integration::View::GetVisualProperty(view, LottieAnimationView::Property::IMAGE, Ui::Integration::ImageVisual::Property::PIXEL_AREA), secondTarget);
+  animation.Play();
+  application.SendNotification();
+  application.Render(0u);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), Vector4(0.125f, 0.0f, 0.625f, 1.0f), TEST_LOCATION);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), secondTarget, TEST_LOCATION);
   END_TEST;
 }

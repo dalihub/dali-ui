@@ -79,7 +79,7 @@ const uint16_t PROPERTY_NAME_INDEX_TABLE_COUNT =
 
 Property::Index GetVisualPropertyIndex(Property::Key key)
 {
-  if(key.type == Property::Key::STRING)
+  if(key.type == Property::Key::Type::STRING)
   {
     for(auto tableId = 0u; tableId < PROPERTY_NAME_INDEX_TABLE_COUNT; ++tableId)
     {
@@ -1167,7 +1167,7 @@ VisualRenderer Visual::Base::GetRenderer() const
 
 Property::Index Visual::Base::GetIntKey(Property::Key key)
 {
-  if(key.type == Property::Key::INDEX)
+  if(key.type == Property::Key::Type::INDEX)
   {
     return key.indexKey;
   }
@@ -1294,8 +1294,8 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
   }
 
   // Fast-out for invalid key.
-  if((key.type == Property::Key::INDEX && key.indexKey == Property::INVALID_KEY) ||
-     (key.type == Property::Key::STRING && key.stringKey.Empty()))
+  if((key.type == Property::Key::Type::INDEX && key.indexKey == Property::INVALID_KEY) ||
+     (key.type == Property::Key::Type::STRING && key.stringKey.Empty()))
   {
     return Property::INVALID_INDEX;
   }
@@ -1313,7 +1313,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
       // independently, as shaders are shared across multiple renderers.
       Dali::String    keyName;
       Property::Index keyIndex(Property::INVALID_KEY);
-      if(key.type == Property::Key::INDEX)
+      if(key.type == Property::Key::Type::INDEX)
       {
         keyName  = shader.GetPropertyName(index);
         keyIndex = key.indexKey;
@@ -1484,7 +1484,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     default:
     {
       // Special case for MIX_COLOR
-      if(key.type == Property::Key::INDEX &&
+      if(key.type == Property::Key::Type::INDEX &&
          ((mImpl->mType == Ui::Integration::InternalVisualType::PRIMITIVE && key.indexKey == Ui::Integration::PrimitiveVisual::Property::MIX_COLOR)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::MIX_COLOR);
@@ -1492,16 +1492,16 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
 
       // Special case for PRE_MULTIPLIED_ALPHA (It is not animatable, but keep it just for logical flow)
       if((mImpl->mType == Ui::Integration::InternalVisualType::IMAGE || mImpl->mType == Ui::Integration::InternalVisualType::ANIMATED_IMAGE || mImpl->mType == Ui::Integration::InternalVisualType::N_PATCH) &&
-         ((key.type == Property::Key::INDEX && key.indexKey == Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA) ||
-          (key.type == Property::Key::STRING && key.stringKey == PRE_MULTIPLIED_ALPHA)))
+         ((key.type == Property::Key::Type::INDEX && key.indexKey == Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA) ||
+          (key.type == Property::Key::Type::STRING && key.stringKey == PRE_MULTIPLIED_ALPHA)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA);
       }
 
       // Special case for BLUR_RADIUS
       if(mImpl->mType == Ui::Integration::InternalVisualType::COLOR &&
-         ((key.type == Property::Key::INDEX && key.indexKey == Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS) ||
-          (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME)))
+         ((key.type == Property::Key::Type::INDEX && key.indexKey == Dali::Ui::Integration::ColorVisual::Property::BLUR_RADIUS) ||
+          (key.type == Property::Key::Type::STRING && key.stringKey == BLUR_RADIUS_NAME)))
       {
         // Request to color-visual class
         return OnGetPropertyObject(key, changeProperties);

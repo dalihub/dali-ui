@@ -444,7 +444,7 @@ Dali::Devel::Accessibility::Attributes ViewAccessible::GetAttributes() const
     Dali::Property::Key mapKey = attributeMap->GetKeyAt(i);
     std::string         mapValue;
 
-    if(mapKey.type == Dali::Property::Key::STRING && GetStdString(attributeMap->GetValue(i), mapValue))
+    if(mapKey.type == Dali::Property::Key::Type::STRING && GetStdString(attributeMap->GetValue(i), mapValue))
     {
       result.emplace(ToStdString(mapKey.stringKey), std::move(mapValue));
     }

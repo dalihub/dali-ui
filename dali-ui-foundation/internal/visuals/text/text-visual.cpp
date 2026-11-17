@@ -382,7 +382,7 @@ void TextVisual::DoSetProperties(const Property::Map& propertyMap)
   for(Property::Map::SizeType index = 0u, count = propertyMap.Count(); index < count; ++index)
   {
     const KeyValuePair& keyValue = propertyMap.GetKeyValue(index);
-    if(keyValue.first.type == Property::Key::INDEX)
+    if(keyValue.first.type == Property::Key::Type::INDEX)
     {
       DoSetProperty(keyValue.first.indexKey, keyValue.second);
     }
