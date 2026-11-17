@@ -486,7 +486,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mVerticalLineAlignment = parameters.verticalLineAlignment;
   mTextModel->mVisualModel->SetVerticalLineAlignment(parameters.verticalLineAlignment);
 
-  mTextModel->mLogicalModel->SetVariationsMap(&parameters.variationsMap);
+  mTextModel->mLogicalModel->SetVariationsMap(parameters.variationsMap ? &*parameters.variationsMap : nullptr);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Update visual model.

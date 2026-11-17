@@ -4393,9 +4393,12 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
   parameters.textFitMaxSize               = mController->GetTextFitMaxSize(Ui::Text::Controller::POINT_SIZE);
   parameters.textFitStepSize              = mController->GetTextFitStepSize(Ui::Text::Controller::POINT_SIZE);
   parameters.isTextFitCandidatesEnabled   = mController->IsTextFitCandidatesEnabled();
-  parameters.textFitCandidates            = mController->GetTextFitCandidates();
-  parameters.isMarqueeEnabled             = mController->IsMarqueeEnabled();
-  const bool hasMarqueeBlocker            = HasInlineReplacementSource();
+  if(parameters.isTextFitCandidatesEnabled && requestType <= Text::Async::RENDER_CONSTRAINT)
+  {
+    parameters.textFitCandidates = mController->GetTextFitCandidates();
+  }
+  parameters.isMarqueeEnabled  = mController->IsMarqueeEnabled();
+  const bool hasMarqueeBlocker = HasInlineReplacementSource();
   if(hasMarqueeBlocker)
   {
     parameters.isMarqueeEnabled = false;
@@ -4434,7 +4437,10 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Asyn
     parameters.isTextRevealBlurRequested      = revealData->blurRadius > 0.0f &&
                                            revealData->blurDurationRatio > 0.0f;
   }
-  mController->GetVariationsMap(parameters.variationsMap);
+  if(const auto* variationsMap = mController->GetVariationsMap())
+  {
+    parameters.variationsMap.emplace(*variationsMap);
+  }
   parameters.renderScale                    = mController->GetRenderScale();
   parameters.isEmbossEnabled                = mController->IsEmbossEnabled();
   parameters.embossDirection                = mController->GetEmbossDirection();
