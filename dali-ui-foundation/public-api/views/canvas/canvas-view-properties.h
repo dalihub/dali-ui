@@ -34,7 +34,7 @@ namespace Ui
  * This struct is the single source of truth for public property indices.
  * It is shared between:
  *   - CanvasView::Property  (public-api, for application code)
- *   - CanvasViewImpl        (internal/canvas-view, for DALI_PROPERTY_REGISTRATION_EXTERNAL)
+ *   - the view implementation's property registration
  * @SINCE_3_0.0
  */
 struct CanvasViewPropertyIndex

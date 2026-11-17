@@ -180,7 +180,7 @@ Framework 개발자가 새 컴포넌트를 만들거나 앱이 커스텀 컴포�
 #### 그외 중요 포인트들
 * [GetImpl(MyView&)](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view.cpp#L13) : 핸들로부터 impl 을 얻어냄
 * [Self()](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L57) : Impl로 부터 핸들을 얻어냄
-* [DALI_TYPE_REGISTRATION_BEGIN(..)](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L19) : DALi 타입 등록을 위한 매크로
+* [Ui::ViewRegistration](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L22) : 커스텀 View 타입을 DALi 타입 레지스트리에 등록 (선택 사항; 등록하지 않아도 일반 View로 동작)
 
 
 <br/>

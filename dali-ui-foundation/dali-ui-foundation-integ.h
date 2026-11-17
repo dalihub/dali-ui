@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
 #include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
 #include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
+#include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/shader-effects/alpha-discard-effect.h>
 #include <dali-ui-foundation/integration-api/shader-effects/dissolve-effect.h>
 #include <dali-ui-foundation/integration-api/shader-effects/distance-field-effect.h>

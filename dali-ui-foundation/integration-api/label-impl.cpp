@@ -60,7 +60,7 @@
 #include <dali-ui-foundation/internal/text/text-pixel-snap-data.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
-#include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
