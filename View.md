@@ -178,7 +178,7 @@ Name | Role | Main Methods
 
 * [GetImpl(MyView&)](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view.cpp#L13): obtains the impl from the handle
 * [Self()](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L57): obtains the handle from the impl
-* [DALI_TYPE_REGISTRATION_BEGIN(..)](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L19): macro for DALi type registration
+* [Ui::ViewRegistration](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L22): registers the custom View type with the DALi type registry (optional; an unregistered subclass still works as a plain View)
 
 
 <br/>
