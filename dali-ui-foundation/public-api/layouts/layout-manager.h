@@ -49,6 +49,8 @@ class ViewImpl;
 class DALI_UI_API LayoutManager
 {
 public:
+  class Extension; ///< Forward declare future extension interface
+
   // ============================================================
   // ABI-frozen virtual API.
   // WARNING: Do NOT add, reorder, remove, or change signatures.
@@ -98,6 +100,26 @@ public:
    * @param[in] bounds The available bounds for arranging children (owner-local content area)
    */
   virtual void Arrange(ViewImpl* view, const LayoutRect& bounds) = 0;
+
+  // Extension: keep this the last virtual of the class
+
+  /**
+   * @brief Retrieves the extension for this layout manager.
+   *
+   * This is the LAST virtual of this class: the final slot of the frozen
+   * vtable. Keep it last. The set of virtual hooks above is final: NO
+   * virtual may be added anywhere in this class, not even appended after
+   * this one, because the appended slot would collide with the first own
+   * virtual of any layout manager binary that has not been rebuilt. Any
+   * new hook goes on the Extension interface returned here.
+   *
+   * @SINCE_3_0.1
+   * @return The extension if available, nullptr otherwise
+   */
+  virtual Extension* GetExtension()
+  {
+    return nullptr;
+  }
 
   // ============================================================
   // Non-virtual, library-internal API.

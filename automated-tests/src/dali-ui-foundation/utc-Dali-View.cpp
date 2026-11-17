@@ -1912,6 +1912,17 @@ int UtcDaliViewSetTraitP(void)
   END_TEST;
 }
 
+int UtcDaliViewTraitObjectGetExtensionP(void)
+{
+  UiTestApplication application;
+  DummyTrait        trait = DummyTrait::New();
+
+  // The base slot is a placeholder: no extension until one is defined and returned.
+  TraitObject& object = trait.GetImpl();
+  DALI_TEST_CHECK(object.GetExtension() == nullptr);
+  END_TEST;
+}
+
 int UtcDaliViewGetTraitP(void)
 {
   UiTestApplication application;
@@ -10265,6 +10276,17 @@ int UtcDaliViewArrangeCacheHitDoesNotScheduleFurtherLayoutSubtreeP(void)
 // direct manager write alone reaches the screen (it schedules the pass and the
 // manager honours the new value), and a same-value write moves nothing.
 // ---------------------------------------------------------------------------
+
+int UtcDaliViewLayoutManagerGetExtensionP(void)
+{
+  UiTestApplication application;
+  tet_infoline("LayoutManager::GetExtension is a placeholder slot: nullptr until an Extension is defined");
+
+  Dali::UniquePtr<StackLayoutManager> owned(new StackLayoutManager(StackOrientation::VERTICAL, 0.0f));
+  LayoutManager*                      manager = owned.Get();
+  DALI_TEST_CHECK(manager->GetExtension() == nullptr);
+  END_TEST;
+}
 
 int UtcDaliViewStackLayoutManagerSetterInvalidatesOwnerP(void)
 {
