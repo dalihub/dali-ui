@@ -185,7 +185,7 @@ Vector2 Transform::GetVisualSize(const Vector2& controlSize, float viewEffective
 
 Property::Index Transform::GetIntKey(const Property::Key& key)
 {
-  if(key.type == Property::Key::INDEX)
+  if(key.type == Property::Key::Type::INDEX)
   {
     return key.indexKey;
   }
