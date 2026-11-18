@@ -164,11 +164,21 @@ jobs:
           fi
 
           patchset=${ref##*/}
+          base_commit=$(git -C "$directory" rev-parse HEAD)
           git -C "$directory" fetch origin "$ref"
-          git -C "$directory" checkout --detach FETCH_HEAD
+          patchset_commit=$(git -C "$directory" rev-parse FETCH_HEAD)
+
+          # Test the change on top of the latest devel/master, as the PR itself is.
+          if ! git -C "$directory" \
+            -c user.name='GitHub Actions' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            merge --no-ff --no-edit FETCH_HEAD; then
+            echo "::error::Gerrit change $change (patch set $patchset) of ${name} conflicts with the latest devel/master. Rebase the change."
+            exit 1
+          fi
           commit=$(git -C "$directory" rev-parse HEAD)
 
-          result="- ${name}: change $change, patch set $patchset, commit $commit"
+          result="- ${name}: change $change, patch set $patchset (commit $patchset_commit) merged into devel/master $base_commit, commit $commit"
           echo "$result"
           echo "$result" >> "$GITHUB_STEP_SUMMARY"
         }
