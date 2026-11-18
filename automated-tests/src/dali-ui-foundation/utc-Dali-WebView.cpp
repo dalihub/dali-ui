@@ -24,9 +24,10 @@
 #include <dali/devel-api/object/type-info.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/dali-ui-foundation-extension.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
 #include <dali-ui-foundation/internal/web-profile-registry.h>
+#include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <ui-web-engine.h>
 
 #define private public
@@ -2143,5 +2144,112 @@ int UtcDaliWebViewRenderingModeWithProfileP(void)
   Test::WebEngine::GetRuntimeState().failView = true;
   DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::NATIVE_IMAGE));
   DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING));
+  END_TEST;
+}
+
+int UtcDaliWebProfileConfigurationSelectedContextP(void)
+{
+  UiTestApplication application;
+  DALI_TEST_CHECK(!Dali::Ui::WebView::SetWebEngineMaxRefreshRate(0));
+  DALI_TEST_CHECK(Dali::Ui::WebView::SetWebEngineMaxRefreshRate(30));
+  auto& runtimeState = Test::WebEngine::GetRuntimeState();
+  auto normal = Dali::Ui::Extension::WebProfile::New("Normal", false, "/normal-bundle.so");
+  DALI_TEST_CHECK(normal);
+  DALI_TEST_EQUALS(runtimeState.lastBundlePath, std::string("/normal-bundle.so"), TEST_LOCATION);
+  DALI_TEST_CHECK(!runtimeState.lastIncognito);
+  auto privateProfile = Dali::Ui::Extension::WebProfile::New("Private", true, "/private-bundle.so");
+  DALI_TEST_CHECK(privateProfile);
+  DALI_TEST_EQUALS(runtimeState.lastBundlePath, std::string("/private-bundle.so"), TEST_LOCATION);
+  DALI_TEST_CHECK(runtimeState.lastIncognito);
+  auto& normalState = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(normal).GetEngineProfile()->GetContext());
+  auto& privateState = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(privateProfile).GetEngineProfile()->GetContext());
+  const double offset = 16777217.125;
+  const double zone = -12345.678901234;
+  const double daylight = 0.1234567890123;
+  for(auto profile : {normal, privateProfile})
+  {
+    auto& state = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetContext());
+    DALI_TEST_CHECK(profile.EnableCache(false));
+    DALI_TEST_CHECK(profile.SetCertificateFilePath("/ca.pem:/certs"));
+    Dali::Vector<Dali::String> schemes;
+    schemes.PushBack("custom");
+    schemes.PushBack("app");
+    WebView::RegisterUrlSchemesAsCorsEnabled(schemes);
+    Dali::Ui::Extension::WebProfile::SetAppId(profile, "test.application");
+    DALI_TEST_CHECK(Dali::Ui::Extension::WebProfile::SetAppVersion(profile, "1.2.3"));
+    Dali::Ui::Extension::WebProfile::SetTimeOffset(profile, offset);
+    Dali::Ui::Extension::WebProfile::SetTimeZoneOffset(profile, zone, daylight);
+    DALI_TEST_CHECK(profile.DeleteAllWebStorage());
+    DALI_TEST_CHECK(profile.DeleteAllWebIndexedDatabase());
+    DALI_TEST_EQUALS(state.calls, 8, TEST_LOCATION);
+    DALI_TEST_CHECK(!state.cacheEnabled);
+    DALI_TEST_EQUALS(state.certificatePath, std::string("/ca.pem:/certs"), TEST_LOCATION);
+    DALI_TEST_CHECK(runtimeState.schemes == std::vector<std::string>({"custom", "app"}));
+    DALI_TEST_EQUALS(state.appId, std::string("test.application"), TEST_LOCATION);
+    DALI_TEST_EQUALS(state.appVersion, std::string("1.2.3"), TEST_LOCATION);
+    DALI_TEST_CHECK(state.offset == offset);
+    DALI_TEST_CHECK(state.zoneOffset == zone);
+    DALI_TEST_CHECK(state.daylightSavingTime == daylight);
+    DALI_TEST_EQUALS(state.storageDeletes, 1, TEST_LOCATION);
+    DALI_TEST_EQUALS(state.indexedDatabaseDeletes, 1, TEST_LOCATION);
+    if(profile == normal)
+    {
+      DALI_TEST_EQUALS(privateState.calls, 0, TEST_LOCATION);
+    }
+  }
+  WebView::RegisterUrlSchemesAsCorsEnabled({});
+  DALI_TEST_CHECK(runtimeState.schemes.empty());
+  DALI_TEST_EQUALS(normalState.calls, 8, TEST_LOCATION);
+  DALI_TEST_CHECK(normal.EnableCache(true));
+  DALI_TEST_CHECK(normalState.cacheEnabled);
+  END_TEST;
+}
+
+int UtcDaliWebProfileConfigurationFailureP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Failure");
+  auto& state = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetContext());
+  state.result = false;
+  DALI_TEST_CHECK(!profile.EnableCache(true));
+  DALI_TEST_CHECK(!profile.SetCertificateFilePath("/missing.pem"));
+  DALI_TEST_CHECK(!Dali::Ui::Extension::WebProfile::SetAppVersion(profile, "1"));
+  DALI_TEST_CHECK(!profile.DeleteAllWebStorage());
+  DALI_TEST_CHECK(!profile.DeleteAllWebIndexedDatabase());
+  DALI_TEST_EQUALS(state.calls, 5, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileConfigurationAfterTerminationP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Terminated");
+  auto& state = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetContext());
+  Test::WebEngine::TerminateRuntime();
+  DALI_TEST_CHECK(!profile.EnableCache(true));
+  DALI_TEST_CHECK(!profile.SetCertificateFilePath("/ca.pem"));
+  Dali::Vector<Dali::String> schemes;
+  schemes.PushBack("app");
+  WebView::RegisterUrlSchemesAsCorsEnabled(schemes);
+  Dali::Ui::Extension::WebProfile::SetAppId(profile, "app");
+  DALI_TEST_CHECK(!Dali::Ui::Extension::WebProfile::SetAppVersion(profile, "1"));
+  Dali::Ui::Extension::WebProfile::SetTimeOffset(profile, 1.0);
+  Dali::Ui::Extension::WebProfile::SetTimeZoneOffset(profile, 2.0, 3.0);
+  DALI_TEST_CHECK(!profile.DeleteAllWebStorage());
+  DALI_TEST_CHECK(!profile.DeleteAllWebIndexedDatabase());
+  DALI_TEST_EQUALS(state.calls, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileConfigurationLegacyBackendP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::GetRuntimeState().legacyContext = true;
+  auto profile = WebProfile::New("Legacy");
+  DALI_TEST_CHECK(!profile.EnableCache(true));
+  DALI_TEST_CHECK(!profile.SetCertificateFilePath("/ca.pem"));
+  DALI_TEST_CHECK(!profile.DeleteAllWebStorage());
+  Dali::Ui::Extension::WebProfile::SetTimeOffset(profile, 16777217.125);
+  Dali::Ui::Extension::WebProfile::SetTimeZoneOffset(profile, 0.123456789, 0.987654321);
   END_TEST;
 }

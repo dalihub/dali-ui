@@ -140,6 +140,8 @@ public:
    * @param[in] incognito Whether browsing data is private
    * @param[in] injectedBundlePath The bundle path, or an empty string for no bundle
    * @return The new profile, or an empty handle on failure; no default fallback
+   * @deprecated Use Dali::Ui::Extension::WebProfile::New()
+   * from <dali-ui-foundation/extension-api/web-profile.h>.
    * @see New(const Dali::String&, bool)
    */
   static WebProfile New(const Dali::String& name, bool incognito, const Dali::String& injectedBundlePath);
@@ -165,6 +167,55 @@ public:
    * @return True if browsing data is private, false otherwise
    */
   bool IsIncognito() const;
+
+  /**
+   * @brief Enables or disables resource caching without clearing existing data.
+   *
+   * Returns false if the backend rejects the request or lacks result support.
+   * Call on the DALi event thread. After context termination, this operation
+   * returns false.
+   * @SINCE_3_0.2
+   * @param[in] enabled True to enable caching, false to disable it
+   * @return True if the backend accepts the request; false on rejection, lack of support, or termination
+   */
+  bool EnableCache(bool enabled);
+
+  /**
+   * @brief Sets CA certificate files, directories or a colon-separated list.
+   *
+   * This configures CA trust, independently of TLS client certificates.
+   * Chromium imports into a shared certificate database, so trust is not isolated
+   * by profile. True reports request acceptance, not successful certificate import.
+   * Returns false on rejection or unsupported operation.
+   * Call on the DALi event thread. After context termination, this operation
+   * returns false.
+   * @SINCE_3_0.2
+   * @param[in] path CA certificate file, directory, or colon-separated list of paths
+   * @return True if the import request is accepted, not necessarily completed; false on rejection, lack of support, or termination
+   */
+  bool SetCertificateFilePath(const Dali::String& path);
+
+  /**
+   * @brief Requests deletion of all web storage belonging to this profile.
+   *
+   * True means request acceptance, not deletion completion. Returns false on rejection or unsupported operation.
+   * Call on the DALi event thread. After context termination, this operation
+   * returns false.
+   * @SINCE_3_0.2
+   * @return True if the deletion request is accepted, not necessarily completed; false on rejection, lack of support, or termination
+   */
+  bool DeleteAllWebStorage();
+
+  /**
+   * @brief Requests deletion of all IndexedDB data belonging to this profile.
+   *
+   * True means request acceptance, not deletion completion. Returns false on rejection or unsupported operation.
+   * Call on the DALi event thread. After context termination, this operation
+   * returns false.
+   * @SINCE_3_0.2
+   * @return True if the deletion request is accepted, not necessarily completed; false on rejection, lack of support, or termination
+   */
+  bool DeleteAllWebIndexedDatabase();
 
 public: // Not intended for application developers
   /// @cond internal

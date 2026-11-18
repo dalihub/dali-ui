@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/public-api/views/web/web-view-page-load-error.h>
 #include <dali-ui-foundation/public-api/views/web/web-view-types.h>
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/events/key-event.h>
 #include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/math/rect.h>
@@ -921,7 +922,8 @@ public: // Additional APIs
   /**
    * @brief Selects the process-wide web engine for WebView instances.
    *
-   * Call before SetWebEngineArguments(), WebView::New() or WebProfile::New().
+   * Call before SetWebEngineArguments(), SetWebEngineMaxRefreshRate(),
+   * RegisterUrlSchemesAsCorsEnabled(), WebView::New() or WebProfile::New().
    * Their first use fixes the engine type, defaulting to Chromium if unset,
    * even if argument storage or backend creation fails. Afterwards, selecting
    * a different engine triggers an assertion, even if no engine was started
@@ -935,7 +937,8 @@ public: // Additional APIs
   /**
    * @brief Replaces process-wide startup arguments before engine initialization begins.
    *
-   * Call on the DALi event thread after UiConfig::Apply(). Profile creation can
+   * Call on the DALi event thread after UiConfig::Apply(). Profile creation,
+   * SetWebEngineMaxRefreshRate(), and RegisterUrlSchemesAsCorsEnabled() can
    * initialize the engine before any view exists. This call fixes the engine
    * type but does not start it.
    * argv[0] is the program name. argc == 0 clears settings and permits null argv.
@@ -979,6 +982,31 @@ public:
    * @pre The profile is initialized.
    */
   static WebView New(const WebProfile& profile, RenderingMode renderingMode);
+
+  /**
+   * @brief Requests the process-wide maximum refresh rate for the web engine.
+   *
+   * Call on the DALi event thread after UiConfig::Apply() and any startup argument
+   * configuration. This can initialize the engine. Set it before creating views
+   * to have them use the cap when computing their rendering preferences.
+   * @SINCE_3_0.2
+   * @param[in] rate Maximum frame rate in frames per second, from 1 to 60
+   * @return True if the backend accepts the request, false for an invalid rate or unavailable support
+   */
+  static bool SetWebEngineMaxRefreshRate(int32_t rate);
+
+  /**
+   * @brief Registers URL schemes for cross-origin resource sharing across profiles.
+   * Call on the DALi event thread after UiConfig::Apply(). If selecting an engine
+   * or setting startup arguments, call SetWebEngineType() and SetWebEngineArguments()
+   * as needed before registering schemes. Registration can initialize the engine.
+   * Once initialization starts, SetWebEngineArguments() returns
+   * WebEngineArgumentsResult::ALREADY_INITIALIZED.
+   * Only supported backends and rendering modes apply the schemes.
+   * @SINCE_3_0.2
+   * @param[in] schemes URL schemes to register
+   */
+  static void RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes);
 
 public: // Not intended for application developers
   /// @cond internal
