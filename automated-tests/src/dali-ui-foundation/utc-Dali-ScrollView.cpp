@@ -2007,7 +2007,6 @@ int UtcDaliPageScrollViewPublicPagingAndHandlesP(void)
 
   int pageChanges = 0;
   pager.PageChangedSignal().Connect(&application, [&pageChanges](int, int) { ++pageChanges; });
-  DALI_TEST_CHECK(pager.DestroyingSignal().Empty());
   pager.ScrollToPage(2, false);
   application.SendNotification();
   application.Render();

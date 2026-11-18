@@ -26,7 +26,7 @@
  *                       Row C: Scenario / nav / [Tmpl] toggle
  *
  * All mutations go through NotifyPagesInserted / NotifyPagesRemoved so the
- * current-page index and PageIndicator stay in sync immediately (before the
+ * current-page index and info panel stay in sync immediately (before the
  * next layout pass).
  *
  * Keyboard:

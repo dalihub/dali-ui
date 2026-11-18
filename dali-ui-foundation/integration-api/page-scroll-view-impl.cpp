@@ -130,13 +130,7 @@ PageScrollViewImpl::PageScrollViewImpl()
 {
 }
 
-PageScrollViewImpl::~PageScrollViewImpl()
-{
-  // Notify observers (e.g. PageIndicator) before any members are destroyed.
-  // Handlers must not call back into this object.
-  if(!mDestroyingSignal.Empty())
-    mDestroyingSignal.Emit();
-}
+PageScrollViewImpl::~PageScrollViewImpl() = default;
 
 void PageScrollViewImpl::OnInitialize()
 {
@@ -251,14 +245,9 @@ void PageScrollViewImpl::ScrollToPage(int page, bool animate)
   }
 }
 
-PageScrollableInterface::PageChangedSignalType& PageScrollViewImpl::PageChangedSignal()
+PageScrollView::PageChangedSignalType& PageScrollViewImpl::PageChangedSignal()
 {
   return mPageChangedSignal;
-}
-
-PageScrollableInterface::DestroyingSignalType& PageScrollViewImpl::DestroyingSignal()
-{
-  return mDestroyingSignal;
 }
 
 // ─── ScrollViewImpl hook ───────────────────────────────────────────────────

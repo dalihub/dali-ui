@@ -170,8 +170,6 @@
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
 #include <dali-ui-foundation/public-api/views/scroll/edge-effect.h>
 #include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
-#include <dali-ui-foundation/public-api/views/scroll/page-scrollable-interface.h>
-#include <dali-ui-foundation/public-api/views/scroll/scroll-bar-interface.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 #include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
