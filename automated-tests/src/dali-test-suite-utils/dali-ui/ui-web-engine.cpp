@@ -1246,15 +1246,7 @@ public:
   {
     return true;
   }
-  bool InitializeNativeImageRendering(uint32_t, uint32_t, uint32_t, char**) override
-  {
-    return true;
-  }
   WebEngineDirectRenderingSessionPtr InitializeDirectRendering(uint32_t, uint32_t, const std::string&, const std::string&) override
-  {
-    return {};
-  }
-  WebEngineDirectRenderingSessionPtr InitializeDirectRendering(uint32_t, uint32_t, uint32_t, char**) override
   {
     return {};
   }
@@ -2838,18 +2830,7 @@ bool WebEngine::InitializeNativeImageRendering(uint32_t width, uint32_t height, 
   return gNativeImageInitializationResult;
 }
 
-bool WebEngine::InitializeNativeImageRendering(uint32_t width, uint32_t height, uint32_t argc, char** argv)
-{
-  Create(width, height, argc, argv);
-  return gNativeImageInitializationResult;
-}
-
 WebEngineDirectRenderingConnection WebEngine::InitializeDirectRendering(uint32_t, uint32_t, const std::string&, const std::string&)
-{
-  return gDirectRenderingSupported ? WebEngineDirectRenderingConnection(new Internal::Adaptor::WebEngineDirectRenderingConnection()) : WebEngineDirectRenderingConnection{};
-}
-
-WebEngineDirectRenderingConnection WebEngine::InitializeDirectRendering(uint32_t, uint32_t, uint32_t, char**)
 {
   return gDirectRenderingSupported ? WebEngineDirectRenderingConnection(new Internal::Adaptor::WebEngineDirectRenderingConnection()) : WebEngineDirectRenderingConnection{};
 }

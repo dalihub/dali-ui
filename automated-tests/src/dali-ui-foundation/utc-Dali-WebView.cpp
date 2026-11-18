@@ -2007,16 +2007,17 @@ int UtcDaliWebViewDirectRenderingUnsupportedN(void)
   UiTestApplication application;
   WebView::SetWebEngineType(WebEngineType::LWE);
   Test::WebEngine::SetDirectRenderingSupported(false);
-  DALI_TEST_CHECK(!WebView::New());
-  DALI_TEST_CHECK(!WebView::New(0u, nullptr));
-  // Keep a successful view alive to obtain an explicit default profile.
-  Test::WebEngine::SetDirectRenderingSupported(true);
   auto view = WebView::New();
   DALI_TEST_CHECK(view);
+  DALI_TEST_CHECK(!GetWebViewImpl(view).mDirectConnection);
   auto profile = view.GetProfile();
-  Test::WebEngine::SetDirectRenderingSupported(false);
-  DALI_TEST_CHECK(!WebView::New(profile));
-  DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().viewCreates, 1, TEST_LOCATION);
+  auto withProfile = WebView::New(profile);
+  DALI_TEST_CHECK(withProfile);
+  DALI_TEST_CHECK(!GetWebViewImpl(withProfile).mDirectConnection);
+  DALI_TEST_CHECK(WebView::New(0u, nullptr));
+  DALI_TEST_CHECK(!WebView::New(WebView::RenderingMode::DIRECT_RENDERING));
+  DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING));
+  DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().viewCreates, 3, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2025,11 +2026,11 @@ int UtcDaliWebViewDirectRenderingSessionP(void)
   UiTestApplication application;
   Test::WebEngine::SetDirectRenderingSupported(true);
   WebView::SetWebEngineType(WebEngineType::LWE);
-  auto direct = WebView::New();
+  auto direct = WebView::New(WebView::RenderingMode::DIRECT_RENDERING);
   Test::WebEngine::SetDirectRenderingSupported(false);
   DALI_TEST_CHECK(direct);
   Test::WebEngine::SetDirectRenderingSupported(true);
-  auto sameProfile = WebView::New(direct.GetProfile());
+  auto sameProfile = WebView::New(direct.GetProfile(), WebView::RenderingMode::DIRECT_RENDERING);
   Test::WebEngine::SetDirectRenderingSupported(false);
   DALI_TEST_CHECK(sameProfile);
   DALI_TEST_CHECK(sameProfile.GetProfile() == direct.GetProfile());
@@ -2127,7 +2128,7 @@ int UtcDaliWebViewDirectCallbacksAfterDestructionP(void)
   UiTestApplication application;
   Test::WebEngine::SetDirectRenderingSupported(true);
   WebView::SetWebEngineType(WebEngineType::LWE);
-  auto view = WebView::New();
+  auto view = WebView::New(WebView::RenderingMode::DIRECT_RENDERING);
   Test::WebEngine::SetDirectRenderingSupported(false);
   DALI_TEST_CHECK(view);
   application.GetScene().Add(view);
@@ -2150,13 +2151,13 @@ int UtcDaliWebViewDirectCallbacksAfterDestructionP(void)
   END_TEST;
 }
 
-static int CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType type)
+static int CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType type, WebView::RenderingMode renderingMode)
 {
   UiTestApplication application;
   WebView::SetWebEngineType(type);
   {
     Test::WebEngine::SetDirectRenderingSupported(true);
-    auto view = WebView::New();
+    auto view = WebView::New(renderingMode);
     Test::WebEngine::SetDirectRenderingSupported(false);
     DALI_TEST_CHECK(view);
     gJavaScriptCallbackCount = 0u;
@@ -2186,10 +2187,35 @@ static int CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType type)
 
 int UtcDaliWebViewApplicationCallbacksAfterDestructionP(void)
 {
-  return CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType::CHROMIUM);
+  return CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType::CHROMIUM, WebView::RenderingMode::NATIVE_IMAGE);
 }
 
 int UtcDaliWebViewDirectApplicationCallbacksAfterDestructionP(void)
 {
-  return CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType::LWE);
+  return CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType::LWE, WebView::RenderingMode::DIRECT_RENDERING);
+}
+
+int UtcDaliWebViewRenderingModeWithProfileP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  auto profile = WebProfile::New("Rendering", true);
+  auto native = WebView::New(profile, WebView::RenderingMode::NATIVE_IMAGE);
+  auto direct = WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING);
+  DALI_TEST_CHECK(native && direct);
+  DALI_TEST_CHECK(native.GetProfile() == profile);
+  DALI_TEST_CHECK(direct.GetProfile() == profile);
+  DALI_TEST_CHECK(!GetWebViewImpl(native).mDirectConnection);
+  DALI_TEST_CHECK(GetWebViewImpl(direct).mDirectConnection);
+  auto defaultView = WebView::New(profile);
+  DALI_TEST_CHECK(defaultView);
+  DALI_TEST_CHECK(!GetWebViewImpl(defaultView).mDirectConnection);
+  auto defaultNative = WebView::New(WebView::RenderingMode::NATIVE_IMAGE);
+  DALI_TEST_CHECK(defaultNative);
+  DALI_TEST_CHECK(!GetWebViewImpl(defaultNative).mDirectConnection);
+  DALI_TEST_ASSERTION(WebView::New(WebProfile(), WebView::RenderingMode::DIRECT_RENDERING), "WebView requires an initialized profile");
+  Test::WebEngine::GetRuntimeState().failView = true;
+  DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::NATIVE_IMAGE));
+  DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING));
+  END_TEST;
 }

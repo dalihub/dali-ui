@@ -55,6 +55,7 @@ class WebViewImpl;
  *
  * This enables embedding web pages in the application.
  * For a working WebView, a web engine plugin for the target platform must be provided.
+ * Engine callbacks are canceled when the WebView is destroyed.
  *
  * @code
  * WebView view = WebView::New();
@@ -62,9 +63,20 @@ class WebViewImpl;
  * @endcode
  * @SINCE_3_0.0
  */
-/** Engine callbacks are canceled when the WebView is destroyed. */
 class DALI_UI_API WebView : public View
 {
+public:
+  /**
+   * @brief Specifies the rendering path selected when creating a WebView.
+   * Each WebView selects its rendering mode independently. The mode cannot be changed after creation.
+   * @SINCE_3_0.2
+   */
+  enum class RenderingMode
+  {
+    NATIVE_IMAGE,    ///< Uses native-image rendering, the default for all engines. @SINCE_3_0.2
+    DIRECT_RENDERING ///< Requires backend support and a GLES window target with resource-context support. @SINCE_3_0.2
+  };
+
 public: // Callback types
   /// @brief Callback for JavaScript result or message.
   /// @SINCE_3_0.0
@@ -148,10 +160,9 @@ public: // Creation & Destruction
   /**
    * @brief Creates an initialized WebView.
    *
-   * LWE uses direct rendering; Chromium uses a native image.
-   * Direct rendering requires a window target and GLES resource-context support.
+   * Uses the default native-image rendering path for all engines.
    * @SINCE_3_0.0
-   * @return A new handle, or an empty handle when engine initialization fails.
+   * @return A new handle, or an empty handle when engine initialization fails
    */
   static WebView New();
 
@@ -159,7 +170,7 @@ public: // Creation & Destruction
    * @brief Creates an initialized WebView and immediately loads the given URL.
    * @SINCE_3_0.0
    * @param[in] url The URL to load
-   * @return A new handle, or an empty handle when engine initialization fails.
+   * @return A new handle, or an empty handle when engine initialization fails
    */
   static WebView New(const Dali::String& url);
 
@@ -971,12 +982,35 @@ public: // Additional APIs
 
   /**
    * @brief Creates a view using the specified profile, retained for the view's lifetime.
-   * Uses the same automatic rendering selection as New().
+   * Uses the same default rendering path as New().
    * @SINCE_3_0.1
    * @param[in] profile An initialized profile; an empty handle is an assertion error
    * @return The new view, or an empty handle on backend failure; no default fallback
    */
   static WebView New(const WebProfile& profile);
+
+public:
+  /**
+   * @brief Creates a WebView with the default profile and the specified rendering mode.
+   * The rendering mode is fixed for the lifetime of the view. Startup arguments must be set with SetWebEngineArguments() before engine initialization begins.
+   * No fallback to another rendering mode is performed. Check the returned handle before calling member functions.
+   * @SINCE_3_0.2
+   * @param[in] renderingMode The rendering mode for the view
+   * @return An initialized WebView, or an empty handle if the rendering mode is unsupported or initialization fails
+   */
+  static WebView New(RenderingMode renderingMode);
+
+  /**
+   * @brief Creates a WebView with the specified profile and rendering mode.
+   * The profile is retained and the rendering mode is fixed for the lifetime of the view. No fallback to another profile or rendering mode is performed.
+   * Check the returned handle before calling member functions.
+   * @SINCE_3_0.2
+   * @param[in] profile An initialized profile to retain for the lifetime of the view
+   * @param[in] renderingMode The rendering mode for the view
+   * @return An initialized WebView, or an empty handle if the rendering mode is unsupported or initialization fails
+   * @pre The profile is initialized.
+   */
+  static WebView New(const WebProfile& profile, RenderingMode renderingMode);
 
 public: // Not intended for application developers
   /// @cond internal

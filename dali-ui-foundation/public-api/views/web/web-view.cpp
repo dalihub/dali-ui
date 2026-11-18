@@ -56,7 +56,12 @@ WebView::~WebView()
 
 WebView WebView::New()
 {
-  auto impl = Integration::WebViewImpl::New();
+  return New(RenderingMode::NATIVE_IMAGE);
+}
+
+WebView WebView::New(RenderingMode renderingMode)
+{
+  auto impl = Integration::WebViewImpl::New(renderingMode);
   if(!impl)
   {
     return {};
@@ -83,8 +88,13 @@ WebView WebView::New(uint32_t /*argc*/, char** /*argv*/)
 
 WebView WebView::New(const WebProfile& profile)
 {
+  return New(profile, RenderingMode::NATIVE_IMAGE);
+}
+
+WebView WebView::New(const WebProfile& profile, RenderingMode renderingMode)
+{
   DALI_ASSERT_ALWAYS(profile && "WebView requires an initialized profile");
-  auto impl = Integration::WebViewImpl::New(profile);
+  auto impl = Integration::WebViewImpl::New(profile, renderingMode);
   if(!impl)
   {
     return {};
