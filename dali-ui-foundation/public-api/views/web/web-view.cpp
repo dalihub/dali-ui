@@ -564,5 +564,24 @@ WebView::WebProcessCrashedSignalType& WebView::WebProcessCrashedSignal()
   return GetImpl(*this).mWebProcessCrashedSignal;
 }
 
+bool WebView::SetWebEngineMaxRefreshRate(int32_t rate)
+{
+  return Integration::WebViewImpl::EnsureEngineType() && Dali::WebEngineRuntime::SetMaxRefreshRate(rate);
+}
+
+void WebView::RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes)
+{
+  if(Integration::WebViewImpl::EnsureEngineType())
+  {
+    std::vector<std::string> nativeSchemes;
+    nativeSchemes.reserve(schemes.Count());
+    for(const auto& scheme : schemes)
+    {
+      nativeSchemes.emplace_back(scheme.CStr());
+    }
+    Dali::WebEngineRuntime::RegisterUrlSchemesAsCorsEnabled(nativeSchemes);
+  }
+}
+
 } // namespace Ui
 } //namespace DALI_NAMESPACE
