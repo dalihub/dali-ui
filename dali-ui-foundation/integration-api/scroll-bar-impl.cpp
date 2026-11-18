@@ -114,11 +114,6 @@ void ScrollBarImpl::Initialize()
   // Do not override mBarMinSize set in constructor
 }
 
-View ScrollBarImpl::GetTarget() const
-{
-  return View::DownCast(Self());
-}
-
 ScrollBarVisibility ScrollBarImpl::GetVerticalScrollBarVisibility() const
 {
   return mVerticalVisibility;

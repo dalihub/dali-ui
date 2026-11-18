@@ -72,19 +72,6 @@ int UtcDaliScrollBarNew(void)
   END_TEST;
 }
 
-int UtcDaliScrollBarInterfaceGetExtensionP(void)
-{
-  UiTestApplication application;
-  tet_infoline(" UtcDaliScrollBarInterfaceGetExtensionP");
-
-  ScrollBar           scrollBar = ScrollBar::New();
-  ScrollBarInterface& iface     = scrollBar;
-  // The base slot is a placeholder: no extension until one is defined and returned.
-  DALI_TEST_CHECK(iface.GetScrollBarExtension() == nullptr);
-
-  END_TEST;
-}
-
 int UtcDaliScrollBarDownCast(void)
 {
   UiTestApplication application;
