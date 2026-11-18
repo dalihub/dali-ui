@@ -174,13 +174,22 @@ jobs:
             }
 
             $Selected = $Candidates | Sort-Object PatchSet | Select-Object -Last 1
+            $BaseCommit = (& git -C $Directory rev-parse HEAD).Trim()
+            if($LASTEXITCODE -ne 0) { throw "Failed to resolve the default $Name commit." }
             & git -C $Directory fetch origin $Selected.Ref
             if($LASTEXITCODE -ne 0) { throw "Failed to fetch Gerrit change $Change for $Name." }
-            & git -C $Directory checkout --detach FETCH_HEAD
-            if($LASTEXITCODE -ne 0) { throw "Failed to checkout Gerrit change $Change for $Name." }
+            $PatchSetCommit = (& git -C $Directory rev-parse FETCH_HEAD).Trim()
+            if($LASTEXITCODE -ne 0) { throw "Failed to resolve Gerrit change $Change for $Name." }
+
+            # Test the change on top of the latest devel/master, as the PR itself is.
+            & git -C $Directory -c user.name='GitHub Actions' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' merge --no-ff --no-edit FETCH_HEAD
+            if($LASTEXITCODE -ne 0)
+            {
+              throw "Gerrit change $Change (patch set $($Selected.PatchSet)) of $Name conflicts with the latest devel/master. Rebase the change."
+            }
             $Commit = (& git -C $Directory rev-parse HEAD).Trim()
-            if($LASTEXITCODE -ne 0) { throw "Failed to resolve the checked out $Name commit." }
-            $Result = "- ${Name}: change $Change, patch set $($Selected.PatchSet), commit $Commit"
+            if($LASTEXITCODE -ne 0) { throw "Failed to resolve the merged $Name commit." }
+            $Result = "- ${Name}: change $Change, patch set $($Selected.PatchSet) (commit $PatchSetCommit) merged into devel/master $BaseCommit, commit $Commit"
           }
 
           Write-Host $Result
