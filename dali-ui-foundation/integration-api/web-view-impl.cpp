@@ -82,7 +82,7 @@ bool          gWebEngineTypeFixed = false;
 
 BaseHandle CreateWebView()
 {
-  return WebView::New();
+  return Ui::WebView::New();
 }
 
 // clang-format off
@@ -194,12 +194,23 @@ WebViewImpl::~WebViewImpl()
 
 WebViewImplPtr WebViewImpl::New()
 {
+  return New(Ui::WebView::RenderingMode::NATIVE_IMAGE);
+}
+
+WebViewImplPtr WebViewImpl::New(Ui::WebView::RenderingMode renderingMode)
+{
   auto profile = WebProfileImpl::GetDefaultProfile();
-  return profile ? New(profile) : WebViewImplPtr();
+  return profile ? New(profile, renderingMode) : WebViewImplPtr();
 }
 
 WebViewImplPtr WebViewImpl::New(const WebProfile& profile)
 {
+  return New(profile, Ui::WebView::RenderingMode::NATIVE_IMAGE);
+}
+
+WebViewImplPtr WebViewImpl::New(const WebProfile& profile, Ui::WebView::RenderingMode renderingMode)
+{
+  DALI_ASSERT_ALWAYS((renderingMode == Ui::WebView::RenderingMode::NATIVE_IMAGE || renderingMode == Ui::WebView::RenderingMode::DIRECT_RENDERING) && "Invalid web engine rendering mode");
   DALI_ASSERT_ALWAYS(profile && "WebView requires an initialized profile");
   if(!EnsureEngineType())
   {
@@ -211,7 +222,7 @@ WebViewImplPtr WebViewImpl::New(const WebProfile& profile)
   const auto& engineProfile = GetImpl(profile).GetEngineProfile();
   const auto  width         = static_cast<uint32_t>(impl->mWebViewSize.width);
   const auto  height        = static_cast<uint32_t>(impl->mWebViewSize.height);
-  if(gWebEngineType == WebEngineType::LWE)
+  if(renderingMode == Ui::WebView::RenderingMode::DIRECT_RENDERING)
   {
     impl->mDirectConnection = Dali::WebEngineRuntime::CreateDirectRenderingView(impl->mWebEngine, engineProfile, width, height);
     if(!impl->mDirectConnection)
@@ -222,7 +233,7 @@ WebViewImplPtr WebViewImpl::New(const WebProfile& profile)
   }
   else if(!Dali::WebEngineRuntime::CreateView(impl->mWebEngine, engineProfile, width, height))
   {
-    DALI_LOG_ERROR("WebView creation failed\n");
+    DALI_LOG_ERROR("WebView: native-image rendering initialization failed\n");
     return {};
   }
   return impl;
@@ -1094,7 +1105,7 @@ void WebViewImpl::EvaluateJavaScript(const Dali::String& script)
   }
 }
 
-void WebViewImpl::EvaluateJavaScript(const Dali::String& script, WebView::JavaScriptCallback callback)
+void WebViewImpl::EvaluateJavaScript(const Dali::String& script, Ui::WebView::JavaScriptCallback callback)
 {
   if(!IsWebEngineAvailable())
   {
@@ -1148,7 +1159,7 @@ void WebViewImpl::RemoveJavaScriptMessageHandler(const Dali::String& exposedObje
   }
 }
 
-void WebViewImpl::RegisterJavaScriptAlertCallback(WebView::JavaScriptAlertCallback callback)
+void WebViewImpl::RegisterJavaScriptAlertCallback(Ui::WebView::JavaScriptAlertCallback callback)
 {
   if(!IsWebEngineAvailable())
   {
@@ -1171,7 +1182,7 @@ void WebViewImpl::JavaScriptAlertReply()
   }
 }
 
-void WebViewImpl::RegisterJavaScriptConfirmCallback(WebView::JavaScriptConfirmCallback callback)
+void WebViewImpl::RegisterJavaScriptConfirmCallback(Ui::WebView::JavaScriptConfirmCallback callback)
 {
   if(!IsWebEngineAvailable())
   {
@@ -1194,7 +1205,7 @@ void WebViewImpl::JavaScriptConfirmReply(bool confirmed)
   }
 }
 
-void WebViewImpl::RegisterJavaScriptPromptCallback(WebView::JavaScriptPromptCallback callback)
+void WebViewImpl::RegisterJavaScriptPromptCallback(Ui::WebView::JavaScriptPromptCallback callback)
 {
   if(!IsWebEngineAvailable())
   {
@@ -1305,7 +1316,7 @@ Dali::Ui::ImageView WebViewImpl::GetScreenshot(Dali::BoundsInteger viewArea, flo
   return CreateImageViewFromPixelData(pixelData);
 }
 
-bool WebViewImpl::GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback)
+bool WebViewImpl::GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, Ui::WebView::ScreenshotCapturedCallback callback)
 {
   if(!IsWebEngineAvailable())
   {
@@ -1351,7 +1362,7 @@ Dali::String WebViewImpl::GetSelectedText() const
   return (IsWebEngineAvailable() && mWebEngine.GetPlugin()) ? ToDaliString(mWebEngine.GetPlugin()->GetSelectedText()) : Dali::String();
 }
 
-void WebViewImpl::GetPlainTextAsynchronously(WebView::PlainTextCallback callback)
+void WebViewImpl::GetPlainTextAsynchronously(Ui::WebView::PlainTextCallback callback)
 {
   if(!IsWebEngineAvailable())
   {
@@ -1546,7 +1557,7 @@ bool WebViewImpl::IsVideoHoleEnabled() const
   return mVideoHoleEnabled;
 }
 
-bool WebViewImpl::CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback callback)
+bool WebViewImpl::CheckVideoPlayingAsynchronously(Ui::WebView::VideoPlayingCallback callback)
 {
   if(!IsWebEngineAvailable())
   {
@@ -1571,79 +1582,79 @@ bool WebViewImpl::CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback 
 void WebViewImpl::EmitPageLoadStarted(const Dali::String& url)
 {
   if(mPageLoadStartedSignal.Empty()) return;
-  mPageLoadStartedSignal.Emit(WebView::DownCast(Self()), url);
+  mPageLoadStartedSignal.Emit(Ui::WebView::DownCast(Self()), url);
 }
 
 void WebViewImpl::EmitPageLoadInProgress(const Dali::String& url)
 {
   if(mPageLoadInProgressSignal.Empty()) return;
-  mPageLoadInProgressSignal.Emit(WebView::DownCast(Self()), url);
+  mPageLoadInProgressSignal.Emit(Ui::WebView::DownCast(Self()), url);
 }
 
 void WebViewImpl::EmitPageLoadFinished(const Dali::String& url)
 {
   if(mPageLoadFinishedSignal.Empty()) return;
-  mPageLoadFinishedSignal.Emit(WebView::DownCast(Self()), url);
+  mPageLoadFinishedSignal.Emit(Ui::WebView::DownCast(Self()), url);
 }
 
 void WebViewImpl::EmitPageLoadError(const WebViewPageLoadError& error)
 {
   if(mPageLoadErrorSignal.Empty()) return;
-  mPageLoadErrorSignal.Emit(WebView::DownCast(Self()), error);
+  mPageLoadErrorSignal.Emit(Ui::WebView::DownCast(Self()), error);
 }
 
 void WebViewImpl::EmitScrollEdgeReached(WebViewScrollEdge edge)
 {
   if(mScrollEdgeReachedSignal.Empty()) return;
-  mScrollEdgeReachedSignal.Emit(WebView::DownCast(Self()), edge);
+  mScrollEdgeReachedSignal.Emit(Ui::WebView::DownCast(Self()), edge);
 }
 
 void WebViewImpl::EmitOverScrolled(WebViewOverScrolled overScrolled)
 {
   if(mOverScrolledSignal.Empty()) return;
-  mOverScrolledSignal.Emit(WebView::DownCast(Self()), overScrolled);
+  mOverScrolledSignal.Emit(Ui::WebView::DownCast(Self()), overScrolled);
 }
 
 void WebViewImpl::EmitUrlChanged(const Dali::String& url)
 {
   if(mUrlChangedSignal.Empty()) return;
-  mUrlChangedSignal.Emit(WebView::DownCast(Self()), url);
+  mUrlChangedSignal.Emit(Ui::WebView::DownCast(Self()), url);
 }
 
 void WebViewImpl::EmitFrameRendered()
 {
   if(mFrameRenderedSignal.Empty()) return;
-  mFrameRenderedSignal.Emit(WebView::DownCast(Self()));
+  mFrameRenderedSignal.Emit(Ui::WebView::DownCast(Self()));
 }
 
 void WebViewImpl::EmitFullscreenEntered()
 {
   if(mFullscreenEnteredSignal.Empty()) return;
-  mFullscreenEnteredSignal.Emit(WebView::DownCast(Self()));
+  mFullscreenEnteredSignal.Emit(Ui::WebView::DownCast(Self()));
 }
 
 void WebViewImpl::EmitFullscreenExited()
 {
   if(mFullscreenExitedSignal.Empty()) return;
-  mFullscreenExitedSignal.Emit(WebView::DownCast(Self()));
+  mFullscreenExitedSignal.Emit(Ui::WebView::DownCast(Self()));
 }
 
 void WebViewImpl::EmitTextFound(uint32_t count)
 {
   if(mTextFoundSignal.Empty()) return;
-  mTextFoundSignal.Emit(WebView::DownCast(Self()), count);
+  mTextFoundSignal.Emit(Ui::WebView::DownCast(Self()), count);
 }
 
 bool WebViewImpl::EmitGeolocationPermission(const Dali::String& host, const Dali::String& protocol)
 {
   if(mGeolocationPermissionSignal.Empty()) return false;
-  return mGeolocationPermissionSignal.Emit(WebView::DownCast(Self()), host, protocol);
+  return mGeolocationPermissionSignal.Emit(Ui::WebView::DownCast(Self()), host, protocol);
 }
 
 void WebViewImpl::EmitWebProcessCrashed()
 {
   if(mWebProcessCrashedSignal.Empty()) return;
-  mWebProcessCrashedSignal.Emit(WebView::DownCast(Self()));
+  mWebProcessCrashedSignal.Emit(Ui::WebView::DownCast(Self()));
 }
 
 } // namespace Integration
