@@ -17,6 +17,9 @@
  *
  */
 
+#include <dali/public-api/common/dali-vector.h>
+#include <cstdint>
+
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
 #include <dali/public-api/common/dali-string.h>
@@ -140,6 +143,8 @@ public:
    * @param[in] incognito Whether browsing data is private
    * @param[in] injectedBundlePath The bundle path, or an empty string for no bundle
    * @return The new profile, or an empty handle on failure; no default fallback
+   * @deprecated Use Dali::Ui::Extension::WebProfile::NewWithInjectedBundle()
+   * from <dali-ui-foundation/extension-api/web-profile.h>.
    * @see New(const Dali::String&, bool)
    */
   static WebProfile New(const Dali::String& name, bool incognito, const Dali::String& injectedBundlePath);
@@ -165,6 +170,100 @@ public:
    * @return True if browsing data is private, false otherwise
    */
   bool IsIncognito() const;
+
+  /**
+   * @brief Requests a maximum refresh rate from 1 to 60 FPS.
+   *
+   * The Chromium backend changes a process-wide option; profiles do not isolate it.
+   * Call on the DALi event thread. After context termination, this operation
+   * does nothing; unsupported backends also do nothing.
+   * @SINCE_3_0.2
+   * @param[in] rate Requested upper frame rate in frames per second, from 1 to 60
+   */
+  void SetMaxRefreshRate(int32_t rate);
+
+  /**
+   * @brief Enables or disables resource caching without clearing existing data.
+   *
+   * Returns false if the backend rejects the request or lacks result support.
+   * Call on the DALi event thread. After context termination, this operation
+   * returns false.
+   * @SINCE_3_0.2
+   * @param[in] enabled True to enable caching, false to disable it
+   * @return True if the backend accepts the request; false on rejection, lack of support, or termination
+   */
+  bool EnableCache(bool enabled);
+
+  /**
+   * @brief Sets CA certificate files, directories or a colon-separated list.
+   *
+   * This configures CA trust, independently of TLS client certificates.
+   * Chromium imports into a shared certificate database, so trust is not isolated
+   * by profile. True reports request acceptance, not successful certificate import.
+   * Returns false on rejection or unsupported operation.
+   * Call on the DALi event thread. After context termination, this operation
+   * returns false.
+   * @SINCE_3_0.2
+   * @param[in] path CA certificate file, directory, or colon-separated list of paths
+   * @return True if the import request is accepted, not necessarily completed; false on rejection, lack of support, or termination
+   */
+  bool SetCertificateFilePath(const Dali::String& path);
+
+  /**
+   * @brief Registers URL schemes as CORS enabled.
+   *
+   * Chromium uses a shared HbbTV widget host; registration is not isolated by profile. Support depends on the platform.
+   * Call on the DALi event thread. After context termination, this operation
+   * does nothing; unsupported backends also do nothing.
+   * @SINCE_3_0.2
+   * @param[in] schemes URL schemes to register; an empty vector registers no schemes
+   */
+  void RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes);
+
+  /**
+   * @brief Sets the engine time offset without narrowing to float.
+   *
+   * Chromium can update process time and all renderers. Configure both normal and incognito contexts consistently; they do not isolate this setting. Platform support varies.
+   * Call on the DALi event thread. After context termination, this operation
+   * does nothing; unsupported backends also do nothing.
+   * @SINCE_3_0.2
+   * @param[in] offset Offset added to the engine system time
+   */
+  void SetTimeOffset(double offset);
+
+  /**
+   * @brief Sets time-zone and daylight-saving offsets without narrowing to float.
+   *
+   * Chromium can change the process time zone and shared engine services. Configure both normal and incognito contexts consistently. Platform support varies.
+   * Call on the DALi event thread. After context termination, this operation
+   * does nothing; unsupported backends also do nothing.
+   * @SINCE_3_0.2
+   * @param[in] zoneOffset Time-zone offset passed to the engine
+   * @param[in] daylightSavingTime Daylight-saving adjustment passed to the engine
+   */
+  void SetTimeZoneOffset(double zoneOffset, double daylightSavingTime);
+
+  /**
+   * @brief Requests deletion of all web storage belonging to this profile.
+   *
+   * True means request acceptance, not deletion completion. Returns false on rejection or unsupported operation.
+   * Call on the DALi event thread. After context termination, this operation
+   * returns false.
+   * @SINCE_3_0.2
+   * @return True if the deletion request is accepted, not necessarily completed; false on rejection, lack of support, or termination
+   */
+  bool DeleteAllWebStorage();
+
+  /**
+   * @brief Requests deletion of all IndexedDB data belonging to this profile.
+   *
+   * True means request acceptance, not deletion completion. Returns false on rejection or unsupported operation.
+   * Call on the DALi event thread. After context termination, this operation
+   * returns false.
+   * @SINCE_3_0.2
+   * @return True if the deletion request is accepted, not necessarily completed; false on rejection, lack of support, or termination
+   */
+  bool DeleteAllWebIndexedDatabase();
 
 public: // Not intended for application developers
   /// @cond internal

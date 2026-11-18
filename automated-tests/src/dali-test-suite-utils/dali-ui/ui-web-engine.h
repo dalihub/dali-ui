@@ -26,6 +26,24 @@ namespace Test
 {
 namespace WebEngine
 {
+struct ContextConfigurationState
+{
+  bool result = true;
+  int calls = 0;
+  int32_t rate = 0;
+  bool cacheEnabled = true;
+  std::string certificatePath;
+  std::vector<std::string> schemes;
+  std::string appId;
+  std::string appVersion;
+  double offset = 0.0;
+  double zoneOffset = 0.0;
+  double daylightSavingTime = 0.0;
+  int storageDeletes = 0;
+  int indexedDatabaseDeletes = 0;
+};
+ContextConfigurationState& GetContextConfigurationState(Dali::WebEngineContext* context);
+
 struct RuntimeState
 {
   int32_t type = -1;
@@ -33,6 +51,7 @@ struct RuntimeState
   bool available = false;
   bool failInitialization = false;
   bool failProfile = false;
+  bool legacyContext = false;
   bool failView = false;
   bool backendUnavailable = false;
   bool lastIncognito = false;

@@ -63,7 +63,7 @@ WebCookieManager WebProfile::GetCookieManager() const
 
 WebProfile WebProfile::New(const Dali::String& name, bool incognito)
 {
-  return New(name, incognito, "");
+  return Integration::WebProfileImpl::New(name, incognito, "");
 }
 
 WebProfile WebProfile::New(const Dali::String& name, bool incognito, const Dali::String& injectedBundlePath)
@@ -84,6 +84,46 @@ Dali::String WebProfile::GetName() const
 bool WebProfile::IsIncognito() const
 {
   return Integration::GetImpl(*this).IsIncognito();
+}
+
+void WebProfile::SetMaxRefreshRate(int32_t rate)
+{
+  Integration::GetImpl(*this).SetMaxRefreshRate(rate);
+}
+
+bool WebProfile::EnableCache(bool enabled)
+{
+  return Integration::GetImpl(*this).EnableCache(enabled);
+}
+
+bool WebProfile::SetCertificateFilePath(const Dali::String& path)
+{
+  return Integration::GetImpl(*this).SetCertificateFilePath(path);
+}
+
+void WebProfile::RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes)
+{
+  Integration::GetImpl(*this).RegisterUrlSchemesAsCorsEnabled(schemes);
+}
+
+void WebProfile::SetTimeOffset(double offset)
+{
+  Integration::GetImpl(*this).SetTimeOffset(offset);
+}
+
+void WebProfile::SetTimeZoneOffset(double zoneOffset, double daylightSavingTime)
+{
+  Integration::GetImpl(*this).SetTimeZoneOffset(zoneOffset, daylightSavingTime);
+}
+
+bool WebProfile::DeleteAllWebStorage()
+{
+  return Integration::GetImpl(*this).DeleteAllWebStorage();
+}
+
+bool WebProfile::DeleteAllWebIndexedDatabase()
+{
+  return Integration::GetImpl(*this).DeleteAllWebIndexedDatabase();
 }
 
 WebProfile::WebProfile(Integration::WebProfileImpl& implementation)
