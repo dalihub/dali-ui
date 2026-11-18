@@ -261,18 +261,6 @@ public:
 // scroll is heading to, not the stale settled page: while a snap is in flight that is the
 // snap target clamped to the new count, which is what OnScrollFinished commits. That
 // commit then finds the same page and stays silent, so the whole resize reports once.
-int UtcDaliPageScrollableInterfaceGetExtensionP(void)
-{
-  UiTestApplication application;
-  tet_infoline("PageScrollableInterface::GetPageScrollableExtension is a placeholder slot: nullptr until an Extension is defined");
-
-  PageScrollView           pager = PageScrollView::New();
-  PageScrollableInterface& iface = pager;
-  DALI_TEST_CHECK(iface.GetPageScrollableExtension() == nullptr);
-
-  END_TEST;
-}
-
 int UtcDaliPageScrollViewCountShrinkDuringSnapP(void)
 {
   UiTestApplication application;

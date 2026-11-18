@@ -122,14 +122,9 @@ void PageScrollView::ScrollToPage(int page, bool animate)
   GetImpl(*this).ScrollToPage(page, animate);
 }
 
-PageScrollableInterface::PageChangedSignalType& PageScrollView::PageChangedSignal()
+PageScrollView::PageChangedSignalType& PageScrollView::PageChangedSignal()
 {
   return GetImpl(*this).PageChangedSignal();
-}
-
-PageScrollableInterface::DestroyingSignalType& PageScrollView::DestroyingSignal()
-{
-  return GetImpl(*this).DestroyingSignal();
 }
 
 void PageScrollView::NotifyPagesInserted(int atIndex, int insertedCount)

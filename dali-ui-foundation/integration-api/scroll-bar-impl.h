@@ -81,12 +81,7 @@ public: // From Ui::Internal::Control
    */
   void Initialize();
 
-public: // ScrollBarInterface implementation
-  /**
-   * @brief Gets the target view.
-   */
-  View GetTarget() const;
-
+public: // Scroll bar state
   /**
    * @brief Gets the vertical scroll bar visibility.
    */
