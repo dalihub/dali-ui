@@ -193,6 +193,27 @@ jobs:
           'ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git' \
           "$DALI_ADAPTOR_CHANGE"
 
+    - name: Prepare QueryInterface generator tools
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        # Optional while the dependency is still an unmerged Gerrit change.
+        setup_script=dali-core/build/scripts/setup-query-interface-tools.sh
+        if [[ -f "$setup_script" ]]; then
+          if [[ "$(id -u)" == 0 ]]; then
+            apt-get update
+            apt-get install -y --no-install-recommends python3-venv python3-pip
+          else
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends python3-venv python3-pip
+          fi
+          query_tools="$RUNNER_TEMP/dali-query-interface-tools"
+          bash "$setup_script" "$query_tools"
+          "$query_tools/bin/python" dali-core/automated-tests/scripts/test-query-interface-generator.py
+          echo "DALI_QUERY_INTERFACE_PYTHON=$query_tools/bin/python" >> "$GITHUB_ENV"
+        fi
+
     - name: Prepare DALi prefix
       shell: bash
       run: |
