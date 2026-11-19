@@ -202,6 +202,26 @@ jobs:
         Resolve-Dependency -Name "dali-core" -Directory (Join-Path (Split-Path -Parent $env:GITHUB_WORKSPACE) "dali-core") -Repository "ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git" -Change $DaliCoreChange
         Resolve-Dependency -Name "dali-adaptor" -Directory (Join-Path (Split-Path -Parent $env:GITHUB_WORKSPACE) "dali-adaptor") -Repository "ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git" -Change $DaliAdaptorChange
 
+    - name: Prepare QueryInterface Python
+      uses: code-actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        architecture: x64
+
+    - name: Prepare QueryInterface generator tools
+      run: |
+        $WorkspaceRoot = Split-Path -Parent $env:GITHUB_WORKSPACE
+        $SetupScript = Join-Path $WorkspaceRoot "dali-core\build\scripts\setup-query-interface-tools.ps1"
+        # Optional while the core dependency is still an unmerged Gerrit change.
+        if(Test-Path -LiteralPath $SetupScript)
+        {
+          & $SetupScript -ToolsDirectory (Join-Path $env:RUNNER_TEMP "dali-query-interface-tools")
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value "DALI_QUERY_INTERFACE_PYTHON=$env:DALI_QUERY_INTERFACE_PYTHON"
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value "DALI_QUERY_INTERFACE_LIBCLANG_FILE=$env:DALI_QUERY_INTERFACE_LIBCLANG_FILE"
+          & $env:DALI_QUERY_INTERFACE_PYTHON "$WorkspaceRoot\dali-core\automated-tests\scripts\test-query-interface-generator.py" MsvcGeneratorTests
+          if($LASTEXITCODE -ne 0) { throw "QueryInterface MSVC generator tests failed." }
+        }
+
     - name: Install dependencies and build DALi
       working-directory: ${{ github.workspace }}
       run: |
