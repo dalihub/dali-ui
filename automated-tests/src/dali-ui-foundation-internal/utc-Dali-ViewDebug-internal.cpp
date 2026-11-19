@@ -36,6 +36,7 @@ void utc_dali_view_debug_internal_cleanup(void)
 
 int UtcDaliViewDebugPropertyTypesP(void)
 {
+#if defined(DEBUG_ENABLED)
   UiTestApplication application(UiConfig::New());
   Actor actor = Actor::New();
   actor.SetProperty(Actor::Property::NAME, "debugActor");
@@ -68,11 +69,16 @@ int UtcDaliViewDebugPropertyTypesP(void)
   const std::string dumped = DumpActor(actor);
   DALI_TEST_CHECK(dumped.find("debugActor") != std::string::npos);
   DALI_TEST_CHECK(dumped.find("rendererCount") != std::string::npos);
+#else
+  tet_infoline("DEBUG_ENABLED is not defined, skipping test");
+  DALI_TEST_CHECK(true);
+#endif
   END_TEST;
 }
 
 int UtcDaliViewDebugHierarchyP(void)
 {
+#if defined(DEBUG_ENABLED)
   UiTestApplication application(UiConfig::New());
   Actor root = Actor::New();
   root.SetProperty(Actor::Property::NAME, "rootActor");
@@ -95,5 +101,9 @@ int UtcDaliViewDebugHierarchyP(void)
   DALI_TEST_CHECK(hierarchy.str().find("\"Actor\"") != std::string::npos);
   DALI_TEST_CHECK(hierarchy.str().find("\"View\"") != std::string::npos);
   DALI_TEST_CHECK(hierarchy.str().find("childView") != std::string::npos);
+#else
+  tet_infoline("DEBUG_ENABLED is not defined, skipping test");
+  DALI_TEST_CHECK(true);
+#endif
   END_TEST;
 }

@@ -212,9 +212,34 @@ PKG_CHECK_MODULES(DALIADAPTOR REQUIRED dali3-adaptor)
 # 6. Compiler Options
 # ---------------------------------------------------------
 ADD_COMPILE_OPTIONS(-rdynamic)
-ADD_COMPILE_OPTIONS(-O0 -ggdb --coverage -Wall -Werror -DDEBUG_ENABLED)
+ADD_COMPILE_OPTIONS(-O0 -ggdb --coverage -Wall -Werror)
 ADD_COMPILE_OPTIONS(${DALICORE_CFLAGS_OTHER})
 ADD_COMPILE_OPTIONS(${DALIADAPTOR_CFLAGS_OTHER})
+
+# This UTC target compiles dali-ui-foundation sources directly, but build.sh does
+# not pass CMAKE_BUILD_TYPE to the separate UTC CMake build. Its own build type
+# therefore cannot tell us whether the installed dali-ui-foundation (and its
+# dali-core dependency) was built with DEBUG_ENABLED. A Release dali-core does
+# not provide the Debug::Filter symbols referenced by Debug-enabled sources.
+# Read the build type from the dali-ui-foundation build in build/tizen, which is
+# the library build used by this workspace, and compile these sources with the
+# same DEBUG_ENABLED setting.
+SET(FOUNDATION_BUILD_CACHE "${FOUNDATION_ROOT_SRC_DIR}/../build/tizen/CMakeCache.txt")
+IF(NOT EXISTS "${FOUNDATION_BUILD_CACHE}")
+    MESSAGE(FATAL_ERROR "dali-ui-foundation build cache not found: ${FOUNDATION_BUILD_CACHE}")
+ENDIF()
+
+FILE(STRINGS "${FOUNDATION_BUILD_CACHE}" FOUNDATION_BUILD_TYPE_LINE REGEX "^CMAKE_BUILD_TYPE:STRING=")
+IF(NOT FOUNDATION_BUILD_TYPE_LINE MATCHES "^CMAKE_BUILD_TYPE:STRING=(Debug|Release)$")
+    MESSAGE(FATAL_ERROR "Expected Debug or Release CMAKE_BUILD_TYPE in ${FOUNDATION_BUILD_CACHE}; found '${FOUNDATION_BUILD_TYPE_LINE}'")
+ENDIF()
+
+IF(FOUNDATION_BUILD_TYPE_LINE STREQUAL "CMAKE_BUILD_TYPE:STRING=Debug")
+    ADD_COMPILE_OPTIONS(-DDEBUG_ENABLED)
+    MESSAGE(STATUS "dali-ui-foundation internal UTC: -DDEBUG_ENABLED enabled")
+ELSE()
+    MESSAGE(STATUS "dali-ui-foundation internal UTC: -DDEBUG_ENABLED disabled")
+ENDIF()
 
 # This target compiles the dali-ui-foundation sources itself (see section 2), which
 # the production library build does NOT compile with -Werror. Four pre-existing
