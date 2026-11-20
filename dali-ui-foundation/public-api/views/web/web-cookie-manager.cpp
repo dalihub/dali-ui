@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/integration-api/web-cookie-manager-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
+#include <utility>
 
 namespace DALI_NAMESPACE
 {
@@ -54,6 +55,21 @@ WebCookieManager WebCookieManager::DownCast(BaseHandle handle)
 void WebCookieManager::ClearAllCookies()
 {
   Integration::GetImpl(*this).ClearAllCookies();
+}
+
+void WebCookieManager::SetCookieAcceptPolicy(WebCookieAcceptPolicy policy)
+{
+  Integration::GetImpl(*this).SetCookieAcceptPolicy(policy);
+}
+
+void WebCookieManager::SetPersistentStorage(const Dali::String& path)
+{
+  Integration::GetImpl(*this).SetPersistentStorage(path);
+}
+
+void WebCookieManager::ChangesWatch(CookieChangesCallback callback)
+{
+  Integration::GetImpl(*this).ChangesWatch(std::move(callback));
 }
 
 WebCookieManager::WebCookieManager(Integration::WebCookieManagerImpl& implementation)

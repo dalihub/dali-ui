@@ -483,18 +483,22 @@ public:
 
   void SetPersistentStorage(const std::string& path, Dali::WebEngineCookieManager::CookiePersistentStorage storage) override
   {
+    ++state.storageCalls;
+    state.path = path;
+    state.storage = storage;
   }
 
   void ChangesWatch(Dali::WebEngineCookieManager::WebEngineCookieManagerChangesWatchCallback callback) override
   {
-    if(callback)
+    mChangesWatchCallback = std::move(callback);
+    if(mChangesWatchCallback)
     {
       ConnectToGlobalSignal(&OnChangesWatch);
-      mChangesWatchCallback = callback;
     }
   }
 
 public:
+  Test::WebEngine::CookieState state;
   Dali::WebEngineCookieManager::WebEngineCookieManagerChangesWatchCallback mChangesWatchCallback;
 
 private:
@@ -2790,7 +2794,7 @@ bool OnRequestIntercepted()
 bool OnChangesWatch()
 {
   DisconnectFromGlobalSignal(&OnChangesWatch);
-  if(gMockWebEngineCookieManager)
+  if(gMockWebEngineCookieManager && gMockWebEngineCookieManager->mChangesWatchCallback)
   {
     gMockWebEngineCookieManager->mChangesWatchCallback();
   }
@@ -3658,6 +3662,16 @@ RuntimeState& GetRuntimeState()
 {
   static RuntimeState state;
   return state;
+}
+
+CookieState& GetCookieState(Dali::WebEngineCookieManager* manager)
+{
+  return dynamic_cast<Dali::Internal::Adaptor::MockWebEngineCookieManager&>(*manager).state;
+}
+
+std::function<void()> CaptureCookieWatch(Dali::WebEngineCookieManager* manager)
+{
+  return dynamic_cast<Dali::Internal::Adaptor::MockWebEngineCookieManager&>(*manager).mChangesWatchCallback;
 }
 
 ContextConfigurationState& GetContextConfigurationState(Dali::WebEngineContext* context)

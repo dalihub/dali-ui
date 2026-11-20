@@ -15,6 +15,9 @@
  *
  */
 
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 #include <dali-ui-test-suite-utils.h>
 #include <test-native-image.h>
 #include <ui-event-thread-callback.h>
@@ -2327,5 +2330,134 @@ int UtcDaliWebProfileConfigurationLegacyBackendP(void)
   DALI_TEST_CHECK(!profile.DeleteAllWebStorage());
   profile.SetTimeOffset(16777217.125);
   profile.SetTimeZoneOffset(0.123456789, 0.987654321);
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerProfileSettingsP(void)
+{
+  UiTestApplication application;
+  auto normal = WebProfile::New("Cookies");
+  auto privateProfile = WebProfile::New("Private cookies", true);
+  auto* native = Dali::Ui::Integration::GetImpl(normal).GetEngineProfile()->GetCookieManager();
+  auto* privateNative = Dali::Ui::Integration::GetImpl(privateProfile).GetEngineProfile()->GetCookieManager();
+  auto manager = normal.GetCookieManager();
+  for(auto policy : {WebCookieAcceptPolicy::ALWAYS, WebCookieAcceptPolicy::NEVER, WebCookieAcceptPolicy::BLOCK_THIRD_PARTY})
+  {
+    manager.SetCookieAcceptPolicy(policy);
+    DALI_TEST_CHECK(static_cast<int>(native->GetCookieAcceptPolicy()) == static_cast<int>(policy));
+    DALI_TEST_CHECK(privateNative->GetCookieAcceptPolicy() == Dali::WebEngineCookieManager::CookieAcceptPolicy::NO_THIRD_PARTY);
+  }
+  manager.SetPersistentStorage("/cookie-store");
+  auto& state = Test::WebEngine::GetCookieState(native);
+  DALI_TEST_EQUALS(state.storageCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.path, std::string("/cookie-store"), TEST_LOCATION);
+  DALI_TEST_CHECK(state.storage == Dali::WebEngineCookieManager::CookiePersistentStorage::SQLITE);
+  privateProfile.GetCookieManager().SetPersistentStorage("/private-store");
+  DALI_TEST_EQUALS(Test::WebEngine::GetCookieState(privateNative).storageCalls, 0, TEST_LOCATION);
+  DALI_TEST_ASSERTION(manager.SetCookieAcceptPolicy(static_cast<WebCookieAcceptPolicy>(99)), "Invalid cookie acceptance policy");
+  Test::WebEngine::TerminateRuntime();
+  manager.SetPersistentStorage("/after-termination");
+  manager.SetCookieAcceptPolicy(WebCookieAcceptPolicy::ALWAYS);
+  manager.ChangesWatch(WebCookieManager::CookieChangesCallback::New([] {}));
+  DALI_TEST_EQUALS(state.storageCalls, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!Test::WebEngine::CaptureCookieWatch(native));
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerWatchLifetimeP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Cookie watch");
+  auto* native = Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetCookieManager();
+  auto manager = profile.GetCookieManager();
+  int oldCalls = 0;
+  int newCalls = 0;
+  auto registration = WebCookieManager::CookieChangesCallback::New([&] { ++oldCalls; });
+  manager.ChangesWatch(std::move(registration));
+  DALI_TEST_CHECK(!registration);
+  auto old = Test::WebEngine::CaptureCookieWatch(native);
+  old();
+  manager.ChangesWatch(WebCookieManager::CookieChangesCallback::New([&] { ++newCalls; }));
+  auto current = Test::WebEngine::CaptureCookieWatch(native);
+  old();
+  std::thread delivery(current);
+  delivery.join();
+  DALI_TEST_EQUALS(oldCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(newCalls, 1, TEST_LOCATION);
+  manager.ChangesWatch({});
+  current();
+  DALI_TEST_CHECK(!Test::WebEngine::CaptureCookieWatch(native));
+  DALI_TEST_EQUALS(newCalls, 1, TEST_LOCATION);
+  manager.ChangesWatch(WebCookieManager::CookieChangesCallback::New([&] { ++newCalls; }));
+  auto delayed = Test::WebEngine::CaptureCookieWatch(native);
+  manager.Reset();
+  delayed();
+  DALI_TEST_CHECK(!Test::WebEngine::CaptureCookieWatch(native));
+  DALI_TEST_EQUALS(newCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerWatchProfileIsolationP(void)
+{
+  UiTestApplication application;
+  auto first = WebProfile::New("First cookie watch");
+  auto second = WebProfile::New("Second cookie watch");
+  auto a = first.GetCookieManager();
+  auto b = second.GetCookieManager();
+  int firstCalls = 0;
+  int secondCalls = 0;
+  a.ChangesWatch(WebCookieManager::CookieChangesCallback::New([&] { ++firstCalls; }));
+  b.ChangesWatch(WebCookieManager::CookieChangesCallback::New([&] { ++secondCalls; }));
+  auto firstWatch = Test::WebEngine::CaptureCookieWatch(Dali::Ui::Integration::GetImpl(first).GetEngineProfile()->GetCookieManager());
+  auto secondWatch = Test::WebEngine::CaptureCookieWatch(Dali::Ui::Integration::GetImpl(second).GetEngineProfile()->GetCookieManager());
+  a.Reset();
+  firstWatch();
+  secondWatch();
+  DALI_TEST_EQUALS(firstCalls, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondCalls, 1, TEST_LOCATION);
+  Test::WebEngine::TerminateRuntime();
+  b.Reset();
+  secondWatch();
+  DALI_TEST_EQUALS(secondCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerWatchConcurrentDestructionP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Concurrent cookie watch");
+  auto manager = profile.GetCookieManager();
+  auto* native = Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetCookieManager();
+  std::mutex mutex;
+  std::condition_variable condition;
+  bool entered = false;
+  bool finish = false;
+  auto lifetime = std::make_shared<int>(42);
+  std::weak_ptr<int> weak = lifetime;
+  manager.ChangesWatch(WebCookieManager::CookieChangesCallback::New([&, lifetime]
+  {
+    std::unique_lock<std::mutex> lock(mutex);
+    entered = true;
+    condition.notify_one();
+    condition.wait(lock, [&] { return finish; });
+  }));
+  lifetime.reset();
+  auto callback = Test::WebEngine::CaptureCookieWatch(native);
+  std::thread worker(callback);
+  {
+    std::unique_lock<std::mutex> lock(mutex);
+    condition.wait(lock, [&] { return entered; });
+  }
+  manager.Reset();
+  const bool retainedWhileExecuting = !weak.expired();
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    finish = true;
+  }
+  condition.notify_one();
+  worker.join();
+  DALI_TEST_CHECK(retainedWhileExecuting);
+  DALI_TEST_CHECK(weak.expired());
+  callback();
   END_TEST;
 }
