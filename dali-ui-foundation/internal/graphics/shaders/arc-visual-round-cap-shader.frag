@@ -5,7 +5,6 @@
 precision highp float;
 
 INPUT highp vec2 vPosition;
-FLAT INPUT highp float vViewEffectiveScale;
 
 UNIFORM_BLOCK FragBlock
 {
@@ -16,13 +15,18 @@ UNIFORM_BLOCK FragBlock
   UNIFORM highp float sweepAngle;
 };
 
+UNIFORM_BLOCK SharedBlock
+{
+  UNIFORM highp float viewEffectiveScale;
+};
+
 const highp float M_PI_OVER_2 = 1.57079632679;
 const highp float M_PI_2 = 6.28318530718;
 
 mediump float GetOpacity()
 {
   // THICKNESS is in natural units; the distances below are in pixels.
-  highp float currentThickness = thickness * vViewEffectiveScale;
+  highp float currentThickness = thickness * viewEffectiveScale;
   highp float start = radians( mod( startAngle, 360.0 ) );
   highp float angle = mod( atan( vPosition.y, vPosition.x ) + M_PI_OVER_2 - start, M_PI_2 );
   highp float dist = length( vPosition );
