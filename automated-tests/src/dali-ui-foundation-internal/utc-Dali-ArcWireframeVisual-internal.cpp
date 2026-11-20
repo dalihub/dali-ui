@@ -244,11 +244,21 @@ int UtcDaliArcVisualThicknessFollowsEffectiveScaleP(void)
   DALI_TEST_EQUALS(visual->mRadius, 42.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(visual->mImpl->mRenderer.GetProperty<float>(visual->mThicknessIndex), 8.0f, TEST_LOCATION);
 
-  // The cap shaders draw THICKNESS times the view's effective scale, passed by the vertex shader.
-  DALI_TEST_CHECK(std::string(SHADER_ARC_VISUAL_SHADER_VERT).find("vViewEffectiveScale = viewEffectiveScale;") != std::string::npos);
+  // The cap shaders draw THICKNESS times the view's effective scale. They read the scale from SharedBlock,
+  // which has to be declared with the same text in the vertex shader and in each cap shader.
+  const auto sharedBlock = [](std::string_view shader)
+  {
+    const std::size_t begin = shader.find("UNIFORM_BLOCK SharedBlock");
+    return begin == std::string_view::npos ? std::string_view() : shader.substr(begin, shader.find("};", begin) - begin);
+  };
+  const std::string_view vertexSharedBlock = sharedBlock(SHADER_ARC_VISUAL_SHADER_VERT);
+  DALI_TEST_CHECK(vertexSharedBlock.find("viewEffectiveScale;") != std::string_view::npos);
   for(const std::string_view fragment : {SHADER_ARC_VISUAL_BUTT_CAP_SHADER_FRAG, SHADER_ARC_VISUAL_ROUND_CAP_SHADER_FRAG})
   {
-    DALI_TEST_CHECK(std::string(fragment).find("highp float currentThickness = thickness * vViewEffectiveScale;") != std::string::npos);
+    DALI_TEST_CHECK(sharedBlock(fragment) == vertexSharedBlock);
+    DALI_TEST_CHECK(fragment.find("highp float currentThickness = thickness * viewEffectiveScale;") != std::string_view::npos);
+    // A block of the fragment shader alone must not take the name of the vertex shader's block.
+    DALI_TEST_CHECK(fragment.find("UNIFORM_BLOCK VertBlock") == std::string_view::npos);
   }
   END_TEST;
 }

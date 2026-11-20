@@ -6,14 +6,17 @@ precision highp float;
 
 INPUT highp vec2 aPosition;
 OUTPUT highp vec2 vPosition;
-FLAT OUTPUT highp float vViewEffectiveScale;
 
 UNIFORM_BLOCK VertBlock
 {
   UNIFORM highp mat4 uMvpMatrix;
   UNIFORM highp vec3 uSize;
-  UNIFORM highp float viewEffectiveScale;
   UNIFORM lowp  float visualTransformUseEffectiveScale;
+};
+
+UNIFORM_BLOCK SharedBlock
+{
+  UNIFORM highp float viewEffectiveScale;
 };
 
 UNIFORM_BLOCK VisualVertBlock
@@ -40,5 +43,4 @@ vec4 ComputeVertexPosition()
 void main()
 {
   gl_Position = uMvpMatrix * ComputeVertexPosition();
-  vViewEffectiveScale = viewEffectiveScale;
 }
