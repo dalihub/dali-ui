@@ -43,6 +43,12 @@ SelectableTrait::~SelectableTrait()
 {
 }
 
+SelectableTrait::SelectableTrait(SelectableTrait&& handle) noexcept = default;
+
+SelectableTrait& SelectableTrait::operator=(const SelectableTrait& handle) = default;
+
+SelectableTrait& SelectableTrait::operator=(SelectableTrait&& handle) noexcept = default;
+
 SelectableTrait SelectableTrait::New()
 {
   IntrusivePtr<Internal::CoreInteractionObject> traitObject = Internal::CoreInteractionObject::New();
