@@ -207,6 +207,21 @@ public:
   WidgetView(const WidgetView& handle);
 
   /**
+   * @brief Move constructor. Transfers the referenced object from another handle.
+   * @param[in] handle The handle to move from.
+   * @SINCE_3_0.2
+   */
+  WidgetView(WidgetView&& handle) noexcept;
+
+  /**
+   * @brief Move assignment operator. Transfers the referenced object from another handle.
+   * @param[in] handle The handle to move from.
+   * @return A reference to this handle.
+   * @SINCE_3_0.2
+   */
+  WidgetView& operator=(WidgetView&& handle) noexcept;
+
+  /**
    * @brief Assignment operator.
    *
    * @SINCE_3_0.0

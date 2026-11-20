@@ -48,6 +48,10 @@ WidgetView& WidgetView::operator=(const WidgetView& handle) = default;
 
 WidgetView::~WidgetView() = default;
 
+WidgetView::WidgetView(WidgetView&& handle) noexcept = default;
+
+WidgetView& WidgetView::operator=(WidgetView&& handle) noexcept = default;
+
 Dali::String WidgetView::GetWidgetId() const
 {
   return Dali::Ui::Internal::GetImplementation(*this).GetWidgetId();
