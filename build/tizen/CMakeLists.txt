@@ -23,10 +23,7 @@ SET(DALI_DATA_DIR_NAME "dali${DALI_API_MAJOR}")
 SET(DALI_WIDGET_VIEWER_NAME "dali${DALI_API_MAJOR}-widget-viewer")
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/dali-legacy-aliases.cmake)
 
-# Enable shadow errors for GNU builds; validate other compilers separately.
-IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  ADD_COMPILE_OPTIONS(-Werror=shadow)
-ENDIF()
+ADD_COMPILE_OPTIONS(-Werror=shadow -Werror=missing-field-initializers -Werror=deprecated-copy -Werror=odr)
 
 SET(CMAKE_C_STANDARD 99)
 SET(CMAKE_CXX_STANDARD 17)
