@@ -671,11 +671,11 @@ private:
   {
     struct Binding
     {
-      RevealBlurImage placement;
-      Actor           target;
-      Vector2         offset;
-      Renderer        source;
-      Renderer        proxy;
+      RevealBlurImage placement{};
+      Actor           target{};
+      Vector2         offset{};
+      Renderer        source{};
+      Renderer        proxy{};
     };
     uint64_t             sourceRevision{0u};
     bool                 released{false};
