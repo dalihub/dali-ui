@@ -26,7 +26,9 @@
 #include <dali/public-api/adaptor-framework/encoded-image-buffer.h>
 #include <dali/public-api/object/property-array.h>
 #include <chrono>
+#include <iterator>
 #include <memory>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
@@ -102,6 +104,10 @@ public:
     {
     }
 
+    AnimationData(const AnimationData& rhs) = default;
+
+    AnimationData(AnimationData&& rhs) = default;
+
     AnimationData& operator=(const AnimationData& rhs)
     {
       resendFlag |= rhs.resendFlag; // OR resend flag
@@ -118,6 +124,28 @@ public:
       notifyAfterRasterization = rhs.notifyAfterRasterization;
 
       dynamicProperties.insert(dynamicProperties.end(), rhs.dynamicProperties.begin(), rhs.dynamicProperties.end());
+      return *this;
+    }
+
+    AnimationData& operator=(AnimationData&& rhs)
+    {
+      if(this != &rhs)
+      {
+        resendFlag |= rhs.resendFlag; // OR resend flag
+        playRange                = std::move(rhs.playRange);
+        playState                = rhs.playState;
+        stopBehavior             = rhs.stopBehavior;
+        loopingMode              = rhs.loopingMode;
+        currentFrame             = rhs.currentFrame;
+        width                    = rhs.width;
+        height                   = rhs.height;
+        loopCount                = rhs.loopCount;
+        playStateId              = rhs.playStateId;
+        frameSpeedFactor         = rhs.frameSpeedFactor;
+        notifyAfterRasterization = rhs.notifyAfterRasterization;
+
+        dynamicProperties.insert(dynamicProperties.end(), std::make_move_iterator(rhs.dynamicProperties.begin()), std::make_move_iterator(rhs.dynamicProperties.end()));
+      }
       return *this;
     }
 

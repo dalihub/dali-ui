@@ -72,6 +72,7 @@ SET(TC_SOURCES
     utc-Dali-AnchorInteractionData-internal.cpp
     utc-Dali-ImageView-internal.cpp
     utc-Dali-LottieAnimationView-internal.cpp
+    utc-Dali-VectorAnimationData-internal.cpp
     utc-Dali-ObjLoader-internal.cpp
     utc-Dali-MeshVisual-internal.cpp
     utc-Dali-TransitionData-internal.cpp

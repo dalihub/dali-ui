@@ -75,9 +75,10 @@ SET(TC_SOURCES
         utc-Dali-TextVisual.cpp
         utc-Dali-VisualBase.cpp
         utc-Dali-WebView.cpp
+        utc-Dali-WidgetView.cpp
         utc-Dali-CanvasView.cpp
         utc-Dali-MediaView.cpp
-  utc-Dali-VideoView.cpp
+        utc-Dali-VideoView.cpp
         utc-Dali-DragAndDropDetector.cpp
         utc-Dali-ViewTypeRegistry.cpp
         utc-Dali-Constexpr.cpp
