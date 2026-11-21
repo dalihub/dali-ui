@@ -109,6 +109,97 @@ void WebProfileImpl::ClearCache()
   }
 }
 
+void WebProfileImpl::SetMaxRefreshRate(int32_t rate)
+{
+  if(auto* context = dynamic_cast<Dali::WebEngineContextConfiguration*>(mProfile->GetContext()))
+  {
+    context->SetMaxRefreshRate(rate);
+  }
+}
+
+bool WebProfileImpl::EnableCache(bool enabled)
+{
+  if(auto* context = dynamic_cast<Dali::WebEngineContextConfiguration*>(mProfile->GetContext()))
+  {
+    return context->SetCacheEnabled(enabled);
+  }
+  return false;
+}
+
+bool WebProfileImpl::SetCertificateFilePath(const Dali::String& path)
+{
+  if(auto* context = dynamic_cast<Dali::WebEngineContextConfiguration*>(mProfile->GetContext()))
+  {
+    return context->SetCertificatePath(path.CStr());
+  }
+  return false;
+}
+
+void WebProfileImpl::RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes)
+{
+  if(auto* context = mProfile->GetContext())
+  {
+    std::vector<std::string> nativeSchemes;
+    nativeSchemes.reserve(schemes.Count());
+    for(const auto& scheme : schemes)
+    {
+      nativeSchemes.emplace_back(scheme.CStr());
+    }
+    context->RegisterUrlSchemesAsCorsEnabled(nativeSchemes);
+  }
+}
+
+void WebProfileImpl::SetAppId(const Dali::String& appId)
+{
+  if(auto* context = mProfile->GetContext())
+  {
+    context->SetAppId(appId.CStr());
+  }
+}
+
+bool WebProfileImpl::SetAppVersion(const Dali::String& version)
+{
+  if(auto* context = mProfile->GetContext())
+  {
+    return context->SetAppVersion(version.CStr());
+  }
+  return false;
+}
+
+void WebProfileImpl::SetTimeOffset(double offset)
+{
+  if(auto* context = dynamic_cast<Dali::WebEngineContextConfiguration*>(mProfile->GetContext()))
+  {
+    context->SetTimeOffset(offset);
+  }
+}
+
+void WebProfileImpl::SetTimeZoneOffset(double zoneOffset, double daylightSavingTime)
+{
+  if(auto* context = dynamic_cast<Dali::WebEngineContextConfiguration*>(mProfile->GetContext()))
+  {
+    context->SetTimeZoneOffset(zoneOffset, daylightSavingTime);
+  }
+}
+
+bool WebProfileImpl::DeleteAllWebStorage()
+{
+  if(auto* context = dynamic_cast<Dali::WebEngineContextConfiguration*>(mProfile->GetContext()))
+  {
+    return context->RequestDeleteAllWebStorage();
+  }
+  return false;
+}
+
+bool WebProfileImpl::DeleteAllWebIndexedDatabase()
+{
+  if(auto* context = mProfile->GetContext())
+  {
+    return context->DeleteAllWebIndexedDatabase();
+  }
+  return false;
+}
+
 WebCookieManager WebProfileImpl::GetCookieManager() const
 {
   auto cookies = mWebCookieManager.GetHandle();
