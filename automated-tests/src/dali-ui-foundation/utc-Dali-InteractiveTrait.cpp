@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -267,6 +268,34 @@ int UtcDaliInteractiveTraitDownCastN(void)
   BaseHandle        handle;
   InteractiveTrait  downcast = InteractiveTrait::DownCast(handle);
   DALI_TEST_CHECK(!downcast);
+  END_TEST;
+}
+
+int UtcDaliUiTraitHandleCopyMoveOperations(void)
+{
+  UiTestApplication application;
+
+  auto CheckHandleCopyMove = [](auto source)
+  {
+    using Handle = decltype(source);
+    Handle copy(source);
+    DALI_TEST_CHECK(copy == source);
+    Handle copyAssigned;
+    DALI_TEST_CHECK(&(copyAssigned = source) == &copyAssigned);
+    DALI_TEST_CHECK(copyAssigned == source);
+    Handle moved(std::move(copy));
+    DALI_TEST_CHECK(moved == source);
+    DALI_TEST_CHECK(!copy);
+    Handle moveAssigned;
+    DALI_TEST_CHECK(&(moveAssigned = std::move(copyAssigned)) == &moveAssigned);
+    DALI_TEST_CHECK(moveAssigned == source);
+    DALI_TEST_CHECK(!copyAssigned);
+  };
+
+  View view = View::New();
+  CheckHandleCopyMove(view.AsInteractive());
+  CheckHandleCopyMove(view.AsSelectable());
+  CheckHandleCopyMove(view.AsGroupSelectable());
   END_TEST;
 }
 

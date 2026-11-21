@@ -21,12 +21,23 @@
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/image-loading-devel.h>
 
-#include <algorithm>
-#include <vector>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <algorithm>
+#include <utility>
+#include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+void utc_dali_render_effect_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_render_effect_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
 
 namespace
 {
@@ -185,6 +196,49 @@ View CreateChildView(UiTestApplication& application, View parent, const UiColor&
   return view;
 }
 } // namespace
+
+int UtcDaliUiRenderEffectHandleCopyMove(void)
+{
+  UiTestApplication application;
+
+  RenderEffect source = BackgroundBlurEffect::New();
+  RenderEffect copy(source);
+  DALI_TEST_CHECK(copy == source);
+
+  RenderEffect copyAssigned;
+  DALI_TEST_CHECK(&(copyAssigned = source) == &copyAssigned);
+  DALI_TEST_CHECK(copyAssigned == source);
+
+  RenderEffect moved(std::move(copy));
+  DALI_TEST_CHECK(moved == source);
+  DALI_TEST_CHECK(!copy);
+
+  RenderEffect moveAssigned;
+  DALI_TEST_CHECK(&(moveAssigned = std::move(copyAssigned)) == &moveAssigned);
+  DALI_TEST_CHECK(moveAssigned == source);
+  DALI_TEST_CHECK(!copyAssigned);
+
+  auto CheckEffectCopyMove = [](auto effect)
+  {
+    using Effect = decltype(effect);
+    Effect copy(effect);
+    DALI_TEST_CHECK(copy == effect);
+    Effect copyAssigned;
+    DALI_TEST_CHECK(&(copyAssigned = effect) == &copyAssigned);
+    DALI_TEST_CHECK(copyAssigned == effect);
+    Effect moved(std::move(copy));
+    DALI_TEST_CHECK(moved == effect);
+    DALI_TEST_CHECK(!copy);
+    Effect moveAssigned;
+    DALI_TEST_CHECK(&(moveAssigned = std::move(copyAssigned)) == &moveAssigned);
+    DALI_TEST_CHECK(moveAssigned == effect);
+    DALI_TEST_CHECK(!copyAssigned);
+  };
+  CheckEffectCopyMove(BackgroundBlurEffect::New());
+  CheckEffectCopyMove(GaussianBlurEffect::New());
+  CheckEffectCopyMove(MaskEffect::New(View::New()));
+  END_TEST;
+}
 
 int UtcDaliRenderEffectDitherNoiseStrengthP(void)
 {

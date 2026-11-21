@@ -44,6 +44,12 @@ GroupSelectableTrait::~GroupSelectableTrait()
 {
 }
 
+GroupSelectableTrait::GroupSelectableTrait(GroupSelectableTrait&& handle) noexcept = default;
+
+GroupSelectableTrait& GroupSelectableTrait::operator=(const GroupSelectableTrait& handle) = default;
+
+GroupSelectableTrait& GroupSelectableTrait::operator=(GroupSelectableTrait&& handle) noexcept = default;
+
 GroupSelectableTrait GroupSelectableTrait::New()
 {
   IntrusivePtr<Internal::CoreInteractionObject> traitObject = Internal::CoreInteractionObject::New();

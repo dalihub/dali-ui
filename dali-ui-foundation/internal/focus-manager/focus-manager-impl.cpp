@@ -301,7 +301,7 @@ bool FocusManager::SetCurrentFocusView(View view, InputEvent cause)
     DALI_LOG_WARNING("Focus cannot be changed from a focus navigation callback\n");
     return false;
   }
-  return view && !view.HasAncestorBlockingFocus() && DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, "", cause});
+  return view && !view.HasAncestorBlockingFocus() && DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, "", cause, Window(), false});
 }
 
 bool FocusManager::RequestFocus(View view)
@@ -320,7 +320,7 @@ bool FocusManager::RequestFocus(View view)
   View resolved = ViewDataImpl::Get(GetImpl(view)).RequestFocus();
   if(resolved)
   {
-    return DoSetCurrentFocusView(resolved, {Ui::FocusDevice::PROGRAMMATIC, ""});
+    return DoSetCurrentFocusView(resolved, {Ui::FocusDevice::PROGRAMMATIC, "", Ui::InputEvent::Programmatic(), Window(), false});
   }
   return false;
 }
@@ -808,7 +808,7 @@ void FocusManager::OnIndependentViewVisibilityChanged(Actor actor, bool visible)
 
 bool FocusManager::MoveFocus(Window window, Ui::FocusDirection direction)
 {
-  return window && MoveFocus(direction, {Ui::FocusDevice::PROGRAMMATIC, "", Ui::InputEvent::Programmatic(), window});
+  return window && MoveFocus(direction, {Ui::FocusDevice::PROGRAMMATIC, "", Ui::InputEvent::Programmatic(), window, false});
 }
 
 void FocusManager::MoveFocusBackward(Window window)
@@ -987,7 +987,7 @@ Ui::FocusDevice FocusManager::ConvertDeviceClassToKeyboardFocusDevice(Device::Cl
 
 bool FocusManager::MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName)
 {
-  return MoveFocus(direction, {Ui::FocusDevice::PROGRAMMATIC, deviceName});
+  return MoveFocus(direction, {Ui::FocusDevice::PROGRAMMATIC, deviceName, Ui::InputEvent::Programmatic(), Window(), false});
 }
 
 bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context)
@@ -1552,7 +1552,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
   const Dali::String& keyName        = event.GetKeyName();
   const Dali::String& logicalKeyName = event.GetLogicalKey();
   Ui::FocusDevice     device         = Ui::FocusDevice::KEYBOARD;
-  FocusChangeContext  context        = {device, event.GetDeviceName(), Ui::InputEvent::New(event), Window::DownCast(sceneHolder)};
+  FocusChangeContext  context        = {device, event.GetDeviceName(), Ui::InputEvent::New(event), Window::DownCast(sceneHolder), false};
 
   if(!mConfigurationLoaded)
   {
@@ -1783,7 +1783,7 @@ void FocusManager::OnWheelEvent(Dali::Integration::SceneHolder sceneHolder, Whee
   {
     Ui::FocusDirection direction = (event.GetDelta() > 0) ? Ui::FocusDirection::CLOCKWISE : Ui::FocusDirection::COUNTER_CLOCKWISE;
     // Move the focus
-    MoveFocus(direction, {Ui::FocusDevice::WHEEL, "", Ui::InputEvent::New(event), Window::DownCast(sceneHolder)});
+    MoveFocus(direction, {Ui::FocusDevice::WHEEL, "", Ui::InputEvent::New(event), Window::DownCast(sceneHolder), false});
   }
 }
 
@@ -1858,7 +1858,7 @@ void FocusManager::OnWindowFocusChanged(Window window, bool focusIn)
     // Validate and restore directly for this platform event, while keeping the
     // public setters' restriction on application requests during navigation.
     if(currentFocusedView && (IsIndependentFocusEnabled(window) || currentFocusedView.IsVisible()) && !currentFocusedView.HasAncestorBlockingFocus() &&
-       DoSetCurrentFocusView(currentFocusedView, {Ui::FocusDevice::PROGRAMMATIC, "", Ui::InputEvent::Programmatic()}))
+       DoSetCurrentFocusView(currentFocusedView, {Ui::FocusDevice::PROGRAMMATIC, "", Ui::InputEvent::Programmatic(), Window(), false}))
     {
       RefreshFocusIndicator(currentFocusedView);
     }

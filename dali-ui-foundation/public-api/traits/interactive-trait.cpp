@@ -43,6 +43,12 @@ InteractiveTrait::~InteractiveTrait()
 {
 }
 
+InteractiveTrait::InteractiveTrait(InteractiveTrait&& handle) noexcept = default;
+
+InteractiveTrait& InteractiveTrait::operator=(const InteractiveTrait& handle) = default;
+
+InteractiveTrait& InteractiveTrait::operator=(InteractiveTrait&& handle) noexcept = default;
+
 InteractiveTrait InteractiveTrait::New()
 {
   IntrusivePtr<Internal::CoreInteractionObject> traitObject = Internal::CoreInteractionObject::New();
