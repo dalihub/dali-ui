@@ -36,7 +36,7 @@ namespace Internal
  * Frames are always ready, so the observer.FrameReady callback is never triggered;
  * the FirstFrame and NextFrame APIs will always return a texture.
  */
-class RollingAnimatedImageCache : public ImageCache, public TextureUploadObserver
+class RollingAnimatedImageCache : public ImageCache, public ImageCache::LoadResultObserver
 {
 public:
   /**
@@ -137,13 +137,6 @@ private:
   void LoadBatch(uint32_t frameIndex);
 
   /**
-   * @brief Find the matching image frame, and set it to ready
-   *
-   * @param[in] textureId texture id to be marked as ready.
-   */
-  void SetImageFrameReady(TextureManager::TextureId textureId);
-
-  /**
    * @brief Get the texture set of the front frame.
    *
    * @return the texture set of the front of Cache.
@@ -176,9 +169,10 @@ private:
 
 protected:
   /**
-   * @copydoc Ui::TextureUploadObserver::LoadComplete()
+   * @copydoc ImageCache::LoadResultObserver::OnLoadResult()
    */
-  void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
+  void OnLoadResult(LoadRequestObserver& requestObserver, uint32_t frameIndex, bool loadSuccess,
+                    TextureUploadObserver::TextureInformation textureInformation) override;
 
 private:
   /**
@@ -186,8 +180,9 @@ private:
    */
   struct ImageFrame
   {
-    uint32_t mFrameNumber = 0u;
-    bool     mReady       = false;
+    std::shared_ptr<LoadRequestObserver> mLoadObserver;
+    uint32_t                             mFrameNumber = 0u;
+    bool                                 mReady       = false;
   };
   std::vector<TextureManager::TextureId> mTextureIds;
 
@@ -199,7 +194,7 @@ private:
   std::vector<uint32_t>      mLoadWaitingQueue;
   CircularQueue<ImageFrame>  mQueue;
   // Frame requested while another frame's decode is still in flight (-1: none).
-  // Keep the in-flight entry until LoadComplete() so its observer is not removed.
+  // Keep the in-flight entry until OnLoadResult() so its observer is not removed.
   int32_t                      mPendingFrameIndex{-1};
   Dali::WrapMode::Type         mWrapModeU : 3;
   Dali::WrapMode::Type         mWrapModeV : 3;
