@@ -26,6 +26,12 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+namespace Test
+{
+void EmitGlobalTimerSignal();
+bool AreTimersRunning();
+} // namespace Test
+
 void utc_dali_animatedimageview_startup(void)
 {
   test_return_value = TET_UNDEF;
@@ -985,6 +991,99 @@ int UtcDaliAnimatedImageViewImageSequenceCacheP(void)
   application.SendNotification();
   application.Render();
   DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 3, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewDuplicateUrlsFixedCacheP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New();
+  view.SetResourceUrlList({"../samples/image-view/res/dog-anim-001.png",
+                           "../samples/image-view/res/dog-anim-001.png"});
+  view.SetBatchSize(2);
+  view.SetCacheSize(2);
+  view.SetFrameDelay(20);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.Play();
+  Test::EmitGlobalTimerSignal();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 1, TEST_LOCATION);
+  DALI_TEST_CHECK(Test::AreTimersRunning());
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewDuplicateUrlsRollingCacheP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New();
+  view.SetResourceUrlList({"../samples/image-view/res/dog-anim-001.png",
+                           "../samples/image-view/res/dog-anim-001.png",
+                           "../samples/image-view/res/dog-anim-002.png"});
+  view.SetBatchSize(2);
+  view.SetCacheSize(2);
+  view.SetFrameDelay(20);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.Play();
+  Test::EmitGlobalTimerSignal();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), 1, TEST_LOCATION);
+  DALI_TEST_CHECK(Test::AreTimersRunning());
+  END_TEST;
+}
+
+int UtcDaliAnimatedImageViewOversizedGifCacheP(void)
+{
+  UiTestApplication application;
+  AnimatedImageView view = AnimatedImageView::New("../samples/visual-base/res/animatedLoading.gif");
+  view.SetBatchSize(16);
+  view.SetCacheSize(16);
+  view.SetFrameDelay(20);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  for(int frame = 0; frame < 3; ++frame)
+  {
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
+    application.SendNotification();
+    application.Render();
+  }
+  DALI_TEST_EQUALS(view.GetTotalFrameCount(), 3, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+
+  view.Play();
+  for(int frame = 1; frame < 8; ++frame)
+  {
+    Test::EmitGlobalTimerSignal();
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(view.GetCurrentFrameNumber(), frame % 3, TEST_LOCATION);
+    DALI_TEST_CHECK(Test::AreTimersRunning());
+  }
   END_TEST;
 }
 

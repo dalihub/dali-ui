@@ -27,7 +27,7 @@ namespace Ui
 {
 namespace Internal
 {
-class FixedImageCache : public ImageCache, public TextureUploadObserver
+class FixedImageCache : public ImageCache, public ImageCache::LoadResultObserver
 {
 public:
   /**
@@ -115,15 +115,16 @@ private:
 
 protected:
   /**
-   * @copydoc Ui::TextureUploadObserver::LoadComplete()
+   * @copydoc ImageCache::LoadResultObserver::OnLoadResult()
    */
-  void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
+  void OnLoadResult(LoadRequestObserver& requestObserver, uint32_t frameIndex, bool loadSuccess, TextureUploadObserver::TextureInformation textureInformation) override;
 
 private:
-  std::vector<UrlStore>&                 mImageUrls;
-  std::vector<bool>                      mReadyFlags;
-  std::vector<TextureManager::LoadState> mLoadStates;
-  uint32_t                               mCurrentFrameIndex;
+  std::vector<UrlStore>&                            mImageUrls;
+  std::vector<bool>                                 mReadyFlags;
+  std::vector<std::shared_ptr<LoadRequestObserver>> mLoadObservers;
+  std::vector<TextureManager::LoadState>            mLoadStates;
+  uint32_t                                          mCurrentFrameIndex;
 };
 
 } // namespace Internal
