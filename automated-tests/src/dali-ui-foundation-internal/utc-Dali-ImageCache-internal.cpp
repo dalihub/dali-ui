@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
+#include <dali-ui/ui-async-task-manager.h>
 #undef protected
 #undef private
 
@@ -1002,7 +1003,7 @@ int UtcDaliSvgVisualPropertyAndCompletionMatrixP(void)
   failedProperties.Insert(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, true);
   SvgVisualPtr failedVisual = SvgVisual::New(cache, shaderFactory, Dali::Ui::Integration::VisualFactory::NONE,
                                              VisualUrl("missing-svg-visual-test.svg"), failedProperties);
-  Actor failedActor = Actor::New();
+  Actor        failedActor  = Actor::New();
   failedActor.SetProperty(Actor::Property::SIZE, Vector2(24.0f, 24.0f));
   application.GetScene().Add(failedActor);
   failedVisual->DoSetOnScene(failedActor);
@@ -1010,13 +1011,137 @@ int UtcDaliSvgVisualPropertyAndCompletionMatrixP(void)
   END_TEST;
 }
 
+int UtcDaliSvgVisualRasterizationFailureBeforeLoadCompletionP(void)
+{
+  UiTestApplication application;
+
+  struct TaskCaptureGuard
+  {
+    TaskCaptureGuard()
+    {
+      Test::AsyncTaskManager::SetTaskCaptureEnabled(true);
+    }
+
+    ~TaskCaptureGuard()
+    {
+      Test::AsyncTaskManager::SetTaskCaptureEnabled(false);
+      static_cast<void>(Test::AsyncTaskManager::TakeCapturedTasks());
+    }
+  } taskCaptureGuard;
+
+  auto  factory       = Dali::Ui::Integration::VisualFactory::Get();
+  auto& factoryImpl   = Dali::Ui::GetImplementation(factory);
+  auto& cache         = factoryImpl.GetFactoryCache();
+  auto& shaderFactory = factoryImpl.GetImageVisualShaderFactory();
+  using Dali::Ui::Internal::SvgLoader;
+  using Dali::Ui::Internal::SvgVisual;
+  using Dali::Ui::Internal::SvgVisualPtr;
+  using Dali::Ui::Internal::VisualUrl;
+
+  SvgVisualPtr visual        = SvgVisual::New(cache, shaderFactory, Dali::Ui::Integration::VisualFactory::NONE,
+                                              VisualUrl("svg-rasterization-order-test.svg"), ImageDimensions());
+  auto         capturedTasks = Test::AsyncTaskManager::TakeCapturedTasks();
+  DALI_TEST_EQUALS(capturedTasks.size(), 1u, TEST_LOCATION);
+
+  Actor actor = Actor::New();
+  actor.SetProperty(Actor::Property::SIZE, Vector2(48.0f, 32.0f));
+  application.GetScene().Add(actor);
+  visual->SetOnScene(actor);
+
+  visual->RasterizeComplete(SvgLoader::INVALID_SVG_RASTERIZE_ID, TextureSet());
+  DALI_TEST_CHECK(visual->IsOnScene());
+  DALI_TEST_CHECK(visual->mRasterizeCompleted);
+  DALI_TEST_EQUALS(visual->GetResourceStatus(), Dali::Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+
+  Dali::VectorImageRenderer vectorImageRenderer = Dali::VectorImageRenderer::New();
+  constexpr char            svgSource[]         = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1\" height=\"1\"><rect width=\"1\" height=\"1\"/></svg>";
+  Dali::Vector<uint8_t>     svgData;
+  for(const char* character = svgSource; *character != '\0'; ++character)
+  {
+    svgData.PushBack(static_cast<uint8_t>(*character));
+  }
+  svgData.PushBack(0u);
+  DALI_TEST_CHECK(vectorImageRenderer.Load(svgData));
+  visual->LoadComplete(visual->mSvgLoadId, vectorImageRenderer);
+  DALI_TEST_EQUALS(visual->GetResourceStatus(), Dali::Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
+  DALI_TEST_CHECK(!visual->mRasterizeSucceeded);
+
+  visual->SetOffScene(actor);
+  visual.Reset();
+  application.SendNotification();
+  END_TEST;
+}
+
+int UtcDaliSvgVisualRasterizationSuccessBeforeLoadCompletionP(void)
+{
+  UiTestApplication application;
+
+  struct TaskCaptureGuard
+  {
+    TaskCaptureGuard()
+    {
+      Test::AsyncTaskManager::SetTaskCaptureEnabled(true);
+    }
+
+    ~TaskCaptureGuard()
+    {
+      Test::AsyncTaskManager::SetTaskCaptureEnabled(false);
+      static_cast<void>(Test::AsyncTaskManager::TakeCapturedTasks());
+    }
+  } taskCaptureGuard;
+
+  auto  factory       = Dali::Ui::Integration::VisualFactory::Get();
+  auto& factoryImpl   = Dali::Ui::GetImplementation(factory);
+  auto& cache         = factoryImpl.GetFactoryCache();
+  auto& shaderFactory = factoryImpl.GetImageVisualShaderFactory();
+  using Dali::Ui::Internal::SvgLoader;
+  using Dali::Ui::Internal::SvgVisual;
+  using Dali::Ui::Internal::SvgVisualPtr;
+  using Dali::Ui::Internal::VisualUrl;
+
+  SvgVisualPtr visual        = SvgVisual::New(cache, shaderFactory, Dali::Ui::Integration::VisualFactory::NONE,
+                                              VisualUrl("svg-rasterization-success-order-test.svg"), ImageDimensions());
+  auto         capturedTasks = Test::AsyncTaskManager::TakeCapturedTasks();
+  DALI_TEST_EQUALS(capturedTasks.size(), 1u, TEST_LOCATION);
+
+  Actor actor = Actor::New();
+  actor.SetProperty(Actor::Property::SIZE, Vector2(48.0f, 32.0f));
+  application.GetScene().Add(actor);
+  visual->SetOnScene(actor);
+
+  TextureSet textureSet = TextureSet::New();
+  DALI_TEST_CHECK(textureSet);
+  visual->RasterizeComplete(SvgLoader::INVALID_SVG_RASTERIZE_ID, textureSet);
+  DALI_TEST_CHECK(visual->IsOnScene());
+  DALI_TEST_CHECK(visual->mRasterizeCompleted);
+  DALI_TEST_CHECK(visual->mRasterizeSucceeded);
+  DALI_TEST_EQUALS(visual->GetResourceStatus(), Dali::Ui::Visual::ResourceStatus::PREPARING, TEST_LOCATION);
+
+  Dali::VectorImageRenderer vectorImageRenderer = Dali::VectorImageRenderer::New();
+  constexpr char            svgSource[]         = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1\" height=\"1\"><rect width=\"1\" height=\"1\"/></svg>";
+  Dali::Vector<uint8_t>     svgData;
+  for(const char* character = svgSource; *character != '\0'; ++character)
+  {
+    svgData.PushBack(static_cast<uint8_t>(*character));
+  }
+  svgData.PushBack(0u);
+  DALI_TEST_CHECK(vectorImageRenderer.Load(svgData));
+  visual->LoadComplete(visual->mSvgLoadId, vectorImageRenderer);
+  DALI_TEST_EQUALS(visual->GetResourceStatus(), Dali::Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+
+  visual->SetOffScene(actor);
+  visual.Reset();
+  application.SendNotification();
+  END_TEST;
+}
+
 int UtcDaliNPatchVisualBorderAndSceneMatrixP(void)
 {
   UiTestApplication application;
-  auto factory = Dali::Ui::Integration::VisualFactory::Get();
-  auto& factoryImpl = Dali::Ui::GetImplementation(factory);
-  auto& cache = factoryImpl.GetFactoryCache();
-  auto& shaderFactory = factoryImpl.GetImageVisualShaderFactory();
+  auto              factory       = Dali::Ui::Integration::VisualFactory::Get();
+  auto&             factoryImpl   = Dali::Ui::GetImplementation(factory);
+  auto&             cache         = factoryImpl.GetFactoryCache();
+  auto&             shaderFactory = factoryImpl.GetImageVisualShaderFactory();
   using Dali::Ui::Internal::NPatchVisual;
   using Dali::Ui::Internal::NPatchVisualPtr;
   using Dali::Ui::Internal::VisualUrl;

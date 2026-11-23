@@ -224,6 +224,7 @@ private:
 
   bool mLoadCompleted : 1;
   bool mRasterizeCompleted : 1;
+  bool mRasterizeSucceeded : 1;
   bool mLoadFailed : 1;
   bool mRasterizeForcibly : 1;
 };
