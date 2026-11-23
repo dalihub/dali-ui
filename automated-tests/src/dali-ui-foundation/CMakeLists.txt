@@ -73,6 +73,7 @@ SET(TC_SOURCES
         utc-Dali-ColorVisual.cpp
         utc-Dali-TextVisual.cpp
         utc-Dali-VisualBase.cpp
+        utc-Dali-VisualCacheHitDetach.cpp
         utc-Dali-WebView.cpp
         utc-Dali-WidgetView.cpp
         utc-Dali-CanvasView.cpp

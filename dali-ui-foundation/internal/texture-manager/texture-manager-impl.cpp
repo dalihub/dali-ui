@@ -262,10 +262,7 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
   }
   else
   {
-    textureId = RequestLoadInternal(url, alphaMaskId, textureId, contentScaleFactor, desiredSize,
-                                    samplingMode, cropToMask, TextureManager::StorageType::UPLOAD_TO_TEXTURE,
-                                    textureObserver, true, reloadPolicy, preMultiplyOnLoad,
-                                    animatedImageLoading, frameIndex, false);
+    RequestLoadInternal(url, alphaMaskId, textureId, textureId, contentScaleFactor, desiredSize, samplingMode, cropToMask, TextureManager::StorageType::UPLOAD_TO_TEXTURE, textureObserver, true, reloadPolicy, preMultiplyOnLoad, animatedImageLoading, frameIndex, false);
 
     TextureManager::LoadState loadState = mTextureCacheManager.GetTextureState(textureId);
     if(loadState == TextureManager::LoadState::UPLOADED)
@@ -309,10 +306,8 @@ PixelBuffer TextureManager::LoadPixelBuffer(
   }
   else
   {
-    RequestLoadInternal(url, INVALID_TEXTURE_ID, INVALID_TEXTURE_ID, 1.0f, desiredSize, samplingMode,
-                        false, TextureManager::StorageType::RETURN_PIXEL_BUFFER, textureObserver, orientationCorrection,
-                        TextureManager::ReloadPolicy::FORCED, preMultiplyOnLoad, Dali::AnimatedImageLoading(), 0u,
-                        false);
+    TextureId textureId = INVALID_TEXTURE_ID;
+    RequestLoadInternal(url, INVALID_TEXTURE_ID, INVALID_TEXTURE_ID, textureId, 1.0f, desiredSize, samplingMode, false, TextureManager::StorageType::RETURN_PIXEL_BUFFER, textureObserver, orientationCorrection, TextureManager::ReloadPolicy::FORCED, preMultiplyOnLoad, Dali::AnimatedImageLoading(), 0u, false);
   }
 
   return pixelBuffer;
@@ -350,9 +345,20 @@ TextureSet TextureManager::LoadTexture(const VisualUrl& url, const Dali::ImageDi
     }
   }
 
-  textureId =
-    RequestLoad(url, alphaMaskId, textureId, contentScaleFactor, desiredSize, samplingMode, cropToMask,
-                textureObserver, orientationCorrection, reloadPolicy, preMultiplyOnLoad, synchronousLoading);
+  RequestLoad(
+    url,
+    alphaMaskId,
+    textureId,
+    textureId,
+    contentScaleFactor,
+    desiredSize,
+    samplingMode,
+    cropToMask,
+    textureObserver,
+    orientationCorrection,
+    reloadPolicy,
+    preMultiplyOnLoad,
+    synchronousLoading);
 
   TextureManager::LoadState loadState = mTextureCacheManager.GetTextureState(textureId);
   if(loadState == TextureManager::LoadState::UPLOADED)
@@ -383,22 +389,27 @@ TextureManager::TextureId TextureManager::RequestLoad(const VisualUrl& url, cons
                                                       const TextureManager::MultiplyOnLoad preMultiplyOnLoad,
                                                       const bool                           synchronousLoading)
 {
-  return RequestLoadInternal(url, INVALID_TEXTURE_ID, INVALID_TEXTURE_ID, 1.0f, desiredSize, samplingMode,
-                             false, TextureManager::StorageType::UPLOAD_TO_TEXTURE, observer, orientationCorrection,
-                             reloadPolicy, preMultiplyOnLoad, Dali::AnimatedImageLoading(), 0u, synchronousLoading);
+  TextureId textureId = INVALID_TEXTURE_ID;
+  RequestLoadInternal(url, INVALID_TEXTURE_ID, INVALID_TEXTURE_ID, textureId, 1.0f, desiredSize, samplingMode, false, TextureManager::StorageType::UPLOAD_TO_TEXTURE, observer, orientationCorrection, reloadPolicy, preMultiplyOnLoad, Dali::AnimatedImageLoading(), 0u, synchronousLoading);
+  return textureId;
 }
 
-TextureManager::TextureId TextureManager::RequestLoad(
-  const VisualUrl& url, const TextureManager::TextureId maskTextureId,
-  const TextureManager::TextureId previousTextureId, const float contentScale,
-  const Dali::ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode, const bool cropToMask,
-  TextureUploadObserver* observer, const bool orientationCorrection, const TextureManager::ReloadPolicy reloadPolicy,
-  const TextureManager::MultiplyOnLoad preMultiplyOnLoad, const bool synchronousLoading)
+void TextureManager::RequestLoad(
+  const VisualUrl&                     url,
+  const TextureManager::TextureId      maskTextureId,
+  const TextureManager::TextureId      previousTextureId,
+  TextureManager::TextureId&           textureId,
+  const float                          contentScale,
+  const Dali::ImageDimensions&         desiredSize,
+  const Dali::SamplingMode::Type       samplingMode,
+  const bool                           cropToMask,
+  TextureUploadObserver*               observer,
+  const bool                           orientationCorrection,
+  const TextureManager::ReloadPolicy   reloadPolicy,
+  const TextureManager::MultiplyOnLoad preMultiplyOnLoad,
+  const bool                           synchronousLoading)
 {
-  return RequestLoadInternal(url, maskTextureId, previousTextureId, contentScale, desiredSize,
-                             samplingMode, cropToMask, TextureManager::StorageType::UPLOAD_TO_TEXTURE, observer,
-                             orientationCorrection, reloadPolicy, preMultiplyOnLoad, Dali::AnimatedImageLoading(), 0u,
-                             synchronousLoading);
+  RequestLoadInternal(url, maskTextureId, previousTextureId, textureId, contentScale, desiredSize, samplingMode, cropToMask, TextureManager::StorageType::UPLOAD_TO_TEXTURE, observer, orientationCorrection, reloadPolicy, preMultiplyOnLoad, Dali::AnimatedImageLoading(), 0u, synchronousLoading);
 }
 
 TextureManager::TextureId TextureManager::RequestMaskLoad(const VisualUrl&                  maskUrl,
@@ -407,21 +418,29 @@ TextureManager::TextureId TextureManager::RequestMaskLoad(const VisualUrl&      
 {
   // Use the normal load procedure to get the alpha mask.
   // TODO : Is their any case to pre multiply required case?
-  auto preMultiply = TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
-  return RequestLoadInternal(maskUrl, INVALID_TEXTURE_ID, INVALID_TEXTURE_ID, 1.0f, ImageDimensions(),
-                             Dali::SamplingMode::NO_FILTER, false, storageType, NULL,
-                             true, TextureManager::ReloadPolicy::CACHED, preMultiply, Dali::AnimatedImageLoading(), 0u,
-                             synchronousLoading);
+  auto      preMultiply = TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
+  TextureId textureId   = INVALID_TEXTURE_ID;
+  RequestLoadInternal(maskUrl, INVALID_TEXTURE_ID, INVALID_TEXTURE_ID, textureId, 1.0f, ImageDimensions(), Dali::SamplingMode::NO_FILTER, false, storageType, NULL, true, TextureManager::ReloadPolicy::CACHED, preMultiply, Dali::AnimatedImageLoading(), 0u, synchronousLoading);
+  return textureId;
 }
 
-TextureManager::TextureId TextureManager::RequestLoadInternal(
-  const VisualUrl& url, const TextureManager::TextureId maskTextureId,
-  const TextureManager::TextureId previousTextureId, const float contentScale,
-  const Dali::ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode,
-  const bool cropToMask, const TextureManager::StorageType storageType,
-  TextureUploadObserver* observer, const bool orientationCorrection, const TextureManager::ReloadPolicy reloadPolicy,
-  const TextureManager::MultiplyOnLoad preMultiplyOnLoad, Dali::AnimatedImageLoading animatedImageLoading,
-  const uint32_t frameIndex, const bool synchronousLoading)
+void TextureManager::RequestLoadInternal(
+  const VisualUrl&                     url,
+  const TextureManager::TextureId      maskTextureId,
+  const TextureManager::TextureId      previousTextureId,
+  TextureManager::TextureId&           textureId,
+  const float                          contentScale,
+  const Dali::ImageDimensions&         desiredSize,
+  const Dali::SamplingMode::Type       samplingMode,
+  const bool                           cropToMask,
+  const TextureManager::StorageType    storageType,
+  TextureUploadObserver*               observer,
+  const bool                           orientationCorrection,
+  const TextureManager::ReloadPolicy   reloadPolicy,
+  const TextureManager::MultiplyOnLoad preMultiplyOnLoad,
+  Dali::AnimatedImageLoading           animatedImageLoading,
+  const uint32_t                       frameIndex,
+  const bool                           synchronousLoading)
 {
   TextureHash       textureHash   = INITIAL_HASH_NUMBER;
   TextureCacheIndex cacheIndex    = INVALID_CACHE_INDEX;
@@ -439,7 +458,7 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
       orientationCorrection, preMultiplyOnLoad, (animatedImageLoading) ? true : false, frameIndex);
   }
 
-  TextureManager::TextureId textureId = INVALID_TEXTURE_ID;
+  textureId = INVALID_TEXTURE_ID;
   // Check if the requested Texture exists in the cache.
   if(cacheIndex != INVALID_CACHE_INDEX)
   {
@@ -614,7 +633,8 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
         {
           // If pixelBuffer loading is failed in synchronously, call RequestRemove() method.
           RequestRemove(textureId, nullptr);
-          return INVALID_TEXTURE_ID;
+          textureId = INVALID_TEXTURE_ID;
+          return;
         }
 
         if(storageType == TextureManager::StorageType::KEEP_PIXEL_BUFFER) // For the mask image loading.
@@ -655,8 +675,6 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
       }
     }
   }
-
-  return textureId;
 }
 
 void TextureManager::RequestRemove(const TextureManager::TextureId textureId, TextureUploadObserver* observer, bool keepUnusedTexture)
@@ -948,6 +966,13 @@ void TextureManager::ProcessLoadQueue()
 {
   for(auto&& element : mLoadQueue)
   {
+    if(element.mObserver)
+    {
+      DALI_LOG_INFO(gTextureManagerLogFilter, Debug::Verbose, "  Disconnect DestructionSignal to observer:%p\n",
+                    element.mObserver);
+      element.mObserver->DestructionSignal().Disconnect(this, &TextureManager::ObserverDestroyed);
+    }
+
     if(element.mTextureId == INVALID_TEXTURE_ID)
     {
       continue;
@@ -970,10 +995,6 @@ void TextureManager::ProcessLoadQueue()
       {
         if(element.mObserver)
         {
-          DALI_LOG_INFO(gTextureManagerLogFilter, Debug::Verbose, "  Disconnect DestructionSignal to observer:%p\n",
-                        element.mObserver);
-          element.mObserver->DestructionSignal().Disconnect(this, &TextureManager::ObserverDestroyed);
-
           EmitLoadComplete(element.mObserver, textureInfo,
                            (textureInfo.loadState != TextureManager::LoadState::LOAD_FAILED));
         }

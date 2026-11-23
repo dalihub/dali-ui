@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/image-cache.h>
+#include <memory>
 
 namespace DALI_NAMESPACE
 {
@@ -41,14 +42,21 @@ public:
    * @param[in] batchSize         The size of a batch to load
    * @param[in] interval          Time interval between each frame
    * @param[in] preMultiplyOnLoad The flag if image's color should be multiplied by it's alpha
+   * @param[in] reloadPolicy      Whether the first time of each frame load should reuse cache or force reload.
    *
    * This will start loading textures immediately, according to the
    * batch and cache sizes. The cache is as large as the number of urls.
    */
-  FixedImageCache(TextureManager& textureManager, ImageDimensions size,
-                  Dali::SamplingMode::Type samplingMode, UrlList& urlList,
-                  TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer,
-                  uint32_t batchSize, uint32_t interval, bool preMultiplyOnLoad);
+  FixedImageCache(TextureManager&                    textureManager,
+                  ImageDimensions                    size,
+                  Dali::SamplingMode::Type           samplingMode,
+                  const ImageCache::UrlList&         urlList,
+                  TextureManager::MaskingDataPointer maskingData,
+                  ImageCache::FrameReadyObserver&    observer,
+                  uint32_t                           batchSize,
+                  uint32_t                           interval,
+                  bool                               preMultiplyOnLoad,
+                  TextureManager::ReloadPolicy       reloadPolicy = TextureManager::ReloadPolicy::CACHED);
 
   ~FixedImageCache() override;
 
@@ -120,11 +128,15 @@ protected:
   void OnLoadResult(LoadRequestObserver& requestObserver, uint32_t frameIndex, bool loadSuccess, TextureUploadObserver::TextureInformation textureInformation) override;
 
 private:
-  std::vector<UrlStore>&                            mImageUrls;
+  const ImageCache::UrlList&                        mImageUrls;
+  std::vector<TextureManager::TextureId>            mTextureIds;
   std::vector<bool>                                 mReadyFlags;
   std::vector<std::shared_ptr<LoadRequestObserver>> mLoadObservers;
   std::vector<TextureManager::LoadState>            mLoadStates;
   uint32_t                                          mCurrentFrameIndex;
+  bool                                              mBatchCancelled : 1;
+
+  std::unique_ptr<std::vector<TextureManager::ReloadPolicy>> mReloadPolicies; // allocate only if mReloadPolicy is not CACHED
 };
 
 } // namespace Internal

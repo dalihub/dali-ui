@@ -30,7 +30,7 @@ namespace Ui
 {
 namespace Internal
 {
-class ImageCache
+class ImageCache : public std::enable_shared_from_this<ImageCache>
 {
 public:
   class LoadRequestObserver;
@@ -62,9 +62,10 @@ public:
     /**
      * @brief Constructor.
      * @param[in] resultObserver The cache that receives the load result.
+     * @param[in] cache The cache to keep alive while forwarding the result.
      * @param[in] frameIndex The requested frame index.
      */
-    LoadRequestObserver(LoadResultObserver& resultObserver, uint32_t frameIndex);
+    LoadRequestObserver(LoadResultObserver& resultObserver, std::weak_ptr<ImageCache> cache, uint32_t frameIndex);
 
     /**
      * @brief Forwards the load result while keeping this observer alive until the callback returns.
@@ -74,8 +75,9 @@ public:
     void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
 
   private:
-    LoadResultObserver& mResultObserver;
-    uint32_t            mFrameIndex;
+    LoadResultObserver&       mResultObserver;
+    std::weak_ptr<ImageCache> mCache;
+    uint32_t                  mFrameIndex;
   };
 
   /**
@@ -93,16 +95,10 @@ public:
     virtual void FrameReady(TextureSet textureSet, uint32_t interval, bool preMultiplied) = 0;
   };
 
-  struct UrlStore
-  {
-    TextureManager::TextureId mTextureId = TextureManager::INVALID_TEXTURE_ID;
-    VisualUrl                 mUrl;
-  };
-
   /**
    * List of URLs
    */
-  typedef std::vector<UrlStore> UrlList;
+  typedef std::vector<VisualUrl> UrlList;
 
 public:
   /**
@@ -110,8 +106,8 @@ public:
    * @param[in] textureManager    The texture manager
    * @param[in] size              The width and height to fit the loaded image to.
    * @param[in] samplingMode      The SamplingMode of the resource to load
+   * @param[in] maskingData       Masking data whose ownership is transferred to this cache.
    * @param[in] observer          FrameReady observer
-   * @param[in] maskingData       Masking data to be applied.
    * @param[in] batchSize         The size of a batch to load
    * @param[in] interval          Time interval(ms) between each frame
    * @param[in] preMultiplyOnLoad The flag if image's color should be multiplied by it's alpha
@@ -120,7 +116,7 @@ public:
    * batch and cache sizes. The cache is as large as the number of urls.
    */
   ImageCache(TextureManager& textureManager, ImageDimensions size,
-             Dali::SamplingMode::Type samplingMode, TextureManager::MaskingDataPointer& maskingData,
+             Dali::SamplingMode::Type samplingMode, TextureManager::MaskingDataPointer maskingData,
              ImageCache::FrameReadyObserver& observer, uint32_t batchSize, uint32_t interval, bool preMultiplyOnLoad);
 
   virtual ~ImageCache();
@@ -184,19 +180,43 @@ public:
    */
   virtual void SetDesiredSize(Dali::ImageDimensions desiredSize);
 
-private:
-  void AllocateMaskData();
+public:
+  /**
+   * @brief Releases the mask URL external-resource reference and clears the owner.
+   * let we make it as static so animated-image-visual could call this helper function too.
+   */
+  static void ReleaseMaskingData(TextureManager& textureManager, TextureManager::MaskingDataPointer& maskingData);
+
+  /**
+   * @brief Get l-value of masking data.
+   */
+  TextureManager::MaskingDataPointer& GetMaskingData();
+
+  /**
+   * @brief Get const l-value of masking data.
+   */
+  const TextureManager::MaskingDataPointer& GetMaskingData() const;
+
+  /**
+   * @brief Transfers masking-data ownership from this cache.
+   */
+  TextureManager::MaskingDataPointer ReleaseMaskingDataOwnership();
+
+  /**
+   * @brief Transfers masking-data ownership to this cache.
+   */
+  void TakeMaskingDataOwnership(TextureManager::MaskingDataPointer maskingData);
 
 protected:
-  TextureManager&                     mTextureManager;
-  FrameReadyObserver&                 mObserver;
-  TextureManager::MaskingDataPointer& mMaskingData;
-  Dali::ImageDimensions               mDesiredSize;
-  uint32_t                            mBatchSize;
-  uint32_t                            mInterval;
-  TextureManager::LoadState           mLoadState;
-  Dali::SamplingMode::Type            mSamplingMode : 5;
-  bool                                mPreMultiplyOnLoad : 1;
+  TextureManager&                    mTextureManager;
+  FrameReadyObserver&                mObserver;
+  TextureManager::MaskingDataPointer mMaskingData;
+  Dali::ImageDimensions              mDesiredSize;
+  uint32_t                           mBatchSize;
+  uint32_t                           mInterval;
+  TextureManager::LoadState          mLoadState;
+  Dali::SamplingMode::Type           mSamplingMode : 5;
+  bool                               mPreMultiplyOnLoad : 1;
 };
 
 } // namespace Internal

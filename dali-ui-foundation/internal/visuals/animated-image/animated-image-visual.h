@@ -27,6 +27,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/weak-handle.h>
+#include <memory>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
@@ -270,6 +271,16 @@ private:
   void AllocateMaskData();
 
   /**
+   * @brief Get valid masking data pointer reference.
+   */
+  TextureManager::MaskingDataPointer& GetMaskingDataOwner();
+
+  /**
+   * @brief Get valid masking data pointer reference.
+   */
+  const TextureManager::MaskingDataPointer& GetMaskingDataOwner() const;
+
+  /**
    * @brief Check whether the mask texture is loaded or not.
    * If MaskingPolicy is ON_LOADING and mask texture is failed to load, update shader.
    * @note Should call at SetTexturesToRenderer() only.
@@ -335,19 +346,19 @@ private:
   uint32_t                   mCurrentFrameIndex;
 
   // Variables for Multi-Image player
-  ImageCache::UrlList* mImageUrls;
-  ImageCache*          mImageCache;
-  uint16_t             mCacheSize;
-  uint16_t             mBatchSize;
-  uint16_t             mFrameDelay;
-  int16_t              mLoopCount;
-  int16_t              mCurrentLoopIndex;
+  ImageCache::UrlList*        mImageUrls;
+  std::shared_ptr<ImageCache> mImageCache;
+  uint16_t                    mCacheSize;
+  uint16_t                    mBatchSize;
+  uint16_t                    mFrameDelay;
+  int16_t                     mLoopCount;
+  int16_t                     mCurrentLoopIndex;
 
   // Variables for image visual properties.
   Dali::Ui::Image::LoadPolicy        mLoadPolicy;
   Dali::Ui::Image::ReleasePolicy     mReleasePolicy;
   Dali::Ui::Image::FittingMode       mFittingMode; ///< How the contents should fit the view
-  TextureManager::MaskingDataPointer mMaskingData;
+  TextureManager::MaskingDataPointer mPendingMaskingData;
   Dali::ImageDimensions              mDesiredSize;
   Dali::ImageDimensions              mLastRequiredSize;
   float                              mFrameSpeedFactor;
