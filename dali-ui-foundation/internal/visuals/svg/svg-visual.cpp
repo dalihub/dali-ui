@@ -123,6 +123,7 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
   mFittingMode(Ui::Image::FittingMode::FILL),
   mLoadCompleted(false),
   mRasterizeCompleted(false),
+  mRasterizeSucceeded(false),
   mLoadFailed(false),
   mRasterizeForcibly(true)
 {
@@ -459,6 +460,7 @@ void SvgVisual::AddRasterizationTask(const Dali::ImageDimensions& size)
     IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
 
   mRasterizeCompleted = false;
+  mRasterizeSucceeded = false;
   mSvgRasterizeId     = mSvgLoader.Rasterize(mSvgLoadId, size.GetWidth(), size.GetHeight(), this, synchronousRasterize);
 }
 
@@ -483,7 +485,7 @@ void SvgVisual::LoadComplete(int32_t loadId, Dali::VectorImageRenderer vectorIma
     // In this case, we should send resource ready here.
     if(DALI_UNLIKELY(mRasterizeCompleted && IsOnScene()))
     {
-      EmitResourceReady(Ui::Visual::ResourceStatus::READY);
+      EmitResourceReady(mRasterizeSucceeded ? Ui::Visual::ResourceStatus::READY : Ui::Visual::ResourceStatus::FAILED);
     }
   }
   else if(!mLoadFailed)
@@ -511,6 +513,7 @@ void SvgVisual::RasterizeComplete(int32_t rasterizeId, Dali::TextureSet textureS
   mSvgRasterizeId = rasterizeId;
 
   mRasterizeCompleted = true;
+  mRasterizeSucceeded = static_cast<bool>(textureSet);
 
   if(DALI_LIKELY(textureSet))
   {
