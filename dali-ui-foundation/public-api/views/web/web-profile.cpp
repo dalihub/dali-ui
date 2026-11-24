@@ -106,6 +106,16 @@ bool WebProfile::DeleteAllWebIndexedDatabase()
   return Integration::GetImpl(*this).DeleteAllWebIndexedDatabase();
 }
 
+bool WebProfile::SetMaxRefreshRate(int32_t rate)
+{
+  return Integration::GetImpl(*this).SetMaxRefreshRate(rate);
+}
+
+void WebProfile::RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes)
+{
+  Integration::GetImpl(*this).RegisterUrlSchemesAsCorsEnabled(schemes);
+}
+
 WebProfile::WebProfile(Integration::WebProfileImpl& implementation)
 : BaseHandle(&implementation)
 {
