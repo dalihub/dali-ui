@@ -391,6 +391,13 @@ class MockConfiguredWebEngineContext : public MockWebEngineContext, public Dali:
 public:
   Test::WebEngine::ContextConfigurationState configuration;
 
+  bool SetMaxRefreshRate(int32_t rate) override
+  {
+    ++configuration.calls;
+    configuration.refreshRate = rate;
+    return configuration.result;
+  }
+
   bool SetCacheEnabled(bool enabled) override
   {
     ++configuration.calls;
@@ -3786,19 +3793,6 @@ WebEngineArgumentsResult WebEngineRuntime::SetArguments(uint32_t argc, char** ar
   }
   state.arguments = std::move(values);
   return WebEngineArgumentsResult::SUCCESS;
-}
-
-void WebEngineRuntime::RegisterUrlSchemesAsCorsEnabled(const std::vector<std::string>& schemes)
-{
-  if(InitializeMockRuntime())
-  {
-    Test::WebEngine::GetRuntimeState().schemes = schemes;
-  }
-}
-
-bool WebEngineRuntime::SetMaxRefreshRate(int32_t rate)
-{
-  return rate >= 1 && rate <= 60 && InitializeMockRuntime();
 }
 
 WebEngineProfilePtr WebEngineRuntime::GetDefaultProfile()
