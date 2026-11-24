@@ -701,17 +701,13 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Validate Fonts.
   ////////////////////////////////////////////////////////////////////////////////
 
-  // Text fit and fit candidates are already converted to effective scaled font sizes
-  // before CheckForTextFit(). Avoid applying effectiveTextScale again here.
-  float effectiveTextScale = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled) ? 1.0f : parameters.effectiveTextScale;
-  float scale              = effectiveTextScale * parameters.renderScale;
-
-  TextAbstraction::PointSize26Dot6 defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(TextAbstraction::FontClient::DEFAULT_POINT_SIZE * scale);
-
-  // Get the number of points per one unit of point-size
-  uint32_t numberOfPointsPerOneUnitOfPointSize = mModule.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
-
-  defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * scale * numberOfPointsPerOneUnitOfPointSize);
+  // Fit selects the effective default size. Authored span sizes still need
+  // effective scale, independently of that selection and raster quality.
+  const float defaultFontScale = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled) ? 1.0f : parameters.effectiveTextScale;
+  const float defaultScale     = defaultFontScale * parameters.renderScale;
+  const float runScale         = parameters.effectiveTextScale * parameters.renderScale;
+  const auto  pointsPerUnit    = mModule.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
+  const auto  defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * defaultScale * pointsPerUnit);
 
   Property::Map* variationsMapPtr = mTextModel->mLogicalModel->GetVariationsMap();
 
@@ -725,7 +721,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                      scripts,
                                      defaultFontDescription,
                                      defaultPointSize,
-                                     scale,
+                                     runScale,
                                      0u,
                                      numberOfCharacters,
                                      validFonts,
@@ -738,9 +734,9 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     // a scaled FontId.
     if(UseLogicalReplacementAutoLineMetrics(parameters, true))
     {
-      const float                            logicalFontScale = effectiveTextScale;
+      const float                            logicalFontScale = parameters.effectiveTextScale;
       const TextAbstraction::PointSize26Dot6 logicalDefaultPointSize =
-        static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * logicalFontScale * numberOfPointsPerOneUnitOfPointSize);
+        static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * defaultFontScale * pointsPerUnit);
       ValidateFontsForProcessingSource(mModule.GetMultilanguageSupport(),
                                        mModule.GetFontClient(),
                                        processingSource,
@@ -764,7 +760,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   {
     mModule.GetMultilanguageSupport().ValidateFonts(mModule.GetFontClient(), utf32Characters, scripts,
                                                     fontDescriptionRuns, defaultFontDescription, defaultPointSize,
-                                                    scale, 0u, numberOfCharacters, validFonts, variationsMapPtr);
+                                                    runScale, 0u, numberOfCharacters, validFonts, variationsMapPtr);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -1183,7 +1179,10 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
 
   // Set minimun line size, line spacing, relative line size.
   mLayoutEngine.SetFontSizeScale(parameters.effectiveTextScale);
-  mLayoutEngine.SetDefaultLineSize(parameters.minLineSize);
+  // Candidates keep authored line height in the completion snapshot. Apply
+  // raster quality to their metrics here, just as SetupRenderScale does for
+  // ordinary line height, without changing the candidate selection order.
+  mLayoutEngine.SetDefaultLineSize(parameters.minLineSize * (parameters.isTextFitCandidatesEnabled ? parameters.renderScale : 1.f));
   mLayoutEngine.SetDefaultLineSpacing(0.0f);
   mLayoutEngine.SetRelativeLineSize(parameters.relativeLineSize);
 
@@ -2049,9 +2048,9 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
     parameters.renderScaleHeight = parameters.textHeight;
     parameters.textWidth         = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
     parameters.textHeight        = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
-    parameters.minLineSize       = parameters.minLineSize * parameters.renderScale;
-    parameters.marqueeGap        = static_cast<int>(parameters.marqueeGap * parameters.renderScale);
-    cachedNaturalSize            = false;
+    parameters.minLineSize *= parameters.isTextFitCandidatesEnabled ? 1.f : parameters.renderScale;
+    parameters.marqueeGap = static_cast<int>(parameters.marqueeGap * parameters.renderScale);
+    cachedNaturalSize     = false;
     return Size::ZERO;
   }
 
