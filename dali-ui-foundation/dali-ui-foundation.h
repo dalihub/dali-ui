@@ -33,8 +33,6 @@
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
@@ -93,7 +91,6 @@
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
-#include <dali-ui-foundation/public-api/image-loader/sync-image-loader.h>
 
 #include <dali-ui-foundation/public-api/render-effects/background-blur-effect.h>
 #include <dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h>

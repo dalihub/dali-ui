@@ -578,11 +578,6 @@ void LottieAnimationViewImpl::JumpToFrame(int frame)
   }
 }
 
-void LottieAnimationViewImpl::SetMinMaxFrame(int minFrame, int maxFrame)
-{
-  SetPlaybackRange(minFrame, maxFrame);
-}
-
 void LottieAnimationViewImpl::SetPlaybackRange(int startFrame, int endFrame)
 {
   if(mPlayRangeType == PlayRangeType::FRAME && mMinFrame == startFrame && mMaxFrame == endFrame)
@@ -599,11 +594,6 @@ void LottieAnimationViewImpl::SetPlaybackRange(int startFrame, int endFrame)
   UpdateVisualProperty(Ui::Integration::ImageVisual::Property::PLAY_RANGE, range);
 }
 
-void LottieAnimationViewImpl::GetMinMaxFrame(int& minFrame, int& maxFrame) const
-{
-  GetPlaybackRange(minFrame, maxFrame);
-}
-
 void LottieAnimationViewImpl::GetPlaybackRange(int& startFrame, int& endFrame) const
 {
   if(mPlayRangeType == PlayRangeType::FRAME)
@@ -615,11 +605,6 @@ void LottieAnimationViewImpl::GetPlaybackRange(int& startFrame, int& endFrame) c
 
   startFrame = 0;
   endFrame   = GetTotalFrameCount();
-}
-
-void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
-{
-  SetPlaybackRangeByMarker(minMarker, maxMarker);
 }
 
 void LottieAnimationViewImpl::SetPlaybackRangeByMarker(const Dali::String& startMarker, const Dali::String& endMarker)

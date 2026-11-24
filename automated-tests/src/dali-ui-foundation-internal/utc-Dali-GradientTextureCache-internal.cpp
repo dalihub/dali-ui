@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/visuals/gradient/gradient-texture-cache.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -760,8 +761,8 @@ int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
   scale.SetUiScale(1.f);
   auto enabled  = Ui::View::New();
   auto disabled = Ui::View::New();
-  enabled.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
-  disabled.SetUiScalePolicy(Ui::UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(enabled, Ui::Extension::UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(disabled, Ui::Extension::UiScalePolicy::DISABLED);
   application.GetScene().Add(enabled);
   application.GetScene().Add(disabled);
   auto                 view = Ui::View::New();
@@ -787,11 +788,11 @@ int UtcDaliGradientTextureCacheViewScaleLifecycle(void)
     disabled.Add(view);
     frame();
     DALI_TEST_CHECK(view.GetRendererAt(0).GetTextures().GetTexture(0) == original);
-    view.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::ENABLED);
     frame();
-    view.SetUiScalePolicy(Ui::UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::DISABLED);
     frame();
-    view.SetUiScalePolicy(Ui::UiScalePolicy::INHERIT);
+    Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::INHERIT);
     view.Unparent();
     frame();
     enabled.Add(view);

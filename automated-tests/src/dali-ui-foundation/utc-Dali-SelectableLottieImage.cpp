@@ -187,12 +187,3 @@ int UtcDaliSelectableLottieImageCopyMoveP(void)
   END_TEST;
 }
 
-int UtcDaliSelectableLottieImageLegacyPlaybackRanges(void)
-{
-  SelectableLottieImage image("checkbox.json", Int32Pair(1, 12), Int32Pair(13, 24));
-  DALI_TEST_EQUALS(image.GetSelectRange().GetStart(), image.GetSelectionPlaybackRange().GetStart(), TEST_LOCATION);
-  DALI_TEST_EQUALS(image.GetSelectRange().GetEnd(), image.GetSelectionPlaybackRange().GetEnd(), TEST_LOCATION);
-  DALI_TEST_EQUALS(image.GetDeselectRange().GetStart(), image.GetDeselectionPlaybackRange().GetStart(), TEST_LOCATION);
-  DALI_TEST_EQUALS(image.GetDeselectRange().GetEnd(), image.GetDeselectionPlaybackRange().GetEnd(), TEST_LOCATION);
-  END_TEST;
-}

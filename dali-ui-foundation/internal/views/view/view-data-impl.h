@@ -560,12 +560,6 @@ public:
   int32_t                   IndexOfChildView(View view) const;
   void                      Remove(View child, RemovePolicy policy);
   void                      RemoveAll(RemovePolicy policy);
-  void                      Raise(LayoutOrderPolicy policy);
-  void                      Lower(LayoutOrderPolicy policy);
-  void                      RaiseToTop(LayoutOrderPolicy policy);
-  void                      LowerToBottom(LayoutOrderPolicy policy);
-  void                      RaiseAbove(View target, LayoutOrderPolicy policy);
-  void                      LowerBelow(View target, LayoutOrderPolicy policy);
   void                      RaisePreservingLayout();
   void                      LowerPreservingLayout();
   void                      RaiseToTopPreservingLayout();
@@ -1045,17 +1039,11 @@ public:
   void SetAccessibilityZoomCallback(Callback<bool(View)> callback);
   bool DispatchAccessibilityZoom();
 
-  bool DispatchAccessibilityRequestName(Dali::String& value);
-
   void SetAccessibilityRequestDefaultNameCallback(Callback<bool(View, Dali::String&)> callback);
   bool DispatchAccessibilityRequestDefaultName(Dali::String& value);
 
-  bool DispatchAccessibilityRequestDescription(Dali::String& value);
-
   void SetAccessibilityRequestDefaultDescriptionCallback(Callback<bool(View, Dali::String&)> callback);
   bool DispatchAccessibilityRequestDefaultDescription(Dali::String& value);
-
-  bool DispatchAccessibilityRequestValue(Dali::String& value);
 
   void SetAccessibilityRequestDefaultValueCallback(Callback<bool(View, Dali::String&)> callback);
   bool DispatchAccessibilityRequestDefaultValue(Dali::String& value);

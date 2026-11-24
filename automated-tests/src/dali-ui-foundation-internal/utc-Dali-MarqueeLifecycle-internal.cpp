@@ -3228,7 +3228,7 @@ void CheckMarqueeUiScalePolicy(bool async)
   root.SetRequestedHeight(300.0f);
   branch.SetRequestedWidth(400.0f);
   branch.SetRequestedHeight(100.0f);
-  root.SetUiScalePolicy(Ui::UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(root, Ui::Extension::UiScalePolicy::DISABLED);
   root.SetProperty(Actor::Property::SCALE, Vector3::ONE * 1.5f);
   branch.SetProperty(Actor::Property::SCALE, Vector3::ONE * 1.5f);
   root.Add(branch);
@@ -3236,12 +3236,12 @@ void CheckMarqueeUiScalePolicy(bool async)
   test.parent.Add(root);
   for(unsigned policy = 0u; policy < 5u; ++policy)
   {
-    if(policy == 1u) test.label.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
-    if(policy == 2u) test.label.SetUiScalePolicy(Ui::UiScalePolicy::DISABLED);
+    if(policy == 1u) Ui::Extension::View::SetUiScalePolicy(test.label, Ui::Extension::UiScalePolicy::ENABLED);
+    if(policy == 2u) Ui::Extension::View::SetUiScalePolicy(test.label, Ui::Extension::UiScalePolicy::DISABLED);
     if(policy == 3u)
     {
-      test.label.SetUiScalePolicy(Ui::UiScalePolicy::INHERIT);
-      branch.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
+      Ui::Extension::View::SetUiScalePolicy(test.label, Ui::Extension::UiScalePolicy::INHERIT);
+      Ui::Extension::View::SetUiScalePolicy(branch, Ui::Extension::UiScalePolicy::ENABLED);
     }
     if(policy == 4u) Ui::Extension::LayoutScaleManager::Get().SetScalable(false);
     test.Start();

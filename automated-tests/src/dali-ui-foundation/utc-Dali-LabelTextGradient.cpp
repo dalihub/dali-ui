@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
@@ -1449,7 +1450,7 @@ int UtcDaliLabelTextGradientUiScaleGeometryP(void)
     for(int type = 0; type != 3; ++type)
     {
       Label label = Label::New();
-      label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+      Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
       label.SetText("Gradient scale geometry");
       label.SetFontSize(20.0f);
       label.SetPadding(10.0f, 5.0f, 3.0f, 2.0f);
@@ -1469,7 +1470,7 @@ int UtcDaliLabelTextGradientUiScaleGeometryP(void)
         CheckDisplayedGradient(renderer, type, scale, bbox);
         CheckDisplayedGradient(renderer, type, scale, bbox, true);
       }
-      label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+      Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::DISABLED);
       LayoutScaleManager::Get().SetUiScale(2.0f);
       SettleGradient(application);
       CheckDisplayedGradient(FindGradientRenderer(label, "uTextGradientEndPosition"), type, 1.0f, bbox);
@@ -1486,7 +1487,7 @@ int UtcDaliEditableTextGradientUiScaleGeometryP(void)
   LayoutScaleManager::Get().SetScalable(true);
   auto verify = [&](auto control)
   {
-    control.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(control, Ui::Extension::UiScalePolicy::ENABLED);
     control.SetText("Atlas gradient geometry");
     control.SetFontSize(20.0f);
     control.SetTextGradientBoundsMode(Text::GradientBoundsMode::VIEW_BOUND);
@@ -1555,7 +1556,7 @@ int UtcDaliLabelTextGradientUiScaleAsyncPublicationP(void)
     const int type = variant % 3;
     LayoutScaleManager::Get().SetUiScale(1.0f);
     Label label = Label::New();
-    label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
     label.SetRequestedWidth(240.0f);
     label.SetRequestedHeight(80.0f);
     label.SetText("Async scale publication");
@@ -1603,7 +1604,7 @@ int UtcDaliLabelTextGradientUiScaleAsyncPublicationP(void)
     DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 5u));
 
     impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
-    label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::DISABLED);
     DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
     DALI_TEST_EQUALS(observer.count, 5u, TEST_LOCATION);
     SettleGradient(application);
@@ -1613,7 +1614,7 @@ int UtcDaliLabelTextGradientUiScaleAsyncPublicationP(void)
     impl.RequestAsyncRenderWithFixedSize(240.0f, 80.0f);
     application.GetScene().Remove(label);
     LayoutScaleManager::Get().SetUiScale(1.25f);
-    label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
     Test::WaitForEventThreadTrigger(1, 0); // A cancelled task need not deliver a trigger.
     DALI_TEST_EQUALS(observer.count, 6u, TEST_LOCATION);
     application.GetScene().Add(label);
@@ -1643,11 +1644,11 @@ int UtcDaliLabelTextGradientUiScaleLifecycleP(void)
   LayoutScaleManager::Get().SetScalable(true);
   LayoutScaleManager::Get().SetUiScale(2.0f);
   View disabled = View::New();
-  disabled.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(disabled, Ui::Extension::UiScalePolicy::DISABLED);
   disabled.SetRequestedWidth(400.0f);
   disabled.SetRequestedHeight(160.0f);
   View enabled = View::New();
-  enabled.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(enabled, Ui::Extension::UiScalePolicy::ENABLED);
   enabled.SetRequestedWidth(400.0f);
   enabled.SetRequestedHeight(160.0f);
   application.GetScene().Add(disabled);
@@ -1684,11 +1685,11 @@ int UtcDaliLabelTextGradientUiScaleLifecycleP(void)
   enabled.Add(label);
   SettleGradient(application);
   CheckDisplayedGradient(FindGradientRenderer(label, "uTextGradientEndPosition"), 2, 0.5f, false);
-  label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::DISABLED);
   SettleGradient(application);
   CheckDisplayedGradient(FindGradientRenderer(label, "uTextGradientEndPosition"), 2, 1.0f, false);
   label.SetTextGradient(MakeScaleGradient(1, true));
-  label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
   SettleGradient(application);
   CheckDisplayedGradient(FindGradientRenderer(label, "uTextGradientEndPosition"), 1, 0.5f, true);
   END_TEST;
@@ -1705,7 +1706,7 @@ int UtcDaliLabelGradientSpanUiScaleAsyncPublicationP(void)
     {
       LayoutScaleManager::Get().SetUiScale(1.0f);
       auto label = Label::New();
-      label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+      Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
       label.SetRequestedWidth(240.5f);
       label.SetRequestedHeight(80.25f);
       label.SetAsyncRendering(true);
@@ -1728,7 +1729,7 @@ int UtcDaliLabelGradientSpanUiScaleAsyncPublicationP(void)
       SettleGradient(application);
       DALI_TEST_CHECK(WaitGradientCompletion(application, observer, 2u));
       impl.RequestAsyncRenderWithFixedSize(240.5f, 80.25f);
-      label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+      Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::DISABLED);
       DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5));
       DALI_TEST_EQUALS(observer.count, 2u, TEST_LOCATION);
       SettleGradient(application);
@@ -1760,7 +1761,7 @@ int UtcDaliLabelGradientUiScaleAsyncStyleTransitionsP(void)
       {
         LayoutScaleManager::Get().SetUiScale(1.0f);
         Label label = Label::New();
-        label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+        Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
         label.SetRequestedWidth(240.0f);
         label.SetRequestedHeight(80.0f);
         label.SetFontSize(18.0f);

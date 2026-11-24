@@ -270,8 +270,7 @@ DALI_UI_API void SetAccessibilityRequestDefaultDescriptionCallback(Ui::View view
 /**
  * @brief Sets a per-instance default accessibility value callback.
  *
- * The callback is called only when the deprecated request-value hook did not
- * handle the request and the explicit accessibility value is empty.
+ * The callback is called only when the explicit accessibility value is empty.
  * When set, it replaces ViewImpl::OnAccessibilityRequestDefaultValue().
  * Returning true accepts the output, including an intentionally empty value.
  * Returning false leaves the accessible value empty; it does not call the
@@ -423,11 +422,8 @@ DALI_UI_API void SetSizeDepth(Ui::View view, float depth);
  * new policy drops the cached effective scale of the view's subtree and requests a re-layout;
  * setting the current policy again does nothing.
  *
- * This replaces the deprecated Ui::View::SetUiScalePolicy() and ViewImpl::SetUiScalePolicy(),
- * which take the deprecated Ui::UiScalePolicy: pass the Extension::UiScalePolicy enumerator of
- * the same name, or static_cast a Ui::UiScalePolicy value. Like the rest of the scale
- * configuration, it is an extension API for platform integrators and module providers, and
- * not part of the application-facing public API.
+ * Like the rest of the scale configuration, it is an extension API for platform integrators
+ * and module providers, and not part of the application-facing public API.
  *
  * @SINCE_3_0.0
  * @param[in] view The view to configure; it must not be empty
@@ -437,9 +433,6 @@ DALI_UI_API void SetUiScalePolicy(Ui::View view, Extension::UiScalePolicy policy
 
 /**
  * @brief Returns how the view takes part in the UI scale.
- *
- * This replaces the deprecated Ui::View::GetUiScalePolicy() and ViewImpl::GetUiScalePolicy(),
- * which return the same policy as a deprecated Ui::UiScalePolicy.
  *
  * @SINCE_3_0.0
  * @param[in] view The view to query; it must not be empty
@@ -464,9 +457,8 @@ DALI_UI_API Extension::UiScalePolicy GetUiScalePolicy(Ui::View view);
  * it as Ui::Extension::View::GetEffectiveLayoutScale(*this): there an unqualified
  * Extension:: names CustomActorImpl::Extension.
  *
- * This replaces the deprecated ViewImpl::GetEffectiveScale(). It is an extension API for
- * platform integrators and module providers, and not part of the application-facing
- * public API.
+ * It is an extension API for platform integrators and module providers, and not part of the
+ * application-facing public API.
  *
  * @SINCE_3_0.0
  * @param[in] viewImpl The view implementation
@@ -529,9 +521,6 @@ DALI_UI_API float GetEffectiveLayoutScale(const ViewImpl& viewImpl);
  * Dali::Actor::Property::DEPTH_INDEX is independent of both orders: it changes only the draw and
  * hit-test order among siblings.
  *
- * This replaces the deprecated Ui::View::Raise(LayoutOrderPolicy) and
- * ViewImpl::Raise(Ui::LayoutOrderPolicy) called with Ui::LayoutOrderPolicy::PRESERVE.
- *
  * @SINCE_3_0.0
  * @param[in] view The view to raise; it must not be empty
  * @see Dali::Actor::Raise()
@@ -551,9 +540,6 @@ DALI_UI_API void RaisePreservingLayout(Ui::View view);
  * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
  * appended without that. RaisePreservingLayout() lists the exact cases.
  *
- * This replaces the deprecated Ui::View::Lower(LayoutOrderPolicy) and
- * ViewImpl::Lower(Ui::LayoutOrderPolicy) called with Ui::LayoutOrderPolicy::PRESERVE.
- *
  * @SINCE_3_0.0
  * @param[in] view The view to lower; it must not be empty
  * @see Dali::Actor::Lower()
@@ -571,9 +557,6 @@ DALI_UI_API void LowerPreservingLayout(Ui::View view);
  * makes its layout order follow the actor order again, as does a reorder of one of its children
  * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
  * appended without that. RaisePreservingLayout() lists the exact cases.
- *
- * This replaces the deprecated Ui::View::RaiseToTop(LayoutOrderPolicy) and
- * ViewImpl::RaiseToTop(Ui::LayoutOrderPolicy) called with Ui::LayoutOrderPolicy::PRESERVE.
  *
  * @SINCE_3_0.0
  * @param[in] view The view to raise; it must not be empty
@@ -594,9 +577,6 @@ DALI_UI_API void RaiseToTopPreservingLayout(Ui::View view);
  * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
  * appended without that. RaisePreservingLayout() lists the exact cases.
  *
- * This replaces the deprecated Ui::View::LowerToBottom(LayoutOrderPolicy) and
- * ViewImpl::LowerToBottom(Ui::LayoutOrderPolicy) called with Ui::LayoutOrderPolicy::PRESERVE.
- *
  * @SINCE_3_0.0
  * @param[in] view The view to lower; it must not be empty
  * @see Dali::Actor::LowerToBottom()
@@ -615,10 +595,6 @@ DALI_UI_API void LowerToBottomPreservingLayout(Ui::View view);
  * makes its layout order follow the actor order again, as does a reorder of one of its children
  * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
  * appended without that. RaisePreservingLayout() lists the exact cases.
- *
- * This replaces the deprecated Ui::View::RaiseAbove(View, LayoutOrderPolicy) and
- * ViewImpl::RaiseAbove(Ui::View, Ui::LayoutOrderPolicy) called with
- * Ui::LayoutOrderPolicy::PRESERVE.
  *
  * @SINCE_3_0.0
  * @param[in] view The view to raise; it must not be empty
@@ -639,10 +615,6 @@ DALI_UI_API void RaiseAbovePreservingLayout(Ui::View view, Ui::View target);
  * makes its layout order follow the actor order again, as does a reorder of one of its children
  * made with the inherited Dali::Actor calls; only a new child that ends up as the last child is
  * appended without that. RaisePreservingLayout() lists the exact cases.
- *
- * This replaces the deprecated Ui::View::LowerBelow(View, LayoutOrderPolicy) and
- * ViewImpl::LowerBelow(Ui::View, Ui::LayoutOrderPolicy) called with
- * Ui::LayoutOrderPolicy::PRESERVE.
  *
  * @SINCE_3_0.0
  * @param[in] view The view to lower; it must not be empty

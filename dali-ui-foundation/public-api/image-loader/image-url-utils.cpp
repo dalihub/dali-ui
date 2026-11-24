@@ -81,27 +81,10 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData)
   return GeneratePixelDataUrl(pixelData, pixelData.IsAlphaPreMultiplied());
 }
 
-Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData, bool preMultiplied)
-{
-  return GeneratePixelDataUrl(pixelData, preMultiplied || pixelData.IsAlphaPreMultiplied());
-}
-
 Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface)
 {
   // The texture takes the flag the native image declares.
   Texture            texture  = Dali::Texture::New(*nativeImageInterface);
-  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
-  return imageUrl;
-}
-
-Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)
-{
-  // The texture takes the flag the native image declares; the caller can only add to it.
-  Texture texture = Dali::Texture::New(*nativeImageInterface);
-  if(preMultiplied)
-  {
-    Dali::Integration::SetTextureAlphaPreMultiplied(texture, true);
-  }
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
   return imageUrl;
 }

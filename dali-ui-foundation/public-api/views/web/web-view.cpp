@@ -81,11 +81,6 @@ WebView WebView::New(const Dali::String& url)
   return view;
 }
 
-WebView WebView::New(uint32_t /*argc*/, char** /*argv*/)
-{
-  return New();
-}
-
 WebView WebView::New(const WebProfile& profile)
 {
   return New(profile, RenderingMode::NATIVE_IMAGE);
@@ -372,16 +367,6 @@ void WebView::GetPlainTextAsynchronously(PlainTextCallback callback)
 void WebView::SetDocumentBackgroundColor(const Dali::Vector4& color)
 {
   GetImpl(*this).SetDocumentBackgroundColor(color);
-}
-
-void WebView::SetTilesClearedWhenHidden(bool cleared)
-{
-  GetImpl(*this).SetTilesClearedWhenHidden(cleared);
-}
-
-void WebView::SetTileCoverAreaMultiplier(float multiplier)
-{
-  GetImpl(*this).SetTileCoverAreaMultiplier(multiplier);
 }
 
 void WebView::SetCursorEnabledByClient(bool enabled)

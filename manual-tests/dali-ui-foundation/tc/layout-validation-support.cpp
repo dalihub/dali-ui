@@ -395,7 +395,7 @@ void Run::AttachToWindow(View root)
 {
   // A View under the Window is its own layout root and takes its position from the
   // requested X/Y, so it is placed where the fixture host currently is on screen.
-  const Dali::Bounds host = DevelActor::CalculateCurrentScreenExtents(mHost);
+  const Dali::Bounds host = mHost.CalculateCurrentScreenBounds();
   root.SetRequestedX(host.x);
   root.SetRequestedY(host.y);
   ColorizeTree(root);
@@ -780,8 +780,8 @@ void Run::StartSettle(std::function<void(Run&)> action)
 LayoutRect Run::RenderedBounds(View view, View base)
 {
   if(!base) base = View::DownCast(view.GetParent());
-  const Dali::Bounds current = DevelActor::CalculateCurrentScreenExtents(view);
-  const Dali::Bounds origin  = base ? DevelActor::CalculateCurrentScreenExtents(base) : Dali::Bounds(0.0f, 0.0f, 0.0f, 0.0f);
+  const Dali::Bounds current = view.CalculateCurrentScreenBounds();
+  const Dali::Bounds origin  = base ? base.CalculateCurrentScreenBounds() : Dali::Bounds(0.0f, 0.0f, 0.0f, 0.0f);
   return LayoutRect(current.x - origin.x, current.y - origin.y, current.width, current.height);
 }
 void Run::Rendered(const char* id, View view, const LayoutRect& expected, double tolerance)
@@ -799,7 +799,7 @@ void Run::CapturePixels(View source, const std::vector<PixelProbe>& probes, std:
   if(mCaptureTimer) mCaptureTimer.Stop();
   mCapture           = Dali::Capture::New();
   const auto   epoch = mActionEpoch;
-  const Dali::Bounds area = DevelActor::CalculateCurrentScreenExtents(source);
+  const Dali::Bounds area = source.CalculateCurrentScreenBounds();
   auto finish = [this, epoch, probes, next](bool failedReason, const char* reason, Dali::Capture capture) mutable {
     if(epoch != mActionEpoch || mFinished || mCaptureDone) return;
     mCaptureDone = true;

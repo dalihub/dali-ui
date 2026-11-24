@@ -253,45 +253,6 @@ public: // Playback Control
   void JumpToFrame(int frame);
 
 public: // Frame Range
-  /**
-   * @brief Sets the playback range by frame numbers.
-   *
-   * The animation will play between @p minFrame and @p maxFrame.
-   *
-   * @SINCE_3_0.0
-   * @param[in] minFrame The start frame index
-   * @param[in] maxFrame The end frame index
-   * @deprecated Use SetPlaybackRange() instead.
-   */
-  void SetMinMaxFrame(int minFrame, int maxFrame);
-
-  /**
-   * @brief Gets the numerically configured playback frame range.
-   *
-   * When no numerical range is configured, including when marker names were
-   * used, this returns the composition range `[0, GetTotalFrameCount()]`.
-   *
-   * @SINCE_3_0.0
-   * @param[out] minFrame The configured start frame index
-   * @param[out] maxFrame The configured end frame index
-   * @deprecated Use GetPlaybackRange() instead.
-   */
-  void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
-
-  /**
-   * @brief Sets the playback range using marker names embedded in the Lottie file.
-   *
-   * If only @p minMarker is given, the animation plays the range of that marker.
-   * If both are given, the animation plays from the start of @p minMarker to the
-   * end of @p maxMarker.
-   *
-   * @SINCE_3_0.0
-   * @param[in] minMarker Name of the start marker
-   * @param[in] maxMarker Name of the end marker (optional)
-   * @deprecated Use SetPlaybackRangeByMarker() instead.
-   */
-  void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker = "");
-
 public: // Playback Options
   /**
    * @brief Sets the behavior of the animation when it is stopped.

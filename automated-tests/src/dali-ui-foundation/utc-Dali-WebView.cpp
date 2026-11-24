@@ -102,23 +102,6 @@ Dali::Ui::Integration::WebViewImpl& GetWebViewImpl(WebView view)
 // Construction & Destruction
 // ===========================================================================
 
-int UtcDaliWebViewUiConfigWebEngineTypeP(void)
-{
-  UiConfig config = UiConfig::New();
-
-  DALI_TEST_EQUALS(config.GetWebEngineType(), WebEngineType::CHROMIUM, TEST_LOCATION);
-
-  config.SetWebEngineType(WebEngineType::LWE);
-  DALI_TEST_EQUALS(config.GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
-
-  config.Apply();
-
-  DALI_TEST_EQUALS(UiConfig::GetCurrent().GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
-  DALI_TEST_ASSERTION(config.SetWebEngineType(WebEngineType::CHROMIUM), "UiConfig is frozen after UiConfig::Apply()");
-
-  END_TEST;
-}
-
 int UtcDaliWebViewNewWithoutAppliedUiConfigN(void)
 {
   DALI_TEST_ASSERTION(WebView::New(), "UiConfig::Apply() must be called before using the web engine");
@@ -128,13 +111,11 @@ int UtcDaliWebViewNewWithoutAppliedUiConfigN(void)
 int UtcDaliWebViewSetWebEngineTypeBeforeCreationP(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetWebEngineType(WebEngineType::LWE);
   WebView::SetWebEngineType(WebEngineType::CHROMIUM);
 
   UiTestApplication application(config);
   WebView view = WebView::New();
   DALI_TEST_CHECK(view);
-  DALI_TEST_EQUALS(UiConfig::GetCurrent().GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
   END_TEST;
 }
 
@@ -851,25 +832,6 @@ int UtcDaliWebViewSetDocumentBackgroundColorP(void)
   END_TEST;
 }
 
-int UtcDaliWebViewSetTilesClearedWhenHiddenP(void)
-{
-  UiTestApplication application;
-  WebView view = WebView::New();
-  view.SetTilesClearedWhenHidden(true);
-  view.SetTilesClearedWhenHidden(false);
-  DALI_TEST_CHECK(view);
-  END_TEST;
-}
-
-int UtcDaliWebViewSetTileCoverAreaMultiplierP(void)
-{
-  UiTestApplication application;
-  WebView view = WebView::New();
-  view.SetTileCoverAreaMultiplier(2.0f);
-  DALI_TEST_CHECK(view);
-  END_TEST;
-}
-
 int UtcDaliWebViewSetCursorEnabledByClientP(void)
 {
   UiTestApplication application;
@@ -1236,12 +1198,11 @@ int UtcDaliWebViewInternalConversionsAndPropertiesP(void)
     Dali::Ui::Integration::WebViewImpl::Property::URL, Dali::Ui::Integration::WebViewImpl::Property::USER_AGENT, Dali::Ui::Integration::WebViewImpl::Property::SCROLL_POSITION,
     Dali::Ui::Integration::WebViewImpl::Property::VIDEO_HOLE_ENABLED, Dali::Ui::Integration::WebViewImpl::Property::MOUSE_EVENTS_ENABLED,
     Dali::Ui::Integration::WebViewImpl::Property::KEY_EVENTS_ENABLED, Dali::Ui::Integration::WebViewImpl::Property::DOCUMENT_BACKGROUND_COLOR,
-    Dali::Ui::Integration::WebViewImpl::Property::TILES_CLEARED_WHEN_HIDDEN, Dali::Ui::Integration::WebViewImpl::Property::TILE_COVER_AREA_MULTIPLIER,
     Dali::Ui::Integration::WebViewImpl::Property::CURSOR_ENABLED_BY_CLIENT, Dali::Ui::Integration::WebViewImpl::Property::PAGE_ZOOM_FACTOR,
     Dali::Ui::Integration::WebViewImpl::Property::TEXT_ZOOM_FACTOR};
   const Dali::Property::Value values[] = {
     Dali::String("https://example.com"), Dali::String("agent"), Vector2(1.0f, 2.0f),
-    true, false, false, Color::WHITE, true, 2.0f, true, 1.5f, 1.25f};
+    true, false, false, Color::WHITE, true, 1.5f, 1.25f};
   for(size_t i = 0u; i < sizeof(writable) / sizeof(writable[0]); ++i)
   {
     Dali::Ui::Integration::WebViewImpl::SetProperty(object, writable[i], values[i]);
@@ -1610,24 +1571,6 @@ int UtcDaliWebViewEngineArgumentsReplacementP(void)
   END_TEST;
 }
 
-int UtcDaliWebViewLegacyArgumentsIgnoredP(void)
-{
-  UiTestApplication application;
-  char program[] = "browser";
-  char option[] = "--incognito";
-  char* arguments[] = {program, option};
-  DALI_TEST_CHECK(WebView::SetWebEngineArguments(2, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
-  auto view = WebView::New(UINT32_MAX, reinterpret_cast<char**>(1));
-  DALI_TEST_CHECK(view);
-  DALI_TEST_CHECK(!view.GetProfile().IsIncognito());
-  DALI_TEST_EQUALS(view.GetProfile().GetName(), Dali::String("Default"), TEST_LOCATION);
-  auto& state = Test::WebEngine::GetRuntimeState();
-  DALI_TEST_EQUALS(state.initializedArguments[1], std::string("--incognito"), TEST_LOCATION);
-  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
-  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::ALREADY_INITIALIZED);
-  END_TEST;
-}
-
 int UtcDaliWebProfileLookupDoesNotInitializeP(void)
 {
   UiTestApplication application;
@@ -1825,17 +1768,6 @@ int UtcDaliWebProfileRetainedAfterTerminationP(void)
   END_TEST;
 }
 
-int UtcDaliWebViewDefaultTypeIgnoresUiConfigP(void)
-{
-  UiConfig config = UiConfig::New();
-  config.SetWebEngineType(WebEngineType::LWE);
-  UiTestApplication application(config);
-  auto view = WebView::New();
-  DALI_TEST_CHECK(view);
-  DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().type, 0, TEST_LOCATION);
-  END_TEST;
-}
-
 int UtcDaliWebViewArgumentsFixDefaultTypeP(void)
 {
   UiTestApplication application;
@@ -2014,7 +1946,7 @@ int UtcDaliWebViewDirectRenderingUnsupportedN(void)
   auto withProfile = WebView::New(profile);
   DALI_TEST_CHECK(withProfile);
   DALI_TEST_CHECK(!GetWebViewImpl(withProfile).mDirectConnection);
-  DALI_TEST_CHECK(WebView::New(0u, nullptr));
+  DALI_TEST_CHECK(WebView::New());
   DALI_TEST_CHECK(!WebView::New(WebView::RenderingMode::DIRECT_RENDERING));
   DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING));
   DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().viewCreates, 3, TEST_LOCATION);
@@ -2058,35 +1990,29 @@ int UtcDaliWebViewDirectRenderingSessionP(void)
   END_TEST;
 }
 
-int UtcDaliWebViewCreationFailuresAndEngineArgumentsP(void)
+int UtcDaliWebViewCreationFailuresP(void)
 {
   UiTestApplication application;
-  char argument[] = "--test-web-engine";
-  char* arguments[] = {argument};
-  auto withArguments = WebView::New(1u, arguments);
-  DALI_TEST_CHECK(withArguments);
-  DALI_TEST_CHECK(!GetWebViewImpl(withArguments).mDirectConnection);
+  auto plain = WebView::New();
+  DALI_TEST_CHECK(plain);
+  DALI_TEST_CHECK(!GetWebViewImpl(plain).mDirectConnection);
   auto explicitProfile = WebView::New(WebProfile::New("Native", true));
   DALI_TEST_CHECK(explicitProfile);
   DALI_TEST_CHECK(!GetWebViewImpl(explicitProfile).mDirectConnection);
 
   Test::WebEngine::SetNativeImageInitializationResult(false);
   auto failed = WebView::New();
-  auto failedWithArguments = WebView::New(1u, arguments);
   auto typeInfo = TypeRegistry::Get().GetTypeInfo("WebView");
   auto failedFromRegistry = typeInfo.CreateInstance();
   Test::WebEngine::SetNativeImageInitializationResult(true);
   DALI_TEST_CHECK(!failed);
-  DALI_TEST_CHECK(!failedWithArguments);
   DALI_TEST_CHECK(!failedFromRegistry);
   DALI_TEST_CHECK(typeInfo.CreateInstance());
 
   Test::WebEngine::SetCreationEnabled(false);
   auto nativeWithoutEngine = WebView::New();
-  auto nativeWithArgumentsWithoutEngine = WebView::New(1u, arguments);
   Test::WebEngine::SetCreationEnabled(true);
   DALI_TEST_CHECK(!nativeWithoutEngine);
-  DALI_TEST_CHECK(!nativeWithArgumentsWithoutEngine);
   END_TEST;
 }
 

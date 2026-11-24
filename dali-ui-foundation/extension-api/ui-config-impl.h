@@ -120,48 +120,6 @@ public:
   float GetScalingFactor() const;
 
   /**
-   * @brief Sets the screen DPI.
-   *
-   * @deprecated Use SetUnitDpi() instead.
-   *
-   * @SINCE_3_0.0
-   * @pre Must not be frozen.
-   * @param[in] dpi The DPI value
-   */
-  void SetDpi(int dpi);
-
-  /**
-   * @brief Retrieves the screen DPI.
-   *
-   * @deprecated Use GetUnitDpi() instead.
-   *
-   * @SINCE_3_0.0
-   * @return The DPI value
-   */
-  int GetDpi() const;
-
-  /**
-   * @brief Sets the baseline DPI.
-   *
-   * @deprecated Use SetUnitBaselineDpi() instead.
-   *
-   * @SINCE_3_0.0
-   * @pre Must not be frozen.
-   * @param[in] baselineDpi The baseline DPI
-   */
-  void SetBaselineDpi(int baselineDpi);
-
-  /**
-   * @brief Retrieves the baseline DPI.
-   *
-   * @deprecated Use GetUnitBaselineDpi() instead.
-   *
-   * @SINCE_3_0.0
-   * @return The baseline DPI value
-   */
-  int GetBaselineDpi() const;
-
-  /**
    * @brief Sets the default key click policy.
    *
    * @SINCE_3_0.0
@@ -669,16 +627,6 @@ public:
    * @copydoc UiConfig::GetAmbiguousPressDuration()
    */
   uint32_t GetAmbiguousPressDuration() const;
-
-  /**
-   * @copydoc UiConfig::SetWebEngineType()
-   */
-  void SetWebEngineType(WebEngineType type);
-
-  /**
-   * @copydoc UiConfig::GetWebEngineType()
-   */
-  WebEngineType GetWebEngineType() const;
 
   /**
    * @brief Sets the policy used to resolve automatic focus indication changes.

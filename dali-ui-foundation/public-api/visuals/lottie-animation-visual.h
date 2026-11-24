@@ -366,49 +366,6 @@ public: // Properties
   void SetLoopCount(int loopCount);
 
   /**
-   * @brief Sets the playback range by frame numbers.
-   *
-   * The animation plays between @p minFrame and @p maxFrame. A frame past the end is
-   * clamped to the last one, and a reversed pair is put back in order. By default the whole
-   * animation is played.
-   *
-   * @SINCE_3_0.0
-   * @param[in] minFrame The start frame number
-   * @param[in] maxFrame The end frame number
-   * @see SetPlaybackRangeByMarker()
-   * @deprecated Use SetPlaybackRange() instead.
-   */
-  void SetMinMaxFrame(int minFrame, int maxFrame);
-
-  /**
-   * @brief Gets the playback range as frame numbers.
-   *
-   * When no numerical range is configured, including when marker names were used,
-   * this returns the whole animation,
-   * `[0, GetTotalFrameCount()]`.
-   *
-   * @SINCE_3_0.0
-   * @param[out] minFrame The start frame number
-   * @param[out] maxFrame The end frame number
-   * @deprecated Use GetPlaybackRange() instead.
-   */
-  void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
-
-  /**
-   * @brief Sets the playback range using marker names embedded in the animation.
-   *
-   * With only @p minMarker, the animation plays that marker's own range. With both, it
-   * plays from the start of @p minMarker to the end of @p maxMarker.
-   *
-   * @SINCE_3_0.0
-   * @param[in] minMarker Name of the start marker
-   * @param[in] maxMarker Name of the end marker, or empty to use only @p minMarker
-   * @see GetMarkerInfo()
-   * @deprecated Use SetPlaybackRangeByMarker() instead.
-   */
-  void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker = "");
-
-  /**
    * @brief Gets the stop behavior of the LottieAnimationVisual.
    *
    * @SINCE_3_0.0

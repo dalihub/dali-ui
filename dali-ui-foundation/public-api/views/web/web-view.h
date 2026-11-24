@@ -175,17 +175,6 @@ public: // Creation & Destruction
   static WebView New(const Dali::String& url);
 
   /**
-   * @brief Creates a view with the default profile; all arguments are ignored.
-   * @SINCE_3_0.0
-   * @deprecated Use SetWebEngineArguments() before engine initialization and
-   * WebProfile::New() with WebView::New(profile) for private browsing.
-   * @param[in] argc Ignored
-   * @param[in] argv Ignored
-   * @return A new WebView, or an empty handle on backend failure
-   */
-  static WebView New(uint32_t argc, char** argv);
-
-  /**
    * @brief Destructor.
    * @SINCE_3_0.0
    */
@@ -346,26 +335,6 @@ public: // Setters & actions
    * @param[in] color The background color
    */
   void SetDocumentBackgroundColor(const Dali::Vector4& color);
-
-  /**
-   * @brief Sets whether tiles are cleared when hidden.
-   *
-   * @deprecated This API is deprecated.
-   *
-   * @SINCE_3_0.0
-   * @param[in] cleared True to clear tiles when hidden
-   */
-  void SetTilesClearedWhenHidden(bool cleared);
-
-  /**
-   * @brief Sets the tile cover area multiplier.
-   *
-   * @deprecated This API is deprecated.
-   *
-   * @SINCE_3_0.0
-   * @param[in] multiplier The multiplier value
-   */
-  void SetTileCoverAreaMultiplier(float multiplier);
 
   /**
    * @brief Sets whether cursor is enabled by client.
@@ -957,7 +926,6 @@ public: // Additional APIs
    * even if argument storage or backend creation fails. Afterwards, selecting
    * a different engine triggers an assertion, even if no engine was started
    * or every view and profile has been destroyed. Selecting the same type is allowed.
-   * The deprecated UiConfig web engine setting is ignored.
    *
    * @SINCE_3_0.0
    * @param[in] type The web engine type

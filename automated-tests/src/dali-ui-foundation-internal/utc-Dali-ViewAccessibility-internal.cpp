@@ -131,11 +131,6 @@ public:
     return Ptr(new TestAccessibilityViewImpl());
   }
 
-  void SetRequestedMode(RequestedMode mode)
-  {
-    mRequestedMode = mode;
-  }
-
   void SetDefaultNameMode(DefaultNameMode mode)
   {
     mDefaultNameMode = mode;
@@ -189,12 +184,6 @@ public:
     return true;
   }
 
-  bool OnAccessibilityRequestName(Dali::String& value) override
-  {
-    ++requestNameCount;
-    return ResolveRequestedValue(value, "Requested name");
-  }
-
   bool OnAccessibilityRequestDefaultName(Dali::String& value) override
   {
     ++requestDefaultNameCount;
@@ -207,12 +196,6 @@ public:
     return true;
   }
 
-  bool OnAccessibilityRequestDescription(Dali::String& value) override
-  {
-    ++requestDescriptionCount;
-    return ResolveRequestedValue(value, "Requested description");
-  }
-
   bool OnAccessibilityRequestDefaultDescription(Dali::String& value) override
   {
     ++requestDefaultDescriptionCount;
@@ -223,12 +206,6 @@ public:
     }
     value = mDefaultDescriptionMode == DefaultDescriptionMode::DYNAMIC ? "Requested default description" : "";
     return true;
-  }
-
-  bool OnAccessibilityRequestValue(Dali::String& value) override
-  {
-    ++requestValueCount;
-    return ResolveRequestedValue(value, "Requested value");
   }
 
   bool OnAccessibilityRequestDefaultValue(Dali::String& value) override
@@ -245,11 +222,8 @@ public:
   int  scrollToChildCount{0};
   int  panCount{0};
   int  zoomCount{0};
-  int  requestNameCount{0};
   int  requestDefaultNameCount{0};
-  int  requestDescriptionCount{0};
   int  requestDefaultDescriptionCount{0};
-  int  requestValueCount{0};
   int requestDefaultValueCount{0};
   View lastScrolledChild;
 
@@ -267,19 +241,7 @@ private:
     });
   }
 
-  bool ResolveRequestedValue(Dali::String& value, const char* dynamicValue)
-  {
-    if(mRequestedMode == RequestedMode::FALLBACK)
-    {
-      value = "Ignored value";
-      return false;
-    }
-    value = mRequestedMode == RequestedMode::DYNAMIC ? dynamicValue : "";
-    return true;
-  }
-
   RequestedMode mDefaultValueMode{RequestedMode::FALLBACK};
-  RequestedMode          mRequestedMode{RequestedMode::FALLBACK};
   DefaultNameMode        mDefaultNameMode{DefaultNameMode::FALLBACK};
   DefaultDescriptionMode mDefaultDescriptionMode{DefaultDescriptionMode::FALLBACK};
 };
@@ -712,21 +674,6 @@ int UtcDaliViewAccessibilityTranslationAndRequestedVirtualsP(void)
   DALI_TEST_EQUALS(accessible->GetDescription(), "Static description", TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->GetValue(), "Static value", TEST_LOCATION);
 
-  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::DYNAMIC);
-  DALI_TEST_EQUALS(accessible->GetName(), "Requested name", TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetDescription(), "Requested description", TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetValue(), "Requested value", TEST_LOCATION);
-
-  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::EMPTY);
-  DALI_TEST_EQUALS(accessible->GetName(), std::string(), TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetDescription(), std::string(), TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
-
-  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::FALLBACK);
-  DALI_TEST_EQUALS(accessible->GetName(), "Static name", TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetDescription(), "Static description", TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetValue(), "Static value", TEST_LOCATION);
-
   // Explicit names win over the component-default hook.
   implementation->SetDefaultNameMode(TestAccessibilityViewImpl::DefaultNameMode::DYNAMIC);
   DALI_TEST_EQUALS(accessible->GetName(), "Static name", TEST_LOCATION);
@@ -1088,14 +1035,6 @@ int UtcDaliViewAccessibilityDefaultValueHookP(void)
   implementation->SetDefaultValueMode(TestAccessibilityViewImpl::RequestedMode::FALLBACK);
   DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
   DALI_TEST_EQUALS(implementation->requestDefaultValueCount, 3, TEST_LOCATION);
-
-  // Deprecated request hooks keep their priority over explicit and default values.
-  view.SetAccessibilityValue("Explicit value");
-  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::DYNAMIC);
-  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Requested value"), TEST_LOCATION);
-  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::EMPTY);
-  DALI_TEST_EQUALS(accessible->GetValue(), std::string(), TEST_LOCATION);
-  DALI_TEST_EQUALS(implementation->requestDefaultValueCount, 3, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1133,16 +1072,6 @@ int UtcDaliViewAccessibilityDefaultRequestCallbacksP(void)
   DALI_TEST_EQUALS(handler.requestDefaultNameCount, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(handler.requestDefaultDescriptionCount, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(handler.requestDefaultValueCount, 0, TEST_LOCATION);
-
-  // Legacy overrides still precede explicit properties and registered defaults.
-  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::DYNAMIC);
-  DALI_TEST_EQUALS(accessible->GetName(), std::string("Requested name"), TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetDescription(), std::string("Requested description"), TEST_LOCATION);
-  DALI_TEST_EQUALS(accessible->GetValue(), std::string("Requested value"), TEST_LOCATION);
-  DALI_TEST_EQUALS(handler.requestDefaultNameCount, 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(handler.requestDefaultDescriptionCount, 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(handler.requestDefaultValueCount, 0, TEST_LOCATION);
-  implementation->SetRequestedMode(TestAccessibilityViewImpl::RequestedMode::FALLBACK);
 
   view.SetAccessibilityName("");
   view.SetAccessibilityDescription("");

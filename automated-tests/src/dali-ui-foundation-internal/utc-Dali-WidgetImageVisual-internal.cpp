@@ -33,7 +33,7 @@ namespace
 {
 Ui::Integration::Visual::Base CreateWidgetVisual(Texture texture)
 {
-  auto url = Ui::ImageUrl::New(texture, true);
+  auto url = Ui::ImageUrl::New(texture);
   Property::Map map;
   map.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
   map.Insert(Ui::Integration::ImageVisual::Property::URL, url.GetUrl());
@@ -219,7 +219,7 @@ int UtcDaliWidgetImageVisualCreationFailureReleasesTexture(void)
     // cleanup must not depend on destruction of the NativeImage object itself.
     auto image = TestNativeImage::New(16, 16);
     {
-      auto url = Ui::ImageUrlUtils::GenerateUrl(image, true);
+      auto url = Ui::ImageUrlUtils::GenerateUrl(image);
       Property::Map properties;
       // Force factory rejection after external texture registration.
       properties.Insert(Ui::Integration::Visual::Property::TYPE, -1);

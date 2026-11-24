@@ -87,8 +87,8 @@ public: // Properties
   enum class PlayRangeType
   {
     NONE,  ///< No play range override
-    FRAME, ///< Range set via SetMinMaxFrame
-    MARKER ///< Range set via SetMinMaxFrameByMarker
+    FRAME, ///< Range set via SetPlaybackRange
+    MARKER ///< Range set via SetPlaybackRangeByMarker
   };
 
 protected: // Construction & Destruction
@@ -161,24 +161,6 @@ public: // API
    * @copydoc Dali::Ui::LottieAnimationView::JumpToFrame
    */
   void JumpToFrame(int frame);
-
-  /**
-   * @copydoc Dali::Ui::LottieAnimationView::SetMinMaxFrame
-   * @deprecated Use SetPlaybackRange() instead.
-   */
-  void SetMinMaxFrame(int minFrame, int maxFrame);
-
-  /**
-   * @copydoc Dali::Ui::LottieAnimationView::GetMinMaxFrame
-   * @deprecated Use GetPlaybackRange() instead.
-   */
-  void GetMinMaxFrame(int& minFrame, int& maxFrame) const;
-
-  /**
-   * @copydoc Dali::Ui::LottieAnimationView::SetMinMaxFrameByMarker
-   * @deprecated Use SetPlaybackRangeByMarker() instead.
-   */
-  void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetStopBehavior

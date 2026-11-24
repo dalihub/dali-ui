@@ -889,30 +889,6 @@ int UtcDaliLottieDynamicPropertyValueSemanticsP(void)
   END_TEST;
 }
 
-int UtcDaliLottieAnimationViewLegacyPlaybackRange(void)
-{
-  UiTestApplication application;
-  LottieAnimationView view = LottieAnimationView::New();
-  int startFrame = -1;
-  int endFrame = -1;
-
-  view.SetMinMaxFrame(4, 18);
-  view.GetPlaybackRange(startFrame, endFrame);
-  DALI_TEST_EQUALS(startFrame, 4, TEST_LOCATION);
-  DALI_TEST_EQUALS(endFrame, 18, TEST_LOCATION);
-
-  view.SetPlaybackRange(8, 24);
-  view.GetMinMaxFrame(startFrame, endFrame);
-  DALI_TEST_EQUALS(startFrame, 8, TEST_LOCATION);
-  DALI_TEST_EQUALS(endFrame, 24, TEST_LOCATION);
-
-  view.SetMinMaxFrameByMarker("start", "end");
-  view.GetPlaybackRange(startFrame, endFrame);
-  DALI_TEST_EQUALS(startFrame, 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(endFrame, view.GetTotalFrameCount(), TEST_LOCATION);
-  END_TEST;
-}
-
 int UtcDaliLottieAnimationVisualAnimatePixelArea(void)
 {
   UiTestApplication application;

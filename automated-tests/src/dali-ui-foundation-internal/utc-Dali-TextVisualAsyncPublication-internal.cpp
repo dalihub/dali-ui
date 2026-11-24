@@ -32,6 +32,7 @@
 #include <dali-ui/ui-event-thread-callback.h>
 
 // Load task types before other headers introduce Internal::Text.
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager-impl.h>
 
 // INTERNAL INCLUDES
@@ -1773,7 +1774,7 @@ int CheckBlurUploadFailureRestoresImages(bool direct)
   auto        rendered   = CreateTextVisual(application);
   auto        controller = UiInternal::TextVisual::GetController(rendered.visual);
   Texture     image      = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  auto        url        = Ui::ImageUrl::New(image, true);
+  auto        url        = Ui::ImageUrl::New(image);
   const char* text       = "First long line\n\xef\xbf\xbc\nLast";
   auto        builder    = UiText::StyledTextBuilder::New(text);
   DALI_TEST_CHECK(builder.SetSpan(UiText::ImageSpan::New(UiText::ImageAttributes(url.GetUrl(), Vector2(24.0f, 18.0f))), 16u, 17u));
@@ -2011,7 +2012,7 @@ int UtcDaliTextVisualUserSpaceScaleAllocationReentryP(void)
   Ui::Extension::LayoutScaleManager::Get().SetScalable(true);
   Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
   auto rendered = CreateTextVisual(application);
-  rendered.view.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(rendered.view, Ui::Extension::UiScalePolicy::ENABLED);
   Ui::Gradient::Linear gradient(Vector2::ZERO, Vector2(100.0f, 0.0f));
   gradient.SetUnits(Ui::Gradient::Units::USER_SPACE);
   gradient.SetStopNodes({{0.0f, Ui::UiColor(Color::RED)}, {1.0f, Ui::UiColor(Color::BLUE)}});
@@ -2088,7 +2089,7 @@ int CheckGradientStyleAllocationReentry(int source, int from, int to)
   Ui::Extension::LayoutScaleManager::Get().SetScalable(true);
   Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
   auto rendered = CreateTextVisual(application);
-  rendered.view.SetUiScalePolicy(Ui::UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(rendered.view, Ui::Extension::UiScalePolicy::ENABLED);
   auto controller             = UiInternal::TextVisual::GetController(rendered.visual);
   auto parameters             = MakeParameters("Gradient callback test");
   parameters.isMarqueeEnabled = false;
@@ -4813,9 +4814,10 @@ int UtcDaliCutoutBackgroundConstraintReuseP(void)
     test.label.Measure(220.f, 80.f);
     DALI_TEST_CHECK(binding == UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual));
   }
-  auto source    = binding.GetSourceAt(0u);
-  auto animation = Animation::New(1.f);
-  animation.AnimateTo(Dali::Property(source.object, source.propertyIndex), Vector4(.8f, .2f, .1f, .5f));
+  auto source       = binding.GetSourceAt(0u);
+  auto sourceObject = source.GetObject();
+  auto animation    = Animation::New(1.f);
+  animation.AnimateTo(Dali::Property(sourceObject, source.GetPropertyIndex()), Vector4(.8f, .2f, .1f, .5f));
   auto textures = test.label.GetRendererAt(0u).GetTextures();
   animation.Play();
   for(unsigned i = 0; i < 4u; ++i)
@@ -4830,7 +4832,7 @@ int UtcDaliCutoutBackgroundConstraintReuseP(void)
   test.application.SendNotification();
   test.application.Render();
   auto       renderer = test.label.GetRendererAt(0u);
-  const auto color    = source.object.GetCurrentProperty<Vector4>(source.propertyIndex);
+  const auto color    = sourceObject.GetCurrentProperty<Vector4>(source.GetPropertyIndex());
   DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(renderer.GetPropertyIndex("uCutoutBackground")),
                    Vector4(color.r * color.a, color.g * color.a, color.b * color.a, color.a), .001f, TEST_LOCATION);
   test.label.ClearBackground();
@@ -5313,7 +5315,7 @@ int UtcDaliCutoutBackgroundArrangeOnlyP(void)
   auto                   visual  = data.GetVisual(UiText::LabelPropertyIndex::TEXT);
   auto                   binding = UiInternal::TextVisualTestAccessor::BackgroundConstraint(visual);
   WeakHandle<Constraint> background(binding);
-  auto                   sourceObject = binding.GetSourceAt(0u).object;
+  auto                   sourceObject = binding.GetSourceAt(0u).GetObject();
   WeakHandle<Handle>     source(sourceObject);
   sourceObject.Reset();
   binding.Reset();

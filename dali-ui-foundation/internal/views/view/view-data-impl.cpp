@@ -131,8 +131,8 @@ namespace Internal
 
 // Keeps the parent View of a child from rebuilding its logical child order (mChildren) out of
 // the ChildOrderChangedSignal that a sibling-order call on that child emits, so that call changes
-// the actor order only. This is the whole of the ...PreservingLayout() behaviour, shared by
-// Extension::View and the deprecated LayoutOrderPolicy::PRESERVE overloads.
+// the actor order only. This is the whole of the ...PreservingLayout() behaviour behind
+// Extension::View.
 //
 // It suppresses OnChildOrderChanged ONLY. A child that a ChildOrderChangedSignal callback adds
 // to or removes from the parent while the guard is alive still goes through OnChildAdded /
@@ -2535,11 +2535,6 @@ bool ViewDataImpl::DispatchAccessibilityZoom()
   return mViewImpl.OnAccessibilityZoom();
 }
 
-bool ViewDataImpl::DispatchAccessibilityRequestName(Dali::String& value)
-{
-  return mViewImpl.OnAccessibilityRequestName(value);
-}
-
 void ViewDataImpl::SetAccessibilityRequestDefaultNameCallback(Callback<bool(View, Dali::String&)> callback)
 {
   SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_DEFAULT_NAME_CALLBACK_TRAIT_ID, std::move(callback));
@@ -2557,11 +2552,6 @@ bool ViewDataImpl::DispatchAccessibilityRequestDefaultName(Dali::String& value)
   return mViewImpl.OnAccessibilityRequestDefaultName(value);
 }
 
-bool ViewDataImpl::DispatchAccessibilityRequestDescription(Dali::String& value)
-{
-  return mViewImpl.OnAccessibilityRequestDescription(value);
-}
-
 void ViewDataImpl::SetAccessibilityRequestDefaultDescriptionCallback(Callback<bool(View, Dali::String&)> callback)
 {
   SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_DEFAULT_DESCRIPTION_CALLBACK_TRAIT_ID, std::move(callback));
@@ -2577,11 +2567,6 @@ bool ViewDataImpl::DispatchAccessibilityRequestDefaultDescription(Dali::String& 
   }
 
   return mViewImpl.OnAccessibilityRequestDefaultDescription(value);
-}
-
-bool ViewDataImpl::DispatchAccessibilityRequestValue(Dali::String& value)
-{
-  return mViewImpl.OnAccessibilityRequestValue(value);
 }
 
 void ViewDataImpl::SetAccessibilityRequestDefaultValueCallback(Callback<bool(View, Dali::String&)> callback)
@@ -3873,76 +3858,7 @@ uint32_t ViewDataImpl::ComputeLogicalChildIndex(const Actor& child, bool& isLast
   return logicalIndex;
 }
 
-void ViewDataImpl::Raise(Ui::LayoutOrderPolicy policy)
-{
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    RaisePreservingLayout();
-    return;
-  }
-  mViewImpl.Self().Raise();
-}
-
-void ViewDataImpl::Lower(Ui::LayoutOrderPolicy policy)
-{
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    LowerPreservingLayout();
-    return;
-  }
-  mViewImpl.Self().Lower();
-}
-
-void ViewDataImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
-{
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    RaiseToTopPreservingLayout();
-    return;
-  }
-  mViewImpl.Self().RaiseToTop();
-}
-
-void ViewDataImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
-{
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    LowerToBottomPreservingLayout();
-    return;
-  }
-  mViewImpl.Self().LowerToBottom();
-}
-
-void ViewDataImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  if(!target)
-  {
-    return;
-  }
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    RaiseAbovePreservingLayout(target);
-    return;
-  }
-  mViewImpl.Self().RaiseAbove(target);
-}
-
-void ViewDataImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  if(!target)
-  {
-    return;
-  }
-  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
-  {
-    LowerBelowPreservingLayout(target);
-    return;
-  }
-  mViewImpl.Self().LowerBelow(target);
-}
-
-// The ...PreservingLayout() family behind Extension::View and the deprecated PRESERVE overloads
-// above: the inherited Actor call, made while ScopedSkipChildrenUpdate keeps a parent View from
+// The ...PreservingLayout() family behind Extension::View: the inherited Actor call, made while ScopedSkipChildrenUpdate keeps a parent View from
 // following the actor order for that one call.
 void ViewDataImpl::RaisePreservingLayout()
 {
@@ -3970,7 +3886,7 @@ void ViewDataImpl::LowerToBottomPreservingLayout()
 
 void ViewDataImpl::RaiseAbovePreservingLayout(Ui::View target)
 {
-  // An empty target is ignored, as the deprecated overload does; Dali::Actor::RaiseAbove()
+  // An empty target is ignored; Dali::Actor::RaiseAbove()
   // asserts on it.
   if(!target)
   {
@@ -3982,7 +3898,7 @@ void ViewDataImpl::RaiseAbovePreservingLayout(Ui::View target)
 
 void ViewDataImpl::LowerBelowPreservingLayout(Ui::View target)
 {
-  // An empty target is ignored, as the deprecated overload does; Dali::Actor::LowerBelow()
+  // An empty target is ignored; Dali::Actor::LowerBelow()
   // asserts on it.
   if(!target)
   {

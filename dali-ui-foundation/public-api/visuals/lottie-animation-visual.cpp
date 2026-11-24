@@ -192,22 +192,12 @@ void LottieAnimationVisual::SetLoopCount(int loopCount)
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::LOOP_COUNT, loopCount);
 }
 
-void LottieAnimationVisual::SetMinMaxFrame(int minFrame, int maxFrame)
-{
-  SetPlaybackRange(minFrame, maxFrame);
-}
-
 void LottieAnimationVisual::SetPlaybackRange(int startFrame, int endFrame)
 {
   Dali::Property::Array range;
   range.PushBack(startFrame);
   range.PushBack(endFrame);
   GetImplementation(*this).SetProperty(Dali::Ui::Integration::ImageVisual::Property::PLAY_RANGE, range);
-}
-
-void LottieAnimationVisual::GetMinMaxFrame(int& minFrame, int& maxFrame) const
-{
-  GetPlaybackRange(minFrame, maxFrame);
 }
 
 void LottieAnimationVisual::GetPlaybackRange(int& startFrame, int& endFrame) const
@@ -223,11 +213,6 @@ void LottieAnimationVisual::GetPlaybackRange(int& startFrame, int& endFrame) con
   // No numeric range is set, including when marker names were used.
   startFrame = 0;
   endFrame   = GetTotalFrameCount();
-}
-
-void LottieAnimationVisual::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
-{
-  SetPlaybackRangeByMarker(minMarker, maxMarker);
 }
 
 void LottieAnimationVisual::SetPlaybackRangeByMarker(const Dali::String& startMarker, const Dali::String& endMarker)
