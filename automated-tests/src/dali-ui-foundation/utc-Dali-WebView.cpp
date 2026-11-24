@@ -2227,8 +2227,6 @@ int UtcDaliWebViewRenderingModeWithProfileP(void)
 int UtcDaliWebProfileConfigurationSelectedContextP(void)
 {
   UiTestApplication application;
-  DALI_TEST_CHECK(!Dali::Ui::WebView::SetWebEngineMaxRefreshRate(0));
-  DALI_TEST_CHECK(Dali::Ui::WebView::SetWebEngineMaxRefreshRate(30));
   auto& runtimeState = Test::WebEngine::GetRuntimeState();
   auto normal = Dali::Ui::Extension::WebProfile::New("Normal", false, "/normal-bundle.so");
   DALI_TEST_CHECK(normal);
@@ -2251,17 +2249,19 @@ int UtcDaliWebProfileConfigurationSelectedContextP(void)
     Dali::Vector<Dali::String> schemes;
     schemes.PushBack("custom");
     schemes.PushBack("app");
-    WebView::RegisterUrlSchemesAsCorsEnabled(schemes);
+    profile.RegisterUrlSchemesAsCorsEnabled(schemes);
+    DALI_TEST_CHECK(profile.SetMaxRefreshRate(profile == normal ? 30 : 45));
     Dali::Ui::Extension::WebProfile::SetAppId(profile, "test.application");
     DALI_TEST_CHECK(Dali::Ui::Extension::WebProfile::SetAppVersion(profile, "1.2.3"));
     Dali::Ui::Extension::WebProfile::SetTimeOffset(profile, offset);
     Dali::Ui::Extension::WebProfile::SetTimeZoneOffset(profile, zone, daylight);
     DALI_TEST_CHECK(profile.DeleteAllWebStorage());
     DALI_TEST_CHECK(profile.DeleteAllWebIndexedDatabase());
-    DALI_TEST_EQUALS(state.calls, 8, TEST_LOCATION);
+    DALI_TEST_EQUALS(state.calls, 10, TEST_LOCATION);
     DALI_TEST_CHECK(!state.cacheEnabled);
     DALI_TEST_EQUALS(state.certificatePath, std::string("/ca.pem:/certs"), TEST_LOCATION);
-    DALI_TEST_CHECK(runtimeState.schemes == std::vector<std::string>({"custom", "app"}));
+    DALI_TEST_CHECK(state.schemes == std::vector<std::string>({"custom", "app"}));
+    DALI_TEST_EQUALS(state.refreshRate, profile == normal ? 30 : 45, TEST_LOCATION);
     DALI_TEST_EQUALS(state.appId, std::string("test.application"), TEST_LOCATION);
     DALI_TEST_EQUALS(state.appVersion, std::string("1.2.3"), TEST_LOCATION);
     DALI_TEST_CHECK(state.offset == offset);
@@ -2274,9 +2274,17 @@ int UtcDaliWebProfileConfigurationSelectedContextP(void)
       DALI_TEST_EQUALS(privateState.calls, 0, TEST_LOCATION);
     }
   }
-  WebView::RegisterUrlSchemesAsCorsEnabled({});
-  DALI_TEST_CHECK(runtimeState.schemes.empty());
-  DALI_TEST_EQUALS(normalState.calls, 8, TEST_LOCATION);
+  normal.RegisterUrlSchemesAsCorsEnabled({});
+  DALI_TEST_CHECK(normalState.schemes.empty());
+  DALI_TEST_CHECK(!privateState.schemes.empty());
+  DALI_TEST_EQUALS(normalState.refreshRate, 30, TEST_LOCATION);
+  DALI_TEST_EQUALS(privateState.refreshRate, 45, TEST_LOCATION);
+  DALI_TEST_EQUALS(normalState.calls, 11, TEST_LOCATION);
+  DALI_TEST_CHECK(!normal.SetMaxRefreshRate(0));
+  DALI_TEST_CHECK(!normal.SetMaxRefreshRate(61));
+  DALI_TEST_EQUALS(normalState.calls, 11, TEST_LOCATION);
+  DALI_TEST_CHECK(normal.SetMaxRefreshRate(1));
+  DALI_TEST_CHECK(normal.SetMaxRefreshRate(60));
   DALI_TEST_CHECK(normal.EnableCache(true));
   DALI_TEST_CHECK(normalState.cacheEnabled);
   END_TEST;
@@ -2288,12 +2296,13 @@ int UtcDaliWebProfileConfigurationFailureP(void)
   auto profile = WebProfile::New("Failure");
   auto& state = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetContext());
   state.result = false;
+  DALI_TEST_CHECK(!profile.SetMaxRefreshRate(30));
   DALI_TEST_CHECK(!profile.EnableCache(true));
   DALI_TEST_CHECK(!profile.SetCertificateFilePath("/missing.pem"));
   DALI_TEST_CHECK(!Dali::Ui::Extension::WebProfile::SetAppVersion(profile, "1"));
   DALI_TEST_CHECK(!profile.DeleteAllWebStorage());
   DALI_TEST_CHECK(!profile.DeleteAllWebIndexedDatabase());
-  DALI_TEST_EQUALS(state.calls, 5, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.calls, 6, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2303,11 +2312,13 @@ int UtcDaliWebProfileConfigurationAfterTerminationP(void)
   auto profile = WebProfile::New("Terminated");
   auto& state = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetContext());
   Test::WebEngine::TerminateRuntime();
+  DALI_TEST_CHECK(!profile.SetMaxRefreshRate(30));
+  profile.RegisterUrlSchemesAsCorsEnabled({});
   DALI_TEST_CHECK(!profile.EnableCache(true));
   DALI_TEST_CHECK(!profile.SetCertificateFilePath("/ca.pem"));
   Dali::Vector<Dali::String> schemes;
   schemes.PushBack("app");
-  WebView::RegisterUrlSchemesAsCorsEnabled(schemes);
+  profile.RegisterUrlSchemesAsCorsEnabled(schemes);
   Dali::Ui::Extension::WebProfile::SetAppId(profile, "app");
   DALI_TEST_CHECK(!Dali::Ui::Extension::WebProfile::SetAppVersion(profile, "1"));
   Dali::Ui::Extension::WebProfile::SetTimeOffset(profile, 1.0);
@@ -2323,6 +2334,7 @@ int UtcDaliWebProfileConfigurationLegacyBackendP(void)
   UiTestApplication application;
   Test::WebEngine::GetRuntimeState().legacyContext = true;
   auto profile = WebProfile::New("Legacy");
+  DALI_TEST_CHECK(!profile.SetMaxRefreshRate(30));
   DALI_TEST_CHECK(!profile.EnableCache(true));
   DALI_TEST_CHECK(!profile.SetCertificateFilePath("/ca.pem"));
   DALI_TEST_CHECK(!profile.DeleteAllWebStorage());
