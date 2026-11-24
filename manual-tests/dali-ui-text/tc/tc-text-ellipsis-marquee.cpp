@@ -16,6 +16,8 @@
 #include "common/image-capture.h"
 #include "text-test-case.h"
 
+#include <dali-ui-foundation/extension-api/view.h>
+
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -260,7 +262,7 @@ public:
     mPreview.Add(mScenario);
 
     mStage = StackLayout::New(StackOrientation::VERTICAL);
-    mStage.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(mStage, Ui::Extension::UiScalePolicy::DISABLED);
     mStage.SetPadding(Insets(12, 12, 12, 12));
     mStage.SetBackgroundColor(UiColor(0xCBD5E1));
     // The manual viewport clips this stage. Automatic capture moves the stage
@@ -268,11 +270,11 @@ public:
     // The red outline belongs to the UI frame, never to the captured fixture.
     // Keep the existing calibration markers and pixel comparison ROIs intact.
     mFrame = StackLayout::New(StackOrientation::VERTICAL);
-    mFrame.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(mFrame, Ui::Extension::UiScalePolicy::DISABLED);
     mFrame.SetPadding(Insets(2, 2, 2, 2));
     mFrame.SetBackgroundColor(UiColor(0xDC2626));
     mFixture = AbsoluteLayout::New();
-    mFixture.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(mFixture, Ui::Extension::UiScalePolicy::DISABLED);
     mFixture.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
     mFixture.SetPivot(Pivot::TOP_LEFT);
     mFixture.SetRequestedWidth(304);
@@ -672,7 +674,7 @@ private:
     mManualSpeed       = 80;
     mFixture.RemoveAll();
     mTarget = Label::New(mManual.text.c_str());
-    mTarget.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(mTarget, Ui::Extension::UiScalePolicy::DISABLED);
     mTarget.SetSystemFontSizeScaleEnabled(false);
     mTarget.SetFontSize(mManual.fontSize);
     mManualWidth = std::max(40, int(mManualWidth * mManual.widthRatio));
@@ -1071,7 +1073,7 @@ private:
     const auto& c       = Current();
     auto        measure = Label::New(c.text.c_str());
     measure.SetFontSize(c.fontSize);
-    measure.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(measure, Ui::Extension::UiScalePolicy::DISABLED);
     measure.SetSystemFontSizeScaleEnabled(false);
     measure.SetMultiLine(c.multiline);
     measure.SetLineWrapMode(c.wrap);
@@ -1081,7 +1083,7 @@ private:
     // Its occupied end edge comes from the static reference capture; a fixed
     // fraction of the viewport can include the replacement glyph at small widths.
     auto marker = Label::New("\u2026");
-    marker.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(marker, Ui::Extension::UiScalePolicy::DISABLED);
     marker.SetSystemFontSizeScaleEnabled(false);
     marker.SetFontSize(c.fontSize);
     mMarkerWidth = marker.GetNaturalSize().x;
@@ -1120,7 +1122,7 @@ private:
     DropTarget();
     const auto& c = Current();
     mTarget = Label::New(c.text.c_str());
-    mTarget.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(mTarget, Ui::Extension::UiScalePolicy::DISABLED);
     mTarget.SetSystemFontSizeScaleEnabled(false);
     mTarget.SetRenderScale(c.renderScale);
     mTarget.SetFontSize(c.fontSize);
@@ -1149,7 +1151,7 @@ private:
     mTarget.SetMarqueeStopMode(c.finishStop ? Text::MarqueeStopMode::FINISH_LOOP : Text::MarqueeStopMode::IMMEDIATE);
     mTarget.SetMarqueeSpeed(mSpeed);
     mTargetParent = AbsoluteLayout::New();
-    mTargetParent.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(mTargetParent, Ui::Extension::UiScalePolicy::DISABLED);
     mTargetParent.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, mWidth + 16, 112)));
     mTargetParent.Add(mTarget);
     mFixture.Add(mTargetParent);

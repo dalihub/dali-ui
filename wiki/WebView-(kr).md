@@ -51,12 +51,10 @@ window.Add(webView);
 
 ### 웹 엔진 선택
 
-WebView는 기본적으로 Chromium을 사용합니다. 다른 웹 엔진을 사용하려면 앱 시작 시점에 `UiConfig`에서 설정합니다.
+WebView는 기본적으로 Chromium을 사용합니다. 다른 웹 엔진을 사용하려면 첫 `WebView::New()`, `WebView::SetWebEngineArguments()` 또는 `WebProfile::New()` 호출 전에 `WebView::SetWebEngineType()`으로 선택합니다. 첫 호출에서 프로세스의 엔진이 확정되며, 이후 다른 엔진을 선택하면 assertion이 발생합니다.
 
 ```cpp
-UiConfig config = UiConfig::New();
-config.SetWebEngineType(WebEngineType::LWE);
-config.Apply();
+WebView::SetWebEngineType(WebEngineType::LWE);
 ```
 
 ---
@@ -400,8 +398,6 @@ bool videoHoleEnabled = webView.IsVideoHoleEnabled();
 큰 페이지를 렌더링할 때의 성능과 리소스 사용을 조정합니다.
 
 ```cpp
-webView.SetTilesClearedWhenHidden(true);   // 숨겨졌을 때 tile 삭제
-webView.SetTileCoverAreaMultiplier(2.0f);  // tile cover area 배수
 webView.ClearAllTilesResources();          // 모든 tile 리소스 즉시 삭제
 ```
 
@@ -559,7 +555,7 @@ Dali::String value = settings.GetExtraFeatureValue("featureName");
 ## 11. 주의사항
 
 - 첫 번째 `WebView`를 생성하기 전에 `UiConfig`를 적용해야 합니다.
-- `UiConfig::Apply()`를 호출하기 전에 웹 엔진을 선택합니다. 기본 엔진은 Chromium입니다.
+- 첫 `WebView`, `SetWebEngineArguments()` 또는 `WebProfile` 사용 전에 `WebView::SetWebEngineType()`으로 웹 엔진을 선택합니다. 기본 엔진은 Chromium입니다.
 - 지원하는 웹 엔진 기능은 플랫폼 및 엔진 구현에 따라 다를 수 있습니다.
 
 ---

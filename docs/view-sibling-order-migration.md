@@ -2,8 +2,8 @@
 
 This guide is for code that calls the `Dali::Ui::View` or `Dali::Ui::ViewImpl` overloads of
 `Raise`, `Lower`, `RaiseToTop`, `LowerToBottom`, `RaiseAbove` and `LowerBelow` that take a
-`Dali::Ui::LayoutOrderPolicy`. These overloads and the enum are deprecated, and a later dali-ui
-removes them; every call that is left then stops compiling. The source locations behind the
+`Dali::Ui::LayoutOrderPolicy`. These overloads and the enum have been removed after release
+3.0.0.11709; every call that is left stops compiling. The source locations behind the
 statements in this guide are listed in the Evidence section at the end.
 
 **Applies to** a dali-ui whose installed `dali-ui-foundation/extension-api/view.h` declares
@@ -19,12 +19,11 @@ advice: every `PRESERVE` call now has an exact replacement among six new
 `Dali::Ui::Extension::View::...PreservingLayout()` functions. Code that already moved to
 `DEPTH_INDEX` keeps working (section 7).
 
-**Binary compatibility.** The deprecated overloads are 12 exported symbols of
+**Binary compatibility.** The removed overloads were 12 exported symbols of
 `libdali3-ui-foundation.so.3` (six `View` and six `ViewImpl` members, for example
-`Dali::Ui::View::RaiseToTop(Dali::Ui::LayoutOrderPolicy)`). They stay during the deprecation, so
-existing binaries keep working. Their removal does not change the SONAME, so a binary, plugin or
-prebuilt library that still calls one of them then fails with an `undefined symbol` error, at load
-time or at the first call. Rebuild everything that includes dali-ui headers once it is migrated,
+`Dali::Ui::View::RaiseToTop(Dali::Ui::LayoutOrderPolicy)`). Their removal does not change the
+SONAME, so a binary, plugin or prebuilt library that still calls one of them fails with an
+`undefined symbol` error, at load time or at the first call. Rebuild everything that includes dali-ui headers once it is migrated,
 and check every prebuilt file that you keep with
 `nm -D --undefined-only <file> | grep LayoutOrderPolicy`, which must print nothing. The six new
 functions are additional exports; no existing symbol changes.
@@ -35,7 +34,7 @@ functions are additional exports; no existing symbol changes.
 
 `v` is a `Dali::Ui::View` and `t` is a `Dali::Ui::View` sibling of `v`.
 
-| Deprecated call | Replacement |
+| Removed call | Replacement |
 |---|---|
 | `v.Raise(LayoutOrderPolicy::UPDATE)`, and likewise `Lower`, `RaiseToTop` and `LowerToBottom` | `v.Raise()` and so on: the inherited `Dali::Actor` method |
 | `v.RaiseAbove(t, LayoutOrderPolicy::UPDATE)`, and likewise `LowerBelow` | `if(t) { v.RaiseAbove(t); }` |
@@ -48,12 +47,12 @@ functions are additional exports; no existing symbol changes.
 | Inside a `ViewImpl` subclass: `RaiseToTop(Ui::LayoutOrderPolicy::UPDATE)` | `Self().RaiseToTop()` |
 | Inside a `ViewImpl` subclass: `RaiseToTop(Ui::LayoutOrderPolicy::PRESERVE)` | `Dali::Ui::Extension::View::RaiseToTopPreservingLayout(Dali::Ui::View::DownCast(Self()))` |
 
-Each replacement runs the same code as the call it replaces: the deprecated overloads call the
+Each replacement runs the same code as the call it replaces: the removed overloads called the
 inherited `Dali::Actor` method for `UPDATE` and the matching `...PreservingLayout()` function for
 `PRESERVE`. The replacement therefore also behaves the same when the parent is not a `Ui::View`
 (both make the plain `Dali::Actor` call), when `v` has no parent (dali-core logs a warning and
 nothing changes) and, for `PRESERVE`, when `t` is empty (the call is ignored). The one difference
-is an empty `t` under `UPDATE`: the deprecated overload ignores it, while the inherited
+is an empty `t` under `UPDATE`: the removed overload ignored it, while the inherited
 `Dali::Actor::RaiseAbove()` and `LowerBelow()` throw `Dali::DaliException`. Keep the `if(t)`
 wherever `t` can be empty.
 
@@ -70,8 +69,8 @@ instead or be ambiguous with it, and inside a `ViewImpl` subclass it names
 
 ### 2.1 Finding them
 
-The deprecation is documented only, so the compiler reports nothing until the overloads are
-removed. Search instead, from the root of your repository:
+The compiler reports every direct call (see the errors below), but not the callers of a wrapper
+that passed a policy for them. Search as well, from the root of your repository:
 
 ```sh
 # 1. Every spelling of the type: calls, constants, parameters, aliases and wrapper functions
@@ -88,8 +87,8 @@ Search 1 also finds calls that are split across lines, through the line that nam
 Three patterns need care:
 
 - A policy passed through an `auto` constant (`constexpr auto kKeep = LayoutOrderPolicy::PRESERVE;`
-  and `v.RaiseToTop(kKeep);`): after the removal the compiler reports the constant's line but not
-  the call. Search 1 finds the constant and search 3 the call.
+  and `v.RaiseToTop(kKeep);`): the compiler reports the constant's line but not the call. Search 1
+  finds the constant and search 3 the call.
 - A wrapper with a defaulted policy parameter
   (`void BringUp(View v, LayoutOrderPolicy p = LayoutOrderPolicy::PRESERVE)`): once the wrapper is
   migrated, its callers (`BringUp(card);`) compile silently. Decide for each caller whether it
@@ -107,8 +106,8 @@ else
 }
 ```
 
-After the removal GCC reports, for example (recorded with GCC 15.2 for the 2.5.46 version of this
-guide; the quote characters depend on the locale):
+GCC reports, for example (recorded with GCC 15.2 for the 2.5.46 version of this guide; the quote
+characters depend on the locale):
 
 ```
 error: 'LayoutOrderPolicy' has not been declared             // LayoutOrderPolicy::X argument or parameter type
@@ -153,14 +152,14 @@ v.LowerBelow(t, LayoutOrderPolicy::PRESERVE);   Dali::Ui::Extension::View::Lower
 
 No case analysis is needed: the same call is right for every kind of parent, for a view without a
 parent and for an empty `t`. `v` must not be empty; the functions assert on an empty handle, as the
-deprecated overloads do.
+removed overloads did.
 
 ### 2.4 Inside a `ViewImpl` subclass
 
-The `ViewImpl` overloads are deprecated as well. Inside a `ViewImpl` subclass an unqualified
-`RaiseToTop(policy)` calls the deprecated `ViewImpl` overload, and an unqualified `RaiseToTop()`
-does not compile, now or after the removal, because neither `ViewImpl` nor `Dali::CustomActorImpl`
-has a sibling-order method without a policy. Go through the handle that `Self()` returns:
+The `ViewImpl` overloads are removed as well. Inside a `ViewImpl` subclass an unqualified
+`RaiseToTop(policy)` called the removed `ViewImpl` overload, and an unqualified `RaiseToTop()`
+does not compile, because neither `ViewImpl` nor `Dali::CustomActorImpl` has a sibling-order
+method without a policy. Go through the handle that `Self()` returns:
 
 ```cpp
 // Before (member function of a class derived from Dali::Ui::ViewImpl)
@@ -194,7 +193,7 @@ A `Ui::View` keeps two orders of its children:
   animation after `Remove(child, RemovePolicy::ANIMATE_EXIT)`, are in the actor order only.
 
 Normally the layout order is the actor order without those two kinds of children. A
-`...PreservingLayout()` call, like the deprecated `PRESERVE` call before it, changes the actor order
+`...PreservingLayout()` call, like the removed `PRESERVE` call before it, changes the actor order
 and leaves the layout order as it is, so afterwards the two orders can differ. No call arranges the
 layout order on its own: each call either keeps the layout order of the children that stay (a new
 child is appended, removed children are dropped) or makes the whole layout order follow the actor
@@ -307,7 +306,7 @@ when it is created and on every arrange, `ScrollView` raises its scroll bar when
 when its content is set, `Navigator` raises its modals above its pages, and `DialogContainer` keeps
 the modal content above the scrim. When such a reorder moves something, dali-core reports it and
 the container's layout order is rebuilt, which undoes a `...PreservingLayout()` call on a direct
-child of the container, as it undid a deprecated `PRESERVE` call. `RecyclerView` items are children
+child of the container, as it undid a `PRESERVE` call before the removal. `RecyclerView` items are children
 of its internal scroller, not of the `RecyclerView`, so these reorders do not touch them.
 
 ---
@@ -374,9 +373,9 @@ These changes apply whether or not you migrate:
 
 ## 9. Checklist
 
-1. Searches 1 to 3 of section 2.1 find no remaining use of the deprecated API (search 3 may also
+1. Searches 1 to 3 of section 2.1 find no remaining use of the removed API (search 3 may also
    find unrelated names).
-2. After the removal the code compiles against the new dali-ui, every binary, plugin and prebuilt
+2. The code compiles against the new dali-ui, every binary, plugin and prebuilt
    library that includes dali-ui headers was rebuilt, and
    `nm -D --undefined-only <file> | grep LayoutOrderPolicy` prints nothing for each prebuilt file
    that you keep.
@@ -396,7 +395,9 @@ These changes apply whether or not you migrate:
 ## Evidence
 
 Verified on 2026-11-10 against the dali-ui working tree with this change (on top of `ff742fa3`),
-dali-core 2.5.47 at `538b3ecdb` and dali-adaptor 2.5.47 at `5bceea653`. dali-ui paths are relative
+dali-core 2.5.47 at `538b3ecdb` and dali-adaptor 2.5.47 at `5bceea653`. The overloads, the enum and
+the tests that exercised them were removed on 2026-11-24; the line numbers below predate that
+removal. dali-ui paths are relative
 to the repository root, and the line numbers are those of the change that added the
 `...PreservingLayout()` functions; they drift in later trees.
 
@@ -406,23 +407,21 @@ dali-ui:
 - `dali-ui-foundation/extension-api/view.cpp:201-229` — the six functions forward to `ViewDataImpl` through `Ui::GetImpl(view)`, which asserts on an empty handle (`dali-ui-foundation/public-api/views/view-impl.h:1394-1401`, assertion at `:1396`).
 - `dali-ui-foundation/internal/views/view/view-data-impl.cpp:130-171` — `ScopedSkipChildrenUpdate`: looks up the view's parent and, only when it is a `Ui::View`, sets the parent's `mSkipChildrenUpdate` for the call (`:146-153`) and restores it afterwards (`:156-162`).
 - `view-data-impl.cpp:3920-3969` — the six `ViewDataImpl::...PreservingLayout()` members: the guard plus the inherited `Actor` call; the target forms return on an empty target first (`:3951-3954`, `:3963-3966`).
-- `view-data-impl.cpp:3852-3918` — the deprecated `Raise(policy)` … `LowerBelow(target, policy)`: `PRESERVE` calls the member above and `UPDATE` the inherited `Actor` method; `RaiseAbove` and `LowerBelow` return on an empty target first (`:3894-3897`, `:3908-3911`). They are reached from `dali-ui-foundation/public-api/views/view.cpp:700-728` and `dali-ui-foundation/public-api/views/view-impl.cpp:690-718`.
 - `view-data-impl.cpp:7302-7312` — `OnChildOrderChanged`: returns while a `...PreservingLayout()` call runs (`:7306-7309`) and otherwise rebuilds (`:7311`).
 - `view-data-impl.cpp:7314-7384` — `SyncChildrenWithActorOrder`: rebuilds from `GetChildAt()`, keeping only tracked views (`:7321-7335`), returns when nothing changed (`:7355-7359`), assigns (`:7361`), tags the children `REORDERED` when a `LayoutTransition` is attached (`:7370-7376`) and invalidates the measure (`:7383`).
 - `view-data-impl.cpp:3971-4249` — `OnChildAdded`: ignores a view that is no longer its child (`:3985-3988`); computes the layout position (`:3996-3997`; `ComputeLogicalChildIndex` at `:3807-3850`, last-child fast path at `:3818-3822`) and inserts the view there (`:3998-4005`); connects the order handler with the first `Ui::View` child (`:4021-4025`, the only connection in the library); rebuilds when the view is not the last actor child (`:4234-4237`). Called from `dali-ui-foundation/public-api/views/view-impl.cpp:1077-1080`.
 - `view-data-impl.cpp:4251-4320` — `OnChildRemoved` erases the child (`:4312`) without a rebuild; `:3680-3805` — `Remove(child, policy)`: with an EXIT effect the child leaves the layout order at once (`:3748`) and stays an actor child.
 - `dali-ui-foundation/internal/views/view/view-data-impl.h:569-574` (the six members), `:1410` (`ComputeLogicalChildIndex`), `:1444` (`SyncChildrenWithActorOrder`), `:1983-1986` (`HasLayoutTransition`: a transition attached to this view), `:2130` (`mSkipChildrenUpdate`).
-- `dali-ui-foundation/public-api/views/view.h:1813-1834` and `:1836-1852` — `GetChildViewAt` and `IndexOfChildView`, whose logical order can differ from the actor order (`:1823-1828`, `:1848-1850`); `:1900-1905` — `using Dali::Actor::Lower` … `RaiseToTop`; `:1948-2064` — the deprecated `View` overloads.
-- `dali-ui-foundation/public-api/views/view-impl.h:91` — `ViewImpl` derives from `CustomActorImpl`; `:757-850` — the deprecated `ViewImpl` overloads.
-- `dali-ui-foundation/public-api/views/view-types.h:41-61` — `LayoutOrderPolicy` and its deprecation note.
+- `dali-ui-foundation/public-api/views/view.h:1813-1834` and `:1836-1852` — `GetChildViewAt` and `IndexOfChildView`, whose logical order can differ from the actor order (`:1823-1828`, `:1848-1850`); `:1900-1905` — `using Dali::Actor::Lower` … `RaiseToTop`.
+- `dali-ui-foundation/public-api/views/view-impl.h:91` — `ViewImpl` derives from `CustomActorImpl`.
 - `dali-ui-foundation/dali-ui-foundation-extension.h:36` — includes `extension-api/view.h`.
 - `dali-ui-foundation/public-api/layouts/layout-transition-types.h:75` — `LayoutChangeCause::REORDERED`; `dali-ui-foundation/internal/layouts/layout-transition-dispatcher.cpp:1027` — ENTER is handled before the change cause is resolved (`:1108-1109`, `REORDERED` first at `:313-316`); a child whose bounds do not change gets no CHANGE transition (`:1103-1106`); a child reached only through an ancestor's `SUBTREE` transition gets `OTHER` or `WINDOW_RESIZED` (`:1004-1009`).
 - `dali-ui-foundation/public-api/layouts/stack-layout-manager.cpp:436-441, 651-656` — `StackLayout` measures and arranges its children in `GetChildViewAt()` order.
 - `dali-ui-foundation/internal/focus-manager/focus-finder.cpp:351-354, 450-459` — the focus finder walks `GetChildCount()` and `GetChildAt()`.
 - `dali-ui-foundation/internal/render-effects/mask-effect-impl.cpp:117-120`, `gaussian-blur-effect-impl.cpp:127-130`, `offscreen-rendering-impl.cpp:67-70` — render effects are off-screen renderables, whose render tasks dali-core orders by the actor order (see dali-core below).
 - `dali-ui-foundation/integration-api/recycler/recycler-view-impl.cpp:241-242, 717` (scroll bar raised at creation and on arrange), `:731-732` (scroller lowered once), `:865, 882` (items are added to the scroller); `dali-ui-foundation/integration-api/scroll-view-impl.cpp:147, 197, 200`; `dali-ui-components/integration-api/navigator/navigator-impl.cpp:626-634` (`RestackModals`); `dali-ui-components/integration-api/dialog/dialog-container-impl.cpp:218, 384`.
-- `git grep LayoutOrderPolicy`: outside the declarations and their forwarding functions only `automated-tests/src/dali-ui-foundation-internal/utc-Dali-View-order-internal.cpp` uses it; no library, component, sample or manual-test code does. In the library and component code no statement uses `Actor::Property::DEPTH_INDEX` or `Dali::Actor::SetDepthIndex()` (`git grep` finds only comments: the documentation in `extension-api/view.h` and three commented-out lines in `dali-ui-foundation/internal/text/decorator/text-decorator.cpp:870, 948, 992`); the library sets only renderer-level depth indices, through `Visual::Base::SetDepthIndex()` and direct `Renderer::Property::DEPTH_INDEX` writes (for example `dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:484` and `gaussian-blur-effect-impl.cpp:481`), and it has no handling of `SIBLING_ORDER` (`git grep` finds only documentation and `DevelLayer::SIBLING_ORDER_MULTIPLIER`).
-- Tests in `automated-tests/src/dali-ui-foundation-internal/utc-Dali-View-order-internal.cpp` (found by name; their lines move as the file grows): `UtcDaliView*UpdateInternalP` and `UtcDaliView*PreserveInternalP` (the deprecated overloads), `UtcDaliViewDepthIndexDoesNotChangeChildOrderInternalP` (a depth index changes neither order and emits no order signal), `UtcDaliViewInsert*` (inserts into parents whose two orders agree), `UtcDaliView*PreservingLayout*InternalP` (rows 1-15, items 1 and 2 of section 5 and the related case after them, a mid insert of a view taken from another parent, nested `...PreservingLayout()` calls, section 8, item 2), `UtcDaliViewReorderInChildOrderChangedCallbackInternalP` (item 3 of section 5, both handler orders), `UtcDaliViewDeprecatedPreserveMatchesPreservingLayoutInternalP` (the deprecated `PRESERVE` overloads and the new functions give the same orders), `UtcDaliViewFreshMidInsertSyncTagsReorderedInternalP` and `UtcDaliViewFreshMidInsertInSyncDoesNotTagReorderedInternalP` (section 8, item 1) and `UtcDaliViewChildRemovedDuringSetParentNotTrackedInternalP` (section 8, item 3); in `automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp`: `UtcDaliViewExtensionPreservingLayoutP` and `UtcDaliViewExtensionPreservingLayoutEmptyHandleN`.
+- `git grep LayoutOrderPolicy` finds nothing: no library, component, sample, manual-test or test code uses the name. In the library and component code no statement uses `Actor::Property::DEPTH_INDEX` or `Dali::Actor::SetDepthIndex()` (`git grep` finds only comments: the documentation in `extension-api/view.h` and three commented-out lines in `dali-ui-foundation/internal/text/decorator/text-decorator.cpp:870, 948, 992`); the library sets only renderer-level depth indices, through `Visual::Base::SetDepthIndex()` and direct `Renderer::Property::DEPTH_INDEX` writes (for example `dali-ui-foundation/internal/render-effects/background-blur-effect-impl.cpp:484` and `gaussian-blur-effect-impl.cpp:481`), and it has no handling of `SIBLING_ORDER` (`git grep` finds only documentation and `DevelLayer::SIBLING_ORDER_MULTIPLIER`).
+- Tests in `automated-tests/src/dali-ui-foundation-internal/utc-Dali-View-order-internal.cpp` (found by name; their lines move as the file grows): `UtcDaliViewDepthIndexDoesNotChangeChildOrderInternalP` (a depth index changes neither order and emits no order signal), `UtcDaliViewInsert*` (inserts into parents whose two orders agree), `UtcDaliView*PreservingLayout*InternalP` (rows 1-15, items 1 and 2 of section 5 and the related case after them, a mid insert of a view taken from another parent, nested `...PreservingLayout()` calls, section 8, item 2), `UtcDaliViewReorderInChildOrderChangedCallbackInternalP` (item 3 of section 5, both handler orders), `UtcDaliViewFreshMidInsertSyncTagsReorderedInternalP` and `UtcDaliViewFreshMidInsertInSyncDoesNotTagReorderedInternalP` (section 8, item 1) and `UtcDaliViewChildRemovedDuringSetParentNotTrackedInternalP` (section 8, item 3); in `automated-tests/src/dali-ui-foundation/utc-Dali-View.cpp`: `UtcDaliViewExtensionPreservingLayoutP` and `UtcDaliViewExtensionPreservingLayoutEmptyHandleN`.
 - Release history (`git log`, `git merge-base --is-ancestor`): `4a237fb4` (Release 2.5.26.10706) declares the enum at `dali-ui-foundation/public-api/view-types.h:44`; the removal `b62b35f0` is in `dabae505` (Release 2.5.35.11198) and its revert `908f9ec0` in `ed0f889e` (Release 2.5.35.11201); the deprecation `e07c3368` is in `c5ba66f2` (Release 2.5.46.11678) and not in `fb7895b0` (Release 2.5.45.11629); `c5ba66f2:dali-ui-foundation/extension-api/view.h` has no `PreservingLayout`, and neither has that file in `1f5a631d` (Release 3.0.0.11709), which still declares the overloads. Every release from 2.5.26.10706 to 3.0.0.11709 that has the overloads also has `using Dali::Actor::RaiseToTop;`, and 2.5.35.11198 has neither.
 - Binary compatibility: `nm -DC` on an existing build of `libdali3-ui-foundation.so.3.0.0` that has the overloads lists 12 `LayoutOrderPolicy` symbols, and `readelf -d` shows `SONAME libdali3-ui-foundation.so.3`; `build/tizen/dali-ui-foundation/CMakeLists.txt:2, 179-184` (`dali${DALI_API_MAJOR}-ui-foundation`, `SOVERSION ${DALI_UI_VERSION_MAJOR}`) and `build/tizen/CMakeLists.txt:10-12, 23` (`DALI_API_MAJOR` 3).
 

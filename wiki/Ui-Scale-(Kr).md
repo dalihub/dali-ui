@@ -10,7 +10,7 @@ dali-ui는 세 가지 독립적인 스케일 메커니즘을 제공하며, 이�
 
 이 문서는 **동적 스케일** 시스템(`UiScale`)과, 그 위에 독립적으로 곱해지는 **윈도우별 스케일**을 다룹니다.
 
-런타임 스케일 API인 `Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()`, `Extension::View::GetEffectiveLayoutScale()`(`dali-ui-foundation/extension-api/view.h`)와 정책 타입 `Extension::UiScalePolicy`(`dali-ui-foundation/extension-api/ui-scale-policy.h`)는 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API입니다. 디스플레이 스케일을 적용하는 시스템·접근성 핸들러나 한 윈도우의 콘텐츠 스케일을 정하는 모듈이 사용합니다. 앱 개발자용 공개 API 목록에는 포함되지 않지만 공개 API와 함께 설치되며 그대로 사용할 수 있습니다. 이 문서의 `LayoutScaleManager`는 `Dali::Ui::Extension::LayoutScaleManager`, `UiScalePolicy`는 `Dali::Ui::Extension::UiScalePolicy`입니다. 공개 API의 `Dali::Ui::UiScalePolicy`는 deprecated되었습니다.
+런타임 스케일 API인 `Extension::LayoutScaleManager`(`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()`, `Extension::View::GetEffectiveLayoutScale()`(`dali-ui-foundation/extension-api/view.h`)와 정책 타입 `Extension::UiScalePolicy`(`dali-ui-foundation/extension-api/ui-scale-policy.h`)는 플랫폼 통합 개발자와 모듈 제공자를 위한 extension API입니다. 디스플레이 스케일을 적용하는 시스템·접근성 핸들러나 한 윈도우의 콘텐츠 스케일을 정하는 모듈이 사용합니다. 앱 개발자용 공개 API 목록에는 포함되지 않지만 공개 API와 함께 설치되며 그대로 사용할 수 있습니다. 이 문서의 `LayoutScaleManager`는 `Dali::Ui::Extension::LayoutScaleManager`, `UiScalePolicy`는 `Dali::Ui::Extension::UiScalePolicy`입니다.
 
 <br/>
 
@@ -124,27 +124,9 @@ LayoutScaleManager::Get().SetWindowScale(window, 1.0f);   // 기본값으로 복
 
 <br/>
 
-### UiScaleManager (deprecated)
-
-`UiScaleManager`(`ui-scale-manager.h`)는 이 클래스의 이전 이름입니다. 이전 릴리스로 빌드한 애플리케이션을 위해 남겨 둔 deprecated 클래스이며, 새 코드는 `LayoutScaleManager`를 사용합니다. 두 클래스는 하나의 상태를 공유하므로 어느 쪽으로 설정한 값이든 양쪽에서 읽히고, 마지막 호출이 적용됩니다. 두 핸들은 서로 다른 객체라서 `UiScaleManager` 핸들을 `LayoutScaleManager::DownCast()`하거나 그 반대로 하면 빈 핸들이 반환됩니다.
-
-| UiScaleManager (deprecated) | LayoutScaleManager |
-|---|---|
-| `UiScaleManager::Get()` | `LayoutScaleManager::Get()` |
-| `GetScale()` | `GetUiScale()` |
-| `SetScale(float)` | `SetUiScale(float)` |
-| `IsScalable()` | `IsScalable()` |
-| `SetScalable(bool)` | `SetScalable(bool)` |
-| `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | 없음. 라이브러리가 레이아웃 루트를 직접 등록합니다 |
-| 없음 | `GetWindowScale(Window)`, `SetWindowScale(Window, float)` |
-
-`ViewImpl::GetEffectiveScale()`도 함께 deprecated되었습니다. 같은 값을 반환하는 `Extension::View::GetEffectiveLayoutScale()`을 사용합니다.
-
-<br/>
-
 ## UiScalePolicy
 
-각 `View`는 `Extension::View::SetUiScalePolicy()`로 스케일 전파에 참여하는 방식을 지정하고, `Extension::View::GetUiScalePolicy()`로 읽습니다. 두 함수는 `Extension::UiScalePolicy`를 받고 반환합니다. `View`와 `ViewImpl`의 `SetUiScalePolicy()` / `GetUiScalePolicy()`는 deprecated되었으며 계속 동작합니다. 이 멤버들은 deprecated된 `Dali::Ui::UiScalePolicy`를 받고 반환하며, 두 타입은 열거자 이름과 값이 같은 별개의 타입이므로 `static_cast`로 변환합니다.
+각 `View`는 `Extension::View::SetUiScalePolicy()`로 스케일 전파에 참여하는 방식을 지정하고, `Extension::View::GetUiScalePolicy()`로 읽습니다. 두 함수는 `Extension::UiScalePolicy`를 받고 반환합니다.
 
 ```cpp
 #include <dali-ui-foundation/extension-api/view.h>

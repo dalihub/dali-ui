@@ -23,8 +23,8 @@ ScalingFactor는 [Configuration](https://github.sec.samsung.net/NUI/dali-ui/wiki
 ```cpp
 UiConfig config = UiConfig::New();
 config.SetUnitScalingFactor(1.5f);
-config.SetDpi(320);
-config.SetBaselineDpi(160);
+config.SetUnitDpi(320);
+config.SetUnitBaselineDpi(160);
 config.Apply();
 ```
 

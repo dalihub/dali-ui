@@ -631,7 +631,7 @@ updater나 `DragPreviewPositionSignal`이 없으면 detector가
 reusable View의 원래 layout 속성을 복구합니다. detector는 preview의 `UiScalePolicy`를
 바꾸지 않으므로, reusable preview를 나머지 UI와 같은 단위로 만들면 preview와 자식은
 추가된 container의 scale로 배치됩니다. 이전 릴리스는 배치하는 동안 preview에
-`UiScalePolicy::DISABLED`를 설정했습니다. 이 방식으로 배치되면서 그 동작을 전제로 한
+`Extension::UiScalePolicy::DISABLED`를 설정했습니다. 이 방식으로 배치되면서 그 동작을 전제로 한
 preview(pixel 크기로 만들었거나 `Extension::UiScalePolicy::DISABLED` 서브트리 안의 source를
 복사한 preview로, reusable preview와 updater 없는 factory preview 모두 해당)는
 preview에 `Extension::View::SetUiScalePolicy()`로 직접 `Extension::UiScalePolicy::DISABLED`를 지정하면 이전 배치를 유지하며, 윈도우

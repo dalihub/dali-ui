@@ -182,11 +182,11 @@ WebView WebView::New(uint32_t /*argc*/, char** /*argv*/)
 }
 ```
 
-인자 오버로드는 앱의 빌드 오류를 방지하기 위해 남긴다. 기존 동작 보존은 요구하지 않는다. 전달된 인자로 엔진 설정을 덮어쓰거나 incognito를 선택하지 않는다. `SetWebEngineArguments()`에서 별도로 설정한 값은 일반 `New()`와 동일하게 사용한다. 따라서 두 인자 API 사이의 우선순위 정책은 필요 없다.
+인자 오버로드 `New(argc, argv)`는 앱의 빌드 오류를 방지하기 위해 deprecated로 남겼다가 3.0.0 릴리스 이후 삭제했다. 남아 있는 동안 기존 동작 보존은 요구하지 않았다. 전달된 인자로 엔진 설정을 덮어쓰거나 incognito를 선택하지 않았다. `SetWebEngineArguments()`에서 별도로 설정한 값은 일반 `New()`와 동일하게 사용한다. 따라서 두 인자 API 사이의 우선순위 정책은 필요 없다.
 
 deprecated 주석은 현재의 "인자가 전달된다/첫 인자가 적용된다" 설명을 지우고, 인자가 무시된다는 사실과 `SetWebEngineArguments()` 및 `WebProfile::New()`로의 이관을 설명하도록 고친다.
 
-`SetWebEngineType()`은 `SetWebEngineArguments()`·`WebView::New()`·`WebProfile::New()`의 첫 사용 전에 호출한다. 첫 사용 시 타입이 확정되며 명시 설정이 없으면 Chromium을 사용한다. 인자 저장이나 백엔드 생성 실패도 타입 확정을 되돌리지 않는다. 이후 다른 타입은 assertion으로 거부하며 같은 타입 재지정은 허용한다. deprecated된 `UiConfig::SetWebEngineType()`의 저장값은 더 이상 엔진 선택에 사용하지 않는다. `UiConfig::Apply()` 선행 조건은 유지한다.
+`SetWebEngineType()`은 `SetWebEngineArguments()`·`WebView::New()`·`WebProfile::New()`의 첫 사용 전에 호출한다. 첫 사용 시 타입이 확정되며 명시 설정이 없으면 Chromium을 사용한다. 인자 저장이나 백엔드 생성 실패도 타입 확정을 되돌리지 않는다. 이후 다른 타입은 assertion으로 거부하며 같은 타입 재지정은 허용한다. `UiConfig::SetWebEngineType()`/`GetWebEngineType()`은 3.0.0 릴리스 이후 삭제했으며, 엔진 선택은 `WebView::SetWebEngineType()`만 사용한다. `UiConfig::Apply()` 선행 조건은 유지한다.
 
 ### 4.4 기본 프로필
 

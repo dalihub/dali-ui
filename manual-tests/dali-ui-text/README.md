@@ -4,7 +4,7 @@
 현재 `Text Layout`, `Ellipsis`, `Marquee` 순서로 제공하며, `manual-tests/dali-ui-foundation`과 같은
 registry / `OnEnter()` / `OnExit()` 구조를 사용한다.
 
-테스트와 공용 검사 모듈은 DALi **Public API만** 사용한다. Internal / integration / extension /
+테스트와 공용 검사 모듈은 DALi **Public / Extension API만** 사용한다. Internal / integration /
 devel API나 UTC mock으로 제품 내부 상태를 검사하지 않는다. Emoji Sequence internal 검증은
 이 앱에 포함하지 않는다. 앱 실행에 필요한 `Application`이 adaptor devel API로 이동하여,
 launcher의 `main.cpp`에서 해당 헤더를 직접 include하는 경우만 예외로 허용한다.

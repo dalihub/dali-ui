@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/internal/views/widget/widget-view-impl.h>
 
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
@@ -362,7 +363,7 @@ void WidgetViewImpl::UpdateWidgetImage(Dali::NativeImagePtr image)
   // RegisterVisual can emit ResourceReadySignal and release the application's handles.
   Dali::Ui::WidgetView keepAlive(GetOwner());
 
-  auto          widgetImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(image, true);
+  auto          widgetImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(image);
   Property::Map properties;
   properties.Insert(Dali::Ui::Integration::Visual::Property::TYPE, Dali::Ui::Integration::InternalVisualType::IMAGE);
   properties.Insert(Dali::Ui::Integration::ImageVisual::Property::URL, widgetImageUrl.GetUrl());
@@ -706,7 +707,7 @@ void WidgetViewImpl::SynchronizeAccessibilityChildPosition()
 
 MeasuredSize WidgetViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  const float scale   = GetEffectiveScale();
+  const float scale   = Ui::Extension::View::GetEffectiveLayoutScale(*this);
   const auto  measure = [scale](float requested, float natural, float constraint)
   {
     if(requested >= 0.0f)

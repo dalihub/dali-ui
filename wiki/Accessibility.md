@@ -235,7 +235,7 @@ Context | `ALERT`, `NOTIFICATION`, `DIALOG`, `POPUP_MENU`
 See `Accessibility::Role` for the complete list. Assigning a meaningful role also makes the View highlightable by default.
 
 > [!NOTE]
-> Use `OnAccessibilityRequestDefaultName/Description/Value()` for Component defaults. The older `OnAccessibilityRequestName/Description/Value()` hooks are deprecated and retain precedence over explicit properties. See [Dynamic Values and Default Component Name/Description/Value](#165-dynamic-values-and-default-component-namedescriptionvalue) for the resolution order.
+> Use `OnAccessibilityRequestDefaultName/Description/Value()` for Component defaults; an explicit property always wins over them. See [Dynamic Values and Default Component Name/Description/Value](#165-dynamic-values-and-default-component-namedescriptionvalue) for the resolution order.
 
 <br/>
 
@@ -1002,15 +1002,13 @@ bool VolumeSliderImpl::OnAccessibilityRequestDefaultValue(Dali::String& value)
 }
 ```
 
-Default hooks run only when the older request hook did not handle the request and the explicit property is empty. Returning `true` accepts the output, including an intentionally empty string. Returning `false` ignores the output and continues the existing Name/Description fallback; for Value, the result is empty.
-
-`OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, and `OnAccessibilityRequestValue()` are deprecated. Their existing priority is retained: returning `true` overrides even an explicit property. Prefer explicit setters or default hooks in new code. Migration to a default hook changes priority because an explicit property now wins. The corresponding non-default request callback setters have been removed.
+Default hooks run only when the explicit property is empty. Returning `true` accepts the output, including an intentionally empty string. Returning `false` ignores the output and continues the existing Name/Description fallback; for Value, the result is empty.
 
 Information | Resolution order
 --|--
-Name | Deprecated request hook → explicit or translated property → default callback or virtual → integration raw fallback → Actor Name
-Description | Deprecated request hook → explicit or translated property → default callback or virtual → integration raw fallback
-Value | Deprecated request hook → explicit property → default callback or virtual → empty
+Name | Explicit or translated property → default callback or virtual → integration raw fallback → Actor Name
+Description | Explicit or translated property → default callback or virtual → integration raw fallback
+Value | Explicit property → default callback or virtual → empty
 
 A registered default callback replaces its virtual hook. Returning `false` does not call that virtual; clear the callback to restore virtual dispatch.
 
@@ -1085,11 +1083,8 @@ Virtual API | Accessibility request
 `OnAccessibilityScrollToChild(View child)` | Reveal a child of a scroll container
 `OnAccessibilityPan(PanGesture)` | Handle an accessibility pan
 `OnAccessibilityZoom()` | Handle accessibility zoom
-`OnAccessibilityRequestName()` | Deprecated: retains priority over explicit properties
 `OnAccessibilityRequestDefaultName()` | Supply a Component default when no explicit Name exists
-`OnAccessibilityRequestDescription()` | Deprecated: retains priority over explicit properties
 `OnAccessibilityRequestDefaultDescription()` | Supply a Component default when no explicit Description exists
-`OnAccessibilityRequestValue()` | Deprecated: retains priority over explicit properties
 `OnAccessibilityRequestDefaultValue()` | Supply a Component default when the explicit Value is empty
 
 An action callback returns `true` when it handled the request and `false` when it did not. See [16.5 Dynamic Values and Default Component Name/Description/Value](#165-dynamic-values-and-default-component-namedescriptionvalue) for string-hook precedence and return rules.
