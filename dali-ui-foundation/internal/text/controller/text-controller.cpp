@@ -1874,7 +1874,12 @@ void Controller::FitCandidatesPointSizeForLayout(Size layoutSize)
 
 float Controller::GetHeightForWidth(float width)
 {
-  return Relayouter::GetHeightForWidth(*this, width);
+  return Relayouter::GetHeightForWidth(*this, width, false);
+}
+
+float Controller::GetHeightForWidth(float width, bool ignoreLineLimit)
+{
+  return Relayouter::GetHeightForWidth(*this, width, ignoreLineLimit);
 }
 
 Vector2 Controller::CalculateLayoutSize(float width, float height, bool forceUpdate)

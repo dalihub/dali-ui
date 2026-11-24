@@ -2213,11 +2213,35 @@ AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& paramet
 AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                    const Size& naturalSize)
 {
+  const auto maximumLines = parameters.maximumNumberOfLines;
   if(parameters.isCutoutEnabled)
   {
     parameters.isCutoutEnabled = false;
     // Rebuild cached decoration scaling and model flags for ordinary scrolling.
     useCachedNaturalSize = false;
+  }
+  Size selectedNaturalSize = naturalSize;
+  if(parameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::MANUAL &&
+     (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled))
+  {
+    // Select against the viewport, then reuse the shaped model for the full
+    // scrolling source. No intermediate static raster is needed.
+    const bool ellipsis         = parameters.ellipsis;
+    parameters.isMarqueeEnabled = false;
+    bool       fits             = false;
+    const bool prepared         = PrepareTextFit(parameters, useCachedNaturalSize, naturalSize, fits);
+    parameters.isMarqueeEnabled = true;
+    parameters.ellipsis         = ellipsis;
+    if(!prepared)
+    {
+      return {};
+    }
+    parameters.maximumNumberOfLines = 0u;
+    useCachedNaturalSize            = true;
+    if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
+    {
+      selectedNaturalSize = ComputeLayoutSize(parameters, MAX_FLOAT, MAX_FLOAT, true);
+    }
   }
   Size      controlSize(parameters.textWidth, parameters.textHeight);
   Size      verifiedSize;
@@ -2229,7 +2253,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   if(isHorizontal)
   {
     // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
-    Size textNaturalSize   = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
+    Size textNaturalSize   = useCachedNaturalSize ? selectedNaturalSize : ComputeNaturalSize(parameters);
     textNaturalSize.width  = ConvertToEven(textNaturalSize.width);
     textNaturalSize.height = ConvertToEven(textNaturalSize.height);
 
@@ -2362,6 +2386,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   renderInfo.renderedSize             = Size(renderedWidth, renderedHeight);
   renderInfo.marqueeWrapGap           = wrapGap;
   renderInfo.isMarqueeContentOverflow = isTextContentOverflow;
+  parameters.maximumNumberOfLines     = maximumLines;
   return renderInfo;
 }
 
@@ -2385,6 +2410,54 @@ bool AsyncTextLoader::CheckForTextFit(AsyncTextParameters& parameters, float poi
 
 AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                    const Size& naturalSize)
+{
+  const bool automatic = parameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW &&
+                         !parameters.suppressAutoMarquee &&
+                         ((!parameters.isMultiLine && parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL) ||
+                          (parameters.isMultiLine && parameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL));
+  const bool ellipsis = parameters.ellipsis;
+  if(automatic)
+  {
+    // Keep the selected fallback unelided until overflow has been evaluated.
+    parameters.ellipsis = false;
+  }
+  bool fits = false;
+  if(!PrepareTextFit(parameters, useCachedNaturalSize, naturalSize, fits))
+  {
+    parameters.ellipsis = ellipsis;
+    return {};
+  }
+  if(!automatic || fits)
+  {
+    // A successful Fit trial already contains the full, aligned static model.
+    // Reuse it without another measurement, shaping pass or raster.
+    parameters.ellipsis = ellipsis;
+    return Render(parameters);
+  }
+
+  // Fit can fail on the other axis or on MaximumLines. Measure the entire
+  // selected source on the scrolling axis, without a line cap or ellipsis.
+  const auto maximumLines         = parameters.maximumNumberOfLines;
+  parameters.maximumNumberOfLines = 0u;
+  const bool horizontal           = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
+  const Size selectedSize         = ComputeLayoutSize(parameters, horizontal ? MAX_FLOAT : parameters.textWidth, MAX_FLOAT, true);
+  parameters.isMarqueeEnabled     = horizontal ? parameters.textWidth < selectedSize.width : parameters.textHeight < selectedSize.height;
+  parameters.ellipsis             = ellipsis;
+  if(parameters.isMarqueeEnabled)
+  {
+    // The cached model and size both belong to the selected font. The task's
+    // pre-Fit natural-size cache is no longer valid.
+    auto renderInfo = RenderMarquee(parameters, true, selectedSize);
+    // Publication validates the authored line limit as part of the snapshot.
+    parameters.maximumNumberOfLines = maximumLines;
+    return renderInfo;
+  }
+  parameters.maximumNumberOfLines = maximumLines;
+  return RenderText(parameters, true, selectedSize);
+}
+
+bool AsyncTextLoader::PrepareTextFit(AsyncTextParameters& parameters, bool useCachedNaturalSize,
+                                     const Size& naturalSize, bool& fits)
 {
   Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
@@ -2459,10 +2532,10 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     // Set the first candidate (minimum font size) as the default best value.
     // If the search does not find an optimal value, the minimum point size will be used to text fit.
-    const Ui::Text::Fit::Candidate& firstCandidate        = fitCandidates[0];
-    bool                            bestSizeUpdatedLatest = false;
-    float                           bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient()) * parameters.effectiveTextScale;
-    float                           bestLineHeight        = firstCandidate.GetLineHeight();
+    const Ui::Text::Fit::Candidate& firstCandidate    = fitCandidates[0];
+    bool                            bestSizeIsCurrent = false;
+    float                           bestPointSize     = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient()) * parameters.effectiveTextScale;
+    float                           bestLineHeight    = firstCandidate.GetLineHeight();
 
     if(binarySearch)
     {
@@ -2479,15 +2552,15 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
-          bestSizeUpdatedLatest = true;
-          bestPointSize         = testPointSize;
-          bestLineHeight        = testLineHeight;
-          left                  = mid + 1;
+          bestSizeIsCurrent = true;
+          bestPointSize     = testPointSize;
+          bestLineHeight    = testLineHeight;
+          left              = mid + 1;
         }
         else
         {
-          bestSizeUpdatedLatest = false;
-          right                 = mid - 1;
+          bestSizeIsCurrent = false;
+          right             = mid - 1;
         }
       }
     }
@@ -2504,27 +2577,28 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
-          bestSizeUpdatedLatest = true;
-          bestPointSize         = testPointSize;
-          bestLineHeight        = testLineHeight;
+          bestSizeIsCurrent = true;
+          bestPointSize     = testPointSize;
+          bestLineHeight    = testLineHeight;
           break;
         }
         else
         {
-          bestSizeUpdatedLatest = false;
+          bestSizeIsCurrent = false;
         }
       }
     }
 
-    // Best point size was not updated. Re-run so the text fit is really applied.
-    if(!bestSizeUpdatedLatest)
+    // Reuse the selected model only when the last trial selected the best size.
+    fits = bestSizeIsCurrent;
+    if(!bestSizeIsCurrent)
     {
       parameters.ellipsis    = mFitActualEllipsis;
       parameters.minLineSize = bestLineHeight;
-      CheckForTextFit(parameters, bestPointSize, allowedSize);
+      fits                   = CheckForTextFit(parameters, bestPointSize, allowedSize);
     }
 
-    return Render(parameters);
+    return true;
   }
   else if(parameters.isTextFitEnabled)
   {
@@ -2534,7 +2608,6 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     mFitActualEllipsis  = parameters.ellipsis;
     parameters.ellipsis = false;
-    float bestPointSize = minPointSize;
 
     Size allowedSize(parameters.textWidth, parameters.textHeight);
 
@@ -2556,7 +2629,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     uint32_t minIndex      = bestSizeIndex + 1u;
     uint32_t maxIndex      = pointSizeRange + 1u;
 
-    bool bestSizeUpdatedLatest = false;
+    bool bestSizeIsCurrent = false;
     // Find best size as binary search.
     // Range format as [l r). (left closed, right opened)
     // It means, we already checked all i < l are valid, and r <= i are invalid.
@@ -2572,33 +2645,33 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
       if(CheckForTextFit(parameters, testPointSize, allowedSize))
       {
-        bestSizeUpdatedLatest = true;
+        bestSizeIsCurrent = true;
 
         bestSizeIndex = testIndex;
         minIndex      = testIndex + 1u;
       }
       else
       {
-        bestSizeUpdatedLatest = false;
-        maxIndex              = testIndex;
+        bestSizeIsCurrent = false;
+        maxIndex          = testIndex;
       }
     }
-    bestPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(bestSizeIndex) * pointInterval);
+    const float bestPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(bestSizeIndex) * pointInterval);
 
-    // Best point size was not updated. Re-run so the text fit is really applied.
-    if(!bestSizeUpdatedLatest)
+    // Reuse the selected model only when the last trial selected the best size.
+    fits = bestSizeIsCurrent;
+    if(!bestSizeIsCurrent)
     {
       parameters.ellipsis = mFitActualEllipsis;
-      CheckForTextFit(parameters, bestPointSize, allowedSize);
+      fits                = CheckForTextFit(parameters, bestPointSize, allowedSize);
     }
 
-    return Render(parameters);
+    return true;
   }
   else
   {
-    DALI_LOG_ERROR("There is no TextFit information in AsyncTextParameters. It returns empty AsyncTextRenderInfo.\n");
-    AsyncTextRenderInfo renderInfo;
-    return renderInfo;
+    DALI_LOG_ERROR("Cannot prepare text fit without a range or candidates.\n");
+    return false;
   }
 }
 

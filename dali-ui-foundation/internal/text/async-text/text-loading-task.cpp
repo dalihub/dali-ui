@@ -137,7 +137,21 @@ void TextLoadingTask::Load()
         naturalSize = mLoader.SetupRenderScale(mParameters, cachedNaturalSize);
       }
 
-      if(!mParameters.suppressAutoMarquee && mParameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
+      const bool validMarqueeOrientation =
+        (!mParameters.isMultiLine && mParameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL) ||
+        (mParameters.isMultiLine && mParameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL);
+      if(mParameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW || !validMarqueeOrientation)
+      {
+        // AUTO state belongs to this request, including suppression and invalid
+        // orientations. A previous MANUAL Start is not an overflow decision.
+        mParameters.isMarqueeEnabled = false;
+      }
+
+      if((mParameters.isTextFitEnabled || mParameters.isTextFitCandidatesEnabled) && !mParameters.isMarqueeEnabled)
+      {
+        mRenderInfo = mLoader.RenderTextFit(mParameters, cachedNaturalSize, naturalSize);
+      }
+      else if(!mParameters.suppressAutoMarquee && mParameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
       {
         if(mParameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
         {
@@ -186,15 +200,9 @@ void TextLoadingTask::Load()
           }
         }
       }
-      else if(mParameters.isMarqueeEnabled &&
-              ((!mParameters.isMultiLine && mParameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL) ||
-               (mParameters.isMultiLine && mParameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL)))
+      else if(mParameters.isMarqueeEnabled)
       {
         mRenderInfo = mLoader.RenderMarquee(mParameters, cachedNaturalSize, naturalSize);
-      }
-      else if(mParameters.isTextFitEnabled || mParameters.isTextFitCandidatesEnabled)
-      {
-        mRenderInfo = mLoader.RenderTextFit(mParameters, cachedNaturalSize, naturalSize);
       }
       else
       {

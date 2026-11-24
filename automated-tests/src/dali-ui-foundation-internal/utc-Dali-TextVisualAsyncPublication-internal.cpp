@@ -22,11 +22,17 @@
 #include <dali/public-api/object/weak-handle.h>
 #include <algorithm>
 #include <array>
+#include <cmath>
+#include <cstddef>
 #include <cstring>
 #include <ctime>
 #include <functional>
+#include <initializer_list>
 #include <limits>
+#include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 // Install the callback mock before production headers.
 #include <dali-ui/ui-event-thread-callback.h>
@@ -2539,6 +2545,88 @@ int UtcDaliLabelAutomaticAsyncPublicationReentrantResizeP(void)
   application.Render();
   DALI_TEST_CHECK(WaitForLabelPublication(application, completed, 2u));
   DALI_TEST_EQUALS(completedWidth, 140.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowPublicationEventThreadSharedP(void)
+{
+  UiTestApplication application;
+  // Real worker/event-thread delivery, with repeated label lifetimes in one
+  // process. The deterministic suite checks the exhaustive completion orders.
+  for(unsigned round = 0u; round < 8u; ++round)
+  {
+    std::array<Ui::Label, 4u> labels;
+    std::array<unsigned, 4u>  completed{{0u, 0u, 0u, 0u}};
+    std::array<float, 4u>     widths{{0.f, 0.f, 0.f, 0.f}};
+    unsigned                  total = 0u;
+    ConnectionTracker         tracker;
+    for(unsigned i = 0u; i < labels.size(); ++i)
+    {
+      auto& label = labels[i];
+      label       = Ui::Label::New(i % 2u ? "One\nTwo\nThree\nFour\nFive\nSix" : "A long asynchronous TextFit result precedes the final callback request");
+      label.SetRequestedWidth(180.f);
+      label.SetRequestedHeight(48.f);
+      label.SetMultiLine(i % 2u != 0u);
+      label.SetMarqueeOrientation(i % 2u ? Ui::Text::MarqueeOrientation::VERTICAL : Ui::Text::MarqueeOrientation::HORIZONTAL);
+      label.SetMarqueeTriggerPolicy(Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+      if(i < 2u)
+      {
+        label.SetTextFit(Ui::Text::Fit::Range(12.f, 32.f, 2.f));
+      }
+      else
+      {
+        Dali::Vector<Ui::Text::Fit::Candidate> candidates;
+        candidates.PushBack(Ui::Text::Fit::Candidate(12.f, 16.f));
+        candidates.PushBack(Ui::Text::Fit::Candidate(32.f, 40.f));
+        label.SetTextFit(candidates);
+      }
+      label.SetAsyncRendering(true);
+      label.AsyncRenderFinishedSignal().Connect(&tracker, [&, i](Ui::View, float width, float)
+      {
+        ++total;
+        widths[i] = width;
+        if(++completed[i] == 1u)
+        {
+          labels[i].SetText("Coalesced intermediate");
+          labels[i].SetText("OK");
+          labels[i].SetRequestedWidth(300.f + static_cast<float>(i));
+        }
+      });
+      application.GetScene().Add(label);
+    }
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(WaitForLabelPublication(application, total, 8u));
+    std::array<TextureSet, 4u> textures;
+    for(unsigned i = 0u; i < labels.size(); ++i)
+    {
+      DALI_TEST_EQUALS(completed[i], 2u, TEST_LOCATION);
+      DALI_TEST_EQUALS(widths[i], 300.f + static_cast<float>(i), .02f, TEST_LOCATION);
+      DALI_TEST_CHECK(HasValidTexture(labels[i]));
+      DALI_TEST_CHECK(!labels[i].IsMarqueeRunning());
+      auto visual = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(labels[i])).GetVisual(Ui::Text::LabelPropertyIndex::TEXT);
+      DALI_TEST_EQUALS(Ui::Internal::TextVisual::GetController(visual)->GetTextFitFontSize(Ui::Text::Controller::PIXEL_SIZE), 32.f, .02f, TEST_LOCATION);
+      textures[i] = labels[i].GetRendererAt(0u).GetTextures();
+    }
+    for(unsigned frame = 0u; frame < 3u; ++frame)
+    {
+      application.SendNotification();
+      application.Render();
+      // All expected workers have published. Drain any queued completions
+      // without waiting for a nonexistent ninth publication.
+      Test::AsyncTaskManager::ProcessAllCompletedTasks();
+    }
+    DALI_TEST_EQUALS(total, 8u, TEST_LOCATION);
+    for(unsigned i = 0u; i < labels.size(); ++i)
+    {
+      DALI_TEST_CHECK(labels[i].GetRendererAt(0u).GetTextures() == textures[i]);
+      labels[i].Unparent();
+    }
+    tracker.DisconnectAll();
+    labels = {};
+    application.SendNotification();
+    application.Render();
+  }
   END_TEST;
 }
 
