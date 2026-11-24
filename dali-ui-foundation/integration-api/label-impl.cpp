@@ -3611,7 +3611,8 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   }
   else // MarqueeOrientation::VERTICAL
   {
-    const float textHeight = mController->GetHeightForWidth(controlSize.width);
+    const float textHeight = mController->GetHeightForWidth(controlSize.width,
+                                                            mController->IsTextFitEnabled() || mController->IsTextFitCandidatesEnabled());
 
     // Calculate the actual gap before scrolling wraps.
     int textPadding = static_cast<int>(std::max(controlSize.height - textHeight, 0.0f));
@@ -4146,7 +4147,8 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Ui::Text::Marqu
     }
     else
     {
-      const float textHeight = mController->GetHeightForWidth(contentSize.width);
+      const float textHeight = mController->GetHeightForWidth(contentSize.width,
+                                                              mController->IsTextFitEnabled() || mController->IsTextFitCandidatesEnabled());
       marqueeEnabled         = contentSize.height < textHeight;
     }
   }

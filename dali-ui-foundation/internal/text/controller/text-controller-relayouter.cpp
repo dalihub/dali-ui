@@ -832,7 +832,7 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
   }
 }
 
-float Controller::Relayouter::GetHeightForWidth(Controller& controller, float width)
+float Controller::Relayouter::GetHeightForWidth(Controller& controller, float width, bool ignoreLineLimit)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::GetHeightForWidth %p width %f\n", &controller, width);
 
@@ -843,6 +843,17 @@ float Controller::Relayouter::GetHeightForWidth(Controller& controller, float wi
   ModelPtr&         model          = impl.mModel;
   VisualModelPtr&   visualModel    = model->mVisualModel;
   TextUpdateInfo&   textUpdateInfo = impl.mTextUpdateInfo;
+
+  if(ignoreLineLimit && impl.mMaximumNumberOfLines != MAXIMUM_LINES_UNLIMITED)
+  {
+    // Do not contaminate the capped height cache used by normal measurement
+    // and Fit selection. This exceptional query reuses the selected glyphs.
+    impl.mRecalculateHeightForWidth = true;
+    return CalculateLayoutSizeOnRequiredControllerSize(controller, Size(width, MAX_FLOAT),
+                                                       MAXIMUM_LINES_UNLIMITED,
+                                                       static_cast<OperationsMask>(LAYOUT | ALIGN))
+      .height;
+  }
 
   // Get cached value.
   Size layoutSize = visualModel->GetHeightForWidth();
@@ -1028,7 +1039,13 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
 
   // Layout the text.
   Size layoutSize;
-  updated = DoRelayout(impl, size, impl.mMaximumNumberOfLines, operationsPending, layoutSize) || updated;
+  // Fit selection observes MaximumLines, but the moving model must contain
+  // the full source. Applying the cap here can elide a line and disable an
+  // already validated vertical marquee before its texture is prepared.
+  const Length maximumLines = impl.mIsMarqueeEnabled && (impl.IsTextFitEnabled() || impl.IsTextFitCandidatesEnabled())
+                                ? MAXIMUM_LINES_UNLIMITED
+                                : impl.mMaximumNumberOfLines;
+  updated                   = DoRelayout(impl, size, maximumLines, operationsPending, layoutSize) || updated;
 
   const ReplacementRenderState& replacement = impl.GetReplacementRenderState();
   if(replacement.processingModel && replacement.projection.HasReplacements())

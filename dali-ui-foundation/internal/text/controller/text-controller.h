@@ -1980,9 +1980,19 @@ public: // Queries & retrieves.
   Vector3 GetNaturalSize(bool convertToEven = true);
 
   /**
-   * @copydoc Control::GetHeightForWidth()
+   * @brief Gets the layout height at the given width.
+   * @param[in] width Available width.
+   * @return The text height.
    */
   float GetHeightForWidth(float width);
+
+  /**
+   * @brief Gets the layout height, optionally measuring the full marquee source.
+   * @param[in] width Available width.
+   * @param[in] ignoreLineLimit Ignore MaximumLines when measuring overflow.
+   * @return The text height.
+   */
+  float GetHeightForWidth(float width, bool ignoreLineLimit);
 
   /**
    * @brief Called by the Controller to get the layout size for a particular width and height.

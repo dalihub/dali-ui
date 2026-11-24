@@ -22,9 +22,12 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
+#include <initializer_list>
 #include <limits>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 // Install the callback mock before production headers.
@@ -69,11 +72,50 @@ void UpdateCore(UiTestApplication& application, unsigned milliseconds)
   application.GetCore().PostRender();
 }
 
+// Each fixture exclusively owns capture until teardown.
+// Keep unprocessed captured tasks alive while cancelling them. Their destructor
+// releases the loader through the manager, so it must run outside its task lock.
+struct CapturedTaskCleanup
+{
+  std::vector<Task> pending;
+
+  CapturedTaskCleanup()
+  {
+    Test::AsyncTaskManager::SetTaskCaptureEnabled(true);
+  }
+
+  ~CapturedTaskCleanup()
+  {
+    for(auto& task : Test::AsyncTaskManager::TakeCapturedTasks())
+    {
+      pending.emplace_back(static_cast<Ui::Internal::TextLoadingTask*>(task.Get()));
+    }
+    auto manager = Text::AsyncTextManager::Get();
+    for(auto& task : pending)
+    {
+      Text::GetImplementation(manager).RequestCancel(task->GetId());
+    }
+    pending.clear();
+    Test::AsyncTaskManager::SetTaskCaptureEnabled(false);
+  }
+
+  void Track(const std::vector<Task>& tasks)
+  {
+    pending.erase(std::remove_if(pending.begin(), pending.end(), [](const Task& task)
+    {
+      return task->IsReady() && !task->mLoader;
+    }),
+                  pending.end());
+    pending.insert(pending.end(), tasks.begin(), tasks.end());
+  }
+};
+
 // Capture the real loader tasks and drive the real core animation clock. No
 // worker sleeps, polling retries, private state writes or fabricated results.
 struct Lifecycle
 {
   UiTestApplication&    application;
+  CapturedTaskCleanup   capturedTasks;
   ConnectionTracker     tracker;
   Actor                 parent;
   Ui::Label             label;
@@ -84,52 +126,81 @@ struct Lifecycle
   bool                  asynchronous;
   bool                  trackMarqueeAnimations = true;
 
-  explicit Lifecycle(UiTestApplication& app, bool async = true, bool vertical = false, bool automatic = false, int loops = 0)
+  explicit Lifecycle(UiTestApplication& app, bool async = true, bool vertical = false, bool automatic = false, int loops = 0, int fit = 0)
   : application(app),
     asynchronous(async)
   {
-    Test::AsyncTaskManager::SetTaskCaptureEnabled(true);
-    application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle handle)
+    try
     {
-      Animation animation = Animation::DownCast(handle);
-      if(animation && trackMarqueeAnimations)
+      application.GetCore().GetObjectRegistry().ObjectCreatedSignal().Connect(&tracker, [&](BaseHandle handle)
       {
-        latestAnimation = animation;
-        ++animationsCreated;
-        animation.FinishedSignal().Connect(&tracker, [&](Animation)
-        { ++finished; });
+        Animation animation = Animation::DownCast(handle);
+        if(animation && trackMarqueeAnimations)
+        {
+          latestAnimation = animation;
+          ++animationsCreated;
+          animation.FinishedSignal().Connect(&tracker, [&](Animation)
+          { ++finished; });
+        }
+      });
+      parent = Actor::New();
+      label  = Ui::Label::New(vertical ? VERTICAL_TEXT : LONG_TEXT);
+      label.SetRequestedWidth(180.0f);
+      label.SetRequestedHeight(48.0f);
+      label.SetFontSize(20.0f);
+      label.SetMultiLine(vertical);
+      label.SetMarqueeOrientation(vertical ? Text::MarqueeOrientation::VERTICAL : Text::MarqueeOrientation::HORIZONTAL);
+      label.SetMarqueeLoopCount(loops);
+      label.SetMarqueeLoopDelay(0.0f);
+      label.SetMarqueeGap(0);
+      label.SetMarqueeSpeed(200);
+      label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+      label.SetMarqueeTriggerPolicy(automatic ? Text::MarqueeTriggerPolicy::ON_OVERFLOW : Text::MarqueeTriggerPolicy::MANUAL);
+      if(fit == 1)
+      {
+        label.SetTextFit(Text::Fit::Range(12.f, 32.f, 2.f));
       }
-    });
-    parent = Actor::New();
-    label  = Ui::Label::New(vertical ? VERTICAL_TEXT : LONG_TEXT);
-    label.SetRequestedWidth(180.0f);
-    label.SetRequestedHeight(48.0f);
-    label.SetFontSize(20.0f);
-    label.SetMultiLine(vertical);
-    label.SetMarqueeOrientation(vertical ? Text::MarqueeOrientation::VERTICAL : Text::MarqueeOrientation::HORIZONTAL);
-    label.SetMarqueeLoopCount(loops);
-    label.SetMarqueeLoopDelay(0.0f);
-    label.SetMarqueeGap(0);
-    label.SetMarqueeSpeed(200);
-    label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
-    label.SetMarqueeTriggerPolicy(automatic ? Text::MarqueeTriggerPolicy::ON_OVERFLOW : Text::MarqueeTriggerPolicy::MANUAL);
-    label.SetAsyncRendering(async);
-    label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View, float, float)
-    { ++completed; });
-    parent.Add(label);
-    application.GetScene().Add(parent);
-    Drain();
+      else if(fit == 2)
+      {
+        Dali::Vector<Text::Fit::Candidate> candidates;
+        candidates.PushBack(Text::Fit::Candidate(12.f, 16.f));
+        candidates.PushBack(Text::Fit::Candidate(22.f, 28.f));
+        candidates.PushBack(Text::Fit::Candidate(32.f, 40.f));
+        label.SetTextFit(candidates);
+      }
+      label.SetAsyncRendering(async);
+      label.AsyncRenderFinishedSignal().Connect(&tracker, [&](Ui::View, float, float)
+      { ++completed; });
+      parent.Add(label);
+      application.GetScene().Add(parent);
+      Drain();
+    }
+    catch(...)
+    {
+      Cleanup();
+      throw;
+    }
   }
 
   ~Lifecycle()
   {
+    Cleanup();
+  }
+
+  void Cleanup()
+  {
     tracker.DisconnectAll();
-    if(label) label.Unparent();
+    if(label)
+    {
+      label.Unparent();
+    }
     label.Reset();
-    parent.Unparent();
+    if(parent)
+    {
+      parent.Unparent();
+    }
     parent.Reset();
     Frame();
-    Test::AsyncTaskManager::SetTaskCaptureEnabled(false);
   }
 
   void Frame(unsigned milliseconds = 0u)
@@ -146,6 +217,7 @@ struct Lifecycle
     {
       output.emplace_back(static_cast<Ui::Internal::TextLoadingTask*>(task.Get()));
     }
+    capturedTasks.Track(output);
     return output;
   }
 
@@ -154,7 +226,7 @@ struct Lifecycle
     Frame();
     auto tasks = Take();
     DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
-    return tasks.empty() ? Task{} : tasks.front();
+    return tasks.front();
   }
 
   void Deliver(Task task)
@@ -184,8 +256,14 @@ struct Lifecycle
     {
       Frame();
       auto tasks = Take();
-      if(tasks.empty()) return;
-      for(auto task : tasks) Complete(task);
+      if(tasks.empty())
+      {
+        return;
+      }
+      for(auto task : tasks)
+      {
+        Complete(task);
+      }
     }
     tet_printf("Marquee did not reach event-thread quiescence in eight relayouts");
     tet_result(TET_FAIL);
@@ -240,10 +318,10 @@ struct Lifecycle
   }
 };
 
-void FinishLoopAt(UiTestApplication& application, unsigned phase, bool async, bool vertical, int loops)
+void FinishLoopAt(UiTestApplication& application, unsigned phase, bool async, bool vertical, int loops, int fit = 0)
 {
   tet_printf("finish-loop phase=%u async=%d vertical=%d loops=%d", phase, async, vertical, loops);
-  Lifecycle test(application, async, vertical, false, loops);
+  Lifecycle test(application, async, vertical, fit != 0, loops, fit);
   test.Start();
   Animation      animation  = test.Current();
   auto           shader     = test.label.GetRendererAt(0u).GetShader();
@@ -327,11 +405,11 @@ int UtcDaliMarqueeLifecycleFinishLoopFiniteP(void)
 
 namespace
 {
-void CheckFiniteLoops(UiTestApplication& application, bool async, bool vertical)
+void CheckFiniteLoops(UiTestApplication& application, bool async, bool vertical, int fit = 0, bool automatic = false)
 {
   for(int loops : {0, 1, 2, 3, 32})
   {
-    Lifecycle test(application, async, vertical, false, loops);
+    Lifecycle test(application, async, vertical, automatic, loops, fit);
     test.Start();
     Animation      animation  = test.Current();
     const auto     before     = test.completed;
@@ -357,6 +435,18 @@ void CheckFiniteLoops(UiTestApplication& application, bool async, bool vertical)
       test.Start();
       DALI_TEST_EQUALS(test.Current().GetLoopCount(), 2, TEST_LOCATION);
       DALI_TEST_EQUALS(test.label.GetMarqueeLoopCount(), 2, TEST_LOCATION);
+    }
+    if(automatic)
+    {
+      test.label.SetText("OK");
+      test.label.SetMarqueeLoopCount(loops);
+      test.Drain();
+      const auto created = test.animationsCreated;
+      test.label.StartMarquee();
+      test.Drain();
+      DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+      DALI_TEST_EQUALS(test.animationsCreated, created, TEST_LOCATION);
+      DALI_TEST_EQUALS(test.label.GetMarqueeLoopCount(), loops, TEST_LOCATION);
     }
   }
 }
@@ -503,15 +593,17 @@ int UtcDaliMarqueeLifecycleRuntimeLoopChangeAtPublicationP(void)
 
 namespace
 {
-void CheckFinishLoopCompletionOrder(bool automatic, bool vertical)
+void CheckFinishLoopCompletionOrder(bool automatic, bool vertical, int fit = 0)
 {
   UiTestApplication application;
   for(unsigned when = 0u; when < 5u; ++when)
   {
-    Lifecycle test(application, true, vertical, automatic);
+    Lifecycle test(application, true, vertical, automatic, 0, fit);
     test.Start();
     test.Advance(test.DurationMs() / 3u);
-    test.label.SetText(when % 2u ? "Ab" : "Updated long asynchronous marquee text with several words\nSecond line\nThird line\nFourth line");
+    const char* overflowText = fit && vertical ? "Updated long asynchronous marquee text\nSecond line\nThird line\nFourth line\nFifth line\nSixth line"
+                                               : "Updated long asynchronous marquee text with several words\nSecond line\nThird line\nFourth line";
+    test.label.SetText(when % 2u ? "Ab" : overflowText);
     Task pending = test.Dispatch();
     DALI_TEST_CHECK(pending);
     if(!pending) continue;
@@ -3824,7 +3916,9 @@ static void LateManual(UiTestApplication& app, unsigned api)
   using Request            = void (Ui::Integration::LabelImpl::*)(float, float);
   const Request requests[] = {&Ui::Integration::LabelImpl::RequestAsyncRenderWithFixedSize, &Ui::Integration::LabelImpl::RequestAsyncRenderWithFixedWidth, &Ui::Integration::LabelImpl::RequestAsyncRenderWithFixedHeight, &Ui::Integration::LabelImpl::RequestAsyncRenderWithConstraints};
   t.label.SetText("Manual B snapshot");
-  (impl.*requests[api])(170, 48);
+  DALI_TEST_CHECK(api < 4u);
+  const Request request = requests[api];
+  (impl.*request)(170, 48);
   auto tasks = t.Take();
   DALI_TEST_CHECK(tasks.size() == 1);
   Task b = tasks.front();
@@ -4211,7 +4305,9 @@ void CheckSuppressedManualStop(unsigned api)
                               &Ui::Integration::LabelImpl::RequestAsyncRenderWithFixedHeight,
                               &Ui::Integration::LabelImpl::RequestAsyncRenderWithConstraints};
   const auto    before     = test.completed;
-  (impl.*requests[api])(137.0f, 48.0f);
+  DALI_TEST_CHECK(api < 4u);
+  const Request request = requests[api];
+  (impl.*request)(137.0f, 48.0f);
   auto tasks = test.Take();
   DALI_TEST_EQUALS(tasks.size(), 1u, TEST_LOCATION);
   auto pending = tasks.front();
@@ -5041,6 +5137,784 @@ int UtcDaliCutoutMarqueeManualColorSnapshotP(void)
       test.Complete(tasks.front());
     }
     DALI_TEST_EQUALS(test.completed, done + 2u, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+// Fit must preserve the real animation budget, including a stable static result
+// after natural completion. These reuse the same boundary checks as no-Fit UTCs.
+int UtcDaliTextFitOverflowLoopsSyncHorizontalP(void)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    CheckFiniteLoops(application, false, false, fit, true);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowLoopsSyncVerticalP(void)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    CheckFiniteLoops(application, false, true, fit, true);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowLoopsAsyncHorizontalP(void)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    CheckFiniteLoops(application, true, false, fit, true);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowLoopsAsyncVerticalP(void)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    CheckFiniteLoops(application, true, true, fit, true);
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowFinishLoopP(void)
+{
+  UiTestApplication application;
+  for(bool async : {false, true})
+  {
+    for(bool vertical : {false, true})
+    {
+      for(int fit : {1, 2})
+      {
+        for(int loops : {0, 3})
+        {
+          FinishLoopAt(application, 1u, async, vertical, loops, fit);
+        }
+      }
+    }
+  }
+  END_TEST;
+}
+
+namespace
+{
+Text::ControllerPtr FitController(Ui::Label label)
+{
+  auto visual = Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(label)).GetVisual(Text::LabelPropertyIndex::TEXT);
+  return Ui::Internal::TextVisual::GetController(visual);
+}
+
+void CheckFitOverflowTransitions(UiTestApplication& application, bool async, bool vertical, int fit)
+{
+  Lifecycle test(application, async, vertical, true, 0, fit);
+  DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+  DALI_TEST_EQUALS(FitController(test.label)->GetTextFitFontSize(Text::Controller::PIXEL_SIZE), 12.f, .02f, TEST_LOCATION);
+  // Repeated fits/overflow transitions must consume only the current snapshot.
+  for(unsigned repeat = 0u; repeat < 2u; ++repeat)
+  {
+    test.label.SetText(vertical ? "One\nTwo" : "Small");
+    test.Drain();
+    DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+    DALI_TEST_CHECK(!FitController(test.label)->IsMarqueeEnabled());
+    const auto animations = test.animationsCreated;
+    const auto completed  = test.completed;
+    test.Advance(10000u);
+    test.Drain();
+    DALI_TEST_EQUALS(test.animationsCreated, animations, TEST_LOCATION);
+    DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+    test.CheckTexture();
+    test.label.SetText(vertical ? VERTICAL_TEXT : LONG_TEXT);
+    test.Drain();
+    DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+    DALI_TEST_EQUALS(FitController(test.label)->GetTextFitFontSize(Text::Controller::PIXEL_SIZE), 12.f, .02f, TEST_LOCATION);
+    test.CheckTexture();
+  }
+  test.label.SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE);
+  test.label.StopMarquee();
+  test.Drain();
+  DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+  test.Start();
+  test.label.SetRequestedWidth(1600.f);
+  test.label.SetRequestedHeight(600.f);
+  test.Drain();
+  DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+  test.CheckTexture();
+}
+} // namespace
+
+int UtcDaliTextFitOverflowTransitionsP(void)
+{
+  UiTestApplication application;
+  for(bool async : {false, true})
+  {
+    for(bool vertical : {false, true})
+    {
+      for(int fit : {1, 2})
+      {
+        CheckFitOverflowTransitions(application, async, vertical, fit);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowAsyncLatestPublicationP(void)
+{
+  UiTestApplication application;
+  for(int fit : {1, 2})
+  {
+    Lifecycle test(application, true, false, true, 0, fit);
+    auto      textures = test.label.GetRendererAt(0u).GetTextures();
+    test.label.SetText("short");
+    auto old = test.Dispatch();
+    old->Process();
+    const auto completed = test.completed;
+    test.label.SetText("A newly selected minimum font must still scroll this entire replacement source");
+    auto current = test.Dispatch();
+    test.Deliver(old);
+    DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+    DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == textures);
+    test.Complete(current);
+    test.Drain();
+    DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+    test.CheckTexture();
+
+    bool changed = false;
+    test.label.AsyncRenderFinishedSignal().Connect(&test.tracker, [&](Ui::View, float, float)
+    {
+      if(!changed)
+      {
+        changed = true;
+        test.label.SetText("OK");
+        test.label.SetRequestedWidth(300.f);
+      }
+    });
+    test.label.SetText(LONG_TEXT);
+    test.Drain();
+    DALI_TEST_CHECK(changed);
+    DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+    test.CheckTexture();
+    test.label.SetAsyncRendering(false);
+    test.Drain();
+    DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+    test.label.SetAsyncRendering(true);
+    test.parent.Unparent();
+    test.Drain();
+    application.GetScene().Add(test.parent);
+    test.Drain();
+    DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+    test.CheckTexture();
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowAuditFinishLoopPendingRangeHorizontalP(void)
+{
+  CheckFinishLoopCompletionOrder(true, false, 1);
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowAuditFinishLoopPendingRangeVerticalP(void)
+{
+  CheckFinishLoopCompletionOrder(true, true, 1);
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowAuditFinishLoopPendingCandidatesHorizontalP(void)
+{
+  CheckFinishLoopCompletionOrder(true, false, 2);
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowAuditFinishLoopPendingCandidatesVerticalP(void)
+{
+  CheckFinishLoopCompletionOrder(true, true, 2);
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowMaximumLinesAsyncPublicationP(void)
+{
+  UiTestApplication application;
+  for(int fit : {1, 2})
+  {
+    Lifecycle  test(application, true, true, true, 0, fit);
+    const auto before = test.completed;
+    test.label.SetMaximumLines(1);
+    auto task = test.Dispatch();
+    task->Process();
+    DALI_TEST_EQUALS(task->mParameters.maximumNumberOfLines, 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(task->mRenderInfo.lineCount, 6, TEST_LOCATION);
+    DALI_TEST_CHECK(task->mRenderInfo.marqueePixelData);
+    test.Deliver(task);
+    test.Drain();
+    DALI_TEST_EQUALS(test.completed, before + 1u, TEST_LOCATION);
+    DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+    test.CheckTexture();
+    test.label.SetRequestedHeight(600.f);
+    test.Drain();
+    DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+    test.CheckTexture();
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowFitChangeDuringFinishLoopP(void)
+{
+  UiTestApplication application;
+  for(bool async : {false, true})
+  {
+    for(bool vertical : {false, true})
+    {
+      for(int fit : {1, 2})
+      {
+        Lifecycle test(application, async, vertical, true, 0, fit);
+        test.label.SetFontFamily("DejaVu Sans");
+        test.label.SetText(vertical ? "One\nTwo\nThree" : "MMMMMMMMMMMMMMMMMMMM");
+        test.Drain();
+        DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+        if(fit == 1)
+        {
+          test.label.SetTextFit(Text::Fit::Range(30.f, 32.f, 2.f));
+        }
+        else
+        {
+          Dali::Vector<Text::Fit::Candidate> candidates;
+          candidates.PushBack(Text::Fit::Candidate(30.f, 40.f));
+          candidates.PushBack(Text::Fit::Candidate(32.f, 44.f));
+          test.label.SetTextFit(candidates);
+        }
+        test.Drain();
+        DALI_TEST_CHECK(test.label.IsMarqueeRunning());
+        auto animation = test.Current();
+        auto textures  = test.label.GetRendererAt(0u).GetTextures();
+        auto shader    = test.label.GetRendererAt(0u).GetShader();
+        test.Advance(test.DurationMs() / 2u);
+        test.label.StopMarquee();
+        if(fit == 1)
+        {
+          test.label.SetTextFit(Text::Fit::Range(12.f, 18.f, 2.f));
+        }
+        else
+        {
+          Dali::Vector<Text::Fit::Candidate> candidates;
+          candidates.PushBack(Text::Fit::Candidate(12.f, 16.f));
+          candidates.PushBack(Text::Fit::Candidate(18.f, 20.f));
+          test.label.SetTextFit(candidates);
+        }
+        test.label.SetText("OK");
+        test.Drain();
+        DALI_TEST_CHECK(test.Current() == animation);
+        DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == textures);
+        DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetShader() == shader);
+        test.Advance(test.DurationMs() + 1u);
+        test.Drain();
+        DALI_TEST_CHECK(!test.label.IsMarqueeRunning());
+        DALI_TEST_EQUALS(FitController(test.label)->GetTextFitFontSize(Text::Controller::PIXEL_SIZE), 18.f, .02f, TEST_LOCATION);
+        test.CheckTexture();
+      }
+    }
+  }
+  END_TEST;
+}
+
+namespace
+{
+// Input mutation does not replace a submitted request. Replacement dispatch
+// transfers ownership; only its successful result may become the final result.
+bool PublicationPixelsEqual(PixelData actual, PixelData expected)
+{
+  if(!actual || !expected || actual.GetWidth() != expected.GetWidth() || actual.GetHeight() != expected.GetHeight() || actual.GetPixelFormat() != expected.GetPixelFormat())
+  {
+    return false;
+  }
+  auto a = Integration::GetPixelDataBuffer(actual);
+  auto b = Integration::GetPixelDataBuffer(expected);
+  return a.bufferSize == b.bufferSize && (a.bufferSize == 0u || (a.buffer && b.buffer && std::memcmp(a.buffer, b.buffer, a.bufferSize) == 0));
+}
+
+void ProcessPublication(Task task, const std::string& text, bool moving)
+{
+  DALI_TEST_CHECK(task);
+  DALI_TEST_EQUALS(task->mParameters.text, text, TEST_LOCATION);
+  // Keep the authored snapshot before the worker selects the font/line size.
+  auto parameters = task->mParameters;
+  Process(task);
+  auto loader    = Text::AsyncTextLoader::New();
+  auto reference = Ui::Internal::TextLoadingTask::New(1u, std::move(parameters), nullptr);
+  reference->SetLoader(loader);
+  reference->Process();
+  DALI_TEST_EQUALS(task->mParameters.isMarqueeEnabled, moving, TEST_LOCATION);
+  DALI_TEST_EQUALS(task->mParameters.fontSize, reference->mParameters.fontSize, .02f, TEST_LOCATION);
+  DALI_TEST_EQUALS(task->mParameters.minLineSize, reference->mParameters.minLineSize, .02f, TEST_LOCATION);
+  DALI_TEST_EQUALS(task->mRenderInfo.controlSize, reference->mRenderInfo.controlSize, .02f, TEST_LOCATION);
+  DALI_TEST_EQUALS(task->mRenderInfo.lineCount, reference->mRenderInfo.lineCount, TEST_LOCATION);
+  DALI_TEST_CHECK(PublicationPixelsEqual(task->mRenderInfo.textPixelData, reference->mRenderInfo.textPixelData));
+  if(moving)
+  {
+    DALI_TEST_CHECK(PublicationPixelsEqual(task->mRenderInfo.marqueePixelData, reference->mRenderInfo.marqueePixelData));
+  }
+  else
+  {
+    DALI_TEST_CHECK(!task->mRenderInfo.marqueePixelData);
+  }
+}
+
+void DeliverPublication(Lifecycle& test, Task latest)
+{
+  TextureSet previous;
+  if(test.label.GetRendererCount())
+  {
+    previous = test.label.GetRendererAt(0u).GetTextures();
+  }
+  test.Deliver(latest);
+  test.CheckTexture();
+  DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() != previous);
+}
+
+void CheckPublishedResult(Lifecycle& test, Task latest, int fit, bool moving)
+{
+  test.CheckTexture();
+  const auto& parameters = latest->mParameters;
+  auto        pixels     = moving ? latest->mRenderInfo.marqueePixelData : latest->mRenderInfo.textPixelData;
+  auto        texture    = test.label.GetRendererAt(0u).GetTextures().GetTexture(0u);
+  DALI_TEST_EQUALS(texture.GetWidth(), pixels.GetWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(texture.GetHeight(), pixels.GetHeight(), TEST_LOCATION);
+  DALI_TEST_EQUALS(test.label.IsMarqueeRunning(), moving, TEST_LOCATION);
+  DALI_TEST_EQUALS(texture.GetPixelFormat(), pixels.GetPixelFormat(), TEST_LOCATION);
+  if(fit)
+  {
+    DALI_TEST_EQUALS(FitController(test.label)->GetTextFitFontSize(Text::Controller::POINT_SIZE), parameters.fontSize, .02f, TEST_LOCATION);
+  }
+  if(fit == 2)
+  {
+    DALI_TEST_EQUALS(FitController(test.label)->GetCurrentLineSize(), parameters.minLineSize, .02f, TEST_LOCATION);
+  }
+}
+
+void CheckPublicationStable(Lifecycle& test, Task latest, const std::vector<Task>& obsolete, int fit, bool moving)
+{
+  CheckPublishedResult(test, latest, fit, moving);
+  auto       renderer  = test.label.GetRendererAt(0u);
+  auto       textures  = renderer.GetTextures();
+  auto       shader    = renderer.GetShader();
+  auto       geometry  = renderer.GetGeometry();
+  auto       animation = test.latestAnimation.GetHandle();
+  const auto completed = test.completed;
+  const auto created   = test.animationsCreated;
+  for(auto old : obsolete)
+  {
+    test.Deliver(old);
+  }
+  test.Deliver(latest); // Duplicate completion cannot retire/re-publish anything.
+  test.Advance(100u);
+  DALI_TEST_CHECK(test.Take().empty());
+  DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+  DALI_TEST_EQUALS(test.animationsCreated, created, TEST_LOCATION);
+  DALI_TEST_CHECK(test.label.GetRendererAt(0u) == renderer);
+  DALI_TEST_CHECK(renderer.GetTextures() == textures);
+  DALI_TEST_CHECK(renderer.GetShader() == shader);
+  DALI_TEST_CHECK(renderer.GetGeometry() == geometry);
+  if(moving)
+  {
+    DALI_TEST_CHECK(test.latestAnimation.GetHandle() == animation);
+  }
+  CheckPublishedResult(test, latest, fit, moving);
+}
+
+void CheckPublicationBeforeDispatch(bool sizeChange)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    for(bool vertical : {false, true})
+    {
+      Lifecycle         test(application, true, vertical, true, 0, fit);
+      const std::string source = vertical ? VERTICAL_TEXT : LONG_TEXT;
+      test.label.SetText(source.c_str());
+      auto old = test.Dispatch();
+      Process(old);
+      const auto completed = test.completed;
+      if(sizeChange)
+      {
+        test.label.SetRequestedWidth(1600.f);
+        test.label.SetRequestedHeight(600.f);
+      }
+      else
+      {
+        test.label.SetText("OK");
+      }
+      test.Deliver(old);
+      // Preserve the established intermediate callback, then prove progress.
+      DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+      auto latest = test.Dispatch();
+      DALI_TEST_EQUALS(latest->mParameters.textWidth, sizeChange ? 1600.f : 180.f, .02f, TEST_LOCATION);
+      DALI_TEST_EQUALS(latest->mParameters.textHeight, sizeChange ? 600.f : 48.f, .02f, TEST_LOCATION);
+      ProcessPublication(latest, sizeChange ? source : "OK", false);
+      DeliverPublication(test, latest);
+      DALI_TEST_EQUALS(test.completed, completed + 2u, TEST_LOCATION);
+      CheckPublicationStable(test, latest, {old}, fit, false);
+      // The size setter has an established no-op fast path.
+      test.label.SetRequestedWidth(sizeChange ? 1600.f : 180.f);
+      test.label.SetRequestedHeight(sizeChange ? 600.f : 48.f);
+      test.Frame();
+      DALI_TEST_CHECK(test.Take().empty());
+      DALI_TEST_EQUALS(test.completed, completed + 2u, TEST_LOCATION);
+    }
+  }
+}
+
+void CheckPublicationOrders()
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    for(bool vertical : {false, true})
+    {
+      for(bool moving : {false, true})
+      {
+        for(bool latestFirst : {false, true})
+        {
+          Lifecycle         test(application, true, vertical, true, 0, fit);
+          std::vector<Task> tasks;
+          const unsigned    count     = 3u;
+          const auto        completed = test.completed;
+          for(unsigned i = 0u; i < count; ++i)
+          {
+            const std::string text = i + 1u == count ? (moving ? (vertical ? VERTICAL_TEXT : LONG_TEXT) : "OK") : "Obsolete " + std::to_string(i);
+            test.label.SetText(text.c_str());
+            auto task = test.Dispatch();
+            if(i + 1u == count)
+            {
+              ProcessPublication(task, text, moving);
+            }
+            else
+            {
+              Process(task);
+            }
+            tasks.push_back(task);
+          }
+          auto     textures = test.label.GetRendererAt(0u).GetTextures();
+          unsigned accepted = 0u;
+          for(unsigned i = 0u; i < count; ++i)
+          {
+            const unsigned index = latestFirst ? count - 1u - i : i;
+            if(index + 1u == count)
+            {
+              DeliverPublication(test, tasks[index]);
+            }
+            else
+            {
+              test.Deliver(tasks[index]);
+            }
+            if(index + 1u == count)
+            {
+              ++accepted;
+              textures = test.label.GetRendererAt(0u).GetTextures();
+              CheckPublishedResult(test, tasks.back(), fit, moving);
+            }
+            DALI_TEST_EQUALS(test.completed, completed + accepted, TEST_LOCATION);
+            DALI_TEST_CHECK(test.label.GetRendererAt(0u).GetTextures() == textures);
+          }
+          DALI_TEST_EQUALS(accepted, 1u, TEST_LOCATION);
+          CheckPublicationStable(test, tasks.back(), tasks, fit, moving);
+        }
+      }
+    }
+  }
+}
+
+} // namespace
+
+int UtcDaliTextFitOverflowPublicationSizeBeforeDispatchP(void)
+{
+  CheckPublicationBeforeDispatch(true);
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowPublicationTextBeforeDispatchP(void)
+{
+  CheckPublicationBeforeDispatch(false);
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowPublicationReorderedP(void)
+{
+  CheckPublicationOrders();
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowPublicationCoalescedTextP(void)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    for(bool vertical : {false, true})
+    {
+      Lifecycle test(application, true, vertical, true, 0, fit);
+      for(unsigned round = 0u; round < 10u; ++round)
+      {
+        const bool        moving = round % 2u;
+        const std::string source = vertical ? VERTICAL_TEXT : LONG_TEXT;
+        test.label.SetText(source.c_str());
+        auto old = test.Dispatch();
+        Process(old);
+        const auto completed = test.completed;
+        test.label.SetText("Intermediate B must be coalesced");
+        test.label.SetText(moving ? source.c_str() : "OK");
+        test.Deliver(old);
+        DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+        auto latest = test.Dispatch(); // Exactly one task: no separate B worker.
+        ProcessPublication(latest, moving ? source : "OK", moving);
+        DeliverPublication(test, latest);
+        DALI_TEST_EQUALS(test.completed, completed + 2u, TEST_LOCATION);
+        CheckPublicationStable(test, latest, {old}, fit, moving);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowPublicationReentrantLatestP(void)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    for(bool vertical : {false, true})
+    {
+      for(bool coalesced : {false, true})
+      {
+        Lifecycle test(application, true, vertical, true, 0, fit);
+        bool      changed = false;
+        test.label.AsyncRenderFinishedSignal().Connect(&test.tracker, [&](Ui::View, float, float)
+        {
+          if(!changed)
+          {
+            changed = true;
+            test.label.SetText("B");
+            test.label.SetRequestedWidth(240.f);
+            if(coalesced)
+            {
+              test.label.SetText("C");
+              test.label.SetRequestedWidth(300.f);
+            }
+          }
+        });
+        test.label.SetText("A callback creates the next successful request");
+        auto       old       = test.Dispatch();
+        const auto completed = test.completed;
+        test.Complete(old);
+        DALI_TEST_CHECK(changed);
+        auto latest = test.Dispatch();
+        DALI_TEST_EQUALS(latest->mParameters.textWidth, coalesced ? 300.f : 240.f, .02f, TEST_LOCATION);
+        ProcessPublication(latest, coalesced ? "C" : "B", false);
+        test.Deliver(old); // Must not retire the request created by the callback.
+        DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+        DeliverPublication(test, latest);
+        DALI_TEST_EQUALS(test.completed, completed + 2u, TEST_LOCATION);
+        CheckPublicationStable(test, latest, {old}, fit, false);
+      }
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowPublicationSizeBoundariesP(void)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    for(unsigned boundary = 0u; boundary < 5u; ++boundary)
+    {
+      Lifecycle test(application, true, false, true, 0, fit);
+      Ui::View  container;
+      if(boundary == 4u)
+      {
+        test.label.Unparent();
+        test.parent.Unparent();
+        container = Ui::View::New();
+        container.SetRequestedWidth(180.f);
+        container.SetRequestedHeight(48.f);
+        test.label.SetRequestedWidth(-2.f);
+        test.label.SetRequestedHeight(-2.f);
+        container.Add(test.label);
+        test.parent = container;
+        application.GetScene().Add(container);
+        test.Drain();
+      }
+      test.label.SetText(LONG_TEXT);
+      auto old = test.Dispatch();
+      ProcessPublication(old, LONG_TEXT, true);
+      const auto completed = test.completed;
+      if(boundary == 1u)
+      {
+        test.label.Measure(180.f, 48.f);
+      }
+      if(container)
+      {
+        container.SetRequestedWidth(1600.f);
+        container.SetRequestedHeight(600.f);
+      }
+      else if(boundary == 0u)
+      {
+        test.label.SetProperty(Ui::View::Property::REQUESTED_WIDTH, 1600.f);
+        test.label.SetProperty(Ui::View::Property::REQUESTED_HEIGHT, 600.f);
+      }
+      else
+      {
+        // Rapid width changes and A -> B -> A before the final size request.
+        test.label.SetRequestedWidth(240.f);
+        test.label.SetRequestedWidth(180.f);
+        if(boundary != 3u)
+        {
+          test.label.SetRequestedWidth(1600.f);
+          test.label.SetRequestedHeight(600.f);
+        }
+      }
+      if(boundary == 2u)
+      {
+        test.label.Measure(1600.f, 600.f);
+      }
+      // Measure may advance layout observations; the request is still owned
+      // until dispatch. No private requested-size generation is assumed.
+      DALI_TEST_CHECK(test.Take().empty());
+      test.Deliver(old);
+      DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+      // A -> B -> A dirties layout once: the coalesced request must use A.
+      const bool  unchangedBounds = boundary == 3u;
+      const float finalWidth      = unchangedBounds ? 180.f : 1600.f;
+      const float finalHeight     = unchangedBounds ? 48.f : 600.f;
+      auto        latest          = test.Dispatch();
+      DALI_TEST_EQUALS(latest->mParameters.textWidth, finalWidth, .02f, TEST_LOCATION);
+      DALI_TEST_EQUALS(latest->mParameters.textHeight, finalHeight, .02f, TEST_LOCATION);
+      ProcessPublication(latest, LONG_TEXT, unchangedBounds);
+      DeliverPublication(test, latest);
+      DALI_TEST_EQUALS(test.completed, completed + 2u, TEST_LOCATION);
+      CheckPublicationStable(test, latest, {old}, fit, unchangedBounds);
+      DALI_TEST_EQUALS(test.label.GetCurrentProperty<Vector3>(Actor::Property::SIZE), Vector3(finalWidth, finalHeight, 0.f), .02f, TEST_LOCATION);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowPublicationStyledFitAndStopP(void)
+{
+  UiTestApplication application;
+  for(int fit : {1, 2})
+  {
+    for(bool vertical : {false, true})
+    {
+      Lifecycle test(application, true, vertical, true, 0, fit);
+      auto      builder = Text::StyledTextBuilder::New(vertical ? VERTICAL_TEXT : LONG_TEXT);
+      builder.SetSpan(Text::ForegroundColorSpan::New(Color::RED), 0u, 3u);
+      test.label.SetStyledText(builder.Build());
+      auto old = test.Dispatch();
+      Process(old);
+      const auto completed    = test.completed;
+      auto       finalBuilder = Text::StyledTextBuilder::New("OK");
+      finalBuilder.SetSpan(Text::ForegroundColorSpan::New(Color::GREEN), 0u, 2u);
+      test.label.SetStyledText(finalBuilder.Build());
+      test.label.SetRequestedWidth(300.f);
+      if(fit == 1)
+      {
+        test.label.SetTextFit(Text::Fit::Range(14.f, 24.f, 2.f));
+      }
+      else
+      {
+        Dali::Vector<Text::Fit::Candidate> candidates;
+        candidates.PushBack(Text::Fit::Candidate(14.f, 18.f));
+        candidates.PushBack(Text::Fit::Candidate(24.f, 30.f));
+        test.label.SetTextFit(candidates);
+      }
+      test.label.SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE);
+      test.label.StopMarquee();
+      auto latest = test.Dispatch();
+      ProcessPublication(latest, "OK", false);
+      test.Deliver(old);
+      DALI_TEST_EQUALS(test.completed, completed, TEST_LOCATION);
+      DeliverPublication(test, latest);
+      DALI_TEST_EQUALS(test.completed, completed + 1u, TEST_LOCATION);
+      CheckPublicationStable(test, latest, {old}, fit, false);
+      DALI_TEST_EQUALS(FitController(test.label)->GetTextFitFontSize(Text::Controller::PIXEL_SIZE), 24.f, .02f, TEST_LOCATION);
+      // Reassigning Text is an authored request (it also removes spans), not a
+      // size-setter no-op. Exactly one worker and no spontaneous duplicate.
+      test.label.SetText("OK");
+      auto plain = test.Dispatch();
+      ProcessPublication(plain, "OK", false);
+      DeliverPublication(test, plain);
+      test.label.SetText("OK");
+      auto same = test.Dispatch();
+      ProcessPublication(same, "OK", false);
+      DeliverPublication(test, same);
+      DALI_TEST_EQUALS(test.completed, completed + 3u, TEST_LOCATION);
+      CheckPublicationStable(test, same, {old, latest, plain}, fit, false);
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliTextFitOverflowPublicationEmptyModeReconnectP(void)
+{
+  UiTestApplication application;
+  for(int fit : {0, 1, 2})
+  {
+    Lifecycle test(application, true, false, true, 0, fit);
+    for(unsigned transition = 0u; transition < 4u; ++transition)
+    {
+      test.label.SetText(LONG_TEXT);
+      auto old = test.Dispatch();
+      Process(old);
+      const auto completed = test.completed;
+      if(transition == 0u)
+      {
+        test.label.SetText("");
+      }
+      else if(transition == 1u)
+      {
+        test.label.SetRequestedWidth(0.f);
+        test.label.SetRequestedHeight(0.f);
+      }
+      else if(transition == 2u)
+      {
+        test.label.SetAsyncRendering(false);
+      }
+      else
+      {
+        test.parent.Unparent();
+      }
+      test.Frame();
+      DALI_TEST_CHECK(test.Take().empty());
+      const auto afterTransition = test.completed;
+      test.Deliver(old);
+      DALI_TEST_EQUALS(test.completed, afterTransition, TEST_LOCATION);
+      if(transition < 2u)
+      {
+        DALI_TEST_EQUALS(afterTransition, completed + 1u, TEST_LOCATION);
+        DALI_TEST_EQUALS(test.label.GetRendererCount(), 0u, TEST_LOCATION);
+      }
+      test.label.SetText("OK");
+      test.label.SetRequestedWidth(180.f);
+      test.label.SetRequestedHeight(48.f);
+      if(transition == 2u)
+      {
+        test.label.SetAsyncRendering(true);
+      }
+      if(transition == 3u)
+      {
+        application.GetScene().Add(test.parent);
+      }
+      auto latest = test.Dispatch();
+      ProcessPublication(latest, "OK", false);
+      DeliverPublication(test, latest);
+      DALI_TEST_EQUALS(test.completed, afterTransition + 1u, TEST_LOCATION);
+      CheckPublicationStable(test, latest, {old}, fit, false);
+    }
   }
   END_TEST;
 }

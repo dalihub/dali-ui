@@ -78,9 +78,10 @@ struct Controller::Relayouter
    *
    * @param[in] controller A reference to the controller class
    * @param[in] width The width we want the height for
-   * @return
+   * @param[in] ignoreLineLimit Measure the complete source without updating the capped height cache
+   * @return The layout height at the requested width
    */
-  static float GetHeightForWidth(Controller& controller, float width);
+  static float GetHeightForWidth(Controller& controller, float width, bool ignoreLineLimit);
 
   /**
    * @brief Called by the Controller to get the layout size for a particular width and height.
