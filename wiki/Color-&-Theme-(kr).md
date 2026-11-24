@@ -154,7 +154,7 @@ public:
   {
     auto* impl = TvConfigImpl::New().Get();
     TVConfig config(impl);
-    config.SetDpi(72);
+    config.SetUnitDpi(72);
     config.SetUnitScalingFactor(2.0f);
     return config;
   }

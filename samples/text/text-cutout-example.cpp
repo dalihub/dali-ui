@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -97,7 +98,7 @@ enum Action : unsigned
 Label MakeLabel(const char* text, float fontSize = 14.f)
 {
   auto label = Label::New(text);
-  label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::DISABLED);
   label.SetFontFamily("SamsungOneUI_600");
   label.SetFontSize(fontSize);
   label.SetTextColor(UiColor(0xF4F7FB));
@@ -126,7 +127,7 @@ private:
     auto window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x0C1424));
     mRoot = AbsoluteLayout::New();
-    mRoot.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(mRoot, Ui::Extension::UiScalePolicy::DISABLED);
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
     window.Add(mRoot);
@@ -159,7 +160,7 @@ private:
     }
     mCard  = AbsoluteLayout::New();
     mLabel = Label::New();
-    mLabel.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(mLabel, Ui::Extension::UiScalePolicy::DISABLED);
     mLabel.SetFontFamily("SamsungOneUI_600");
     mLabel.SetCornerRadius(24.f);
     mCard.Add(mLabel);

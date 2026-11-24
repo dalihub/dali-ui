@@ -235,7 +235,7 @@ role은 View의 구현 클래스가 아니라 **사용자에게 제공하는 기
 전체 role은 `Accessibility::Role`을 참고하세요. 의미 있는 role을 지정하면 기본적으로 highlightable 대상이 됩니다.
 
 > [!NOTE]
-> Component 기본값에는 `OnAccessibilityRequestDefaultName/Description/Value()`를 사용합니다. 기존 `OnAccessibilityRequestName/Description/Value()`는 deprecated이며 explicit property보다 우선하는 기존 동작을 유지합니다. 자세한 우선순위는 [동적 값과 Component 기본 Name/Description/Value](#165-동적-값과-component-기본-namedescriptionvalue)를 참고하세요.
+> Component 기본값에는 `OnAccessibilityRequestDefaultName/Description/Value()`를 사용합니다. explicit property가 항상 이 기본값보다 우선합니다. 자세한 우선순위는 [동적 값과 Component 기본 Name/Description/Value](#165-동적-값과-component-기본-namedescriptionvalue)를 참고하세요.
 
 <br/>
 
@@ -1001,15 +1001,13 @@ bool VolumeSliderImpl::OnAccessibilityRequestDefaultValue(Dali::String& value)
 }
 ```
 
-Default hook은 기존 request hook이 요청을 처리하지 않았고 explicit property가 비어 있을 때만 호출됩니다. `true`이면 의도적인 빈 문자열을 포함해 output을 채택합니다. `false`이면 output을 무시하고 기존 Name/Description fallback으로 진행하며, Value는 빈 값이 됩니다.
-
-`OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, `OnAccessibilityRequestValue()`는 deprecated입니다. 기존 우선순위는 유지되므로 `true`이면 explicit property도 덮어씁니다. 새 코드에는 explicit setter 또는 default hook을 권장합니다. Default hook으로 이전하면 explicit property가 우선하므로 동작이 달라집니다. 대응하는 non-default request callback setter는 제거되었습니다.
+Default hook은 explicit property가 비어 있을 때만 호출됩니다. `true`이면 의도적인 빈 문자열을 포함해 output을 채택합니다. `false`이면 output을 무시하고 기존 Name/Description fallback으로 진행하며, Value는 빈 값이 됩니다.
 
 정보 | 조회 순서
 --|--
-Name | deprecated request hook → explicit/translated property → default callback 또는 virtual → integration raw fallback → Actor Name
-Description | deprecated request hook → explicit/translated property → default callback 또는 virtual → integration raw fallback
-Value | deprecated request hook → explicit property → default callback 또는 virtual → 빈 값
+Name | explicit/translated property → default callback 또는 virtual → integration raw fallback → Actor Name
+Description | explicit/translated property → default callback 또는 virtual → integration raw fallback
+Value | explicit property → default callback 또는 virtual → 빈 값
 
 등록된 default callback은 해당 virtual hook을 대체합니다. `false`를 반환해도 virtual을 호출하지 않으며, callback을 해제하면 virtual dispatch로 복귀합니다.
 
@@ -1084,11 +1082,8 @@ Virtual API | 접근성 요청
 `OnAccessibilityScrollToChild(View child)` | scroll container가 child를 화면에 표시
 `OnAccessibilityPan(PanGesture)` | 접근성 pan 처리
 `OnAccessibilityZoom()` | 접근성 zoom 처리
-`OnAccessibilityRequestName()` | Deprecated: explicit property보다 우선하는 기존 동작 유지
 `OnAccessibilityRequestDefaultName()` | explicit Name이 없을 때 Component 기본 name 제공
-`OnAccessibilityRequestDescription()` | Deprecated: explicit property보다 우선하는 기존 동작 유지
 `OnAccessibilityRequestDefaultDescription()` | explicit Description이 없을 때 Component 기본 description 제공
-`OnAccessibilityRequestValue()` | Deprecated: explicit property보다 우선하는 기존 동작 유지
 `OnAccessibilityRequestDefaultValue()` | explicit Value가 비어 있을 때 Component 기본값 제공
 
 Action callback은 요청을 처리했으면 `true`, 지원하지 않거나 처리하지 못했으면 `false`를 반환합니다. 문자열 조회 hook의 우선순위와 반환 규칙은 [16.5 동적 값과 Component 기본 Name/Description/Value](#165-동적-값과-component-기본-namedescriptionvalue)을 참고하세요.

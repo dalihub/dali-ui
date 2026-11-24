@@ -12,7 +12,7 @@ dali-ui provides three independent scaling mechanisms that together produce the 
 
 This document covers the **dynamic scale** system (`UiScale`) and the **per-window scale**, which is an independent multiplier on top of it.
 
-The runtime scale APIs — `Extension::LayoutScaleManager` (`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()` and `Extension::View::GetEffectiveLayoutScale()` (`dali-ui-foundation/extension-api/view.h`), with the policy type `Extension::UiScalePolicy` (`dali-ui-foundation/extension-api/ui-scale-policy.h`) — are extension APIs for platform integrators and module providers: the system or accessibility handler that applies the display scale, or a module that scales one window's content. They are not part of the application-facing public API, but they are installed with it and remain usable. In this page `LayoutScaleManager` means `Dali::Ui::Extension::LayoutScaleManager` and `UiScalePolicy` means `Dali::Ui::Extension::UiScalePolicy`; the public `Dali::Ui::UiScalePolicy` is deprecated.
+The runtime scale APIs — `Extension::LayoutScaleManager` (`dali-ui-foundation/extension-api/layout-scale-manager.h`), `Extension::View::SetUiScalePolicy()` / `GetUiScalePolicy()` and `Extension::View::GetEffectiveLayoutScale()` (`dali-ui-foundation/extension-api/view.h`), with the policy type `Extension::UiScalePolicy` (`dali-ui-foundation/extension-api/ui-scale-policy.h`) — are extension APIs for platform integrators and module providers: the system or accessibility handler that applies the display scale, or a module that scales one window's content. They are not part of the application-facing public API, but they are installed with it and remain usable. In this page `LayoutScaleManager` means `Dali::Ui::Extension::LayoutScaleManager` and `UiScalePolicy` means `Dali::Ui::Extension::UiScalePolicy`.
 
 <br/>
 
@@ -126,27 +126,9 @@ The window scale applies to a view only while the view is in that window. A view
 
 <br/>
 
-### UiScaleManager (deprecated)
-
-`UiScaleManager` (`ui-scale-manager.h`) is the earlier name of this class. It is deprecated and kept for applications built against earlier releases; new code uses `LayoutScaleManager`. Both classes share one state, so a value set through either one is read back through both and the last call wins. They are separate handles: `LayoutScaleManager::DownCast()` of a `UiScaleManager` handle, and the reverse, returns an empty handle.
-
-| UiScaleManager (deprecated) | LayoutScaleManager |
-|---|---|
-| `UiScaleManager::Get()` | `LayoutScaleManager::Get()` |
-| `GetScale()` | `GetUiScale()` |
-| `SetScale(float)` | `SetUiScale(float)` |
-| `IsScalable()` | `IsScalable()` |
-| `SetScalable(bool)` | `SetScalable(bool)` |
-| `RegisterLayoutRoot(View)`, `UnregisterLayoutRoot(View)` | None; the library registers layout roots itself |
-| None | `GetWindowScale(Window)`, `SetWindowScale(Window, float)` |
-
-`ViewImpl::GetEffectiveScale()` is deprecated along with it: use `Extension::View::GetEffectiveLayoutScale()`, which returns the same value.
-
-<br/>
-
 ## UiScalePolicy
 
-Each `View` can override how it participates in the scale propagation via `Extension::View::SetUiScalePolicy()`; `Extension::View::GetUiScalePolicy()` reads it back. Both take and return `Extension::UiScalePolicy`. The `View` and `ViewImpl` members `SetUiScalePolicy()` / `GetUiScalePolicy()` are deprecated and still work; they take and return the deprecated `Dali::Ui::UiScalePolicy`, a distinct type with the same enumerators and values, so convert between the two with `static_cast`.
+Each `View` can override how it participates in the scale propagation via `Extension::View::SetUiScalePolicy()`; `Extension::View::GetUiScalePolicy()` reads it back. Both take and return `Extension::UiScalePolicy`.
 
 ```cpp
 #include <dali-ui-foundation/extension-api/view.h>
