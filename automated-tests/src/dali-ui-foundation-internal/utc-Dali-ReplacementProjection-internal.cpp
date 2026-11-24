@@ -2678,7 +2678,7 @@ int UtcDaliInlineReplacementManagerPixelBindingOrderingP(void)
   using Accessor = Dali::Ui::Internal::Text::InlineReplacementManagerTestAccessor;
 
   Texture      texture  = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 48u, 32u);
-  Ui::ImageUrl imageUrl = Ui::ImageUrl::New(texture, true);
+  Ui::ImageUrl imageUrl = Ui::ImageUrl::New(texture);
 
   Text::ReplacementSourceSnapshot source;
   source.sourceRevision            = 101u;
@@ -3298,7 +3298,7 @@ struct BlurCaptureFixture
     host(owner, Ui::Integration::DepthIndex::CONTENT + 1),
     manager(std::make_unique<ReplacementManager>()),
     image(Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u)),
-    url(Ui::ImageUrl::New(image, true))
+    url(Ui::ImageUrl::New(image))
   {
     application.GetScene().Add(owner);
     source.sourceRevision = 17u;

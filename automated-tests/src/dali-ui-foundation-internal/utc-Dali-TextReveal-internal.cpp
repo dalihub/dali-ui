@@ -3185,7 +3185,7 @@ int UtcDaliTextRevealImageReplacementPixelFragmentP(void)
   UiTestApplication application;
 
   Texture                   imageTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  Ui::ImageUrl              imageUrl     = Ui::ImageUrl::New(imageTexture, true);
+  Ui::ImageUrl              imageUrl     = Ui::ImageUrl::New(imageTexture);
   UiText::StyledTextBuilder builder      = UiText::StyledTextBuilder::New("A X B");
   DALI_TEST_CHECK(builder.SetSpan(
     UiText::ImageSpan::New(UiText::ImageAttributes(imageUrl.GetUrl(), Vector2(120.0f, 40.0f))),
@@ -3493,7 +3493,7 @@ int UtcDaliTextRevealImageReplacementEndEllipsisPerLineSequenceP(void)
   UiTestApplication application;
 
   Texture      imageTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  Ui::ImageUrl imageUrl     = Ui::ImageUrl::New(imageTexture, true);
+  Ui::ImageUrl imageUrl     = Ui::ImageUrl::New(imageTexture);
 
   struct CheckedPlan
   {
@@ -4172,7 +4172,7 @@ int UtcDaliTextRevealImageReplacementAsyncPixelAutoP(void)
   UiTestApplication application;
 
   Texture      imageTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  Ui::ImageUrl imageUrl     = Ui::ImageUrl::New(imageTexture, true);
+  Ui::ImageUrl imageUrl     = Ui::ImageUrl::New(imageTexture);
 
   auto runCase = [&](const char*                              text,
                      const std::vector<UiText::CharacterRun>& ranges,
@@ -4279,7 +4279,7 @@ int UtcDaliTextRevealImageReplacementAsyncOwnerDestructionP(void)
   // only deferred callback below is therefore the TextVisual render request
   // whose observer lifetime this test targets.
   Texture                   imageTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  Ui::ImageUrl              imageUrl     = Ui::ImageUrl::New(imageTexture, true);
+  Ui::ImageUrl              imageUrl     = Ui::ImageUrl::New(imageTexture);
   UiText::StyledTextBuilder builder      = UiText::StyledTextBuilder::New("A X B lifecycle ownership");
   DALI_TEST_CHECK(builder.SetSpan(
     UiText::ImageSpan::New(UiText::ImageAttributes(imageUrl.GetUrl(), Vector2(24.0f, 20.0f))),

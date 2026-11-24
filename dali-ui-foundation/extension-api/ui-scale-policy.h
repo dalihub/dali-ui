@@ -45,12 +45,8 @@ namespace Extension
  * rest of the scale configuration, this is an extension API for platform integrators and
  * module providers, and not part of the application-facing public API.
  *
- * It replaces the deprecated Ui::UiScalePolicy, which only the deprecated
- * Ui::View::SetUiScalePolicy(), Ui::View::GetUiScalePolicy() and their Ui::ViewImpl
- * counterparts take and return. The two are distinct types with the same enumerators and
- * values: the enumerators of the same name select the same policy, and static_cast converts
- * a value between them. Inside a ViewImpl subclass write Ui::Extension::UiScalePolicy: an
- * unqualified Extension:: names CustomActorImpl::Extension there.
+ * Inside a ViewImpl subclass write Ui::Extension::UiScalePolicy: an unqualified Extension::
+ * names CustomActorImpl::Extension there.
  *
  * @code
  *   Extension::View::SetUiScalePolicy(panel, Extension::UiScalePolicy::DISABLED);

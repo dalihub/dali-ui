@@ -16,39 +16,31 @@ operation is not exposed by the generic `Accessible` interface.
 
 The effective accessible name is resolved in this order:
 
-1. Deprecated `OnAccessibilityRequestName()` when it returns `true`, including an
+1. A non-empty explicitly configured (or translated) accessibility name.
+2. `OnAccessibilityRequestDefaultName()` when it returns `true`, including an
    intentionally empty value.
-2. A non-empty explicitly configured (or translated) accessibility name.
-3. `OnAccessibilityRequestDefaultName()` when it returns `true`, including an
-   intentionally empty value.
-4. The integration-only legacy raw-name fallback, then `Actor::Property::NAME`.
+3. The integration-only legacy raw-name fallback, then `Actor::Property::NAME`.
 
-The deprecated `OnAccessibilityRequestName()` retains its original priority.
-New components should use `OnAccessibilityRequestDefaultName()`, which supplies
-subclass semantics only when the explicit name is empty. Migrating between
-these hooks changes priority because an explicit name wins over the default.
+`OnAccessibilityRequestDefaultName()` supplies subclass semantics only when the
+explicit name is empty: an explicit name always wins over the default.
 
 ## Description Resolution Contract
 
 The effective accessible description follows the corresponding order:
 
-1. Deprecated `OnAccessibilityRequestDescription()` when it returns `true`, including an
-   intentionally empty value.
-2. A non-empty explicitly configured (or translated) accessibility description.
-3. `OnAccessibilityRequestDefaultDescription()` when it returns `true`,
+1. A non-empty explicitly configured (or translated) accessibility description.
+2. `OnAccessibilityRequestDefaultDescription()` when it returns `true`,
    including an intentionally empty value.
-4. The integration-only legacy raw-description fallback.
+3. The integration-only legacy raw-description fallback.
 
 ## Value Resolution Contract
 
 The effective accessible value is resolved in this order:
 
-1. Deprecated `OnAccessibilityRequestValue()` when it returns `true`, including
-   an intentionally empty value.
-2. A non-empty explicitly configured accessibility value.
-3. The default-value callback or `OnAccessibilityRequestDefaultValue()` when
+1. A non-empty explicitly configured accessibility value.
+2. The default-value callback or `OnAccessibilityRequestDefaultValue()` when
    it returns `true`, including an intentionally empty value.
-4. An empty value.
+3. An empty value.
 
 The extension API exposes only default Name, Description, and Value callbacks.
 A registered callback replaces its corresponding default virtual. Returning
@@ -73,8 +65,8 @@ The sample checks:
 - Static name, description, value, role, flags, automation id, state, reading
   information, relation, language-span, translation, collection, and raw
   attribute methods.
-- Deprecated name, description, and value virtuals for handled values,
-  intentionally empty values, and fallback to stored values.
+- Explicitly set name, description, and value read back through the
+  accessible object.
 - Explicit-name precedence over the default-name hook, handled-empty
   defaults, and fallback from the default-name hook to the Actor name.
 - Explicit-description precedence over the default-description hook,
@@ -108,9 +100,13 @@ change directions, `virtual scroll to child`, and reading status values
 
 The checked-in screenshot and concise output were verified on 2026-08-04 with
 the Ubuntu DALi desktop environment at 480x800, before the per-instance callback
-checks were added. That baseline report contains 24 `PASS` rows. The current
-source adds four callback rows, so a current run should contain 28 `PASS` rows
-and `Overall: PASS`.
+checks were added and while the `OnAccessibilityRequestName/Description/Value()`
+hooks still existed. That baseline report contains 24 `PASS` rows, three of
+which (`requested text virtuals`, `handled empty requested values`,
+`requested virtual fallback`) exercised those hooks. The current source adds
+five per-View callback rows and replaces the three hook rows with one
+`explicit values` row, so a current run should contain 27 `PASS` rows and
+`Overall: PASS`.
 
 The baseline stdout sequence confirmed all action virtuals, reading statuses 0
 through 4 in order, both highlight signal states, and the focus-triggered

@@ -28,7 +28,6 @@
 #include <initializer_list>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-navigation-callback.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
@@ -804,33 +803,6 @@ public: // Measure / Arrange API
   void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
 
 public: // View configuration (scale, size, layout, focus, appearance) & hierarchy
-  /**
-   * @brief Sets the UiScale participation policy for this view.
-   *
-   * @deprecated Use Extension::View::SetUiScalePolicy() instead; this function will be removed.
-   * The UI scale is configured through the extension API
-   * (dali-ui-foundation/extension-api/view.h) for platform integrators and module providers.
-   * Replace view.SetUiScalePolicy(UiScalePolicy::DISABLED) with
-   * Extension::View::SetUiScalePolicy(view, Extension::UiScalePolicy::DISABLED): the extension
-   * function takes Extension::UiScalePolicy, which has the same enumerators and values.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy The UiScalePolicy to apply
-   */
-  void SetUiScalePolicy(UiScalePolicy policy);
-
-  /**
-   * @brief Gets the UiScale participation policy of this view.
-   *
-   * @deprecated Use Extension::View::GetUiScalePolicy() instead; this function will be removed.
-   * Replace view.GetUiScalePolicy() with Extension::View::GetUiScalePolicy(view), which returns
-   * the same policy as an Extension::UiScalePolicy.
-   *
-   * @SINCE_3_0.0
-   * @return The current UiScalePolicy
-   */
-  UiScalePolicy GetUiScalePolicy() const;
-
   /**
    * @brief Sets the X position requested by the user.
    *
@@ -1824,8 +1796,7 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
    *
    * The logical order normally follows the actor order of the View children
    * (@c Dali::Actor::GetChildAt). The two can differ, for example after an
-   * @c Extension::View::RaisePreservingLayout() call or a deprecated
-   * @c LayoutOrderPolicy::PRESERVE overload on a child;
+   * @c Extension::View::RaisePreservingLayout() call on a child;
    * @c Extension::View::RaisePreservingLayout() describes when they differ and
    * the calls that make the two orders agree again.
    *
@@ -1946,124 +1917,6 @@ public: // View configuration & hierarchy (continued: focus, appearance, traits,
   // Re-expose the inherited no-argument immediate bulk remove; the
   // RemoveAll(RemovePolicy) overload would otherwise hide it (C++ name hiding).
   using Dali::Actor::RemoveAll;
-
-  /**
-   * @brief Raises this view one step above its immediate next sibling in the
-   * parent's children list.
-   *
-   * @deprecated Use the inherited Dali::Actor::Raise() or
-   * Extension::View::RaisePreservingLayout() instead; this overload will be removed. Replace a
-   * call as follows:
-   * - UPDATE: Raise(), which is the same call.
-   * - PRESERVE: Extension::View::RaisePreservingLayout(view)
-   *   (dali-ui-foundation/extension-api/view.h), which is the same call.
-   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE changes only the actor order and keeps the layout order.
-   * @pre The View has been parented.
-   */
-  void Raise(LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view one step below its immediate previous sibling in the
-   * parent's children list.
-   *
-   * @deprecated Use the inherited Dali::Actor::Lower() or
-   * Extension::View::LowerPreservingLayout() instead; this overload will be removed. Replace a
-   * call as follows:
-   * - UPDATE: Lower(), which is the same call.
-   * - PRESERVE: Extension::View::LowerPreservingLayout(view)
-   *   (dali-ui-foundation/extension-api/view.h), which is the same call.
-   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE changes only the actor order and keeps the layout order.
-   * @pre The View has been parented.
-   */
-  void Lower(LayoutOrderPolicy policy);
-
-  /**
-   * @brief Raises this view to the top of its sibling list.
-   *
-   * @deprecated Use the inherited Dali::Actor::RaiseToTop() or
-   * Extension::View::RaiseToTopPreservingLayout() instead; this overload will be removed.
-   * Replace a call as follows:
-   * - UPDATE: RaiseToTop(), which is the same call.
-   * - PRESERVE: Extension::View::RaiseToTopPreservingLayout(view)
-   *   (dali-ui-foundation/extension-api/view.h), which is the same call.
-   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE changes only the actor order and keeps the layout order.
-   * @pre The View has been parented.
-   */
-  void RaiseToTop(LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view to the bottom of its sibling list.
-   *
-   * @deprecated Use the inherited Dali::Actor::LowerToBottom() or
-   * Extension::View::LowerToBottomPreservingLayout() instead; this overload will be removed.
-   * Replace a call as follows:
-   * - UPDATE: LowerToBottom(), which is the same call.
-   * - PRESERVE: Extension::View::LowerToBottomPreservingLayout(view)
-   *   (dali-ui-foundation/extension-api/view.h), which is the same call.
-   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE changes only the actor order and keeps the layout order.
-   * @pre The View has been parented.
-   */
-  void LowerToBottom(LayoutOrderPolicy policy);
-
-  /**
-   * @brief Raises this view above the given target sibling.
-   *
-   * @deprecated Use the inherited Dali::Actor::RaiseAbove() or
-   * Extension::View::RaiseAbovePreservingLayout() instead; this overload will be removed.
-   * Replace a call as follows:
-   * - UPDATE: RaiseAbove(target) after checking that @p target is not empty: this overload
-   *   ignores an empty @p target, while the inherited call asserts on one.
-   * - PRESERVE: Extension::View::RaiseAbovePreservingLayout(view, target)
-   *   (dali-ui-foundation/extension-api/view.h), which is the same call and also ignores an
-   *   empty @p target.
-   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
-   *
-   * @SINCE_3_0.0
-   * @param[in] target The target sibling view to raise above.
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE changes only the actor order and keeps the layout order.
-   * @pre The View has been parented.
-   * @pre The target view is a sibling.
-   */
-  void RaiseAbove(View target, LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view below the given target sibling.
-   *
-   * @deprecated Use the inherited Dali::Actor::LowerBelow() or
-   * Extension::View::LowerBelowPreservingLayout() instead; this overload will be removed.
-   * Replace a call as follows:
-   * - UPDATE: LowerBelow(target) after checking that @p target is not empty: this overload
-   *   ignores an empty @p target, while the inherited call asserts on one.
-   * - PRESERVE: Extension::View::LowerBelowPreservingLayout(view, target)
-   *   (dali-ui-foundation/extension-api/view.h), which is the same call and also ignores an
-   *   empty @p target.
-   * See docs/view-sibling-order-migration.md in the dali-ui source tree for the details.
-   *
-   * @SINCE_3_0.0
-   * @param[in] target The target sibling view to lower below.
-   * @param[in] policy UPDATE also reorders the parent layout's children;
-   *                   PRESERVE changes only the actor order and keeps the layout order.
-   * @pre The View has been parented.
-   * @pre The target view is a sibling.
-   */
-  void LowerBelow(View target, LayoutOrderPolicy policy);
 
 public: // State API
   /**

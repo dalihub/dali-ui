@@ -85,20 +85,10 @@ const Dali::String& SelectableLottieImage::GetUrl() const
   return mImpl->mUrl;
 }
 
-Int32Pair SelectableLottieImage::GetSelectRange() const
-{
-  return GetSelectionPlaybackRange();
-}
-
 Int32Pair SelectableLottieImage::GetSelectionPlaybackRange() const
 {
   DALI_ASSERT_VALID_SELECTABLE_LOTTIE_IMAGE(mImpl);
   return mImpl->mSelectionPlaybackRange;
-}
-
-Int32Pair SelectableLottieImage::GetDeselectRange() const
-{
-  return GetDeselectionPlaybackRange();
 }
 
 Int32Pair SelectableLottieImage::GetDeselectionPlaybackRange() const

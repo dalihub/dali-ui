@@ -4,6 +4,8 @@
 // Install the adaptor test mocks before including production headers.
 #include <dali-ui-test-suite-utils.h>
 
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/widget-view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
@@ -12,7 +14,6 @@
 #include <dali-ui-foundation/internal/views/widget/widget-view-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
@@ -780,7 +781,7 @@ int UtcDaliWidgetViewEffectApiAndPropertyP(void)
   UiTestApplication application;
   auto              view  = NewWidget();
   auto              image = TestNativeImage::New(64, 64);
-  auto              url   = Ui::ImageUrlUtils::GenerateUrl(image, true);
+  auto              url   = Ui::ImageUrlUtils::GenerateUrl(image);
   Property::Map     properties;
   properties.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
   properties.Insert(Ui::Integration::ImageVisual::Property::URL, url.GetUrl());
@@ -987,7 +988,7 @@ int UtcDaliWidgetViewRetainsFrameUntilDestructionP(void)
     // Supply a native image without a platform graphics backend. Disconnection
     // retains it for reattachment; destruction releases it even if the image
     // itself is still held by a buffer queue.
-    auto          url = Ui::ImageUrlUtils::GenerateUrl(image, true);
+    auto          url = Ui::ImageUrlUtils::GenerateUrl(image);
     Property::Map properties;
     properties.Insert(Ui::Integration::Visual::Property::TYPE, Ui::Integration::InternalVisualType::IMAGE);
     properties.Insert(Ui::Integration::ImageVisual::Property::URL, url.GetUrl());
@@ -1099,13 +1100,13 @@ int UtcDaliWidgetViewParentRotationUpdatesPauseP(void)
     }
   };
   render();
-  auto bounds = DevelActor::CalculateCurrentScreenExtents(view);
+  auto bounds = view.CalculateCurrentScreenBounds();
   DALI_TEST_CHECK(bounds.y + bounds.height < 0.0f);
   DALI_TEST_CHECK(isPaused(0));
 
   parent.SetProperty(Actor::Property::ORIENTATION, Quaternion(Degree(90), Vector3::ZAXIS));
   render();
-  bounds = DevelActor::CalculateCurrentScreenExtents(view);
+  bounds = view.CalculateCurrentScreenBounds();
   DALI_TEST_CHECK(bounds.y + bounds.height > 0.0f);
   DALI_TEST_CHECK(!isPaused(0));
 
@@ -1161,9 +1162,9 @@ int UtcDaliWidgetViewNaturalSizeIsIndependentOfArrangeP(void)
 int UtcDaliWidgetViewNaturalSizeScalesWithoutProviderFeedbackP(void)
 {
   UiTestApplication application;
-  auto              scaleManager  = Ui::UiScaleManager::Get();
-  const float       originalScale = scaleManager.GetScale();
-  scaleManager.SetScale(1.3f);
+  auto              scaleManager  = Ui::Extension::LayoutScaleManager::Get();
+  const float       originalScale = scaleManager.GetUiScale();
+  scaleManager.SetUiScale(1.3f);
   auto view = WidgetView::New(APP_ID, "test.widget", "", 100, 60, 0.0f);
   view.SetRequestedWidth(Ui::WRAP_CONTENT);
   view.SetRequestedHeight(Ui::WRAP_CONTENT);
@@ -1186,15 +1187,15 @@ int UtcDaliWidgetViewNaturalSizeScalesWithoutProviderFeedbackP(void)
   DALI_TEST_EQUALS(measured.height, 78.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(getDimension(0, 2), resizeCount, TEST_LOCATION);
   application.GetScene().Add(view);
-  scaleManager.SetScale(2.0f);
+  scaleManager.SetUiScale(2.0f);
   measured = view.Measure(500.0f, 400.0f);
   DALI_TEST_EQUALS(measured.width, 200.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 120.0f, 0.001f, TEST_LOCATION);
-  scaleManager.SetScale(1.0f);
+  scaleManager.SetUiScale(1.0f);
   measured = view.Measure(500.0f, 400.0f);
   DALI_TEST_EQUALS(measured.width, 100.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 60.0f, 0.001f, TEST_LOCATION);
-  scaleManager.SetScale(originalScale);
+  scaleManager.SetUiScale(originalScale);
   END_TEST;
 }
 
@@ -1227,26 +1228,26 @@ int UtcDaliWidgetViewKeepSizeOnlyFreezesProviderP(void)
   DALI_TEST_EQUALS(getDimension(0, 2), 1, TEST_LOCATION);
 
   // KEEP preserves logical natural size even when the display scale changes.
-  auto        scaleManager  = Ui::UiScaleManager::Get();
-  const float originalScale = scaleManager.GetScale();
+  auto        scaleManager  = Ui::Extension::LayoutScaleManager::Get();
+  const float originalScale = scaleManager.GetUiScale();
   view.SetKeepWidgetSizeEnabled(true);
   application.GetScene().Add(view);
-  scaleManager.SetScale(2.0f);
+  scaleManager.SetUiScale(2.0f);
   view.Arrange(Ui::LayoutRect(0.0f, 0.0f, 800.0f, 480.0f));
   measured = view.Measure(1000.0f, 1000.0f);
   DALI_TEST_EQUALS(measured.width, 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.height, 120.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(getDimension(0, 2), 1, TEST_LOCATION);
-  scaleManager.SetScale(originalScale);
+  scaleManager.SetUiScale(originalScale);
   END_TEST;
 }
 
 int UtcDaliWidgetViewNaturalSizeSettlesOnSceneP(void)
 {
   UiTestApplication application;
-  auto              scaleManager  = Ui::UiScaleManager::Get();
-  const float       originalScale = scaleManager.GetScale();
-  scaleManager.SetScale(1.0f);
+  auto              scaleManager  = Ui::Extension::LayoutScaleManager::Get();
+  const float       originalScale = scaleManager.GetUiScale();
+  scaleManager.SetUiScale(1.0f);
   auto view = WidgetView::New(APP_ID, "test.widget", "", 100, 60, 0.0f);
   view.SetRequestedWidth(Ui::WRAP_CONTENT);
   view.SetRequestedHeight(Ui::WRAP_CONTENT);
@@ -1261,7 +1262,7 @@ int UtcDaliWidgetViewNaturalSizeSettlesOnSceneP(void)
     }
   };
   settle();
-  scaleManager.SetScale(1.3f);
+  scaleManager.SetUiScale(1.3f);
   settle();
   auto size = view.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(size.x, 130.0f, 0.001f, TEST_LOCATION);
@@ -1269,21 +1270,21 @@ int UtcDaliWidgetViewNaturalSizeSettlesOnSceneP(void)
   const int resizeCount = getDimension(0, 2);
   settle();
   DALI_TEST_EQUALS(getDimension(0, 2), resizeCount, TEST_LOCATION);
-  scaleManager.SetScale(1.0f);
+  scaleManager.SetUiScale(1.0f);
   settle();
   size = view.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(size.x, 100.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(size.y, 60.0f, 0.001f, TEST_LOCATION);
-  scaleManager.SetScale(originalScale);
+  scaleManager.SetUiScale(originalScale);
   END_TEST;
 }
 
 int UtcDaliWidgetViewOverlaysFollowParentLayoutP(void)
 {
   UiTestApplication application;
-  auto              scaleManager  = Ui::UiScaleManager::Get();
-  const float       originalScale = scaleManager.GetScale();
-  scaleManager.SetScale(1.3f);
+  auto              scaleManager  = Ui::Extension::LayoutScaleManager::Get();
+  const float       originalScale = scaleManager.GetUiScale();
+  scaleManager.SetUiScale(1.3f);
   auto view = NewWidget();
 
   const auto checkOverlays = [&view](const Vector2& expected)
@@ -1308,7 +1309,7 @@ int UtcDaliWidgetViewOverlaysFollowParentLayoutP(void)
   DALI_TEST_EQUALS(getDimension(0, 0), 195, TEST_LOCATION);
   DALI_TEST_EQUALS(getDimension(0, 1), 104, TEST_LOCATION);
 
-  scaleManager.SetScale(originalScale);
+  scaleManager.SetUiScale(originalScale);
   END_TEST;
 }
 

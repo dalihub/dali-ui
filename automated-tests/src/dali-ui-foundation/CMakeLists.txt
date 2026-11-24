@@ -46,7 +46,6 @@ SET(TC_SOURCES
         utc-Dali-UiLocalizationManager.cpp
         utc-Dali-UiThemeManager.cpp
         utc-Dali-LayoutScaleManager.cpp
-        utc-Dali-UiScaleManager.cpp
         utc-Dali-UiConfig.cpp
         utc-Dali-InteractiveTrait.cpp
         utc-Dali-InteractiveView.cpp

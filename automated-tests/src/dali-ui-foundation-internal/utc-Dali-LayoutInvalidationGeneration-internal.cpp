@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <iostream>
 
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/layouts/layout-invalidation-generation.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -415,7 +416,7 @@ int UtcDaliLayoutInvalidationGenerationRetractedBySubtreeScaleResetP(void)
   // ResetSubtreeScaleAndLayoutCaches, which is where the records are retracted: a
   // record written against the OLD ancestor chain must not authorise skipping a walk
   // that now has a different root to reach.
-  chain.root.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(chain.root, Ui::Extension::UiScalePolicy::DISABLED);
 
   // The DESCENDANTS' records are retracted and stay retracted: the reset walks DOWN
   // the subtree, and the InvalidateMeasure() the policy setter follows it with walks

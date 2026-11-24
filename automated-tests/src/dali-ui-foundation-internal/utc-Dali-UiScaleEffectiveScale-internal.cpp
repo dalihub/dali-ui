@@ -24,7 +24,6 @@
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/layout-scale-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-test-suite-utils.h>
@@ -207,7 +206,7 @@ int UtcDaliUiScaleEffectiveScaleSyncBitP(void)
   DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleValid());
 
   // A policy change re-roots this view's scale derivation.
-  view.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::DISABLED);
   DALI_TEST_CHECK(!DataOf(view).IsEffectiveScaleValid());
 
   DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(view)), 1.0f, 0.001f, TEST_LOCATION);
@@ -380,7 +379,7 @@ int UtcDaliUiScaleResetKeepsDescendantMeasureDirtyP(void)
   // Reset the scale context from the ANCESTOR. This recurses into the child;
   // the follow-up InvalidateMeasure() runs on the root and walks upward, so it
   // never reaches the child.
-  root.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(root, Ui::Extension::UiScalePolicy::DISABLED);
 
   // The reset retracts cached results; the pending work must survive it.
   // (The cache bits are not asserted here: the invalidation that raised the
@@ -435,7 +434,7 @@ int UtcDaliUiScaleResetClearsWholeSubtreeEffectiveScaleP(void)
   DALI_TEST_CHECK(DataOf(grandChild).IsEffectiveScaleValid());
 
   // No layout pass afterwards: the reset itself must clear the whole subtree.
-  root.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(root, Ui::Extension::UiScalePolicy::DISABLED);
 
   DALI_TEST_CHECK(!DataOf(root).IsEffectiveScaleValid());
   DALI_TEST_CHECK(!DataOf(child).IsEffectiveScaleValid());
@@ -792,7 +791,7 @@ int UtcDaliUiScaleOffSceneFixedTermContainerReMeasuresP(void)
   LayoutScaleManager::Get().SetUiScale(1.0f);
 
   View fixedParent = View::New();
-  fixedParent.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(fixedParent, Ui::Extension::UiScalePolicy::DISABLED);
   View fixedContainer = View::New(); // INHERIT: its term is the parent's DISABLED one
   fixedContainer.SetMeasureCallback(MeasureCallback::New(&CountingFixedContainerMeasure));
   View fixedLeaf = View::New();
@@ -891,7 +890,7 @@ int UtcDaliUiScaleSetScalableFalseCollapsesEffectiveScaleP(void)
   inheritView.SetRequestedHeight(100.0f);
 
   View enabledView = View::New();
-  enabledView.SetUiScalePolicy(UiScalePolicy::ENABLED); // always tracks the global scale
+  Ui::Extension::View::SetUiScalePolicy(enabledView, Ui::Extension::UiScalePolicy::ENABLED); // always tracks the global scale
   enabledView.SetRequestedWidth(100.0f);
   enabledView.SetRequestedHeight(100.0f);
 
@@ -1229,7 +1228,7 @@ int UtcDaliUiScaleWindowScaleAppliesToDisabledViewP(void)
   LayoutScaleManager::Get().SetUiScale(1.5f);
 
   View panel = View::New();
-  panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(panel, Ui::Extension::UiScalePolicy::DISABLED);
   panel.SetRequestedWidth(200.0f);
   panel.SetRequestedHeight(200.0f);
 
@@ -1274,12 +1273,12 @@ int UtcDaliUiScaleWindowScaleAppliesToEnabledInsideDisabledSubtreeP(void)
   LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
 
   View panel = View::New();
-  panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(panel, Ui::Extension::UiScalePolicy::DISABLED);
   panel.SetRequestedWidth(200.0f);
   panel.SetRequestedHeight(200.0f);
 
   View badge = View::New();
-  badge.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(badge, Ui::Extension::UiScalePolicy::ENABLED);
   badge.SetRequestedWidth(50.0f);
   badge.SetRequestedHeight(50.0f);
   panel.Add(badge);
@@ -1323,12 +1322,12 @@ int UtcDaliUiScaleWindowScaleCollapsesUnderSetScalableFalseP(void)
   root.SetRequestedHeight(100.0f);
 
   View panel = View::New(); // DISABLED: the window scale alone
-  panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(panel, Ui::Extension::UiScalePolicy::DISABLED);
   panel.SetRequestedWidth(200.0f);
   panel.SetRequestedHeight(200.0f);
 
   View badge = View::New(); // ENABLED inside the DISABLED panel: both terms
-  badge.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(badge, Ui::Extension::UiScalePolicy::ENABLED);
   badge.SetRequestedWidth(50.0f);
   badge.SetRequestedHeight(50.0f);
   panel.Add(badge);
@@ -2011,10 +2010,10 @@ int UtcDaliUiScaleWindowScaleKeepsWindowSizedRootConstraintPhysicalP(void)
 namespace
 {
 // A 100x100 view with both policies set: the shape every case below builds.
-View MakePolicyView(UiScalePolicy systemPolicy, WindowScalePolicy windowPolicy)
+View MakePolicyView(Ui::Extension::UiScalePolicy systemPolicy, WindowScalePolicy windowPolicy)
 {
   View view = View::New();
-  view.SetUiScalePolicy(systemPolicy);
+  Ui::Extension::View::SetUiScalePolicy(view, systemPolicy);
   DataOf(view).SetWindowScalePolicy(windowPolicy);
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
@@ -2054,7 +2053,7 @@ int UtcDaliUiScaleWindowScalePolicyInheritFastPathP(void)
   plainChild.SetRequestedHeight(50.0f);
   root.Add(plainChild);
 
-  View windowOff = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::DISABLED); // leaves the fast path
+  View windowOff = MakePolicyView(Ui::Extension::UiScalePolicy::INHERIT, WindowScalePolicy::DISABLED); // leaves the fast path
   root.Add(windowOff);
 
   View leaf = View::New(); // INHERIT/INHERIT under windowOff: the fast path again
@@ -2103,10 +2102,10 @@ int UtcDaliUiScaleWindowScalePolicyDisabledDropsWindowTermP(void)
   LayoutScaleManager::Get().SetScalable(true);
   LayoutScaleManager::Get().SetUiScale(1.5f);
 
-  View windowOff         = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::DISABLED);
-  View windowOffEnabled  = MakePolicyView(UiScalePolicy::ENABLED, WindowScalePolicy::DISABLED);
-  View windowOffDisabled = MakePolicyView(UiScalePolicy::DISABLED, WindowScalePolicy::DISABLED);
-  View plain             = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
+  View windowOff         = MakePolicyView(Ui::Extension::UiScalePolicy::INHERIT, WindowScalePolicy::DISABLED);
+  View windowOffEnabled  = MakePolicyView(Ui::Extension::UiScalePolicy::ENABLED, WindowScalePolicy::DISABLED);
+  View windowOffDisabled = MakePolicyView(Ui::Extension::UiScalePolicy::DISABLED, WindowScalePolicy::DISABLED);
+  View plain             = MakePolicyView(Ui::Extension::UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
 
   application.GetScene().Add(windowOff);
   application.GetScene().Add(windowOffEnabled);
@@ -2156,15 +2155,15 @@ int UtcDaliUiScaleWindowScalePolicyDisabledSubtreeStaysUnscaledP(void)
   LayoutScaleManager::Get().SetUiScale(1.5f);
   LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
 
-  View optedOutRoot  = MakePolicyView(UiScalePolicy::DISABLED, WindowScalePolicy::DISABLED);
-  View disabledChild = MakePolicyView(UiScalePolicy::DISABLED, WindowScalePolicy::INHERIT);
-  View enabledChild  = MakePolicyView(UiScalePolicy::ENABLED, WindowScalePolicy::INHERIT);
-  View grandChild    = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
+  View optedOutRoot  = MakePolicyView(Ui::Extension::UiScalePolicy::DISABLED, WindowScalePolicy::DISABLED);
+  View disabledChild = MakePolicyView(Ui::Extension::UiScalePolicy::DISABLED, WindowScalePolicy::INHERIT);
+  View enabledChild  = MakePolicyView(Ui::Extension::UiScalePolicy::ENABLED, WindowScalePolicy::INHERIT);
+  View grandChild    = MakePolicyView(Ui::Extension::UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
   optedOutRoot.Add(disabledChild);
   optedOutRoot.Add(enabledChild);
   enabledChild.Add(grandChild);
 
-  View plain = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
+  View plain = MakePolicyView(Ui::Extension::UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
 
   application.GetScene().Add(optedOutRoot);
   application.GetScene().Add(plain);
@@ -2205,10 +2204,10 @@ int UtcDaliUiScaleWindowScalePolicyEnabledBreaksOutP(void)
   LayoutScaleManager::Get().SetUiScale(1.5f);
   LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
 
-  View panel        = MakePolicyView(UiScalePolicy::DISABLED, WindowScalePolicy::DISABLED);
-  View breakout     = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::ENABLED);
-  View grandChild   = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
-  View fullBreakout = MakePolicyView(UiScalePolicy::ENABLED, WindowScalePolicy::ENABLED);
+  View panel        = MakePolicyView(Ui::Extension::UiScalePolicy::DISABLED, WindowScalePolicy::DISABLED);
+  View breakout     = MakePolicyView(Ui::Extension::UiScalePolicy::INHERIT, WindowScalePolicy::ENABLED);
+  View grandChild   = MakePolicyView(Ui::Extension::UiScalePolicy::INHERIT, WindowScalePolicy::INHERIT);
+  View fullBreakout = MakePolicyView(Ui::Extension::UiScalePolicy::ENABLED, WindowScalePolicy::ENABLED);
   panel.Add(breakout);
   breakout.Add(grandChild);
   panel.Add(fullBreakout);
@@ -2260,7 +2259,7 @@ int UtcDaliUiScaleWindowScalePolicyChangeInvalidatesSubtreeP(void)
   root.Add(child);
 
   View leaf = View::New(); // system DISABLED, window INHERIT: reads root's policy on its ascent
-  leaf.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(leaf, Ui::Extension::UiScalePolicy::DISABLED);
   leaf.SetRequestedWidth(50.0f);
   leaf.SetRequestedHeight(50.0f);
   child.Add(leaf);
@@ -2328,8 +2327,8 @@ int UtcDaliUiScaleWindowScalePolicyCollapsesUnderSetScalableFalseP(void)
   LayoutScaleManager::Get().SetUiScale(1.5f);
   LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
 
-  View windowOff = MakePolicyView(UiScalePolicy::INHERIT, WindowScalePolicy::DISABLED);
-  View windowOn  = MakePolicyView(UiScalePolicy::DISABLED, WindowScalePolicy::ENABLED);
+  View windowOff = MakePolicyView(Ui::Extension::UiScalePolicy::INHERIT, WindowScalePolicy::DISABLED);
+  View windowOn  = MakePolicyView(Ui::Extension::UiScalePolicy::DISABLED, WindowScalePolicy::ENABLED);
 
   application.GetScene().Add(windowOff);
   application.GetScene().Add(windowOn);
@@ -2376,7 +2375,7 @@ int UtcDaliUiScaleWindowScalePolicyCombinationsP(void)
   LayoutScaleManager::Get().SetWindowScale(window, 2.0f);
 
   // Index order == enum value order (INHERIT 0, ENABLED 1, DISABLED 2) for both enums.
-  const UiScalePolicy     systemPolicies[3] = {UiScalePolicy::INHERIT, UiScalePolicy::ENABLED, UiScalePolicy::DISABLED};
+  const Ui::Extension::UiScalePolicy     systemPolicies[3] = {Ui::Extension::UiScalePolicy::INHERIT, Ui::Extension::UiScalePolicy::ENABLED, Ui::Extension::UiScalePolicy::DISABLED};
   const WindowScalePolicy windowPolicies[3] = {WindowScalePolicy::INHERIT, WindowScalePolicy::ENABLED, WindowScalePolicy::DISABLED};
 
   // The terms, with S = 1.5 and W = 2.0: [policy] for the root parent, and

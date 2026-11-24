@@ -35,6 +35,7 @@
 #include <mutex>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
@@ -98,8 +99,6 @@ DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "videoHoleEnabled",    
 DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "mouseEventsEnabled",      BOOLEAN, MOUSE_EVENTS_ENABLED      )
 DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "keyEventsEnabled",        BOOLEAN, KEY_EVENTS_ENABLED        )
 DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "documentBackgroundColor", VECTOR4, DOCUMENT_BACKGROUND_COLOR )
-DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "tilesClearedWhenHidden",  BOOLEAN, TILES_CLEARED_WHEN_HIDDEN )
-DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "tileCoverAreaMultiplier", FLOAT,   TILE_COVER_AREA_MULTIPLIER)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "cursorEnabledByClient",   BOOLEAN, CURSOR_ENABLED_BY_CLIENT  )
 DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "selectedText",            STRING,  SELECTED_TEXT             )
 DALI_PROPERTY_REGISTRATION(Ui::Integration, WebViewImpl, "pageZoomFactor",          FLOAT,   PAGE_ZOOM_FACTOR          )
@@ -332,24 +331,6 @@ void WebViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index in
       if(value.Get(color))
       {
         impl.SetDocumentBackgroundColor(color);
-      }
-      break;
-    }
-    case Property::TILES_CLEARED_WHEN_HIDDEN:
-    {
-      bool cleared;
-      if(value.Get(cleared))
-      {
-        impl.SetTilesClearedWhenHidden(cleared);
-      }
-      break;
-    }
-    case Property::TILE_COVER_AREA_MULTIPLIER:
-    {
-      float multiplier;
-      if(value.Get(multiplier))
-      {
-        impl.SetTileCoverAreaMultiplier(multiplier);
       }
       break;
     }
@@ -686,7 +667,7 @@ void WebViewImpl::OnFrameRendered()
     auto& viewData = Internal::ViewDataImpl::Get(*this);
     // External textures do not necessarily request automatic fitting. Engine
     // frames arrive asynchronously, so initialize their control size explicitly.
-    mVisual.SetTransformAndSize({}, mWebViewSize, GetEffectiveScale());
+    mVisual.SetTransformAndSize({}, mWebViewSize, Ui::Extension::View::GetEffectiveLayoutScale(*this));
     viewData.RegisterVisual(WebViewImpl::Property::URL, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
     EnableBlendMode(!mVideoHoleEnabled);
   }
@@ -1393,22 +1374,6 @@ void WebViewImpl::SetDocumentBackgroundColor(const Dali::Vector4& color)
   if(IsWebEngineAvailable() && mWebEngine.GetPlugin())
   {
     mWebEngine.GetPlugin()->SetDocumentBackgroundColor(color);
-  }
-}
-
-void WebViewImpl::SetTilesClearedWhenHidden(bool cleared)
-{
-  if(IsWebEngineAvailable())
-  {
-    mWebEngine.ClearTilesWhenHidden(cleared);
-  }
-}
-
-void WebViewImpl::SetTileCoverAreaMultiplier(float multiplier)
-{
-  if(IsWebEngineAvailable() && mWebEngine.GetPlugin())
-  {
-    mWebEngine.GetPlugin()->SetTileCoverAreaMultiplier(multiplier);
   }
 }
 

@@ -112,46 +112,6 @@ UiConfig UiConfig::GetCurrent()
   return gCurrentConfig;
 }
 
-void UiConfig::SetScalingFactor(float scalingFactor)
-{
-  GetImpl(*this).SetScalingFactor(scalingFactor);
-}
-
-float UiConfig::GetScalingFactor() const
-{
-  return GetImpl(*this).GetScalingFactor();
-}
-
-float UiConfig::GetDpiFactor() const
-{
-  return GetImpl(*this).GetDpiFactor();
-}
-
-float UiConfig::GetScaledDpiFactor() const
-{
-  return GetImpl(*this).GetScaledDpiFactor();
-}
-
-void UiConfig::SetDpi(int dpi)
-{
-  GetImpl(*this).SetDpi(dpi);
-}
-
-int UiConfig::GetDpi() const
-{
-  return GetImpl(*this).GetDpi();
-}
-
-void UiConfig::SetBaselineDpi(int baselineDpi)
-{
-  GetImpl(*this).SetBaselineDpi(baselineDpi);
-}
-
-int UiConfig::GetBaselineDpi() const
-{
-  return GetImpl(*this).GetBaselineDpi();
-}
-
 void UiConfig::SetKeyClickPolicy(KeyClickPolicy policy)
 {
   GetImpl(*this).SetKeyClickPolicy(policy);
@@ -540,16 +500,6 @@ void UiConfig::SetAmbiguousPressDuration(uint32_t timeMs)
 uint32_t UiConfig::GetAmbiguousPressDuration() const
 {
   return GetImpl(*this).GetAmbiguousPressDuration();
-}
-
-void UiConfig::SetWebEngineType(WebEngineType type)
-{
-  GetImpl(*this).SetWebEngineType(type);
-}
-
-WebEngineType UiConfig::GetWebEngineType() const
-{
-  return GetImpl(*this).GetWebEngineType();
 }
 
 void UiConfig::ResetStyleSheet(UiStyleSheet styleSheet)

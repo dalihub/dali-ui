@@ -94,8 +94,6 @@ public: // Properties (required by DALI_PROPERTY_REGISTRATION)
       MOUSE_EVENTS_ENABLED,       ///< Whether mouse events are forwarded
       KEY_EVENTS_ENABLED,         ///< Whether key events are forwarded
       DOCUMENT_BACKGROUND_COLOR,  ///< The background color of the document
-      TILES_CLEARED_WHEN_HIDDEN,  ///< Whether tiles are cleared when hidden
-      TILE_COVER_AREA_MULTIPLIER, ///< The tile cover area multiplier
       CURSOR_ENABLED_BY_CLIENT,   ///< Whether cursor is managed by client
       SELECTED_TEXT,              ///< The currently selected text
       PAGE_ZOOM_FACTOR,           ///< The page zoom factor
@@ -472,16 +470,6 @@ public: // API — Document Appearance
    * @copydoc Dali::Ui::WebView::SetDocumentBackgroundColor
    */
   void SetDocumentBackgroundColor(const Dali::Vector4& color);
-
-  /**
-   * @copydoc Dali::Ui::WebView::SetTilesClearedWhenHidden
-   */
-  void SetTilesClearedWhenHidden(bool cleared);
-
-  /**
-   * @copydoc Dali::Ui::WebView::SetTileCoverAreaMultiplier
-   */
-  void SetTileCoverAreaMultiplier(float multiplier);
 
   /**
    * @copydoc Dali::Ui::WebView::SetCursorEnabledByClient

@@ -22,9 +22,21 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include "dali-ui-foundation/public-api/configuration/ui-config.h"
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
+#include <cmath>
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+namespace
+{
+// The DPI the unit factors resolve to: the dp factor times the baseline, read through the
+// UiConfigImpl accessor that also retries the window-system query.
+int ResolvedDpi(UiConfig config)
+{
+  return static_cast<int>(std::lround(GetImpl(config).GetDpiFactor() * static_cast<float>(config.GetUnitBaselineDpi())));
+}
+} // namespace
 
 void utc_dali_unit_startup(void)
 {
@@ -73,7 +85,7 @@ int UtcDaliUnitSpxLongDouble(void)
 int UtcDaliUnitDpUnsignedInt(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetDpi(72);
+  config.SetUnitDpi(72);
   UiTestApplication application(config);
 
   // Test unsigned long long int version
@@ -92,7 +104,7 @@ int UtcDaliUnitDpUnsignedInt(void)
 int UtcDaliUnitDpLongDouble(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetDpi(72);
+  config.SetUnitDpi(72);
   UiTestApplication application(config);
 
   // Test long double version
@@ -111,7 +123,7 @@ int UtcDaliUnitDpLongDouble(void)
 int UtcDaliUnitSdpUnsignedInt(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetDpi(72);
+  config.SetUnitDpi(72);
   UiTestApplication application(config);
 
   // Test unsigned long long int version
@@ -130,7 +142,7 @@ int UtcDaliUnitSdpUnsignedInt(void)
 int UtcDaliUnitSdpLongDouble(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetDpi(72);
+  config.SetUnitDpi(72);
   UiTestApplication application(config);
 
   // Test long double version
@@ -150,12 +162,12 @@ int UtcDaliUnitWindowSystemDpi(void)
 {
   const auto queryCount = Test::UiAdaptor::GetWindowSystemDpiQueryCount();
   UiConfig config = UiConfig::New();
-  config.SetScalingFactor(1.5f);
-  config.SetBaselineDpi(200);
+  config.SetUnitScalingFactor(1.5f);
+  config.SetUnitBaselineDpi(200);
   UiTestApplication application(config, 480, 800, 320.0f, 240.0f);
 
   DALI_TEST_CHECK(Test::UiAdaptor::GetWindowSystemDpiQueryCount() > queryCount);
-  DALI_TEST_EQUALS(config.GetDpi(), 320, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 320, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 16.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10.5_dp, 16.8f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 24.0f, 0.001f, TEST_LOCATION);
@@ -163,7 +175,7 @@ int UtcDaliUnitWindowSystemDpi(void)
 
   // Changes to the source DPI do not change the cached unit factors.
   application.GetScene().SetDpi(Vector2(640.0f, 480.0f));
-  DALI_TEST_EQUALS(config.GetDpi(), 320, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 320, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 16.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 24.0f, 0.001f, TEST_LOCATION);
 
@@ -174,14 +186,14 @@ int UtcDaliUnitExplicitDpi(void)
 {
   UiConfig config = UiConfig::New();
   DALI_TEST_EQUALS(config.GetUnitScalingFactor(), 1.0f, TEST_LOCATION);
-  config.SetScalingFactor(1.5f);
+  config.SetUnitScalingFactor(1.5f);
   DALI_TEST_EQUALS(config.GetUnitScalingFactor(), 1.5f, TEST_LOCATION);
-  config.SetDpi(144);
+  config.SetUnitDpi(144);
   config.SetUnitScalingFactor(2.0f);
-  DALI_TEST_EQUALS(config.GetScalingFactor(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetUnitScalingFactor(), 2.0f, TEST_LOCATION);
   UiTestApplication application(config, 480, 800, 320.0f, 240.0f);
 
-  DALI_TEST_EQUALS(config.GetDpi(), 144, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 144, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_spx, 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 40.0f, TEST_LOCATION);
@@ -192,10 +204,10 @@ int UtcDaliUnitExplicitDpi(void)
 int UtcDaliUnitUnavailableWindowSystemDpi(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetScalingFactor(2.0f);
+  config.SetUnitScalingFactor(2.0f);
   UiTestApplication application(config, 480, 800, 0.0f, 0.0f);
 
-  DALI_TEST_EQUALS(config.GetDpi(), 72, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 72, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 10.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 20.0f, TEST_LOCATION);
 
@@ -206,10 +218,10 @@ int UtcDaliUnitDpiBeforeApplicationCreated(void)
 {
   const auto queryCount = Test::UiAdaptor::GetWindowSystemDpiQueryCount();
   UiConfig config = UiConfig::New();
-  config.SetScalingFactor(2.0f);
+  config.SetUnitScalingFactor(2.0f);
   config.Apply();
 
-  DALI_TEST_EQUALS(config.GetDpi(), 72, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 72, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 10.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 20.0f, TEST_LOCATION);
 
@@ -221,23 +233,23 @@ int UtcDaliUnitDpiBeforeApplicationCreated(void)
 int UtcDaliUnitRetryWindowSystemDpi(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetScalingFactor(2.0f);
+  config.SetUnitScalingFactor(2.0f);
   UiTestApplication application(config, 480, 800, 0.0f, 0.0f);
 
-  DALI_TEST_EQUALS(config.GetBaselineDpi(), 72, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetUnitBaselineDpi(), 72, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 10.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 20.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(config.GetDpi(), 72, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 72, TEST_LOCATION);
 
   application.GetScene().SetDpi(Vector2(144.0f, 144.0f));
   DALI_TEST_EQUALS(10_dp, 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 40.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(config.GetDpi(), 144, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 144, TEST_LOCATION);
 
   application.GetScene().SetDpi(Vector2(288.0f, 288.0f));
   DALI_TEST_EQUALS(10_dp, 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 40.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(config.GetDpi(), 144, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 144, TEST_LOCATION);
 
   END_TEST;
 }
@@ -245,15 +257,15 @@ int UtcDaliUnitRetryWindowSystemDpi(void)
 int UtcDaliUnitRetryWindowSystemDpiFromSdp(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetScalingFactor(2.0f);
-  config.SetBaselineDpi(144);
+  config.SetUnitScalingFactor(2.0f);
+  config.SetUnitBaselineDpi(144);
   UiTestApplication application(config, 480, 800, 0.0f, 0.0f);
 
   DALI_TEST_EQUALS(10_sdp, 10.0f, TEST_LOCATION);
   application.GetScene().SetDpi(Vector2(288.0f, 288.0f));
   DALI_TEST_EQUALS(10_sdp, 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 20.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(config.GetDpi(), 288, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 288, TEST_LOCATION);
 
   END_TEST;
 }
@@ -263,9 +275,9 @@ int UtcDaliUnitRetryWindowSystemDpiFromGetter(void)
   UiTestApplication application(480, 800, 0.0f, 0.0f);
   UiConfig config = UiConfig::GetCurrent();
 
-  DALI_TEST_EQUALS(config.GetDpi(), 72, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 72, TEST_LOCATION);
   application.GetScene().SetDpi(Vector2(144.0f, 144.0f));
-  DALI_TEST_EQUALS(config.GetDpi(), 144, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 144, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(10_sdp, 20.0f, TEST_LOCATION);
 
@@ -284,7 +296,7 @@ int UtcDaliUnitDpiConfiguration(void)
   UiTestApplication application(config, 480, 800, 320.0f, 240.0f);
   DALI_TEST_EQUALS(config.GetUnitDpi(), 144, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetUnitBaselineDpi(), 144, TEST_LOCATION);
-  DALI_TEST_EQUALS(config.GetDpi(), 144, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 144, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 10.0f, TEST_LOCATION);
   DALI_TEST_ASSERTION(config.SetUnitDpi(72), "UiConfig is frozen");
   DALI_TEST_ASSERTION(config.SetUnitBaselineDpi(72), "UiConfig is frozen");
@@ -301,6 +313,6 @@ int UtcDaliUnitAutomaticDpiConfiguration(void)
   DALI_TEST_EQUALS(config.GetUnitDpi(), 0, TEST_LOCATION);
   DALI_TEST_EQUALS(10_dp, 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetUnitDpi(), 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(config.GetDpi(), 144, TEST_LOCATION);
+  DALI_TEST_EQUALS(ResolvedDpi(config), 144, TEST_LOCATION);
   END_TEST;
 }

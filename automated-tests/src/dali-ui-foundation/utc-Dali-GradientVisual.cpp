@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
@@ -620,11 +621,11 @@ int UtcDaliGradientVisualUiScaleGeometryAndResources(void)
     for(auto units : {Gradient::Units::USER_SPACE, Gradient::Units::OBJECT_BOUNDING_BOX})
     {
       View parent = View::New();
-      parent.SetUiScalePolicy(UiScalePolicy::DISABLED);
+      Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::DISABLED);
       parent.SetRequestedWidth(240.0f);
       parent.SetRequestedHeight(90.0f);
       View view = View::New();
-      view.SetUiScalePolicy(UiScalePolicy::ENABLED);
+      Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::ENABLED);
       view.SetLayoutMode(LayoutMode::STANDALONE);
       view.SetRequestedWidth(MATCH_PARENT);
       view.SetRequestedHeight(MATCH_PARENT);
@@ -684,8 +685,8 @@ int UtcDaliGradientVisualUiScaleLifecycle(void)
   LayoutScaleManager::Get().SetUiScale(2.0f);
   View enabled  = View::New();
   View disabled = View::New();
-  enabled.SetUiScalePolicy(UiScalePolicy::ENABLED);
-  disabled.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(enabled, Ui::Extension::UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(disabled, Ui::Extension::UiScalePolicy::DISABLED);
   application.GetWindow().Add(enabled);
   application.GetWindow().Add(disabled);
   View child = View::New();
@@ -699,10 +700,10 @@ int UtcDaliGradientVisualUiScaleLifecycle(void)
   enabled.Add(child);
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(child), 1, 2.0f);
-  child.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::DISABLED);
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(child), 1, 1.0f);
-  child.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::ENABLED);
   enabled.SetProperty(Actor::Property::SCALE, Vector3(1.5f, 0.75f, 1.0f));
   SettleGradient(application);
   ExpectGradientMapping(GradientMatrix(child), 1, 2.0f);
@@ -1183,8 +1184,8 @@ int UtcDaliGradientVisualUiScaleSharedGradient(void)
     const auto authored = ScaleTestGradient(type, Gradient::Units::USER_SPACE);
     View       enabled  = View::New();
     View       disabled = View::New();
-    enabled.SetUiScalePolicy(UiScalePolicy::ENABLED);
-    disabled.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(enabled, Ui::Extension::UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(disabled, Ui::Extension::UiScalePolicy::DISABLED);
     for(auto view : {enabled, disabled})
     {
       view.SetRequestedWidth(240.0f);

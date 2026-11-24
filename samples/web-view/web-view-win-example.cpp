@@ -597,8 +597,8 @@ int DALI_EXPORT_API main(int argc, char** argv)
   Application application = Application::New(&argc, &argv);
   DALI_LOG_RELEASE_INFO("[WebViewSample] Application created\n");
   UiConfig config = UiConfig::New();
-  config.SetWebEngineType(WebEngineType::LWE);
   config.Apply();
+  WebView::SetWebEngineType(WebEngineType::LWE);
   DALI_LOG_RELEASE_INFO("[WebViewSample] UiConfig applied (LWE)\n");
   WebViewSampleController sample(application);
   DALI_LOG_RELEASE_INFO("[WebViewSample] Controller created, entering MainLoop\n");

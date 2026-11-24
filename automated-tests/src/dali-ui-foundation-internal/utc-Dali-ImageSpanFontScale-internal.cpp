@@ -519,7 +519,7 @@ int UtcDaliImageSpanSystemFontScaleAsyncPublicationP(void)
   UiTestApplication application(config);
   TextAbstraction::FontClient::Get();
   auto       texture  = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 24u, 24u);
-  const auto imageUrl = Ui::ImageUrl::New(texture, true);
+  const auto imageUrl = Ui::ImageUrl::New(texture);
   {
     const char* source = imageUrl.GetUrl().CStr();
     auto        label  = Label::New();
@@ -680,7 +680,7 @@ int UtcDaliImageSpanResourceRuntimeP(void)
 {
   UiTestApplication application;
   auto              texture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 24u, 24u);
-  const auto        fixed   = Ui::ImageUrl::New(texture, true);
+  const auto        fixed   = Ui::ImageUrl::New(texture);
   for(bool uiScale : {false, true})
   {
     InlineImageFixture fixture(application, fixed.GetUrl().CStr());

@@ -1324,7 +1324,7 @@ int UtcDaliTextRevealSourceAtlasImageBoundaryP(void)
   UiTestApplication application;
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
   Texture    image   = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  ImageUrl   url     = ImageUrl::New(image, true);
+  ImageUrl   url     = ImageUrl::New(image);
   auto       builder = Text::StyledTextBuilder::New("First\nMiddle ");
   const auto start   = builder.GetUtf32Length();
   builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
@@ -1744,7 +1744,7 @@ int UtcDaliTextRevealImageTimingReentrantSourceP(void)
   UiTestApplication application;
   Label             label   = MakeLabel(application);
   Texture           image   = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  auto              url     = Ui::ImageUrl::New(image, true);
+  auto              url     = Ui::ImageUrl::New(image);
   auto              builder = Text::StyledTextBuilder::New("A \xef\xbf\xbc B");
   DALI_TEST_CHECK(builder.SetSpan(Text::ImageSpan::New(Text::ImageAttributes(url.GetUrl(), Vector2(24.0f, 18.0f))), 2u, 3u));
   label.SetStyledText(builder.Build());
@@ -3293,7 +3293,7 @@ int UtcDaliTextRevealRuntimeGaussianPublicImageTimingP(void)
   label.SetMultiLine(true);
   label.SetRequestedHeight(180.0f);
   Texture      image      = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  Ui::ImageUrl url        = Ui::ImageUrl::New(image, true);
+  Ui::ImageUrl url        = Ui::ImageUrl::New(image);
   auto         builder    = Text::StyledTextBuilder::New("A full text line.\n");
   const auto   imageIndex = builder.GetUtf32Length();
   builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
@@ -3350,7 +3350,7 @@ int CheckAsyncImageRevealPending(bool blur)
   Label label = MakeLabel(application);
   label.SetTextReveal(Text::Reveal::None());
   Texture      image      = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  Ui::ImageUrl url        = Ui::ImageUrl::New(image, true);
+  Ui::ImageUrl url        = Ui::ImageUrl::New(image);
   auto         builder    = Text::StyledTextBuilder::New("Text before ");
   const auto   imageIndex = builder.GetUtf32Length();
   builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
@@ -3576,7 +3576,7 @@ int UtcDaliTextRevealRuntimeGaussianAsyncImageTimingP(void)
   label.SetMultiLine(true);
   label.SetRequestedHeight(180.0f);
   Texture      image      = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  Ui::ImageUrl url        = Ui::ImageUrl::New(image, true);
+  Ui::ImageUrl url        = Ui::ImageUrl::New(image);
   auto         builder    = Text::StyledTextBuilder::New("A full text line.\n");
   const auto   imageIndex = builder.GetUtf32Length();
   builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
@@ -3714,7 +3714,7 @@ int CheckImageBlurCapture(UiTestApplication& application, bool async, bool image
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
   TextAbstraction::FontClient::Get();
   Texture    image   = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  ImageUrl   url     = ImageUrl::New(image, true);
+  ImageUrl   url     = ImageUrl::New(image);
   auto       builder = Text::StyledTextBuilder::New(imageOnly ? "" : "Before ");
   const auto index   = builder.GetUtf32Length();
   builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
@@ -3891,7 +3891,7 @@ int UtcDaliTextRevealRuntimeOutputBatchImageOrderP(void)
   UiTestApplication application;
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
   Texture  image   = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-  ImageUrl url     = ImageUrl::New(image, true);
+  ImageUrl url     = ImageUrl::New(image);
   auto     builder = Text::StyledTextBuilder::New("");
   for(uint32_t line = 0u; line < 6u; ++line)
   {
@@ -4352,7 +4352,7 @@ int CheckImageBlurDirectDestruction(bool async, bool shutdown)
     if(imageSpan)
     {
       image            = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-      url              = ImageUrl::New(image, true);
+      url              = ImageUrl::New(image);
       auto       text  = Text::StyledTextBuilder::New("Before ");
       const auto index = text.GetUtf32Length();
       text.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
@@ -4499,7 +4499,7 @@ int UtcDaliTextRevealBlurImageCaptureReplacementOwnershipP(void)
   {
     const bool async = iteration >= 2u;
     Texture    image = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 4u, 4u);
-    ImageUrl   url   = ImageUrl::New(image, true);
+    ImageUrl   url   = ImageUrl::New(image);
     auto       text  = Text::StyledTextBuilder::New("Before ");
     const auto index = text.GetUtf32Length();
     text.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);

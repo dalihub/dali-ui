@@ -68,13 +68,6 @@ class AccessibilityDemoViewImpl : public Dali::Ui::ViewImpl
 public:
   using Ptr = Dali::IntrusivePtr<AccessibilityDemoViewImpl>;
 
-  enum class RequestedMode
-  {
-    DYNAMIC,
-    EMPTY,
-    FALLBACK
-  };
-
   enum class DefaultNameMode
   {
     VALUE,
@@ -92,11 +85,6 @@ public:
   static Ptr New()
   {
     return Ptr(new AccessibilityDemoViewImpl());
-  }
-
-  void SetRequestedMode(RequestedMode mode)
-  {
-    mRequestedMode = mode;
   }
 
   void SetDefaultNameMode(DefaultNameMode mode)
@@ -151,11 +139,6 @@ public:
     return true;
   }
 
-  bool OnAccessibilityRequestName(Dali::String& value) override
-  {
-    return ResolveRequestedValue(value, "Requested account name");
-  }
-
   bool OnAccessibilityRequestDefaultName(Dali::String& value) override
   {
     if(mDefaultNameMode == DefaultNameMode::FALLBACK)
@@ -166,11 +149,6 @@ public:
     return true;
   }
 
-  bool OnAccessibilityRequestDescription(Dali::String& value) override
-  {
-    return ResolveRequestedValue(value, "Requested account description");
-  }
-
   bool OnAccessibilityRequestDefaultDescription(Dali::String& value) override
   {
     if(mDefaultDescriptionMode == DefaultDescriptionMode::FALLBACK)
@@ -179,11 +157,6 @@ public:
     }
     value = mDefaultDescriptionMode == DefaultDescriptionMode::VALUE ? "View default account description" : "";
     return true;
-  }
-
-  bool OnAccessibilityRequestValue(Dali::String& value) override
-  {
-    return ResolveRequestedValue(value, "Requested account value");
   }
 
   int GetActivateCount() const
@@ -225,17 +198,6 @@ protected:
 private:
   AccessibilityDemoViewImpl() = default;
 
-  bool ResolveRequestedValue(Dali::String& value, const char* dynamicValue)
-  {
-    if(mRequestedMode == RequestedMode::FALLBACK)
-    {
-      return false;
-    }
-    value = mRequestedMode == RequestedMode::DYNAMIC ? dynamicValue : "";
-    return true;
-  }
-
-  RequestedMode          mRequestedMode{RequestedMode::DYNAMIC};
   DefaultNameMode        mDefaultNameMode{DefaultNameMode::FALLBACK};
   DefaultDescriptionMode mDefaultDescriptionMode{DefaultDescriptionMode::FALLBACK};
   View                   mLastScrolledChild;
@@ -648,18 +610,7 @@ private:
                 mSubject.GetAccessibilityDescription() == "Localized account description");
 
     auto* accessible = Dali::Accessibility::Accessible::Get(mSubject);
-    AddResult(report, passed, "requested text virtuals",
-              accessible && accessible->GetName() == "Requested account name" &&
-                accessible->GetDescription() == "Requested account description" &&
-                accessible->GetValue() == "Requested account value");
-
-    mSubjectImpl->SetRequestedMode(AccessibilityDemoViewImpl::RequestedMode::EMPTY);
-    AddResult(report, passed, "handled empty requested values",
-              accessible && accessible->GetName().empty() &&
-                accessible->GetDescription().empty() && accessible->GetValue().empty());
-
-    mSubjectImpl->SetRequestedMode(AccessibilityDemoViewImpl::RequestedMode::FALLBACK);
-    AddResult(report, passed, "requested virtual fallback",
+    AddResult(report, passed, "explicit values",
               accessible && accessible->GetName() == "Localized account name" &&
                 accessible->GetDescription() == "Localized account description" &&
                 accessible->GetValue() == "Static value");

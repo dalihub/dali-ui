@@ -38,12 +38,6 @@ ImageUrl ImageUrl::New(Texture& texture)
   return ImageUrl(internal.Get());
 }
 
-ImageUrl ImageUrl::New(Texture& texture, bool preMultiplied)
-{
-  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(texture, preMultiplied || (texture && texture.IsAlphaPreMultiplied()));
-  return ImageUrl(internal.Get());
-}
-
 ImageUrl ImageUrl::New(const EncodedImageBuffer& encodedImageBuffer)
 {
   Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(encodedImageBuffer);

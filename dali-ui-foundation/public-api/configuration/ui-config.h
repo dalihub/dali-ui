@@ -30,7 +30,6 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
-#include <dali-ui-foundation/public-api/views/web/web-engine-type.h>
 
 namespace DALI_NAMESPACE
 {
@@ -160,8 +159,7 @@ public:
   /**
    * @brief Creates a new UiConfig with default values.
    *
-   * Default: scalingFactor=1.0f, baselineDpi=72,
-   * webEngineType=WebEngineType::CHROMIUM.
+   * Default: scalingFactor=1.0f, baselineDpi=72.
    *
    * @SINCE_3_0.0
    * @return An initialized UiConfig handle
@@ -193,91 +191,6 @@ public: // Properties
    * @SINCE_3_0.0
    */
   void Apply();
-
-  /**
-   * @brief Sets the scaling factor applied to spx and sdp units.
-   *
-   * @deprecated Use SetUnitScalingFactor() instead.
-   *
-   * @SINCE_3_0.0
-   * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()).
-   * @param[in] scalingFactor The scaling factor value
-   */
-  void SetScalingFactor(float scalingFactor);
-
-  /**
-   * @brief Retrieves the scaling factor.
-   *
-   * @deprecated Use GetUnitScalingFactor() instead.
-   *
-   * @SINCE_3_0.0
-   * @return The scaling factor applied to spx and sdp units
-   */
-  float GetScalingFactor() const;
-
-  /**
-   * @brief Retrieves the DPI factor (dpi / baselineDpi).
-   *
-   * @deprecated Use the _dp unit literals for unit conversions instead.
-   *
-   * @SINCE_3_0.0
-   * @pre The config must be frozen (i.e. Apply() must have been called).
-   * @return The computed DPI factor
-   */
-  float GetDpiFactor() const;
-
-  /**
-   * @brief Retrieves the scaled DPI factor (dpiFactor * scalingFactor).
-   *
-   * @deprecated Use the _sdp unit literals for unit conversions instead.
-   *
-   * @SINCE_3_0.0
-   * @pre The config must be frozen (i.e. Apply() must have been called).
-   * @return The computed scaled DPI factor
-   */
-  float GetScaledDpiFactor() const;
-
-  /**
-   * @brief Sets the screen DPI used for dp and sdp unit calculations.
-   *
-   * @deprecated Use SetUnitDpi() instead.
-   *
-   * @SINCE_3_0.0
-   * @pre The config must not be frozen.
-   * @param[in] dpi The dots-per-inch value of the target display
-   */
-  void SetDpi(int dpi);
-
-  /**
-   * @brief Retrieves the screen DPI.
-   *
-   * @deprecated Use GetUnitDpi() instead.
-   *
-   * @SINCE_3_0.0
-   * @return The dots-per-inch value of the target display
-   */
-  int GetDpi() const;
-
-  /**
-   * @brief Sets the baseline DPI used as the reference for dp calculations.
-   *
-   * @deprecated Use SetUnitBaselineDpi() instead.
-   *
-   * @SINCE_3_0.0
-   * @pre The config must not be frozen.
-   * @param[in] baselineDpi The baseline dots-per-inch value
-   */
-  void SetBaselineDpi(int baselineDpi);
-
-  /**
-   * @brief Retrieves the baseline DPI.
-   *
-   * @deprecated Use GetUnitBaselineDpi() instead.
-   *
-   * @SINCE_3_0.0
-   * @return The baseline dots-per-inch used as the reference for dp calculations
-   */
-  int GetBaselineDpi() const;
 
   /**
    * @brief Sets the default key click policy for clickable views.
@@ -1207,29 +1120,6 @@ public: // Properties
   {
     return StyleSheet().GetStyle(key);
   }
-
-  /**
-   * @brief Sets the web engine used by WebView instances.
-   *
-   * @deprecated Use WebView::SetWebEngineType() instead. This setting no longer
-   * affects WebView or WebProfile engine selection.
-   *
-   * @SINCE_3_0.0
-   * @pre The config must not be frozen.
-   * @param[in] type The web engine type
-   */
-  void SetWebEngineType(WebEngineType type);
-
-  /**
-   * @brief Gets the web engine used by WebView instances.
-   *
-   * @deprecated This returns the stored UiConfig setting, which is ignored by
-   * WebView and WebProfile. It does not report the selected web engine.
-   *
-   * @SINCE_3_0.0
-   * @return The configured web engine type
-   */
-  WebEngineType GetWebEngineType() const;
 
   /**
    * @brief Sets the DPI override used only for dp and sdp unit calculations.

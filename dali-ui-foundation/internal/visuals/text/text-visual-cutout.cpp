@@ -98,7 +98,7 @@ void TextVisual::SetCutoutBackground(Ui::Integration::Visual::Base background)
   {
     const auto bound = constraint.GetSourceAt(0u);
     const auto state = constraint.GetState();
-    if(bound.object == sourceObject && bound.propertyIndex == sourceIndex &&
+    if(bound.GetObject() == sourceObject && bound.GetPropertyIndex() == sourceIndex &&
        (state == Constraint::APPLIED || state == Constraint::APPLIED_OBJECT_OFF_SCENE))
     {
       return;

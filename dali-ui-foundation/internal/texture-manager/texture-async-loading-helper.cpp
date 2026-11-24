@@ -23,7 +23,6 @@
 
 // INTERNAL HEADERS
 #include <dali-ui-foundation/internal/image-loader/async-image-loader-impl.h>
-#include <dali-ui-foundation/public-api/image-loader/sync-image-loader.h>
 
 namespace DALI_NAMESPACE
 {

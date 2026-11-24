@@ -332,44 +332,6 @@ int UtcDaliLayoutScaleManagerSetUiScaleStoredWhileNotScalableAppliedOnEnableP(vo
 
 // === Effective layout scale ===
 
-// ViewImpl::GetEffectiveScale() is deprecated in favour of Extension::View::GetEffectiveLayoutScale(),
-// and the two report the same value for every view: a scaled root, a child that opts out of
-// the UI scale, and the root again after the UI scale changes.
-int UtcDaliLayoutScaleManagerDeprecatedGetEffectiveScaleMatchesP(void)
-{
-  UiTestApplication  application;
-  LayoutScaleManager manager          = LayoutScaleManager::Get();
-  const float        originalScale    = manager.GetUiScale();
-  const bool         originalScalable = manager.IsScalable();
-  manager.SetScalable(true);
-  manager.SetUiScale(1.5f);
-
-  View root = View::New();
-  root.SetRequestedWidth(100.0f);
-  root.SetRequestedHeight(100.0f);
-  View unscaled = View::New();
-  unscaled.SetUiScalePolicy(UiScalePolicy::DISABLED);
-  unscaled.SetRequestedWidth(50.0f);
-  unscaled.SetRequestedHeight(50.0f);
-  root.Add(unscaled);
-  application.GetWindow().Add(root);
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.5f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), TEST_LOCATION);
-  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(unscaled)), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(unscaled).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(unscaled)), TEST_LOCATION);
-
-  manager.SetUiScale(2.0f);
-  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), TEST_LOCATION);
-
-  manager.SetUiScale(originalScale);
-  manager.SetScalable(originalScalable);
-  END_TEST;
-}
-
 // === Window scale and scene membership ===
 //
 // The window term of a view's effective scale exists only while the view is in a Window (a
@@ -475,7 +437,7 @@ int UtcDaliLayoutScaleManagerWindowScaleDroppedWhenDisabledRootLeavesWindowP(voi
   manager.SetWindowScale(window, 2.0f);
 
   View panel = View::New();
-  panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(panel, Ui::Extension::UiScalePolicy::DISABLED);
   panel.SetRequestedWidth(100.0f);
   panel.SetRequestedHeight(50.0f);
   View icon = View::New(); // INHERIT under the DISABLED root
@@ -836,9 +798,9 @@ int UtcDaliLayoutScaleManagerOffSceneDisabledContainerFollowsEnabledChildP(void)
 
   View root  = View::New(); // INHERIT, WRAP_CONTENT
   View panel = View::New(); // WRAP_CONTENT
-  panel.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(panel, Ui::Extension::UiScalePolicy::DISABLED);
   View badge = View::New();
-  badge.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(badge, Ui::Extension::UiScalePolicy::ENABLED);
   badge.SetRequestedWidth(10.0f);
   badge.SetRequestedHeight(10.0f);
   panel.Add(badge);

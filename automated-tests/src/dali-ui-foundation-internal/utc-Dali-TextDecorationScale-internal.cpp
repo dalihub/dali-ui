@@ -403,11 +403,11 @@ void PolicyMatrix(UiTestApplication& application, Control control)
 {
   ScaleGuard guard;
   auto       enabledRoot = View::New();
-  enabledRoot.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(enabledRoot, Ui::Extension::UiScalePolicy::ENABLED);
   enabledRoot.SetRequestedWidth(1000.f);
   enabledRoot.SetRequestedHeight(1000.f);
   auto disabledRoot = View::New();
-  disabledRoot.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(disabledRoot, Ui::Extension::UiScalePolicy::DISABLED);
   disabledRoot.SetRequestedWidth(1000.f);
   disabledRoot.SetRequestedHeight(1000.f);
   auto branch = View::New();
@@ -484,17 +484,17 @@ void PolicyMatrix(UiTestApplication& application, Control control)
       }
     };
     LayoutScaleManager::Get().SetUiScale(2.f);
-    control.SetUiScalePolicy(UiScalePolicy::INHERIT);
+    Ui::Extension::View::SetUiScalePolicy(control, Ui::Extension::UiScalePolicy::INHERIT);
     check(2.f);
-    control.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(control, Ui::Extension::UiScalePolicy::DISABLED);
     check(1.f);
-    control.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(control, Ui::Extension::UiScalePolicy::ENABLED);
     check(2.f);
-    enabledRoot.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(enabledRoot, Ui::Extension::UiScalePolicy::DISABLED);
     check(2.f); // Explicit ENABLED overrides the disabled ancestor.
-    control.SetUiScalePolicy(UiScalePolicy::INHERIT);
+    Ui::Extension::View::SetUiScalePolicy(control, Ui::Extension::UiScalePolicy::INHERIT);
     check(1.f);
-    enabledRoot.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(enabledRoot, Ui::Extension::UiScalePolicy::ENABLED);
     check(2.f);
     LayoutScaleManager::Get().SetUiScale(1.5f);
     check(1.5f);
@@ -503,11 +503,11 @@ void PolicyMatrix(UiTestApplication& application, Control control)
     check(1.f);
     LayoutScaleManager::Get().SetUiScale(2.f);
     check(1.f);
-    branch.SetUiScalePolicy(UiScalePolicy::ENABLED);
+    Ui::Extension::View::SetUiScalePolicy(branch, Ui::Extension::UiScalePolicy::ENABLED);
     check(2.f);
-    branch.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(branch, Ui::Extension::UiScalePolicy::DISABLED);
     check(1.f);
-    branch.SetUiScalePolicy(UiScalePolicy::INHERIT);
+    Ui::Extension::View::SetUiScalePolicy(branch, Ui::Extension::UiScalePolicy::INHERIT);
     branch.Unparent();
     enabledRoot.Add(branch);
     check(2.f);
@@ -738,7 +738,7 @@ int UtcDaliTextDecorationScaleOutlineLayoutP(void)
   auto              oracle = InputField::New();
   Configure(field, 0, Text::Underline::Type::SOLID);
   Configure(oracle, 0, Text::Underline::Type::SOLID);
-  oracle.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(oracle, Ui::Extension::UiScalePolicy::DISABLED);
   application.GetScene().Add(field);
   application.GetScene().Add(oracle);
   for(unsigned index = 0; index < 5u; ++index)
@@ -926,20 +926,20 @@ int UtcDaliTextDecorationScalePolicyAsyncP(void)
     DALI_TEST_EQUALS(label.GetRenderScale(), 1.f, TEST_LOCATION);
   };
   awaitScale(2.f);
-  label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::DISABLED);
   awaitScale(1.f);
-  label.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::ENABLED);
   awaitScale(2.f);
-  label.SetUiScalePolicy(UiScalePolicy::INHERIT);
-  parent.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::INHERIT);
+  Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::DISABLED);
   awaitScale(1.f);
-  parent.SetUiScalePolicy(UiScalePolicy::ENABLED);
+  Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::ENABLED);
   awaitScale(2.f);
   // Supersede a pending request with the final disabled policy.
   LayoutScaleManager::Get().SetUiScale(1.25f);
   application.SendNotification();
   application.Render();
-  label.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(label, Ui::Extension::UiScalePolicy::DISABLED);
   awaitScale(1.f);
   END_TEST;
 }
@@ -995,7 +995,7 @@ void CheckCursorInsetScale(UiTestApplication& application, bool enabled)
     ControllerFor(input)->GetLayoutEngine().SetCursorInsetEnabled(enabled);
     application.GetScene().Add(input);
   }
-  oracle.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(oracle, Ui::Extension::UiScalePolicy::DISABLED);
   for(float fontScale : {1.f, 2.f})
   {
     control.SetMinimumFontSizeScale(fontScale);

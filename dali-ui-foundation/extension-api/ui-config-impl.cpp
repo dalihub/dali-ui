@@ -85,7 +85,6 @@ public:
     mLongPressKeyEventMinimumCount(3),
     mAmbiguousPressDelay(100u),
     mAmbiguousPressDuration(64u),
-    mWebEngineType(WebEngineType::CHROMIUM),
     mFocusIndicationPolicy(&FocusIndicationPolicy::Default),
     mClearFocusOnEscapeEnabled(true),
     mClearFocusIndicationOnTouch(true),
@@ -165,7 +164,6 @@ public:
   std::optional<uint32_t>         mRotationGestureMinimumTouchEventsAfterStart;
   uint32_t                        mAmbiguousPressDelay;
   uint32_t                        mAmbiguousPressDuration;
-  WebEngineType                   mWebEngineType;
   float                           mCachedDpiFactor{1.0f};
   float                           mCachedScaledDpiFactor{1.0f};
   FocusIndicationPolicy::Function mFocusIndicationPolicy;
@@ -234,11 +232,6 @@ float UiConfigImpl::GetScalingFactor() const
   return mImpl->mScalingFactor;
 }
 
-void UiConfigImpl::SetDpi(int dpi)
-{
-  SetUnitDpi(dpi);
-}
-
 void UiConfigImpl::SetUnitDpi(int dpi)
 {
   DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after UiConfig::Apply()");
@@ -255,28 +248,12 @@ int UiConfigImpl::GetUnitDpi() const
 
 void UiConfigImpl::SetUnitBaselineDpi(int baselineDpi)
 {
-  SetBaselineDpi(baselineDpi);
-}
-
-int UiConfigImpl::GetUnitBaselineDpi() const
-{
-  return GetBaselineDpi();
-}
-
-int UiConfigImpl::GetDpi() const
-{
-  mImpl->UpdateDpiFromWindowSystem();
-  return mImpl->mDpi;
-}
-
-void UiConfigImpl::SetBaselineDpi(int baselineDpi)
-{
-  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after UiConfig::Apply()");
   DALI_ASSERT_ALWAYS(baselineDpi != 0 && "Baseline dpi could not be 0");
   mImpl->mBaselineDpi = baselineDpi;
 }
 
-int UiConfigImpl::GetBaselineDpi() const
+int UiConfigImpl::GetUnitBaselineDpi() const
 {
   return mImpl->mBaselineDpi;
 }
@@ -532,17 +509,6 @@ void UiConfigImpl::SetAmbiguousPressDuration(uint32_t timeMs)
 uint32_t UiConfigImpl::GetAmbiguousPressDuration() const
 {
   return mImpl->mAmbiguousPressDuration;
-}
-
-void UiConfigImpl::SetWebEngineType(WebEngineType type)
-{
-  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after UiConfig::Apply()");
-  mImpl->mWebEngineType = type;
-}
-
-WebEngineType UiConfigImpl::GetWebEngineType() const
-{
-  return mImpl->mWebEngineType;
 }
 
 void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
