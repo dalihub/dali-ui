@@ -386,6 +386,71 @@ private:
   float                              mockZoomFactor;
 };
 
+class MockConfiguredWebEngineContext : public MockWebEngineContext, public Dali::WebEngineContextConfiguration
+{
+public:
+  Test::WebEngine::ContextConfigurationState configuration;
+
+  bool SetMaxRefreshRate(int32_t rate) override
+  {
+    ++configuration.calls;
+    configuration.refreshRate = rate;
+    return configuration.result;
+  }
+
+  bool SetCacheEnabled(bool enabled) override
+  {
+    ++configuration.calls;
+    configuration.cacheEnabled = enabled;
+    return configuration.result;
+  }
+  bool SetCertificatePath(const std::string& path) override
+  {
+    ++configuration.calls;
+    configuration.certificatePath = path;
+    return configuration.result;
+  }
+  bool RequestDeleteAllWebStorage() override
+  {
+    ++configuration.calls;
+    ++configuration.storageDeletes;
+    return configuration.result;
+  }
+  void SetTimeOffset(double offset) override
+  {
+    ++configuration.calls;
+    configuration.offset = offset;
+  }
+  void SetTimeZoneOffset(double zoneOffset, double daylightSavingTime) override
+  {
+    ++configuration.calls;
+    configuration.zoneOffset = zoneOffset;
+    configuration.daylightSavingTime = daylightSavingTime;
+  }
+  void RegisterUrlSchemesAsCorsEnabled(const std::vector<std::string>& schemes) override
+  {
+    ++configuration.calls;
+    configuration.schemes = schemes;
+  }
+  void SetAppId(const std::string& appId) override
+  {
+    ++configuration.calls;
+    configuration.appId = appId;
+  }
+  bool SetAppVersion(const std::string& version) override
+  {
+    ++configuration.calls;
+    configuration.appVersion = version;
+    return configuration.result;
+  }
+  bool DeleteAllWebIndexedDatabase() override
+  {
+    ++configuration.calls;
+    ++configuration.indexedDatabaseDeletes;
+    return configuration.result;
+  }
+};
+
 Dali::WebEngineContext* GetContext(bool isIncognito)
 {
   if(!gWebEngineContextInstance)
@@ -420,18 +485,22 @@ public:
 
   void SetPersistentStorage(const std::string& path, Dali::WebEngineCookieManager::CookiePersistentStorage storage) override
   {
+    ++state.storageCalls;
+    state.path = path;
+    state.storage = storage;
   }
 
   void ChangesWatch(Dali::WebEngineCookieManager::WebEngineCookieManagerChangesWatchCallback callback) override
   {
-    if(callback)
+    mChangesWatchCallback = std::move(callback);
+    if(mChangesWatchCallback)
     {
       ConnectToGlobalSignal(&OnChangesWatch);
-      mChangesWatchCallback = callback;
     }
   }
 
 public:
+  Test::WebEngine::CookieState state;
   Dali::WebEngineCookieManager::WebEngineCookieManagerChangesWatchCallback mChangesWatchCallback;
 
 private:
@@ -2727,7 +2796,7 @@ bool OnRequestIntercepted()
 bool OnChangesWatch()
 {
   DisconnectFromGlobalSignal(&OnChangesWatch);
-  if(gMockWebEngineCookieManager)
+  if(gMockWebEngineCookieManager && gMockWebEngineCookieManager->mChangesWatchCallback)
   {
     gMockWebEngineCookieManager->mChangesWatchCallback();
   }
@@ -3597,6 +3666,21 @@ RuntimeState& GetRuntimeState()
   return state;
 }
 
+CookieState& GetCookieState(Dali::WebEngineCookieManager* manager)
+{
+  return dynamic_cast<Dali::Internal::Adaptor::MockWebEngineCookieManager&>(*manager).state;
+}
+
+std::function<void()> CaptureCookieWatch(Dali::WebEngineCookieManager* manager)
+{
+  return dynamic_cast<Dali::Internal::Adaptor::MockWebEngineCookieManager&>(*manager).mChangesWatchCallback;
+}
+
+ContextConfigurationState& GetContextConfigurationState(Dali::WebEngineContext* context)
+{
+  return dynamic_cast<Dali::Internal::Adaptor::MockConfiguredWebEngineContext&>(*context).configuration;
+}
+
 void TerminateRuntime()
 {
   GetRuntimeState().available = false;
@@ -3628,7 +3712,11 @@ public:
   }
   WebEngineContext* GetContext() const override
   {
-    return Test::WebEngine::GetRuntimeState().available ? &mContext : nullptr;
+    if(!Test::WebEngine::GetRuntimeState().available)
+    {
+      return nullptr;
+    }
+    return Test::WebEngine::GetRuntimeState().legacyContext ? &mLegacyContext : &mContext;
   }
   WebEngineCookieManager* GetCookieManager() const override
   {
@@ -3637,7 +3725,8 @@ public:
   bool incognito;
 private:
   bool mOwned;
-  mutable Internal::Adaptor::MockWebEngineContext mContext;
+  mutable Internal::Adaptor::MockConfiguredWebEngineContext mContext;
+  mutable Internal::Adaptor::MockWebEngineContext mLegacyContext;
   mutable Internal::Adaptor::MockWebEngineCookieManager mCookies;
 };
 

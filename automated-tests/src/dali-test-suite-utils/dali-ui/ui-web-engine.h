@@ -19,6 +19,7 @@
 
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
+#include <dali/devel-api/adaptor-framework/web-engine/web-engine-cookie-manager.h>
 #include <string>
 #include <vector>
 
@@ -26,6 +27,33 @@ namespace Test
 {
 namespace WebEngine
 {
+struct ContextConfigurationState
+{
+  bool result = true;
+  int calls = 0;
+  bool cacheEnabled = true;
+  int32_t refreshRate = 0;
+  std::string certificatePath;
+  std::vector<std::string> schemes;
+  std::string appId;
+  std::string appVersion;
+  double offset = 0.0;
+  double zoneOffset = 0.0;
+  double daylightSavingTime = 0.0;
+  int storageDeletes = 0;
+  int indexedDatabaseDeletes = 0;
+};
+ContextConfigurationState& GetContextConfigurationState(Dali::WebEngineContext* context);
+
+struct CookieState
+{
+  int storageCalls = 0;
+  std::string path;
+  Dali::WebEngineCookieManager::CookiePersistentStorage storage = Dali::WebEngineCookieManager::CookiePersistentStorage::TEXT;
+};
+CookieState& GetCookieState(Dali::WebEngineCookieManager* manager);
+std::function<void()> CaptureCookieWatch(Dali::WebEngineCookieManager* manager);
+
 struct RuntimeState
 {
   int32_t type = -1;
@@ -33,6 +61,7 @@ struct RuntimeState
   bool available = false;
   bool failInitialization = false;
   bool failProfile = false;
+  bool legacyContext = false;
   bool failView = false;
   bool backendUnavailable = false;
   bool lastIncognito = false;
