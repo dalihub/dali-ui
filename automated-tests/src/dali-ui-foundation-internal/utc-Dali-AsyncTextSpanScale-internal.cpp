@@ -26,13 +26,13 @@
 #include <dali-ui/ui-adaptor-impl.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
@@ -45,15 +45,16 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+using Dali::Ui::Extension::LayoutScaleManager;
 
 namespace
 {
 struct RestoreUiScale
 {
-  float scale{UiScaleManager::Get().GetScale()};
+  float scale{LayoutScaleManager::Get().GetUiScale()};
   ~RestoreUiScale()
   {
-    UiScaleManager::Get().SetScale(scale);
+    LayoutScaleManager::Get().SetUiScale(scale);
   }
 };
 
@@ -87,7 +88,7 @@ int CheckTextFitExplicitSpanScale(bool replacement)
   const char* source         = "Scale ABC mixed 한글 😀";
   for(float uiScale : {1.f, 1.2f})
   {
-    UiScaleManager::Get().SetScale(uiScale);
+    LayoutScaleManager::Get().SetUiScale(uiScale);
     for(float fontScale : {1.f, 1.25f, 1.5f})
     {
       for(int fit = 0; fit < 4; ++fit)
