@@ -30,7 +30,22 @@ class WebCookieManagerImpl;
 } // namespace Integration DALI_INTERNAL
 
 /**
+ * @brief Cookie acceptance policy for the represented profile.
+ * @SINCE_3_0.3
+ */
+enum class WebCookieAcceptPolicy
+{
+  ALWAYS,            ///< Accept cookies from any page. @SINCE_3_0.3
+  NEVER,             ///< Reject all cookies. @SINCE_3_0.3
+  BLOCK_THIRD_PARTY, ///< Block third-party cookies. @SINCE_3_0.3
+};
+
+/**
  * @brief Manages cookies belonging to a WebProfile.
+ *
+ * The profile owns the cookie manager. An initialized manager handle
+ * can outlive the profile. Cookie operations then log an error and have
+ * no effect.
  * @SINCE_3_0.0
  */
 class DALI_UI_API WebCookieManager : public BaseHandle
@@ -96,11 +111,23 @@ public:
   /**
    * @brief Clears all cookies in this manager's cookie store.
    *
-   * This method does nothing when the web engine does not provide a cookie
-   * manager.
+   * Call on the DALi event thread. Logs an error and does nothing when the
+   * profile has been destroyed or the cookie store is unavailable.
    * @SINCE_3_0.0
    */
   void ClearAllCookies();
+
+  /**
+   * @brief Sets the cookie acceptance policy for this profile.
+   *
+   * Call on the DALi event thread. Logs an error and does nothing when the
+   * profile has been destroyed or the cookie store is unavailable.
+   * @SINCE_3_0.3
+   * @param[in] policy The policy applied to all views sharing this profile
+   * @pre policy is a valid WebCookieAcceptPolicy enumerator
+   * @supported TIZEN_CHROMIUM
+   */
+  void SetCookieAcceptPolicy(WebCookieAcceptPolicy policy);
 
 public: // Not intended for application developers
   /// @cond internal
