@@ -386,64 +386,6 @@ private:
   float                              mockZoomFactor;
 };
 
-class MockConfiguredWebEngineContext : public MockWebEngineContext, public Dali::WebEngineContextConfiguration
-{
-public:
-  Test::WebEngine::ContextConfigurationState configuration;
-
-  bool SetCacheEnabled(bool enabled) override
-  {
-    ++configuration.calls;
-    configuration.cacheEnabled = enabled;
-    return configuration.result;
-  }
-  bool SetCertificatePath(const std::string& path) override
-  {
-    ++configuration.calls;
-    configuration.certificatePath = path;
-    return configuration.result;
-  }
-  bool RequestDeleteAllWebStorage() override
-  {
-    ++configuration.calls;
-    ++configuration.storageDeletes;
-    return configuration.result;
-  }
-  void SetTimeOffset(double offset) override
-  {
-    ++configuration.calls;
-    configuration.offset = offset;
-  }
-  void SetTimeZoneOffset(double zoneOffset, double daylightSavingTime) override
-  {
-    ++configuration.calls;
-    configuration.zoneOffset = zoneOffset;
-    configuration.daylightSavingTime = daylightSavingTime;
-  }
-  void RegisterUrlSchemesAsCorsEnabled(const std::vector<std::string>& schemes) override
-  {
-    ++configuration.calls;
-    configuration.schemes = schemes;
-  }
-  void SetAppId(const std::string& appId) override
-  {
-    ++configuration.calls;
-    configuration.appId = appId;
-  }
-  bool SetAppVersion(const std::string& version) override
-  {
-    ++configuration.calls;
-    configuration.appVersion = version;
-    return configuration.result;
-  }
-  bool DeleteAllWebIndexedDatabase() override
-  {
-    ++configuration.calls;
-    ++configuration.indexedDatabaseDeletes;
-    return configuration.result;
-  }
-};
-
 Dali::WebEngineContext* GetContext(bool isIncognito)
 {
   if(!gWebEngineContextInstance)
@@ -3655,11 +3597,6 @@ RuntimeState& GetRuntimeState()
   return state;
 }
 
-ContextConfigurationState& GetContextConfigurationState(Dali::WebEngineContext* context)
-{
-  return dynamic_cast<Dali::Internal::Adaptor::MockConfiguredWebEngineContext&>(*context).configuration;
-}
-
 void TerminateRuntime()
 {
   GetRuntimeState().available = false;
@@ -3691,11 +3628,7 @@ public:
   }
   WebEngineContext* GetContext() const override
   {
-    if(!Test::WebEngine::GetRuntimeState().available)
-    {
-      return nullptr;
-    }
-    return Test::WebEngine::GetRuntimeState().legacyContext ? &mLegacyContext : &mContext;
+    return Test::WebEngine::GetRuntimeState().available ? &mContext : nullptr;
   }
   WebEngineCookieManager* GetCookieManager() const override
   {
@@ -3704,8 +3637,7 @@ public:
   bool incognito;
 private:
   bool mOwned;
-  mutable Internal::Adaptor::MockConfiguredWebEngineContext mContext;
-  mutable Internal::Adaptor::MockWebEngineContext mLegacyContext;
+  mutable Internal::Adaptor::MockWebEngineContext mContext;
   mutable Internal::Adaptor::MockWebEngineCookieManager mCookies;
 };
 
@@ -3772,19 +3704,6 @@ WebEngineArgumentsResult WebEngineRuntime::SetArguments(uint32_t argc, char** ar
   }
   state.arguments = std::move(values);
   return WebEngineArgumentsResult::SUCCESS;
-}
-
-void WebEngineRuntime::RegisterUrlSchemesAsCorsEnabled(const std::vector<std::string>& schemes)
-{
-  if(InitializeMockRuntime())
-  {
-    Test::WebEngine::GetRuntimeState().schemes = schemes;
-  }
-}
-
-bool WebEngineRuntime::SetMaxRefreshRate(int32_t rate)
-{
-  return rate >= 1 && rate <= 60 && InitializeMockRuntime();
 }
 
 WebEngineProfilePtr WebEngineRuntime::GetDefaultProfile()
