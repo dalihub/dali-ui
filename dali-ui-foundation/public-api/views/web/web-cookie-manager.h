@@ -18,9 +18,7 @@
  */
 
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/base-handle.h>
-#include <dali/public-api/signals/callback.h>
 
 namespace DALI_NAMESPACE
 {
@@ -30,17 +28,6 @@ namespace Integration DALI_INTERNAL
 {
 class WebCookieManagerImpl;
 } // namespace Integration DALI_INTERNAL
-
-/**
- * @brief Cookie acceptance policy for the represented profile.
- * @SINCE_3_0.2
- */
-enum class WebCookieAcceptPolicy
-{
-  ALWAYS,            ///< Accept cookies from any page. @SINCE_3_0.2
-  NEVER,             ///< Reject cookies. @SINCE_3_0.2
-  BLOCK_THIRD_PARTY, ///< Blocks third-party cookies. @SINCE_3_0.2
-};
 
 /**
  * @brief Manages cookies belonging to a WebProfile.
@@ -114,51 +101,6 @@ public:
    * @SINCE_3_0.0
    */
   void ClearAllCookies();
-
-  /**
-   * @brief Owning callback invoked without arguments when cookies change.
-   * @SINCE_3_0.2
-   */
-  using CookieChangesCallback = Dali::Callback<void()>;
-
-  /**
-   * @brief Sets the cookie acceptance policy for this profile.
-   *
-   * Call on the DALi event thread. Does nothing when the backend has no cookie
-   * manager or the context has terminated.
-   * @SINCE_3_0.2
-   * @param[in] policy The policy applied to all views sharing this profile
-   * @pre policy is a valid WebCookieAcceptPolicy enumerator
-   */
-  void SetCookieAcceptPolicy(WebCookieAcceptPolicy policy);
-
-  /**
-   * @brief Configures persistent cookie storage for a normal profile.
-   *
-   * Call on the DALi event thread. Incognito profiles ignore this operation and
-   * never forward a persistent-storage request to the backend. Does nothing
-   * when the backend has no cookie manager or the context has terminated.
-   * The Chromium backend uses a Cookies database under the supplied directory
-   * and may persist session cookies as well. Return does not imply completion
-   * of database loading or writing.
-   * @SINCE_3_0.2
-   * @param[in] path Directory used for cookie storage
-   */
-  void SetPersistentStorage(const Dali::String& path);
-
-  /**
-   * @brief Replaces the cookie change callback for this profile.
-   * @SINCE_3_0.2
-   * @param[in] callback Callback whose ownership is transferred to this manager; empty to stop watching
-   * @note Call on the main event thread. The callback may run on an engine
-   * thread and must not access UI handles. It reports a change, without cookie
-   * identity or change type. Do not capture this manager by value, as that creates a reference cycle.
-   * @note Replacing, clearing, or destroying the manager prevents subsequent
-   * dispatch of the old callback. A dispatch that already acquired the callback
-   * may begin or finish invoking it after removal.
-   * No operation is performed if the engine is unavailable or terminated.
-   */
-  void SetCookieChangesCallback(CookieChangesCallback callback);
 
 public: // Not intended for application developers
   /// @cond internal

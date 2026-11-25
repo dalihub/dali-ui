@@ -19,7 +19,6 @@
 
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
-#include <dali/devel-api/adaptor-framework/web-engine/web-engine-cookie-manager.h>
 #include <string>
 #include <vector>
 
@@ -43,15 +42,6 @@ struct ContextConfigurationState
   int indexedDatabaseDeletes = 0;
 };
 ContextConfigurationState& GetContextConfigurationState(Dali::WebEngineContext* context);
-
-struct CookieState
-{
-  int storageCalls = 0;
-  std::string path;
-  Dali::WebEngineCookieManager::CookiePersistentStorage storage = Dali::WebEngineCookieManager::CookiePersistentStorage::TEXT;
-};
-CookieState& GetCookieState(Dali::WebEngineCookieManager* manager);
-std::function<void()> CaptureCookieWatch(Dali::WebEngineCookieManager* manager);
 
 struct RuntimeState
 {
