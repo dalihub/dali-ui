@@ -79,11 +79,12 @@ int UtcDaliFastTrackLoadingTaskLoadP(void)
   DALI_TEST_EQUALS(task->mTextures.size(), 1u, TEST_LOCATION);
   task->Process();
   DALI_TEST_CHECK(task->mLoadSuccess);
-  DALI_TEST_CHECK(task->mPremultiplied);
   DALI_TEST_CHECK(!task->mPlanesLoaded);
   CompleteTask(task);
   DALI_TEST_CHECK(gCallbackCalled);
   DALI_TEST_EQUALS(task->mTextures.size(), 1u, TEST_LOCATION);
+  // The resource-id texture bypasses Texture::Upload(), so OnComplete must carry the flag over.
+  DALI_TEST_CHECK(task->mTextures[0].IsAlphaPreMultiplied());
   END_TEST;
 }
 
@@ -105,6 +106,7 @@ int UtcDaliFastTrackLoadingTaskPlanesAndFailureP(void)
   DALI_TEST_CHECK(!planeTask->mPlanesLoaded);
   CompleteTask(planeTask);
   DALI_TEST_EQUALS(planeTask->mTextures.size(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!planeTask->mTextures[0].IsAlphaPreMultiplied());
 
   Dali::Ui::Internal::FastTrackLoadingTaskPtr failedTask = Dali::Ui::Internal::FastTrackLoadingTask::New(
     Dali::Ui::Internal::VisualUrl(""),
