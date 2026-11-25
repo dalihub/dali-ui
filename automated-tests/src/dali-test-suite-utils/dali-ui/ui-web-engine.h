@@ -32,7 +32,6 @@ struct ContextConfigurationState
   bool result = true;
   int calls = 0;
   bool cacheEnabled = true;
-  int32_t refreshRate = 0;
   std::string certificatePath;
   std::vector<std::string> schemes;
   std::string appId;
@@ -65,6 +64,7 @@ struct RuntimeState
   bool failView = false;
   bool backendUnavailable = false;
   bool lastIncognito = false;
+  std::vector<std::string> schemes;
   std::string lastBundlePath;
   std::vector<std::string> arguments;
   std::vector<std::string> initializedArguments;

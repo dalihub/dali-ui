@@ -20,7 +20,6 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
 #include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/base-handle.h>
 
 namespace DALI_NAMESPACE
@@ -217,31 +216,6 @@ public:
    * @return True if the deletion request is accepted, not necessarily completed; false on rejection, lack of support, or termination
    */
   bool DeleteAllWebIndexedDatabase();
-
-  /**
-   * @brief Requests the maximum refresh rate through this profile's context.
-   *
-   * Call on the DALi event thread, before creating views that should use the cap.
-   * The web engine implementation may apply this setting across contexts.
-   * @SINCE_3_0.2
-   * @param[in] rate Maximum frame rate from 1 to 60 FPS
-   * @return True if a valid request was forwarded to the backend; false for an
-   * invalid rate, unsupported backend, or terminated context. The native setter
-   * returns void, so true does not confirm that the requested cap was applied.
-   */
-  bool SetMaxRefreshRate(int32_t rate);
-
-  /**
-   * @brief Registers CORS-enabled URL schemes through this profile's context.
-   *
-   * Call on the DALi event thread. Does nothing after context termination.
-   * The Chromium implementation stores the list process-wide; profile isolation
-   * and immediate propagation to existing renderers are not guaranteed.
-   * CORS registration does not register a request-interception callback.
-   * @SINCE_3_0.2
-   * @param[in] schemes URL schemes to register
-   */
-  void RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes);
 
 public: // Not intended for application developers
   /// @cond internal

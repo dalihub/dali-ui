@@ -109,33 +109,6 @@ void WebProfileImpl::ClearCache()
   }
 }
 
-bool WebProfileImpl::SetMaxRefreshRate(int32_t rate)
-{
-  if(rate < 1 || rate > 60)
-  {
-    return false;
-  }
-  if(auto* context = dynamic_cast<Dali::WebEngineContextConfiguration*>(mProfile->GetContext()))
-  {
-    return context->SetMaxRefreshRate(rate);
-  }
-  return false;
-}
-
-void WebProfileImpl::RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes)
-{
-  if(auto* context = mProfile->GetContext())
-  {
-    std::vector<std::string> nativeSchemes;
-    nativeSchemes.reserve(schemes.Count());
-    for(const auto& scheme : schemes)
-    {
-      nativeSchemes.emplace_back(scheme.CStr());
-    }
-    context->RegisterUrlSchemesAsCorsEnabled(nativeSchemes);
-  }
-}
-
 bool WebProfileImpl::EnableCache(bool enabled)
 {
   if(auto* context = dynamic_cast<Dali::WebEngineContextConfiguration*>(mProfile->GetContext()))
