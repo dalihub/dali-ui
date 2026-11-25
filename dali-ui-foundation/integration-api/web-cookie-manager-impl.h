@@ -21,7 +21,6 @@
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
-#include <memory>
 
 namespace DALI_NAMESPACE
 {
@@ -44,19 +43,14 @@ public:
   static WebCookieManagerImplPtr New(const WebProfile& profile);
 
   void ClearAllCookies();
-  void SetCookieChangesCallback(WebCookieManager::CookieChangesCallback callback);
   bool IsEqual(const WebCookieManagerImpl& rhs) const;
-  void SetCookieAcceptPolicy(WebCookieAcceptPolicy policy);
-  void SetPersistentStorage(const Dali::String& path);
 
 protected:
   explicit WebCookieManagerImpl(const WebProfile& profile);
   ~WebCookieManagerImpl() override;
 
 private:
-  struct WatchState;
-  WebProfile                  mProfile;
-  std::shared_ptr<WatchState> mWatch;
+  WebProfile mProfile;
 };
 
 inline WebCookieManagerImpl& GetImpl(WebCookieManager& manager)

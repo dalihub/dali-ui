@@ -53,17 +53,6 @@ public:
   WebCookieManager GetCookieManager() const;
   bool             IsEqual(const WebProfileImpl& rhs) const;
 
-  bool EnableCache(bool enabled);
-  bool SetCertificateFilePath(const Dali::String& path);
-  void SetAppId(const Dali::String& appId);
-  bool SetAppVersion(const Dali::String& version);
-  void SetTimeOffset(double offset);
-  void SetTimeZoneOffset(double zoneOffset, double daylightSavingTime);
-  bool DeleteAllWebStorage();
-  bool DeleteAllWebIndexedDatabase();
-  bool SetMaxRefreshRate(int32_t rate);
-  void RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes);
-
 protected:
   WebProfileImpl(const Dali::String& name, bool incognito, Dali::WebEngineProfilePtr profile);
   ~WebProfileImpl() override;

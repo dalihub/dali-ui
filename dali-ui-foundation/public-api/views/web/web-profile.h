@@ -20,7 +20,6 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
 #include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/base-handle.h>
 
 namespace DALI_NAMESPACE
@@ -141,8 +140,6 @@ public:
    * @param[in] incognito Whether browsing data is private
    * @param[in] injectedBundlePath The bundle path, or an empty string for no bundle
    * @return The new profile, or an empty handle on failure; no default fallback
-   * @deprecated Use Dali::Ui::Extension::WebProfile::New()
-   * from <dali-ui-foundation/extension-api/web-profile.h>.
    * @see New(const Dali::String&, bool)
    */
   static WebProfile New(const Dali::String& name, bool incognito, const Dali::String& injectedBundlePath);
@@ -168,80 +165,6 @@ public:
    * @return True if browsing data is private, false otherwise
    */
   bool IsIncognito() const;
-
-  /**
-   * @brief Enables or disables resource caching without clearing existing data.
-   *
-   * Returns false if the backend rejects the request or lacks result support.
-   * Call on the DALi event thread. After context termination, this operation
-   * returns false.
-   * @SINCE_3_0.2
-   * @param[in] enabled True to enable caching, false to disable it
-   * @return True if the backend accepts the request; false on rejection, lack of support, or termination
-   */
-  bool EnableCache(bool enabled);
-
-  /**
-   * @brief Sets CA certificate files, directories or a colon-separated list.
-   *
-   * This configures CA trust, independently of TLS client certificates.
-   * Chromium imports into a shared certificate database, so trust is not isolated
-   * by profile. True reports request acceptance, not successful certificate import.
-   * Returns false on rejection or unsupported operation.
-   * Call on the DALi event thread. After context termination, this operation
-   * returns false.
-   * @SINCE_3_0.2
-   * @param[in] path CA certificate file, directory, or colon-separated list of paths
-   * @return True if the import request is accepted, not necessarily completed; false on rejection, lack of support, or termination
-   */
-  bool SetCertificateFilePath(const Dali::String& path);
-
-  /**
-   * @brief Requests deletion of all web storage belonging to this profile.
-   *
-   * True means request acceptance, not deletion completion. Returns false on rejection or unsupported operation.
-   * Call on the DALi event thread. After context termination, this operation
-   * returns false.
-   * @SINCE_3_0.2
-   * @return True if the deletion request is accepted, not necessarily completed; false on rejection, lack of support, or termination
-   */
-  bool DeleteAllWebStorage();
-
-  /**
-   * @brief Requests deletion of all IndexedDB data belonging to this profile.
-   *
-   * True means request acceptance, not deletion completion. Returns false on rejection or unsupported operation.
-   * Call on the DALi event thread. After context termination, this operation
-   * returns false.
-   * @SINCE_3_0.2
-   * @return True if the deletion request is accepted, not necessarily completed; false on rejection, lack of support, or termination
-   */
-  bool DeleteAllWebIndexedDatabase();
-
-  /**
-   * @brief Requests the maximum refresh rate through this profile's context.
-   *
-   * Call on the DALi event thread, before creating views that should use the cap.
-   * The web engine implementation may apply this setting across contexts.
-   * @SINCE_3_0.2
-   * @param[in] rate Maximum frame rate from 1 to 60 FPS
-   * @return True if a valid request was forwarded to the backend; false for an
-   * invalid rate, unsupported backend, or terminated context. The native setter
-   * returns void, so true does not confirm that the requested cap was applied.
-   */
-  bool SetMaxRefreshRate(int32_t rate);
-
-  /**
-   * @brief Registers CORS-enabled URL schemes through this profile's context.
-   *
-   * Call on the DALi event thread. Does nothing after context termination.
-   * The Chromium implementation stores the list process-wide; profile isolation
-   * and immediate propagation to existing renderers are not guaranteed.
-   * CORS registration does not register a request-interception callback.
-   * @SINCE_3_0.2
-   * @param[in] schemes URL schemes to register
-   */
-  void RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes);
 
 public: // Not intended for application developers
   /// @cond internal
