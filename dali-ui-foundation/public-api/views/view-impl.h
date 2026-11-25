@@ -32,7 +32,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
@@ -109,17 +108,8 @@ public:
 
 public:
   // ============================================================
-  // public: ABI-frozen virtual API
+  // public: ABI-frozen virtual API.
   // WARNING: Do NOT add, reorder, remove, or change signatures.
-  //
-  // The vtable is a single frozen set: the declaration order of every
-  // virtual in this class -- public and protected sections alike --
-  // defines the slot order, and the base class list (order included)
-  // is part of the same frozen ABI.
-  //
-  // The object layout is frozen with it: mImpl is the ONLY data member,
-  // because subclass member offsets depend on sizeof(ViewImpl). Never
-  // add a data member here; extend Internal::ViewDataImpl instead.
   // ============================================================
 
   // Resource & offscreen-rendering queries
@@ -191,23 +181,9 @@ public:
   virtual bool OnAccessibilityZoom();
 
   /**
-   * @brief Called when the accessibility client requests a dynamic name.
-   * @deprecated For component-provided fallback names, use
-   * OnAccessibilityRequestDefaultName(). Unlike this hook, the default-name
-   * hook is called only when the explicit accessibility name is empty.
-   * Use View::SetAccessibilityName() to set an explicit name.
-   * This hook retains precedence over the explicit name when it returns true.
-   * @SINCE_3_0.0
-   * @param[out] value The requested name, including an intentionally empty value
-   * @return true if this view supplied the value
-   */
-  virtual bool OnAccessibilityRequestName(Dali::String& value);
-
-  /**
    * @brief Called when this View may supply a fallback accessibility name.
    *
-   * This method is called only when OnAccessibilityRequestName() did not
-   * handle the request and no explicit accessibility name is configured.
+   * This method is called only when no explicit accessibility name is configured.
    * Returning true accepts @p value as the final default, including an
    * intentionally empty value. Returning false continues with framework
    * fallback naming.
@@ -219,23 +195,9 @@ public:
   virtual bool OnAccessibilityRequestDefaultName(Dali::String& value);
 
   /**
-   * @brief Called when the accessibility client requests a dynamic description.
-   * @deprecated For component-provided fallback descriptions, use
-   * OnAccessibilityRequestDefaultDescription(). Unlike this hook, the default-description
-   * hook is called only when the explicit accessibility description is empty.
-   * Use View::SetAccessibilityDescription() to set an explicit description.
-   * This hook retains precedence over the explicit description when it returns true.
-   * @SINCE_3_0.0
-   * @param[out] value The requested description, including an intentionally empty value
-   * @return true if this view supplied the value
-   */
-  virtual bool OnAccessibilityRequestDescription(Dali::String& value);
-
-  /**
    * @brief Called when this View may supply a fallback accessibility description.
    *
-   * This method is called only when OnAccessibilityRequestDescription() did not
-   * handle the request and no explicit accessibility description is configured.
+   * This method is called only when no explicit accessibility description is configured.
    * Returning true accepts @p value as the final default, including an
    * intentionally empty value. Returning false continues with framework
    * fallback description handling.
@@ -247,23 +209,9 @@ public:
   virtual bool OnAccessibilityRequestDefaultDescription(Dali::String& value);
 
   /**
-   * @brief Called when the accessibility client requests a dynamic value.
-   * @deprecated For component-provided fallback values, use
-   * OnAccessibilityRequestDefaultValue(). Unlike this hook, the default-value
-   * hook is called only when the explicit accessibility value is empty.
-   * Use View::SetAccessibilityValue() to set an explicit value.
-   * This hook retains precedence over the explicit value when it returns true.
-   * @SINCE_3_0.0
-   * @param[out] value The requested value, including an intentionally empty value
-   * @return true if this view supplied the value
-   */
-  virtual bool OnAccessibilityRequestValue(Dali::String& value);
-
-  /**
    * @brief Called when this View may supply a fallback accessibility value.
    *
-   * This method is called only when OnAccessibilityRequestValue() did not
-   * handle the request and the explicit accessibility value is empty.
+   * This method is called only when the explicit accessibility value is empty.
    * Returning true accepts @p value as the final default, including an
    * intentionally empty value. Returning false leaves the accessible value empty.
    *
@@ -378,46 +326,6 @@ public: // Non-virtual API (safe to reorder / extend)
   LayoutRect GetArrangedBounds() const;
 
   // View configuration (scale, size, layout, focus, appearance) & hierarchy
-
-  /**
-   * @brief Sets the UiScale participation policy for this view.
-   *
-   * @deprecated Use Ui::Extension::View::SetUiScalePolicy() instead; this function will be
-   * removed. It takes the View handle and a Ui::Extension::UiScalePolicy: in a ViewImpl subclass
-   * replace SetUiScalePolicy(UiScalePolicy::DISABLED) with
-   * Ui::Extension::View::SetUiScalePolicy(Ui::View::DownCast(Self()), Ui::Extension::UiScalePolicy::DISABLED).
-   * Write the Ui:: qualifier: an unqualified Extension:: names CustomActorImpl::Extension there.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy The UiScalePolicy to apply
-   */
-  void SetUiScalePolicy(UiScalePolicy policy);
-
-  /**
-   * @brief Gets the UiScale participation policy of this view.
-   *
-   * @deprecated Use Ui::Extension::View::GetUiScalePolicy() instead; this function will be
-   * removed. In a ViewImpl subclass replace GetUiScalePolicy() with
-   * Ui::Extension::View::GetUiScalePolicy(Ui::View::DownCast(Self())), which returns the same
-   * policy as a Ui::Extension::UiScalePolicy.
-   *
-   * @SINCE_3_0.0
-   * @return The current UiScalePolicy
-   */
-  UiScalePolicy GetUiScalePolicy() const;
-
-  /**
-   * @brief Gets the effective scale for this view.
-   *
-   * @deprecated Use Ui::Extension::View::GetEffectiveLayoutScale() instead. In a ViewImpl
-   * subclass replace GetEffectiveScale() with Ui::Extension::View::GetEffectiveLayoutScale(*this).
-   * Write the Ui:: qualifier: an unqualified Extension:: names CustomActorImpl::Extension there.
-   *
-   * @SINCE_3_0.0
-   * @return The effective scale factor, always the value
-   * Ui::Extension::View::GetEffectiveLayoutScale() returns
-   */
-  float GetEffectiveScale() const;
 
   /**
    * @copydoc Ui::View::SetRequestedX()
@@ -753,101 +661,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @note Logical index of @p view in mChildren, or -1 if not a logical child.
    */
   int32_t IndexOfChildView(Ui::View view) const;
-
-  /**
-   * @brief Raises the view one step above its immediate next sibling.
-   *
-   * @deprecated Use Self().Raise() or Ui::Extension::View::RaisePreservingLayout() instead; this
-   * overload will be removed. An unqualified Raise() does not compile in a ViewImpl subclass.
-   * Replace Raise(Ui::LayoutOrderPolicy::UPDATE) with Self().Raise() and
-   * Raise(Ui::LayoutOrderPolicy::PRESERVE) with
-   * Ui::Extension::View::RaisePreservingLayout(Ui::View::DownCast(Self())); keep the Ui::
-   * qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy See Ui::View::Raise(LayoutOrderPolicy).
-   */
-  void Raise(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers the view one step below its immediate previous sibling.
-   *
-   * @deprecated Use Self().Lower() or Ui::Extension::View::LowerPreservingLayout() instead; this
-   * overload will be removed. An unqualified Lower() does not compile in a ViewImpl subclass.
-   * Replace Lower(Ui::LayoutOrderPolicy::UPDATE) with Self().Lower() and
-   * Lower(Ui::LayoutOrderPolicy::PRESERVE) with
-   * Ui::Extension::View::LowerPreservingLayout(Ui::View::DownCast(Self())); keep the Ui::
-   * qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy See Ui::View::Lower(LayoutOrderPolicy).
-   */
-  void Lower(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Raises the view to the top of its sibling list.
-   *
-   * @deprecated Use Self().RaiseToTop() or Ui::Extension::View::RaiseToTopPreservingLayout()
-   * instead; this overload will be removed. An unqualified RaiseToTop() does not compile in a
-   * ViewImpl subclass. Replace RaiseToTop(Ui::LayoutOrderPolicy::UPDATE) with
-   * Self().RaiseToTop() and RaiseToTop(Ui::LayoutOrderPolicy::PRESERVE) with
-   * Ui::Extension::View::RaiseToTopPreservingLayout(Ui::View::DownCast(Self())); keep the Ui::
-   * qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy See Ui::View::RaiseToTop(LayoutOrderPolicy).
-   */
-  void RaiseToTop(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers the view to the bottom of its sibling list.
-   *
-   * @deprecated Use Self().LowerToBottom() or
-   * Ui::Extension::View::LowerToBottomPreservingLayout() instead; this overload will be
-   * removed. An unqualified LowerToBottom() does not compile in a ViewImpl subclass. Replace
-   * LowerToBottom(Ui::LayoutOrderPolicy::UPDATE) with Self().LowerToBottom() and
-   * LowerToBottom(Ui::LayoutOrderPolicy::PRESERVE) with
-   * Ui::Extension::View::LowerToBottomPreservingLayout(Ui::View::DownCast(Self())); keep the
-   * Ui:: qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
-   *
-   * @SINCE_3_0.0
-   * @param[in] policy See Ui::View::LowerToBottom(LayoutOrderPolicy).
-   */
-  void LowerToBottom(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Raises the view above the given target sibling.
-   *
-   * @deprecated Use Self().RaiseAbove() or Ui::Extension::View::RaiseAbovePreservingLayout()
-   * instead; this overload will be removed. An unqualified RaiseAbove() does not compile in a
-   * ViewImpl subclass. Replace RaiseAbove(target, Ui::LayoutOrderPolicy::UPDATE) with
-   * Self().RaiseAbove(target) after checking that @p target is not empty, and
-   * RaiseAbove(target, Ui::LayoutOrderPolicy::PRESERVE) with
-   * Ui::Extension::View::RaiseAbovePreservingLayout(Ui::View::DownCast(Self()), target); keep the
-   * Ui:: qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
-   *
-   * @SINCE_3_0.0
-   * @param[in] target See Ui::View::RaiseAbove(View, LayoutOrderPolicy).
-   * @param[in] policy See Ui::View::RaiseAbove(View, LayoutOrderPolicy).
-   */
-  void RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers the view below the given target sibling.
-   *
-   * @deprecated Use Self().LowerBelow() or Ui::Extension::View::LowerBelowPreservingLayout()
-   * instead; this overload will be removed. An unqualified LowerBelow() does not compile in a
-   * ViewImpl subclass. Replace LowerBelow(target, Ui::LayoutOrderPolicy::UPDATE) with
-   * Self().LowerBelow(target) after checking that @p target is not empty, and
-   * LowerBelow(target, Ui::LayoutOrderPolicy::PRESERVE) with
-   * Ui::Extension::View::LowerBelowPreservingLayout(Ui::View::DownCast(Self()), target); keep the
-   * Ui:: qualifier, since an unqualified Extension:: names CustomActorImpl::Extension there.
-   *
-   * @SINCE_3_0.0
-   * @param[in] target See Ui::View::LowerBelow(View, LayoutOrderPolicy).
-   * @param[in] policy See Ui::View::LowerBelow(View, LayoutOrderPolicy).
-   */
-  void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
 
   // State API
 
@@ -1210,13 +1023,16 @@ public:
    *
    * The overrides above fill dali-core base-class slots and introduce none,
    * so this is the LAST virtual of this class: the final slot of the frozen
-   * vtable. Keep it last. Until the release that first ships this class
-   * (DALi 3.0.0) freezes the vtable, a new virtual hook is added to its
-   * category section above, since every repo rebuilds together. After the
-   * freeze NO virtual may be added anywhere in this class, not even appended
-   * after this one: the appended slot would collide with the first own
-   * virtual of any subclass binary that has not been rebuilt. Post-freeze
-   * hooks go on the Extension interface returned here.
+   * vtable. Keep it last. The set of virtual hooks above is final: NO
+   * virtual may be added anywhere in this class, not even appended after
+   * this one, because the appended slot would collide with the first own
+   * virtual of any subclass binary that has not been rebuilt. Any new hook
+   * goes on the Extension interface returned here.
+   *
+   * The name differs from CustomActorImpl::GetExtension() on purpose. A
+   * same-named virtual returning ViewImpl::Extension* would be an override
+   * with a non-covariant return type, which does not compile, and it would
+   * hide the base slot. Each class with its own extension needs its own name.
    *
    * @SINCE_3_0.0
    * @return The extension if available, nullptr otherwise

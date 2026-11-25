@@ -98,11 +98,6 @@ ScrollBar::ScrollBar(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::ScrollBarImpl>(internal);
 }
 
-View ScrollBar::GetTarget() const
-{
-  return GetImpl(*this).GetTarget();
-}
-
 ScrollBarVisibility ScrollBar::GetVerticalScrollBarVisibility() const
 {
   return GetImpl(*this).GetVerticalScrollBarVisibility();

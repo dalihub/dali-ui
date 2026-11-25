@@ -109,9 +109,8 @@ bool GlViewDirectBackend::StartTerminate()
 
 void GlViewDirectBackend::AbandonQuietly()
 {
-  // Nothing to stop: the callback only runs while the renderer is drawn, and the
-  // view is on its way out. Marking the invocation done keeps a frame that is
-  // already in flight from reaching the application's callbacks.
+  // Join active invocations before the owner clears application callbacks.
+  mRenderCallback->Invalidate();
   mTerminateInvoked = true;
 }
 

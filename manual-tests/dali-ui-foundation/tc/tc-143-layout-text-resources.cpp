@@ -284,13 +284,13 @@ public:
          s->label.SetRequestedHeight(WRAP_CONTENT);
          s->stage = Mount(r, s->label, 300, 300);
          r.SetState(s);
-         r.AfterRender({s->stage, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->label}, [=](Run& done) {
            s->single          = s->label.GetNaturalSize();
            const float height = s->label.GetHeightForWidth(s->single.x);
            const auto  a      = s->label.GetMeasuredSize();
-           r.Near("intrinsic.A.width", a.width, s->single.x);
-           r.Near("intrinsic.A.height", a.height, height);
-           r.Rendered("intrinsic.A.rendered", s->label, LayoutRect(0, 0, s->single.x, height));
+           done.Near("intrinsic.A.width", a.width, s->single.x);
+           done.Near("intrinsic.A.height", a.height, height);
+           done.Rendered("intrinsic.A.rendered", s->label, LayoutRect(0, 0, s->single.x, height));
          });
        }},
       {"narrow", 7, [](Run& r) {
@@ -299,70 +299,70 @@ public:
          s->label.SetLineWrapMode(Text::LineWrapMode::CHARACTER);
          s->label.SetRequestedWidth(MATCH_PARENT);
          s->stage.SetRequestedWidth(25);
-         r.AfterRender({s->stage, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->label}, [=](Run& done) {
            const auto  narrow = s->label.GetMeasuredSize();
            const float height = s->label.GetHeightForWidth(25);
-           r.Near("intrinsic.match.slot", narrow.width, 25);
-           r.Near("intrinsic.narrow.height", narrow.height, height);
-           r.Rendered("intrinsic.narrow.rendered", s->label, LayoutRect(0, 0, 25, height));
-           r.Truth("intrinsic.narrow.wraps", height > s->single.y);
+           done.Near("intrinsic.match.slot", narrow.width, 25);
+           done.Near("intrinsic.narrow.height", narrow.height, height);
+           done.Rendered("intrinsic.narrow.rendered", s->label, LayoutRect(0, 0, 25, height));
+           done.Truth("intrinsic.narrow.wraps", height > s->single.y);
          });
        }},
       {"wide", 7, [](Run& r) {
          auto s = r.State<IntrinsicText>();
          s->stage.SetRequestedWidth(40);
-         r.AfterRender({s->stage, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->label}, [=](Run& done) {
            const auto  wide   = s->label.GetMeasuredSize();
            const float height = s->label.GetHeightForWidth(40);
-           r.Near("intrinsic.match.wide.slot", wide.width, 40);
-           r.Near("intrinsic.wide.height", wide.height, height);
-           r.Rendered("intrinsic.wide.rendered", s->label, LayoutRect(0, 0, 40, height));
-           r.Truth("intrinsic.wide.not-taller", height <= s->label.GetHeightForWidth(25));
+           done.Near("intrinsic.match.wide.slot", wide.width, 40);
+           done.Near("intrinsic.wide.height", wide.height, height);
+           done.Rendered("intrinsic.wide.rendered", s->label, LayoutRect(0, 0, 40, height));
+           done.Truth("intrinsic.wide.not-taller", height <= s->label.GetHeightForWidth(25));
          });
        }},
       {"fixed-width", 6, [](Run& r) {
          auto s = r.State<IntrinsicText>();
          s->label.SetRequestedWidth(25);
          s->stage.SetRequestedWidth(300);
-         r.AfterRender({s->stage, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->label}, [=](Run& done) {
            const auto  fixed  = s->label.GetMeasuredSize();
            const float height = s->label.GetHeightForWidth(25);
-           r.Near("intrinsic.fixed.width", fixed.width, 25);
-           r.Near("intrinsic.fixed.height", fixed.height, height);
-           r.Rendered("intrinsic.fixed.rendered", s->label, LayoutRect(0, 0, 25, height));
+           done.Near("intrinsic.fixed.width", fixed.width, 25);
+           done.Near("intrinsic.fixed.height", fixed.height, height);
+           done.Rendered("intrinsic.fixed.rendered", s->label, LayoutRect(0, 0, 25, height));
          });
        }},
       {"changed-text", 6, [](Run& r) {
          auto s = r.State<IntrinsicText>();
          s->label.SetText("A");
-         r.AfterRender({s->stage, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->label}, [=](Run& done) {
            const auto  changed = s->label.GetMeasuredSize();
            const float height  = s->label.GetHeightForWidth(25);
-           r.Near("intrinsic.changed.width", changed.width, 25);
-           r.Near("intrinsic.changed.height", changed.height, height);
-           r.Rendered("intrinsic.changed.rendered", s->label, LayoutRect(0, 0, 25, height));
+           done.Near("intrinsic.changed.width", changed.width, 25);
+           done.Near("intrinsic.changed.height", changed.height, height);
+           done.Rendered("intrinsic.changed.rendered", s->label, LayoutRect(0, 0, 25, height));
          });
        }},
       {"font-size", 7, [](Run& r) {
          auto s = r.State<IntrinsicText>();
          s->label.SetRequestedWidth(WRAP_CONTENT);
          s->label.SetFontSize(36);
-         r.AfterRender({s->stage, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->label}, [=](Run& done) {
            const Vector3 natural = s->label.GetNaturalSize();
            const float   height  = s->label.GetHeightForWidth(natural.x);
            const auto    large   = s->label.GetMeasuredSize();
-           r.Near("intrinsic.font.width", large.width, natural.x);
-           r.Near("intrinsic.font.height", large.height, height);
-           r.Rendered("intrinsic.font.rendered", s->label, LayoutRect(0, 0, natural.x, height));
-           r.Truth("intrinsic.font.larger", natural.x > s->single.x && natural.y > s->single.y);
+           done.Near("intrinsic.font.width", large.width, natural.x);
+           done.Near("intrinsic.font.height", large.height, height);
+           done.Rendered("intrinsic.font.rendered", s->label, LayoutRect(0, 0, natural.x, height));
+           done.Truth("intrinsic.font.larger", natural.x > s->single.x && natural.y > s->single.y);
          });
        }},
       {"empty", 6, [](Run& r) {
          auto s = r.State<IntrinsicText>();
          s->label.SetText("");
-         r.AfterRender({s->stage, s->label}, [=](Run& r) {
-           r.Size("intrinsic.empty", s->label.GetMeasuredSize(), MeasuredSize(0, 0));
-           r.Rendered("intrinsic.empty.rendered", s->label, LayoutRect(0, 0, 0, 0));
+         r.AfterRender({s->stage, s->label}, [=](Run& done) {
+           done.Size("intrinsic.empty", s->label.GetMeasuredSize(), MeasuredSize(0, 0));
+           done.Rendered("intrinsic.empty.rendered", s->label, LayoutRect(0, 0, 0, 0));
          });
        }},
     }));
@@ -389,36 +389,36 @@ public:
            r.Near("image.natural.height", natural.y, h);
            s->stage = Mount(r, s->image, 300, 300);
            r.SetState(s);
-           r.AfterRender({s->stage, s->image}, [=](Run& r) {
-             r.Size("image.wrap", s->image.GetMeasuredSize(), MeasuredSize(w, h));
-             r.Rendered("image.wrap.rendered", s->image, LayoutRect(0, 0, w, h));
+           r.AfterRender({s->stage, s->image}, [=](Run& done) {
+             done.Size("image.wrap", s->image.GetMeasuredSize(), MeasuredSize(w, h));
+             done.Rendered("image.wrap.rendered", s->image, LayoutRect(0, 0, w, h));
            });
          }},
         {"fixed-width", 6, [w, h](Run& r) {
            auto s = r.State<SyncImage>();
            s->image.SetRequestedWidth(w * 2);
-           r.AfterRender({s->stage, s->image}, [=](Run& r) {
-             r.Size("image.fixed.width", s->image.GetMeasuredSize(), MeasuredSize(w * 2, h * 2));
-             r.Rendered("image.fixed.width.rendered", s->image, LayoutRect(0, 0, w * 2, h * 2));
+           r.AfterRender({s->stage, s->image}, [=](Run& done) {
+             done.Size("image.fixed.width", s->image.GetMeasuredSize(), MeasuredSize(w * 2, h * 2));
+             done.Rendered("image.fixed.width.rendered", s->image, LayoutRect(0, 0, w * 2, h * 2));
            });
          }},
         {"fixed-height", 6, [w, h](Run& r) {
            auto s = r.State<SyncImage>();
            s->image.SetRequestedWidth(WRAP_CONTENT);
            s->image.SetRequestedHeight(h * 3);
-           r.AfterRender({s->stage, s->image}, [=](Run& r) {
-             r.Size("image.fixed.height", s->image.GetMeasuredSize(), MeasuredSize(w * 3, h * 3));
-             r.Rendered("image.fixed.height.rendered", s->image, LayoutRect(0, 0, w * 3, h * 3));
+           r.AfterRender({s->stage, s->image}, [=](Run& done) {
+             done.Size("image.fixed.height", s->image.GetMeasuredSize(), MeasuredSize(w * 3, h * 3));
+             done.Rendered("image.fixed.height.rendered", s->image, LayoutRect(0, 0, w * 3, h * 3));
            });
          }},
         {"both-fixed", 7, [](Run& r) {
            auto s = r.State<SyncImage>();
            s->image.SetRequestedWidth(80);
            s->image.SetRequestedHeight(30);
-           r.AfterRender({s->stage, s->image}, [=](Run& r) {
-             r.Size("image.both.fixed", s->image.GetMeasuredSize(), MeasuredSize(80, 30));
-             r.Rendered("image.both.fixed.rendered", s->image, LayoutRect(0, 0, 80, 30));
-             r.Equal("image.status", static_cast<int>(s->image.GetLoadingStatus()), static_cast<int>(Visual::ResourceStatus::READY));
+           r.AfterRender({s->stage, s->image}, [=](Run& done) {
+             done.Size("image.both.fixed", s->image.GetMeasuredSize(), MeasuredSize(80, 30));
+             done.Rendered("image.both.fixed.rendered", s->image, LayoutRect(0, 0, 80, 30));
+             done.Equal("image.status", static_cast<int>(s->image.GetLoadingStatus()), static_cast<int>(Visual::ResourceStatus::READY));
            });
          }},
       }));
@@ -445,10 +445,10 @@ public:
          s->image.SetResourceUrl(IMAGE_ABSENT);
          s->stage = Mount(r, s->image, 300, 300);
          r.SetState(s);
-         r.AfterRender({s->stage, s->image}, [=](Run& r) {
-           r.Size("invalid.fixed", s->image.GetMeasuredSize(), MeasuredSize(80, 30));
-           r.Equal("invalid.status", static_cast<int>(s->image.GetLoadingStatus()), static_cast<int>(Visual::ResourceStatus::FAILED));
-           r.Rendered("invalid.slot", s->image, LayoutRect(3, 5, 80, 30));
+         r.AfterRender({s->stage, s->image}, [=](Run& done) {
+           done.Size("invalid.fixed", s->image.GetMeasuredSize(), MeasuredSize(80, 30));
+           done.Equal("invalid.status", static_cast<int>(s->image.GetLoadingStatus()), static_cast<int>(Visual::ResourceStatus::FAILED));
+           done.Rendered("invalid.slot", s->image, LayoutRect(3, 5, 80, 30));
          });
        }},
       {"recovered", 6, [](Run& r) {
@@ -456,9 +456,9 @@ public:
          s->image.SetResourceUrl(IMAGE_LOGO);
          s->image.SetRequestedWidth(WRAP_CONTENT);
          s->image.SetRequestedHeight(WRAP_CONTENT);
-         r.AfterRender({s->stage, s->image}, [=](Run& r) {
-           r.Size("recovered.intrinsic", s->image.GetMeasuredSize(), MeasuredSize(326, 171));
-           r.Rendered("recovered.rendered", s->image, LayoutRect(3, 5, 326, 171));
+         r.AfterRender({s->stage, s->image}, [=](Run& done) {
+           done.Size("recovered.intrinsic", s->image.GetMeasuredSize(), MeasuredSize(326, 171));
+           done.Rendered("recovered.rendered", s->image, LayoutRect(3, 5, 326, 171));
          });
        }},
     }));
@@ -477,27 +477,27 @@ public:
          s->stack.Add(s->label);
          s->stage = Mount(r, s->stack, 300, 300);
          r.SetState(s);
-         r.AfterRender({s->stage, s->stack, s->seed, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->stack, s->seed, s->label}, [=](Run& done) {
            const float height = s->label.GetHeightForWidth(40);
-           r.Size("two-step.stack", s->stack.GetMeasuredSize(), MeasuredSize(40, height));
-           r.Rendered("two-step.stack.rendered", s->stack, LayoutRect(0, 0, 40, height));
-           r.Size("two-step.label", s->label.GetMeasuredSize(), MeasuredSize(40, height));
-           r.Rendered("two-step.label.rendered", s->label, LayoutRect(0, 0, 40, height));
-           r.Near("two-step.label.height-at-width", s->label.GetMeasuredSize().height, s->label.GetHeightForWidth(40));
-           r.Truth("two-step.precondition", s->label.GetHeightForWidth(40) > s->label.GetHeightForWidth(300));
+           done.Size("two-step.stack", s->stack.GetMeasuredSize(), MeasuredSize(40, height));
+           done.Rendered("two-step.stack.rendered", s->stack, LayoutRect(0, 0, 40, height));
+           done.Size("two-step.label", s->label.GetMeasuredSize(), MeasuredSize(40, height));
+           done.Rendered("two-step.label.rendered", s->label, LayoutRect(0, 0, 40, height));
+           done.Near("two-step.label.height-at-width", s->label.GetMeasuredSize().height, s->label.GetHeightForWidth(40));
+           done.Truth("two-step.precondition", s->label.GetHeightForWidth(40) > s->label.GetHeightForWidth(300));
          });
        }},
       {"seed-75", 14, [](Run& r) {
          auto s = r.State<LaidOutText>();
          s->seed.SetRequestedWidth(75);
-         r.AfterRender({s->stage, s->stack, s->seed, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->stack, s->seed, s->label}, [=](Run& done) {
            const float height = s->label.GetHeightForWidth(75);
-           r.Size("two-step.stack", s->stack.GetMeasuredSize(), MeasuredSize(75, height));
-           r.Rendered("two-step.stack.rendered", s->stack, LayoutRect(0, 0, 75, height));
-           r.Size("two-step.label", s->label.GetMeasuredSize(), MeasuredSize(75, height));
-           r.Rendered("two-step.label.rendered", s->label, LayoutRect(0, 0, 75, height));
-           r.Near("two-step.label.height-at-width", s->label.GetMeasuredSize().height, s->label.GetHeightForWidth(75));
-           r.Truth("two-step.precondition", s->label.GetHeightForWidth(75) > s->label.GetHeightForWidth(300));
+           done.Size("two-step.stack", s->stack.GetMeasuredSize(), MeasuredSize(75, height));
+           done.Rendered("two-step.stack.rendered", s->stack, LayoutRect(0, 0, 75, height));
+           done.Size("two-step.label", s->label.GetMeasuredSize(), MeasuredSize(75, height));
+           done.Rendered("two-step.label.rendered", s->label, LayoutRect(0, 0, 75, height));
+           done.Near("two-step.label.height-at-width", s->label.GetMeasuredSize().height, s->label.GetHeightForWidth(75));
+           done.Truth("two-step.precondition", s->label.GetHeightForWidth(75) > s->label.GetHeightForWidth(300));
          });
        }},
     }));
@@ -520,22 +520,22 @@ public:
          s->stack.Add(s->label);
          s->stage = Mount(r, s->stack, 300, 300);
          r.SetState(s);
-         r.AfterRender({s->stage, s->stack, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->stack, s->label}, [=](Run& done) {
            const float height = s->label.GetHeightForWidth(300);
-           r.Near("stretched.measured.width", s->label.GetMeasuredSize().width, 300);
-           r.Near("stretched.measured.height", s->label.GetMeasuredSize().height, height);
-           r.Rendered("stretched.rendered", s->label, LayoutRect(0, 0, 300, height));
+           done.Near("stretched.measured.width", s->label.GetMeasuredSize().width, 300);
+           done.Near("stretched.measured.height", s->label.GetMeasuredSize().height, height);
+           done.Rendered("stretched.rendered", s->label, LayoutRect(0, 0, 300, height));
          });
        }},
       {"maximum", 6, [](Run& r) {
          auto s = r.State<LaidOutText>();
          s->label.SetText("AAAAAA");
          s->label.SetMaximumWidth(25);
-         r.AfterRender({s->stage, s->stack, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->stack, s->label}, [=](Run& done) {
            const float height = s->label.GetHeightForWidth(25);
-           r.Near("stretched.maximum.width", s->label.GetMeasuredSize().width, 25);
-           r.Near("stretched.maximum.height", s->label.GetMeasuredSize().height, height);
-           r.Rendered("stretched.maximum.rendered", s->label, LayoutRect(0, 0, 25, height));
+           done.Near("stretched.maximum.width", s->label.GetMeasuredSize().width, 25);
+           done.Near("stretched.maximum.height", s->label.GetMeasuredSize().height, height);
+           done.Rendered("stretched.maximum.rendered", s->label, LayoutRect(0, 0, 25, height));
          });
        }},
       {"minimum", 6, [](Run& r) {
@@ -543,11 +543,11 @@ public:
          s->label.SetMaximumWidth(std::numeric_limits<float>::max());
          s->label.SetMinimumWidth(300);
          s->stack.SetRequestedWidth(40);
-         r.AfterRender({s->stage, s->stack, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->stack, s->label}, [=](Run& done) {
            const float height = s->label.GetHeightForWidth(300);
-           r.Near("stretched.minimum.width", s->label.GetMeasuredSize().width, 300);
-           r.Near("stretched.minimum.height", s->label.GetMeasuredSize().height, height);
-           r.Rendered("stretched.minimum.rendered", s->label, LayoutRect(0, 0, 300, height));
+           done.Near("stretched.minimum.width", s->label.GetMeasuredSize().width, 300);
+           done.Near("stretched.minimum.height", s->label.GetMeasuredSize().height, height);
+           done.Rendered("stretched.minimum.rendered", s->label, LayoutRect(0, 0, 300, height));
          });
        }},
       {"conflict", 8, [](Run& r) {
@@ -555,13 +555,13 @@ public:
          s->label.SetMinimumWidth(100);
          s->label.SetMaximumWidth(25);
          s->stack.SetRequestedWidth(300);
-         r.AfterRender({s->stage, s->stack, s->label}, [=](Run& r) {
+         r.AfterRender({s->stage, s->stack, s->label}, [=](Run& done) {
            const float height = s->label.GetHeightForWidth(25);
-           r.Near("stretched.conflict.width", s->label.GetMeasuredSize().width, 25);
-           r.Near("stretched.conflict.height", s->label.GetMeasuredSize().height, height);
-           r.Near("stretched.conflict.height-at-width", s->label.GetMeasuredSize().height, s->label.GetHeightForWidth(25));
-           r.Rendered("stretched.conflict.rendered", s->label, LayoutRect(0, 0, 25, height));
-           r.Truth("stretched.conflict.precondition", s->label.GetHeightForWidth(25) > s->label.GetHeightForWidth(100));
+           done.Near("stretched.conflict.width", s->label.GetMeasuredSize().width, 25);
+           done.Near("stretched.conflict.height", s->label.GetMeasuredSize().height, height);
+           done.Near("stretched.conflict.height-at-width", s->label.GetMeasuredSize().height, s->label.GetHeightForWidth(25));
+           done.Rendered("stretched.conflict.rendered", s->label, LayoutRect(0, 0, 25, height));
+           done.Truth("stretched.conflict.precondition", s->label.GetHeightForWidth(25) > s->label.GetHeightForWidth(100));
          });
        }},
     }));

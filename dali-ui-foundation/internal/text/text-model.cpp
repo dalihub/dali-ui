@@ -359,16 +359,6 @@ bool Model::IsCutoutEnabled() const
   return mVisualModel->IsCutoutEnabled();
 }
 
-const bool Model::IsBackgroundWithCutoutEnabled() const
-{
-  return mVisualModel->IsBackgroundWithCutoutEnabled();
-}
-
-const Vector4& Model::GetBackgroundColorWithCutout() const
-{
-  return mVisualModel->GetBackgroundColorWithCutout();
-}
-
 const Vector2& Model::GetOffsetWithCutout() const
 {
   return mVisualModel->GetOffsetWithCutout();

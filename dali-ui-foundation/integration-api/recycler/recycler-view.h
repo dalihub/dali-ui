@@ -40,6 +40,10 @@ class RecyclerViewImpl;
  * RecyclerView keeps only the item views required for the current viewport and
  * cache area. It scrolls an internal content view using DALi render animation
  * and recycles item views as the relative viewport anchor moves.
+ *
+ * Scroll requests made after an effective-scale change and before the next layout pass use the
+ * previous layout geometry; with the built-in layouters, the layout pass that follows the scale
+ * change lays the items out again at the new scale.
  */
 class DALI_UI_API RecyclerView : public Ui::View
 {
@@ -65,6 +69,8 @@ public:
   void          SetItemsLayouter(ItemsLayouter layouter);
   ItemsLayouter GetItemsLayouter() const;
 
+  // Distances realised before and after the viewport, in natural units: this view multiplies them
+  // by its effective scale (default 300 each).
   void SetCacheExtent(float before, float after);
   void GetCacheExtent(float& before, float& after) const;
 
@@ -94,12 +100,14 @@ public:
   bool IsScrolling() const;
 
   // Key-scroll configuration — mirrors ScrollView API.
+  // The step is in natural units, multiplied by this view's effective scale.
   void  SetKeyScrollEnabled(bool enable);
   bool  IsKeyScrollEnabled() const;
   void  SetKeyScrollStep(float step);
   float GetKeyScrollStep() const;
 
   // Focus-scroll configuration — scroll to make focused item visible.
+  // The peek is in natural units, multiplied by this view's effective scale.
   void  SetScrollOnFocus(bool enable);
   bool  GetScrollOnFocus() const;
   void  SetFocusScrollPeek(float peek);

@@ -50,6 +50,19 @@ SINCE_RE = re.compile(r'@SINCE_[0-9][\w.]*')
 # Fallback when neither the doc block nor the tag states a version
 DEFAULT_SINCE = '@SINCE_3_0.0'
 
+# The release that gave every root bridge its out-of-line copy, move and destructor.
+# A class first released after this uses its own version for them instead.
+LIFECYCLE_SINCE = '@SINCE_3_0.1'
+
+
+def _since_key(since):
+    """'@SINCE_3_0.1' -> (3, 0, 1), for ordering versions."""
+    return tuple(int(n) for n in re.findall(r'\d+', since))
+
+
+def _lifecycle_since(class_since):
+    return max(class_since, LIFECYCLE_SINCE, key=_since_key)
+
 # @ANIMATION_CONFIG(Class[, Parent][, since])  e.g. (Label, View, 3_0.0)
 CONFIG_TAG_RE = re.compile(
     r'//\s*@ANIMATION_CONFIG\(\s*(\w+)'
@@ -461,6 +474,7 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
         'PARENT_INCLUDE': f'#include <{P}/public-api/animation/{_class_to_filename(parent_bridge)}.autogen.h>' if has_parent else '',
         'VIEW_INCLUDE': f'#include <{view_include}>',
         'SINCE': since,
+        'LIFECYCLE_SINCE': _lifecycle_since(since),
         'METHODS': bridge_methods,
     }))
 

@@ -57,15 +57,20 @@ public:
   // Move all currently active views to the recycle pool.
   virtual void RecycleAllViews() = 0;
 
+  // Extents, cache distances and decoration offsets are rendered pixels: the RecyclerView multiplies
+  // its cache extent and its decorations' offsets (natural units) by its effective scale. A custom
+  // layouter scales its own lengths by that owner scale -- read it from the scroller, the parent of
+  // the item views, not from an item view, whose UiScalePolicy can differ -- and is not laid out
+  // again on a scale change that keeps the viewport size.
   virtual uint32_t GetItemCount() const      = 0;
   virtual float    GetViewportExtent() const = 0;
   virtual float    GetCrossExtent() const    = 0;
   virtual float    GetCacheBefore() const    = 0;
   virtual float    GetCacheAfter() const     = 0;
 
-  // Returns the sum of all registered ItemDecoration::GetItemOffsets() for the
-  // item at @a position. Called by the layouter in LayoutChunk after
-  // GetViewForPosition() has populated the holder. start/end mean physical
+  // Returns the sum of all registered ItemDecoration::GetItemOffsets(), multiplied by the
+  // RecyclerView's effective scale, for the item at @a position. Called by the layouter in
+  // LayoutChunk after GetViewForPosition() has populated the holder. start/end mean physical
   // left/right and are not swapped for a right-to-left layout direction.
   virtual Insets GetDecorationOffsets(uint32_t position) const = 0;
 };

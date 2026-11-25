@@ -1,6 +1,6 @@
 # Dialog 예제
 
-일반적인 Dialog 표시는 **`Post(navigator)` / `Dismiss()`를 권장**한다. 이 샘플도 내부 Container를 직접 만들거나 Dialog를 root에 Add하지 않고 이 방식만 사용한다. Post 버튼은 선택한 `DialogPostOptions.transitionSpec`·`containerStyle`·`animated`로 표시한다.
+일반적인 Dialog 표시는 **`Post(navigator)` / `Dismiss()`를 권장**한다. 이 샘플도 내부 Container를 직접 만들거나 Dialog를 root에 Add하지 않고 이 방식만 사용한다. Post 버튼은 선택한 `DialogPostOptions`의 `SetTransitionSpec`·`SetContainerStyle`·`SetAnimated`로 표시한다.
 
 단순 색상·blur·비표시 설정에는 옵션으로 충분하다. 사용자 정의 scrim View 교체나 복잡한 배경 구성이 필요하면 기존 `DialogContainer.SetScrim`·`SetModalContent`·`Navigator.PushModal` 경로를 사용한다. **동일한 표시에서 수동 Add/Remove와 Post/Dismiss를 혼용하지 않는다.** 자세한 선택 기준과 독립적인 수동 예제는 [Dialog 문서](../../wiki/Dialog-(kr).md)를 참고한다.
 

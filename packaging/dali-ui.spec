@@ -19,6 +19,17 @@
 %{error:Tizen <= 10.0 ships the real DALi 2.x; dali2 aliases must not be built there}
 %endif
 
+# Temporary, for the Tizen Studio rootstrap. Its generator copies only the
+# files that the packages it names list themselves, and reaches a directory
+# link as an empty directory, so while the public rootstrap still names the
+# DALi 2.x packages and include paths the alias devel packages install real
+# copies of the headers under include/dali-ui-foundation and
+# include/dali-ui-components in place of the links. Remove this once the
+# rootstrap names the dali3 packages and include/dali3.
+%if %{with dali2_aliases}
+%bcond_without dali2_include_copy
+%endif
+
 # rpm derives no Provides from a symbolic link, so the alias packages declare
 # the ELF ones themselves. 64-bit ELF provides carry a suffix.
 %if "%{__isa_bits}" == "64"
@@ -29,7 +40,7 @@
 
 Name:       dali3-ui-foundation
 Summary:    DALi UI Library
-Version:    3.0.0.11735
+Version:    3.0.1.11791
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0 and BSD-3-Clause and MIT
@@ -238,9 +249,6 @@ cmake -DDALI_DATA_RO_DIR="%{dali3_data_ro_dir}" \
 %if 0%{?enable_low_spec_memory_management}
       -DENABLE_LOW_SPEC_MEMORY_MANAGEMENT=ON \
 %endif
-%if 0%{?enable_gpu_memory_profile}
-      -DENABLE_GPU_MEMORY_PROFILE=ON \
-%endif
       -DCMAKE_INSTALL_PREFIX=%{_prefix} \
       -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
       -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
@@ -255,6 +263,16 @@ make %{?jobs:-j%jobs}
 rm -rf %{buildroot}
 cd build/tizen
 %make_install
+
+%if %{with dali2_include_copy}
+# include/dali-ui-*: copies of the dali3 headers in place of the links (see
+# dali2_include_copy above)
+for d in dali-ui-foundation dali-ui-components
+do
+  rm %{buildroot}%{_includedir}/$d
+  cp -a %{buildroot}%{_includedir}/dali3/$d %{buildroot}%{_includedir}/$d
+done
+%endif
 
 # Translations and the images are not part of the CMake install. The gettext
 # catalog and the data directory carry the API major (see
@@ -330,18 +348,32 @@ exit 0
 # scriptlet or %files may follow them. Every earlier package (DALi 2.x and
 # dali3 3.0.0 alike) installed these include directories as real
 # directories; rpm cannot replace a directory with a link, so the alias
-# packages clear them before the transaction unpacks.
+# packages clear them before the transaction unpacks. With
+# dali2_include_copy the packages install directories again, and clear a
+# link left by an alias package built without the copy.
 %if %{with dali2_aliases}
 %pretrans -n dali2-ui-foundation-devel -p <lua>
 local path = "%{_includedir}/dali-ui-foundation"
+%if %{with dali2_include_copy}
+if posix.stat(path, "type") == "link" then
+  os.remove(path)
+end
+%else
 if posix.stat(path, "type") == "directory" then
   os.execute("rm -rf '" .. path .. "'")
 end
+%endif
 %pretrans -n dali2-ui-components-devel -p <lua>
 local path = "%{_includedir}/dali-ui-components"
+%if %{with dali2_include_copy}
+if posix.stat(path, "type") == "link" then
+  os.remove(path)
+end
+%else
 if posix.stat(path, "type") == "directory" then
   os.execute("rm -rf '" .. path .. "'")
 end
+%endif
 %endif
 %files
 %if 0%{?enable_dali_smack_rules}
@@ -402,7 +434,14 @@ end
 
 %files -n dali2-ui-foundation-devel
 %defattr(-,root,root,-)
+%if %{with dali2_include_copy}
+%{_includedir}/dali-ui-foundation/dali-ui-foundation.h
+%{_includedir}/dali-ui-foundation/dali-ui-foundation-extension.h
+%{_includedir}/dali-ui-foundation/extension-api/*
+%{_includedir}/dali-ui-foundation/public-api/*
+%else
 %{_includedir}/dali-ui-foundation
+%endif
 %{_libdir}/libdali2-ui-foundation.so
 %{_libdir}/pkgconfig/dali2-ui-foundation.pc
 %{_bindir}/dali-ui-shader-generator
@@ -410,6 +449,10 @@ end
 %files -n dali2-ui-foundation-integration-devel
 %defattr(-,root,root,-)
 %{_libdir}/pkgconfig/dali2-ui-foundation-integration.pc
+%if %{with dali2_include_copy}
+%{_includedir}/dali-ui-foundation/dali-ui-foundation-integ.h
+%{_includedir}/dali-ui-foundation/integration-api/*
+%endif
 
 %files -n dali2-ui-components
 %if 0%{?enable_dali_smack_rules}
@@ -423,7 +466,12 @@ end
 
 %files -n dali2-ui-components-devel
 %defattr(-,root,root,-)
+%if %{with dali2_include_copy}
+%{_includedir}/dali-ui-components/*.h
+%{_includedir}/dali-ui-components/public-api/*
+%else
 %{_includedir}/dali-ui-components
+%endif
 %{_libdir}/libdali2-ui-components.so
 %{_libdir}/pkgconfig/dali2-ui-components.pc
 %endif

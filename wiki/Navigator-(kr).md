@@ -24,7 +24,7 @@ auto dialog = AlertDialog::New();
 dialog.SetTitle("Information");
 dialog.SetMessage("Operation finished.");
 DialogPostOptions options;
-options.containerStyle = DialogContainerStyle::NoScrimPreset();
+options.SetContainerStyle(DialogContainerStyle::NoScrimPreset());
 dialog.Post(navigator, options);
 dialog.Dismiss();
 ```
@@ -41,7 +41,7 @@ dialog.Dismiss();
 
 ## 전환과 신호
 
-`SetPageTransitionAnimationEnabled`, `SetModalTransitionAnimationEnabled`로 전환을 켜거나 끈다. `SetPageTransitionSpec`, `SetModalTransitionSpec`, `SetPageModalTransitionSpec`으로 NavigationTransitionSpec을 선택한다. Post의 `options.transitionSpec`은 해당 표시 세션의 전환을 선택한다.
+`SetPageTransitionAnimationEnabled`, `SetModalTransitionAnimationEnabled`로 전환을 켜거나 끈다. `SetPageTransitionSpec`, `SetModalTransitionSpec`, `SetPageModalTransitionSpec`으로 NavigationTransitionSpec을 선택한다. Post의 `options.SetTransitionSpec()`은 해당 표시 세션의 전환을 선택한다.
 
 DialogContainer의 전환·snap 콜백 대상은 **콘텐츠 View**다. spec 등록 키와 페이지 신호 대상은 계속 Container이며, Container 자체의 위치·크기는 전환하지 않는다. scrim은 같은 Animation에서 독립적인 linear fade를 사용한다. duration 설정을 따르며 기본 시간은 0.25초다. 콜백이 더 긴 속성 애니메이션을 추가하면 전체 완료는 그 종료까지 기다린다. 일반 페이지와 Container가 아닌 모달의 대상은 변경하지 않는다. 기존 콜백 형식과 keyframe은 유지하며 ViewAnimationSpec API는 추가하지 않는다.
 

@@ -90,6 +90,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 세 가지 API 레벨
 * [Create New Component](https://github.sec.samsung.net/NUI/dali-ui/wiki/Create-New-Component-(kr))
 * [컴포넌트 목록](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components-%28kr%29)
   * [Text](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-(kr))
+  * [이미지 포맷 지원](https://github.sec.samsung.net/NUI/dali-ui/wiki/Image-Format-Support-(kr))
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView-(kr))
   * [VideoView](https://github.sec.samsung.net/NUI/dali-ui/wiki/VideoView-(kr))
   * [MediaView](https://github.sec.samsung.net/NUI/dali-ui/wiki/MediaView-(kr))

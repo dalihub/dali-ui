@@ -57,7 +57,7 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_SCROLLVIEW");
 #endif
 
-constexpr float WHEEL_SCROLL_STEP   = 120.0f; ///< Pixels scrolled per wheel notch
+constexpr float WHEEL_SCROLL_STEP   = 120.0f; ///< Content distance per wheel notch, in natural units
 constexpr float WHEEL_ANIM_SEC      = 0.2f;   ///< Duration of wheel scroll animation (seconds)
 constexpr float KEY_SCROLL_ANIM_SEC = 0.25f;  ///< Duration of key step-scroll animation (seconds)
 
@@ -290,10 +290,16 @@ void ScrollViewImpl::RefreshViewport()
 
   // The viewport IS this view's own arranged size. Compare against the cached value
   // with the same tolerance SetScrollable* uses, so a pass that did not resize the
-  // scroll view costs one property read and nothing else.
+  // scroll view and kept its rest offset costs a few reads and nothing else.
   const float width  = Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
   const float height = Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);
-  if(std::abs(mViewportWidth - width) < 0.01f && std::abs(mViewportHeight - height) < 0.01f)
+  // The content rests at the padding in rendered pixels: a new padding or effective scale moves it
+  // even when neither the viewport nor the content extent changed. Same expression as
+  // UpdateScrollingProperties, so an unchanged offset compares equal.
+  const Insets padding = GetPadding();
+  const float  scale   = Ui::Extension::View::GetEffectiveLayoutScale(*this);
+  if(std::abs(mViewportWidth - width) < 0.01f && std::abs(mViewportHeight - height) < 0.01f &&
+     mMaximumStartX == padding.start * scale && mMaximumStartY == padding.top * scale)
   {
     return;
   }
@@ -573,6 +579,8 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
 
   Vector2    childScrollPos = GetScrollPositionForChild(child, Vector2::ZERO);
   const bool wasMakeVisible = (scrollToPosition == ScrollToPosition::MakeVisible);
+  // The peek is set in natural units; scroll positions are rendered pixels.
+  const float peek = mFocusScrollPeek * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   if(scrollToPosition == ScrollToPosition::MakeVisible)
   {
@@ -619,16 +627,16 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
           posY = scrollPos.y + (childBottom - scrollBottom);
         }
         // Apply peek: scroll a little further past the item edge to hint more content
-        if(mFocusScrollPeek > 0.0f)
+        if(peek > 0.0f)
         {
           if(posX > scrollPos.x)
-            posX += mFocusScrollPeek;
+            posX += peek;
           else if(posX < scrollPos.x)
-            posX -= mFocusScrollPeek;
+            posX -= peek;
           if(posY > scrollPos.y)
-            posY += mFocusScrollPeek;
+            posY += peek;
           else if(posY < scrollPos.y)
-            posY -= mFocusScrollPeek;
+            posY -= peek;
         }
         ScrollTo(Vector2(posX, posY), animation);
         return;
@@ -647,19 +655,19 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
       childScrollPos.y -= mViewportHeight - child.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       childScrollPos.x -= mViewportWidth - child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
       // Apply peek: scroll further past the bottom/right edge
-      if(wasMakeVisible && mFocusScrollPeek > 0.0f)
+      if(wasMakeVisible && peek > 0.0f)
       {
-        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y += mFocusScrollPeek;
-        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x += mFocusScrollPeek;
+        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y += peek;
+        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x += peek;
       }
       break;
     case ScrollToPosition::Start:
     default:
       // Apply peek: scroll further past the top/left edge
-      if(wasMakeVisible && mFocusScrollPeek > 0.0f)
+      if(wasMakeVisible && peek > 0.0f)
       {
-        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y -= mFocusScrollPeek;
-        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x -= mFocusScrollPeek;
+        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y -= peek;
+        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x -= peek;
       }
       break;
   }
@@ -1060,7 +1068,8 @@ void ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNa
       break;
   }
 
-  if(distance < mKeyScrollStep)
+  // The step is set in natural units; the distance is in rendered pixels.
+  if(distance < mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this))
   {
     mKeyScrollLastChild.Reset();
     result.MoveTo(next);
@@ -1293,29 +1302,31 @@ bool ScrollViewImpl::IsAtScrollBoundary(FocusDirection direction) const
 
 void ScrollViewImpl::TriggerKeyEdgeFeedback(FocusDirection direction)
 {
-  // velocity chosen so |vel| * ABSORB_FACTOR (~0.05) ≈ 30 px displacement.
+  // A synthetic velocity: |vel| * ABSORB_FACTOR (~0.05) ≈ a 30-unit bump, a design length that
+  // follows this view's effective scale like the content it moves.
   constexpr float KEY_ABSORB_VEL = 600.0f;
+  const float     velocity       = KEY_ABSORB_VEL * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   switch(direction)
   {
     case FocusDirection::UP:
     case FocusDirection::PAGE_UP:
       if(mStartEdgeEffect)
-        mStartEdgeEffect.OnAbsorb(KEY_ABSORB_VEL);
+        mStartEdgeEffect.OnAbsorb(velocity);
       break;
     case FocusDirection::DOWN:
     case FocusDirection::PAGE_DOWN:
       if(mEndEdgeEffect)
-        mEndEdgeEffect.OnAbsorb(-KEY_ABSORB_VEL);
+        mEndEdgeEffect.OnAbsorb(-velocity);
       break;
     case FocusDirection::LEFT:
     {
-      if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(KEY_ABSORB_VEL);
+      if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(velocity);
       break;
     }
     case FocusDirection::RIGHT:
     {
-      if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-KEY_ABSORB_VEL);
+      if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-velocity);
       break;
     }
     default:
@@ -1326,19 +1337,21 @@ void ScrollViewImpl::TriggerKeyEdgeFeedback(FocusDirection direction)
 void ScrollViewImpl::ScrollByKeyDirection(FocusDirection direction)
 {
   Vector2 pos = GetScrollPosition();
+  // The step is set in natural units; scroll positions are rendered pixels.
+  const float step = mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this);
   switch(direction)
   {
     case FocusDirection::UP:
-      ScrollToWithDuration(Vector2(pos.x, pos.y - mKeyScrollStep), KEY_SCROLL_ANIM_SEC);
+      ScrollToWithDuration(Vector2(pos.x, pos.y - step), KEY_SCROLL_ANIM_SEC);
       break;
     case FocusDirection::DOWN:
-      ScrollToWithDuration(Vector2(pos.x, pos.y + mKeyScrollStep), KEY_SCROLL_ANIM_SEC);
+      ScrollToWithDuration(Vector2(pos.x, pos.y + step), KEY_SCROLL_ANIM_SEC);
       break;
     case FocusDirection::LEFT:
-      ScrollToWithDuration(Vector2(pos.x - mKeyScrollStep, pos.y), KEY_SCROLL_ANIM_SEC);
+      ScrollToWithDuration(Vector2(pos.x - step, pos.y), KEY_SCROLL_ANIM_SEC);
       break;
     case FocusDirection::RIGHT:
-      ScrollToWithDuration(Vector2(pos.x + mKeyScrollStep, pos.y), KEY_SCROLL_ANIM_SEC);
+      ScrollToWithDuration(Vector2(pos.x + step, pos.y), KEY_SCROLL_ANIM_SEC);
       break;
     case FocusDirection::PAGE_UP:
       ScrollToWithDuration(Vector2(pos.x, pos.y - mViewportHeight), KEY_SCROLL_ANIM_SEC);
@@ -1612,12 +1625,14 @@ Vector2 ScrollViewImpl::AdjustScrollPosition(const Vector2& position) const
 
   // If layout hasn't run yet, fall back to requested sizes so that
   // SetScrollPosition / ScrollTo work correctly before the first layout pass.
+  // A requested size is in natural units: multiply it by its own view's effective scale, as the
+  // layout will, to compare it with a position in rendered pixels.
   float scrollableW = (mScrollableWidth > 0.0f) ? mScrollableWidth
-                                                : (mContent ? mContent.GetRequestedWidth() : 0.0f);
+                                                : (mContent ? mContent.GetRequestedWidth() * Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(mContent)) : 0.0f);
   float scrollableH = (mScrollableHeight > 0.0f) ? mScrollableHeight
-                                                 : (mContent ? mContent.GetRequestedHeight() : 0.0f);
-  float viewportW   = (mViewportWidth > 0.0f) ? mViewportWidth : std::max(0.0f, GetRequestedWidth());
-  float viewportH   = (mViewportHeight > 0.0f) ? mViewportHeight : std::max(0.0f, GetRequestedHeight());
+                                                 : (mContent ? mContent.GetRequestedHeight() * Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(mContent)) : 0.0f);
+  float viewportW   = (mViewportWidth > 0.0f) ? mViewportWidth : std::max(0.0f, GetRequestedWidth()) * Ui::Extension::View::GetEffectiveLayoutScale(*this);
+  float viewportH   = (mViewportHeight > 0.0f) ? mViewportHeight : std::max(0.0f, GetRequestedHeight()) * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   float maxScrollY = std::max(0.0f, scrollableH - viewportH);
   float maxScrollX = std::max(0.0f, scrollableW - viewportW);
@@ -1654,12 +1669,9 @@ Vector2 ScrollViewImpl::GetScrollPositionForChild(View child, Vector2 current) c
 
 Vector2 ScrollViewImpl::ContentPositionToScrollPosition(const Vector2& content) const
 {
-  float marginStart     = 0.0f;
-  float marginStartTop  = 0.0f;
-  float paddingStart    = GetPadding().start;
-  float paddingStartTop = GetPadding().top;
-
-  return Vector2(-(content.x - paddingStart - marginStart), -(content.y - paddingStartTop - marginStartTop));
+  // The inverse of ApplyScrollPosition, from the same rest offset it placed the content at (the
+  // padding in rendered pixels, cached by UpdateScrollingProperties).
+  return Vector2(mMaximumStartX - content.x, mMaximumStartY - content.y);
 }
 
 Vector2 ScrollViewImpl::DeltaFromScrollPosition(const Vector2& scrollPosition) const
@@ -1686,6 +1698,9 @@ bool ScrollViewImpl::OnWheelEvent(const Dali::WheelEvent& event)
   const bool canV = CanScrollVertically(mScrollDirection);
   const bool canH = CanScrollHorizontally(mScrollDirection);
 
+  // A notch scrolls a fixed distance of content: natural units, multiplied by the effective scale.
+  const float wheelStep = WHEEL_SCROLL_STEP * Ui::Extension::View::GetEffectiveLayoutScale(*this);
+
   float stepX = 0.0f;
   float stepY = 0.0f;
 
@@ -1693,19 +1708,19 @@ bool ScrollViewImpl::OnWheelEvent(const Dali::WheelEvent& event)
   {
     if(canV)
     {
-      stepY = delta * WHEEL_SCROLL_STEP;
+      stepY = delta * wheelStep;
     }
     else if(canH)
     {
       // Redirect vertical wheel to horizontal axis when only horizontal scroll is available.
-      stepX = delta * WHEEL_SCROLL_STEP;
+      stepX = delta * wheelStep;
     }
   }
   else // hwDirection == 1
   {
     if(canH)
     {
-      stepX = delta * WHEEL_SCROLL_STEP;
+      stepX = delta * wheelStep;
     }
   }
 
@@ -2310,10 +2325,13 @@ void ScrollViewImpl::UpdateScrollingProperties()
     return;
   }
 
-  Insets padding = GetPadding();
+  // The content rests at the padding, a layout length in natural units: place it in rendered
+  // pixels, as the layout insets and sizes the content with the padding times the same scale.
+  const Insets padding = GetPadding();
+  const float  scale   = Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
-  mMaximumStartX = padding.start;
-  mMaximumStartY = padding.top;
+  mMaximumStartX = padding.start * scale;
+  mMaximumStartY = padding.top * scale;
 
   mViewportWidth  = Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
   mViewportHeight = Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);

@@ -26,7 +26,9 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
+#include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/adaptor-framework/image-loading.h>
+#include <string_view>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
@@ -59,7 +61,14 @@ Texture LoadTexture(const char* imageUrl, bool generateMipmaps)
     texture             = Texture::New(TextureType::TEXTURE_2D, pixelBuffer.GetPixelFormat(), pixelBuffer.GetWidth(),
                                        pixelBuffer.GetHeight());
     PixelData pixelData = PixelBuffer::Convert(pixelBuffer);
-    texture.Upload(pixelData);
+    if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+    {
+      Dali::Integration::TextureUploadWithContent(texture, pixelData, Dali::Integration::ToDaliString(std::string_view(imageUrl)), Dali::Integration::TextureContextTypeHint::STANDARD_IMAGE);
+    }
+    else
+    {
+      texture.Upload(pixelData);
+    }
 
     if(generateMipmaps)
     {
@@ -128,7 +137,7 @@ void MeshVisual::DoSetProperties(const Property::Map& propertyMap)
   for(Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
   {
     KeyValuePair keyValue = propertyMap.GetKeyValue(iter);
-    if(keyValue.first.type == Property::Key::INDEX)
+    if(keyValue.first.type == Property::Key::Type::INDEX)
     {
       DoSetProperty(keyValue.first.indexKey, keyValue.second);
     }

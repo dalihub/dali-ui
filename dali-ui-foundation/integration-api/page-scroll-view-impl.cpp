@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cmath>
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
@@ -129,13 +130,7 @@ PageScrollViewImpl::PageScrollViewImpl()
 {
 }
 
-PageScrollViewImpl::~PageScrollViewImpl()
-{
-  // Notify observers (e.g. PageIndicator) before any members are destroyed.
-  // Handlers must not call back into this object.
-  if(!mDestroyingSignal.Empty())
-    mDestroyingSignal.Emit();
-}
+PageScrollViewImpl::~PageScrollViewImpl() = default;
 
 void PageScrollViewImpl::OnInitialize()
 {
@@ -250,14 +245,9 @@ void PageScrollViewImpl::ScrollToPage(int page, bool animate)
   }
 }
 
-PageScrollableInterface::PageChangedSignalType& PageScrollViewImpl::PageChangedSignal()
+PageScrollView::PageChangedSignalType& PageScrollViewImpl::PageChangedSignal()
 {
   return mPageChangedSignal;
-}
-
-PageScrollableInterface::DestroyingSignalType& PageScrollViewImpl::DestroyingSignal()
-{
-  return mDestroyingSignal;
 }
 
 // ─── ScrollViewImpl hook ───────────────────────────────────────────────────
@@ -331,8 +321,10 @@ void PageScrollViewImpl::OnBeforeScrollAnimation(Vector2& targetPosition, float&
 
 Vector2 PageScrollViewImpl::GetEffectivePageSize() const
 {
+  // An explicit page size is set in natural units, like a requested size; the viewport it
+  // defaults to, the extents and the scroll positions are rendered pixels.
   if(mPageSize.x > 0.0f || mPageSize.y > 0.0f)
-    return mPageSize;
+    return mPageSize * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   return Vector2(GetViewportWidth(), GetViewportHeight());
 }

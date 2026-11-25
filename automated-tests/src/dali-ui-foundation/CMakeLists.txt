@@ -46,7 +46,6 @@ SET(TC_SOURCES
         utc-Dali-UiLocalizationManager.cpp
         utc-Dali-UiThemeManager.cpp
         utc-Dali-LayoutScaleManager.cpp
-        utc-Dali-UiScaleManager.cpp
         utc-Dali-UiConfig.cpp
         utc-Dali-InteractiveTrait.cpp
         utc-Dali-InteractiveView.cpp
@@ -75,9 +74,10 @@ SET(TC_SOURCES
         utc-Dali-TextVisual.cpp
         utc-Dali-VisualBase.cpp
         utc-Dali-WebView.cpp
+        utc-Dali-WidgetView.cpp
         utc-Dali-CanvasView.cpp
         utc-Dali-MediaView.cpp
-  utc-Dali-VideoView.cpp
+        utc-Dali-VideoView.cpp
         utc-Dali-DragAndDropDetector.cpp
         utc-Dali-ViewTypeRegistry.cpp
         utc-Dali-Constexpr.cpp
@@ -129,8 +129,9 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
     ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
-    ../dali-test-suite-utils/dali-ui/ui-trigger-event-factory.cpp
+    ../dali-test-suite-utils/dali-ui/ui-texture-upload-manager.cpp
     ../dali-test-suite-utils/dali-ui/ui-timer.cpp
+    ../dali-test-suite-utils/dali-ui/ui-trigger-event-factory.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-animation-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-image-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-window.cpp

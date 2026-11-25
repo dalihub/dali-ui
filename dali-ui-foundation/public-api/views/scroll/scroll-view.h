@@ -51,6 +51,9 @@ class ScrollViewImpl;
  * - Scroll event signals
  * - Drag event signals
  *
+ * The content rests at this view's padding (View::SetPadding()). Like every layout length the
+ * padding is in natural units and is multiplied by the view's effective scale.
+ *
  * Basic usage:
  * @code
  * // Create a ScrollView
@@ -341,14 +344,15 @@ public: // Focus Scroll
    * @brief Sets the peek distance applied when auto-scrolling to a focused child.
    *
    * When @p peek is greater than zero and the scroll mode is ScrollToPosition::MakeVisible,
-   * the view scrolls an additional @p peek pixels past the item edge in the direction of
+   * the view scrolls an additional @p peek past the item edge in the direction of
    * travel. This hints to the user that more content is available beyond the focused item.
    *
    * The final position is still clamped to the valid scroll range, so peek is silently
    * reduced near the content boundaries.
    *
    * @SINCE_3_0.0
-   * @param[in] peek Extra scroll distance in pixels (default: 0.0f, disabled)
+   * @param[in] peek Extra scroll distance (default: 0.0f, disabled). Like a layout length it is
+   *            in natural units: the view multiplies it by its effective scale.
    */
   void SetFocusScrollPeek(float peek);
 
@@ -356,7 +360,7 @@ public: // Focus Scroll
    * @brief Gets the peek distance applied when auto-scrolling to a focused child.
    *
    * @SINCE_3_0.0
-   * @return The peek distance in pixels
+   * @return The peek distance, as set (natural units)
    */
   float GetFocusScrollPeek() const;
 
@@ -366,8 +370,8 @@ public: // Key Scroll
    *
    * When enabled, ScrollView intercepts focus navigation requests (UP/DOWN/LEFT/RIGHT/
    * PAGE_UP/PAGE_DOWN) from its content children. If the next focusable view in that
-   * direction is within GetKeyScrollStep() pixels it receives focus as normal; otherwise
-   * the ScrollView scrolls by one step instead, keeping the focus where it is.
+   * direction is within the key scroll step (GetKeyScrollStep()) it receives focus as normal;
+   * otherwise the ScrollView scrolls by one step instead, keeping the focus where it is.
    *
    * This gives a "gradual reveal" UX on keyboard/remote-control navigation: the user
    * scrolls through content one step at a time and focus only jumps to a new item when
@@ -390,12 +394,14 @@ public: // Key Scroll
    * @brief Sets the step distance used for key-based step scrolling.
    *
    * Serves as both the proximity threshold and the scroll step size:
-   * - Next focusable is within @p step px  → focus moves there.
-   * - Next focusable is beyond @p step px, or none → scroll by @p step px.
+   * - Next focusable is within @p step  → focus moves there.
+   * - Next focusable is beyond @p step, or none → scroll by @p step.
    * PAGE_UP / PAGE_DOWN always scrolls by the full viewport size regardless of this value.
+   * The step is in natural units like a layout length: the view multiplies it by its
+   * effective scale, so a step covers the same part of the content at every scale.
    *
    * @SINCE_3_0.0
-   * @param[in] step Step distance in pixels (default: 200.0f)
+   * @param[in] step Step distance (default: 200.0f)
    */
   void SetKeyScrollStep(float step);
 
@@ -403,7 +409,7 @@ public: // Key Scroll
    * @brief Gets the step distance used for key-based step scrolling.
    *
    * @SINCE_3_0.0
-   * @return The step distance in pixels
+   * @return The step distance, as set (natural units)
    */
   float GetKeyScrollStep() const;
 

@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <memory>
 #include <optional>
 #include <utility>
 
@@ -34,6 +35,7 @@
 #include <dali-ui-foundation/internal/text/ellipsis/ellipsis-resolver.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-start-geometry.h>
+#include <dali-ui-foundation/internal/text/rendering/text-cutout-render-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-raster-coordinate.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
@@ -486,7 +488,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mVerticalLineAlignment = parameters.verticalLineAlignment;
   mTextModel->mVisualModel->SetVerticalLineAlignment(parameters.verticalLineAlignment);
 
-  mTextModel->mLogicalModel->SetVariationsMap(&parameters.variationsMap);
+  mTextModel->mLogicalModel->SetVariationsMap(parameters.variationsMap ? &*parameters.variationsMap : nullptr);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Update visual model.
@@ -496,7 +498,46 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // control size is used in ElideGlyphs in ViewModel.
   mTextModel->mVisualModel->mControlSize = Size(parameters.textWidth, parameters.textHeight);
 
-  // Update style properties.
+  mTextModel->mRemoveFrontInset = false;
+  mTextModel->mRemoveBackInset  = false;
+
+  if(parameters.hasStyledTextStyleSnapshot)
+  {
+    Dali::Ui::Internal::Text::StyledTextApplier::ApplySnapshotToLogicalModel(parameters.styledTextStyleSnapshot,
+                                                                             parameters.text,
+                                                                             *mTextModel->mLogicalModel);
+    // ApplySnapshotToLogicalModel updates logicalModel.mText; utf32Characters is a reference to it.
+    numberOfCharacters = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
+  }
+  else
+  {
+    textSize = static_cast<Dali::Ui::Text::Length>(parameters.text.size());
+
+    // This is a bit horrible but std::string returns a (signed) char*
+    utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Convert from utf8 to utf32
+    ////////////////////////////////////////////////////////////////////////////////
+
+    utf32Characters.Resize(textSize);
+
+    // Transform a text array encoded in utf8 into an array encoded in utf32.
+    // It returns the actual number of characters.
+    numberOfCharacters = Utf8ToUtf32(utf8, textSize, utf32Characters.Begin());
+    utf32Characters.Resize(numberOfCharacters);
+  }
+
+  if(parameters.isCutoutEnabled)
+  {
+    const auto* gradientSpans  = mTextModel->GetGradientSpanModelData();
+    parameters.isCutoutEnabled = IsShaderCutoutSupported(gradientSpans && !gradientSpans->characterRuns.Empty(), parameters.isMarqueeEnabled,
+                                                         parameters.isTextGradientRequested, parameters.isTextGradientOverlayRequested,
+                                                         parameters.isTextRevealEnabled, parameters.replacementSourceSnapshot.hasValidReplacementSource,
+                                                         parameters.isEmbossEnabled);
+  }
+
+  // Update style properties. Ordinary text retains its original scale path.
   mTextModel->mVisualModel->SetDecorationUiScale(parameters.decorationUiScale);
   mTextModel->mVisualModel->SetTextColor(parameters.textColor);
   // Requests carry resolved colors, also used by runs when global style is off.
@@ -551,37 +592,19 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   }
 
   mTextModel->mVisualModel->SetCutoutEnabled(parameters.isCutoutEnabled);
-  mTextModel->mVisualModel->SetBackgroundWithCutoutEnabled(parameters.isBackgroundWithCutoutEnabled);
-  mTextModel->mVisualModel->SetBackgroundColorWithCutout(parameters.backgroundColorWithCutout);
-
-  mTextModel->mRemoveFrontInset = false;
-  mTextModel->mRemoveBackInset  = false;
-
-  if(parameters.hasStyledTextStyleSnapshot)
+  if(parameters.isCutoutEnabled)
   {
-    Dali::Ui::Internal::Text::StyledTextApplier::ApplySnapshotToLogicalModel(parameters.styledTextStyleSnapshot,
-                                                                             parameters.text,
-                                                                             *mTextModel->mLogicalModel);
-    // ApplySnapshotToLogicalModel updates logicalModel.mText; utf32Characters is a reference to it.
-    numberOfCharacters = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
-  }
-  else
-  {
-    textSize = static_cast<Dali::Ui::Text::Length>(parameters.text.size());
-
-    // This is a bit horrible but std::string returns a (signed) char*
-    utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // Convert from utf8 to utf32
-    ////////////////////////////////////////////////////////////////////////////////
-
-    utf32Characters.Resize(textSize);
-
-    // Transform a text array encoded in utf8 into an array encoded in utf32.
-    // It returns the actual number of characters.
-    numberOfCharacters = Utf8ToUtf32(utf8, textSize, utf32Characters.Begin());
-    utf32Characters.Resize(numberOfCharacters);
+    // Only cropped cutout planes sample decorations in the supersampled canvas.
+    const float density = std::max(parameters.renderScale, 1.f);
+    mTextModel->mVisualModel->SetDecorationUiScale(parameters.decorationUiScale * density);
+    if(parameters.isShadowEnabled)
+    {
+      mTextModel->mVisualModel->SetShadowBlurRadius(parameters.shadowBlurRadius * density);
+    }
+    if(parameters.isOutlineEnabled)
+    {
+      mTextModel->mVisualModel->SetOutlineBlurRadius(parameters.outlineBlurRadius * density);
+    }
   }
 
   processingSource = MakeTextProcessingSource(*mTextModel);
@@ -678,17 +701,13 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Validate Fonts.
   ////////////////////////////////////////////////////////////////////////////////
 
-  // Text fit and fit candidates are already converted to effective scaled font sizes
-  // before CheckForTextFit(). Avoid applying effectiveTextScale again here.
-  float effectiveTextScale = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled) ? 1.0f : parameters.effectiveTextScale;
-  float scale              = effectiveTextScale * parameters.renderScale;
-
-  TextAbstraction::PointSize26Dot6 defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(TextAbstraction::FontClient::DEFAULT_POINT_SIZE * scale);
-
-  // Get the number of points per one unit of point-size
-  uint32_t numberOfPointsPerOneUnitOfPointSize = mModule.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
-
-  defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * scale * numberOfPointsPerOneUnitOfPointSize);
+  // Fit selects the effective default size. Authored span sizes still need
+  // effective scale, independently of that selection and raster quality.
+  const float defaultFontScale = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled) ? 1.0f : parameters.effectiveTextScale;
+  const float defaultScale     = defaultFontScale * parameters.renderScale;
+  const float runScale         = parameters.effectiveTextScale * parameters.renderScale;
+  const auto  pointsPerUnit    = mModule.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
+  const auto  defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * defaultScale * pointsPerUnit);
 
   Property::Map* variationsMapPtr = mTextModel->mLogicalModel->GetVariationsMap();
 
@@ -702,7 +721,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                                      scripts,
                                      defaultFontDescription,
                                      defaultPointSize,
-                                     scale,
+                                     runScale,
                                      0u,
                                      numberOfCharacters,
                                      validFonts,
@@ -715,9 +734,9 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     // a scaled FontId.
     if(UseLogicalReplacementAutoLineMetrics(parameters, true))
     {
-      const float                            logicalFontScale = effectiveTextScale;
+      const float                            logicalFontScale = parameters.effectiveTextScale;
       const TextAbstraction::PointSize26Dot6 logicalDefaultPointSize =
-        static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * logicalFontScale * numberOfPointsPerOneUnitOfPointSize);
+        static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * defaultFontScale * pointsPerUnit);
       ValidateFontsForProcessingSource(mModule.GetMultilanguageSupport(),
                                        mModule.GetFontClient(),
                                        processingSource,
@@ -741,7 +760,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   {
     mModule.GetMultilanguageSupport().ValidateFonts(mModule.GetFontClient(), utf32Characters, scripts,
                                                     fontDescriptionRuns, defaultFontDescription, defaultPointSize,
-                                                    scale, 0u, numberOfCharacters, validFonts, variationsMapPtr);
+                                                    runScale, 0u, numberOfCharacters, validFonts, variationsMapPtr);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -1160,7 +1179,10 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated,
 
   // Set minimun line size, line spacing, relative line size.
   mLayoutEngine.SetFontSizeScale(parameters.effectiveTextScale);
-  mLayoutEngine.SetDefaultLineSize(parameters.minLineSize);
+  // Candidates keep authored line height in the completion snapshot. Apply
+  // raster quality to their metrics here, just as SetupRenderScale does for
+  // ordinary line height, without changing the candidate selection order.
+  mLayoutEngine.SetDefaultLineSize(parameters.minLineSize * (parameters.isTextFitCandidatesEnabled ? parameters.renderScale : 1.f));
   mLayoutEngine.SetDefaultLineSpacing(0.0f);
   mLayoutEngine.SetRelativeLineSize(parameters.relativeLineSize);
 
@@ -1448,19 +1470,18 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool outlineEnabled    = renderModel->IsOutlineEnabled();
   const bool backgroundEnabled = renderModel->IsBackgroundEnabled();
   // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
-  const bool underlineRunEnabled         = renderModel->IsMarkupUnderlineSet();
-  const bool strikethroughRunEnabled     = renderModel->IsMarkupStrikethroughSet();
-  const bool underlineEnabled            = renderModel->IsUnderlineEnabled() || underlineRunEnabled;
-  const bool strikethroughEnabled        = renderModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
-  const bool backgroundMarkupSet         = renderModel->IsMarkupBackgroundColorSet();
-  const bool cutoutEnabled               = renderModel->IsCutoutEnabled();
-  const bool backgroundWithCutoutEnabled = renderModel->IsBackgroundWithCutoutEnabled();
-  const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
-  const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
-  const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
-  const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
-  const bool embossEnabled               = parameters.isEmbossEnabled;
-  const bool marqueeGradientCoverage     = parameters.isMarqueeEnabled && parameters.isTextGradientRequested &&
+  const bool underlineRunEnabled     = renderModel->IsMarkupUnderlineSet();
+  const bool strikethroughRunEnabled = renderModel->IsMarkupStrikethroughSet();
+  const bool underlineEnabled        = renderModel->IsUnderlineEnabled() || underlineRunEnabled;
+  const bool strikethroughEnabled    = renderModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
+  const bool backgroundMarkupSet     = renderModel->IsMarkupBackgroundColorSet();
+  const bool cutoutEnabled           = renderModel->IsCutoutEnabled();
+  const bool styleTextureEnabled     = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
+  const bool styleBlocksTextGradient = cutoutEnabled;
+  const bool styleEnabled            = styleTextureEnabled || styleBlocksTextGradient;
+  const bool isOverlayStyle          = underlineEnabled || strikethroughEnabled;
+  const bool embossEnabled           = parameters.isEmbossEnabled;
+  const bool marqueeGradientCoverage = parameters.isMarqueeEnabled && parameters.isTextGradientRequested &&
                                        !hasMultipleTextColors && !containsColorGlyph &&
                                        !styleBlocksTextGradient && !embossEnabled;
 
@@ -1490,14 +1511,15 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   if(cutoutEnabled)
   {
     // We need to store the offset including padding and vertical alignment.
-    float xOffset = parameters.padding.start;
-    float yOffset = parameters.padding.top + std::round((parameters.textHeight - layoutSize.y) *
-                                                        VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)]);
+    const float density = parameters.isMarqueeEnabled ? 1.f : std::max(parameters.renderScale, 1.f);
+    const float xOffset = std::round(parameters.padding.start * density);
+    const float yOffset = std::round(parameters.padding.top * density + (parameters.textHeight - layoutSize.y) *
+                                                                          VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)]);
     renderModel->mVisualModel->SetOffsetWithCutout(Vector2(xOffset, yOffset));
 
     // The layout size is set to the text control size including padding.
-    layoutSize.x = parameters.textWidth + (parameters.padding.start + parameters.padding.end);
-    layoutSize.y = parameters.textHeight + (parameters.padding.top + parameters.padding.bottom);
+    layoutSize.x = parameters.textWidth + (parameters.padding.start + parameters.padding.end) * density;
+    layoutSize.y = parameters.textHeight + (parameters.padding.top + parameters.padding.bottom) * density;
   }
 
   // Use the same return object on every path to preserve return-value elision.
@@ -1507,7 +1529,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   // scaled raster without losing content. Keep 1x height tiling, but reject a
   // scaled request before producing any bitmap if its raster needs tiling.
   // Marquee has already resolved its actual, capped raster size at this point.
-  if(parameters.maxTextureSize > 0 && (parameters.renderScale > 1.0f || parameters.isMarqueeEnabled))
+  if(!cutoutEnabled && parameters.maxTextureSize > 0 && (parameters.renderScale > 1.0f || parameters.isMarqueeEnabled))
   {
     int32_t width, height;
     if(!Raster::Convert(layoutSize.x, width) || !Raster::Convert(layoutSize.y, height) ||
@@ -1524,7 +1546,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   // Match the synchronous Label's width clipping. Height can use the existing
   // 1x tile path; there is no horizontal tiling path.
-  if(parameters.maxTextureSize > 0)
+  if(!cutoutEnabled && parameters.maxTextureSize > 0)
   {
     layoutSize.x = std::min(layoutSize.x, static_cast<float>(parameters.maxTextureSize));
   }
@@ -1607,23 +1629,26 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
 
-  PixelBuffer cutoutData;
   if(cutoutEnabled)
   {
-    cutoutData = mTypesetter->RenderWithPixelBuffer(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
-                                                    ignoreHorizontalAlignment, textPixelFormat, Size::ZERO, context);
-
-    // Make transparent buffer.
-    // If the cutout is enabled, a separate texture is not used for the text.
-    PixelBuffer buffer       = mTypesetter->CreateFullBackgroundBuffer(1, 1, Color::TRANSPARENT);
-    renderInfo.textPixelData = PixelBuffer::Convert(buffer);
-
-    // Set the flag of cutout.
-    renderInfo.isCutoutEnabled = cutoutEnabled && (cutoutData != nullptr);
+    auto       data   = std::make_shared<CutoutRenderData>();
+    const auto format = containsColorGlyph || hasMultipleTextColors ? Pixel::RGBA8888 : Pixel::L8;
+    // Like ordinary rendering, a nonpositive request limit means no device cap.
+    const uint32_t maxTextureSize = parameters.maxTextureSize > 0 ? static_cast<uint32_t>(parameters.maxTextureSize) : 0u;
+    if(mTypesetter->RenderCutoutPlanes(layoutSize, *data, format, maxTextureSize))
+    {
+      renderInfo.cutout          = std::move(data);
+      renderInfo.isCutoutEnabled = true;
+    }
+    else
+    {
+      DALI_LOG_ERROR("Cutout raster bounds exceed the texture limit or are invalid\n");
+      return renderInfo;
+    }
   }
   else
   {
-    // Create a pixel data for the text without any styles
+    // Create ordinary glyph pixels, including all unsupported cutout combinations.
     renderInfo.textPixelData =
       marqueeGradientCoverage
         ? mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, textPixelFormat)
@@ -1723,28 +1748,19 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     }
   }
 
-  if(styleEnabled)
+  if(styleEnabled && !renderInfo.cutout)
   {
-    if(renderInfo.isCutoutEnabled)
-    {
-      float cutoutAlpha         = renderModel->GetDefaultColor().a;
-      renderInfo.stylePixelData = mTypesetter->RenderWithCutout(
-        layoutSize, textDirection, cutoutData, Text::Typesetter::RENDER_NO_TEXT, ignoreHorizontalAlignment, Pixel::RGBA8888, cutoutAlpha);
-    }
-    else
-    {
-      // Create RGBA pixel data for all the text styles (without the text itself)
-      renderInfo.stylePixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT, ignoreHorizontalAlignment, Pixel::RGBA8888);
-    }
+    // Create RGBA pixel data for all the text styles (without the text itself).
+    renderInfo.stylePixelData =
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT, ignoreHorizontalAlignment, Pixel::RGBA8888);
   }
-  if(isOverlayStyle)
+  if(isOverlayStyle && !renderInfo.cutout)
   {
     // Create RGBA pixel data for all the overlay styles
     renderInfo.overlayStylePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE, ignoreHorizontalAlignment, Pixel::RGBA8888);
   }
-  if(containsColorGlyph && !hasMultipleTextColors)
+  if(containsColorGlyph && !hasMultipleTextColors && !cutoutEnabled)
   {
     // Create a L8 pixel data as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
     renderInfo.maskPixelData =
@@ -1782,7 +1798,6 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     !styleBlocksTextGradient &&
     !embossEnabled &&
     !cutoutEnabled &&
-    !backgroundWithCutoutEnabled &&
     (hasMixedColorTarget ? parameters.isTextGradientRequested
                          : (parameters.isTextGradientRequested || parameters.isTextGradientOverlayRequested));
   if(marqueeStylePayload)
@@ -1888,6 +1903,45 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                 const Size& naturalSize)
 {
+  if(parameters.text.empty() && parameters.isCutoutEnabled)
+  {
+    AsyncTextRenderInfo info;
+    auto                data     = std::make_shared<CutoutRenderData>();
+    auto                coverage = PixelBuffer::New(1u, 1u, Pixel::L8);
+    auto                style    = PixelBuffer::New(1u, 1u, Pixel::RGBA8888);
+    memset(coverage.GetBuffer(), 0, 1u);
+    memset(style.GetBuffer(), 0, 4u);
+    data->coverage     = PixelBuffer::Convert(coverage);
+    data->style        = PixelBuffer::Convert(style);
+    data->rect         = Vector4(0.f, 0.f, 1.f, 1.f);
+    const float width  = parameters.renderScale > 1.f ? parameters.renderScaleWidth : parameters.textWidth;
+    const float height = parameters.renderScale > 1.f ? parameters.renderScaleHeight : parameters.textHeight;
+    // Match the existing empty-request completion dimensions. Background drawing
+    // uses the owner's quad; no unconstrained dimension becomes a raster extent.
+    Size completedSize;
+    switch(parameters.requestType)
+    {
+      case Ui::Integration::Text::Async::RENDER_FIXED_SIZE:
+        completedSize = Size(width, height);
+        break;
+      case Ui::Integration::Text::Async::RENDER_FIXED_WIDTH:
+        completedSize = Size(width, 0.f);
+        break;
+      case Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT:
+        completedSize = Size(0.f, height);
+        break;
+      default:
+        completedSize = Size::ZERO;
+        break;
+    }
+    completedSize += Size(parameters.padding.start + parameters.padding.end,
+                          parameters.padding.top + parameters.padding.bottom);
+    info.size = info.controlSize = info.renderedSize = completedSize;
+    data->controlSize                                = completedSize;
+    info.cutout                                      = std::move(data);
+    info.isCutoutEnabled                             = true;
+    return info;
+  }
   Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
 
@@ -1994,9 +2048,9 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
     parameters.renderScaleHeight = parameters.textHeight;
     parameters.textWidth         = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
     parameters.textHeight        = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
-    parameters.minLineSize       = parameters.minLineSize * parameters.renderScale;
-    parameters.marqueeGap        = static_cast<int>(parameters.marqueeGap * parameters.renderScale);
-    cachedNaturalSize            = false;
+    parameters.minLineSize *= parameters.isTextFitCandidatesEnabled ? 1.f : parameters.renderScale;
+    parameters.marqueeGap = static_cast<int>(parameters.marqueeGap * parameters.renderScale);
+    cachedNaturalSize     = false;
     return Size::ZERO;
   }
 
@@ -2159,6 +2213,36 @@ AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& paramet
 AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                    const Size& naturalSize)
 {
+  const auto maximumLines = parameters.maximumNumberOfLines;
+  if(parameters.isCutoutEnabled)
+  {
+    parameters.isCutoutEnabled = false;
+    // Rebuild cached decoration scaling and model flags for ordinary scrolling.
+    useCachedNaturalSize = false;
+  }
+  Size selectedNaturalSize = naturalSize;
+  if(parameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::MANUAL &&
+     (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled))
+  {
+    // Select against the viewport, then reuse the shaped model for the full
+    // scrolling source. No intermediate static raster is needed.
+    const bool ellipsis         = parameters.ellipsis;
+    parameters.isMarqueeEnabled = false;
+    bool       fits             = false;
+    const bool prepared         = PrepareTextFit(parameters, useCachedNaturalSize, naturalSize, fits);
+    parameters.isMarqueeEnabled = true;
+    parameters.ellipsis         = ellipsis;
+    if(!prepared)
+    {
+      return {};
+    }
+    parameters.maximumNumberOfLines = 0u;
+    useCachedNaturalSize            = true;
+    if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
+    {
+      selectedNaturalSize = ComputeLayoutSize(parameters, MAX_FLOAT, MAX_FLOAT, true);
+    }
+  }
   Size      controlSize(parameters.textWidth, parameters.textHeight);
   Size      verifiedSize;
   float     wrapGap               = 0.0f;
@@ -2169,7 +2253,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   if(isHorizontal)
   {
     // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
-    Size textNaturalSize   = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
+    Size textNaturalSize   = useCachedNaturalSize ? selectedNaturalSize : ComputeNaturalSize(parameters);
     textNaturalSize.width  = ConvertToEven(textNaturalSize.width);
     textNaturalSize.height = ConvertToEven(textNaturalSize.height);
 
@@ -2217,11 +2301,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   }
   else // MarqueeOrientation::VERTICAL
   {
-    // Render() adds padding to cutout rasters. Reserve that space before
-    // laying out the capped scrolling content, including its ellipsis.
-    const float maxTextureHeight = parameters.isCutoutEnabled
-                                     ? std::max(static_cast<float>(maxTextureSize) - parameters.padding.top - parameters.padding.bottom, 0.0f)
-                                     : static_cast<float>(maxTextureSize);
+    const float maxTextureHeight = static_cast<float>(maxTextureSize);
     bool        layoutOnly       = useCachedNaturalSize;
     bool        useCachedHeight  = false;
     float       textHeight       = 0.0f;
@@ -2306,6 +2386,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   renderInfo.renderedSize             = Size(renderedWidth, renderedHeight);
   renderInfo.marqueeWrapGap           = wrapGap;
   renderInfo.isMarqueeContentOverflow = isTextContentOverflow;
+  parameters.maximumNumberOfLines     = maximumLines;
   return renderInfo;
 }
 
@@ -2329,6 +2410,54 @@ bool AsyncTextLoader::CheckForTextFit(AsyncTextParameters& parameters, float poi
 
 AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                    const Size& naturalSize)
+{
+  const bool automatic = parameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW &&
+                         !parameters.suppressAutoMarquee &&
+                         ((!parameters.isMultiLine && parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL) ||
+                          (parameters.isMultiLine && parameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL));
+  const bool ellipsis = parameters.ellipsis;
+  if(automatic)
+  {
+    // Keep the selected fallback unelided until overflow has been evaluated.
+    parameters.ellipsis = false;
+  }
+  bool fits = false;
+  if(!PrepareTextFit(parameters, useCachedNaturalSize, naturalSize, fits))
+  {
+    parameters.ellipsis = ellipsis;
+    return {};
+  }
+  if(!automatic || fits)
+  {
+    // A successful Fit trial already contains the full, aligned static model.
+    // Reuse it without another measurement, shaping pass or raster.
+    parameters.ellipsis = ellipsis;
+    return Render(parameters);
+  }
+
+  // Fit can fail on the other axis or on MaximumLines. Measure the entire
+  // selected source on the scrolling axis, without a line cap or ellipsis.
+  const auto maximumLines         = parameters.maximumNumberOfLines;
+  parameters.maximumNumberOfLines = 0u;
+  const bool horizontal           = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
+  const Size selectedSize         = ComputeLayoutSize(parameters, horizontal ? MAX_FLOAT : parameters.textWidth, MAX_FLOAT, true);
+  parameters.isMarqueeEnabled     = horizontal ? parameters.textWidth < selectedSize.width : parameters.textHeight < selectedSize.height;
+  parameters.ellipsis             = ellipsis;
+  if(parameters.isMarqueeEnabled)
+  {
+    // The cached model and size both belong to the selected font. The task's
+    // pre-Fit natural-size cache is no longer valid.
+    auto renderInfo = RenderMarquee(parameters, true, selectedSize);
+    // Publication validates the authored line limit as part of the snapshot.
+    parameters.maximumNumberOfLines = maximumLines;
+    return renderInfo;
+  }
+  parameters.maximumNumberOfLines = maximumLines;
+  return RenderText(parameters, true, selectedSize);
+}
+
+bool AsyncTextLoader::PrepareTextFit(AsyncTextParameters& parameters, bool useCachedNaturalSize,
+                                     const Size& naturalSize, bool& fits)
 {
   Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
@@ -2403,10 +2532,10 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     // Set the first candidate (minimum font size) as the default best value.
     // If the search does not find an optimal value, the minimum point size will be used to text fit.
-    const Ui::Text::Fit::Candidate& firstCandidate        = fitCandidates[0];
-    bool                            bestSizeUpdatedLatest = false;
-    float                           bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient()) * parameters.effectiveTextScale;
-    float                           bestLineHeight        = firstCandidate.GetLineHeight();
+    const Ui::Text::Fit::Candidate& firstCandidate    = fitCandidates[0];
+    bool                            bestSizeIsCurrent = false;
+    float                           bestPointSize     = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient()) * parameters.effectiveTextScale;
+    float                           bestLineHeight    = firstCandidate.GetLineHeight();
 
     if(binarySearch)
     {
@@ -2423,15 +2552,15 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
-          bestSizeUpdatedLatest = true;
-          bestPointSize         = testPointSize;
-          bestLineHeight        = testLineHeight;
-          left                  = mid + 1;
+          bestSizeIsCurrent = true;
+          bestPointSize     = testPointSize;
+          bestLineHeight    = testLineHeight;
+          left              = mid + 1;
         }
         else
         {
-          bestSizeUpdatedLatest = false;
-          right                 = mid - 1;
+          bestSizeIsCurrent = false;
+          right             = mid - 1;
         }
       }
     }
@@ -2448,27 +2577,28 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
-          bestSizeUpdatedLatest = true;
-          bestPointSize         = testPointSize;
-          bestLineHeight        = testLineHeight;
+          bestSizeIsCurrent = true;
+          bestPointSize     = testPointSize;
+          bestLineHeight    = testLineHeight;
           break;
         }
         else
         {
-          bestSizeUpdatedLatest = false;
+          bestSizeIsCurrent = false;
         }
       }
     }
 
-    // Best point size was not updated. Re-run so the text fit is really applied.
-    if(!bestSizeUpdatedLatest)
+    // Reuse the selected model only when the last trial selected the best size.
+    fits = bestSizeIsCurrent;
+    if(!bestSizeIsCurrent)
     {
       parameters.ellipsis    = mFitActualEllipsis;
       parameters.minLineSize = bestLineHeight;
-      CheckForTextFit(parameters, bestPointSize, allowedSize);
+      fits                   = CheckForTextFit(parameters, bestPointSize, allowedSize);
     }
 
-    return Render(parameters);
+    return true;
   }
   else if(parameters.isTextFitEnabled)
   {
@@ -2478,7 +2608,6 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     mFitActualEllipsis  = parameters.ellipsis;
     parameters.ellipsis = false;
-    float bestPointSize = minPointSize;
 
     Size allowedSize(parameters.textWidth, parameters.textHeight);
 
@@ -2500,7 +2629,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     uint32_t minIndex      = bestSizeIndex + 1u;
     uint32_t maxIndex      = pointSizeRange + 1u;
 
-    bool bestSizeUpdatedLatest = false;
+    bool bestSizeIsCurrent = false;
     // Find best size as binary search.
     // Range format as [l r). (left closed, right opened)
     // It means, we already checked all i < l are valid, and r <= i are invalid.
@@ -2516,33 +2645,33 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
       if(CheckForTextFit(parameters, testPointSize, allowedSize))
       {
-        bestSizeUpdatedLatest = true;
+        bestSizeIsCurrent = true;
 
         bestSizeIndex = testIndex;
         minIndex      = testIndex + 1u;
       }
       else
       {
-        bestSizeUpdatedLatest = false;
-        maxIndex              = testIndex;
+        bestSizeIsCurrent = false;
+        maxIndex          = testIndex;
       }
     }
-    bestPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(bestSizeIndex) * pointInterval);
+    const float bestPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(bestSizeIndex) * pointInterval);
 
-    // Best point size was not updated. Re-run so the text fit is really applied.
-    if(!bestSizeUpdatedLatest)
+    // Reuse the selected model only when the last trial selected the best size.
+    fits = bestSizeIsCurrent;
+    if(!bestSizeIsCurrent)
     {
       parameters.ellipsis = mFitActualEllipsis;
-      CheckForTextFit(parameters, bestPointSize, allowedSize);
+      fits                = CheckForTextFit(parameters, bestPointSize, allowedSize);
     }
 
-    return Render(parameters);
+    return true;
   }
   else
   {
-    DALI_LOG_ERROR("There is no TextFit information in AsyncTextParameters. It returns empty AsyncTextRenderInfo.\n");
-    AsyncTextRenderInfo renderInfo;
-    return renderInfo;
+    DALI_LOG_ERROR("Cannot prepare text fit without a range or candidates.\n");
+    return false;
   }
 }
 

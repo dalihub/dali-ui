@@ -126,9 +126,9 @@ public: // API
   void SetScrollableHeight(float height);
 
   /**
-   * @brief Re-reads this view's own arranged size as the scroll viewport and, if it
-   * changed, recomputes the scroll bounds and clamp and notifies
-   * OnScrollableAreaChanged().
+   * @brief Re-reads this view's own arranged size as the scroll viewport and, if it or
+   * the content's rest offset (the padding times the effective scale) changed, recomputes
+   * the scroll bounds and clamp and notifies OnScrollableAreaChanged().
    *
    * @note The viewport is this view's OWN size, which the layout pass applies from
    * the PARENT's arrange -- it never passes through SetScrollableWidth/Height (those
@@ -274,8 +274,8 @@ public: // API
    * @brief Sets whether key-based step scrolling is enabled.
    *
    * When enabled, ScrollView intercepts focus navigation requests from children.
-   * If the next focusable view is within mKeyScrollStep pixels it is focused normally;
-   * otherwise the ScrollView scrolls by mKeyScrollStep instead.
+   * If the next focusable view is within the key scroll step it is focused normally;
+   * otherwise the ScrollView scrolls by that step instead.
    */
   void SetKeyScrollEnabled(bool enable);
 
@@ -285,7 +285,8 @@ public: // API
   bool IsKeyScrollEnabled() const;
 
   /**
-   * @brief Sets the step distance (px) used for key-based step scrolling.
+   * @brief Sets the step distance used for key-based step scrolling, in natural units
+   * (multiplied by the effective scale where it is used).
    *
    * Acts as both the proximity threshold (focus jumps if next item is within this
    * distance) and the scroll step size (scrolled by this amount when no nearby
@@ -418,7 +419,8 @@ protected:
   Vector2 GetScrollPositionForChild(View child, Vector2 current) const;
 
   /**
-   * @brief Converts content position to scroll position.
+   * @brief Converts a content actor position to the scroll position: its distance from the
+   * rest offset ApplyScrollPosition() places the content at (the padding in rendered pixels).
    */
   Vector2 ContentPositionToScrollPosition(const Vector2& content) const;
 
@@ -786,8 +788,8 @@ private:
   bool            mIsScrolling;          ///< Is scrolling in progress
   float           mViewportWidth;        ///< Viewport width
   float           mViewportHeight;       ///< Viewport height
-  float           mMaximumStartY;        ///< Maximum start Y position
-  float           mMaximumStartX;        ///< Maximum start X position
+  float           mMaximumStartY;        ///< Content rest Y: the top padding in rendered pixels
+  float           mMaximumStartX;        ///< Content rest X: the start padding in rendered pixels
   float           mMinimumStartY;        ///< Minimum start Y position
   float           mMinimumStartX;        ///< Minimum start X position
   bool            mHasScrollableArea;    ///< Has scrollable area
@@ -795,11 +797,11 @@ private:
   // Focus-scroll behaviour
   bool             mScrollOnFocus;         ///< Auto-scroll to child when it gains focus
   ScrollToPosition mFocusScrollToPosition; ///< Target position for focus-triggered scroll
-  float            mFocusScrollPeek;       ///< Extra scroll distance past the item edge on focus (MakeVisible only)
+  float            mFocusScrollPeek;       ///< Extra scroll distance past the item edge on focus (MakeVisible only) (natural units)
 
   // Key-scroll behaviour
   bool           mKeyScrollEnabled;   ///< Whether key-based step scrolling is active
-  float          mKeyScrollStep;      ///< Proximity threshold and step size for key scrolling (px)
+  float          mKeyScrollStep;      ///< Proximity threshold and step size for key scrolling (natural units)
   View           mKeyScrollLastChild; ///< Content child that last triggered a case-3 focus transfer to Self()
   FocusDirection mKeyScrollLastDir;   ///< Direction of that transfer (only valid when mKeyScrollLastChild is set)
 

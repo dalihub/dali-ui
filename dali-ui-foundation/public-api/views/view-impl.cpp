@@ -25,7 +25,6 @@
 #include <dali/public-api/actors/custom-actor-impl.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/type-info-id.h>
-#include <type_traits>
 #include <utility>
 
 // INTERNAL INCLUDES
@@ -64,29 +63,6 @@ namespace
 /// Thread-local because Actor::Add invokes OnChildAdd synchronously on the same
 /// (event) thread. POD with a constant initializer: no dynamic init, no heap allocation.
 thread_local unsigned int gAllowNonViewChildDepth = 0u;
-
-// The deprecated Ui::UiScalePolicy that ViewImpl::SetUiScalePolicy() and GetUiScalePolicy() take
-// and return, and Ui::Extension::UiScalePolicy that ViewDataImpl stores, are distinct types with
-// the same underlying type and the same value for every enumerator. Those two deprecated members
-// (View's pair forwards to them) are the only place that converts between them.
-static_assert(std::is_same<std::underlying_type<UiScalePolicy>::type, std::underlying_type<Ui::Extension::UiScalePolicy>::type>::value,
-              "UiScalePolicy and Extension::UiScalePolicy must have the same underlying type");
-static_assert(static_cast<uint8_t>(UiScalePolicy::INHERIT) == static_cast<uint8_t>(Ui::Extension::UiScalePolicy::INHERIT),
-              "UiScalePolicy::INHERIT and Extension::UiScalePolicy::INHERIT must have the same value");
-static_assert(static_cast<uint8_t>(UiScalePolicy::ENABLED) == static_cast<uint8_t>(Ui::Extension::UiScalePolicy::ENABLED),
-              "UiScalePolicy::ENABLED and Extension::UiScalePolicy::ENABLED must have the same value");
-static_assert(static_cast<uint8_t>(UiScalePolicy::DISABLED) == static_cast<uint8_t>(Ui::Extension::UiScalePolicy::DISABLED),
-              "UiScalePolicy::DISABLED and Extension::UiScalePolicy::DISABLED must have the same value");
-
-constexpr Ui::Extension::UiScalePolicy ToExtensionUiScalePolicy(UiScalePolicy policy)
-{
-  return static_cast<Ui::Extension::UiScalePolicy>(policy);
-}
-
-constexpr UiScalePolicy ToDeprecatedUiScalePolicy(Ui::Extension::UiScalePolicy policy)
-{
-  return static_cast<UiScalePolicy>(policy);
-}
 
 } // namespace
 
@@ -423,25 +399,6 @@ LayoutRect ViewImpl::OnArrange(const LayoutRect& bounds)
   return mImpl->ArrangeDefault(bounds);
 }
 
-// =============================================================================
-// UiScale API
-// =============================================================================
-
-void ViewImpl::SetUiScalePolicy(UiScalePolicy policy)
-{
-  mImpl->SetUiScalePolicy(ToExtensionUiScalePolicy(policy));
-}
-
-UiScalePolicy ViewImpl::GetUiScalePolicy() const
-{
-  return ToDeprecatedUiScalePolicy(mImpl->GetUiScalePolicy());
-}
-
-float ViewImpl::GetEffectiveScale() const
-{
-  return mImpl->GetEffectiveLayoutScale();
-}
-
 bool ViewImpl::UpdateColorBindingInternal(StringView bindingId, const UiColor& color)
 {
   return mImpl->UpdateColorBindingInternal(bindingId, color);
@@ -685,36 +642,6 @@ Ui::View ViewImpl::GetChildViewAt(uint32_t index) const
 int32_t ViewImpl::IndexOfChildView(Ui::View view) const
 {
   return mImpl->IndexOfChildView(view);
-}
-
-void ViewImpl::Raise(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->Raise(policy);
-}
-
-void ViewImpl::Lower(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->Lower(policy);
-}
-
-void ViewImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->RaiseToTop(policy);
-}
-
-void ViewImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
-{
-  mImpl->LowerToBottom(policy);
-}
-
-void ViewImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  mImpl->RaiseAbove(target, policy);
-}
-
-void ViewImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
-{
-  mImpl->LowerBelow(target, policy);
 }
 
 void ViewImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
@@ -1020,27 +947,12 @@ bool ViewImpl::OnAccessibilityZoom()
   return false; // Accessibility zoom action is not handled by default
 }
 
-bool ViewImpl::OnAccessibilityRequestName(Dali::String& value)
-{
-  return false;
-}
-
 bool ViewImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
 {
   return false;
 }
 
-bool ViewImpl::OnAccessibilityRequestDescription(Dali::String& value)
-{
-  return false;
-}
-
 bool ViewImpl::OnAccessibilityRequestDefaultDescription(Dali::String& value)
-{
-  return false;
-}
-
-bool ViewImpl::OnAccessibilityRequestValue(Dali::String& value)
 {
   return false;
 }

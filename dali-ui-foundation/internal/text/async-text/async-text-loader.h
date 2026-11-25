@@ -38,6 +38,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -52,6 +53,8 @@ struct PreparedRevealBlur;
 
 namespace Text
 {
+struct CutoutRenderData;
+
 namespace Internal DALI_INTERNAL
 {
 class AsyncTextLoader;
@@ -91,7 +94,6 @@ struct AsyncTextParameters
     strikethroughColor{Color::BLACK},
     shadowColor{Color::BLACK},
     outlineColor{Color::WHITE},
-    backgroundColorWithCutout{Color::TRANSPARENT},
     textBackgroundColor{Color::TRANSPARENT},
     embossLightColor{Color::TRANSPARENT},
     embossShadowColor{Color::TRANSPARENT},
@@ -172,7 +174,6 @@ struct AsyncTextParameters
     isMarqueeEnabled{false},
     isMarqueeMaxTextureExceeded{false},
     isCutoutEnabled{false},
-    isBackgroundWithCutoutEnabled{false},
     isEmbossEnabled{false},
     isTextGradientRequested{false},
     isTextGradientOverlayRequested{false},
@@ -224,7 +225,6 @@ struct AsyncTextParameters
   Vector4 strikethroughColor;
   Vector4 shadowColor;
   Vector4 outlineColor;
-  Vector4 backgroundColorWithCutout; ///< Background color with cutout.
   Vector4 textBackgroundColor;
   Vector4 embossLightColor;
   Vector4 embossShadowColor;
@@ -235,7 +235,7 @@ struct AsyncTextParameters
 
   Insets padding; ///< The padding of the boundaries where the text is going to be laid-out.
 
-  Property::Map                      variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
+  std::optional<Property::Map>       variationsMap; ///< Owned variation values, absent when the request has no variable font axes.
   Dali::Vector<Text::Fit::Candidate> textFitCandidates;
   Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot
                                        styledTextStyleSnapshot;   ///< Copy-safe StyledText style run snapshot for async rendering.
@@ -313,8 +313,7 @@ struct AsyncTextParameters
   bool isTextFitCandidatesEnabled : 1;     ///< TextFit Candidates enabeld flag.
   bool isMarqueeEnabled : 1;               ///< Marquee enabeld flag.
   bool isMarqueeMaxTextureExceeded : 1;    ///< Whether the marquee texture size exceeds the maximum texture width.
-  bool isCutoutEnabled : 1;                ///< Cutout enabled flag.
-  bool isBackgroundWithCutoutEnabled : 1;  ///< Background with cutout enabled flag.
+  bool isCutoutEnabled : 1;                ///< Effective shader cutout for this request.
   bool isEmbossEnabled : 1;                ///< Emboss enabled flag.
   bool isTextGradientRequested : 1;        ///< Whether async render may generate TextGradient-only payloads.
   bool isTextGradientOverlayRequested : 1; ///< Whether async render may generate TextGradientOverlay-only payloads.
@@ -339,6 +338,7 @@ struct AsyncTextRenderInfo
     marqueePixelData(),
     revealMetadataTiles(),
     revealBlur(),
+    cutout(),
     size(),
     textLogicalBounds(0.0f, 0.0f, 1.0f, 1.0f),
     controlSize(),
@@ -387,6 +387,8 @@ struct AsyncTextRenderInfo
   std::vector<PixelData>                    revealMetadataTiles; ///< One RGBA8888 buffer per height tile.
 
   std::shared_ptr<const Ui::Internal::PreparedRevealBlur> revealBlur; ///< Optional CPU-only result; absent for ordinary Reveal.
+
+  std::shared_ptr<const CutoutRenderData> cutout; ///< One immutable cutout raster snapshot.
 
   /**
    * @brief Rendered size in display units, including the scrolling extent for marquee.

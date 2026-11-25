@@ -59,8 +59,8 @@ public:
   ~GroupBodyDecoration() override;
 
   void SetBodyColor(UiColor color);
-  // Sets the horizontal margins reserved around body items.
-  // This value is returned from GetItemOffsets() and applied by the layouter.
+  // Sets the horizontal margins reserved around body items, in natural units.
+  // This value is returned from GetItemOffsets(); RecyclerView multiplies it by its effective scale.
   // Do NOT combine with GroupLinearItemsLayouter::SetBodyHorizontalMargin() on the
   // same RecyclerView — the two margins would be additive.
   void SetBodyHorizontalMargin(float left, float right);
@@ -74,7 +74,7 @@ public:
    * Top and bottom are always zero. Non-body items receive zero offsets.
    *
    * @param[in] holder The item whose row type determines whether margins apply.
-   * @return Insets in pixels reserved around the item.
+   * @return Insets reserved around the item, in natural units.
    */
   Insets GetItemOffsets(const ItemViewHolder& holder) const override;
 

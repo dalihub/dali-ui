@@ -57,3 +57,8 @@ Output: `com.samsung.dali.scrollview-2.0.0-1.armv7l.rpm`
 - **Scroll**: Pan vertically inside the ScrollView area.
 - **Tap item**: Changes the item's background color and updates the status bar label.
 - **Escape** or **Back**: Quit the application.
+- **scrollview.example**: `q`–`t` set the UI scale to 0.8, 1.0, 1.2, 1.5 and 2.0; `D` toggles the edge effect (moved from `E`).
+- **scrollview-nofocus-keyscroll**: `q`–`t` set the UI scale to 0.8, 1.0, 1.2, 1.5 and 2.0; `N` rebuilds the
+  ScrollView and calls `ScrollToY(3000)` before its first layout. The list has a top padding of 40 and bounces at both ends.
+- **scrollview-scrollbar-example**: `q`–`t` set the UI scale; `m` gives the scroll bar on the small white track at the
+  top left a content 500 times its height, so its red thumb shows the minimum length, and prints `GetBarMinSize()`.

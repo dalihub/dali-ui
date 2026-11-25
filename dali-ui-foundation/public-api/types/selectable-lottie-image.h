@@ -127,24 +127,6 @@ public:
   const Dali::String& GetUrl() const;
 
   /**
-   * @brief Returns the frame segment played when the control becomes selected.
-   *
-   * @SINCE_3_0.0
-   * @return The select frame range
-   * @deprecated Use GetSelectionPlaybackRange() instead.
-   */
-  Int32Pair GetSelectRange() const;
-
-  /**
-   * @brief Returns the frame segment played when the control becomes deselected.
-   *
-   * @SINCE_3_0.0
-   * @return The deselect frame range
-   * @deprecated Use GetDeselectionPlaybackRange() instead.
-   */
-  Int32Pair GetDeselectRange() const;
-
-  /**
    * @brief Returns the asset key path of the inner fill recoloured with the state colours.
    *
    * @SINCE_3_0.0

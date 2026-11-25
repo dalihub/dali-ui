@@ -156,16 +156,6 @@ void View::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 // Properties
 // =============================================================================
 
-void View::SetUiScalePolicy(UiScalePolicy policy)
-{
-  GetImpl(*this).SetUiScalePolicy(policy);
-}
-
-UiScalePolicy View::GetUiScalePolicy() const
-{
-  return GetImpl(*this).GetUiScalePolicy();
-}
-
 void View::SetRequestedX(float x)
 {
   GetImpl(*this).SetRequestedX(x);
@@ -695,36 +685,6 @@ void View::Remove(View child, RemovePolicy policy)
 void View::RemoveAll(RemovePolicy policy)
 {
   GetImpl(*this).RemoveAll(policy);
-}
-
-void View::Raise(LayoutOrderPolicy policy)
-{
-  GetImpl(*this).Raise(policy);
-}
-
-void View::Lower(LayoutOrderPolicy policy)
-{
-  GetImpl(*this).Lower(policy);
-}
-
-void View::RaiseToTop(LayoutOrderPolicy policy)
-{
-  GetImpl(*this).RaiseToTop(policy);
-}
-
-void View::LowerToBottom(LayoutOrderPolicy policy)
-{
-  GetImpl(*this).LowerToBottom(policy);
-}
-
-void View::RaiseAbove(View target, LayoutOrderPolicy policy)
-{
-  GetImpl(*this).RaiseAbove(target, policy);
-}
-
-void View::LowerBelow(View target, LayoutOrderPolicy policy)
-{
-  GetImpl(*this).LowerBelow(target, policy);
 }
 
 bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::DepthLayer depthLayer)

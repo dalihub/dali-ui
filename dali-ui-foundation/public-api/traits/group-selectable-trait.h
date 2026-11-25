@@ -108,6 +108,29 @@ public: // Creation & Destruction
   GroupSelectableTrait(const GroupSelectableTrait& groupSelectableTrait);
 
   /**
+   * @brief Move constructor. Transfers the referenced object from another handle.
+   * @param[in] handle The handle to move from.
+   * @SINCE_3_0.2
+   */
+  GroupSelectableTrait(GroupSelectableTrait&& handle) noexcept;
+
+  /**
+   * @brief Copy assignment operator. Shares the referenced object with another handle.
+   * @param[in] handle The handle to copy from.
+   * @return A reference to this handle.
+   * @SINCE_3_0.2
+   */
+  GroupSelectableTrait& operator=(const GroupSelectableTrait& handle);
+
+  /**
+   * @brief Move assignment operator. Transfers the referenced object from another handle.
+   * @param[in] handle The handle to move from.
+   * @return A reference to this handle.
+   * @SINCE_3_0.2
+   */
+  GroupSelectableTrait& operator=(GroupSelectableTrait&& handle) noexcept;
+
+  /**
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.

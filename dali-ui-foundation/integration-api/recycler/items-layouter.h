@@ -67,6 +67,9 @@ public:
 
   // --- App-facing query/configuration API ----------------------------------
   // (RecyclerView internals call layout/scroll methods directly via GetImpl())
+  // Offsets, extents and bounds are rendered pixels. The item extent (assumed for an item not measured
+  // yet) and the item spacing are natural units: the built-in linear layouters multiply them by the
+  // effective scale of the RecyclerView they lay out.
 
   bool  CanScrollVertically() const;
   bool  CanScrollHorizontally() const;

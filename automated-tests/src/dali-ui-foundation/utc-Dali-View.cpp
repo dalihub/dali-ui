@@ -25,7 +25,6 @@
 #include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/extension-api/ui-scale-policy.h>
 #include <dali-ui-foundation/extension-api/view.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/gradient-visual-properties-integ.h>
@@ -44,6 +43,7 @@
 #include <iostream>
 #include <limits>
 #include <type_traits>
+#include <utility>
 #include <vector>
 #include <dali-ui-foundation/integration-api/visuals/color-visual-properties-integ.h>
 
@@ -1547,6 +1547,107 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   END_TEST;
 }
 
+int UtcDaliViewAnimationBridgeCopyConstructorP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  application.GetWindow().Add(view);
+
+  Animation           animation = Animation::New(0.0f);
+  ViewAnimationBridge bridge    = view.Animate(animation);
+  ViewAnimationBridge copy(bridge);
+
+  const Vector4 cornerRadius(4.0f, 3.0f, 2.0f, 1.0f);
+  copy.Opacity(0.25f, Duration(0.1f));
+  bridge.CornerRadius(cornerRadius, Duration(0.1f));
+  DALI_TEST_EQUALS(animation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(200);
+
+  DALI_TEST_EQUALS(view.GetCurrentProperty<Vector4>(View::Property::CORNER_RADIUS), cornerRadius, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAnimationBridgeCopyAssignmentP(void)
+{
+  UiTestApplication application;
+  View              view      = View::New();
+  View              otherView = View::New();
+  application.GetWindow().Add(view);
+  application.GetWindow().Add(otherView);
+
+  Animation           animation      = Animation::New(0.0f);
+  Animation           otherAnimation = Animation::New(0.0f);
+  ViewAnimationBridge bridge         = view.Animate(animation);
+  ViewAnimationBridge copy           = otherView.Animate(otherAnimation);
+
+  ViewAnimationBridge& result = (copy = bridge);
+  DALI_TEST_CHECK(&result == &copy);
+  copy.Opacity(0.25f, Duration(0.1f));
+  DALI_TEST_EQUALS(animation.GetDuration(), 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(otherAnimation.GetDuration(), 0.0f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(200);
+
+  DALI_TEST_EQUALS(view.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(otherView.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAnimationBridgeMoveConstructorP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  application.GetWindow().Add(view);
+
+  Animation           animation = Animation::New(0.0f);
+  ViewAnimationBridge bridge    = view.Animate(animation);
+  ViewAnimationBridge moved(std::move(bridge));
+
+  moved.Opacity(0.25f, Duration(0.1f));
+  DALI_TEST_EQUALS(animation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(200);
+
+  DALI_TEST_EQUALS(view.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewAnimationBridgeMoveAssignmentP(void)
+{
+  UiTestApplication application;
+  View              view      = View::New();
+  View              otherView = View::New();
+  application.GetWindow().Add(view);
+  application.GetWindow().Add(otherView);
+
+  Animation           animation      = Animation::New(0.0f);
+  Animation           otherAnimation = Animation::New(0.0f);
+  ViewAnimationBridge bridge         = view.Animate(animation);
+  ViewAnimationBridge moved          = otherView.Animate(otherAnimation);
+
+  ViewAnimationBridge& result = (moved = std::move(bridge));
+  DALI_TEST_CHECK(&result == &moved);
+  moved.Opacity(0.25f, Duration(0.1f));
+  DALI_TEST_EQUALS(animation.GetDuration(), 0.1f, TEST_LOCATION);
+  DALI_TEST_EQUALS(otherAnimation.GetDuration(), 0.0f, TEST_LOCATION);
+
+  animation.Play();
+  application.SendNotification();
+  application.Render(200);
+
+  DALI_TEST_EQUALS(view.GetCurrentProperty<float>(Actor::Property::OPACITY), 0.25f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(otherView.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliViewShadowAnimationNoShadowP(void)
 {
   UiTestApplication application;
@@ -1807,6 +1908,17 @@ int UtcDaliViewSetTraitP(void)
   DALI_TEST_CHECK(retrievedTrait);
   DALI_TEST_CHECK(retrievedTrait == trait);
   DALI_TEST_EQUALS(trait.GetImpl().GetAttachedCount(), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewTraitObjectGetExtensionP(void)
+{
+  UiTestApplication application;
+  DummyTrait        trait = DummyTrait::New();
+
+  // The base slot is a placeholder: no extension until one is defined and returned.
+  TraitObject& object = trait.GetImpl();
+  DALI_TEST_CHECK(object.GetExtension() == nullptr);
   END_TEST;
 }
 
@@ -5093,92 +5205,6 @@ int UtcDaliViewExtensionSetUiScalePolicyP(void)
   END_TEST;
 }
 
-// The extension accessors and the deprecated View and ViewImpl members read and write the
-// same policy, in both directions, each in its own enumeration.
-int UtcDaliViewExtensionUiScalePolicyMatchesDeprecatedP(void)
-{
-  UiTestApplication application;
-  tet_infoline("UtcDaliViewExtensionUiScalePolicyMatchesDeprecatedP - the extension accessors and the deprecated members share one policy");
-
-  View view = View::New();
-
-  Ui::Extension::View::SetUiScalePolicy(view, Ui::Extension::UiScalePolicy::DISABLED);
-  DALI_TEST_CHECK(view.GetUiScalePolicy() == UiScalePolicy::DISABLED);
-  DALI_TEST_CHECK(GetImpl(view).GetUiScalePolicy() == UiScalePolicy::DISABLED);
-
-  view.SetUiScalePolicy(UiScalePolicy::ENABLED);
-  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == Ui::Extension::UiScalePolicy::ENABLED);
-
-  GetImpl(view).SetUiScalePolicy(UiScalePolicy::INHERIT);
-  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(view) == Ui::Extension::UiScalePolicy::INHERIT);
-
-  END_TEST;
-}
-
-// Extension::UiScalePolicy replaces the deprecated UiScalePolicy: a distinct type with the same
-// underlying type and the same value for every enumerator.
-static_assert(!std::is_same<Ui::Extension::UiScalePolicy, Ui::UiScalePolicy>::value, "Extension::UiScalePolicy must be a distinct type");
-static_assert(std::is_same<std::underlying_type<Ui::Extension::UiScalePolicy>::type, std::underlying_type<Ui::UiScalePolicy>::type>::value,
-              "Extension::UiScalePolicy and UiScalePolicy must have the same underlying type");
-
-int UtcDaliViewExtensionUiScalePolicyValuesMatchDeprecatedP(void)
-{
-  UiTestApplication application;
-  tet_infoline("UtcDaliViewExtensionUiScalePolicyValuesMatchDeprecatedP - Extension::UiScalePolicy has the size and values of the deprecated UiScalePolicy");
-
-  DALI_TEST_EQUALS(sizeof(Ui::Extension::UiScalePolicy), sizeof(Ui::UiScalePolicy), TEST_LOCATION);
-
-  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::INHERIT), static_cast<int>(Ui::UiScalePolicy::INHERIT), TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::ENABLED), static_cast<int>(Ui::UiScalePolicy::ENABLED), TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::DISABLED), static_cast<int>(Ui::UiScalePolicy::DISABLED), TEST_LOCATION);
-
-  // The released values themselves.
-  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::INHERIT), 0, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::ENABLED), 1, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(Ui::Extension::UiScalePolicy::DISABLED), 2, TEST_LOCATION);
-
-  END_TEST;
-}
-
-// Every policy converts both ways: set through the extension accessor it reads back through the
-// deprecated View and ViewImpl getters as the enumerator of the same name, and set through either
-// deprecated setter it reads back through the extension accessor. The order moves every view off
-// its previous policy at each step, so no check passes on the INHERIT default alone.
-int UtcDaliViewExtensionUiScalePolicyConvertsEveryValueP(void)
-{
-  UiTestApplication application;
-  tet_infoline("UtcDaliViewExtensionUiScalePolicyConvertsEveryValueP - every policy converts both ways between the deprecated members and Extension::View");
-
-  struct PolicyPair
-  {
-    Ui::UiScalePolicy            deprecated;
-    Ui::Extension::UiScalePolicy extension;
-  };
-  const PolicyPair pairs[] = {
-    {Ui::UiScalePolicy::ENABLED, Ui::Extension::UiScalePolicy::ENABLED},
-    {Ui::UiScalePolicy::DISABLED, Ui::Extension::UiScalePolicy::DISABLED},
-    {Ui::UiScalePolicy::INHERIT, Ui::Extension::UiScalePolicy::INHERIT},
-  };
-
-  View viaExtension = View::New();
-  View viaView      = View::New();
-  View viaImpl      = View::New();
-  for(const PolicyPair& pair : pairs)
-  {
-    Ui::Extension::View::SetUiScalePolicy(viaExtension, pair.extension);
-    DALI_TEST_CHECK(viaExtension.GetUiScalePolicy() == pair.deprecated);
-    DALI_TEST_CHECK(GetImpl(viaExtension).GetUiScalePolicy() == pair.deprecated);
-
-    viaView.SetUiScalePolicy(pair.deprecated);
-    DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(viaView) == pair.extension);
-
-    GetImpl(viaImpl).SetUiScalePolicy(pair.deprecated);
-    DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(viaImpl) == pair.extension);
-  }
-
-  END_TEST;
-}
-
 // A policy set through the extension API re-lays the view out at the scale it selects: a
 // child requested 40 x 30 renders 80 x 60 at the UI scale 2.0, 40 x 30 once it opts out, and
 // 80 x 60 again when it inherits again.
@@ -5447,44 +5473,6 @@ int UtcDaliViewExtensionGetEffectiveLayoutScaleP(void)
   DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(disabled)), 1.0f, TEST_LOCATION);
 
   manager.SetWindowScale(window, originalWindowScale);
-  manager.SetUiScale(originalScale);
-  manager.SetScalable(originalScalable);
-  END_TEST;
-}
-
-// The deprecated ViewImpl::GetEffectiveScale() reports what the extension function reports,
-// for a view never added to a scene, an on-scene root and its DISABLED child. A view off a
-// scene caches nothing, so a new UI scale reaches both at once.
-int UtcDaliViewExtensionGetEffectiveLayoutScaleMatchesDeprecatedP(void)
-{
-  UiTestApplication application;
-  tet_infoline("UtcDaliViewExtensionGetEffectiveLayoutScaleMatchesDeprecatedP - ViewImpl::GetEffectiveScale() reports the extension value");
-
-  LayoutScaleManager manager          = LayoutScaleManager::Get();
-  const float        originalScale    = manager.GetUiScale();
-  const bool         originalScalable = manager.IsScalable();
-  manager.SetScalable(true);
-  manager.SetUiScale(1.25f);
-
-  View detached = View::New();
-  View root     = View::New();
-  View child    = View::New();
-  Ui::Extension::View::SetUiScalePolicy(child, Ui::Extension::UiScalePolicy::DISABLED);
-  root.Add(child);
-  application.GetWindow().Add(root);
-  SettleLayout(application);
-
-  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(detached)), 1.25f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(detached).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(detached)), TEST_LOCATION);
-  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), 1.25f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(root).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(root)), TEST_LOCATION);
-  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(child).GetEffectiveScale(), Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(child)), TEST_LOCATION);
-
-  manager.SetUiScale(2.0f);
-  DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(detached)), 2.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(GetImpl(detached).GetEffectiveScale(), 2.0f, TEST_LOCATION);
-
   manager.SetUiScale(originalScale);
   manager.SetScalable(originalScalable);
   END_TEST;
@@ -7332,7 +7320,7 @@ int UtcDaliViewStandaloneReconnectAfterScalePolicyChangeAndDirectMeasureRelayout
   // and publishes a 40x30 slot, but places nothing, so the actor stays 80x60. The child's
   // dirty bits are both still false: it re-joins clean.
   window.Remove(root);
-  parent.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(parent, Ui::Extension::UiScalePolicy::DISABLED);
   const MeasuredSize direct = child.Measure(40.0f, 30.0f);
   DALI_TEST_EQUALS(gFillMeasureProducerCount, 2, TEST_LOCATION);
   DALI_TEST_EQUALS(direct.GetWidth(), 40.0f, TEST_LOCATION);
@@ -7959,7 +7947,7 @@ int UtcDaliViewRemoveInvalidatesSubtreeEffectiveScaleP(void)
   root.SetRequestedHeight(100.0f);
 
   View p = View::New();
-  p.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(p, Ui::Extension::UiScalePolicy::DISABLED);
   p.SetRequestedWidth(200.0f);
   p.SetRequestedHeight(100.0f);
 
@@ -8009,7 +7997,7 @@ int UtcDaliViewRemoveThenWindowAddRelayoutsSubtreeAtNewScaleP(void)
   root.SetRequestedHeight(100.0f);
 
   View p = View::New();
-  p.SetUiScalePolicy(UiScalePolicy::DISABLED);
+  Ui::Extension::View::SetUiScalePolicy(p, Ui::Extension::UiScalePolicy::DISABLED);
   p.SetRequestedWidth(200.0f);
   p.SetRequestedHeight(100.0f);
 
@@ -10163,6 +10151,17 @@ int UtcDaliViewArrangeCacheHitDoesNotScheduleFurtherLayoutSubtreeP(void)
 // direct manager write alone reaches the screen (it schedules the pass and the
 // manager honours the new value), and a same-value write moves nothing.
 // ---------------------------------------------------------------------------
+
+int UtcDaliViewLayoutManagerGetExtensionP(void)
+{
+  UiTestApplication application;
+  tet_infoline("LayoutManager::GetExtension is a placeholder slot: nullptr until an Extension is defined");
+
+  Dali::UniquePtr<StackLayoutManager> owned(new StackLayoutManager(StackOrientation::VERTICAL, 0.0f));
+  LayoutManager*                      manager = owned.Get();
+  DALI_TEST_CHECK(manager->GetExtension() == nullptr);
+  END_TEST;
+}
 
 int UtcDaliViewStackLayoutManagerSetterInvalidatesOwnerP(void)
 {

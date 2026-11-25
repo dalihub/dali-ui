@@ -95,8 +95,10 @@ LayoutRect GroupLinearItemsLayouterImpl::GetItemBounds(uint32_t position, float 
      rt == Integration::GroupRowType::BODY_MIDDLE ||
      rt == Integration::GroupRowType::BODY_BOTTOM)
   {
-    bounds.x += mBodyMarginLeft;
-    bounds.width -= (mBodyMarginLeft + mBodyMarginRight);
+    // The margins are natural units; bounds are rendered pixels.
+    const float scale = GetEffectiveLayoutScale();
+    bounds.x += mBodyMarginLeft * scale;
+    bounds.width -= (mBodyMarginLeft + mBodyMarginRight) * scale;
     if(bounds.width < 0.0f) bounds.width = 0.0f;
   }
 

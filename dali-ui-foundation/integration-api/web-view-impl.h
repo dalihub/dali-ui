@@ -32,9 +32,12 @@
 #include <dali/public-api/signals/callback.h>
 #include <functional>
 #include <memory>
+#include <type_traits>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
@@ -91,8 +94,6 @@ public: // Properties (required by DALI_PROPERTY_REGISTRATION)
       MOUSE_EVENTS_ENABLED,       ///< Whether mouse events are forwarded
       KEY_EVENTS_ENABLED,         ///< Whether key events are forwarded
       DOCUMENT_BACKGROUND_COLOR,  ///< The background color of the document
-      TILES_CLEARED_WHEN_HIDDEN,  ///< Whether tiles are cleared when hidden
-      TILE_COVER_AREA_MULTIPLIER, ///< The tile cover area multiplier
       CURSOR_ENABLED_BY_CLIENT,   ///< Whether cursor is managed by client
       SELECTED_TEXT,              ///< The currently selected text
       PAGE_ZOOM_FACTOR,           ///< The page zoom factor
@@ -119,23 +120,40 @@ protected: // Construction & Destruction
 
 public: // Creation
   /**
-   * @brief Creates a new WebViewImpl with no engine arguments.
+   * @brief Creates a new WebViewImpl with the default profile.
    *
    * @return An intrusive pointer to the newly allocated WebViewImpl
    */
   static WebViewImplPtr New();
 
   /**
-   * @brief Creates a new WebViewImpl with application arguments forwarded to the web engine.
-   *
-   * The argc/argv pair is passed to WebEngine::Create(width, height, argc, argv)
-   * so that engine-specific command-line options can be parsed during creation.
-   *
-   * @param[in] argc The count of application arguments
-   * @param[in] argv The string array of application arguments
-   * @return An intrusive pointer to the newly allocated WebViewImpl
+   * @brief Creates a view using an initialized profile.
+   * @param[in] profile The profile retained by the view
+   * @return An implementation, or an empty pointer on backend failure
    */
-  static WebViewImplPtr New(uint32_t argc, char** argv);
+  static WebViewImplPtr New(const WebProfile& profile);
+
+  /**
+   * @brief Creates a WebViewImpl with the default profile and the specified rendering mode.
+   * No fallback to another rendering mode is performed.
+   * @SINCE_3_0.2
+   * @param[in] renderingMode The rendering mode for the view
+   * @return An intrusive pointer to the WebViewImpl, or an empty pointer if the rendering mode is unsupported or initialization fails
+   */
+  static WebViewImplPtr New(Ui::WebView::RenderingMode renderingMode);
+
+  /**
+   * @brief Creates a WebViewImpl with the specified profile and rendering mode.
+   * The profile is retained for the lifetime of the view. No fallback to another profile or rendering mode is performed.
+   * @SINCE_3_0.2
+   * @param[in] profile An initialized profile to retain for the lifetime of the view
+   * @param[in] renderingMode The rendering mode for the view
+   * @return An intrusive pointer to the WebViewImpl, or an empty pointer if the rendering mode is unsupported or initialization fails
+   * @pre The profile is initialized.
+   */
+  static WebViewImplPtr New(const WebProfile& profile, Ui::WebView::RenderingMode renderingMode);
+
+  static bool EnsureEngineType();
 
   /**
    * @copydoc Dali::Ui::WebView::SetWebEngineType
@@ -316,7 +334,7 @@ public: // API — JavaScript
   /**
    * @copydoc Dali::Ui::WebView::EvaluateJavaScript(const Dali::String&, JavaScriptCallback)
    */
-  void EvaluateJavaScript(const Dali::String& script, WebView::JavaScriptCallback callback);
+  void EvaluateJavaScript(const Dali::String& script, Ui::WebView::JavaScriptCallback callback);
 
   /**
    * @copydoc Dali::Ui::WebView::AddJavaScriptMessageHandler
@@ -336,7 +354,7 @@ public: // API — JavaScript
   /**
    * @copydoc Dali::Ui::WebView::RegisterJavaScriptAlertCallback
    */
-  void RegisterJavaScriptAlertCallback(WebView::JavaScriptAlertCallback callback);
+  void RegisterJavaScriptAlertCallback(Ui::WebView::JavaScriptAlertCallback callback);
 
   /**
    * @copydoc Dali::Ui::WebView::JavaScriptAlertReply
@@ -346,7 +364,7 @@ public: // API — JavaScript
   /**
    * @copydoc Dali::Ui::WebView::RegisterJavaScriptConfirmCallback
    */
-  void RegisterJavaScriptConfirmCallback(WebView::JavaScriptConfirmCallback callback);
+  void RegisterJavaScriptConfirmCallback(Ui::WebView::JavaScriptConfirmCallback callback);
 
   /**
    * @copydoc Dali::Ui::WebView::JavaScriptConfirmReply
@@ -356,7 +374,7 @@ public: // API — JavaScript
   /**
    * @copydoc Dali::Ui::WebView::RegisterJavaScriptPromptCallback
    */
-  void RegisterJavaScriptPromptCallback(WebView::JavaScriptPromptCallback callback);
+  void RegisterJavaScriptPromptCallback(Ui::WebView::JavaScriptPromptCallback callback);
 
   /**
    * @copydoc Dali::Ui::WebView::JavaScriptPromptReply
@@ -403,7 +421,7 @@ public: // API — Screenshot
   /**
    * @copydoc Dali::Ui::WebView::GetScreenshotAsynchronously
    */
-  bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback);
+  bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, Ui::WebView::ScreenshotCapturedCallback callback);
 
 public: // API — Profile & Settings
   /**
@@ -440,7 +458,7 @@ public: // API — Page Info
   /**
    * @copydoc Dali::Ui::WebView::GetPlainTextAsynchronously
    */
-  void GetPlainTextAsynchronously(WebView::PlainTextCallback callback);
+  void GetPlainTextAsynchronously(Ui::WebView::PlainTextCallback callback);
 
   /**
    * @copydoc Dali::Ui::WebView::FindText
@@ -452,16 +470,6 @@ public: // API — Document Appearance
    * @copydoc Dali::Ui::WebView::SetDocumentBackgroundColor
    */
   void SetDocumentBackgroundColor(const Dali::Vector4& color);
-
-  /**
-   * @copydoc Dali::Ui::WebView::SetTilesClearedWhenHidden
-   */
-  void SetTilesClearedWhenHidden(bool cleared);
-
-  /**
-   * @copydoc Dali::Ui::WebView::SetTileCoverAreaMultiplier
-   */
-  void SetTileCoverAreaMultiplier(float multiplier);
 
   /**
    * @copydoc Dali::Ui::WebView::SetCursorEnabledByClient
@@ -522,7 +530,7 @@ public: // API — Input & Video
   /**
    * @copydoc Dali::Ui::WebView::CheckVideoPlayingAsynchronously
    */
-  bool CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback callback);
+  bool CheckVideoPlayingAsynchronously(Ui::WebView::VideoPlayingCallback callback);
 
 public: // Signal emission helpers (called by WebView to emit signals)
   /// @brief Emits the PageLoadStartedSignal
@@ -588,6 +596,31 @@ private: // From CustomActorImpl
    * @copydoc Dali::CustomActorImpl::OnTouchEvent()
    */
   bool OnTouchEvent(const Dali::TouchEvent& touch) override;
+
+private:
+  // Engine notifications are delivered on the event thread. Keep the view alive
+  // across application code, but cancel queued notifications once it is released.
+  template<typename Function>
+  auto GuardCallback(Function function)
+  {
+    return [this, lifetime = std::weak_ptr<int>(mCallbackLifetime), function = std::move(function)](auto&&... args) mutable
+    {
+      using Result = std::invoke_result_t<Function&, decltype(args)...>;
+      if(lifetime.expired())
+      {
+        if constexpr(!std::is_void_v<Result>)
+        {
+          return Result{};
+        }
+        else
+        {
+          return;
+        }
+      }
+      auto owner = Self();
+      return function(std::forward<decltype(args)>(args)...);
+    };
+  }
 
 private: // Internal rendering callbacks
   /**
@@ -668,34 +701,28 @@ private: // Internal conversion helpers
    */
   static WebViewPageLoadErrorType ToUiPageLoadErrorType(Dali::WebEngineLoadError::ErrorType type);
 
-private: // Internal factory helper
-  /**
-   * @brief Creates a WebViewImpl instance and initializes its WebEngine.
-   *
-   * Shared by both New() overloads. The caller is responsible for invoking
-   * the appropriate WebEngine::Create() overload afterwards.
-   *
-   * @return An intrusive pointer to the newly allocated WebViewImpl
-   */
-  static WebViewImplPtr CreateWithEngine();
-
 private:
+  bool IsWebEngineAvailable() const;
+
   // Not copyable or movable
   WebViewImpl(const WebViewImpl&)            = delete;
   WebViewImpl(WebViewImpl&&)                 = delete;
   WebViewImpl& operator=(const WebViewImpl&) = delete;
   WebViewImpl& operator=(WebViewImpl&&)      = delete;
 
-private:                                                        // Data — Rendering
-  Ui::Integration::Visual::Base mVisual;                        ///< Current image visual showing the web content
-  Dali::Size                    mWebViewSize;                   ///< Current web view size (width, height)
-  Dali::BoundsInteger           mWebViewArea;                   ///< Last known display area in screen coordinates
-  uint32_t                      mLastRenderedNativeImageWidth;  ///< Width of the last uploaded NativeImage texture
-  uint32_t                      mLastRenderedNativeImageHeight; ///< Height of the last uploaded NativeImage texture
-  bool                          mVisualChangeRequired;          ///< True when the visual must be re-created on next frame
-  bool                          mVideoHoleEnabled;              ///< Video hole rendering enabled
-  bool                          mMouseEventsEnabled;            ///< Mouse events forwarded to web content
-  bool                          mKeyEventsEnabled;              ///< Key events forwarded to web content
+private:                                                                                // Data — Rendering
+  std::shared_ptr<int>                     mCallbackLifetime{std::make_shared<int>(0)}; ///< Cancels callbacks after view destruction.
+  Dali::WebEngineDirectRenderingConnection mDirectConnection;                           ///< Owns the adaptor output connection.
+  Ui::ImageUrl                             mNativeImageUrl;                             ///< Keeps the external texture registered while the visual uses it.
+  Ui::Integration::Visual::Base            mVisual;                                     ///< Current image visual showing the web content
+  Dali::Size                               mWebViewSize;                                ///< Current web view size (width, height)
+  Dali::BoundsInteger                      mWebViewArea;                                ///< Last known display area in screen coordinates
+  uint32_t                                 mLastRenderedNativeImageWidth;               ///< Width of the last uploaded NativeImage texture
+  uint32_t                                 mLastRenderedNativeImageHeight;              ///< Height of the last uploaded NativeImage texture
+  bool                                     mVisualChangeRequired;                       ///< True when the visual must be re-created on next frame
+  bool                                     mVideoHoleEnabled;                           ///< Video hole rendering enabled
+  bool                                     mMouseEventsEnabled;                         ///< Mouse events forwarded to web content
+  bool                                     mKeyEventsEnabled;                           ///< Key events forwarded to web content
 
   // Display-area update notifications
   Dali::PropertyNotification mPositionUpdateNotification; ///< Fires on world-position change
@@ -703,19 +730,19 @@ private:                                                        // Data — Rend
   Dali::PropertyNotification mScaleUpdateNotification;    ///< Fires on world-scale change
 
 public: // Signal members (accessible by WebView for signal emission)
-  WebView::PageLoadStartedSignalType       mPageLoadStartedSignal;
-  WebView::PageLoadInProgressSignalType    mPageLoadInProgressSignal;
-  WebView::PageLoadFinishedSignalType      mPageLoadFinishedSignal;
-  WebView::PageLoadErrorSignalType         mPageLoadErrorSignal;
-  WebView::ScrollEdgeReachedSignalType     mScrollEdgeReachedSignal;
-  WebView::OverScrolledSignalType          mOverScrolledSignal;
-  WebView::UrlChangedSignalType            mUrlChangedSignal;
-  WebView::FrameRenderedSignalType         mFrameRenderedSignal;
-  WebView::FullscreenEnteredSignalType     mFullscreenEnteredSignal;
-  WebView::FullscreenExitedSignalType      mFullscreenExitedSignal;
-  WebView::TextFoundSignalType             mTextFoundSignal;
-  WebView::GeolocationPermissionSignalType mGeolocationPermissionSignal;
-  WebView::WebProcessCrashedSignalType     mWebProcessCrashedSignal;
+  Ui::WebView::PageLoadStartedSignalType       mPageLoadStartedSignal;
+  Ui::WebView::PageLoadInProgressSignalType    mPageLoadInProgressSignal;
+  Ui::WebView::PageLoadFinishedSignalType      mPageLoadFinishedSignal;
+  Ui::WebView::PageLoadErrorSignalType         mPageLoadErrorSignal;
+  Ui::WebView::ScrollEdgeReachedSignalType     mScrollEdgeReachedSignal;
+  Ui::WebView::OverScrolledSignalType          mOverScrolledSignal;
+  Ui::WebView::UrlChangedSignalType            mUrlChangedSignal;
+  Ui::WebView::FrameRenderedSignalType         mFrameRenderedSignal;
+  Ui::WebView::FullscreenEnteredSignalType     mFullscreenEnteredSignal;
+  Ui::WebView::FullscreenExitedSignalType      mFullscreenExitedSignal;
+  Ui::WebView::TextFoundSignalType             mTextFoundSignal;
+  Ui::WebView::GeolocationPermissionSignalType mGeolocationPermissionSignal;
+  Ui::WebView::WebProcessCrashedSignalType     mWebProcessCrashedSignal;
 
 private:                                 // Data — Engine
   Dali::WebEngine            mWebEngine; ///< The underlying dali-adaptor web engine instance

@@ -240,11 +240,14 @@ void NPatchData::SetLoadedNPatchData(PixelBuffer& pixelBuffer, bool preMultiplie
 
   Texture texture =
     Texture::New(TextureType::TEXTURE_2D, pixels.GetPixelFormat(), pixels.GetWidth(), pixels.GetHeight());
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-  Dali::Integration::TextureUploadWithContent(texture, pixels, ToDaliString(mUrl.GetUrl()), Dali::Integration::TextureContextTypeHint::NPATCH_IMAGE);
-#else
-  texture.Upload(pixels);
-#endif
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+  {
+    Dali::Integration::TextureUploadWithContent(texture, pixels, ToDaliString(mUrl.GetUrl()), Dali::Integration::TextureContextTypeHint::NPATCH_IMAGE);
+  }
+  else
+  {
+    texture.Upload(pixels);
+  }
 
   mTextureSet = TextureSet::New();
   mTextureSet.SetTexture(0u, texture);

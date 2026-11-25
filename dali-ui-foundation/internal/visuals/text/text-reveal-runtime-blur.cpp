@@ -33,6 +33,7 @@
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/integration-api/shader-integ.h>
 #include <dali/integration-api/string-utils.h>
+#include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/actors/camera-actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
 #include <dali/public-api/actors/custom-actor.h>
@@ -670,11 +671,11 @@ private:
   {
     struct Binding
     {
-      RevealBlurImage placement;
-      Actor           target;
-      Vector2         offset;
-      Renderer        source;
-      Renderer        proxy;
+      RevealBlurImage placement{};
+      Actor           target{};
+      Vector2         offset{};
+      Renderer        source{};
+      Renderer        proxy{};
     };
     uint64_t             sourceRevision{0u};
     bool                 released{false};
@@ -965,6 +966,10 @@ public:
       {
         return;
       }
+      if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+      {
+        Dali::Integration::TextureUploadWithContent(compositeTexture, PixelData(), "TextRevealDecoration", Dali::Integration::TextureContextTypeHint::FBO_ATTACHED_COLOR_TEXTURE, true);
+      }
       decoration.buffer.AttachColorTexture(compositeTexture);
       Renderer output = CreatePlainOutput();
       if(!Dali::Adaptor::IsAvailable() || !output)
@@ -1230,6 +1235,11 @@ public:
           if(!Dali::Adaptor::IsAvailable())
           {
             return;
+          }
+          if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+          {
+            std::string context = "TextRevealBlurTarget batch:" + std::to_string(batchIndex) + " buffer:" + std::to_string(bufferIndex);
+            Dali::Integration::TextureUploadWithContent(texture, PixelData(), Dali::Integration::ToDaliString(std::move(context)), Dali::Integration::TextureContextTypeHint::FBO_ATTACHED_COLOR_TEXTURE, true);
           }
           buffer.AttachColorTexture(texture);
         }

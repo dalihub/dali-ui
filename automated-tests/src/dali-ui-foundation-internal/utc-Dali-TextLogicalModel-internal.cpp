@@ -214,14 +214,14 @@ int UtcDaliTextVariationsAsyncWorkerReuseP(void)
   request.fontSize   = 16.0f;
   request.textWidth  = 200.0f;
   request.textHeight = 60.0f;
-  controller->GetVariationsMap(request.variationsMap);
+  request.variationsMap.emplace(*controller->GetVariationsMap());
   controller->ClearVariationsMap();
   DALI_TEST_CHECK(request.variationsMap == values);
   auto loader = AsyncTextLoader::New();
   for(int pass = 0; pass < 4; ++pass)
   {
-    if(pass == 1) request.variationsMap.Clear();
-    if(pass == 2) request.variationsMap.Insert("wght", 700.0f);
+    if(pass == 1) request.variationsMap.reset();
+    if(pass == 2) request.variationsMap.emplace().Insert("wght", 700.0f);
     if(pass == 3)
     {
       ReplacementRunSnapshot replacement;
@@ -243,9 +243,9 @@ int UtcDaliTextVariationsAsyncWorkerReuseP(void)
       auto* state = Text::GetImplementation(loader).GetReplacementRenderState();
       DALI_TEST_CHECK(state && state->processingModel);
       auto* copied = state->processingModel->mLogicalModel->GetVariationsMap();
-      DALI_TEST_CHECK(copied && *copied == request.variationsMap);
-      const Property::Map expectedMap = request.variationsMap;
-      request.variationsMap["wght"]   = 800.0f;
+      DALI_TEST_CHECK(copied && *copied == *request.variationsMap);
+      const Property::Map expectedMap  = *request.variationsMap;
+      (*request.variationsMap)["wght"] = 800.0f;
       DALI_TEST_CHECK(*copied == expectedMap);
     }
   }
@@ -559,5 +559,29 @@ int UtcDaliMultilanguageKeycapTextFallbackP(void)
   const auto pointSize = 12u * client.GetNumberOfPointsPerOneUnitOfPointSize();
   support.ValidateFonts(client, text, scripts, descriptions, fontDescription, pointSize, 1.0f, 0u, 3u, fonts);
   DALI_TEST_CHECK(!fonts.Empty());
+  END_TEST;
+}
+
+int UtcDaliTextVariationsOptionalRequestOwnershipP(void)
+{
+  UiTestApplication   application;
+  auto                controller = Controller::New();
+  AsyncTextParameters empty;
+  DALI_TEST_CHECK(!empty.variationsMap);
+  DALI_TEST_CHECK(!controller->GetVariationsMap());
+  Property::Map values;
+  values.Insert("wght", 450.0f);
+  controller->SetVariationsMap(values);
+  AsyncTextParameters request;
+  request.variationsMap.emplace(*controller->GetVariationsMap());
+  auto copy                        = request;
+  (*request.variationsMap)["wght"] = 700.0f;
+  controller->ClearVariationsMap();
+  DALI_TEST_CHECK(!controller->GetVariationsMap());
+  DALI_TEST_CHECK(copy.variationsMap && *copy.variationsMap == values);
+  auto moved = std::move(copy);
+  DALI_TEST_CHECK(moved.variationsMap && *moved.variationsMap == values);
+  controller->SetVariationsMap(values);
+  DALI_TEST_CHECK(controller->GetVariationsMap() && *controller->GetVariationsMap() == values);
   END_TEST;
 }

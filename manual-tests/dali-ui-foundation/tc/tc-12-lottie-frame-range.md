@@ -1,6 +1,6 @@
 # 12. Lottie: SetPlaybackRange / FrameSpeedFactor
 
-SetPlaybackRange / SetMinMaxFrameByMarker로 재생 프레임 범위를 제한하고, SetFrameSpeedFactor /
+SetPlaybackRange / SetPlaybackRangeByMarker로 재생 프레임 범위를 제한하고, SetFrameSpeedFactor /
 GetFrameSpeedFactor로 속도를 조절하는지 확인한다.
 
 구간과 속도는 "무엇을 그릴지"가 아니라 **"어떻게 재생할지"**다. 두 setter 모두 재생 중인

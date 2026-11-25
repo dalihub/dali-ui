@@ -19,7 +19,6 @@
 #define DALI_UI_FOUNDATION_SCROLL_BAR_H
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
-#include <dali-ui-foundation/public-api/views/scroll/scroll-bar-interface.h>
 #include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/object/property-map.h>
@@ -36,10 +35,10 @@ class ScrollBarImpl;
 }
 
 /**
- * @brief A class representing a scroll bar that can be used to control the scrolling of a view.
+ * @brief A class representing a scroll bar that displays the scroll position of a view.
  * @SINCE_3_0.0
  */
-class DALI_UI_API ScrollBar : public AbsoluteLayout, public ScrollBarInterface
+class DALI_UI_API ScrollBar : public AbsoluteLayout
 {
 public:
   /**
@@ -96,46 +95,59 @@ public: // Creation & Destruction
    */
   static ScrollBar DownCast(BaseHandle handle);
 
-public: // ScrollBarInterface implementation
+public: // Scroll bar state
   /**
-   * @copydoc ScrollBarInterface::GetTarget()
+   * @brief Gets the visibility of the vertical scroll bar.
+   * @SINCE_3_0.0
+   * @return The vertical scroll bar visibility.
    */
-  View GetTarget() const override;
+  ScrollBarVisibility GetVerticalScrollBarVisibility() const;
 
   /**
-   * @copydoc ScrollBarInterface::GetVerticalScrollBarVisibility()
+   * @brief Sets the visibility of the vertical scroll bar.
+   * @SINCE_3_0.0
+   * @param[in] visibility The vertical scroll bar visibility.
    */
-  ScrollBarVisibility GetVerticalScrollBarVisibility() const override;
+  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
 
   /**
-   * @copydoc ScrollBarInterface::SetVerticalScrollBarVisibility()
+   * @brief Gets the visibility of the horizontal scroll bar.
+   * @SINCE_3_0.0
+   * @return The horizontal scroll bar visibility.
    */
-  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility) override;
+  ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
 
   /**
-   * @copydoc ScrollBarInterface::GetHorizontalScrollBarVisibility()
+   * @brief Sets the visibility of the horizontal scroll bar.
+   * @SINCE_3_0.0
+   * @param[in] visibility The horizontal scroll bar visibility.
    */
-  ScrollBarVisibility GetHorizontalScrollBarVisibility() const override;
+  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
 
   /**
-   * @copydoc ScrollBarInterface::SetHorizontalScrollBarVisibility()
+   * @brief Updates the size of the scroll bar based on the given scroll area and viewport size.
+   * @SINCE_3_0.0
+   * @param[in] scrollWidth The width of the scrollable area.
+   * @param[in] scrollHeight The height of the scrollable area.
+   * @param[in] viewportWidth The width of the visible area.
+   * @param[in] viewportHeight The height of the visible area.
    */
-  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility) override;
+  void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight);
 
   /**
-   * @copydoc ScrollBarInterface::UpdateBarSize()
+   * @brief Updates the scroll position of the scroll bar based on the given position.
+   * @SINCE_3_0.0
+   * @param[in] position The new scroll position.
    */
-  void UpdateBarSize(float scrollWidth, float scrollHeight, float viewportWidth, float viewportHeight) override;
+  void UpdateScrollPosition(const Vector2& position);
 
   /**
-   * @copydoc ScrollBarInterface::UpdateScrollPosition()
+   * @brief Hides the scroll bar (fade out).
+   *
+   * Only affects bars with Auto visibility.
+   * @SINCE_3_0.0
    */
-  void UpdateScrollPosition(const Vector2& position) override;
-
-  /**
-   * @copydoc ScrollBarInterface::HideBar()
-   */
-  void HideBar() override;
+  void HideBar();
 
 public: // Properties
   /**
@@ -156,6 +168,10 @@ public: // Properties
 
   /**
    * @brief Gets or sets the minimum size of the scroll bar.
+   *
+   * Like the thickness and the offset it is a length in natural units, multiplied by the effective
+   * scale. A value <= 0 selects a twentieth of the scroll bar's longer side; GetBarMinSize() then
+   * returns that length in natural units.
    * @SINCE_3_0.0
    * @return The minimum size of the scroll bar.
    */

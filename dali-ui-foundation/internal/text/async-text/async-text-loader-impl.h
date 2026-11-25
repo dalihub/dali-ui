@@ -175,6 +175,17 @@ private:
 
   // Worker thread
   /**
+   * @brief Selects and lays out the fitted model on the worker thread without rasterizing it.
+   *
+   * @param[in,out] parameters Request snapshot receiving the selected size and line height.
+   * @param[in] useCachedNaturalSize Whether the incoming natural-size model is available.
+   * @param[in] naturalSize Incoming natural size, used only to resolve constraints before Fit.
+   * @param[out] fits Whether the selected model fits the viewport and line limit.
+   * @return True when a fitted or minimum-size fallback model was prepared.
+   */
+  bool PrepareTextFit(AsyncTextParameters& parameters, bool useCachedNaturalSize, const Size& naturalSize, bool& fits);
+
+  /**
    * @brief Initializes internal fields.
    *
    * @param[in] parameters All options required to render text.

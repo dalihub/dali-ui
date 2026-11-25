@@ -389,12 +389,15 @@ Texture VisualFactoryCache::GetBrokenVisualImage(uint32_t brokenIndex)
       pixelData                                      = PixelBuffer::Convert(pixelBuffer); // takes ownership of buffer
       mBrokenImageInfoContainer[brokenIndex].texture = Texture::New(
         Dali::TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-      Dali::Integration::TextureUploadWithContent(mBrokenImageInfoContainer[brokenIndex].texture, pixelData,
-                                                  ToDaliString(mBrokenImageInfoContainer[brokenIndex].url), Dali::Integration::TextureContextTypeHint::BROKEN_IMAGE);
-#else
-      mBrokenImageInfoContainer[brokenIndex].texture.Upload(pixelData);
-#endif
+      if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+      {
+        Dali::Integration::TextureUploadWithContent(mBrokenImageInfoContainer[brokenIndex].texture, pixelData,
+                                                    ToDaliString(mBrokenImageInfoContainer[brokenIndex].url), Dali::Integration::TextureContextTypeHint::BROKEN_IMAGE);
+      }
+      else
+      {
+        mBrokenImageInfoContainer[brokenIndex].texture.Upload(pixelData);
+      }
       mBrokenImageInfoContainer[brokenIndex].width  = pixelData.GetWidth();
       mBrokenImageInfoContainer[brokenIndex].height = pixelData.GetHeight();
     }

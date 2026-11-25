@@ -47,7 +47,7 @@ struct RevealBlurSequence
   uint32_t       lineIndex{0u};
   float          start{0.0f};
   bool           hasTextForeground{true};
-  Rect<uint32_t> coverage;
+  Rect<uint32_t> coverage{};
   Vector4        textureRect{0.0f, 0.0f, 1.0f, 1.0f};
 };
 

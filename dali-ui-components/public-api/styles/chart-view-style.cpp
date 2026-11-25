@@ -48,7 +48,7 @@ public:
    * The constructor must acquire its first reference (the returned reference count is zero).
    * Use New() when an IntrusivePtr owner is required.
    */
-  static DALI_INTERNAL ChartViewStyleImpl* NewForBaseHandle()
+  static ChartViewStyleImpl* NewForBaseHandle()
   {
     return new ChartViewStyleImpl();
   }
@@ -59,7 +59,7 @@ public:
    * The constructor must acquire its first reference (the returned reference count is zero).
    * Use New() when an IntrusivePtr owner is required.
    */
-  static DALI_INTERNAL ChartViewStyleImpl* NewForBaseHandle(const ChartViewStyleImpl& rhs)
+  static ChartViewStyleImpl* NewForBaseHandle(const ChartViewStyleImpl& rhs)
   {
     return new ChartViewStyleImpl(rhs);
   }

@@ -352,6 +352,31 @@ TextVisualShaderFactory::~TextVisualShaderFactory()
 {
 }
 
+Shader TextVisualShaderFactory::GetCutoutShader(VisualFactoryCache& factoryCache, bool coloredGlyphs, bool overlay)
+{
+  const auto type   = static_cast<VisualFactoryCache::ShaderType>(VisualFactoryCache::TEXT_SHADER_CUTOUT +
+                                                                  (coloredGlyphs ? 1 : 0) + (overlay ? 2 : 0));
+  auto       shader = factoryCache.GetShader(type);
+  if(!shader)
+  {
+    std::string fragment;
+    if(coloredGlyphs)
+    {
+      fragment += "#define CUTOUT_COLOR_GLYPHS\n";
+    }
+    if(overlay)
+    {
+      fragment += "#define CUTOUT_OVERLAY\n";
+    }
+    fragment += SHADER_TEXT_CUTOUT_SHADER_FRAG;
+    shader = factoryCache.GenerateAndSaveShader(type, SHADER_TEXT_VISUAL_SHADER_VERT, fragment);
+    shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+    shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
+    shader.RegisterProperty(PIXEL_SNAP_FACTOR_UNIFORM_NAME.data(), PIXEL_SNAP_DISABLED_VALUE);
+  }
+  return shader;
+}
+
 Shader TextVisualShaderFactory::GetShader(VisualFactoryCache&                            factoryCache,
                                           const TextVisualShaderFeature::FeatureBuilder& featureBuilder)
 {

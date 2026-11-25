@@ -14,13 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
-#include <dali-ui-foundation/public-api/views/scroll/page-scrollable-interface.h>
 
 namespace DALI_NAMESPACE
 {
@@ -40,14 +38,10 @@ using PageScrollViewImplPtr = IntrusivePtr<PageScrollViewImpl>;
  * Subclasses ScrollViewImpl to add page-snap behaviour:
  *  - OnBeforeScrollAnimation() is overridden to redirect any fling or slow-drag
  *    finish to the nearest page boundary.
- *  - A PageChangedSignal is emitted whenever the settled page index changes.
+ *  - A PageChangedSignal is emitted whenever the logical page index or page count changes.
  *
- * External libraries that need only public-api access should implement
- * PageScrollableInterface on their own View subclass instead of inheriting this class.
- *
- * @note ABI note: do NOT reorder or remove virtual methods after first publication.
  */
-class DALI_UI_API PageScrollViewImpl : public ScrollViewImpl, public PageScrollableInterface
+class DALI_UI_API PageScrollViewImpl : public ScrollViewImpl
 {
 public:
   /**
@@ -78,6 +72,7 @@ public: // Page API
    *
    * Only the component on the active scroll axis is used.
    * Set to (0, 0) to derive the page size from the current viewport.
+   * The size is in natural units: GetEffectivePageSize() multiplies it by the effective scale.
    */
   void SetPageSize(const Vector2& size);
 
@@ -86,12 +81,10 @@ public: // Page API
    */
   Vector2 GetPageSize() const;
 
-  // PageScrollableInterface
-
   /**
    * @brief Returns the zero-based current page index, or -1 if empty.
    */
-  int GetCurrentPage() const override;
+  int GetCurrentPage() const;
 
   /**
    * @brief Returns the total page count derived from content / effective page size.
@@ -101,7 +94,7 @@ public: // Page API
    * stored by those methods so that PageChangedSignal consumers see a
    * consistent value immediately.
    */
-  int GetPageCount() const override;
+  int GetPageCount() const;
 
   /**
    * @brief Scrolls to the given page with an optional animation.
@@ -110,7 +103,7 @@ public: // Page API
    * also when it is a partial last page whose resting offset rounds to the page before
    * it. A request that has nothing to scroll commits its page at once.
    */
-  void ScrollToPage(int page, bool animate = true) override;
+  void ScrollToPage(int page, bool animate = true);
 
   /**
    * @brief Call after dynamically inserting pages into the scroll content.
@@ -143,17 +136,12 @@ public: // Page API
   void NotifyPagesRemoved(int atIndex, int removedCount = 1);
 
   /**
-   * @brief Signal emitted when the settled page changes.
-   */
-  PageScrollableInterface::PageChangedSignalType& PageChangedSignal() override;
-
-  /**
-   * @brief Signal emitted from the destructor before this object is freed.
+   * @brief Signal emitted when the logical current page or page count changes.
    *
-   * Observers (e.g. PageIndicator) connect here to null any raw pointer they
-   * hold to this object.  Do not call back into the sender from the handler.
+   * Layout, content notifications and scroll cancellation can emit before an
+   * animation reaches its endpoint; this is not a request-completion signal.
    */
-  PageScrollableInterface::DestroyingSignalType& DestroyingSignal() override;
+  PageScrollView::PageChangedSignalType& PageChangedSignal();
 
 protected:
   /**
@@ -210,7 +198,8 @@ private:
   /**
    * @brief Returns the effective page size.
    *
-   * Uses mPageSize if non-zero; falls back to the current viewport dimensions.
+   * Uses mPageSize times the effective scale if non-zero; falls back to the current viewport
+   * dimensions. Rendered pixels either way.
    */
   Vector2 GetEffectivePageSize() const;
 
@@ -250,14 +239,13 @@ private:
   PageScrollViewImpl& operator=(PageScrollViewImpl&&)      = delete;
 
 private:
-  Vector2                                        mPageSize{0.0f, 0.0f};      ///< Explicit page size; (0,0) = use viewport
-  int                                            mCurrentPage{0};            ///< Settled page index
-  int                                            mSnapTargetPage{-1};        ///< Page a snap or an explicit ScrollToPage settles on until committed; -1 = none
-  int                                            mExpectedPageCount{-1};     ///< >=0: overrides layout-based count; -1: use layout (sentinel)
-  int                                            mLastNotifiedPageCount{-2}; ///< Page count last passed to PageChangedSignal; -2 = never emitted
-  bool                                           mNotifyInProgress{false};   ///< Suppress OnScrollFinished re-derive during NotifyPages*
-  PageScrollableInterface::PageChangedSignalType mPageChangedSignal;         ///< Emitted on page settle
-  PageScrollableInterface::DestroyingSignalType  mDestroyingSignal;          ///< Emitted from destructor for observer lifetime management
+  Vector2                               mPageSize{0.0f, 0.0f};      ///< Explicit page size; (0,0) = use viewport
+  int                                   mCurrentPage{0};            ///< Settled page index
+  int                                   mSnapTargetPage{-1};        ///< Page a snap or an explicit ScrollToPage settles on until committed; -1 = none
+  int                                   mExpectedPageCount{-1};     ///< >=0: overrides layout-based count; -1: use layout (sentinel)
+  int                                   mLastNotifiedPageCount{-2}; ///< Page count last passed to PageChangedSignal; -2 = never emitted
+  bool                                  mNotifyInProgress{false};   ///< Suppress OnScrollFinished re-derive during NotifyPages*
+  PageScrollView::PageChangedSignalType mPageChangedSignal;         ///< Reports logical page state
 };
 
 } // namespace Integration

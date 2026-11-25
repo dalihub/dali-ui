@@ -140,8 +140,8 @@ bool NavigatorModalBridge::Register(Integration::NavigatorImpl& host, std::share
 {
   auto modal = session->container.GetHandle();
   if(host.mModalData->destroying || host.mInvokingTransitionCallback || !modal) return false;
-  if(options.transitionSpec) host.SetPageModalTransitionSpec(modal, options.transitionSpec);
-  bool accepted = host.PushModalInternal(modal, options.animated, session);
+  if(options.GetTransitionSpec()) host.SetPageModalTransitionSpec(modal, options.GetTransitionSpec());
+  bool accepted = host.PushModalInternal(modal, options.IsAnimated(), session);
   if(!accepted) host.RemovePageSpec(modal);
   return accepted;
 }

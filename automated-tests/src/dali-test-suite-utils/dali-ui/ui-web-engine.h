@@ -19,11 +19,46 @@
 
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
+#include <string>
+#include <vector>
 
 namespace Test
 {
 namespace WebEngine
 {
+struct RuntimeState
+{
+  int32_t type = -1;
+  bool started = false;
+  bool available = false;
+  bool failInitialization = false;
+  bool failProfile = false;
+  bool failView = false;
+  bool backendUnavailable = false;
+  bool lastIncognito = false;
+  std::string lastBundlePath;
+  std::vector<std::string> arguments;
+  std::vector<std::string> initializedArguments;
+  int initializationCalls = 0;
+  int profileCreates = 0;
+  int profileReleases = 0;
+  int viewCreates = 0;
+  int cookieClearCalls = 0;
+  int cacheClearCalls = 0;
+  const void* lastViewContext = nullptr;
+};
+RuntimeState& GetRuntimeState();
+void TerminateRuntime();
+
+Dali::WebEnginePlugin::WebEnginePageLoadCallback GetPageLoadStartedCallback(Dali::WebEngine engine);
+void SetCreationEnabled(bool enabled);
+void SetNativeImageInitializationResult(bool success);
+std::function<bool()> CaptureViewCallbacks(Dali::WebEngine engine);
+std::function<bool()> CaptureApplicationCallbacks(Dali::WebEngine engine);
+void SetDirectRenderingSupported(bool supported);
+std::function<void()> GetDirectFrameRequest(Dali::WebEngineDirectRenderingConnection connection);
+std::function<void()> GetDirectFrameSubmitted(Dali::WebEngineDirectRenderingConnection connection);
+bool IsDirectConnectionClosed(Dali::WebEngineDirectRenderingConnection connection);
 void SetNativeImageInterface(Dali::WebEngine engine, Dali::NativeImageInterfacePtr nativeImage);
 void SetWebViewAccessible(Dali::Accessibility::Accessible* webAccessible);
 void SetWebAccessibleActivatedAddress(Dali::Devel::Accessibility::Address address);

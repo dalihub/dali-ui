@@ -19,6 +19,7 @@
 
 | 문서 | 상태 | 요약 |
 |---|---|---|
+| [ScrollBarAdaptor와 사용자 스크롤바 연결](scroll-bar-adaptor.md) | 설계 후속·구현 보류 | 공통 handle, ScrollView 설정·조회 API, 콜백 ABI와 수명 계약 |
 | [SoundFeedback optional dependency](sound-feedback-optional-dependency.md) | 설계 필요 | Native multimedia 의존성을 필요한 제품에서만 제공하는 구조 |
 | [Style DefaultPreset 이름 변경](rename-style-default-preset.md) | 명칭 결정 필요 | Built-in fallback style을 더 정확히 나타내는 public API 이름 검토 |
 | [DALi Signal 단일 connection 최적화](optimize-dali-signal-single-connection.md) | 설계·측정 필요 | 0/1/N connection storage 검토 |

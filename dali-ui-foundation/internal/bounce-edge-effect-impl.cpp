@@ -26,6 +26,10 @@
 #include <algorithm>
 #include <cmath>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+
 namespace DALI_NAMESPACE
 {
 
@@ -37,10 +41,11 @@ namespace Internal
 
 namespace
 {
-constexpr float MAX_PULL_PIXELS    = 100.0f;
-constexpr float ABSORB_FACTOR      = 0.05f;
-constexpr float MAX_ABSORB_PX      = 80.0f;
-constexpr float ABSORB_PHASE_RATIO = 0.3f;
+// The limits are design lengths in natural units: multiplied by the source view's effective scale.
+constexpr float MAX_PULL_DISTANCE   = 100.0f;
+constexpr float ABSORB_FACTOR       = 0.05f;
+constexpr float MAX_ABSORB_DISTANCE = 80.0f;
+constexpr float ABSORB_PHASE_RATIO  = 0.3f;
 } // namespace
 
 BounceEdgeEffectImplPtr BounceEdgeEffectImpl::New(ScrollDirection axis)
@@ -123,8 +128,11 @@ void BounceEdgeEffectImpl::OnPullImpl(State /*prevState*/, float deltaDistance, 
   CaptureBasePosition();
   CancelAnimation();
 
+  // The pull follows the finger; only its limit follows the scale of the content it moves.
+  const float maxPull = MAX_PULL_DISTANCE * Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(mSource));
+
   mCurrentOffset += deltaDistance * mPullResistance;
-  mCurrentOffset = std::max(-MAX_PULL_PIXELS, std::min(MAX_PULL_PIXELS, mCurrentOffset));
+  mCurrentOffset = std::max(-maxPull, std::min(maxPull, mCurrentOffset));
   ApplyOffset(mCurrentOffset);
 }
 
@@ -146,7 +154,10 @@ void BounceEdgeEffectImpl::OnAbsorbImpl(float velocity)
   CaptureBasePosition();
   CancelAnimation();
 
-  float extent = std::min(MAX_ABSORB_PX, std::abs(velocity) * ABSORB_FACTOR);
+  // The push-out limit follows the scale of the content it moves; the velocity is the caller's.
+  const float maxAbsorb = MAX_ABSORB_DISTANCE * Ui::Extension::View::GetEffectiveLayoutScale(Ui::GetImpl(mSource));
+
+  float extent = std::min(maxAbsorb, std::abs(velocity) * ABSORB_FACTOR);
   float dir    = (velocity >= 0.0f) ? 1.0f : -1.0f;
 
   bool  isHoriz    = (mAxis == ScrollDirection::Horizontal);

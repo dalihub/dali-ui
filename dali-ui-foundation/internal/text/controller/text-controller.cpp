@@ -337,10 +337,24 @@ void Controller::SetTextCutout(bool cutout)
 {
   if(cutout != mImpl->mTextCutout)
   {
-    mImpl->mModel->mVisualModel->SetCutoutEnabled(cutout);
     mImpl->mTextCutout = cutout;
+    if(!cutout)
+    {
+      // Retire effective model state once, when the request is switched off.
+      // The published renderer retains its own state until replacement.
+      SetCutoutRenderingEnabled(false);
+    }
     RequestRelayout();
     RequestAsyncRender();
+  }
+}
+
+void Controller::SetCutoutRenderingEnabled(bool enabled)
+{
+  mImpl->mModel->mVisualModel->SetCutoutEnabled(enabled);
+  if(!enabled)
+  {
+    mImpl->mModel->mVisualModel->SetOffsetWithCutout(Vector2::ZERO);
   }
 }
 
@@ -356,6 +370,12 @@ void Controller::GetVariationsMap(Property::Map& map)
   }
 }
 
+const Property::Map* Controller::GetVariationsMap() const
+{
+  const auto* map = mImpl->mModel->mLogicalModel->GetVariationsMap();
+  return map && !map->Empty() ? map : nullptr;
+}
+
 void Controller::SetVariationsMap(const Property::Map& map)
 {
   auto& logicalModel = *mImpl->mModel->mLogicalModel;
@@ -367,7 +387,7 @@ void Controller::SetVariationsMap(const Property::Map& map)
   {
     const KeyValuePair& keyvalue = map.GetKeyValue(index);
 
-    if(keyvalue.first.type == Property::Key::STRING)
+    if(keyvalue.first.type == Property::Key::Type::STRING)
     {
       float value = 0.f;
       if(keyvalue.first.stringKey.Size() == 4 && keyvalue.second.Get(value)) // Variable tag must be 4-length string.
@@ -391,7 +411,7 @@ Dali::Vector<Text::FontVariation::Axis> Controller::GetVariations() const
   for(Property::Map::SizeType i = 0u; i < count; ++i)
   {
     const auto& keyValue = map->GetKeyValue(i);
-    if(keyValue.first.type == Property::Key::STRING)
+    if(keyValue.first.type == Property::Key::Type::STRING)
     {
       float value = 0.0f;
       if(keyValue.second.Get(value))
@@ -1155,6 +1175,12 @@ float Controller::GetPlaceholderTextFontSize(FontSizeType type) const
   return PlaceholderHandler::GetPlaceholderTextFontSize(*this, type);
 }
 
+void Controller::SetCutoutTextColor(const Vector4& color)
+{
+  mImpl->mTextColor = color;
+  mImpl->mModel->mVisualModel->SetTextColor(color);
+}
+
 void Controller::SetDefaultColor(const Vector4& color)
 {
   mImpl->SetDefaultColor(color);
@@ -1848,7 +1874,12 @@ void Controller::FitCandidatesPointSizeForLayout(Size layoutSize)
 
 float Controller::GetHeightForWidth(float width)
 {
-  return Relayouter::GetHeightForWidth(*this, width);
+  return Relayouter::GetHeightForWidth(*this, width, false);
+}
+
+float Controller::GetHeightForWidth(float width, bool ignoreLineLimit)
+{
+  return Relayouter::GetHeightForWidth(*this, width, ignoreLineLimit);
 }
 
 Vector2 Controller::CalculateLayoutSize(float width, float height, bool forceUpdate)
@@ -2196,29 +2227,6 @@ void Controller::SetLayoutOffsetWithPadding(Vector2 offset)
 Vector2 Controller::GetLayoutOffsetWithPadding() const
 {
   return mImpl->mModel->mLayoutOffsetWithPadding;
-}
-
-void Controller::SetBackgroundWithCutoutEnabled(bool cutout)
-{
-  mImpl->mModel->mVisualModel->SetBackgroundWithCutoutEnabled(cutout);
-  RequestRelayout();
-  RequestAsyncRender();
-}
-
-bool Controller::IsBackgroundWithCutoutEnabled() const
-{
-  return mImpl->mModel->mVisualModel->IsBackgroundWithCutoutEnabled();
-}
-
-void Controller::SetBackgroundColorWithCutout(const Vector4& color)
-{
-  mImpl->mModel->mVisualModel->SetBackgroundColorWithCutout(color);
-  RequestRelayout();
-}
-
-const Vector4 Controller::GetBackgroundColorWithCutout() const
-{
-  return mImpl->mModel->mVisualModel->GetBackgroundColorWithCutout();
 }
 
 void Controller::SetOffsetWithCutout(const Vector2& offset)

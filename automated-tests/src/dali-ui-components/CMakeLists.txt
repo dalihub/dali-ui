@@ -25,6 +25,7 @@ SET(TC_SOURCES
     utc-Dali-Navigator.cpp
     utc-Dali-Dialog.cpp
     utc-Dali-DialogPresentation.cpp
+    utc-Dali-DialogPostOptions.cpp
     utc-Dali-DialogTransitionSample.cpp
     utc-Dali-DialogContainer.cpp
     utc-Dali-AlertDialog.cpp
@@ -129,6 +130,7 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
     ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
+    ../dali-test-suite-utils/dali-ui/ui-texture-upload-manager.cpp
     ../dali-test-suite-utils/dali-ui/ui-timer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-animation-renderer.cpp
     ../dali-test-suite-utils/dali-ui/ui-vector-image-renderer.cpp

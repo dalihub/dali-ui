@@ -77,14 +77,14 @@ public:
            s->sibling.SetRequestedY(80);
            s->stage.Add(s->sibling);
            r.SetState(s);
-           r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& r) {
+           r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& done) {
              s->probe->onMeasure = {};
              s->measures         = s->probe->measures;
-             r.Truth("owned-producer-observed", calls->calls > 0);
-             r.Size("budget-constraint", calls->budget, MeasuredSize(300, 100));
-             r.Size("owned-constraint", calls->owned, MeasuredSize(30, 10));
-             r.Size("measured", s->probe->view.GetMeasuredSize(), MeasuredSize(30, 10));
-             r.Rendered("final-slot", s->probe->view, LayoutRect(0, 0, 30, 10));
+             done.Truth("owned-producer-observed", calls->calls > 0);
+             done.Size("budget-constraint", calls->budget, MeasuredSize(300, 100));
+             done.Size("owned-constraint", calls->owned, MeasuredSize(30, 10));
+             done.Size("measured", s->probe->view.GetMeasuredSize(), MeasuredSize(30, 10));
+             done.Rendered("final-slot", s->probe->view, LayoutRect(0, 0, 30, 10));
            });
          }},
         {"stable", 1, [](Run& r) {
@@ -93,7 +93,7 @@ public:
            // re-measure the child at the stage constraint here.
            auto s = r.State<Owned>();
            s->sibling.SetRequestedWidth(11);
-           r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& r) { r.Equal("stable.no-producer", s->probe->measures, s->measures); });
+           r.AfterRender({s->stage, s->parent, s->probe->view, s->sibling}, [=](Run& done) { done.Equal("stable.no-producer", s->probe->measures, s->measures); });
          }},
       }));
     for(unsigned kind : {0u, 4u})
@@ -114,13 +114,13 @@ public:
         Probe* probe = p.get();
         p->onMeasure = [calls, probe, parent]() { CountOwnedCall(*calls, *probe, parent); };
         View stage   = Mount(r, parent, 300, 100);
-        r.AfterRender({stage, parent, child}, [=](Run& r) {
+        r.AfterRender({stage, parent, child}, [=](Run& done) {
           p->onMeasure = {};
-          r.Equal("owned-calls", calls->calls, 0);
-          r.Equal("child-producer", p->measures, 2);
-          r.Size("final-measure-constraint", MeasuredSize(p->lastWidth, p->lastHeight), MeasuredSize(120, 60));
-          r.Size("measured", child.GetMeasuredSize(), MeasuredSize(120, 60));
-          r.Rendered("child", child, LayoutRect(0, 0, 120, 60));
+          done.Equal("owned-calls", calls->calls, 0);
+          done.Equal("child-producer", p->measures, 2);
+          done.Size("final-measure-constraint", MeasuredSize(p->lastWidth, p->lastHeight), MeasuredSize(120, 60));
+          done.Size("measured", child.GetMeasuredSize(), MeasuredSize(120, 60));
+          done.Rendered("child", child, LayoutRect(0, 0, 120, 60));
         });
       }));
     return out;

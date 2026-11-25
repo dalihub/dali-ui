@@ -35,8 +35,9 @@ using GroupLinearItemsLayouterImplPtr = IntrusivePtr<GroupLinearItemsLayouterImp
  * @brief LinearItemsLayouter subclass that applies horizontal body margins for group items.
  *
  * When a Integration::GroupAdapter is attached, GetItemBounds narrows the bounding rect for
- * BODY_* rows by the configured horizontal margins. This makes body items appear
- * inset within the group card while GAP and HEADER items span the full width.
+ * BODY_* rows by the configured horizontal margins (natural units, multiplied by the
+ * effective scale). This makes body items appear inset within the group card while GAP
+ * and HEADER items span the full width.
  */
 class DALI_UI_API GroupLinearItemsLayouterImpl : public LinearItemsLayouterImpl
 {

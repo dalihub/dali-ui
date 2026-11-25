@@ -15,13 +15,15 @@
  *
  */
 
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-properties-integ.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/rendering/frame-buffer-devel.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
-#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <test-native-image.h>
 
 using namespace Dali;
@@ -145,7 +147,7 @@ int UtcDaliImageUrlUtilsGenerateUrlP(void)
 
   auto* pixelBytes = new uint8_t[4u]{0xffu, 0x80u, 0x40u, 0xffu};
   PixelData pixelData = PixelData::New(pixelBytes, 4u, 1u, 1u, Pixel::RGBA8888, PixelData::DELETE_ARRAY);
-  ImageUrl pixelUrl   = ImageUrlUtils::GenerateUrl(pixelData, false);
+  ImageUrl pixelUrl   = ImageUrlUtils::GenerateUrl(pixelData);
   DALI_TEST_CHECK(pixelUrl);
 
   NativeImageInterfacePtr nativeImage = TestNativeImage::New(4u, 4u);
@@ -190,40 +192,11 @@ int UtcDaliImageUrlUtilsGenerateUrlPreMultiplied(void)
   DALI_TEST_CHECK(straightView.GetRendererCount() > 0u);
   DALI_TEST_CHECK(!straightView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
 
-  // The deprecated two-argument overload still honors the caller's declaration.
-  ImageUrl  declaredUrl  = ImageUrlUtils::GenerateUrl(straightData, true);
-  ImageView declaredView = ImageView::New(declaredUrl);
-  application.GetScene().Add(declaredView);
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_CHECK(declaredView.GetRendererCount() > 0u);
-  DALI_TEST_CHECK(declaredView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
-
-  // And it does not lose the pixel data's own declaration either.
-  ImageUrl  reportedUrl  = ImageUrlUtils::GenerateUrl(premultipliedData, false);
-  ImageView reportedView = ImageView::New(reportedUrl);
-  application.GetScene().Add(reportedView);
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_CHECK(reportedView.GetRendererCount() > 0u);
-  DALI_TEST_CHECK(reportedView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
-
   // A native image that reports pre-multiplied alpha is treated as pre-multiplied too.
   TestNativeImagePointer reportingNativeImage = TestNativeImage::New(1u, 1u);
   reportingNativeImage->mAlphaPreMultiplied   = true;
   ImageUrl nativeReportedUrl = ImageUrlUtils::GenerateUrl(NativeImageInterfacePtr(reportingNativeImage.Get()));
   DALI_TEST_CHECK(nativeReportedUrl);
-
-  // The deprecated two-argument overload does not lose that declaration either.
-  ImageUrl nativeKeptUrl = ImageUrlUtils::GenerateUrl(NativeImageInterfacePtr(reportingNativeImage.Get()), false);
-  DALI_TEST_CHECK(nativeKeptUrl);
-
-  // And it still honors the caller's declaration on a native image that does not report it.
-  TestNativeImagePointer plainNativeImage = TestNativeImage::New(1u, 1u);
-  ImageUrl nativeDeclaredUrl = ImageUrlUtils::GenerateUrl(NativeImageInterfacePtr(plainNativeImage.Get()), true);
-  DALI_TEST_CHECK(nativeDeclaredUrl);
 
   END_TEST;
 }
@@ -261,39 +234,10 @@ int UtcDaliImageUrlNewPreMultiplied(void)
   DALI_TEST_CHECK(straightView.GetRendererCount() > 0u);
   DALI_TEST_CHECK(!straightView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
 
-  // The deprecated two-argument overload still honors the caller's declaration.
-  ImageUrl  declaredUrl  = ImageUrl::New(straightTexture, true);
-  ImageView declaredView = ImageView::New(declaredUrl);
-  application.GetScene().Add(declaredView);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_CHECK(declaredView.GetRendererCount() > 0u);
-  DALI_TEST_CHECK(declaredView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
-
-  // An undeclared straight texture stays straight.
-  ImageUrl  undeclaredUrl  = ImageUrl::New(straightTexture, false);
-  ImageView undeclaredView = ImageView::New(undeclaredUrl);
-  application.GetScene().Add(undeclaredView);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_CHECK(undeclaredView.GetRendererCount() > 0u);
-  DALI_TEST_CHECK(!undeclaredView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
-
-  // And it does not lose the texture's own declaration either.
-  ImageUrl  keptUrl  = ImageUrl::New(reportingTexture, false);
-  ImageView keptView = ImageView::New(keptUrl);
-  application.GetScene().Add(keptView);
-  application.SendNotification();
-  application.Render();
-  DALI_TEST_CHECK(keptView.GetRendererCount() > 0u);
-  DALI_TEST_CHECK(keptView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
-
   // An empty texture handle is still accepted, as before.
   Texture  emptyTexture;
   ImageUrl emptyUrl = ImageUrl::New(emptyTexture);
   DALI_TEST_CHECK(emptyUrl);
-  ImageUrl emptyDeclaredUrl = ImageUrl::New(emptyTexture, false);
-  DALI_TEST_CHECK(emptyDeclaredUrl);
 
   END_TEST;
 }
@@ -936,5 +880,47 @@ int UtcDaliImageViewRenderedPropertyChangesP(void)
   application.Render();
   DALI_TEST_CHECK(view.IsPreMultiplyAlphaOnLoadEnabled());
   DALI_TEST_EQUALS(view.GetLoadingStatus(), Ui::Visual::ResourceStatus::READY, TEST_LOCATION);
+  END_TEST;
+}
+
+
+int UtcDaliImageViewAnimatePixelArea(void)
+{
+  UiTestApplication application;
+  ImageView         view = ImageView::New("../samples/image-view/res/sample.jpg");
+  view.SetSynchronousLoading(true);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  application.GetScene().Add(view);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, 100.0f, 100.0f));
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+  const Vector4 firstTarget(0.0f, 0.0f, 0.5f, 1.0f);
+  Animation     animation = Animation::New(1.0f);
+  animation.AnimateTo(Ui::Integration::View::GetVisualProperty(view, ImageView::Property::IMAGE, Ui::Integration::ImageVisual::Property::PIXEL_AREA), firstTarget);
+  animation.Play();
+  application.SendNotification();
+  application.Render(0u);
+  application.Render(500u);
+
+  Renderer   renderer       = view.GetRendererAt(0u);
+  const auto pixelAreaIndex = renderer.GetPropertyIndex("pixelArea");
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), Vector4(0.0f, 0.0f, 0.75f, 1.0f), TEST_LOCATION);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), firstTarget, TEST_LOCATION);
+
+  const Vector4 secondTarget(0.25f, 0.0f, 0.75f, 1.0f);
+  animation = Animation::New(1.0f);
+  animation.AnimateTo(Ui::Integration::View::GetVisualProperty(view, ImageView::Property::IMAGE, "pixelArea"), secondTarget);
+  animation.Play();
+  application.SendNotification();
+  application.Render(0u);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), Vector4(0.125f, 0.0f, 0.625f, 1.0f), TEST_LOCATION);
+  application.Render(500u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<Vector4>(pixelAreaIndex), secondTarget, TEST_LOCATION);
   END_TEST;
 }

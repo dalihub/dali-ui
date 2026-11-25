@@ -34,7 +34,7 @@ namespace Ui
  * This struct is the single source of truth for all property indices.
  * It is shared between:
  *   - AnimatedImageView::Property  (public-api, for application code)
- *   - AnimatedImageViewImpl         (integration-api, for DALI_PROPERTY_REGISTRATION_EXTERNAL)
+ *   - the view implementation's property registration
  * @SINCE_3_0.0
  */
 struct AnimatedImageViewPropertyIndex

@@ -39,28 +39,6 @@ enum class CornerRadiusPolicy
 };
 
 /**
- * @brief Controls whether sibling-order changes (Raise/Lower/RaiseAbove/LowerBelow)
- * also reorder the layout children list.
- *
- * The actor (sibling) order and the layout order are kept in sync by default. With
- * PRESERVE only the actor order changes, which sets the draw and hit-test order, while
- * the layout order stays the same.
- *
- * @deprecated Used only by the deprecated View and ViewImpl sibling-order overloads and
- * removed together with them. Instead of UPDATE, call the inherited Dali::Actor method
- * without a policy. Instead of PRESERVE, call the Extension::View function of the same base
- * name with the suffix PreservingLayout (dali-ui-foundation/extension-api/view.h), for example
- * Extension::View::RaiseToTopPreservingLayout(view) for RaiseToTop(LayoutOrderPolicy::PRESERVE).
- * See also docs/view-sibling-order-migration.md in the dali-ui source tree.
- * @SINCE_3_0.0
- */
-enum class LayoutOrderPolicy
-{
-  UPDATE   = 0, ///< Also reorder layout children to match the new sibling order. @SINCE_3_0.0
-  PRESERVE = 1, ///< Keep layout children order unchanged; only the actor (sibling) order changes. @SINCE_3_0.0
-};
-
-/**
  * @brief Controls how View::Remove(View, RemovePolicy) and
  * View::RemoveAll(RemovePolicy) treat an attached LayoutTransition's EXIT slot.
  *

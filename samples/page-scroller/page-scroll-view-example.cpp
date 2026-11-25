@@ -21,14 +21,17 @@
  *   [0,   0] 600x90   Info panel:
  *                       "Page N / M"  |  "ScrollPos: X"
  *   [0,  90] 600x990  PageScrollView — horizontal, 5 pages each 600×990 px
+ *                     explicit page size 600x990 (SetPageSize, natural units)
  *
  * Keyboard:
  *   ← / →    previous / next page  (animated)
  *   1 – 5    jump to page 0 – 4    (instant)
+ *   q – t    UI scale 0.8 / 1.0 / 1.2 / 1.5 / 2.0
  *   ESC      quit
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
 #include <dali/devel-api/adaptor-framework/application.h>
 #include <sstream>
@@ -202,6 +205,8 @@ private:
     mPageScrollView.SetRequestedHeight(SCROLL_H);
     mPageScrollView.SetRequestedX(0.0f);
     mPageScrollView.SetRequestedY(SCROLL_Y);
+    // An explicit page size equal to the viewport, in natural units like the requested size.
+    mPageScrollView.SetPageSize(Vector2(PAGE_W, PAGE_H));
     mPageScrollView.SetContent(content);
 
     window.Add(mPageScrollView);
@@ -279,6 +284,26 @@ private:
     else if(key == "5")
     {
       mPageScrollView.ScrollToPage(4, false);
+    }
+    else if(key == "q")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
+    }
+    else if(key == "w")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
+    }
+    else if(key == "e")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
+    }
+    else if(key == "r")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+    }
+    else if(key == "t")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
     }
     RefreshInfoPanel();
   }

@@ -17,18 +17,25 @@
 
 #include <dali-ui-test-suite-utils.h>
 #include <test-native-image.h>
+#include <ui-event-thread-callback.h>
+#include <ui-lifecycle-controller.h>
 #include <ui-web-engine.h>
 #include <dali.h>
+#include <dali/devel-api/object/type-info.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
+#include <dali-ui-foundation/internal/web-profile-registry.h>
 #include <ui-web-engine.h>
 
 #define private public
 #define protected public
 #include <dali-ui-foundation/integration-api/web-view-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #undef protected
 #undef private
+#include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -95,39 +102,20 @@ Dali::Ui::Integration::WebViewImpl& GetWebViewImpl(WebView view)
 // Construction & Destruction
 // ===========================================================================
 
-int UtcDaliWebViewUiConfigWebEngineTypeP(void)
-{
-  UiConfig config = UiConfig::New();
-
-  DALI_TEST_EQUALS(config.GetWebEngineType(), WebEngineType::CHROMIUM, TEST_LOCATION);
-
-  config.SetWebEngineType(WebEngineType::LWE);
-  DALI_TEST_EQUALS(config.GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
-
-  config.Apply();
-
-  DALI_TEST_EQUALS(UiConfig::GetCurrent().GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
-  DALI_TEST_ASSERTION(config.SetWebEngineType(WebEngineType::CHROMIUM), "UiConfig is frozen after UiConfig::Apply()");
-
-  END_TEST;
-}
-
 int UtcDaliWebViewNewWithoutAppliedUiConfigN(void)
 {
-  DALI_TEST_ASSERTION(WebView::New(), "UiConfig::Apply() must be called before WebView::New()");
+  DALI_TEST_ASSERTION(WebView::New(), "UiConfig::Apply() must be called before using the web engine");
   END_TEST;
 }
 
 int UtcDaliWebViewSetWebEngineTypeBeforeCreationP(void)
 {
   UiConfig config = UiConfig::New();
-  config.SetWebEngineType(WebEngineType::LWE);
   WebView::SetWebEngineType(WebEngineType::CHROMIUM);
 
   UiTestApplication application(config);
   WebView view = WebView::New();
   DALI_TEST_CHECK(view);
-  DALI_TEST_EQUALS(UiConfig::GetCurrent().GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
   END_TEST;
 }
 
@@ -140,7 +128,7 @@ int UtcDaliWebViewSetWebEngineTypeAfterCreationN(void)
   }
 
   WebView::SetWebEngineType(WebEngineType::CHROMIUM);
-  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Web engine cannot be changed after a WebView has been created");
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
   END_TEST;
 }
 
@@ -844,25 +832,6 @@ int UtcDaliWebViewSetDocumentBackgroundColorP(void)
   END_TEST;
 }
 
-int UtcDaliWebViewSetTilesClearedWhenHiddenP(void)
-{
-  UiTestApplication application;
-  WebView view = WebView::New();
-  view.SetTilesClearedWhenHidden(true);
-  view.SetTilesClearedWhenHidden(false);
-  DALI_TEST_CHECK(view);
-  END_TEST;
-}
-
-int UtcDaliWebViewSetTileCoverAreaMultiplierP(void)
-{
-  UiTestApplication application;
-  WebView view = WebView::New();
-  view.SetTileCoverAreaMultiplier(2.0f);
-  DALI_TEST_CHECK(view);
-  END_TEST;
-}
-
 int UtcDaliWebViewSetCursorEnabledByClientP(void)
 {
   UiTestApplication application;
@@ -1229,12 +1198,11 @@ int UtcDaliWebViewInternalConversionsAndPropertiesP(void)
     Dali::Ui::Integration::WebViewImpl::Property::URL, Dali::Ui::Integration::WebViewImpl::Property::USER_AGENT, Dali::Ui::Integration::WebViewImpl::Property::SCROLL_POSITION,
     Dali::Ui::Integration::WebViewImpl::Property::VIDEO_HOLE_ENABLED, Dali::Ui::Integration::WebViewImpl::Property::MOUSE_EVENTS_ENABLED,
     Dali::Ui::Integration::WebViewImpl::Property::KEY_EVENTS_ENABLED, Dali::Ui::Integration::WebViewImpl::Property::DOCUMENT_BACKGROUND_COLOR,
-    Dali::Ui::Integration::WebViewImpl::Property::TILES_CLEARED_WHEN_HIDDEN, Dali::Ui::Integration::WebViewImpl::Property::TILE_COVER_AREA_MULTIPLIER,
     Dali::Ui::Integration::WebViewImpl::Property::CURSOR_ENABLED_BY_CLIENT, Dali::Ui::Integration::WebViewImpl::Property::PAGE_ZOOM_FACTOR,
     Dali::Ui::Integration::WebViewImpl::Property::TEXT_ZOOM_FACTOR};
   const Dali::Property::Value values[] = {
     Dali::String("https://example.com"), Dali::String("agent"), Vector2(1.0f, 2.0f),
-    true, false, false, Color::WHITE, true, 2.0f, true, 1.5f, 1.25f};
+    true, false, false, Color::WHITE, true, 1.5f, 1.25f};
   for(size_t i = 0u; i < sizeof(writable) / sizeof(writable[0]); ++i)
   {
     Dali::Ui::Integration::WebViewImpl::SetProperty(object, writable[i], values[i]);
@@ -1576,5 +1544,604 @@ int UtcDaliWebViewVerboseDiagnosticsP(void)
   DALI_TEST_CHECK(!impl.mVisualChangeRequired);
   DALI_TEST_CHECK(emptyTouchHandled);
   DALI_TEST_CHECK(touchHandled);
+  END_TEST;
+}
+
+int UtcDaliWebViewEngineArgumentsReplacementP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  {
+    char program[] = "browser";
+    char option[] = "--incognito";
+    char* arguments[] = {program, option};
+    DALI_TEST_CHECK(WebView::SetWebEngineArguments(2, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
+    option[2] = 'X';
+  }
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_EQUALS(state.arguments[1], std::string("--incognito"), TEST_LOCATION);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, nullptr) == Ui::WebEngineArgumentsResult::INVALID_ARGUMENT);
+  char* invalid[] = {nullptr};
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, invalid) == Ui::WebEngineArgumentsResult::INVALID_ARGUMENT);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(UINT32_MAX, invalid) == Ui::WebEngineArgumentsResult::INVALID_ARGUMENT);
+  DALI_TEST_EQUALS(state.arguments.size(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::SUCCESS);
+  DALI_TEST_CHECK(state.arguments.empty());
+  DALI_TEST_CHECK(!state.started);
+  END_TEST;
+}
+
+int UtcDaliWebProfileLookupDoesNotInitializeP(void)
+{
+  UiTestApplication application;
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Default"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Missing"));
+  DALI_TEST_CHECK(!Test::WebEngine::GetRuntimeState().started);
+  DALI_TEST_ASSERTION(WebProfile::New(""), "Profile name must be nonempty and not Default");
+  DALI_TEST_ASSERTION(WebProfile::New("Default"), "Profile name must be nonempty and not Default");
+  DALI_TEST_CHECK(!Test::WebEngine::GetRuntimeState().started);
+  END_TEST;
+}
+
+int UtcDaliWebProfileCreationInitializesEngineP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Private", true, "/bundle.so");
+  DALI_TEST_CHECK(profile);
+  DALI_TEST_CHECK(profile.IsIncognito());
+  DALI_TEST_EQUALS(profile.GetName(), Dali::String("Private"), TEST_LOCATION);
+  DALI_TEST_CHECK(profile == WebProfile::GetProfile("Private"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("private"));
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.viewCreates, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.lastBundlePath, std::string("/bundle.so"), TEST_LOCATION);
+  DALI_TEST_CHECK(state.lastIncognito);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::ALREADY_INITIALIZED);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  DALI_TEST_ASSERTION(WebProfile::New("Private", true), "A live profile already uses this name");
+  DALI_TEST_ASSERTION(WebProfile::New("Private", false), "A live profile already uses this name");
+  END_TEST;
+}
+
+int UtcDaliWebProfileSharedViewsRetainContextP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  auto profile = WebProfile::New("Session", true);
+  DALI_TEST_EQUALS(state.lastBundlePath, std::string(""), TEST_LOCATION);
+  auto copy = profile;
+  const void* context;
+  {
+    auto first = WebView::New(profile);
+    context = state.lastViewContext;
+    auto second = WebView::New(copy);
+    DALI_TEST_CHECK(first && second);
+    DALI_TEST_CHECK(state.lastViewContext == context);
+    DALI_TEST_CHECK(first.GetProfile() == profile);
+    DALI_TEST_CHECK(second.GetProfile() == profile);
+    auto independent = WebProfile::New("Independent", true);
+    auto otherView = WebView::New(independent);
+    DALI_TEST_CHECK(state.lastViewContext != context);
+    DALI_TEST_CHECK(otherView.GetProfile() != profile);
+  }
+  DALI_TEST_EQUALS(state.profileReleases, 1, TEST_LOCATION);
+  auto recreated = WebView::New(profile);
+  DALI_TEST_CHECK(recreated);
+  DALI_TEST_CHECK(state.lastViewContext == context);
+  profile.Reset();
+  copy.Reset();
+  DALI_TEST_CHECK(WebProfile::GetProfile("Session"));
+  recreated.Reset();
+  DALI_TEST_EQUALS(state.profileReleases, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Session"));
+  auto newSession = WebProfile::New("Session", true);
+  DALI_TEST_CHECK(newSession);
+  DALI_TEST_EQUALS(state.profileCreates, 3, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileCookieOnlyRetainsNameP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  WebCookieManager cookies;
+  {
+    auto profile = WebProfile::New("Cookies", true);
+    cookies = profile.GetCookieManager();
+    DALI_TEST_CHECK(cookies == profile.GetCookieManager());
+  }
+  DALI_TEST_EQUALS(state.profileReleases, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(WebProfile::GetProfile("Cookies"));
+  DALI_TEST_ASSERTION(WebProfile::New("Cookies"), "A live profile already uses this name");
+  cookies.ClearAllCookies();
+  DALI_TEST_EQUALS(state.cookieClearCalls, 1, TEST_LOCATION);
+  cookies.Reset();
+  DALI_TEST_EQUALS(state.profileReleases, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Cookies"));
+  DALI_TEST_CHECK(WebProfile::New("Cookies"));
+  END_TEST;
+}
+
+int UtcDaliWebProfileFailureDoesNotReserveNameP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.failProfile = true;
+  DALI_TEST_CHECK(!WebProfile::New("Retry"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Retry"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Default"));
+  state.failProfile = false;
+  DALI_TEST_CHECK(WebProfile::New("Retry"));
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileInitializationFailureFreezesSettingsP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.failInitialization = true;
+  DALI_TEST_CHECK(!WebProfile::New("Failed"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Failed"));
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::ALREADY_INITIALIZED);
+  state.failInitialization = false;
+  DALI_TEST_CHECK(!WebView::New());
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewProfileFailureNoFallbackP(void)
+{
+  UiTestApplication application;
+  WebProfile empty;
+  DALI_TEST_ASSERTION(WebView::New(empty), "WebView requires an initialized profile");
+  auto profile = WebProfile::New("Selected", true);
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.failView = true;
+  DALI_TEST_CHECK(!WebView::New(profile));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Default"));
+  DALI_TEST_EQUALS(state.viewCreates, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(WebProfile::GetProfile("Selected") == profile);
+  state.failView = false;
+  DALI_TEST_CHECK(WebView::New(profile));
+  END_TEST;
+}
+
+int UtcDaliWebViewBackendUnavailableP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.backendUnavailable = true;
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::BACKEND_UNAVAILABLE);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  DALI_TEST_CHECK(!WebProfile::New("Unavailable"));
+  DALI_TEST_CHECK(!WebView::New());
+  DALI_TEST_CHECK(!state.started);
+  END_TEST;
+}
+
+int UtcDaliWebViewLweDefaultAndUnsupportedProfilesP(void)
+{
+  UiTestApplication application;
+  char program[] = "browser";
+  char* arguments[] = {program};
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_CHECK(!WebProfile::New("Unsupported", true, "/bundle.so"));
+  DALI_TEST_CHECK(!WebProfile::GetProfile("Unsupported"));
+  auto view = WebView::New();
+  DALI_TEST_CHECK(view);
+  DALI_TEST_CHECK(!view.GetProfile().IsIncognito());
+  DALI_TEST_EQUALS(state.initializedArguments[0], std::string("browser"), TEST_LOCATION);
+  view.Reset();
+  DALI_TEST_EQUALS(state.profileReleases, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileRetainedAfterTerminationP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Retained", true);
+  auto cookies = profile.GetCookieManager();
+  auto view = WebView::New(profile);
+  auto settings = view.GetSettings();
+  auto history = view.GetBackForwardList();
+  auto& state = Test::WebEngine::GetRuntimeState();
+  Test::WebEngine::TerminateRuntime();
+  profile.ClearCache();
+  cookies.ClearAllCookies();
+  DALI_TEST_EQUALS(state.cacheClearCalls, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.cookieClearCalls, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!WebView::New(profile));
+  DALI_TEST_EQUALS(settings.GetDefaultFontSize(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(history.GetItemCount(), 0u, TEST_LOCATION);
+  view.LoadUrl("https://example.com");
+  DALI_TEST_CHECK(view.GetUrl().Empty());
+  view.Reset();
+  profile.Reset();
+  cookies.Reset();
+  DALI_TEST_EQUALS(state.profileReleases, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewArgumentsFixDefaultTypeP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::SUCCESS);
+  DALI_TEST_EQUALS(state.type, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.initializationCalls, 0, TEST_LOCATION);
+  DALI_TEST_CHECK(!state.started);
+  WebView::SetWebEngineType(WebEngineType::CHROMIUM);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  char program[] = "replacement";
+  char* arguments[] = {program};
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_CHECK(WebView::New());
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.initializedArguments[0], std::string("replacement"), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewArgumentsFixExplicitTypeP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  WebView::SetWebEngineType(WebEngineType::CHROMIUM);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  auto& state = Test::WebEngine::GetRuntimeState();
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::SUCCESS);
+  DALI_TEST_EQUALS(state.type, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.initializationCalls, 0, TEST_LOCATION);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::CHROMIUM), "Cannot change engine type after first web engine API use");
+  DALI_TEST_EQUALS(state.type, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_CHECK(WebView::New());
+  DALI_TEST_EQUALS(state.initializationCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewInvalidArgumentsFixTypeP(void)
+{
+  UiTestApplication application;
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, nullptr) == Ui::WebEngineArgumentsResult::INVALID_ARGUMENT);
+  DALI_TEST_CHECK(!Test::WebEngine::GetRuntimeState().started);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  DALI_TEST_CHECK(WebView::SetWebEngineArguments(0, nullptr) == Ui::WebEngineArgumentsResult::SUCCESS);
+  END_TEST;
+}
+
+int UtcDaliWebViewUnavailableCreationFixesTypeP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.backendUnavailable = true;
+  DALI_TEST_CHECK(!WebView::New());
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  state.backendUnavailable = false;
+  DALI_TEST_CHECK(WebView::New());
+  DALI_TEST_EQUALS(state.type, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileUnavailableCreationFixesTypeP(void)
+{
+  UiTestApplication application;
+  auto& state = Test::WebEngine::GetRuntimeState();
+  state.backendUnavailable = true;
+  DALI_TEST_CHECK(!WebProfile::New("Unavailable"));
+  DALI_TEST_CHECK(!state.started);
+  DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
+  state.backendUnavailable = false;
+  DALI_TEST_CHECK(WebProfile::New("Unavailable"));
+  DALI_TEST_EQUALS(state.type, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileRegistryPrunesExpiredNamesP(void)
+{
+  UiTestApplication application;
+  Dali::Ui::Internal::WebProfileRegistry profiles;
+  auto live = WebProfile::New("Live");
+  Dali::Ui::Internal::RegisterWebProfile(profiles, live);
+  for(unsigned int index = 0; index < 1000; ++index)
+  {
+    auto name = std::string("Temporary") + std::to_string(index);
+    auto profile = WebProfile::New(name.c_str());
+    Dali::Ui::Internal::RegisterWebProfile(profiles, profile);
+    DALI_TEST_EQUALS(profiles.size(), size_t(2), TEST_LOCATION);
+    DALI_TEST_CHECK(profiles.at("Live").GetHandle() == live);
+  }
+  DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().profileReleases, 1000, TEST_LOCATION);
+  auto reused = WebProfile::New("Temporary0");
+  Dali::Ui::Internal::RegisterWebProfile(profiles, reused);
+  DALI_TEST_EQUALS(profiles.size(), size_t(2), TEST_LOCATION);
+  DALI_TEST_CHECK(WebProfile::GetProfile("Temporary0") == reused);
+  END_TEST;
+}
+
+int UtcDaliWebProfileRegistrySweepPreservesOwnersP(void)
+{
+  UiTestApplication application;
+  auto view = WebView::New(WebProfile::New("ViewOwned"));
+  auto cookies = WebProfile::New("CookieOwned").GetCookieManager();
+  for(unsigned int index = 0; index < 1000; ++index)
+  {
+    auto name = std::string("Temporary") + std::to_string(index);
+    DALI_TEST_CHECK(WebProfile::New(name.c_str()));
+  }
+  auto defaultView = WebView::New();
+  DALI_TEST_CHECK(defaultView);
+  DALI_TEST_CHECK(WebProfile::GetProfile("ViewOwned") == view.GetProfile());
+  DALI_TEST_CHECK(WebProfile::GetProfile("CookieOwned").GetCookieManager() == cookies);
+  DALI_TEST_ASSERTION(WebProfile::New("ViewOwned"), "A live profile already uses this name");
+  DALI_TEST_ASSERTION(WebProfile::New("CookieOwned"), "A live profile already uses this name");
+  view.Reset();
+  cookies.Reset();
+  DALI_TEST_CHECK(WebProfile::New("ViewOwned"));
+  DALI_TEST_CHECK(WebProfile::New("CookieOwned"));
+  END_TEST;
+}
+
+int UtcDaliWebProfileRegistryDefaultRegistrationPrunesP(void)
+{
+  UiTestApplication application;
+  Dali::Ui::Internal::WebProfileRegistry profiles;
+  {
+    auto expired = WebProfile::New("Expired");
+    Dali::Ui::Internal::RegisterWebProfile(profiles, expired);
+  }
+  auto view = WebView::New();
+  Dali::Ui::Internal::RegisterWebProfile(profiles, view.GetProfile());
+  DALI_TEST_EQUALS(profiles.size(), size_t(1), TEST_LOCATION);
+  DALI_TEST_CHECK(profiles.at("Default").GetHandle() == view.GetProfile());
+  view.Reset();
+  DALI_TEST_CHECK(!profiles.at("Default").GetHandle());
+  END_TEST;
+}
+
+int UtcDaliWebViewNativeImageVisualAfterLayoutP(void)
+{
+  UiTestApplication application;
+  auto view = WebView::New();
+  view.SetRequestedWidth(160.0f);
+  view.SetRequestedHeight(90.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  auto image = TestNativeImage::New(160u, 90u);
+  auto& impl = GetWebViewImpl(view);
+  Test::WebEngine::SetNativeImageInterface(impl.mWebEngine, image);
+  impl.OnFrameRendered();
+  DALI_TEST_CHECK(impl.mVisual);
+  // Check the frame-created visual before another layout can supply its size.
+  const auto& visual = Dali::Ui::GetImplementation(impl.mVisual);
+  DALI_TEST_EQUALS(visual.mImpl->mControlSize, Size(160.0f, 90.0f), TEST_LOCATION);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  DALI_TEST_CHECK(view.GetRendererCount() > 0u);
+  DALI_TEST_CHECK(image->mTargetTextureCalls > 0);
+  END_TEST;
+}
+
+int UtcDaliWebViewDirectRenderingUnsupportedN(void)
+{
+  UiTestApplication application;
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  auto view = WebView::New();
+  DALI_TEST_CHECK(view);
+  DALI_TEST_CHECK(!GetWebViewImpl(view).mDirectConnection);
+  auto profile = view.GetProfile();
+  auto withProfile = WebView::New(profile);
+  DALI_TEST_CHECK(withProfile);
+  DALI_TEST_CHECK(!GetWebViewImpl(withProfile).mDirectConnection);
+  DALI_TEST_CHECK(WebView::New());
+  DALI_TEST_CHECK(!WebView::New(WebView::RenderingMode::DIRECT_RENDERING));
+  DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING));
+  DALI_TEST_EQUALS(Test::WebEngine::GetRuntimeState().viewCreates, 3, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewDirectRenderingSessionP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  auto direct = WebView::New(WebView::RenderingMode::DIRECT_RENDERING);
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  DALI_TEST_CHECK(direct);
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  auto sameProfile = WebView::New(direct.GetProfile(), WebView::RenderingMode::DIRECT_RENDERING);
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  DALI_TEST_CHECK(sameProfile);
+  DALI_TEST_CHECK(sameProfile.GetProfile() == direct.GetProfile());
+  DALI_TEST_CHECK(GetWebViewImpl(sameProfile).mDirectConnection);
+  auto& impl = GetWebViewImpl(direct);
+  DALI_TEST_CHECK(impl.mDirectConnection);
+  DALI_TEST_CHECK(!impl.mVisual);
+  DALI_TEST_EQUALS(direct.GetRendererCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(direct.GetRendererAt(0u) == impl.mDirectConnection.GetRenderer());
+  unsigned frames = 0;
+  direct.FrameRenderedSignal().Connect(&application, [&](WebView) { ++frames; });
+  auto submitted = Test::WebEngine::GetDirectFrameSubmitted(impl.mDirectConnection);
+  submitted();
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  auto lateCallback = Test::WebEngine::GetPageLoadStartedCallback(impl.mWebEngine);
+  unsigned loads = 0;
+  direct.PageLoadStartedSignal().Connect(&application, [&](WebView, const Dali::String&) { ++loads; });
+  lateCallback("before-destruction");
+  DALI_TEST_EQUALS(loads, 1u, TEST_LOCATION);
+  direct.Reset();
+  lateCallback("after-destruction");
+  submitted();
+  DALI_TEST_EQUALS(loads, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewCreationFailuresP(void)
+{
+  UiTestApplication application;
+  auto plain = WebView::New();
+  DALI_TEST_CHECK(plain);
+  DALI_TEST_CHECK(!GetWebViewImpl(plain).mDirectConnection);
+  auto explicitProfile = WebView::New(WebProfile::New("Native", true));
+  DALI_TEST_CHECK(explicitProfile);
+  DALI_TEST_CHECK(!GetWebViewImpl(explicitProfile).mDirectConnection);
+
+  Test::WebEngine::SetNativeImageInitializationResult(false);
+  auto failed = WebView::New();
+  auto typeInfo = TypeRegistry::Get().GetTypeInfo("WebView");
+  auto failedFromRegistry = typeInfo.CreateInstance();
+  Test::WebEngine::SetNativeImageInitializationResult(true);
+  DALI_TEST_CHECK(!failed);
+  DALI_TEST_CHECK(!failedFromRegistry);
+  DALI_TEST_CHECK(typeInfo.CreateInstance());
+
+  Test::WebEngine::SetCreationEnabled(false);
+  auto nativeWithoutEngine = WebView::New();
+  Test::WebEngine::SetCreationEnabled(true);
+  DALI_TEST_CHECK(!nativeWithoutEngine);
+  END_TEST;
+}
+
+int UtcDaliWebViewQueuedCallbacksAfterDestructionP(void)
+{
+  UiTestApplication application;
+  auto view = WebView::New();
+  unsigned calls = 0;
+  view.PageLoadStartedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadInProgressSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadFinishedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.PageLoadErrorSignal().Connect(&application, [&calls](WebView, const WebViewPageLoadError&) { ++calls; });
+  view.ScrollEdgeReachedSignal().Connect(&application, [&calls](WebView, WebViewScrollEdge) { ++calls; });
+  view.OverScrolledSignal().Connect(&application, [&calls](WebView, WebViewOverScrolled) { ++calls; });
+  view.UrlChangedSignal().Connect(&application, [&calls](WebView, const Dali::String&) { ++calls; });
+  view.FrameRenderedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.FullscreenEnteredSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.FullscreenExitedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  view.TextFoundSignal().Connect(&application, [&calls](WebView, uint32_t) { ++calls; });
+  view.GeolocationPermissionSignal().Connect(&application, [&calls](WebView, const Dali::String&, const Dali::String&) { ++calls; return true; });
+  view.WebProcessCrashedSignal().Connect(&application, [&calls](WebView) { ++calls; });
+  gScreenshotCallbackCount = 0u;
+  DALI_TEST_CHECK(view.GetScreenshotAsynchronously(Dali::BoundsInteger(0, 0, 1, 1), 1.0f,
+      WebView::ScreenshotCapturedCallback::New(OnScreenshotCallback)));
+  auto queued = Test::WebEngine::CaptureViewCallbacks(GetWebViewImpl(view).mWebEngine);
+  DALI_TEST_CHECK(queued());
+  DALI_TEST_EQUALS(calls, 13u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gScreenshotCallbackCount, 1u, TEST_LOCATION);
+  view.Reset();
+  // A queued permission request must deny access and every notification must be ignored.
+  DALI_TEST_CHECK(!queued());
+  DALI_TEST_EQUALS(calls, 13u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gScreenshotCallbackCount, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewDirectCallbacksAfterDestructionP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  WebView::SetWebEngineType(WebEngineType::LWE);
+  auto view = WebView::New(WebView::RenderingMode::DIRECT_RENDERING);
+  Test::WebEngine::SetDirectRenderingSupported(false);
+  DALI_TEST_CHECK(view);
+  application.GetScene().Add(view);
+  unsigned frames = 0;
+  view.FrameRenderedSignal().Connect(&application, [&frames](WebView) { ++frames; });
+  auto connection = GetWebViewImpl(view).mDirectConnection;
+  auto request = Test::WebEngine::GetDirectFrameRequest(connection);
+  auto submitted = Test::WebEngine::GetDirectFrameSubmitted(connection);
+  request();
+  submitted();
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  application.GetScene().Remove(view);
+  view.Reset();
+  DALI_TEST_CHECK(Test::WebEngine::IsDirectConnectionClosed(connection));
+  DALI_TEST_CHECK(!Test::WebEngine::GetDirectFrameRequest(connection));
+  DALI_TEST_CHECK(!Test::WebEngine::GetDirectFrameSubmitted(connection));
+  request();
+  submitted();
+  DALI_TEST_EQUALS(frames, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+static int CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType type, WebView::RenderingMode renderingMode)
+{
+  UiTestApplication application;
+  WebView::SetWebEngineType(type);
+  {
+    Test::WebEngine::SetDirectRenderingSupported(true);
+    auto view = WebView::New(renderingMode);
+    Test::WebEngine::SetDirectRenderingSupported(false);
+    DALI_TEST_CHECK(view);
+    gJavaScriptCallbackCount = 0u;
+    gPlainTextCallbackCount = 0u;
+    gVideoCallbackCount = 0u;
+    view.EvaluateJavaScript(Dali::String("1"), WebView::JavaScriptCallback::New(OnJavaScriptCallback));
+    view.AddJavaScriptMessageHandler(Dali::String("object"), WebView::JavaScriptCallback::New(OnJavaScriptCallback));
+    view.AddJavaScriptMessageHandler(Dali::String("object"), Dali::Callback<void(const Dali::String&, const Dali::String&)>::New(OnJavaScriptMessageWithNameCallback));
+    view.RegisterJavaScriptAlertCallback(WebView::JavaScriptAlertCallback::New(OnJavaScriptAlertCallback));
+    view.RegisterJavaScriptConfirmCallback(WebView::JavaScriptConfirmCallback::New(OnJavaScriptConfirmCallback));
+    view.RegisterJavaScriptPromptCallback(WebView::JavaScriptPromptCallback::New(OnJavaScriptPromptCallback));
+    view.GetPlainTextAsynchronously(WebView::PlainTextCallback::New(OnPlainTextCallback));
+    view.CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback::New(OnVideoPlayingCallback));
+    auto queued = Test::WebEngine::CaptureApplicationCallbacks(GetWebViewImpl(view).mWebEngine);
+    DALI_TEST_CHECK(queued());
+    DALI_TEST_EQUALS(gJavaScriptCallbackCount, 2u, TEST_LOCATION);
+    DALI_TEST_EQUALS(gPlainTextCallbackCount, 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(gVideoCallbackCount, 1u, TEST_LOCATION);
+    view.Reset();
+    DALI_TEST_CHECK(!queued());
+    DALI_TEST_EQUALS(gJavaScriptCallbackCount, 2u, TEST_LOCATION);
+    DALI_TEST_EQUALS(gPlainTextCallbackCount, 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(gVideoCallbackCount, 1u, TEST_LOCATION);
+  }
+  END_TEST;
+}
+
+int UtcDaliWebViewApplicationCallbacksAfterDestructionP(void)
+{
+  return CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType::CHROMIUM, WebView::RenderingMode::NATIVE_IMAGE);
+}
+
+int UtcDaliWebViewDirectApplicationCallbacksAfterDestructionP(void)
+{
+  return CheckWebViewApplicationCallbacksAfterDestruction(WebEngineType::LWE, WebView::RenderingMode::DIRECT_RENDERING);
+}
+
+int UtcDaliWebViewRenderingModeWithProfileP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::SetDirectRenderingSupported(true);
+  auto profile = WebProfile::New("Rendering", true);
+  auto native = WebView::New(profile, WebView::RenderingMode::NATIVE_IMAGE);
+  auto direct = WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING);
+  DALI_TEST_CHECK(native && direct);
+  DALI_TEST_CHECK(native.GetProfile() == profile);
+  DALI_TEST_CHECK(direct.GetProfile() == profile);
+  DALI_TEST_CHECK(!GetWebViewImpl(native).mDirectConnection);
+  DALI_TEST_CHECK(GetWebViewImpl(direct).mDirectConnection);
+  auto defaultView = WebView::New(profile);
+  DALI_TEST_CHECK(defaultView);
+  DALI_TEST_CHECK(!GetWebViewImpl(defaultView).mDirectConnection);
+  auto defaultNative = WebView::New(WebView::RenderingMode::NATIVE_IMAGE);
+  DALI_TEST_CHECK(defaultNative);
+  DALI_TEST_CHECK(!GetWebViewImpl(defaultNative).mDirectConnection);
+  DALI_TEST_ASSERTION(WebView::New(WebProfile(), WebView::RenderingMode::DIRECT_RENDERING), "WebView requires an initialized profile");
+  Test::WebEngine::GetRuntimeState().failView = true;
+  DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::NATIVE_IMAGE));
+  DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING));
   END_TEST;
 }

@@ -91,7 +91,12 @@ public:
    * @SINCE_3_0.0
    * @param[in] name The unique name for the state
    * @return The ViewState with the assigned bitmask
-   * @throws DaliException if no more bits are available (max 32 custom states)
+   * @throws DaliException if all 32 bits are already assigned. The predefined states hold some
+   * of these bits, so fewer than 32 custom states can be registered.
+   * @warning The state mask is 32 bits wide and will not be widened. The bits are shared by
+   * every library and application in the process and are never released, so each distinct
+   * name passed to Create() uses up one bit for the lifetime of the process. Create a fixed
+   * set of states once, as in the class example, and do not build state names at runtime.
    */
   static ViewState Create(StringView name);
 
@@ -249,7 +254,7 @@ private:
   static constexpr int MAX_BITS = 32;
   static uint32_t      Register(StringView name);
 
-  uint32_t mBits;
+  uint32_t mBits; ///< The inline operators compile this width into applications: do NOT widen it.
 };
 
 } // namespace Ui

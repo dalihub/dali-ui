@@ -51,12 +51,10 @@ Run this code after application initialization, with `window` referring to the a
 
 ### Selecting a Web Engine
 
-WebView uses Chromium by default. To use another web engine, configure it in `UiConfig` at application startup.
+WebView uses Chromium by default. To use another web engine, select it with `WebView::SetWebEngineType()` before the first `WebView::New()`, `WebView::SetWebEngineArguments()` or `WebProfile::New()` call. That first call fixes the engine for the process; selecting a different engine afterwards triggers an assertion.
 
 ```cpp
-UiConfig config = UiConfig::New();
-config.SetWebEngineType(WebEngineType::LWE);
-config.Apply();
+WebView::SetWebEngineType(WebEngineType::LWE);
 ```
 
 ---
@@ -398,8 +396,6 @@ bool videoHoleEnabled = webView.IsVideoHoleEnabled();
 Optimize rendering performance for large pages:
 
 ```cpp
-webView.SetTilesClearedWhenHidden(true);     // Clear tiles when view is hidden
-webView.SetTileCoverAreaMultiplier(2.0f);    // Multiplier for tile cover area
 webView.ClearAllTilesResources();            // Clear all tile resources manually
 ```
 
@@ -557,7 +553,7 @@ Dali::String value = settings.GetExtraFeatureValue("featureName");
 ## 11. Important Notes
 
 - Apply `UiConfig` before creating the first `WebView`.
-- Select the web engine before calling `UiConfig::Apply()`. Chromium is used by default.
+- Select the web engine with `WebView::SetWebEngineType()` before the first `WebView`, `SetWebEngineArguments()` or `WebProfile` use. Chromium is used by default.
 - Web engine capabilities may differ by platform and engine implementation.
 
 ---

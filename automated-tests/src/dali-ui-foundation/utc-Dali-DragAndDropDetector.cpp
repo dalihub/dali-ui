@@ -322,7 +322,7 @@ struct RequestedUnitPreviewCallbacks
     preview.SetRequestedWidth(event.GetPreviewRequestedWidth());
     preview.SetRequestedHeight(event.GetPreviewRequestedHeight());
     preview.SetLayoutMode(LayoutMode::STANDALONE);
-    preview.SetUiScalePolicy(previewPolicy);
+    Ui::Extension::View::SetUiScalePolicy(preview, previewPolicy);
     preview.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     preview.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
     preview.SetProperty(Actor::Property::SENSITIVE, false);
@@ -351,7 +351,7 @@ struct RequestedUnitPreviewCallbacks
   }
 
   View                          container;
-  UiScalePolicy                 previewPolicy{UiScalePolicy::INHERIT};
+  Ui::Extension::UiScalePolicy                 previewPolicy{Ui::Extension::UiScalePolicy::INHERIT};
   View                          preview;
   View                          content;
   std::vector<DragAndDropEvent> factoryEvents;
@@ -394,7 +394,7 @@ struct LegacyPixelPreviewCallbacks
     preview.SetRequestedWidth(size.x);
     preview.SetRequestedHeight(size.y);
     preview.SetLayoutMode(LayoutMode::STANDALONE);
-    preview.SetUiScalePolicy(UiScalePolicy::DISABLED);
+    Ui::Extension::View::SetUiScalePolicy(preview, Ui::Extension::UiScalePolicy::DISABLED);
     preview.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     preview.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
     preview.SetProperty(Actor::Property::SENSITIVE, false);
@@ -1815,7 +1815,7 @@ int UtcDaliDragAndDropDetectorTransformSafeVisualAnchor(void)
   const Vector3       originalPivot(0.8f, 0.2f, 0.5f);
   const Vector3       originalParentOrigin  = ParentOrigin::CENTER;
   const LayoutMode    originalLayoutMode    = visual.GetLayoutMode();
-  const UiScalePolicy originalUiScalePolicy = visual.GetUiScalePolicy();
+  const Ui::Extension::UiScalePolicy originalUiScalePolicy = Ui::Extension::View::GetUiScalePolicy(visual);
   const float         originalRequestedX    = 17.0f;
   const float         originalRequestedY    = 23.0f;
   const bool          originalPositionUsesPivot =
@@ -1901,7 +1901,7 @@ int UtcDaliDragAndDropDetectorTransformSafeVisualAnchor(void)
     0.01f,
     TEST_LOCATION);
   DALI_TEST_CHECK(visual.GetLayoutMode() == originalLayoutMode);
-  DALI_TEST_CHECK(visual.GetUiScalePolicy() == originalUiScalePolicy);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(visual) == originalUiScalePolicy);
   DALI_TEST_EQUALS(visual.GetRequestedX(), originalRequestedX, 0.01f, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetRequestedY(), originalRequestedY, 0.01f, TEST_LOCATION);
   DALI_TEST_CHECK(
@@ -1936,7 +1936,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsWindowScale(void)
   overlay.SetRequestedHeight(280.0f);
   overlay.SetProperty(Actor::Property::SENSITIVE, false);
 
-  const UiScalePolicy originalUiScalePolicy = visual.GetUiScalePolicy();
+  const Ui::Extension::UiScalePolicy originalUiScalePolicy = Ui::Extension::View::GetUiScalePolicy(visual);
   visual.SetRequestedWidth(150.0f);
   visual.SetRequestedHeight(60.0f);
   visual.SetProperty(Actor::Property::SENSITIVE, false);
@@ -1963,7 +1963,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsWindowScale(void)
 
   // During the drag the preview keeps its policy and is window-scaled like any other view...
   DALI_TEST_CHECK(visual.GetParent() == overlay);
-  DALI_TEST_CHECK(visual.GetUiScalePolicy() == originalUiScalePolicy);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(visual) == originalUiScalePolicy);
   DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(visual)), 2.0f, 0.001f, TEST_LOCATION);
   const Vector3 visualSize = visual.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(visualSize.x, 300.0f, 0.1f, TEST_LOCATION);
@@ -1982,7 +1982,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsWindowScale(void)
 
   TestEndPan(application, firstPointer, time + TestGetFrameInterval());
   DALI_TEST_CHECK(!visual.GetParent());
-  DALI_TEST_CHECK(visual.GetUiScalePolicy() == originalUiScalePolicy);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(visual) == originalUiScalePolicy);
   DALI_TEST_EQUALS(visual.GetRequestedX(), 0.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetRequestedY(), 0.0f, 0.001f, TEST_LOCATION);
 
@@ -2046,7 +2046,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsSystemScale(void)
 
   // During the drag the preview keeps its policy and follows the system scale, its content too...
   DALI_TEST_CHECK(visual.GetParent() == source.GetParent());
-  DALI_TEST_CHECK(visual.GetUiScalePolicy() == UiScalePolicy::INHERIT);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(visual) == Ui::Extension::UiScalePolicy::INHERIT);
   DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(visual)), 2.0f, 0.001f, TEST_LOCATION);
   const Vector3 visualSize = visual.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(visualSize.x, 300.0f, 0.1f, TEST_LOCATION);
@@ -2067,7 +2067,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsSystemScale(void)
 
   TestEndPan(application, movedPointer, time + TestGetFrameInterval());
   DALI_TEST_CHECK(!visual.GetParent());
-  DALI_TEST_CHECK(visual.GetUiScalePolicy() == UiScalePolicy::INHERIT);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(visual) == Ui::Extension::UiScalePolicy::INHERIT);
   DALI_TEST_CHECK(visual.GetLayoutMode() == originalLayoutMode);
   DALI_TEST_EQUALS(visual.GetProperty<Vector3>(Actor::Property::PIVOT), originalPivot, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetProperty<Vector3>(Actor::Property::PARENT_ORIGIN), originalParentOrigin, 0.001f, TEST_LOCATION);
@@ -2102,7 +2102,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewKeepsItsUiScalePolicy(void)
   overlay.SetRequestedWidth(200.0f); // an ordinary overlay: rendered 400 x 700
   overlay.SetRequestedHeight(350.0f);
   overlay.SetProperty(Actor::Property::SENSITIVE, false);
-  visual.SetUiScalePolicy(UiScalePolicy::DISABLED); // the migration: sized in pixels for a system scale of 2
+  Ui::Extension::View::SetUiScalePolicy(visual, Ui::Extension::UiScalePolicy::DISABLED); // the migration: sized in pixels for a system scale of 2
   visual.SetRequestedWidth(300.0f);
   visual.SetRequestedHeight(120.0f);
   visual.SetProperty(Actor::Property::SENSITIVE, false);
@@ -2126,7 +2126,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewKeepsItsUiScalePolicy(void)
 
   // During the drag the preview keeps its own policy and the geometry it had before...
   DALI_TEST_CHECK(visual.GetParent() == overlay);
-  DALI_TEST_CHECK(visual.GetUiScalePolicy() == UiScalePolicy::DISABLED);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(visual) == Ui::Extension::UiScalePolicy::DISABLED);
   DALI_TEST_EQUALS(Ui::Extension::View::GetEffectiveLayoutScale(GetImpl(visual)), 1.0f, 0.001f, TEST_LOCATION);
   const Vector3 visualSize = visual.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
   DALI_TEST_EQUALS(visualSize.x, 300.0f, 0.1f, TEST_LOCATION);
@@ -2142,7 +2142,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewKeepsItsUiScalePolicy(void)
 
   TestEndPan(application, firstPointer, time + TestGetFrameInterval());
   DALI_TEST_CHECK(!visual.GetParent());
-  DALI_TEST_CHECK(visual.GetUiScalePolicy() == UiScalePolicy::DISABLED);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(visual) == Ui::Extension::UiScalePolicy::DISABLED);
   END_TEST;
 }
 
@@ -2223,7 +2223,7 @@ int UtcDaliDragAndDropDetectorDefaultPreviewFollowsScaleChangeOnNextUpdate(void)
 
   detector.CancelDrag();
   DALI_TEST_CHECK(!visual.GetParent());
-  DALI_TEST_CHECK(visual.GetUiScalePolicy() == UiScalePolicy::INHERIT);
+  DALI_TEST_CHECK(Ui::Extension::View::GetUiScalePolicy(visual) == Ui::Extension::UiScalePolicy::INHERIT);
   END_TEST;
 }
 
@@ -3425,7 +3425,7 @@ int UtcDaliDragAndDropDetectorPreviewMatchesSourceInScaleOptedOutSubtree(void)
 
   panel.SetRequestedWidth(200.0f);
   panel.SetRequestedHeight(200.0f);
-  panel.SetUiScalePolicy(UiScalePolicy::DISABLED); // the source's subtree opts out: 100 x 100 at (20, 20)
+  Ui::Extension::View::SetUiScalePolicy(panel, Ui::Extension::UiScalePolicy::DISABLED); // the source's subtree opts out: 100 x 100 at (20, 20)
   overlay.SetRequestedWidth(200.0f);               // an ordinary overlay: rendered 400 x 700
   overlay.SetRequestedHeight(350.0f);
   overlay.SetProperty(Actor::Property::SENSITIVE, false);
@@ -3435,7 +3435,7 @@ int UtcDaliDragAndDropDetectorPreviewMatchesSourceInScaleOptedOutSubtree(void)
   application.GetScene().Add(overlay);
   detector.AttachSource(source);
   callbacks.container     = overlay;
-  callbacks.previewPolicy = UiScalePolicy::DISABLED; // the remedy: the preview takes the source's policy
+  callbacks.previewPolicy = Ui::Extension::UiScalePolicy::DISABLED; // the remedy: the preview takes the source's policy
   detector.SetDragPreviewContainer(overlay);
   detector.SetDragPreviewCallbacks(
     DragAndDropDetector::DragPreviewFactory::New(&callbacks, &RequestedUnitPreviewCallbacks::Create),

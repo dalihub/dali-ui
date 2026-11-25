@@ -25,11 +25,12 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/multi-language-helper-functions.h>
-#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/styled-text/gradient-span-data.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
-#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
@@ -1774,5 +1775,27 @@ int UtcDaliStyledTextApplierInvalidImagePayloadFallbackP(void)
   attributes.SetReservedSize(Vector2(12.0f, 12.0f));
   DALI_TEST_EQUALS(snapshot.runs[0u].image.source, "", TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliStyledTextSnapshotUnsortedAndEqualInsertionOrderP(void)
+{
+  UiTestApplication                               application;
+  const auto                                      red   = PublicText::ForegroundColorSpan::New(Ui::UiColor(Color::RED));
+  const auto                                      blue  = PublicText::ForegroundColorSpan::New(Ui::UiColor(Color::BLUE));
+  const auto                                      green = PublicText::ForegroundColorSpan::New(Ui::UiColor(Color::GREEN));
+  std::vector<StyledTextInternal::SpanAttachment> attachments{
+    {red, 0u, 4u, 3u}, {blue, 2u, 6u, 1u}, {green, 1u, 5u, 1u}, {red, 4u, 4u, 0u}};
+  PublicText::StyledText styled;
+  static_cast<BaseHandle&>(styled) = BaseHandle(StyledTextInternal::StyledText::NewForBaseHandle("abcdef", std::move(attachments), 6u));
+  auto snapshot                    = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(styled, 96.0f);
+  DALI_TEST_EQUALS(snapshot.foregroundColorRuns.size(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.foregroundColorRuns[0].color, Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.foregroundColorRuns[1].color, Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.foregroundColorRuns[2].color, Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.foregroundColorRuns[0].characterIndex, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.foregroundColorRuns[1].numberOfCharacters, 4u, TEST_LOCATION);
+  styled.Reset();
+  DALI_TEST_EQUALS(snapshot.foregroundColorRuns[2].insertionOrder, 3u, TEST_LOCATION);
   END_TEST;
 }

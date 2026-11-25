@@ -647,7 +647,7 @@ and restores the reusable view's original layout properties when the session
 ends. It does not change the preview's `UiScalePolicy`: build the reusable
 preview in the same units as the rest of the UI, and it and its children are
 laid out at the scale of the container it is added to. Earlier releases set
-`UiScalePolicy::DISABLED` on the preview while positioning it. A preview
+`Extension::UiScalePolicy::DISABLED` on the preview while positioning it. A preview
 positioned this way that relied on it -- sized in pixels, or copying a source
 that sits in an `Extension::UiScalePolicy::DISABLED` subtree, whether reusable or created
 by a factory without an updater -- keeps its earlier geometry when it sets

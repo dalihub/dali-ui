@@ -16,6 +16,7 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/unit.h>
 
@@ -37,22 +38,22 @@ float operator"" _spx(long double v)
 
 float operator"" _dp(unsigned long long int v)
 {
-  return static_cast<float>(v) * UiConfig::GetCurrent().GetDpiFactor();
+  return static_cast<float>(v) * GetImpl(UiConfig::GetCurrent()).GetDpiFactor();
 }
 
 float operator"" _dp(long double v)
 {
-  return static_cast<float>(v) * UiConfig::GetCurrent().GetDpiFactor();
+  return static_cast<float>(v) * GetImpl(UiConfig::GetCurrent()).GetDpiFactor();
 }
 
 float operator"" _sdp(unsigned long long int v)
 {
-  return static_cast<float>(v) * UiConfig::GetCurrent().GetScaledDpiFactor();
+  return static_cast<float>(v) * GetImpl(UiConfig::GetCurrent()).GetScaledDpiFactor();
 }
 
 float operator"" _sdp(long double v)
 {
-  return static_cast<float>(v) * UiConfig::GetCurrent().GetScaledDpiFactor();
+  return static_cast<float>(v) * GetImpl(UiConfig::GetCurrent()).GetScaledDpiFactor();
 }
 
 } // namespace Ui

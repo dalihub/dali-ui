@@ -50,7 +50,7 @@ class DialogContainerImpl;
  * Prefer Dialog::Post/Dismiss for ordinary dialogs. Use a manually assembled
  * DialogContainer when a custom scrim view or complex scrim composition is
  * required. Scrim color, blur, and visibility alone can be selected through
- * DialogPostOptions::containerStyle without manual assembly.
+ * DialogPostOptions::SetContainerStyle without manual assembly.
  *
  * Keep manual SetModalContent/PushModal and managed Post/Dismiss separate for
  * the entire presentation, including closing animations. Do not manually

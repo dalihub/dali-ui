@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/integration-api/recycler/recycler-view-impl.h>
 #include <dali-ui-foundation/integration-api/recycler/recycler.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
+#include <dali-ui-foundation/internal/recycler/linear-items-layouter-impl.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
@@ -55,6 +56,16 @@ constexpr size_t   MAX_RECYCLED_PER_TYPE = 8u;
 // An absolute scroll target is aimed at again after a scroll whose measurements moved it. Each
 // pass measures what the previous one brought in, so the distance left shrinks quickly.
 constexpr uint32_t MAX_AIM_PASSES = 3u;
+
+// The built-in linear layouters keep their item extent, spacing and body margins in natural units
+// and multiply them by the scale handed over here: this RecyclerView's effective scale. Returns true
+// when that scale changed, which drops the layouter's measured extents: the caller lays the items
+// out again. Another ItemsLayouterImpl scales its own lengths.
+bool SetLayouterScale(ItemsLayouter& layouter, float scale)
+{
+  auto* linear = dynamic_cast<Internal::LinearItemsLayouterImpl*>(&layouter.GetImpl());
+  return linear != nullptr && linear->SetEffectiveLayoutScale(scale);
+}
 
 BaseHandle Create()
 {
@@ -128,14 +139,16 @@ struct RecyclerViewImpl::RecyclerImpl : public Recycler
     return rv.GetCrossExtent();
   }
 
+  // The cache extent is set in natural units; the layouter works in rendered pixels, the units of
+  // the viewport and of every item it measures.
   float GetCacheBefore() const override
   {
-    return rv.mCacheBefore;
+    return rv.mCacheBefore * Ui::Extension::View::GetEffectiveLayoutScale(rv);
   }
 
   float GetCacheAfter() const override
   {
-    return rv.mCacheAfter;
+    return rv.mCacheAfter * Ui::Extension::View::GetEffectiveLayoutScale(rv);
   }
 
   Insets GetDecorationOffsets(uint32_t position) const override
@@ -168,6 +181,13 @@ struct RecyclerViewImpl::RecyclerImpl : public Recycler
       total.end += offs.end;
       total.bottom += offs.bottom;
     }
+    // Decorations reserve space in natural units, like the list's other lengths; the layouter
+    // places items in rendered pixels.
+    const float scale = Ui::Extension::View::GetEffectiveLayoutScale(rv);
+    total.start *= scale;
+    total.top *= scale;
+    total.end *= scale;
+    total.bottom *= scale;
     return total;
   }
 
@@ -253,6 +273,9 @@ void RecyclerViewImpl::OnInitialize()
 
 void RecyclerViewImpl::LayoutChildrenScoped()
 {
+  // A full layout resolves the layouter's natural lengths at this view's current scale.
+  SetLayouterScale(mLayouter, Ui::Extension::View::GetEffectiveLayoutScale(*this));
+
   // The scope sits on the recycler side of the layouter boundary so that third-party
   // ItemsLayouterImpl subclasses are covered without having to opt in.
   Ui::Internal::LayoutDependency::RecyclerLayoutOwnerScope ownerScope(this, &mLayouter.GetImpl());
@@ -705,9 +728,13 @@ LayoutRect RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
 
   EnsureScroller();
 
-  // Full relayout only when the viewport dimensions actually change.
+  // The layouter's natural lengths follow this view's effective scale: a changed scale lays the
+  // items out again even when the viewport kept its size.
+  const bool scaleChanged = mLayouter && SetLayouterScale(mLayouter, Ui::Extension::View::GetEffectiveLayoutScale(*this));
+
+  // Full relayout only when the viewport dimensions or the effective scale actually change.
   // SetAdapter / SetItemsLayouter / NotifyDataSetChanged call OnLayoutChildren directly.
-  if(sizeChanged && mLayouter && mAdapter)
+  if((sizeChanged || scaleChanged) && mLayouter && mAdapter)
   {
     LayoutChildrenScoped();
   }
@@ -1521,13 +1548,15 @@ uint32_t RecyclerViewImpl::NextItemPosition(uint32_t pos, FocusDirection dir) co
 
 void RecyclerViewImpl::TriggerKeyEdgeFeedback(FocusDirection dir)
 {
+  // The bump is a design length expressed as a synthetic velocity: scale it like the content.
+  const float velocity = KEY_ABSORB_VEL * Ui::Extension::View::GetEffectiveLayoutScale(*this);
   if(IsForwardDirection(dir))
   {
-    if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-KEY_ABSORB_VEL);
+    if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-velocity);
   }
   else
   {
-    if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(KEY_ABSORB_VEL);
+    if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(velocity);
   }
 }
 
@@ -1542,15 +1571,17 @@ void RecyclerViewImpl::ScrollToItemMakeVisible(uint32_t position, bool animate)
   const bool       vertical   = mLayouter.CanScrollVertically();
   const float      itemStart  = vertical ? bounds.y : bounds.x;
   const float      itemEnd    = itemStart + (vertical ? bounds.height : bounds.width);
+  // The peek is set in natural units; offsets are rendered pixels.
+  const float peek = mFocusScrollPeek * Ui::Extension::View::GetEffectiveLayoutScale(*this);
 
   float target = curOffset;
-  if(itemStart - mFocusScrollPeek < curOffset)
+  if(itemStart - peek < curOffset)
   {
-    target = itemStart - mFocusScrollPeek;
+    target = itemStart - peek;
   }
-  else if(itemEnd + mFocusScrollPeek > curOffset + viewExtent)
+  else if(itemEnd + peek > curOffset + viewExtent)
   {
-    target = itemEnd + mFocusScrollPeek - viewExtent;
+    target = itemEnd + peek - viewExtent;
   }
   else
   {
@@ -1574,7 +1605,7 @@ void RecyclerViewImpl::ScrollToItemMakeVisible(uint32_t position, bool animate)
     const LayoutRect measured = mLayouter.GetItemBounds(position, GetCrossExtent());
     const float      start    = vertical ? measured.y : measured.x;
     const float      end      = start + (vertical ? measured.height : measured.width);
-    const float      aim      = alignStart ? start - mFocusScrollPeek : end + mFocusScrollPeek - viewExtent;
+    const float      aim      = alignStart ? start - peek : end + peek - viewExtent;
     const float      distance = ClampScrollOffset(aim) - mLayouter.ComputeScrollOffset();
     if(std::abs(distance) < 0.5f)
     {
@@ -1623,7 +1654,9 @@ bool RecyclerViewImpl::OnKeyRepeatTimerTick()
         // hasn't scrolled to offset 0). Step-scroll to the boundary and keep the timer.
         if(!IsAtScrollBoundary(mKeyRepeatDir))
         {
-          ScrollBy(IsForwardDirection(mKeyRepeatDir) ? mKeyScrollStep : -mKeyScrollStep, false);
+          // The step is set in natural units; scroll distances are rendered pixels.
+          const float step = mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this);
+          ScrollBy(IsForwardDirection(mKeyRepeatDir) ? step : -step, false);
           return true;
         }
         mKeyRepeatTargetPos = INVALID_ITEM_POSITION;
@@ -1706,12 +1739,15 @@ void RecyclerViewImpl::OnFocusNavigationRequested(Ui::View currentFocusedView, F
     return;
   }
 
+  // The step is set in natural units; offsets and distances are rendered pixels.
+  const float step = mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this);
+
   uint32_t nextPos = NextItemPosition(curPos, direction);
   if(nextPos == INVALID_ITEM_POSITION)
   {
     if(!IsAtScrollBoundary(direction))
     {
-      ScrollBy(IsForwardDirection(direction) ? mKeyScrollStep : -mKeyScrollStep, true);
+      ScrollBy(IsForwardDirection(direction) ? step : -step, true);
       result.Stay();
       return;
     }
@@ -1738,7 +1774,7 @@ void RecyclerViewImpl::OnFocusNavigationRequested(Ui::View currentFocusedView, F
       // of firing the edge feedback immediately.
       if(!IsAtScrollBoundary(direction))
       {
-        ScrollBy(IsForwardDirection(direction) ? mKeyScrollStep : -mKeyScrollStep, true);
+        ScrollBy(IsForwardDirection(direction) ? step : -step, true);
         result.Stay();
         return;
       }
@@ -1761,7 +1797,7 @@ void RecyclerViewImpl::OnFocusNavigationRequested(Ui::View currentFocusedView, F
                                    ? std::max(0.0f, end - (curOffset + GetViewportExtent()))
                                    : std::max(0.0f, curOffset - start);
 
-    if(dist < mKeyScrollStep)
+    if(dist < step)
     {
       // Item is within step distance — focus it directly.
       // ScrollOnFocus (OnFocusManagerChanged) handles making it fully visible.
@@ -1834,8 +1870,9 @@ bool RecyclerViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
     return false;
   }
 
+  // The key scroll step is set in natural units; the viewport extent is already rendered.
   const bool  pageScroll = (direction == FocusDirection::PAGE_UP || direction == FocusDirection::PAGE_DOWN);
-  const float step       = pageScroll ? GetViewportExtent() : mKeyScrollStep;
+  const float step       = pageScroll ? GetViewportExtent() : mKeyScrollStep * Ui::Extension::View::GetEffectiveLayoutScale(*this);
   ScrollBy(IsForwardDirection(direction) ? step : -step, true);
   return true;
 }
@@ -1880,7 +1917,8 @@ bool RecyclerViewImpl::OnWheelEvent(const Dali::WheelEvent& event)
     return false;
   }
 
-  ScrollBy(static_cast<float>(event.GetDelta()) * WHEEL_SCROLL_STEP, true);
+  // A notch scrolls 120 natural units of content: multiply by the effective scale.
+  ScrollBy(static_cast<float>(event.GetDelta()) * WHEEL_SCROLL_STEP * Ui::Extension::View::GetEffectiveLayoutScale(*this), true);
   return true;
 }
 

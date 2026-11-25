@@ -280,9 +280,10 @@ struct LabelPropertyIndex
     SYSTEM_FONT_SIZE_SCALE_ENABLED,
 
     /**
-     * @brief Whether cutout rendering is enabled for the text.
+     * @brief The requested text cutout setting.
      * @SINCE_3_0.0
      * @details Name "cutoutEnabled", type Property::BOOLEAN.
+     * @note Unsupported text features and non-color backgrounds use ordinary rendering without changing this value.
      * @see Label::SetTextCutoutEnabled(), Label::IsTextCutoutEnabled().
      */
     CUTOUT_ENABLED,

@@ -49,7 +49,7 @@ class DALI_UI_API LinearItemsLayouterImpl : public Integration::ItemsLayouterImp
 {
 public:
   /**
-   * @brief Per-item cross-axis inset returned by GetItemCrossInset.
+   * @brief Per-item cross-axis inset returned by GetItemCrossInset, in natural units.
    *
    * For a vertical list: leadingCrossOffset = left margin, trailingCrossOffset = right margin.
    * For a horizontal list: leadingCrossOffset = top margin, trailingCrossOffset = bottom margin.
@@ -81,6 +81,23 @@ public:
   void        SetItemSpacing(float spacing) override;
   float       GetItemSpacing() const override;
 
+  /**
+   * @brief Sets the effective scale of the RecyclerView this layouter lays out.
+   *
+   * The item extent, the item spacing and the cross insets are natural units; the layouter
+   * multiplies them by this scale, the scale the viewport and the measured items already carry.
+   * A changed scale drops the measured extents and the realised window, so the caller lays the
+   * items out again.
+   * @param[in] scale The owner's effective scale
+   * @return True when the scale changed
+   */
+  bool SetEffectiveLayoutScale(float scale);
+
+  /**
+   * @brief Returns the scale SetEffectiveLayoutScale() set (1.0 until a RecyclerView sets one).
+   */
+  float GetEffectiveLayoutScale() const;
+
   void OnAdapterChanged() override;
   void OnDecorationChanged() override;
 
@@ -91,6 +108,7 @@ public:
    * implementation returns zero inset (no offset). Override in subclasses
    * to apply per-item horizontal (vertical list) or vertical (horizontal list)
    * margins without modifying LayoutChunk directly.
+   * The inset is in natural units: the layouter multiplies it by GetEffectiveLayoutScale().
    */
   virtual ItemInset GetItemCrossInset(uint32_t position) const;
 
@@ -141,9 +159,14 @@ private:
   uint32_t FindFirstVisiblePosition(float scrollOffset, float cacheBefore, uint32_t itemCount) const;
   float    ScrollBy(float delta, Integration::Recycler& recycler);
 
+  // The item spacing and the extent assumed for an unmeasured item, in rendered pixels.
+  float ItemSpacing() const;
+  float EstimatedItemExtent() const;
+
   Orientation         mOrientation;
   float               mItemExtent;
   float               mItemSpacing;
+  float               mEffectiveScale; // Natural lengths x this = rendered pixels (the owner's effective scale)
   float               mScrollOffset;
   float               mViewportExtent;
   float               mCrossExtent;

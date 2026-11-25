@@ -52,17 +52,17 @@ void AddConstraintCases(std::vector<Scenario>& out)
       };
       scroll.SetContent(p->view);
       View stage = Mount(r, scroll, 100, 80);
-      r.AfterRender({stage, scroll, p->view}, [=](Run& r) {
+      r.AfterRender({stage, scroll, p->view}, [=](Run& done) {
         const float width = bits & 1 ? 72 : 240, height = bits & 2 ? 60 : 200;
-        r.Size("owner.measure", scroll.GetMeasuredSize(), {100, 80});
-        r.Near("measure.constraint.width", first->first, bits & 1 ? 72 : std::numeric_limits<float>::max(), 0);
-        r.Near("measure.constraint.height", first->second, bits & 2 ? 60 : std::numeric_limits<float>::max(), 0);
-        r.Size("content.measure", p->view.GetMeasuredSize(), {width, height});
-        r.Rendered("owner.arrange", scroll, {0, 0, 100, 80});
-        r.Rendered("content.arranged", p->view, {11, 7, width, height});
-        r.Near("last.constraint.width", p->lastWidth, bits & 1 ? 72 : std::numeric_limits<float>::max(), 0);
-        r.Near("last.constraint.height", p->lastHeight, bits & 2 ? 60 : std::numeric_limits<float>::max(), 0);
-        r.Equal("measure.producers", p->measures, 1);
+        done.Size("owner.measure", scroll.GetMeasuredSize(), {100, 80});
+        done.Near("measure.constraint.width", first->first, bits & 1 ? 72 : std::numeric_limits<float>::max(), 0);
+        done.Near("measure.constraint.height", first->second, bits & 2 ? 60 : std::numeric_limits<float>::max(), 0);
+        done.Size("content.measure", p->view.GetMeasuredSize(), {width, height});
+        done.Rendered("owner.arrange", scroll, {0, 0, 100, 80});
+        done.Rendered("content.arranged", p->view, {11, 7, width, height});
+        done.Near("last.constraint.width", p->lastWidth, bits & 1 ? 72 : std::numeric_limits<float>::max(), 0);
+        done.Near("last.constraint.height", p->lastHeight, bits & 2 ? 60 : std::numeric_limits<float>::max(), 0);
+        done.Equal("measure.producers", p->measures, 1);
       });
     }));
 }
@@ -870,12 +870,12 @@ void AddContentExtentCases(std::vector<Scenario>& out)
        s->scroll.SetContent(s->content);
        s->stage = Mount(r, s->scroll, 100, 80);
        r.SetState(s);
-       r.AfterRender({s->stage, s->scroll, s->content}, [=](Run& r) {
+       r.AfterRender({s->stage, s->scroll, s->content}, [=](Run& done) {
          auto& impl = ScrollImpl(s->scroll);
-         r.Size("extent.content.measured", s->content.GetMeasuredSize(), MeasuredSize(100, 200));
-         r.Rendered("extent.content", s->content, LayoutRect(0, 0, 100, 200));
-         r.Near("extent.scrollable.height", impl.GetScrollableHeight(), 200);
-         r.Near("extent.viewport.height", impl.GetViewportHeight(), 80);
+         done.Size("extent.content.measured", s->content.GetMeasuredSize(), MeasuredSize(100, 200));
+         done.Rendered("extent.content", s->content, LayoutRect(0, 0, 100, 200));
+         done.Near("extent.scrollable.height", impl.GetScrollableHeight(), 200);
+         done.Near("extent.viewport.height", impl.GetViewportHeight(), 80);
        });
      }},
     {"scroll-end", 6, [](Run& r) {
@@ -890,13 +890,13 @@ void AddContentExtentCases(std::vector<Scenario>& out)
        auto s             = r.State<ExtentState>();
        s->probe           = Probed(r, 37, 19);
        s->probe->returned = [](const LayoutRect& b) { return LayoutRect(b.x, b.y, b.width, 300); };
-       r.AfterLayout({s->scroll, s->probe->view}, [s](Run& r) {
+       r.AfterLayout({s->scroll, s->probe->view}, [s](Run& done) {
          auto& impl = ScrollImpl(s->scroll);
-         r.Near("extent.custom.scrollable.height", impl.GetScrollableHeight(), 300);
-         r.Near("extent.custom.scrollable.width", impl.GetScrollableWidth(), 37);
+         done.Near("extent.custom.scrollable.height", impl.GetScrollableHeight(), 300);
+         done.Near("extent.custom.scrollable.width", impl.GetScrollableWidth(), 37);
          s->scroll.ScrollTo(Vector2(0, 999), false);
-         r.Near("extent.custom.scroll.y", s->scroll.GetScrollPosition().y, 220);
-         r.Rect("extent.custom.scrolled", s->probe->view, LayoutRect(0, -220, 37, 300));
+         done.Near("extent.custom.scroll.y", s->scroll.GetScrollPosition().y, 220);
+         done.Rect("extent.custom.scrolled", s->probe->view, LayoutRect(0, -220, 37, 300));
        });
        s->scroll.SetContent(s->probe->view);
      }},

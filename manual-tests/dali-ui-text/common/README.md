@@ -40,8 +40,8 @@ API가 활성화되어 실제로 링크되는지도 configure에서 확인한다
 | `run-report.h/.cpp` | TC별 실행 로그 분리와 지정 경로의 누적 로그 보존 |
 | `../tests/run-report-test.cpp` | 기존 파일·다른 TC·재실행·객체 재생성 시 보존, 잘못된 경로 거부 |
 
-`Capture::GetNativeImage()` / `NativeImage::GetPixels()`가 모든 backend에서 동작하지
-않으므로 Public Capture의 파일 저장 경로를 사용한다. 현재 DALi Capture 구현은 GLES가
+`NativeImage::GetPixels()`가 모든 backend에서 동작하지 않으므로 Public Capture의
+파일 저장 경로를 사용한다. 현재 DALi Capture 구현은 GLES가
 필요하다. 이를 사용할 수 없는 플랫폼은 검증 불가 ERROR이며 다른 backend로 몰래 전환하지 않는다.
 매 캡처의 scratch 디렉터리는 `/tmp`에 고유하게 생성하고 결과 회수/취소 시 제거한다.
 

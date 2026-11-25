@@ -15,6 +15,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/layout-scale-manager.h>
 #include <dali-ui-foundation/integration-api/recycler/group-adapter.h>
 #include <dali-ui-foundation/integration-api/recycler/group-body-decoration.h>
 #include <dali-ui-foundation/integration-api/recycler/group-data-source.h>
@@ -336,6 +337,7 @@ public:
 
     BuildHeader(window);
     BuildRecyclerView(window);
+    window.KeyEventSignal().Connect(this, &RecyclerGroupController::OnKeyEvent);
 
     FocusManager::Get().FocusChangedSignal().Connect(this, &RecyclerGroupController::OnFocusChanged);
 
@@ -448,6 +450,54 @@ private:
     return true;
   }
 
+  // ---- Keys ------------------------------------------------------------------
+  // q/w/e/r/t set the UI scale (0.8/1.0/1.2/1.5/2.0). l moves the 14-unit body margins between
+  // GroupBodyDecoration (with its white card) and GroupLinearItemsLayouter (rows only, on the
+  // window background) -- never both, as the note in BuildRecyclerView() explains.
+  void OnKeyEvent(Window /*window*/, KeyEvent event)
+  {
+    if(event.GetState() != KeyEvent::DOWN)
+    {
+      return;
+    }
+
+    const Dali::String& key = event.GetKeyName();
+    if(key == "l")
+    {
+      mLayouterMargins = !mLayouterMargins;
+      if(mLayouterMargins)
+      {
+        mRecyclerView.RemoveItemDecoration(mBodyDecoration);
+        mLayouter.SetBodyHorizontalMargin(BODY_MARGIN, BODY_MARGIN);
+      }
+      else
+      {
+        mLayouter.SetBodyHorizontalMargin(0.0f, 0.0f);
+        mRecyclerView.AddItemDecoration(mBodyDecoration);
+      }
+    }
+    else if(key == "q")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(0.8f);
+    }
+    else if(key == "w")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0f);
+    }
+    else if(key == "e")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.2f);
+    }
+    else if(key == "r")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.5f);
+    }
+    else if(key == "t")
+    {
+      Ui::Extension::LayoutScaleManager::Get().SetUiScale(2.0f);
+    }
+  }
+
   void UpdateStats()
   {
     if(!mStatsLabel || !mRecyclerView) return;
@@ -481,6 +531,7 @@ private:
 
   Label mStatsLabel;
   Timer mRangeTimer;
+  bool  mLayouterMargins{false};
 };
 
 // ---------------------------------------------------------------------------

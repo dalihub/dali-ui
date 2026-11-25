@@ -153,15 +153,16 @@ void OffscreenRenderingImpl::CreateFrameBuffer()
   mFrameBuffer    = FrameBuffer::New(static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), FrameBuffer::Attachment::AUTO);
   Texture texture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height));
 
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
   {
-    std::ostringstream oss;
-    oss.imbue(std::locale::classic());
-    oss << "OffscreenRendering refresh rate:" << static_cast<int>(mRefreshRate);
+    {
+      std::ostringstream oss;
+      oss.imbue(std::locale::classic());
+      oss << "OffscreenRendering refresh rate:" << static_cast<int>(mRefreshRate);
 
-    Dali::Integration::TextureUploadWithContent(texture, Dali::PixelData(), ToDaliString(oss.str()), Dali::Integration::TextureContextTypeHint::FBO_ATTACHED_COLOR_TEXTURE, true);
+      Dali::Integration::TextureUploadWithContent(texture, Dali::PixelData(), ToDaliString(oss.str()), Dali::Integration::TextureContextTypeHint::FBO_ATTACHED_COLOR_TEXTURE, true);
+    }
   }
-#endif
 
   mFrameBuffer.AttachColorTexture(texture);
 }

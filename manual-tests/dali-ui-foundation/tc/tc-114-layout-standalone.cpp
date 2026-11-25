@@ -44,11 +44,11 @@ public:
         root.Add(ordinary);
         root.Add(standalone);
         View stage = Mount(r, root, 200, 100);
-        r.AfterRender({stage, root, ordinary}, [=](Run& r) {
-          r.Size("parent-measured", root.GetMeasuredSize(), MeasuredSize(20, 10));
-          r.Rendered("ordinary", ordinary, LayoutRect(0, 0, 20, 10));
-          r.Rendered("independent", standalone, LayoutRect(7, 9, 100, 80));
-          r.Equal("logical-count", root.GetChildViewCount(), 2);
+        r.AfterRender({stage, root, ordinary}, [=](Run& done) {
+          done.Size("parent-measured", root.GetMeasuredSize(), MeasuredSize(20, 10));
+          done.Rendered("ordinary", ordinary, LayoutRect(0, 0, 20, 10));
+          done.Rendered("independent", standalone, LayoutRect(7, 9, 100, 80));
+          done.Equal("logical-count", root.GetChildViewCount(), 2);
         });
       }));
     out.push_back(Steps("G14.mode-change", "Changing the layout mode invalidates the parent intrinsic extent on screen", {
@@ -62,17 +62,17 @@ public:
          s->root.Add(s->b);
          s->stage = Mount(r, s->root, 200, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->root, s->a, s->b}, [=](Run& r) {
-           r.Size("ordinary", s->root.GetMeasuredSize(), MeasuredSize(57, 15));
-           r.Rendered("ordinary.rendered", s->root, LayoutRect(0, 0, 57, 15));
+         r.AfterRender({s->stage, s->root, s->a, s->b}, [=](Run& done) {
+           done.Size("ordinary", s->root.GetMeasuredSize(), MeasuredSize(57, 15));
+           done.Rendered("ordinary.rendered", s->root, LayoutRect(0, 0, 57, 15));
          });
        }},
       {"standalone", 6, [](Run& r) {
          auto s = r.State<Tree>();
          s->b.SetLayoutMode(LayoutMode::STANDALONE);
-         r.AfterRender({s->stage, s->root, s->a}, [=](Run& r) {
-           r.Size("excluded", s->root.GetMeasuredSize(), MeasuredSize(20, 10));
-           r.Rendered("excluded.rendered", s->root, LayoutRect(0, 0, 20, 10));
+         r.AfterRender({s->stage, s->root, s->a}, [=](Run& done) {
+           done.Size("excluded", s->root.GetMeasuredSize(), MeasuredSize(20, 10));
+           done.Rendered("excluded.rendered", s->root, LayoutRect(0, 0, 20, 10));
          });
        }},
     }));
@@ -92,7 +92,7 @@ public:
            s->root.Add(s->b);
            s->stage = Mount(r, s->root, 200, 100);
            r.SetState(s);
-           r.AfterRender({s->stage, s->root, s->a}, [=](Run& r) { r.Rendered("full-parent-minus-own-margin", s->b, LayoutRect(12, 22, 182, 70)); });
+           r.AfterRender({s->stage, s->root, s->a}, [=](Run& done) { done.Rendered("full-parent-minus-own-margin", s->b, LayoutRect(12, 22, 182, 70)); });
          }},
         {"clamp", 4, [](Run& r) {
            auto s = r.State<Tree>();
@@ -100,7 +100,7 @@ public:
            s->b.SetMaximumWidth(195);
            s->b.SetMinimumHeight(20);
            s->b.SetMaximumHeight(60);
-           r.AfterRender({s->b}, [=](Run& r) { r.Rendered("own-minmax-after-match", s->b, LayoutRect(12, 22, 190, 60)); });
+           r.AfterRender({s->b}, [=](Run& done) { done.Rendered("own-minmax-after-match", s->b, LayoutRect(12, 22, 190, 60)); });
          }},
       }));
     // MATCH_PARENT standalone: available = parent extent less own margin (195,143), measured EXACTLY
@@ -117,17 +117,17 @@ public:
          s->parent.Add(s->s);
          s->stage = Mount(r, s->parent, 200, 150);
          r.SetState(s);
-         r.AfterRender({s->stage, s->parent, s->s}, [=](Run& r) {
-           r.Rendered("s", s->s, LayoutRect(5, 7, 60, 45));
-           r.Size("s.measured", s->s.GetMeasuredSize(), MeasuredSize(60, 45));
+         r.AfterRender({s->stage, s->parent, s->s}, [=](Run& done) {
+           done.Rendered("s", s->s, LayoutRect(5, 7, 60, 45));
+           done.Size("s.measured", s->s.GetMeasuredSize(), MeasuredSize(60, 45));
          });
        }},
       {"arrange-only", 6, [](Run& r) {
          auto s = r.State<StandaloneProbe>();
          s->parent.InvalidateArrange();
-         r.AfterRender({s->stage, s->parent, s->s}, [=](Run& r) {
-           r.Rendered("s", s->s, LayoutRect(5, 7, 60, 45));
-           r.Size("s.measured", s->s.GetMeasuredSize(), MeasuredSize(60, 45));
+         r.AfterRender({s->stage, s->parent, s->s}, [=](Run& done) {
+           done.Rendered("s", s->s, LayoutRect(5, 7, 60, 45));
+           done.Size("s.measured", s->s.GetMeasuredSize(), MeasuredSize(60, 45));
          });
        }},
     }));
@@ -142,13 +142,13 @@ public:
       probe->view.SetMargin(Insets(1, 2, 3, 4));
       parent.Add(probe->view);
       View stage = Mount(r, parent, 200, 100);
-      r.AfterRender({stage, parent, probe->view}, [=](Run& r) {
-        const auto  window = r.GetWindow().GetPositionSize();
+      r.AfterRender({stage, parent, probe->view}, [=](Run& done) {
+        const auto  window = done.GetWindow().GetPositionSize();
         const float w = static_cast<float>(window.width) - 3, h = static_cast<float>(window.height) - 7;
-        r.Near("s.last-width", probe->lastWidth, w);
-        r.Near("s.last-height", probe->lastHeight, h);
-        r.Size("s.measured", probe->view.GetMeasuredSize(), MeasuredSize(std::min(150.0f, w), std::min(90.0f, h)));
-        r.Rendered("s", probe->view, LayoutRect(4, 7, std::min(150.0f, w), std::min(90.0f, h)));
+        done.Near("s.last-width", probe->lastWidth, w);
+        done.Near("s.last-height", probe->lastHeight, h);
+        done.Size("s.measured", probe->view.GetMeasuredSize(), MeasuredSize(std::min(150.0f, w), std::min(90.0f, h)));
+        done.Rendered("s", probe->view, LayoutRect(4, 7, std::min(150.0f, w), std::min(90.0f, h)));
       });
     }));
     // An explicit standalone axis is measured at its requested size, whatever the parent; the margin
@@ -166,12 +166,12 @@ public:
       parent.Add(leaf);
       parent.Add(probe->view);
       View stage = Mount(r, parent, 200, 100);
-      r.AfterRender({stage, parent, leaf, probe->view}, [=](Run& r) {
-        r.Near("s.last-width", probe->lastWidth, 40);
-        r.Near("s.last-height", probe->lastHeight, 30);
-        r.Size("s.measured", probe->view.GetMeasuredSize(), MeasuredSize(40, 30));
-        r.Rendered("s", probe->view, LayoutRect(7, 9, 40, 30));
-        r.Size("parent.measured", parent.GetMeasuredSize(), MeasuredSize(20, 10));
+      r.AfterRender({stage, parent, leaf, probe->view}, [=](Run& done) {
+        done.Near("s.last-width", probe->lastWidth, 40);
+        done.Near("s.last-height", probe->lastHeight, 30);
+        done.Size("s.measured", probe->view.GetMeasuredSize(), MeasuredSize(40, 30));
+        done.Rendered("s", probe->view, LayoutRect(7, 9, 40, 30));
+        done.Size("parent.measured", parent.GetMeasuredSize(), MeasuredSize(20, 10));
       });
     }));
     // Mixed axes: the WRAP_CONTENT width is bounded by the window (150 fits), the MATCH_PARENT height
@@ -186,21 +186,21 @@ public:
          s->parent.Add(s->probe->view);
          s->stage = Mount(r, s->parent, 300, 250);
          r.SetState(s);
-         r.AfterRender({s->stage, s->parent, s->probe->view}, [=](Run& r) {
-           const float width = std::min(150.0f, static_cast<float>(r.GetWindow().GetPositionSize().width));
-           r.Size("s.measured", s->probe->view.GetMeasuredSize(), MeasuredSize(width, 120));
-           r.Near("s.last-height", s->probe->lastHeight, 120);
-           r.Rendered("s", s->probe->view, LayoutRect(0, 0, width, 120));
+         r.AfterRender({s->stage, s->parent, s->probe->view}, [=](Run& done) {
+           const float width = std::min(150.0f, static_cast<float>(done.GetWindow().GetPositionSize().width));
+           done.Size("s.measured", s->probe->view.GetMeasuredSize(), MeasuredSize(width, 120));
+           done.Near("s.last-height", s->probe->lastHeight, 120);
+           done.Rendered("s", s->probe->view, LayoutRect(0, 0, width, 120));
          });
        }},
       {"parent-200", 7, [](Run& r) {
          auto s = r.State<StandaloneProbe>();
          s->parent.SetRequestedHeight(200);
-         r.AfterRender({s->stage, s->parent, s->probe->view}, [=](Run& r) {
-           const float width = std::min(150.0f, static_cast<float>(r.GetWindow().GetPositionSize().width));
-           r.Size("s.measured", s->probe->view.GetMeasuredSize(), MeasuredSize(width, 200));
-           r.Near("s.last-height", s->probe->lastHeight, 200);
-           r.Rendered("s", s->probe->view, LayoutRect(0, 0, width, 200));
+         r.AfterRender({s->stage, s->parent, s->probe->view}, [=](Run& done) {
+           const float width = std::min(150.0f, static_cast<float>(done.GetWindow().GetPositionSize().width));
+           done.Size("s.measured", s->probe->view.GetMeasuredSize(), MeasuredSize(width, 200));
+           done.Near("s.last-height", s->probe->lastHeight, 200);
+           done.Rendered("s", s->probe->view, LayoutRect(0, 0, width, 200));
          });
        }},
     }));
@@ -216,12 +216,12 @@ public:
       parent.Add(leaf);
       parent.Add(probe->view);
       View stage = Mount(r, parent, 200, 100);
-      r.AfterRender({stage, parent, leaf, probe->view}, [=](Run& r) {
-        r.Rendered("s", probe->view, LayoutRect(0, 0, 120, 60));
-        r.Size("s.measured", probe->view.GetMeasuredSize(), MeasuredSize(120, 60));
-        r.Near("s.last-width", probe->lastWidth, 120);
-        r.Near("s.last-height", probe->lastHeight, 60);
-        r.Size("parent.measured", parent.GetMeasuredSize(), MeasuredSize(120, 60));
+      r.AfterRender({stage, parent, leaf, probe->view}, [=](Run& done) {
+        done.Rendered("s", probe->view, LayoutRect(0, 0, 120, 60));
+        done.Size("s.measured", probe->view.GetMeasuredSize(), MeasuredSize(120, 60));
+        done.Near("s.last-width", probe->lastWidth, 120);
+        done.Near("s.last-height", probe->lastHeight, 60);
+        done.Size("parent.measured", parent.GetMeasuredSize(), MeasuredSize(120, 60));
       });
     }));
     // STANDALONE -> DEFAULT in the same action as a change that queued the child's own turn: the
@@ -241,18 +241,18 @@ public:
          s->parent.Add(s->s);
          s->stage = Mount(r, s->parent, 200, 100);
          r.SetState(s);
-         r.AfterRender({s->stage, s->parent, s->ordinary, s->s}, [=](Run& r) {
-           r.Rendered("s", s->s, LayoutRect(50, 40, 30, 15));
-           r.Size("root.measured", s->parent.GetMeasuredSize(), MeasuredSize(20, 10));
+         r.AfterRender({s->stage, s->parent, s->ordinary, s->s}, [=](Run& done) {
+           done.Rendered("s", s->s, LayoutRect(50, 40, 30, 15));
+           done.Size("root.measured", s->parent.GetMeasuredSize(), MeasuredSize(20, 10));
          });
        }},
       {"release", 6, [](Run& r) {
          auto s = r.State<StandaloneProbe>();
          s->s.SetRequestedWidth(35);
          s->s.SetLayoutMode(LayoutMode::DEFAULT);
-         r.AfterRender({s->stage, s->parent, s->ordinary, s->s}, [=](Run& r) {
-           r.Rendered("s", s->s, LayoutRect(27, 0, 35, 15));
-           r.Size("root.measured", s->parent.GetMeasuredSize(), MeasuredSize(62, 15));
+         r.AfterRender({s->stage, s->parent, s->ordinary, s->s}, [=](Run& done) {
+           done.Rendered("s", s->s, LayoutRect(27, 0, 35, 15));
+           done.Size("root.measured", s->parent.GetMeasuredSize(), MeasuredSize(62, 15));
          });
        }},
     }));

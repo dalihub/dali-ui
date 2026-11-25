@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/integration-api/web-cookie-manager-impl.h>
+#include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-cookie-manager.h>
 
 namespace DALI_NAMESPACE
@@ -25,13 +26,13 @@ namespace Ui
 namespace Integration
 {
 
-WebCookieManagerImplPtr WebCookieManagerImpl::New(Dali::WebEngineCookieManager* cookieManager)
+WebCookieManagerImplPtr WebCookieManagerImpl::New(const WebProfile& profile)
 {
-  return new WebCookieManagerImpl(cookieManager);
+  return new WebCookieManagerImpl(profile);
 }
 
-WebCookieManagerImpl::WebCookieManagerImpl(Dali::WebEngineCookieManager* cookieManager)
-: mCookieManager(cookieManager)
+WebCookieManagerImpl::WebCookieManagerImpl(const WebProfile& profile)
+: mProfile(profile)
 {
 }
 
@@ -39,15 +40,15 @@ WebCookieManagerImpl::~WebCookieManagerImpl() = default;
 
 void WebCookieManagerImpl::ClearAllCookies()
 {
-  if(mCookieManager)
+  if(auto* cookieManager = GetImpl(mProfile).GetEngineProfile()->GetCookieManager())
   {
-    mCookieManager->ClearCookies();
+    cookieManager->ClearCookies();
   }
 }
 
 bool WebCookieManagerImpl::IsEqual(const WebCookieManagerImpl& rhs) const
 {
-  return mCookieManager == rhs.mCookieManager;
+  return mProfile == rhs.mProfile;
 }
 
 } // namespace Integration

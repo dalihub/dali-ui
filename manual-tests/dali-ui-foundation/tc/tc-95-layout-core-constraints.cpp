@@ -23,9 +23,9 @@ struct Mounted
 void ExpectMounted(Run& r, const char* sizeId, const char* rectId, const MeasuredSize& size, const LayoutRect& rect)
 {
   auto s = r.State<Mounted>();
-  r.AfterRender({s->stage, s->view}, [=](Run& r) {
-    r.Size(sizeId, s->view.GetMeasuredSize(), size);
-    r.Rendered(rectId, s->view, rect);
+  r.AfterRender({s->stage, s->view}, [=](Run& done) {
+    done.Size(sizeId, s->view.GetMeasuredSize(), size);
+    done.Rendered(rectId, s->view, rect);
   });
 }
 void MountView(Run& r, View view, float width, float height)
@@ -70,10 +70,10 @@ public:
           View v = Container(kind, value, value);
           v.SetMargin(Insets(7, 0, 11, 0));
           View stage = Mount(r, v, 300, 200);
-          r.AfterRender({stage, v}, [=](Run& r) {
-            r.Size("measured", v.GetMeasuredSize(), MeasuredSize(value, value));
-            r.Rect("arranged", r.Snapshot(v), LayoutRect(7, 11, value, value));
-            r.Rendered("rendered", v, LayoutRect(7, 11, value, value));
+          r.AfterRender({stage, v}, [=](Run& done) {
+            done.Size("measured", v.GetMeasuredSize(), MeasuredSize(value, value));
+            done.Rect("arranged", done.Snapshot(v), LayoutRect(7, 11, value, value));
+            done.Rendered("rendered", v, LayoutRect(7, 11, value, value));
           });
         }));
       for(float value : {39.0f, 40.0f, 41.0f, 99.0f, 100.0f, 101.0f})

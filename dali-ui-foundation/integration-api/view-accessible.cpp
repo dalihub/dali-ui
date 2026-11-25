@@ -243,28 +243,24 @@ std::string ViewAccessible::GetName() const
   Dali::String            name;
 
   auto* accessibilityData = viewImpl.GetAccessibilityData();
-  if(!viewImpl.DispatchAccessibilityRequestName(name))
+  if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.name.empty())
+  {
+    name = ToDaliString(accessibilityData->mAccessibilityProps.name);
+  }
+  if(name.Empty())
   {
     name.Clear();
-    if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.name.empty())
+    if(viewImpl.DispatchAccessibilityRequestDefaultName(name))
     {
-      name = ToDaliString(accessibilityData->mAccessibilityProps.name);
+      // A handled default is final even when intentionally empty.
     }
-    if(name.Empty())
+    else if(auto raw = GetNameRaw(); !raw.first.empty() || raw.second)
     {
-      name.Clear();
-      if(viewImpl.DispatchAccessibilityRequestDefaultName(name))
-      {
-        // A handled default is final even when intentionally empty.
-      }
-      else if(auto raw = GetNameRaw(); !raw.first.empty() || raw.second)
-      {
-        name = ToDaliString(raw.first);
-      }
-      else
-      {
-        name = Self().GetProperty<Dali::String>(Actor::Property::NAME);
-      }
+      name = ToDaliString(raw.first);
+    }
+    else
+    {
+      name = Self().GetProperty<Dali::String>(Actor::Property::NAME);
     }
   }
 
@@ -285,24 +281,20 @@ std::string ViewAccessible::GetDescription() const
   Dali::String            description;
 
   auto* accessibilityData = viewImpl.GetAccessibilityData();
-  if(!viewImpl.DispatchAccessibilityRequestDescription(description))
+  if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.description.empty())
+  {
+    description = ToDaliString(accessibilityData->mAccessibilityProps.description);
+  }
+  if(description.Empty())
   {
     description.Clear();
-    if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.description.empty())
+    if(viewImpl.DispatchAccessibilityRequestDefaultDescription(description))
     {
-      description = ToDaliString(accessibilityData->mAccessibilityProps.description);
+      // A handled default is final even when intentionally empty.
     }
-    if(description.Empty())
+    else
     {
-      description.Clear();
-      if(viewImpl.DispatchAccessibilityRequestDefaultDescription(description))
-      {
-        // A handled default is final even when intentionally empty.
-      }
-      else
-      {
-        description = ToDaliString(GetDescriptionRaw());
-      }
+      description = ToDaliString(GetDescriptionRaw());
     }
   }
 
@@ -318,17 +310,12 @@ std::string ViewAccessible::GetValue() const
 {
   auto         view         = Dali::Ui::View::DownCast(Self());
   auto&        viewDataImpl = Internal::ViewDataImpl::Get(Ui::GetImpl(view));
-  Dali::String value;
-  if(!viewDataImpl.DispatchAccessibilityRequestValue(value))
+  Dali::String value        = view.GetAccessibilityValue();
+  if(value.Empty())
   {
-    value.Clear();
-    value = view.GetAccessibilityValue();
-    if(value.Empty())
+    if(!viewDataImpl.DispatchAccessibilityRequestDefaultValue(value))
     {
-      if(!viewDataImpl.DispatchAccessibilityRequestDefaultValue(value))
-      {
-        value.Clear();
-      }
+      value.Clear();
     }
   }
   return ToStdString(value);
@@ -444,7 +431,7 @@ Dali::Devel::Accessibility::Attributes ViewAccessible::GetAttributes() const
     Dali::Property::Key mapKey = attributeMap->GetKeyAt(i);
     std::string         mapValue;
 
-    if(mapKey.type == Dali::Property::Key::STRING && GetStdString(attributeMap->GetValue(i), mapValue))
+    if(mapKey.type == Dali::Property::Key::Type::STRING && GetStdString(attributeMap->GetValue(i), mapValue))
     {
       result.emplace(ToStdString(mapKey.stringKey), std::move(mapValue));
     }

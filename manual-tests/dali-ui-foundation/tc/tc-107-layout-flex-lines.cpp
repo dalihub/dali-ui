@@ -34,18 +34,18 @@ public:
           f.Add(b);
           f.Add(c);
           View stage = Mount(r, f, width, 80);
-          r.AfterRender({stage, f, a, b, c}, [=](Run& r) {
+          r.AfterRender({stage, f, a, b, c}, [=](Run& done) {
             if(width == 100)
             {
-              r.Rendered("a", a, LayoutRect(0, reverse ? 15 : 0, 40, 10));
-              r.Rendered("b", b, LayoutRect(40, reverse ? 15 : 0, 60, 20));
-              r.Rendered("c", c, LayoutRect(0, reverse ? 0 : 20, 30, 15));
+              done.Rendered("a", a, LayoutRect(0, reverse ? 15 : 0, 40, 10));
+              done.Rendered("b", b, LayoutRect(40, reverse ? 15 : 0, 60, 20));
+              done.Rendered("c", c, LayoutRect(0, reverse ? 0 : 20, 30, 15));
             }
             else
             {
-              r.Rendered("a", a, LayoutRect(0, reverse ? 20 : 0, 40, 10));
-              r.Rendered("b", b, LayoutRect(0, reverse ? 0 : 10, 60, 20));
-              r.Rendered("c", c, LayoutRect(60, reverse ? 0 : 10, 30, 15));
+              done.Rendered("a", a, LayoutRect(0, reverse ? 20 : 0, 40, 10));
+              done.Rendered("b", b, LayoutRect(0, reverse ? 0 : 10, 60, 20));
+              done.Rendered("c", c, LayoutRect(60, reverse ? 0 : 10, 30, 15));
             }
           });
         }));
@@ -59,9 +59,9 @@ public:
       f.Add(b);
       f.Add(c);
       View stage = Mount(r, f, 100, 80);
-      r.AfterRender({stage, f, a, b, c}, [=](Run& r) {
-        r.Size("wrapped", f.GetMeasuredSize(), MeasuredSize(100, 35));
-        r.Rendered("wrapped.rendered", f, LayoutRect(0, 0, 100, 35));
+      r.AfterRender({stage, f, a, b, c}, [=](Run& done) {
+        done.Size("wrapped", f.GetMeasuredSize(), MeasuredSize(100, 35));
+        done.Rendered("wrapped.rendered", f, LayoutRect(0, 0, 100, 35));
       });
     }));
     for(unsigned mode = 0; mode < 4; ++mode)
@@ -76,10 +76,10 @@ public:
         f.Add(a);
         f.Add(b);
         View stage = Mount(r, f, 60, 100);
-        r.AfterRender({stage, f, a, b}, [=](Run& r) {
+        r.AfterRender({stage, f, a, b}, [=](Run& done) {
           const float y0 = mode == 1 ? 35 : mode == 2 ? 70 : 0, y1 = mode == 3 ? 45 : y0 + 10;
-          r.Rendered("line0", a, LayoutRect(0, y0, 40, 10));
-          r.Rendered("line1", b, LayoutRect(0, y1, 40, 20));
+          done.Rendered("line0", a, LayoutRect(0, y0, 40, 10));
+          done.Rendered("line1", b, LayoutRect(0, y1, 40, 20));
         });
       }));
     out.push_back(Single("F02.wrap-grow-lines", "Grow and shrink are resolved per wrapped line on screen", 20, [](Run& r) {
@@ -101,12 +101,12 @@ public:
       f.Add(e);
       View stage = Mount(r, f, 100, 60);
       // Lines: [40,50] free 10 -> 45/55; [30,30] free 40 to grow 2 -> 70/30; [120] alone shrinks to 100.
-      r.AfterRender({stage, f, a, b, c, d, e}, [=](Run& r) {
-        r.Rendered("a", a, LayoutRect(0, 0, 45, 10));
-        r.Rendered("b", b, LayoutRect(45, 0, 55, 10));
-        r.Rendered("c", c, LayoutRect(0, 10, 70, 20));
-        r.Rendered("d", d, LayoutRect(70, 10, 30, 20));
-        r.Rendered("e", e, LayoutRect(0, 30, 100, 10));
+      r.AfterRender({stage, f, a, b, c, d, e}, [=](Run& done) {
+        done.Rendered("a", a, LayoutRect(0, 0, 45, 10));
+        done.Rendered("b", b, LayoutRect(45, 0, 55, 10));
+        done.Rendered("c", c, LayoutRect(0, 10, 70, 20));
+        done.Rendered("d", d, LayoutRect(70, 10, 30, 20));
+        done.Rendered("e", e, LayoutRect(0, 30, 100, 10));
       });
     }));
     // A wrapping flex builds its lines from the measured sizes, so it measures every child AT_MOST:
@@ -120,9 +120,9 @@ public:
       View a = Leaf(MATCH_PARENT, 10, "a");
       f.Add(a);
       View stage = Mount(r, f, 100, 80);
-      r.AfterRender({stage, f, a}, [=](Run& r) {
-        r.Size("a", a.GetMeasuredSize(), MeasuredSize(0, 10));
-        r.Rendered("a.rendered", a, LayoutRect(0, 0, 100, 10));
+      r.AfterRender({stage, f, a}, [=](Run& done) {
+        done.Size("a", a.GetMeasuredSize(), MeasuredSize(0, 10));
+        done.Rendered("a.rendered", a, LayoutRect(0, 0, 100, 10));
       });
     }));
     return out;

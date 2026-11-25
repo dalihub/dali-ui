@@ -39,20 +39,20 @@ public:
          s->root.Add(s->probe->view);
          s->stage = Mount(r, s->root, 100, 50);
          r.SetState(s);
-         r.AfterRender({s->stage, s->root, s->probe->view}, [=](Run& r) {
+         r.AfterRender({s->stage, s->root, s->probe->view}, [=](Run& done) {
            s->measures = s->probe->measures;
-           r.Rendered("probe", s->probe->view, LayoutRect(0, 0, 20, 10));
+           done.Rendered("probe", s->probe->view, LayoutRect(0, 0, 20, 10));
          });
        }},
       {"invalidate", 7, [](Run& r) {
          auto s          = r.State<Generation>();
          s->probe->width = 30;
          s->probe->view.InvalidateMeasure();
-         r.AfterRender({s->stage, s->root, s->probe->view}, [=](Run& r) {
+         r.AfterRender({s->stage, s->root, s->probe->view}, [=](Run& done) {
            // The WRAP x WRAP root can only report the new width if the invalidation made it re-measure.
-           r.Truth("producer-reran", s->probe->measures > s->measures);
-           r.Size("root.measured", s->root.GetMeasuredSize(), MeasuredSize(30, 10));
-           r.Rendered("probe.rendered", s->probe->view, LayoutRect(0, 0, 30, 10));
+           done.Truth("producer-reran", s->probe->measures > s->measures);
+           done.Size("root.measured", s->root.GetMeasuredSize(), MeasuredSize(30, 10));
+           done.Rendered("probe.rendered", s->probe->view, LayoutRect(0, 0, 30, 10));
          });
        }},
     }));
@@ -62,23 +62,23 @@ public:
          s->probe = Probed(r);
          s->stage = Mount(r, s->probe->view, 100, 50);
          r.SetState(s);
-         r.AfterRender({s->stage, s->probe->view}, [=](Run& r) { r.Rendered("probe", s->probe->view, LayoutRect(0, 0, 37, 19)); });
+         r.AfterRender({s->stage, s->probe->view}, [=](Run& done) { done.Rendered("probe", s->probe->view, LayoutRect(0, 0, 37, 19)); });
        }},
       {"invalidate-arrange", 2, [](Run& r) {
          auto s = r.State<Generation>();
          s->probe->view.InvalidateArrange();
-         r.AfterRender({s->stage, s->probe->view}, [=](Run& r) {
-           r.Equal("measure-producer", s->probe->measures, 1);
-           r.Equal("arrange-producer", s->probe->arranges, 2);
+         r.AfterRender({s->stage, s->probe->view}, [=](Run& done) {
+           done.Equal("measure-producer", s->probe->measures, 1);
+           done.Equal("arrange-producer", s->probe->arranges, 2);
          });
        }},
       {"repeat", 2, [](Run& r) {
          auto s = r.State<Generation>();
          // The stage re-arranges the probe at the same bounds: the settled cache serves it.
          s->stage.InvalidateArrange();
-         r.AfterRender({s->stage, s->probe->view}, [=](Run& r) {
-           r.Equal("repeat.measure-producer", s->probe->measures, 1);
-           r.Equal("repeat.arrange-producer", s->probe->arranges, 2);
+         r.AfterRender({s->stage, s->probe->view}, [=](Run& done) {
+           done.Equal("repeat.measure-producer", s->probe->measures, 1);
+           done.Equal("repeat.arrange-producer", s->probe->arranges, 2);
          });
        }},
     }));

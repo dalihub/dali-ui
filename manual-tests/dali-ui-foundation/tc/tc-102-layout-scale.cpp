@@ -68,12 +68,12 @@ public:
         p.Add(b);
         View stage = UnscaledStage(r, 400, 200);
         stage.Add(p);
-        r.AfterRender({stage, p, a, b}, [=](Run& r) {
-          r.Size("parent-disabled", p.GetMeasuredSize(), MeasuredSize(200, 100));
-          r.Size("child-inherit", a.GetMeasuredSize(), MeasuredSize(20, 10));
-          r.Size("child-enabled", b.GetMeasuredSize(), MeasuredSize(30 * scale, 15 * scale));
-          r.Rendered("child-inherit.rendered", a, LayoutRect(0, 0, 20, 10));
-          r.Rendered("child-enabled.rendered", b, LayoutRect(0, 0, 30 * scale, 15 * scale));
+        r.AfterRender({stage, p, a, b}, [=](Run& done) {
+          done.Size("parent-disabled", p.GetMeasuredSize(), MeasuredSize(200, 100));
+          done.Size("child-inherit", a.GetMeasuredSize(), MeasuredSize(20, 10));
+          done.Size("child-enabled", b.GetMeasuredSize(), MeasuredSize(30 * scale, 15 * scale));
+          done.Rendered("child-inherit.rendered", a, LayoutRect(0, 0, 20, 10));
+          done.Rendered("child-enabled.rendered", b, LayoutRect(0, 0, 30 * scale, 15 * scale));
         });
       }));
     out.push_back(Steps("C14.K12.master-switch", "Stored scale survives disable and re-enable on screen", {
@@ -87,27 +87,27 @@ public:
          s->stage = UnscaledStage(r, 200, 100);
          s->stage.Add(s->view);
          r.SetState(s);
-         r.AfterRender({s->stage, s->view}, [=](Run& r) {
-           r.Size("enabled", s->view.GetMeasuredSize(), MeasuredSize(74, 38));
-           r.Rendered("enabled.rendered", s->view, LayoutRect(0, 0, 74, 38));
+         r.AfterRender({s->stage, s->view}, [=](Run& done) {
+           done.Size("enabled", s->view.GetMeasuredSize(), MeasuredSize(74, 38));
+           done.Rendered("enabled.rendered", s->view, LayoutRect(0, 0, 74, 38));
          });
        }},
       {"disabled", 6, [](Run& r) {
          auto s = r.State<Scaled>();
          Dali::Ui::Extension::LayoutScaleManager::Get().SetScalable(false);
          s->view.InvalidateMeasure();
-         r.AfterRender({s->stage, s->view}, [=](Run& r) {
-           r.Size("disabled", s->view.GetMeasuredSize(), MeasuredSize(37, 19));
-           r.Rendered("disabled.rendered", s->view, LayoutRect(0, 0, 37, 19));
+         r.AfterRender({s->stage, s->view}, [=](Run& done) {
+           done.Size("disabled", s->view.GetMeasuredSize(), MeasuredSize(37, 19));
+           done.Rendered("disabled.rendered", s->view, LayoutRect(0, 0, 37, 19));
          });
        }},
       {"restored", 6, [](Run& r) {
          auto s = r.State<Scaled>();
          Dali::Ui::Extension::LayoutScaleManager::Get().SetScalable(true);
          s->view.InvalidateMeasure();
-         r.AfterRender({s->stage, s->view}, [=](Run& r) {
-           r.Size("restored", s->view.GetMeasuredSize(), MeasuredSize(74, 38));
-           r.Rendered("restored.rendered", s->view, LayoutRect(0, 0, 74, 38));
+         r.AfterRender({s->stage, s->view}, [=](Run& done) {
+           done.Size("restored", s->view.GetMeasuredSize(), MeasuredSize(74, 38));
+           done.Rendered("restored.rendered", s->view, LayoutRect(0, 0, 74, 38));
          });
        }},
     }));
@@ -143,24 +143,24 @@ public:
          s->stage.Add(s->probe->view);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
            s->measures = s->probe->measures;
-           r.Rendered("probe", s->probe->view, LayoutRect(0, 0, 37, 19));
+           done.Rendered("probe", s->probe->view, LayoutRect(0, 0, 37, 19));
          });
        }},
       {"sub-epsilon-scale", 2, [](Run& r) {
          auto s = r.State<ScaledProbe>();
          Dali::Ui::Extension::LayoutScaleManager::Get().SetUiScale(1.0005f);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
-           r.Equal("producer-recomputed", s->probe->measures, s->measures + 1);
-           r.Near("exact-effective", EffectiveScale(s->probe->view), 1.0005f, 0);
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
+           done.Equal("producer-recomputed", s->probe->measures, s->measures + 1);
+           done.Near("exact-effective", EffectiveScale(s->probe->view), 1.0005f, 0);
            s->measures = s->probe->measures;
          });
        }},
       {"same-scale", 1, [](Run& r) {
          auto s = r.State<ScaledProbe>();
          s->sibling.SetRequestedWidth(s->nudge += 1);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) { r.Equal("same-scale-hit", s->probe->measures, s->measures); });
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) { done.Equal("same-scale-hit", s->probe->measures, s->measures); });
        }},
     }));
     out.push_back(Steps("C13.actor-scale-repair", "A cached measure repairs the framework-owned scale property", {
@@ -173,10 +173,10 @@ public:
          s->stage.Add(s->probe->view);
          s->stage.Add(s->sibling);
          r.SetState(s);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
            s->scaleIndex = ScaleProperty(s->probe->view);
-           r.Truth("property-index", s->scaleIndex != Property::INVALID_INDEX);
-           r.Rendered("probe", s->probe->view, LayoutRect(0, 0, 37, 19));
+           done.Truth("property-index", s->scaleIndex != Property::INVALID_INDEX);
+           done.Rendered("probe", s->probe->view, LayoutRect(0, 0, 37, 19));
            s->measures = s->probe->measures;
          });
        }},
@@ -186,10 +186,10 @@ public:
          raw.SetProperty(s->scaleIndex, 9.0f);
          r.Near("corrupted", raw.GetProperty<float>(s->scaleIndex), 9, 0);
          s->sibling.SetRequestedWidth(s->nudge += 1);
-         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& r) {
+         r.AfterRender({s->stage, s->probe->view, s->sibling}, [=](Run& done) {
            // The repair pushes the effective scale back into the property on the cached measure path.
-           r.Near("actor-scale", s->probe->view.GetProperty<float>(s->scaleIndex), 1, 0);
-           r.Equal("producer-hit", s->probe->measures, s->measures);
+           done.Near("actor-scale", s->probe->view.GetProperty<float>(s->scaleIndex), 1, 0);
+           done.Equal("producer-hit", s->probe->measures, s->measures);
          });
        }},
     }));
@@ -208,10 +208,10 @@ public:
         c.SetMaximumHeight(80);
         View stage = UnscaledStage(r, 300, 200);
         stage.Add(c);
-        r.AfterRender({stage, c}, [=](Run& r) {
+        r.AfterRender({stage, c}, [=](Run& done) {
           const float width = std::min(300 - 10 * scale, 120 * scale), height = std::min(200 - 20 * scale, 80 * scale);
-          r.Size("clamped", c.GetMeasuredSize(), MeasuredSize(width, height));
-          r.Rendered("clamped.rendered", c, LayoutRect(10 * scale, 20 * scale, width, height));
+          done.Size("clamped", c.GetMeasuredSize(), MeasuredSize(width, height));
+          done.Rendered("clamped.rendered", c, LayoutRect(10 * scale, 20 * scale, width, height));
         });
       }));
     return out;

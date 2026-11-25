@@ -61,6 +61,31 @@ WebCookieManager WebProfile::GetCookieManager() const
   return Integration::GetImpl(*this).GetCookieManager();
 }
 
+WebProfile WebProfile::New(const Dali::String& name, bool incognito)
+{
+  return New(name, incognito, "");
+}
+
+WebProfile WebProfile::New(const Dali::String& name, bool incognito, const Dali::String& injectedBundlePath)
+{
+  return Integration::WebProfileImpl::New(name, incognito, injectedBundlePath);
+}
+
+WebProfile WebProfile::GetProfile(const Dali::String& name)
+{
+  return Integration::WebProfileImpl::GetProfile(name);
+}
+
+Dali::String WebProfile::GetName() const
+{
+  return Integration::GetImpl(*this).GetName();
+}
+
+bool WebProfile::IsIncognito() const
+{
+  return Integration::GetImpl(*this).IsIncognito();
+}
+
 WebProfile::WebProfile(Integration::WebProfileImpl& implementation)
 : BaseHandle(&implementation)
 {

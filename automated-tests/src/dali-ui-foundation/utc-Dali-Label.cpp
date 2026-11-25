@@ -1819,7 +1819,7 @@ int UtcDaliLabelTextRevealAsyncRenderScaleP(void)
   END_TEST;
 }
 
-int UtcDaliLabelTextRevealCutoutUnsupportedP(void)
+int UtcDaliLabelTextRevealCutoutFallbackP(void)
 {
   UiTestApplication application;
   Label             label = Label::New("Cutout retains authored reveal");
@@ -1836,8 +1836,8 @@ int UtcDaliLabelTextRevealCutoutUnsupportedP(void)
   application.Render(16);
 
   DALI_TEST_CHECK(label.GetTextReveal() == reveal);
-  DALI_TEST_EQUALS(label.GetRendererAt(0u).GetPropertyIndex("uTextRevealProgress"),
-                   Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_CHECK(label.IsTextCutoutEnabled());
+  DALI_TEST_CHECK(label.GetRendererAt(0u).GetPropertyIndex("uTextRevealProgress") != Property::INVALID_INDEX);
 
   label.SetTextCutoutEnabled(false);
   application.SendNotification();
