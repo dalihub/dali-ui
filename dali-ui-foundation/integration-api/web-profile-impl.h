@@ -61,8 +61,6 @@ public:
   void SetTimeZoneOffset(double zoneOffset, double daylightSavingTime);
   bool DeleteAllWebStorage();
   bool DeleteAllWebIndexedDatabase();
-  bool SetMaxRefreshRate(int32_t rate);
-  void RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes);
 
 protected:
   WebProfileImpl(const Dali::String& name, bool incognito, Dali::WebEngineProfilePtr profile);
