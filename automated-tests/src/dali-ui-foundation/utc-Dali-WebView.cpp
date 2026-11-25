@@ -15,6 +15,8 @@
  *
  */
 
+#include <atomic>
+#include <thread>
 #include <dali-ui-test-suite-utils.h>
 #include <test-native-image.h>
 #include <ui-event-thread-callback.h>
@@ -24,9 +26,10 @@
 #include <dali/devel-api/object/type-info.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/dali-ui-foundation-extension.h>
 #include <dali-ui-foundation/public-api/views/web/web-view.h>
 #include <dali-ui-foundation/internal/web-profile-registry.h>
+#include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <ui-web-engine.h>
 
 #define private public
@@ -39,6 +42,9 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+namespace WebProfileExtension = Dali::Ui::Extension::WebProfile;
+namespace WebCookieManagerExtension = Dali::Ui::Extension::WebCookieManager;
 
 namespace Test
 {
@@ -1586,7 +1592,7 @@ int UtcDaliWebProfileLookupDoesNotInitializeP(void)
 int UtcDaliWebProfileCreationInitializesEngineP(void)
 {
   UiTestApplication application;
-  auto profile = WebProfile::New("Private", true, "/bundle.so");
+  auto profile = WebProfileExtension::New("Private", true, "/bundle.so");
   DALI_TEST_CHECK(profile);
   DALI_TEST_CHECK(profile.IsIncognito());
   DALI_TEST_EQUALS(profile.GetName(), Dali::String("Private"), TEST_LOCATION);
@@ -1601,6 +1607,12 @@ int UtcDaliWebProfileCreationInitializesEngineP(void)
   DALI_TEST_ASSERTION(WebView::SetWebEngineType(WebEngineType::LWE), "Cannot change engine type after first web engine API use");
   DALI_TEST_ASSERTION(WebProfile::New("Private", true), "A live profile already uses this name");
   DALI_TEST_ASSERTION(WebProfile::New("Private", false), "A live profile already uses this name");
+
+  auto legacy = WebProfile::New("Legacy bundle", false, "/legacy-bundle.so");
+  DALI_TEST_CHECK(legacy);
+  DALI_TEST_CHECK(legacy == WebProfile::GetProfile("Legacy bundle"));
+  DALI_TEST_EQUALS(state.lastBundlePath, std::string("/legacy-bundle.so"), TEST_LOCATION);
+  DALI_TEST_CHECK(!state.lastIncognito);
   END_TEST;
 }
 
@@ -1641,25 +1653,34 @@ int UtcDaliWebProfileSharedViewsRetainContextP(void)
   END_TEST;
 }
 
-int UtcDaliWebProfileCookieOnlyRetainsNameP(void)
+int UtcDaliWebProfileCookieManagerDoesNotRetainProfileP(void)
 {
   UiTestApplication application;
   auto& state = Test::WebEngine::GetRuntimeState();
-  WebCookieManager cookies;
-  {
-    auto profile = WebProfile::New("Cookies", true);
-    cookies = profile.GetCookieManager();
-    DALI_TEST_CHECK(cookies == profile.GetCookieManager());
-  }
-  DALI_TEST_EQUALS(state.profileReleases, 0, TEST_LOCATION);
-  DALI_TEST_CHECK(WebProfile::GetProfile("Cookies"));
-  DALI_TEST_ASSERTION(WebProfile::New("Cookies"), "A live profile already uses this name");
+  auto profile = WebProfile::New("Cookies", true);
+  auto cookies = profile.GetCookieManager();
+  WeakHandle<WebCookieManager> weakManager(cookies);
+  cookies.Reset();
+
+  DALI_TEST_CHECK(weakManager.GetHandle());
+  cookies = profile.GetCookieManager();
+  DALI_TEST_CHECK(cookies.GetObjectPtr() == weakManager.GetHandle().GetObjectPtr());
+  auto copy = cookies;
   cookies.ClearAllCookies();
   DALI_TEST_EQUALS(state.cookieClearCalls, 1, TEST_LOCATION);
-  cookies.Reset();
+  profile.Reset();
   DALI_TEST_EQUALS(state.profileReleases, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!WebProfile::GetProfile("Cookies"));
-  DALI_TEST_CHECK(WebProfile::New("Cookies"));
+
+  cookies.ClearAllCookies();
+  cookies.SetCookieAcceptPolicy(WebCookieAcceptPolicy::ALWAYS);
+  WebCookieManagerExtension::SetPersistentStorage(cookies, "/expired");
+  DALI_TEST_CHECK(WebCookieManagerExtension::CookieChangedSignal(cookies).Empty());
+  DALI_TEST_EQUALS(state.cookieClearCalls, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(cookies == copy);
+
+  auto recreated = WebProfile::New("Cookies", true);
+  DALI_TEST_CHECK(cookies != recreated.GetCookieManager());
   END_TEST;
 }
 
@@ -1731,7 +1752,7 @@ int UtcDaliWebViewLweDefaultAndUnsupportedProfilesP(void)
   DALI_TEST_CHECK(WebView::SetWebEngineArguments(1, arguments) == Ui::WebEngineArgumentsResult::SUCCESS);
   auto& state = Test::WebEngine::GetRuntimeState();
   DALI_TEST_CHECK(!state.started);
-  DALI_TEST_CHECK(!WebProfile::New("Unsupported", true, "/bundle.so"));
+  DALI_TEST_CHECK(!WebProfileExtension::New("Unsupported", true, "/bundle.so"));
   DALI_TEST_CHECK(!WebProfile::GetProfile("Unsupported"));
   auto view = WebView::New();
   DALI_TEST_CHECK(view);
@@ -1872,7 +1893,8 @@ int UtcDaliWebProfileRegistrySweepPreservesOwnersP(void)
 {
   UiTestApplication application;
   auto view = WebView::New(WebProfile::New("ViewOwned"));
-  auto cookies = WebProfile::New("CookieOwned").GetCookieManager();
+  auto profile = WebProfile::New("ProfileOwned");
+  auto cookies = profile.GetCookieManager();
   for(unsigned int index = 0; index < 1000; ++index)
   {
     auto name = std::string("Temporary") + std::to_string(index);
@@ -1881,13 +1903,13 @@ int UtcDaliWebProfileRegistrySweepPreservesOwnersP(void)
   auto defaultView = WebView::New();
   DALI_TEST_CHECK(defaultView);
   DALI_TEST_CHECK(WebProfile::GetProfile("ViewOwned") == view.GetProfile());
-  DALI_TEST_CHECK(WebProfile::GetProfile("CookieOwned").GetCookieManager() == cookies);
+  DALI_TEST_CHECK(WebProfile::GetProfile("ProfileOwned").GetCookieManager() == cookies);
   DALI_TEST_ASSERTION(WebProfile::New("ViewOwned"), "A live profile already uses this name");
-  DALI_TEST_ASSERTION(WebProfile::New("CookieOwned"), "A live profile already uses this name");
+  DALI_TEST_ASSERTION(WebProfile::New("ProfileOwned"), "A live profile already uses this name");
   view.Reset();
-  cookies.Reset();
+  profile.Reset();
   DALI_TEST_CHECK(WebProfile::New("ViewOwned"));
-  DALI_TEST_CHECK(WebProfile::New("CookieOwned"));
+  DALI_TEST_CHECK(WebProfile::New("ProfileOwned"));
   END_TEST;
 }
 
@@ -2143,5 +2165,324 @@ int UtcDaliWebViewRenderingModeWithProfileP(void)
   Test::WebEngine::GetRuntimeState().failView = true;
   DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::NATIVE_IMAGE));
   DALI_TEST_CHECK(!WebView::New(profile, WebView::RenderingMode::DIRECT_RENDERING));
+  END_TEST;
+}
+
+int UtcDaliWebProfileConfigurationSelectedContextP(void)
+{
+  UiTestApplication application;
+  auto& runtimeState = Test::WebEngine::GetRuntimeState();
+  auto normal = WebProfileExtension::New("Normal", false, "/normal-bundle.so");
+  DALI_TEST_CHECK(normal);
+  DALI_TEST_EQUALS(runtimeState.lastBundlePath, std::string("/normal-bundle.so"), TEST_LOCATION);
+  DALI_TEST_CHECK(!runtimeState.lastIncognito);
+  auto privateProfile = WebProfileExtension::New("Private", true, "/private-bundle.so");
+  DALI_TEST_CHECK(privateProfile);
+  DALI_TEST_EQUALS(runtimeState.lastBundlePath, std::string("/private-bundle.so"), TEST_LOCATION);
+  DALI_TEST_CHECK(runtimeState.lastIncognito);
+  auto& normalState = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(normal).GetEngineProfile()->GetContext());
+  auto& privateState = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(privateProfile).GetEngineProfile()->GetContext());
+  const double offset = 16777217.125;
+  const double zone = -12345.678901234;
+  const double daylight = 0.1234567890123;
+  for(auto profile : {normal, privateProfile})
+  {
+    auto& state = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetContext());
+    DALI_TEST_CHECK(WebProfileExtension::SetCacheEnabled(profile, false));
+    DALI_TEST_CHECK(WebProfileExtension::SetCertificateFilePath(profile, "/ca.pem:/certs"));
+    Dali::Vector<Dali::String> schemes;
+    schemes.PushBack("custom");
+    schemes.PushBack("app");
+    WebProfileExtension::RegisterUrlSchemesAsCorsEnabled(profile, schemes);
+    WebProfileExtension::SetMaxRefreshRate(profile, profile == normal ? 30 : 45);
+    WebProfileExtension::SetAppId(profile, "test.application");
+    DALI_TEST_CHECK(WebProfileExtension::SetAppVersion(profile, "1.2.3"));
+    WebProfileExtension::SetTimeOffset(profile, offset);
+    WebProfileExtension::SetTimeZoneOffset(profile, zone, daylight);
+    DALI_TEST_CHECK(WebProfileExtension::DeleteAllWebStorage(profile));
+    DALI_TEST_CHECK(WebProfileExtension::DeleteAllWebIndexedDatabase(profile));
+    DALI_TEST_EQUALS(state.calls, 10, TEST_LOCATION);
+    DALI_TEST_CHECK(!state.cacheEnabled);
+    DALI_TEST_EQUALS(state.certificatePath, std::string("/ca.pem:/certs"), TEST_LOCATION);
+    DALI_TEST_CHECK(state.schemes == std::vector<std::string>({"custom", "app"}));
+    DALI_TEST_EQUALS(state.refreshRate, profile == normal ? 30 : 45, TEST_LOCATION);
+    DALI_TEST_EQUALS(state.appId, std::string("test.application"), TEST_LOCATION);
+    DALI_TEST_EQUALS(state.appVersion, std::string("1.2.3"), TEST_LOCATION);
+    DALI_TEST_CHECK(state.offset == offset);
+    DALI_TEST_CHECK(state.zoneOffset == zone);
+    DALI_TEST_CHECK(state.daylightSavingTime == daylight);
+    DALI_TEST_EQUALS(state.storageDeletes, 1, TEST_LOCATION);
+    DALI_TEST_EQUALS(state.indexedDatabaseDeletes, 1, TEST_LOCATION);
+    if(profile == normal)
+    {
+      DALI_TEST_EQUALS(privateState.calls, 0, TEST_LOCATION);
+    }
+  }
+  Dali::Vector<Dali::String> replacementSchemes;
+  replacementSchemes.PushBack("replacement");
+  WebProfileExtension::RegisterUrlSchemesAsCorsEnabled(normal, replacementSchemes);
+  DALI_TEST_CHECK(normalState.schemes == std::vector<std::string>({"replacement"}));
+
+  // Model native WV, which replaces its scheme list even when it is empty.
+  WebProfileExtension::RegisterUrlSchemesAsCorsEnabled(normal, {});
+  DALI_TEST_CHECK(normalState.schemes.empty());
+  DALI_TEST_CHECK(!privateState.schemes.empty());
+  DALI_TEST_EQUALS(normalState.refreshRate, 30, TEST_LOCATION);
+  DALI_TEST_EQUALS(privateState.refreshRate, 45, TEST_LOCATION);
+  DALI_TEST_EQUALS(normalState.calls, 12, TEST_LOCATION);
+  WebProfileExtension::SetMaxRefreshRate(normal, 0);
+  WebProfileExtension::SetMaxRefreshRate(normal, 61);
+  DALI_TEST_EQUALS(normalState.calls, 12, TEST_LOCATION);
+  DALI_TEST_EQUALS(normalState.refreshRate, 30, TEST_LOCATION);
+  WebProfileExtension::SetMaxRefreshRate(normal, 1);
+  DALI_TEST_EQUALS(normalState.refreshRate, 1, TEST_LOCATION);
+  WebProfileExtension::SetMaxRefreshRate(normal, 60);
+  DALI_TEST_EQUALS(normalState.refreshRate, 60, TEST_LOCATION);
+  DALI_TEST_CHECK(WebProfileExtension::SetCacheEnabled(normal, true));
+  DALI_TEST_CHECK(normalState.cacheEnabled);
+  END_TEST;
+}
+
+int UtcDaliWebProfileConfigurationFailureP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Failure");
+  auto& state = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetContext());
+  state.result = false;
+  WebProfileExtension::SetMaxRefreshRate(profile, 30);
+  DALI_TEST_CHECK(!WebProfileExtension::SetCacheEnabled(profile, true));
+  DALI_TEST_CHECK(!WebProfileExtension::SetCertificateFilePath(profile, "/missing.pem"));
+  DALI_TEST_CHECK(!WebProfileExtension::SetAppVersion(profile, "1"));
+  DALI_TEST_CHECK(!WebProfileExtension::DeleteAllWebStorage(profile));
+  DALI_TEST_CHECK(!WebProfileExtension::DeleteAllWebIndexedDatabase(profile));
+  DALI_TEST_EQUALS(state.calls, 6, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileConfigurationAfterTerminationP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Terminated");
+  auto& state = Test::WebEngine::GetContextConfigurationState(Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetContext());
+  Test::WebEngine::TerminateRuntime();
+  WebProfileExtension::SetMaxRefreshRate(profile, 30);
+  WebProfileExtension::RegisterUrlSchemesAsCorsEnabled(profile, {});
+  DALI_TEST_CHECK(!WebProfileExtension::SetCacheEnabled(profile, true));
+  DALI_TEST_CHECK(!WebProfileExtension::SetCertificateFilePath(profile, "/ca.pem"));
+  Dali::Vector<Dali::String> schemes;
+  schemes.PushBack("app");
+  WebProfileExtension::RegisterUrlSchemesAsCorsEnabled(profile, schemes);
+  WebProfileExtension::SetAppId(profile, "app");
+  DALI_TEST_CHECK(!WebProfileExtension::SetAppVersion(profile, "1"));
+  WebProfileExtension::SetTimeOffset(profile, 1.0);
+  WebProfileExtension::SetTimeZoneOffset(profile, 2.0, 3.0);
+  DALI_TEST_CHECK(!WebProfileExtension::DeleteAllWebStorage(profile));
+  DALI_TEST_CHECK(!WebProfileExtension::DeleteAllWebIndexedDatabase(profile));
+  DALI_TEST_EQUALS(state.calls, 0, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebProfileConfigurationLegacyBackendP(void)
+{
+  UiTestApplication application;
+  Test::WebEngine::GetRuntimeState().legacyContext = true;
+  auto profile = WebProfile::New("Legacy");
+  WebProfileExtension::SetMaxRefreshRate(profile, 30);
+  DALI_TEST_CHECK(!WebProfileExtension::SetCacheEnabled(profile, true));
+  DALI_TEST_CHECK(!WebProfileExtension::SetCertificateFilePath(profile, "/ca.pem"));
+  DALI_TEST_CHECK(!WebProfileExtension::DeleteAllWebStorage(profile));
+  WebProfileExtension::SetTimeOffset(profile, 16777217.125);
+  WebProfileExtension::SetTimeZoneOffset(profile, 0.123456789, 0.987654321);
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerProfileSettingsP(void)
+{
+  UiTestApplication application;
+  auto normal = WebProfile::New("Cookies");
+  auto privateProfile = WebProfile::New("Private cookies", true);
+  auto* native = Dali::Ui::Integration::GetImpl(normal).GetEngineProfile()->GetCookieManager();
+  auto* privateNative = Dali::Ui::Integration::GetImpl(privateProfile).GetEngineProfile()->GetCookieManager();
+  auto manager = normal.GetCookieManager();
+  for(auto policy : {WebCookieAcceptPolicy::ALWAYS, WebCookieAcceptPolicy::NEVER, WebCookieAcceptPolicy::BLOCK_THIRD_PARTY})
+  {
+    manager.SetCookieAcceptPolicy(policy);
+    DALI_TEST_CHECK(static_cast<int>(native->GetCookieAcceptPolicy()) == static_cast<int>(policy));
+    DALI_TEST_CHECK(privateNative->GetCookieAcceptPolicy() == Dali::WebEngineCookieManager::CookieAcceptPolicy::NO_THIRD_PARTY);
+  }
+  WebCookieManagerExtension::SetPersistentStorage(manager, "/cookie-store");
+  auto& state = Test::WebEngine::GetCookieState(native);
+  DALI_TEST_EQUALS(state.storageCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(state.path, std::string("/cookie-store"), TEST_LOCATION);
+  DALI_TEST_CHECK(state.storage == Dali::WebEngineCookieManager::CookiePersistentStorage::SQLITE);
+  WebCookieManagerExtension::SetPersistentStorage(privateProfile.GetCookieManager(), "/private-store");
+  DALI_TEST_EQUALS(Test::WebEngine::GetCookieState(privateNative).storageCalls, 0, TEST_LOCATION);
+  DALI_TEST_ASSERTION(manager.SetCookieAcceptPolicy(static_cast<WebCookieAcceptPolicy>(99)), "Invalid cookie acceptance policy");
+  Test::WebEngine::TerminateRuntime();
+  WebCookieManagerExtension::SetPersistentStorage(manager, "/after-termination");
+  manager.SetCookieAcceptPolicy(WebCookieAcceptPolicy::ALWAYS);
+  DALI_TEST_CHECK(WebCookieManagerExtension::CookieChangedSignal(manager).Empty());
+  DALI_TEST_EQUALS(state.storageCalls, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!Test::WebEngine::CaptureCookieWatch(native));
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerSignalSubscriptionsP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Cookie signal");
+  auto* native = Dali::Ui::Integration::GetImpl(profile).GetEngineProfile()->GetCookieManager();
+
+  struct Listener : ConnectionTracker
+  {
+    explicit Listener(int& calls)
+    : callCount(calls)
+    {
+    }
+
+    void OnCookieChanged()
+    {
+      ++callCount;
+    }
+
+    int& callCount;
+  };
+
+  int survivingCalls = 0;
+  int scopedCalls = 0;
+  auto eventThread = std::this_thread::get_id();
+  bool ranOnEventThread = false;
+  ConnectionTracker survivor;
+  auto& signal = WebCookieManagerExtension::CookieChangedSignal(profile.GetCookieManager());
+  signal.Connect(&survivor, [&]
+  {
+    ++survivingCalls;
+    ranOnEventThread = std::this_thread::get_id() == eventThread;
+  });
+  auto nativeWatch = Test::WebEngine::CaptureCookieWatch(native);
+  DALI_TEST_CHECK(nativeWatch);
+  {
+    Listener scoped(scopedCalls);
+    signal.Connect(&scoped, &Listener::OnCookieChanged);
+    std::thread delivery(nativeWatch);
+    delivery.join();
+    DALI_TEST_EQUALS(survivingCalls, 0, TEST_LOCATION);
+    DALI_TEST_EQUALS(scopedCalls, 0, TEST_LOCATION);
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+    DALI_TEST_CHECK(ranOnEventThread);
+    DALI_TEST_EQUALS(survivingCalls, 1, TEST_LOCATION);
+    DALI_TEST_EQUALS(scopedCalls, 1, TEST_LOCATION);
+  }
+
+  nativeWatch();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+  DALI_TEST_EQUALS(survivingCalls, 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(scopedCalls, 1, TEST_LOCATION);
+  survivor.DisconnectAll();
+  DALI_TEST_CHECK(signal.Empty());
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerSignalProfileIsolationP(void)
+{
+  UiTestApplication application;
+  auto first = WebProfile::New("First cookie signal");
+  auto second = WebProfile::New("Second cookie signal");
+  auto firstManager = first.GetCookieManager();
+  auto secondManager = second.GetCookieManager();
+  auto firstEngineProfile = Dali::Ui::Integration::GetImpl(first).GetEngineProfile();
+  auto* firstNative = firstEngineProfile->GetCookieManager();
+  auto* secondNative = Dali::Ui::Integration::GetImpl(second).GetEngineProfile()->GetCookieManager();
+  int firstCalls = 0;
+  int secondCalls = 0;
+  ConnectionTracker subscribers;
+  WebCookieManagerExtension::CookieChangedSignal(firstManager).Connect(&subscribers, [&] { ++firstCalls; });
+  WebCookieManagerExtension::CookieChangedSignal(secondManager).Connect(&subscribers, [&] { ++secondCalls; });
+  auto firstWatch = Test::WebEngine::CaptureCookieWatch(firstNative);
+  auto secondWatch = Test::WebEngine::CaptureCookieWatch(secondNative);
+
+  firstWatch();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+  DALI_TEST_EQUALS(firstCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondCalls, 0, TEST_LOCATION);
+
+  // A queued notification and subsequent native calls must not reach an expired profile.
+  firstWatch();
+  first.Reset();
+  DALI_TEST_CHECK(firstManager);
+  DALI_TEST_CHECK(!Test::WebEngine::CaptureCookieWatch(firstNative));
+  DALI_TEST_EQUALS(subscribers.GetConnectionCount(), 1u, TEST_LOCATION);
+  firstWatch();
+  secondWatch();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+  DALI_TEST_EQUALS(firstCalls, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondCalls, 1, TEST_LOCATION);
+
+  secondWatch();
+  Test::WebEngine::TerminateRuntime();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+  DALI_TEST_EQUALS(secondCalls, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerSignalConcurrentDestructionP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Concurrent cookie signal");
+  auto manager = profile.GetCookieManager();
+  auto engineProfile = Dali::Ui::Integration::GetImpl(profile).GetEngineProfile();
+  auto* native = engineProfile->GetCookieManager();
+  int calls = 0;
+  ConnectionTracker subscriber;
+  WebCookieManagerExtension::CookieChangedSignal(manager).Connect(&subscriber, [&] { ++calls; });
+  auto nativeWatch = Test::WebEngine::CaptureCookieWatch(native);
+
+  std::atomic<bool> delivered{false};
+  std::atomic<bool> stop{false};
+  std::thread worker([&]
+  {
+    nativeWatch();
+    delivered.store(true);
+    while(!stop.load())
+    {
+      nativeWatch();
+      std::this_thread::yield();
+    }
+  });
+  while(!delivered.load())
+  {
+    std::this_thread::yield();
+  }
+  profile.Reset();
+  stop.store(true);
+  worker.join();
+  nativeWatch();
+  DALI_TEST_CHECK(!Test::WebEngine::CaptureCookieWatch(native));
+  DALI_TEST_CHECK(!Test::WaitForEventThreadTrigger(1, 0));
+  DALI_TEST_EQUALS(calls, 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(subscriber.GetConnectionCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebCookieManagerSignalReleasesLastProfileHandleP(void)
+{
+  UiTestApplication application;
+  auto profile = WebProfile::New("Cookie signal release");
+  auto manager = profile.GetCookieManager();
+  auto engineProfile = Dali::Ui::Integration::GetImpl(profile).GetEngineProfile();
+  auto* native = engineProfile->GetCookieManager();
+  int calls = 0;
+  ConnectionTracker subscriber;
+  auto& signal = WebCookieManagerExtension::CookieChangedSignal(manager);
+  signal.Connect(&subscriber, [&] { profile.Reset(); });
+  signal.Connect(&subscriber, [&] { ++calls; });
+
+  Test::WebEngine::CaptureCookieWatch(native)();
+  DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1));
+  DALI_TEST_CHECK(!profile);
+  DALI_TEST_CHECK(manager);
+  DALI_TEST_EQUALS(calls, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(!Test::WebEngine::CaptureCookieWatch(native));
+  DALI_TEST_EQUALS(subscriber.GetConnectionCount(), 0u, TEST_LOCATION);
   END_TEST;
 }

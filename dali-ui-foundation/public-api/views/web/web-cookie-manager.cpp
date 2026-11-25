@@ -56,6 +56,11 @@ void WebCookieManager::ClearAllCookies()
   Integration::GetImpl(*this).ClearAllCookies();
 }
 
+void WebCookieManager::SetCookieAcceptPolicy(WebCookieAcceptPolicy policy)
+{
+  Integration::GetImpl(*this).SetCookieAcceptPolicy(policy);
+}
+
 WebCookieManager::WebCookieManager(Integration::WebCookieManagerImpl& implementation)
 : BaseHandle(&implementation)
 {

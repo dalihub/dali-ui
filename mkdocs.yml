@@ -50,6 +50,8 @@ plugins:
             EXTRACT_PRIVATE: "NO"
             EXTRACT_STATIC: "YES"
             HIDE_UNDOC_MEMBERS: "NO"
+            # Use one @supported tag per engine in each API comment.
+            ALIASES: '"supported=\par Supported web engines^^"'
             SOURCE_BROWSER: "YES"
             STRIP_FROM_INC_PATH: "."
             INCLUDE_PATH: "dali-ui-foundation dali-ui-components"

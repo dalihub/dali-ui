@@ -57,6 +57,33 @@ WebView uses Chromium by default. To use another web engine, select it with `Web
 WebView::SetWebEngineType(WebEngineType::LWE);
 ```
 
+### Shared Profiles and Cookie Policy
+
+Create a named `WebProfile` to share browsing data between WebViews. Pass `true` as the second argument to `WebProfile::New()` to create an incognito profile. Keep the profile handle if you plan to create more views after closing the current ones. Each WebView keeps its profile alive.
+
+```cpp
+#include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
+#include <dali-ui-foundation/public-api/views/web/web-profile.h>
+#include <dali-ui-foundation/public-api/views/web/web-view.h>
+
+using namespace Dali::Ui;
+
+auto profile = WebProfile::New("Browser");
+if(profile)
+{
+  auto cookies = profile.GetCookieManager();
+  cookies.SetCookieAcceptPolicy(WebCookieAcceptPolicy::BLOCK_THIRD_PARTY);
+  auto firstView = WebView::New(profile);
+  auto secondView = WebView::New(profile);
+}
+```
+
+`SetCookieAcceptPolicy()` is available from 3.0.3 on Tizen Chromium. Choose `ALWAYS`, `NEVER`, or `BLOCK_THIRD_PARTY` for the profile. Call cookie operations on the DALi event thread. Use `ClearAllCookies()` to clear the profile's cookie store.
+
+`GetCookieManager()` returns the same manager for the lifetime of the profile. A manager handle does not keep the profile alive. If the profile has been destroyed or its cookie store is unavailable, cookie operations log an error and have no effect.
+
+The three-argument `WebProfile::New(name, incognito, injectedBundlePath)` overload is deprecated.
+
 ---
 
 ## 2. Loading Content

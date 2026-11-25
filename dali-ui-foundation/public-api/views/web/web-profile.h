@@ -110,8 +110,11 @@ public:
   /**
    * @brief Gets the cookie manager for this profile.
    *
-   * The returned handle is initialized even when the backend does not support
-   * cookie management. Its operations then do nothing.
+   * This profile retains the same cookie manager for its lifetime. The
+   * returned handle does not extend the lifetime of the profile. It can
+   * be initialized even when the backend does not provide a cookie store.
+   * Cookie operations report an error and have no effect if the store
+   * is unavailable or this profile has been destroyed.
    *
    * @SINCE_3_0.0
    * @return The cookie manager associated with this profile
@@ -140,6 +143,8 @@ public:
    * @param[in] incognito Whether browsing data is private
    * @param[in] injectedBundlePath The bundle path, or an empty string for no bundle
    * @return The new profile, or an empty handle on failure; no default fallback
+   * @deprecated Use Dali::Ui::Extension::WebProfile::New()
+   * from `dali-ui-foundation/extension-api/web-profile.h`.
    * @see New(const Dali::String&, bool)
    */
   static WebProfile New(const Dali::String& name, bool incognito, const Dali::String& injectedBundlePath);

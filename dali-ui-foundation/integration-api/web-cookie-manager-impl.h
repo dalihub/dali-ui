@@ -17,10 +17,12 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
+#include <dali-ui-foundation/extension-api/web-cookie-manager.h>
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
+#include <dali/public-api/object/weak-handle.h>
+#include <memory>
 
 namespace DALI_NAMESPACE
 {
@@ -42,15 +44,27 @@ class DALI_UI_API WebCookieManagerImpl : public BaseObject
 public:
   static WebCookieManagerImplPtr New(const WebProfile& profile);
 
-  void ClearAllCookies();
-  bool IsEqual(const WebCookieManagerImpl& rhs) const;
+  void                                                  ClearAllCookies();
+  Extension::WebCookieManager::CookieChangedSignalType& CookieChangedSignal();
+  bool                                                  IsEqual(const WebCookieManagerImpl& rhs) const;
+  void                                                  SetCookieAcceptPolicy(WebCookieAcceptPolicy policy);
+  void                                                  SetPersistentStorage(const Dali::String& directory);
 
 protected:
   explicit WebCookieManagerImpl(const WebProfile& profile);
   ~WebCookieManagerImpl() override;
 
 private:
-  WebProfile mProfile;
+  friend class WebProfileImpl;
+
+  void DetachFromProfile(Dali::WebEngineCookieManager* manager);
+  void EmitCookieChanged();
+
+  struct WatchState;
+  Dali::WeakHandle<WebProfile>                                          mProfile;
+  std::unique_ptr<Extension::WebCookieManager::CookieChangedSignalType> mCookieChangedSignal;
+  Extension::WebCookieManager::CookieChangedSignalType                  mInactiveSignal;
+  std::shared_ptr<WatchState>                                           mWatch;
 };
 
 inline WebCookieManagerImpl& GetImpl(WebCookieManager& manager)

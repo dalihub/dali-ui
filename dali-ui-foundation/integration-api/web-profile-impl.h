@@ -17,11 +17,12 @@
  *
  */
 
+#include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-profile.h>
+#include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
-#include <dali/public-api/object/weak-handle.h>
 
 namespace DALI_NAMESPACE
 {
@@ -53,15 +54,26 @@ public:
   WebCookieManager GetCookieManager() const;
   bool             IsEqual(const WebProfileImpl& rhs) const;
 
+  bool SetCacheEnabled(bool enabled);
+  bool SetCertificateFilePath(const Dali::String& path);
+  void SetAppId(const Dali::String& appId);
+  bool SetAppVersion(const Dali::String& version);
+  void SetTimeOffset(double offset);
+  void SetTimeZoneOffset(double zoneOffset, double daylightSavingTime);
+  bool DeleteAllWebStorage();
+  bool DeleteAllWebIndexedDatabase();
+  void SetMaxRefreshRate(int32_t rate);
+  void RegisterUrlSchemesAsCorsEnabled(const Dali::Vector<Dali::String>& schemes);
+
 protected:
   WebProfileImpl(const Dali::String& name, bool incognito, Dali::WebEngineProfilePtr profile);
   ~WebProfileImpl() override;
 
 private:
-  Dali::String                               mName;
-  bool                                       mIncognito;
-  Dali::WebEngineProfilePtr                  mProfile;
-  mutable Dali::WeakHandle<WebCookieManager> mWebCookieManager;
+  Dali::String              mName;
+  bool                      mIncognito;
+  Dali::WebEngineProfilePtr mProfile;
+  mutable WebCookieManager  mWebCookieManager;
 };
 
 inline WebProfileImpl& GetImpl(WebProfile& profile)
