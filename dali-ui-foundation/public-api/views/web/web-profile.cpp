@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/web-profile.h>
 #include <dali-ui-foundation/integration-api/web-profile-impl.h>
 #include <dali-ui-foundation/public-api/views/web/web-profile.h>
 
@@ -63,12 +64,12 @@ WebCookieManager WebProfile::GetCookieManager() const
 
 WebProfile WebProfile::New(const Dali::String& name, bool incognito)
 {
-  return New(name, incognito, "");
+  return Integration::WebProfileImpl::New(name, incognito, "");
 }
 
 WebProfile WebProfile::New(const Dali::String& name, bool incognito, const Dali::String& injectedBundlePath)
 {
-  return Integration::WebProfileImpl::New(name, incognito, injectedBundlePath);
+  return Extension::WebProfile::New(name, incognito, injectedBundlePath);
 }
 
 WebProfile WebProfile::GetProfile(const Dali::String& name)
