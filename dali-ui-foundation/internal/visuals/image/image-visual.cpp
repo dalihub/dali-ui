@@ -1314,7 +1314,7 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
     mLoadState     = TextureManager::LoadState::LOAD_FINISHED;
 
     // Change premultiplied alpha flag after change renderer.
-    SetTexturePreMultiplied(mFastTrackLoadingTask->mPremultiplied);
+    SetTexturePreMultiplied(mFastTrackLoadingTask->mTextures[0].IsAlphaPreMultiplied());
 
     if(mFastTrackLoadingTask->mLoadPlanesAvailable)
     {
