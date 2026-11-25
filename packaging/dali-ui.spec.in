@@ -50,7 +50,7 @@ Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires:  cmake
 BuildRequires:  pkgconfig
-BuildRequires:  gawk
+BuildRequires:  awk
 BuildRequires:  pkgconfig(dali3-core)
 BuildRequires:  pkgconfig(dali3-adaptor)
 BuildRequires:  dali3-integration-devel
