@@ -7224,7 +7224,16 @@ void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)
 {
   Dali::Ui::View handle = Ui::View::DownCast(mViewImpl.Self());
 
-  if(Dali::Integration::Accessibility::IsUp())
+  const bool bridgeUp = Dali::Integration::Accessibility::IsUp();
+  if(!bridgeUp || !focusGained)
+  {
+    if(auto manager = Ui::FocusManager::Get())
+    {
+      GetImpl(manager).UpdatePendingAccessibilityFocus(handle, focusGained);
+    }
+  }
+
+  if(bridgeUp)
   {
     auto accessible = GetAccessibleObject();
     if(DALI_LIKELY(accessible))
@@ -9818,7 +9827,13 @@ SharedPtr<Ui::ViewAccessible> ViewDataImpl::GetAccessibleObject()
 
 void ViewDataImpl::NotifyAccessibilityActiveDescendantChanged(View descendant)
 {
-  if(!descendant || !Dali::Integration::Accessibility::IsUp())
+  const bool bridgeUp = Dali::Integration::Accessibility::IsUp();
+  if(auto manager = Ui::FocusManager::Get())
+  {
+    auto owner = View::DownCast(mViewImpl.Self());
+    GetImpl(manager).UpdatePendingAccessibilityActiveDescendant(owner, bridgeUp ? View() : descendant);
+  }
+  if(!bridgeUp || !descendant)
   {
     return;
   }

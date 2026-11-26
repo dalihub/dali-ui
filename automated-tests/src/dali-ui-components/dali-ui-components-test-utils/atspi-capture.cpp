@@ -154,8 +154,11 @@ public:
   PendingPtr dbus_connection_send_impl(const ConnectionPtr&, const MessagePtr& message) override
   {
     auto wireMessage = get(message);
-    if(g_strcmp0(g_dbus_message_get_interface(wireMessage), "org.a11y.atspi.Event.Object") == 0 &&
-       g_strcmp0(g_dbus_message_get_member(wireMessage), "StateChanged") == 0)
+    if(g_strcmp0(g_dbus_message_get_interface(wireMessage), "org.a11y.atspi.Event.Object") != 0)
+    {
+      return std::make_shared<Pending>();
+    }
+    if(g_strcmp0(g_dbus_message_get_member(wireMessage), "StateChanged") == 0)
     {
       auto body = g_dbus_message_get_body(wireMessage);
       if(!body || !g_variant_is_of_type(body, G_VARIANT_TYPE("(siiv(so))")))
@@ -173,7 +176,29 @@ public:
       }
       events.push_back({g_dbus_message_get_path(wireMessage), g_dbus_message_get_interface(wireMessage),
                         g_dbus_message_get_member(wireMessage), g_dbus_message_get_signature(wireMessage),
-                        state, value, reserved, g_variant_get_int32(payload), bus, path});
+                        state, value, reserved, g_variant_get_int32(payload), bus, path, {}});
+      g_variant_unref(payload);
+    }
+    else if(g_strcmp0(g_dbus_message_get_member(wireMessage), "ActiveDescendantChanged") == 0)
+    {
+      auto body = g_dbus_message_get_body(wireMessage);
+      if(!body || !g_variant_is_of_type(body, G_VARIANT_TYPE("(siiv(so))")))
+      {
+        throw std::runtime_error("Malformed serialized AT-SPI ActiveDescendantChanged body");
+      }
+      const gchar *state, *bus, *path, *descendantBus, *descendantPath;
+      gint32       value, reserved;
+      GVariant*    payload;
+      g_variant_get(body, "(&siiv(&s&o))", &state, &value, &reserved, &payload, &bus, &path);
+      if(!g_variant_is_of_type(payload, G_VARIANT_TYPE("(so)")))
+      {
+        g_variant_unref(payload);
+        throw std::runtime_error("Unexpected serialized AT-SPI ActiveDescendantChanged variant");
+      }
+      g_variant_get(payload, "(&s&o)", &descendantBus, &descendantPath);
+      events.push_back({g_dbus_message_get_path(wireMessage), g_dbus_message_get_interface(wireMessage),
+                        g_dbus_message_get_member(wireMessage), g_dbus_message_get_signature(wireMessage),
+                        state, value, reserved, 0, bus, path, descendantPath});
       g_variant_unref(payload);
     }
     return std::make_shared<Pending>();

@@ -204,6 +204,11 @@ public:
   // unlike an explicit ClearFocus() that also cancels a deferred replacement.
   void InvalidateFocusView(View view);
 
+  // Keep the latest focus gain skipped while the accessibility bridge is down.
+  void UpdatePendingAccessibilityFocus(View view, bool defer);
+
+  void UpdatePendingAccessibilityActiveDescendant(View owner, View descendant);
+
   /**
    * @brief Checks native focus while accounting for overlapping focus-in/out events.
    * @param[in] sceneHolder The scene holder to query
@@ -325,6 +330,17 @@ protected:
   ~FocusManager() override;
 
 private:
+  struct PendingAccessibilityFocus
+  {
+    WeakHandle<Window> window;
+    WeakHandle<View>   owner;
+    WeakHandle<View>   descendant;
+    bool               focusPending{false};
+  };
+
+  PendingAccessibilityFocus& GetOrCreatePendingAccessibilityFocus(Window window, View owner);
+  void OnAccessibilityBridgeEnabled();
+
   typedef std::vector<WeakHandle<View>> FocusStack;
 
   ///< Focus history stack
@@ -599,6 +615,7 @@ private:
   Ui::FocusManager::WindowFocusChangedSignalType               mWindowFocusChangedSignal;
   std::vector<IndependentFocusState>                           mIndependentFocusStates;
   std::vector<std::pair<WeakHandle<View>, FocusChangeContext>> mFocusNotificationContexts;
+  std::vector<PendingAccessibilityFocus>                       mPendingAccessibilityFocus;
   WeakHandle<View>                                             mCurrentFocusView;
   ///< A weak handle to the current focused view
   WeakHandle<Window> mCurrentFocusWindow;

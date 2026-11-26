@@ -24,6 +24,7 @@
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/focused-actor-provider.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
@@ -37,11 +38,13 @@
 #include <dali/public-api/object/property-map.h>
 #include <algorithm>
 #include <cstring> // for strcmp
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/ui-config-impl.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-indication-context-impl.h>
 
@@ -213,6 +216,7 @@ FocusManager::FocusManager()
 {
   Dali::Integration::RegisterFocusedActorProvider(mFocusedActorProvider.get());
   LifecycleController::Get().PreInitSignal().Connect(mSlotDelegate, &FocusManager::OnAdaptorInit);
+  Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(mSlotDelegate, &FocusManager::OnAccessibilityBridgeEnabled);
   ScrollStateObserver::Get().WindowDragStartedSignal().Connect(mSlotDelegate, &FocusManager::OnDragStarted);
 }
 
@@ -670,6 +674,127 @@ bool FocusManager::SetIndependentFocusEnabled(Window window, bool enabled)
                                   mIndependentFocusStates.end());
   }
   return true;
+}
+
+FocusManager::PendingAccessibilityFocus& FocusManager::GetOrCreatePendingAccessibilityFocus(Window window, View owner)
+{
+  auto& pending = mPendingAccessibilityFocus;
+  pending.erase(
+    std::remove_if(pending.begin(), pending.end(), [&](const auto& entry)
+    {
+      auto pendingWindow = entry.window.GetHandle();
+      auto pendingOwner  = entry.owner.GetHandle();
+      return !pendingWindow || !pendingOwner || (pendingOwner == owner && pendingWindow != window);
+    }),
+    pending.end());
+
+  auto entry = std::find_if(pending.begin(), pending.end(), [&](const auto& record)
+  {
+    return record.window.GetHandle() == window;
+  });
+  if(entry == pending.end())
+  {
+    pending.push_back({window, owner, {}, false});
+    return pending.back();
+  }
+  if(entry->owner.GetHandle() != owner)
+  {
+    *entry = {window, owner, {}, false};
+  }
+  return *entry;
+}
+
+void FocusManager::UpdatePendingAccessibilityFocus(View view, bool defer)
+{
+  if(defer && view.IsConnectedToScene())
+  {
+    if(auto window = Window::DownCast(Dali::Integration::SceneHolder::Get(view)))
+    {
+      GetOrCreatePendingAccessibilityFocus(window, view).focusPending = true;
+      return;
+    }
+  }
+
+  auto& pending = mPendingAccessibilityFocus;
+  pending.erase(
+    std::remove_if(pending.begin(), pending.end(), [&](const auto& entry)
+    {
+      auto owner = entry.owner.GetHandle();
+      return !entry.window.GetHandle() || !owner || owner == view;
+    }),
+    pending.end());
+}
+
+void FocusManager::UpdatePendingAccessibilityActiveDescendant(View owner, View descendant)
+{
+  if(!descendant)
+  {
+    for(auto& entry : mPendingAccessibilityFocus)
+    {
+      if(entry.owner.GetHandle() == owner)
+      {
+        entry.descendant.Reset();
+        break;
+      }
+    }
+    return;
+  }
+
+  if(owner.IsConnectedToScene())
+  {
+    auto window = Window::DownCast(Dali::Integration::SceneHolder::Get(owner));
+    if(window && KeyInputFocusManager::Get().GetCurrentFocusView(window) == owner)
+    {
+      GetOrCreatePendingAccessibilityFocus(window, owner).descendant = descendant;
+    }
+  }
+}
+
+void FocusManager::OnAccessibilityBridgeEnabled()
+{
+  auto pending = std::exchange(mPendingAccessibilityFocus, {});
+  if(pending.empty())
+  {
+    return;
+  }
+
+  auto keyManager = KeyInputFocusManager::Get();
+  for(const auto& entry : pending)
+  {
+    auto window = entry.window.GetHandle();
+    auto owner  = entry.owner.GetHandle();
+    if(!window || !owner || keyManager.GetCurrentFocusView(window) != owner ||
+       !owner.IsConnectedToScene() || Dali::Integration::SceneHolder::Get(owner) != window)
+    {
+      continue;
+    }
+
+    auto descendant = entry.descendant.GetHandle();
+    if(descendant)
+    {
+      auto parent = descendant.GetParent();
+      while(parent && parent != owner)
+      {
+        parent = parent.GetParent();
+      }
+      if(!parent)
+      {
+        descendant.Reset();
+      }
+    }
+
+    if(entry.focusPending || descendant)
+    {
+      if(auto accessible = ViewDataImpl::Get(GetImpl(owner)).GetAccessibleObject())
+      {
+        accessible->EmitFocused(true);
+        if(descendant)
+        {
+          owner.NotifyAccessibilityActiveDescendantChanged(descendant);
+        }
+      }
+    }
+  }
 }
 
 View FocusManager::GetCurrentFocusView(Window window)
