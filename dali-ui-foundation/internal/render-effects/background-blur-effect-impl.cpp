@@ -95,7 +95,7 @@ BackgroundBlurEffectImpl::BackgroundBlurEffectImpl()
 }
 
 BackgroundBlurEffectImpl::BackgroundBlurEffectImpl(uint32_t blurRadius)
-: RenderEffectImpl(),
+: RenderEffectImpl(0.1f),
   mInternalRoot(Actor::New()),
   mDownscaleFactor(BLUR_EFFECT_DOWNSCALE_FACTOR),
   mBlurRadius(blurRadius),

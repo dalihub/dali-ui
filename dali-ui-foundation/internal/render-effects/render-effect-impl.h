@@ -118,9 +118,10 @@ public:
 
 protected:
   /**
-   * @copydoc Dali::Ui::RenderEffect::RenderEffect
+   * @brief Creates an uninitialized render effect.
+   * @param[in] ditherNoiseStrength Initial dithering strength, clamped to [0.0f, 1.0f].
    */
-  RenderEffectImpl();
+  explicit RenderEffectImpl(float ditherNoiseStrength = 0.0f);
 
   /**
    * @copydoc Dali::Ui::RenderEffect::~RenderEffect
