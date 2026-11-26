@@ -39,7 +39,6 @@ namespace Internal
 namespace
 {
 static constexpr uint32_t RENDER_EFFECT_RENDER_PASS_TAG = 11;
-static constexpr float    DEFAULT_DITHER_NOISE_STRENGTH = 0.1f;
 static constexpr float    DITHER_NOISE_UNIFORM_SCALE    = 0.2f;
 
 float GetDitherNoiseUniformStrength(float strength)
@@ -62,7 +61,6 @@ RenderEffectImpl::RenderEffectImpl()
 : mRenderer(),
   mOwnerView(),
   mTargetSize(Vector2::ZERO),
-  mDitherNoiseStrength(DEFAULT_DITHER_NOISE_STRENGTH),
   mIsActivated(false)
 {
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Verbose, "[RenderEffect:%p] Constructor\n", this);

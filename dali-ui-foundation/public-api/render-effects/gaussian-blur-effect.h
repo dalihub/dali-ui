@@ -176,6 +176,8 @@ public:
   /**
    * @brief Gets the dithering noise strength of the final blur output.
    *
+   * The default value is 0.1f.
+   *
    * @SINCE_3_0.0
    * @return The dithering noise strength.
    */
