@@ -100,7 +100,7 @@ FastTrackLoadingTask::FastTrackLoadingTask(const VisualUrl& url, ImageDimensions
   mPreMultiplyOnLoad(preMultiplyOnLoad),
   mCallback(),
   mTextureUploadManager(Dali::Devel::TextureUploadManager::Get()),
-  mImageInformations(),
+  mImageInformation(),
   mPixelData(),
   mOrientationCorrection(orientationCorrection),
   mLoadSuccess(false),
@@ -121,12 +121,12 @@ void FastTrackLoadingTask::PrepareTexture()
   const uint32_t requiredTexturesCount = mLoadPlanesAvailable ? 4u : 1u;
 
   mTextures.resize(requiredTexturesCount);
-  mImageInformations.resize(requiredTexturesCount);
+  mImageInformation.resize(requiredTexturesCount);
   for(uint32_t index = 0u; index < requiredTexturesCount; ++index)
   {
     mTextures[index] = mTextureUploadManager.GenerateTexture2D();
 
-    mImageInformations[index].resourceId = Dali::Integration::GetTextureResourceId(mTextures[index]);
+    mImageInformation[index].resourceId = Dali::Integration::GetTextureResourceId(mTextures[index]);
   }
 
   if(mLoadPlanesAvailable)
@@ -142,15 +142,15 @@ void FastTrackLoadingTask::OnComplete(AsyncTaskPtr task)
 {
   if(mLoadSuccess)
   {
-    for(uint32_t index = 0u; index < mImageInformations.size(); ++index)
+    for(uint32_t index = 0u; index < mImageInformation.size(); ++index)
     {
-      Dali::Integration::SetTextureSize(mTextures[index], mImageInformations[index].width,
-                                        mImageInformations[index].height);
-      Dali::Integration::SetTexturePixelFormat(mTextures[index], mImageInformations[index].format);
-      Dali::Integration::SetTextureAlphaPreMultiplied(mTextures[index], mImageInformations[index].preMultiplied);
+      Dali::Integration::SetTextureSize(mTextures[index], mImageInformation[index].width,
+                                        mImageInformation[index].height);
+      Dali::Integration::SetTexturePixelFormat(mTextures[index], mImageInformation[index].format);
+      Dali::Integration::SetTextureAlphaPreMultiplied(mTextures[index], mImageInformation[index].preMultiplied);
       if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
       {
-        // Call Upload API, only for add informations of GPU memory usage.
+        // Call Upload API, only for add information of GPU memory usage.
         std::string content = mUrl.GetUrl();
         if(index > 0u || (index == 0u && mPlanesLoaded))
         {
@@ -229,7 +229,7 @@ void FastTrackLoadingTask::Load()
   {
     mLoadSuccess = false;
     DALI_LOG_ERROR("FastTrackLoadingTask::Load: Loading is failed: ResourceId : %d url : [%s]\n",
-                   mImageInformations[0u].resourceId, mUrl.GetUrl().c_str());
+                   mImageInformation[0u].resourceId, mUrl.GetUrl().c_str());
   }
   else
   {
@@ -269,12 +269,12 @@ void FastTrackLoadingTask::Load()
       mPixelData[A_INDEX]             = GetDummyAPixelData();
     }
 
-    if(DALI_UNLIKELY(mPixelData.size() != mImageInformations.size()))
+    if(DALI_UNLIKELY(mPixelData.size() != mImageInformation.size()))
     {
       DALI_LOG_ERROR(
         "FastTrackLoadingTask::Load: Undefined case. pixelBuffers.size() : %zu, image size : %zu, ResourceId : %d, "
         "url : [%s]\n",
-        pixelBuffers.size(), mImageInformations.size(), mImageInformations[0u].resourceId, mUrl.GetUrl().c_str());
+        pixelBuffers.size(), mImageInformation.size(), mImageInformation[0u].resourceId, mUrl.GetUrl().c_str());
       mLoadSuccess = false;
     }
   }
@@ -309,17 +309,17 @@ void FastTrackLoadingTask::UploadToTexture()
 {
   if(mLoadSuccess)
   {
-    DALI_ASSERT_DEBUG(mPixelData.size() == mImageInformations.size());
+    DALI_ASSERT_DEBUG(mPixelData.size() == mImageInformation.size());
 
     uint32_t index = 0u;
     for(auto&& pixelData : mPixelData)
     {
-      mImageInformations[index].width         = pixelData.GetWidth();
-      mImageInformations[index].height        = pixelData.GetHeight();
-      mImageInformations[index].format        = pixelData.GetPixelFormat();
-      mImageInformations[index].preMultiplied = pixelData.IsAlphaPreMultiplied();
+      mImageInformation[index].width         = pixelData.GetWidth();
+      mImageInformation[index].height        = pixelData.GetHeight();
+      mImageInformation[index].format        = pixelData.GetPixelFormat();
+      mImageInformation[index].preMultiplied = pixelData.IsAlphaPreMultiplied();
 
-      mTextureUploadManager.RequestUpload(mImageInformations[index].resourceId, pixelData);
+      mTextureUploadManager.RequestUpload(mImageInformation[index].resourceId, pixelData);
 
       pixelData.Reset();
 
