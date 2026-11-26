@@ -6,6 +6,8 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/devel-api/actors/actor-devel.h>
+#include <dali/devel-api/atspi-interfaces/accessible.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h>
 #include "dali-ui-components-test-utils/atspi-capture.h"
 
 using namespace Dali;
@@ -309,5 +311,85 @@ int UtcDaliDialogShowingBridgeCullingTransitionsP(void)
   DALI_TEST_CHECK(!content.GetProperty<bool>(DevelActor::Property::CULLED));
   DALI_TEST_EQUALS(fixture.capture.Events().size(), 2u, TEST_LOCATION);
   DALI_TEST_CHECK(IsShowingMessage(fixture.capture.Events()[1], content, 1));
+  END_TEST;
+}
+
+int UtcDaliIndependentFocusNotifiedWhenAccessibilityBridgeStartsP(void)
+{
+  EventFixture fixture;
+  using Bridge = Dali::Integration::Accessibility::Bridge;
+  auto bridge = Bridge::GetCurrentBridge();
+  bridge->ForceDown();
+  DALI_TEST_CHECK(!Dali::Integration::Accessibility::IsUp());
+
+  auto window = Window::New(PositionSize(0, 0, 480, 800), "independent-focus-accessibility");
+  window.Show();
+  auto previous = fixture.Content();
+  auto current  = fixture.Content();
+  window.Add(previous);
+  window.Add(current);
+  previous.SetFocusable(true);
+  current.SetFocusable(true);
+  auto staleDescendant   = fixture.Content();
+  auto clearedDescendant = fixture.Content();
+  auto activeDescendant  = fixture.Content();
+  previous.Add(staleDescendant);
+  current.Add(clearedDescendant);
+  current.Add(activeDescendant);
+
+  auto manager = FocusManager::Get();
+  DALI_TEST_CHECK(manager.SetIndependentFocusEnabled(window, true));
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(previous));
+  previous.NotifyAccessibilityActiveDescendantChanged(staleDescendant);
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(current));
+  current.NotifyAccessibilityActiveDescendantChanged(clearedDescendant);
+  current.NotifyAccessibilityActiveDescendantChanged(activeDescendant);
+  DALI_TEST_CHECK(manager.GetCurrentFocusView(window) == current);
+  auto registerWindows = [&]()
+  {
+    bridge->AddTopLevelWindow(Dali::Accessibility::Accessible::Get(fixture.application.GetScene().GetRootLayer()));
+    bridge->AddTopLevelWindow(Dali::Accessibility::Accessible::Get(window.GetRootLayer()));
+  };
+  registerWindows();
+  fixture.capture.Clear();
+
+  DALI_TEST_CHECK(bridge->ForceUp() == Bridge::ForceUpResult::JUST_STARTED);
+  DALI_TEST_CHECK(manager.SetCurrentFocusView(current));
+
+  const auto ownerPath      = "/org/a11y/atspi/accessible/" + std::to_string(current.GetProperty<int>(Actor::Property::ID));
+  const auto descendantPath = "/org/a11y/atspi/accessible/" + std::to_string(activeDescendant.GetProperty<int>(Actor::Property::ID));
+  unsigned int focusEvents      = 0;
+  unsigned int descendantEvents = 0;
+  for(const auto& event : fixture.capture.Events())
+  {
+    if(event.state == "focused" && event.value == 1)
+    {
+      DALI_TEST_EQUALS(event.path, ownerPath, TEST_LOCATION);
+      DALI_TEST_EQUALS(descendantEvents, 0u, TEST_LOCATION);
+      ++focusEvents;
+    }
+    else if(event.member == "ActiveDescendantChanged")
+    {
+      DALI_TEST_EQUALS(event.path, ownerPath, TEST_LOCATION);
+      DALI_TEST_EQUALS(event.activeDescendantPath, descendantPath, TEST_LOCATION);
+      DALI_TEST_EQUALS(focusEvents, 1u, TEST_LOCATION);
+      ++descendantEvents;
+    }
+  }
+  DALI_TEST_EQUALS(focusEvents, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(descendantEvents, 1u, TEST_LOCATION);
+
+  bridge->ForceDown();
+  current.NotifyAccessibilityActiveDescendantChanged(clearedDescendant);
+  current.NotifyAccessibilityActiveDescendantChanged({});
+  registerWindows();
+  fixture.capture.Clear();
+  DALI_TEST_CHECK(bridge->ForceUp() == Bridge::ForceUpResult::JUST_STARTED);
+  for(const auto& event : fixture.capture.Events())
+  {
+    DALI_TEST_CHECK(event.state != "focused");
+    DALI_TEST_CHECK(event.member != "ActiveDescendantChanged");
+  }
+  fixture.capture.Stop();
   END_TEST;
 }

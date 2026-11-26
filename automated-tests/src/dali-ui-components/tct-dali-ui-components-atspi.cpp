@@ -11,6 +11,7 @@ extern int UtcDaliDialogShowingBridgeRapidHideShowCoalescesLatestP(void);
 extern int UtcDaliDialogShowingBridgeCaptureStartStopIsIdempotentP(void);
 extern int UtcDaliDialogShowingBridgeWorldAlphaTransitionsP(void);
 extern int UtcDaliDialogShowingBridgeCullingTransitionsP(void);
+extern int UtcDaliIndependentFocusNotifiedWhenAccessibilityBridgeStartsP(void);
 
 // Separate opt-in transport tests: no generated normal-suite header and no
 // adaptor-internal/GIO dependency added to the normal Components executable.
@@ -23,6 +24,7 @@ static testcase tc_array[] = {
   {"UtcDaliDialogShowingBridgeCaptureStartStopIsIdempotentP", UtcDaliDialogShowingBridgeCaptureStartStopIsIdempotentP, nullptr, nullptr},
   {"UtcDaliDialogShowingBridgeWorldAlphaTransitionsP", UtcDaliDialogShowingBridgeWorldAlphaTransitionsP, nullptr, nullptr},
   {"UtcDaliDialogShowingBridgeCullingTransitionsP", UtcDaliDialogShowingBridgeCullingTransitionsP, nullptr, nullptr},
+  {"UtcDaliIndependentFocusNotifiedWhenAccessibilityBridgeStartsP", UtcDaliIndependentFocusNotifiedWhenAccessibilityBridgeStartsP, nullptr, nullptr},
   {nullptr, nullptr, nullptr, nullptr}};
 
 int main(int argc, char* const argv[])

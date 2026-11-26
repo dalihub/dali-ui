@@ -23,6 +23,7 @@ struct AtspiStateEvent
   int         payload;
   std::string sourceBus;
   std::string sourcePath;
+  std::string activeDescendantPath;
 };
 
 // Captures actual BridgeObject serialized emissions at the transport boundary.
