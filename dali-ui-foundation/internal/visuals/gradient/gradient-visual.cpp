@@ -315,6 +315,7 @@ void GradientVisual::UpdateUiScale(float effectiveScale)
   if(mImpl->mViewEffectiveScale != effectiveScale)
   {
     mImpl->mViewEffectiveScale = effectiveScale;
+    mImpl->mRenderer.SetProperty(Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE, effectiveScale);
     if(mGradient && mGradient->GetUnits() == Ui::Gradient::Units::USER_SPACE)
     {
       UpdateAlignmentTransform();

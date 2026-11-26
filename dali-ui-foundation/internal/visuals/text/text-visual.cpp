@@ -80,9 +80,6 @@ DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_PERFORMANCE_MARKER, false);
 
 const int CUSTOM_PROPERTY_COUNT(24); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, gradient uniforms
 
-// Private key on additional tile renderers avoids allocating a name during transform updates.
-constexpr Property::Index TILE_TRANSFORM_POLICY_KEY = 0;
-
 static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
 static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::Integration::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                              22);
@@ -690,19 +687,20 @@ void TextVisual::OnSetTransform()
   if(mRendererList.size() > 1u)
   {
     TextVisualPtr keepAlive(this);
-    const float   policy        = IsTransformMapSetForFittingMode() ? 0.0f : 1.0f;
+    const bool    policy        = !IsTransformMapSetForFittingMode();
     const auto    rendererCount = mRendererList.size();
     // A callback may replace or remove tiles. Keep the current handle, not a
     // reference into the container, and stop when this publication changes.
     for(uint32_t tile = 1u; tile < rendererCount; ++tile)
     {
       auto       renderer = mRendererList[tile];
-      const auto index    = renderer.GetPropertyIndex(TILE_TRANSFORM_POLICY_KEY);
-      if(renderer.GetProperty<float>(index) != policy)
+      const auto index    = Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE_ENABLED;
+      renderer.SetProperty(Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE, mImpl->mViewEffectiveScale);
+      if(renderer.GetProperty<bool>(index) != policy)
       {
         renderer.SetProperty(index, policy);
         if(mRendererList.size() != rendererCount || mRendererList[tile] != renderer ||
-           policy != (IsTransformMapSetForFittingMode() ? 0.0f : 1.0f))
+           policy != !IsTransformMapSetForFittingMode())
         {
           break;
         }
@@ -1295,7 +1293,8 @@ bool TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
   if(renderer != mImpl->mRenderer)
   {
     // Cropped transforms use the same units and scale policy as the full visual.
-    renderer.RegisterUniqueProperty(TILE_TRANSFORM_POLICY_KEY, "visualTransformUseEffectiveScale", IsTransformMapSetForFittingMode() ? 0.0f : 1.0f);
+    renderer.SetProperty(Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE, mImpl->mViewEffectiveScale);
+    renderer.SetProperty(Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE_ENABLED, !IsTransformMapSetForFittingMode());
   }
   // Crop the full visual transform in raster proportions. Raster pixels may
   // already include UI scale, whereas an authored absolute size does not.

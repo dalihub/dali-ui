@@ -121,6 +121,7 @@ void Visual::Base::Initialize()
 
   if(mImpl->mRenderer)
   {
+    mImpl->mRenderer.SetProperty(Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE, mImpl->mViewEffectiveScale);
     RegisterMixColor();
     RegisterDecoration();
 
@@ -135,7 +136,7 @@ void Visual::Base::Initialize()
 
     if(mImpl->mTransformMapSetForFittingMode)
     {
-      mImpl->mRenderer.RegisterUniqueProperty("visualTransformUseEffectiveScale", 0.0f);
+      mImpl->mRenderer.SetProperty(Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE_ENABLED, false);
     }
   }
 }
@@ -514,6 +515,10 @@ void Visual::Base::SetTransformAndSize(const Property::Map& transform, Size cont
 {
   mImpl->mControlSize        = controlSize;
   mImpl->mViewEffectiveScale = effectiveScale;
+  if(mImpl->mRenderer)
+  {
+    mImpl->mRenderer.SetProperty(Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE, effectiveScale);
+  }
   mImpl->mTransformMapChanged |= !transform.Empty();
   if(mImpl->mTransformMapChanged && mImpl->mTransformMapUsingDefault)
   {
@@ -1026,7 +1031,7 @@ void Visual::Base::SetTransformMapUsageForFittingMode(bool used)
 {
   mImpl->mTransformMapSetForFittingMode = used;
 
-  mImpl->mRenderer.RegisterProperty("visualTransformUseEffectiveScale", mImpl->mTransformMapSetForFittingMode ? 0.0f : 1.0f);
+  mImpl->mRenderer.SetProperty(Dali::VisualRenderer::Property::VISUAL_EFFECTIVE_SCALE_ENABLED, !mImpl->mTransformMapSetForFittingMode);
 }
 
 void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale)
