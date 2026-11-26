@@ -66,13 +66,12 @@ public:
    * @param [in] textureObserver The NPatchVisual that requested loading.
    * @param [in] url to retrieve
    * @param [in] border The border size of the image
-   * @param [in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if the
-   *                                   image has no alpha channel
+   * @param [in] preMultiplyOnLoad True if the image color should be multiplied by it's alpha.
    * @param [in] synchronousLoading True if the image will be loaded in synchronous time.
    * @return id of the texture.
    */
   NPatchData::NPatchDataId Load(TextureManager& textureManager, TextureUploadObserver* textureObserver,
-                                const VisualUrl& url, const Dali::Insets& border, bool& preMultiplyOnLoad,
+                                const VisualUrl& url, const Dali::Insets& border, bool preMultiplyOnLoad,
                                 bool synchronousLoading);
 
   /**
@@ -178,11 +177,9 @@ private:
    *
    * @param [in] url to retrieve
    * @param [in] border The border size of the image
-   * @param [in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if the
-   *                                   image has no alpha channel
    * @return NPatchData pointer that Load function will used.
    */
-  NPatchDataPtr GetNPatchData(const VisualUrl& url, const Dali::Insets& border, bool& preMultiplyOnLoad);
+  NPatchDataPtr GetNPatchData(const VisualUrl& url, const Dali::Insets& border);
 
 protected:
   /**

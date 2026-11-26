@@ -254,7 +254,7 @@ void RollingImageCache::LoadComplete(bool loadSuccess, TextureInformation textur
 
     if(!frontFrameReady && IsFrontReady())
     {
-      mObserver.FrameReady(textureInformation.textureSet, mInterval, textureInformation.preMultiplied);
+      mObserver.FrameReady(textureInformation.textureSet, mInterval, TextureManager::IsAlphaPreMultiplied(textureInformation.textureSet));
     }
   }
   else

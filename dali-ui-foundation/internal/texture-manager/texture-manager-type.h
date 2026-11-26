@@ -289,18 +289,16 @@ struct TextureInfo
  */
 struct ExternalTextureInfo
 {
-  ExternalTextureInfo(const TextureId initTextureId, const TextureSet& initTextureSet, const bool initPreMultiplied)
+  ExternalTextureInfo(const TextureId initTextureId, const TextureSet& initTextureSet)
   : textureId(initTextureId),
     textureSet(initTextureSet),
-    referenceCount(1),
-    preMultiplied(initPreMultiplied)
+    referenceCount(1)
   {
   }
 
-  TextureId  textureId;         ///< The TextureId associated with this ExternalTexture
-  TextureSet textureSet;        ///< The external texture
-  int32_t    referenceCount;    ///< The reference count of clients using this ExternalTexture
-  bool       preMultiplied : 1; ///< True if the image's color was multiplied by it's alpha
+  TextureId  textureId;      ///< The TextureId associated with this ExternalTexture
+  TextureSet textureSet;     ///< The external texture
+  int32_t    referenceCount; ///< The reference count of clients using this ExternalTexture
 };
 
 } // namespace TextureManagerType

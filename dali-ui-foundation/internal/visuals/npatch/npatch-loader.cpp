@@ -67,10 +67,10 @@ NPatchData::NPatchDataId NPatchLoader::GenerateUniqueNPatchDataId()
 }
 
 NPatchData::NPatchDataId NPatchLoader::Load(TextureManager& textureManager, TextureUploadObserver* textureObserver,
-                                            const VisualUrl& url, const Dali::Insets& border, bool& preMultiplyOnLoad,
+                                            const VisualUrl& url, const Dali::Insets& border, bool preMultiplyOnLoad,
                                             bool synchronousLoading)
 {
-  NPatchDataPtr data = GetNPatchData(url, border, preMultiplyOnLoad);
+  NPatchDataPtr data = GetNPatchData(url, border);
 
   DALI_ASSERT_ALWAYS(data.Get() && "NPatchData creation failed!");
 
@@ -107,8 +107,7 @@ NPatchData::NPatchDataId NPatchLoader::Load(TextureManager& textureManager, Text
 
     if(pixelBuffer)
     {
-      preMultiplyOnLoad = (preMultiplyOnLoading == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD) ? true : false;
-      data->SetLoadedNPatchData(pixelBuffer, preMultiplyOnLoad);
+      data->SetLoadedNPatchData(pixelBuffer);
     }
     else if(synchronousLoading)
     {
@@ -236,7 +235,7 @@ void NPatchLoader::Process(bool postProcessor)
   DALI_TRACE_END(gTraceFilter, "DALI_NPATCH_LOADER_PROCESS_REMOVE_QUEUE");
 }
 
-NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Insets& border, bool& preMultiplyOnLoad)
+NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Insets& border)
 {
   std::size_t                              hash  = url.GetUrlHash();
   std::vector<NPatchInfo>::size_type       index = UNINITIALIZED_ID;
@@ -293,7 +292,6 @@ NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Inse
     info.mData->SetHash(hash);
     info.mData->SetUrl(url);
     info.mData->SetBorder(border);
-    info.mData->SetPreMultiplyOnLoad(preMultiplyOnLoad);
 
     mCache.emplace_back(std::move(info));
     infoPtr = &mCache.back();
@@ -321,8 +319,6 @@ NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Inse
     info.mData->SetStretchPixelsX(stretchRangesX);
     info.mData->SetStretchPixelsY(stretchRangesY);
     info.mData->SetBorder(border);
-
-    info.mData->SetPreMultiplyOnLoad(infoPtr->mData->IsPreMultiplied());
 
     info.mData->SetLoadingState(NPatchData::LoadingState::LOAD_COMPLETE);
 

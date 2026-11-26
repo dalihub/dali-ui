@@ -26,35 +26,30 @@ namespace DALI_NAMESPACE
 namespace Ui
 {
 TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType initReturnType, const int32_t initTextureId,
-                                                              TextureSet initTextureSet, const bool initPreMultiplied)
+                                                              TextureSet initTextureSet)
 : returnType(initReturnType),
   textureId(initTextureId),
   textureSet(initTextureSet),
-  preMultiplied(initPreMultiplied),
   pixelBuffer(),
   url()
 {
 }
 
 TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType initReturnType, const int32_t initTextureId,
-                                                              TextureSet initTextureSet, const std::string& initUrl,
-                                                              const bool initPreMultiplied)
+                                                              TextureSet initTextureSet, const std::string& initUrl)
 : returnType(initReturnType),
   textureId(initTextureId),
   textureSet(initTextureSet),
-  preMultiplied(initPreMultiplied),
   pixelBuffer(),
   url(initUrl)
 {
 }
 
 TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType initReturnType,
-                                                              PixelBuffer initPixelBuffer, const std::string& initUrl,
-                                                              const bool initPreMultiplied)
+                                                              PixelBuffer initPixelBuffer, const std::string& initUrl)
 : returnType(initReturnType),
   textureId(Internal::TextureManagerType::INVALID_TEXTURE_ID),
   textureSet(),
-  preMultiplied(initPreMultiplied),
   pixelBuffer(initPixelBuffer),
   url(initUrl)
 {
@@ -62,11 +57,10 @@ TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType i
 
 TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType initReturnType, const int32_t initTextureId,
                                                               TextureSet initTextureSet, const uint32_t initFrameCount,
-                                                              const uint32_t initInterval, const bool initPreMultiplied)
+                                                              const uint32_t initInterval)
 : returnType(initReturnType),
   textureId(initTextureId),
   textureSet(initTextureSet),
-  preMultiplied(initPreMultiplied),
   pixelBuffer(),
   url(),
   frameCount(initFrameCount),

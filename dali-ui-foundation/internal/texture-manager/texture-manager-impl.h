@@ -112,8 +112,7 @@ public:
    * @param[in]  synchronousLoading    true if the frame should be loaded synchronously
    * @param[in]  textureObserver       The client object should inherit from this and provide the "LoadCompleted"
    * virtual. This is called when an image load completes (or fails).
-   * @param[in,out] preMultiplyOnLoad  True if the image color should be multiplied by it's alpha. Set to false if the
-   *                                   image has no alpha channel
+   * @param[in] preMultiplyOnLoad  True if the image color should be multiplied by it's alpha.
    * @param[in] reloadPolicy           Whether to reuse a cached texture or force a reload.
    *
    * @return                           The texture set containing the frame of animated image, or empty if still
@@ -123,9 +122,9 @@ public:
                                       const uint32_t frameIndex, TextureManager::TextureId& textureId,
                                       MaskingDataPointer& maskInfo, const Dali::ImageDimensions& desiredSize,
                                       const Dali::SamplingMode::Type samplingMode, const bool synchronousLoading,
-                                      TextureUploadObserver*          textureObserver,
-                                      TextureManager::MultiplyOnLoad& preMultiplyOnLoad,
-                                      const ReloadPolicy              reloadPolicy = ReloadPolicy::CACHED);
+                                      TextureUploadObserver*               textureObserver,
+                                      const TextureManager::MultiplyOnLoad preMultiplyOnLoad,
+                                      const ReloadPolicy                   reloadPolicy = ReloadPolicy::CACHED);
 
   /**
    * @brief Requests an image load of the given URL to get PixelBuffer.
@@ -141,15 +140,14 @@ public:
    * @param[in] textureObserver       The client object should inherit from this and provide the "LoadCompleted"
    * virtual. This is called when an image load completes (or fails).
    * @param[in] orientationCorrection Whether to rotate image to match embedded orientation data
-   * @param[in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if the
-   *                                  image has no alpha channel
+   * @param[in] preMultiplyOnLoad     True if the image color should be multiplied by it's alpha.
    *
    * @return                          The pixel buffer containing the image, or empty if still loading.
    */
   PixelBuffer LoadPixelBuffer(const VisualUrl& url, const Dali::ImageDimensions& desiredSize,
                               const Dali::SamplingMode::Type samplingMode, const bool synchronousLoading,
                               TextureUploadObserver* textureObserver, const bool orientationCorrection,
-                              TextureManager::MultiplyOnLoad& preMultiplyOnLoad);
+                              const TextureManager::MultiplyOnLoad preMultiplyOnLoad);
 
   /**
    * @brief Requests an image load of the given URL.
@@ -172,8 +170,7 @@ public:
    * virtual. This is called when an image load completes (or fails).
    * @param[in] orientationCorrection Whether to rotate image to match embedded orientation data
    * @param[in] reloadPolicy          Forces a reload of the texture even if already cached
-   * @param[in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if the
-   *                                  image has no alpha channel
+   * @param[in] preMultiplyOnLoad True if the image color should be multiplied by it's alpha.
    *
    * @return                          The texture set containing the image, or empty if still loading.
    */
@@ -182,8 +179,8 @@ public:
                          MaskingDataPointer& maskInfo, const bool synchronousLoading,
                          TextureManager::TextureId& textureId, bool& loadingStatus,
                          TextureUploadObserver* textureObserver, const bool orientationCorrection,
-                         const TextureManager::ReloadPolicy reloadPolicy,
-                         TextureManager::MultiplyOnLoad&    preMultiplyOnLoad);
+                         const TextureManager::ReloadPolicy   reloadPolicy,
+                         const TextureManager::MultiplyOnLoad preMultiplyOnLoad);
 
   /**
    * @brief Returns the geometry associated with texture.
@@ -201,6 +198,18 @@ public:
    * @return The textureSet in texture manager. These textures include YUV textures or images and masks.
    */
   TextureSet GetTextureSet(const TextureManager::TextureId textureId);
+
+  /**
+   * @brief Queries whether a texture set holds pre-multiplied alpha.
+   *
+   * Reads the first texture, which is the image; a mask or the remaining YUV planes follow it.
+   * This is what the texture set holds, so it is what blending has to follow. It can differ from what
+   * was requested at load: an external texture is handed over as it is.
+   *
+   * @param[in] textureSet The texture set to query
+   * @return True if the texture set has an image texture that declares pre-multiplied alpha.
+   */
+  static bool IsAlphaPreMultiplied(const TextureSet& textureSet);
 
 public:
   // API list that need to access TextureCacheManager.
@@ -264,9 +273,9 @@ public:
   /**
    * @copydoc TextureCacheManager::AddExternalTexture
    */
-  inline std::string AddExternalTexture(const TextureSet& texture, const bool preMultiplied = false)
+  inline std::string AddExternalTexture(const TextureSet& texture)
   {
-    return mTextureCacheManager.AddExternalTexture(texture, preMultiplied);
+    return mTextureCacheManager.AddExternalTexture(texture);
   }
 
   /**
@@ -294,8 +303,7 @@ public: // Load Request API
    * virtual. This is called when an image load completes (or fails).
    * @param[in] orientationCorrection Whether to rotate image to match embedded orientation data
    * @param[in] reloadPolicy          Forces a reload of the texture even if already cached
-   * @param[in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if the
-   * image has no alpha channel
+   * @param[in] preMultiplyOnLoad True if the image color should be multiplied by it's alpha.
    * @param[in] synchronousLoading    True if the frame should be loaded synchronously. If you skip this parameter,
    *                                  default is false.
    * @return                          A TextureId to use as a handle to reference this Texture
@@ -303,8 +311,8 @@ public: // Load Request API
   TextureId RequestLoad(const VisualUrl& url, const ImageDimensions& desiredSize,
                         const Dali::SamplingMode::Type samplingMode,
                         TextureUploadObserver* observer, const bool orientationCorrection,
-                        const TextureManager::ReloadPolicy reloadPolicy,
-                        TextureManager::MultiplyOnLoad& preMultiplyOnLoad, const bool synchronousLoading = false);
+                        const TextureManager::ReloadPolicy   reloadPolicy,
+                        const TextureManager::MultiplyOnLoad preMultiplyOnLoad, const bool synchronousLoading = false);
 
 private: // Internal Load Request API
   /**
@@ -332,8 +340,7 @@ private: // Internal Load Request API
    *                                  This is called when an image load completes (or fails).
    * @param[in] orientationCorrection Whether to rotate image to match embedded orientation data
    * @param[in] reloadPolicy          Forces a reload of the texture even if already cached
-   * @param[in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if the
-   *                                  image has no alpha channel
+   * @param[in] preMultiplyOnLoad True if the image color should be multiplied by it's alpha.
    * @param[in] synchronousLoading    True if the frame should be loaded synchronously. If you skip this parameter,
    *                                  default is false.
    * @return                          A TextureId to use as a handle to reference this Texture
@@ -343,8 +350,8 @@ private: // Internal Load Request API
                         const ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode,
                         const bool             cropToMask,
                         TextureUploadObserver* observer, const bool orientationCorrection,
-                        const TextureManager::ReloadPolicy reloadPolicy,
-                        TextureManager::MultiplyOnLoad& preMultiplyOnLoad, const bool synchronousLoading = false);
+                        const TextureManager::ReloadPolicy   reloadPolicy,
+                        const TextureManager::MultiplyOnLoad preMultiplyOnLoad, const bool synchronousLoading = false);
 
   /**
    * @brief Requests a masking image to be loaded. This mask is not uploaded to GL,
@@ -385,8 +392,7 @@ private: // Internal Load Request API
    *                                  This is called when an image load completes (or fails).
    * @param[in] orientationCorrection Whether to rotate image to match embedded orientation data
    * @param[in] reloadPolicy          Forces a reload of the texture even if already cached
-   * @param[in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if
-   *                                  there is no alpha
+   * @param[in] preMultiplyOnLoad True if the image color should be multiplied by it's alpha.
    * @param[in] animatedImageLoading  The AnimatedImageLoading to load animated image
    * @param[in] frameIndex            The frame index of a frame to be loaded frame
    * @param[in] synchronousLoading    True if the frame should be loaded synchronously. If you skip this parameter,
@@ -399,7 +405,7 @@ private: // Internal Load Request API
                                 const bool                        cropToMask,
                                 const TextureManager::StorageType storageType, TextureUploadObserver* observer,
                                 const bool orientationCorrection, const TextureManager::ReloadPolicy reloadPolicy,
-                                TextureManager::MultiplyOnLoad& preMultiplyOnLoad,
+                                const TextureManager::MultiplyOnLoad preMultiplyOnLoad,
                                 Dali::AnimatedImageLoading animatedImageLoading, const uint32_t frameIndex,
                                 const bool synchronousLoading);
 
@@ -581,11 +587,8 @@ private: // Internal methods
   /**
    * @brief Update texture info from external texture info if url is external texture.
    * @param[in,out] textureInfo the information of the texture
-   * @param[in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if the
-   * image has no alpha channel
    */
-  void UpdateExternalTextureInfo(TextureManager::TextureInfo&    textureInfo,
-                                 TextureManager::MultiplyOnLoad& preMultiplyOnLoad);
+  void UpdateExternalTextureInfo(TextureManager::TextureInfo& textureInfo);
 
 public:
   /**

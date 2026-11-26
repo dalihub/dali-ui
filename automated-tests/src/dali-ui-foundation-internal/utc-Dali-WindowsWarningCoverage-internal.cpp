@@ -183,7 +183,7 @@ int UtcDaliWindowsWarningCoverageImageVisualsP(void)
   image.mPlacementActor = actor;
   image.LoadComplete(false, Ui::TextureUploadObserver::TextureInformation(
                               Ui::TextureUploadObserver::ReturnType::TEXTURE,
-                              UiInternal::TextureManager::INVALID_TEXTURE_ID, TextureSet(), false));
+                              UiInternal::TextureManager::INVALID_TEXTURE_ID, TextureSet()));
   DALI_TEST_EQUALS(actor.GetRendererCount(), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(image.mImpl->mResourceStatus, Ui::Visual::ResourceStatus::FAILED, TEST_LOCATION);
 

@@ -46,7 +46,6 @@ NPatchData::NPatchData()
   mBorder(0, 0, 0, 0),
   mLoadingState(LoadingState::NOT_STARTED),
   mRenderingMap{nullptr},
-  mPreMultiplyOnLoad(false),
   mObserverNotifying(false)
 {
 }
@@ -190,14 +189,9 @@ Dali::Insets NPatchData::GetBorder() const
   return mBorder;
 }
 
-void NPatchData::SetPreMultiplyOnLoad(bool preMultiplyOnLoad)
-{
-  mPreMultiplyOnLoad = preMultiplyOnLoad;
-}
-
 bool NPatchData::IsPreMultiplied() const
 {
-  return mPreMultiplyOnLoad;
+  return TextureManager::IsAlphaPreMultiplied(mTextureSet);
 }
 
 void NPatchData::SetLoadingState(const LoadingState loadingState)
@@ -215,7 +209,7 @@ void* NPatchData::GetRenderingMap() const
   return mRenderingMap;
 }
 
-void NPatchData::SetLoadedNPatchData(PixelBuffer& pixelBuffer, bool preMultiplied)
+void NPatchData::SetLoadedNPatchData(PixelBuffer& pixelBuffer)
 {
   if(mBorder == Dali::Insets() && Dali::Ui::Integration::NPatchUtility::ParseBorders(pixelBuffer, mStretchPixelsX, mStretchPixelsY))
   {
@@ -252,8 +246,6 @@ void NPatchData::SetLoadedNPatchData(PixelBuffer& pixelBuffer, bool preMultiplie
   mTextureSet = TextureSet::New();
   mTextureSet.SetTexture(0u, texture);
 
-  mPreMultiplyOnLoad = preMultiplied;
-
   mLoadingState = LoadingState::LOAD_COMPLETE;
 }
 
@@ -264,7 +256,7 @@ void NPatchData::NotifyObserver(TextureUploadObserver* observer, const bool& loa
                    TextureUploadObserver::ReturnType::TEXTURE,
                    static_cast<TextureManager::TextureId>(
                      mId), ///< Note : until end of NPatchLoader::Load, npatch-visual don't know the id of data.
-                   mTextureSet, mUrl.GetUrl(), mPreMultiplyOnLoad));
+                   mTextureSet, mUrl.GetUrl()));
 }
 
 void NPatchData::LoadComplete(bool loadSuccess, TextureInformation textureInformation)
@@ -277,7 +269,7 @@ void NPatchData::LoadComplete(bool loadSuccess, TextureInformation textureInform
     {
       // If mLoadingState is LOAD_FAILED, just re-set (It can be happened when sync loading is failed, but async loading
       // is succeeded).
-      SetLoadedNPatchData(textureInformation.pixelBuffer, textureInformation.preMultiplied);
+      SetLoadedNPatchData(textureInformation.pixelBuffer);
     }
   }
   else

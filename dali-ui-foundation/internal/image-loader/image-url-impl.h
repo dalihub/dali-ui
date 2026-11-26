@@ -41,7 +41,7 @@ public:
   /**
    * @copydoc Dali::Ui::ImageUrl::New
    */
-  static ImageUrlPtr New(Texture& texture, bool preMultiplied);
+  static ImageUrlPtr New(Texture& texture);
 
   /**
    * @copydoc Dali::Ui::ImageUrl::New
@@ -57,7 +57,7 @@ protected:
   /**
    * @brief Constructor.
    */
-  ImageUrl(Texture& texture, bool preMultiplied);
+  ImageUrl(Texture& texture);
 
   /**
    * @brief Constructor.

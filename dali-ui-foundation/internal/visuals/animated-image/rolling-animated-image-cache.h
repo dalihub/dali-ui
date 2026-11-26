@@ -122,13 +122,12 @@ private:
    *
    * @param[in] frameIndex             Index of frame to be loaded.
    * @param[in] synchronousLoading     True if the frame should be loaded synchronously
-   * @param[in,out] preMultiplyOnLoad  True if the image color should be multiplied by it's alpha. Set to false if the
-   *                                   image has no alpha channel
+   * @param[in] preMultiplyOnLoading   True if the image color should be multiplied by it's alpha.
    *
    * @return the texture set currently loaded.
    */
   TextureSet RequestFrameLoading(uint32_t frameIndex, bool synchronousLoading,
-                                 TextureManager::MultiplyOnLoad& preMultiplyOnLoading);
+                                 TextureManager::MultiplyOnLoad preMultiplyOnLoading);
 
   /**
    * @brief Load the next batch of images
