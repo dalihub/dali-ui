@@ -254,6 +254,7 @@ When enabled:
 - Image is (re)loaded at the view's resolved layout size
 - Avoids loading full-resolution image when only smaller display is needed
 - Direction: view size → image load size
+- The natural size is the current view size in natural units, so a WRAP_CONTENT view keeps its size at any scale
 
 ---
 
@@ -422,7 +423,7 @@ bool borderOnly = imageView.IsNPatchBorderOnly();
 | ![Original](./assets/ImageView/np_original.svg) | ![Stretched](./assets/ImageView/np_stretched.svg) | ![NPatch Applied](./assets/ImageView/np_applied.svg) |
 
 **Key Points:**
-- 🔳 **Corners** remain fixed at original size
+- 🔳 **Corners** remain fixed at original size: source pixels are natural units, drawn at the View's effective scale (a 10-pixel frame is 20 pixels at scale 2)
 - ↔️ **Top/Bottom edges** stretch horizontally only
 - ↕️ **Left/Right edges** stretch vertically only
 - 🟧 **Center** stretches in both directions
