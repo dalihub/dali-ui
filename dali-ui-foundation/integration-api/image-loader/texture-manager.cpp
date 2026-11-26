@@ -32,18 +32,18 @@ namespace Integration
 {
 namespace TextureManager
 {
-String AddTexture(Texture& texture, bool preMultiplied)
+String AddTexture(Texture& texture)
 {
   TextureSet set = TextureSet::New();
   set.SetTexture(0u, texture);
-  return AddTexture(set, preMultiplied);
+  return AddTexture(set);
 }
 
-String AddTexture(TextureSet& textureSet, bool preMultiplied)
+String AddTexture(TextureSet& textureSet)
 {
   auto  visualFactory = Ui::Integration::VisualFactory::Get();
   auto& textureMgr    = GetImplementation(visualFactory).GetTextureManager();
-  return ToDaliString(textureMgr.AddExternalTexture(textureSet, preMultiplied));
+  return ToDaliString(textureMgr.AddExternalTexture(textureSet));
 }
 
 TextureSet RemoveTexture(const String& textureUrl)

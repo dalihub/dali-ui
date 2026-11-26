@@ -139,10 +139,9 @@ public:
   /**
    * Adds an external texture to the texture manager
    * @param[in] texture The texture to add
-   * @param[in] preMultiplied Whether this external texture preMultiplied or not. Default as false.
    * @return string containing the URL for the texture
    */
-  std::string AddExternalTexture(const TextureSet& texture, const bool preMultiplied);
+  std::string AddExternalTexture(const TextureSet& texture);
 
   /**
    * Adds an encoded image buffer to the texture manager

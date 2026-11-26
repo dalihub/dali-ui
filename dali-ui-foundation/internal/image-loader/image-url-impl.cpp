@@ -34,9 +34,9 @@ namespace Ui
 {
 namespace Internal
 {
-ImageUrl::ImageUrl(Texture& texture, bool preMultiplied)
+ImageUrl::ImageUrl(Texture& texture)
 {
-  mUrl = Dali::Ui::Integration::TextureManager::AddTexture(texture, preMultiplied);
+  mUrl = Dali::Ui::Integration::TextureManager::AddTexture(texture);
 }
 
 ImageUrl::ImageUrl(const EncodedImageBuffer& encodedImageBuffer)
@@ -63,9 +63,9 @@ ImageUrl::~ImageUrl()
   }
 }
 
-ImageUrlPtr ImageUrl::New(Texture& texture, bool preMultiplied)
+ImageUrlPtr ImageUrl::New(Texture& texture)
 {
-  ImageUrlPtr imageUrlPtr = new ImageUrl(texture, preMultiplied);
+  ImageUrlPtr imageUrlPtr = new ImageUrl(texture);
   return imageUrlPtr;
 }
 

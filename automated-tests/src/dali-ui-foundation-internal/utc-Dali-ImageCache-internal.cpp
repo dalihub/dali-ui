@@ -32,11 +32,14 @@
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-visual.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
+#include <dali-ui-foundation/internal/visuals/image/image-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui/ui-async-task-manager.h>
 #undef protected
 #undef private
+
+#include <dali/integration-api/texture-integ.h>
 
 namespace Test
 {
@@ -87,6 +90,15 @@ Dali::Ui::Internal::TextureManager::TextureId ReuseTexture(Dali::Ui::Internal::T
                                     Dali::SamplingMode::BOX_THEN_LINEAR, nullptr, true,
                                     Dali::Ui::Internal::TextureManager::ReloadPolicy::CACHED,
                                     preMultiplyOnLoad, true);
+}
+
+Dali::TextureSet CreateFlaggedTextureSet(bool preMultiplied)
+{
+  Dali::Texture texture = Dali::Texture::New(Dali::TextureType::TEXTURE_2D, Dali::Pixel::RGBA8888, 2u, 2u);
+  Dali::Integration::SetTextureAlphaPreMultiplied(texture, preMultiplied);
+  Dali::TextureSet textureSet = Dali::TextureSet::New();
+  textureSet.SetTexture(0u, texture);
+  return textureSet;
 }
 
 class TestFrameReadyObserver : public Dali::Ui::Internal::ImageCache::FrameReadyObserver
@@ -321,12 +333,11 @@ int UtcDaliRollingImageCacheStateP(void)
 
   cache.mQueue.PushBack({0u, false});
   cache.mRequestingLoad = true;
-  Dali::TextureSet readyTextureSet = Dali::TextureSet::New();
+  Dali::TextureSet readyTextureSet = CreateFlaggedTextureSet(true);
   Dali::Ui::TextureUploadObserver::TextureInformation readyInformation(
     Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
     firstTextureId,
-    readyTextureSet,
-    true);
+    readyTextureSet);
   cache.LoadComplete(true, readyInformation);
   DALI_TEST_CHECK(cache.IsFrontReady());
   DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
@@ -342,8 +353,7 @@ int UtcDaliRollingImageCacheStateP(void)
   Dali::Ui::TextureUploadObserver::TextureInformation secondInformation(
     Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
     secondTextureId,
-    Dali::TextureSet::New(),
-    false);
+    Dali::TextureSet::New());
   cache.LoadComplete(true, secondInformation);
   DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
 
@@ -756,7 +766,7 @@ int UtcDaliFixedImageCacheReadyAndFailedFramesP(void)
                                              observer,
                                              1u,
                                              42u,
-                                             false);
+                                             true);
   DALI_TEST_EQUALS(cache.GetTotalFrameCount(), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(cache.GetCurrentFrameIndex(), 0, TEST_LOCATION);
   DALI_TEST_EQUALS(cache.GetFrameInterval(0u), 42u, TEST_LOCATION);
@@ -767,8 +777,7 @@ int UtcDaliFixedImageCacheReadyAndFailedFramesP(void)
   Dali::Ui::TextureUploadObserver::TextureInformation ready(
     Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
     textureId,
-    Dali::TextureSet::New(),
-    true);
+    CreateFlaggedTextureSet(true));
   cache.LoadComplete(true, ready);
   DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(observer.lastInterval, 42u, TEST_LOCATION);
@@ -905,15 +914,16 @@ int UtcDaliRollingAnimatedImageCacheCallbackStartsNextFrameP(void)
   Dali::Ui::Internal::RollingAnimatedImageCache cache(textureManager, Dali::ImageDimensions(),
                                                       Dali::SamplingMode::BOX_THEN_LINEAR, animation,
                                                       maskingData, observer, 2u, 1u, Dali::WrapMode::REPEAT,
-                                                      Dali::WrapMode::REPEAT, false, false);
+                                                      Dali::WrapMode::REPEAT, false, true);
   cache.mTextureIds[0] = AddUploadedTexture(textureManager, "rolling-callback.png", 1);
   cache.mQueue.PushBack({0u, false});
   cache.mLoadWaitingQueue.push_back(1u);
   Dali::Ui::TextureUploadObserver::TextureInformation ready(
     Dali::Ui::TextureUploadObserver::ReturnType::ANIMATED_IMAGE_TEXTURE,
-    cache.mTextureIds[0], Dali::TextureSet::New(), 3u, 45u, false);
+    cache.mTextureIds[0], CreateFlaggedTextureSet(true), 3u, 45u);
   cache.LoadComplete(true, ready);
   DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(observer.lastPremultiplied);
   DALI_TEST_EQUALS(cache.GetFrameInterval(0u), 45u, TEST_LOCATION);
   DALI_TEST_CHECK(cache.mLoadWaitingQueue.empty());
   DALI_TEST_EQUALS(cache.GetCurrentFrameIndex(), 0, TEST_LOCATION);
@@ -932,8 +942,8 @@ int UtcDaliTextureCacheExternalResourceLifecycleP(void)
   Texture secondTexture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 2u, 2u);
   firstSet.SetTexture(0u, firstTexture);
   secondSet.SetTexture(0u, secondTexture);
-  VisualUrl firstUrl(cache.AddExternalTexture(firstSet, false));
-  VisualUrl secondUrl(cache.AddExternalTexture(secondSet, true));
+  VisualUrl firstUrl(cache.AddExternalTexture(firstSet));
+  VisualUrl secondUrl(cache.AddExternalTexture(secondSet));
   Dali::Ui::Internal::TextureManager::TextureId firstId = 0;
   Dali::Ui::Internal::TextureManager::TextureId secondId = 0;
   DALI_TEST_CHECK(firstUrl.GetLocationAsInteger(firstId));
@@ -1219,11 +1229,11 @@ int UtcDaliNPatchVisualBorderAndSceneMatrixP(void)
       auxiliary.SetTexture(0u, Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, 2u, 2u));
       using Observer = Dali::Ui::TextureUploadObserver;
       Observer::TextureInformation success(Observer::ReturnType::TEXTURE, visual->mAuxiliaryTextureId,
-                                           auxiliary, false);
+                                           auxiliary);
       visual->LoadComplete(true, success);
       DALI_TEST_CHECK(visual->mAuxiliaryResourceStatus == Dali::Ui::Visual::ResourceStatus::READY);
       Observer::TextureInformation failure(Observer::ReturnType::TEXTURE, visual->mAuxiliaryTextureId,
-                                           TextureSet(), false);
+                                           TextureSet());
       visual->LoadComplete(false, failure);
       DALI_TEST_CHECK(visual->mAuxiliaryResourceStatus == Dali::Ui::Visual::ResourceStatus::FAILED);
     }
@@ -1570,6 +1580,103 @@ int UtcDaliTextureManagerMaskCompletionMatrixP(void)
   END_TEST;
 }
 
+int UtcDaliTextureManagerAsynchronousAnimatedFrameP(void)
+{
+  UiTestApplication application;
+  using TextureManager = Dali::Ui::Internal::TextureManager;
+  auto& textureManager = GetFactoryCache().GetTextureManager();
+
+  class Observer : public Dali::Ui::TextureUploadObserver
+  {
+  public:
+    void LoadComplete(bool success, TextureInformation information) override
+    {
+      ++loadCount;
+      loaded        = success;
+      returnType    = information.returnType;
+      frameCount    = information.frameCount;
+      preMultiplied = TextureManager::IsAlphaPreMultiplied(information.textureSet);
+    }
+
+    int        loadCount{0};
+    bool       loaded{false};
+    ReturnType returnType{ReturnType::PIXEL_BUFFER};
+    uint32_t   frameCount{0u};
+    bool       preMultiplied{false};
+  };
+
+  const auto url       = Dali::Ui::Internal::VisualUrl("../samples/image-view/res/dali-logo-anim.gif");
+  auto       animation = Dali::AnimatedImageLoading::New(url.GetUrl(), true);
+  DALI_TEST_CHECK(animation);
+
+  // Each request loads its own frame, so the two do not share a cached texture.
+  struct Case
+  {
+    uint32_t                       frameIndex;
+    TextureManager::MultiplyOnLoad request;
+    bool                           preMultiplied;
+  };
+  const Case cases[] = {
+    {0u, TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD, true},
+    {1u, TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY, false},
+  };
+
+  for(const auto& testCase : cases)
+  {
+    Observer                           observer;
+    TextureManager::MaskingDataPointer maskInfo;
+    TextureManager::TextureId          textureId = TextureManager::INVALID_TEXTURE_ID;
+    Dali::TextureSet                   textureSet = textureManager.LoadAnimatedImageTexture(
+      url, animation, testCase.frameIndex, textureId, maskInfo, Dali::ImageDimensions(48u, 48u),
+      Dali::SamplingMode::BOX_THEN_LINEAR, false, &observer, testCase.request, TextureManager::ReloadPolicy::CACHED);
+    DALI_TEST_CHECK(!textureSet);
+    DALI_TEST_CHECK(textureId != TextureManager::INVALID_TEXTURE_ID);
+
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, 5, true));
+    DALI_TEST_EQUALS(observer.loadCount, 1, TEST_LOCATION);
+    DALI_TEST_CHECK(observer.loaded);
+    DALI_TEST_CHECK(observer.returnType == Dali::Ui::TextureUploadObserver::ReturnType::ANIMATED_IMAGE_TEXTURE);
+    DALI_TEST_EQUALS(observer.frameCount, animation.GetImageCount(), TEST_LOCATION);
+
+    tet_infoline("The observer reads from the uploaded frame whether it was pre-multiplied");
+    DALI_TEST_EQUALS(observer.preMultiplied, testCase.preMultiplied, TEST_LOCATION);
+
+    textureManager.RequestRemove(textureId, &observer);
+    application.SendNotification();
+  }
+  END_TEST;
+}
+
+int UtcDaliTextureManagerSynchronousExternalTextureWithoutImageN(void)
+{
+  UiTestApplication application;
+  using TextureManager = Dali::Ui::Internal::TextureManager;
+  tet_infoline("A synchronous request for an external texture set that holds no image fails, and its url is not loaded as a file");
+
+  TextureManager                      manager;
+  Dali::TextureSet                    emptySet = Dali::TextureSet::New();
+  const Dali::Ui::Internal::VisualUrl url(manager.AddExternalTexture(emptySet));
+
+  TextureManager::MaskingDataPointer maskInfo;
+  TextureManager::TextureId          textureId     = TextureManager::INVALID_TEXTURE_ID;
+  bool                               loadingStatus = true;
+  Dali::TextureSet                   textureSet    = manager.LoadTexture(
+    url, Dali::ImageDimensions(), Dali::SamplingMode::BOX_THEN_LINEAR, maskInfo, true, textureId, loadingStatus,
+    nullptr, true, TextureManager::ReloadPolicy::CACHED, TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
+
+  DALI_TEST_CHECK(!textureSet);
+  DALI_TEST_CHECK(!loadingStatus);
+
+  // A file load that fails synchronously removes its cache entry. The external texture keeps it, marked as failed.
+  DALI_TEST_CHECK(textureId != TextureManager::INVALID_TEXTURE_ID);
+  DALI_TEST_EQUALS(manager.mTextureCacheManager.GetTextureState(textureId), TextureManager::LoadState::LOAD_FAILED, TEST_LOCATION);
+
+  manager.RequestRemove(textureId, nullptr);
+  application.SendNotification();
+  DALI_TEST_CHECK(manager.RemoveExternalTexture(url) == emptySet);
+  END_TEST;
+}
+
 int UtcDaliTextureManagerSynchronousAnimatedMaskAndBufferP(void)
 {
   UiTestApplication application;
@@ -1795,5 +1902,225 @@ int UtcDaliTextureManagerImmediateCornerRadiusSingleObserverP(void)
   DALI_TEST_CHECK(view.GetLoadingStatus() == Dali::Ui::Visual::ResourceStatus::READY);
   DALI_TEST_EQUALS(readyCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetRendererCount(), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextureManagerIsAlphaPreMultipliedP(void)
+{
+  UiTestApplication application;
+  using TextureManager = Dali::Ui::Internal::TextureManager;
+
+  tet_infoline("A texture set reports what its first texture declares");
+  DALI_TEST_CHECK(TextureManager::IsAlphaPreMultiplied(CreateFlaggedTextureSet(true)));
+  DALI_TEST_CHECK(!TextureManager::IsAlphaPreMultiplied(CreateFlaggedTextureSet(false)));
+
+  tet_infoline("A texture set without a usable first texture is not pre-multiplied");
+  DALI_TEST_CHECK(!TextureManager::IsAlphaPreMultiplied(Dali::TextureSet()));
+  DALI_TEST_CHECK(!TextureManager::IsAlphaPreMultiplied(Dali::TextureSet::New()));
+  Dali::TextureSet emptyFirstSlot = Dali::TextureSet::New();
+  emptyFirstSlot.SetTexture(1u, CreateFlaggedTextureSet(true).GetTexture(0u));
+  DALI_TEST_EQUALS(emptyFirstSlot.GetTextureCount(), static_cast<size_t>(2u), TEST_LOCATION);
+  DALI_TEST_CHECK(!TextureManager::IsAlphaPreMultiplied(emptyFirstSlot));
+  END_TEST;
+}
+
+int UtcDaliImageCachePreMultipliedFollowsTextureP(void)
+{
+  UiTestApplication application;
+  auto& textureManager = GetFactoryCache().GetTextureManager();
+  Dali::Ui::Internal::TextureManager::MaskingDataPointer maskingData;
+  using Information = Dali::Ui::TextureUploadObserver::TextureInformation;
+  using ReturnType  = Dali::Ui::TextureUploadObserver::ReturnType;
+
+  struct Case
+  {
+    bool        requested;
+    bool        texturePreMultiplied;
+    const char* rollingUrl;
+    const char* fixedUrl;
+    const char* animatedUrl;
+  };
+  const Case cases[] = {
+    {true, true, "request-rolling-0.png", "request-fixed-0.png", "request-animated-0.png"},
+    {true, false, "request-rolling-1.png", "request-fixed-1.png", "request-animated-1.png"},
+    {false, true, "request-rolling-2.png", "request-fixed-2.png", "request-animated-2.png"},
+    {false, false, "request-rolling-3.png", "request-fixed-3.png", "request-animated-3.png"},
+  };
+
+  tet_infoline("A frame is pre-multiplied when its texture holds it, whatever the cache asked for");
+  for(const auto& testCase : cases)
+  {
+    const bool expected = testCase.texturePreMultiplied;
+    {
+      auto textureId = AddUploadedTexture(textureManager, testCase.rollingUrl, 1);
+      Dali::Ui::Internal::ImageCache::UrlList urls(1u);
+      urls[0].mUrl       = Dali::Ui::Internal::VisualUrl(testCase.rollingUrl);
+      urls[0].mTextureId = textureId;
+      TestFrameReadyObserver observer;
+      Dali::Ui::Internal::RollingImageCache cache(textureManager, Dali::ImageDimensions(),
+                                                   Dali::SamplingMode::BOX_THEN_LINEAR, urls, maskingData, observer,
+                                                   1u, 1u, 42u, testCase.requested);
+      cache.mQueue.PushBack({0u, false});
+      cache.mRequestingLoad = true;
+      cache.LoadComplete(true, Information(ReturnType::TEXTURE, textureId,
+                                           CreateFlaggedTextureSet(testCase.texturePreMultiplied)));
+      DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
+      DALI_TEST_EQUALS(observer.lastPremultiplied, expected, TEST_LOCATION);
+      cache.ClearCache(true);
+    }
+    {
+      auto textureId = AddUploadedTexture(textureManager, testCase.fixedUrl, 1);
+      Dali::Ui::Internal::ImageCache::UrlList urls(1u);
+      urls[0].mUrl = Dali::Ui::Internal::VisualUrl(testCase.fixedUrl);
+      TestFrameReadyObserver observer;
+      Dali::Ui::Internal::FixedImageCache cache(textureManager, Dali::ImageDimensions(),
+                                                 Dali::SamplingMode::BOX_THEN_LINEAR, urls, maskingData, observer,
+                                                 1u, 42u, testCase.requested);
+      cache.mReadyFlags.push_back(false);
+      cache.mRequestingLoad = true;
+      cache.LoadComplete(true, Information(ReturnType::TEXTURE, textureId,
+                                           CreateFlaggedTextureSet(testCase.texturePreMultiplied)));
+      DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
+      DALI_TEST_EQUALS(observer.lastPremultiplied, expected, TEST_LOCATION);
+      cache.ClearCache();
+    }
+    {
+      auto animation = Dali::AnimatedImageLoading::New("../samples/image-view/res/dali-logo-anim.gif", true);
+      DALI_TEST_CHECK(animation);
+      TestFrameReadyObserver observer;
+      Dali::Ui::Internal::RollingAnimatedImageCache cache(textureManager, Dali::ImageDimensions(),
+                                                          Dali::SamplingMode::BOX_THEN_LINEAR, animation, maskingData,
+                                                          observer, 2u, 1u, Dali::WrapMode::REPEAT,
+                                                          Dali::WrapMode::REPEAT, false, testCase.requested);
+      cache.mTextureIds[0] = AddUploadedTexture(textureManager, testCase.animatedUrl, 1);
+      cache.mQueue.PushBack({0u, false});
+      cache.LoadComplete(true, Information(ReturnType::ANIMATED_IMAGE_TEXTURE, cache.mTextureIds[0],
+                                           CreateFlaggedTextureSet(testCase.texturePreMultiplied), 3u, 45u));
+      DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
+      DALI_TEST_EQUALS(observer.lastPremultiplied, expected, TEST_LOCATION);
+      cache.ClearCache();
+    }
+  }
+  END_TEST;
+}
+
+int UtcDaliImageVisualExternalTexturePreMultipliedFollowsTextureP(void)
+{
+  UiTestApplication application;
+  auto  factory        = Dali::Ui::Integration::VisualFactory::Get();
+  auto& factoryImpl    = Dali::Ui::GetImplementation(factory);
+  auto& cache          = factoryImpl.GetFactoryCache();
+  auto& shaderFactory  = factoryImpl.GetImageVisualShaderFactory();
+  auto& textureManager = cache.GetTextureManager();
+  using Dali::Ui::Internal::ImageVisual;
+  using Dali::Ui::Internal::ImageVisualPtr;
+  using Dali::Ui::Internal::VisualUrl;
+
+  struct Case
+  {
+    bool texturePreMultiplied;
+    bool requested;
+    bool customShader;
+  };
+  const Case cases[] = {
+    {true, true, false},   // Asked for, and the texture holds it.
+    {false, true, false},  // Asked for, but the texture is straight alpha.
+    {true, false, false},  // Not asked for, but the texture holds it.
+    {false, false, false}, // Not asked for, and the texture is straight alpha.
+    {true, true, true},    // A custom shader never asks, but the texture holds it.
+  };
+
+  // Every case keeps its texture registered until the end, so no two cases share a texture url.
+  std::vector<std::string> urls;
+  for(const auto& testCase : cases)
+  {
+    TextureSet      textureSet = CreateFlaggedTextureSet(testCase.texturePreMultiplied);
+    const VisualUrl url(textureManager.AddExternalTexture(textureSet));
+    urls.push_back(url.GetUrl());
+
+    Property::Map properties;
+    properties.Insert(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, testCase.requested);
+    if(testCase.customShader)
+    {
+      Property::Map shader;
+      shader.Insert("vertexShader", "void main() { gl_Position = vec4(0.0); }");
+      shader.Insert("fragmentShader", "void main() { gl_FragColor = vec4(1.0); }");
+      properties.Insert(Dali::Ui::Integration::Visual::Property::SHADER, shader);
+    }
+    ImageVisualPtr visual =
+      ImageVisual::New(cache, shaderFactory, Dali::Ui::Integration::VisualFactory::NONE, url, properties);
+
+    Actor actor = Actor::New();
+    actor.SetProperty(Actor::Property::SIZE, Vector2(80.0f, 60.0f));
+    application.GetScene().Add(actor);
+    visual->DoSetOnScene(actor);
+
+    tet_infoline("A texture that is ready at once is blended the way it holds its pixels");
+    DALI_TEST_EQUALS(visual->IsPreMultipliedAlphaEnabled(), testCase.texturePreMultiplied, TEST_LOCATION);
+
+    tet_infoline("A later completion hands over the texture only, and reaches the same decision");
+    visual->SetTexturePreMultiplied(!testCase.texturePreMultiplied);
+    Dali::Ui::TextureUploadObserver::TextureInformation information(
+      Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE, visual->mTextureId, textureSet);
+    visual->LoadComplete(true, information);
+    DALI_TEST_EQUALS(visual->IsPreMultipliedAlphaEnabled(), testCase.texturePreMultiplied, TEST_LOCATION);
+
+    visual->DoSetOffScene(actor);
+    actor.Unparent();
+  }
+
+  for(const auto& url : urls)
+  {
+    textureManager.RemoveExternalTextureByUrl(url);
+  }
+  END_TEST;
+}
+
+int UtcDaliNPatchDataKeepsPreMultipliedAfterBorderCropP(void)
+{
+  UiTestApplication application;
+  auto  factory       = Dali::Ui::Integration::VisualFactory::Get();
+  auto& factoryImpl   = Dali::Ui::GetImplementation(factory);
+  auto& cache         = factoryImpl.GetFactoryCache();
+  auto& shaderFactory = factoryImpl.GetImageVisualShaderFactory();
+  using Dali::Ui::Internal::NPatchVisual;
+  using Dali::Ui::Internal::NPatchVisualPtr;
+  using Dali::Ui::Internal::VisualUrl;
+
+  // A 25x29 image that carries its own one pixel n-patch border, which is cropped away after loading.
+  const VisualUrl url("../samples/image-view/res/button-up-1.9.png");
+
+  for(bool synchronousLoading : {false, true})
+  {
+    Property::Map properties;
+    properties.Insert(Dali::Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, synchronousLoading);
+    properties.Insert(Dali::Ui::Integration::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, true);
+    NPatchVisualPtr visual =
+      NPatchVisual::New(cache, shaderFactory, Dali::Ui::Integration::VisualFactory::NONE, url, properties);
+
+    Actor actor = Actor::New();
+    actor.SetProperty(Actor::Property::SIZE, Vector2(80.0f, 60.0f));
+    application.GetScene().Add(actor);
+    visual->DoSetOnScene(actor);
+    if(!synchronousLoading)
+    {
+      DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, 30, true), true, TEST_LOCATION);
+      application.SendNotification();
+      application.Render();
+    }
+
+    Dali::Ui::Internal::NPatchDataPtr patchData;
+    DALI_TEST_CHECK(visual->mLoader.GetNPatchData(visual->mId, patchData));
+    DALI_TEST_CHECK(patchData->GetLoadingState() == Dali::Ui::Internal::NPatchData::LoadingState::LOAD_COMPLETE);
+    DALI_TEST_EQUALS(patchData->GetCroppedWidth(), 23u, TEST_LOCATION);
+    DALI_TEST_EQUALS(patchData->GetCroppedHeight(), 27u, TEST_LOCATION);
+
+    DALI_TEST_CHECK(patchData->IsPreMultiplied());
+    DALI_TEST_CHECK(patchData->GetTextures().GetTexture(0u).IsAlphaPreMultiplied());
+    DALI_TEST_CHECK(visual->IsPreMultipliedAlphaEnabled());
+
+    visual->DoSetOffScene(actor);
+    actor.Unparent();
+  }
   END_TEST;
 }

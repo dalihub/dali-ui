@@ -42,10 +42,9 @@ namespace TextureManager
  * @note this method does not check for duplicates,
  *       if same Texture is added multiple times, a different URL is returned each time
  * @param[in] texture the Texture to add
- * @param[in] preMultiplied Whether this external texture preMultiplied or not. Default as false.
  * @return the Url string representing this texture
  */
-DALI_UI_API String AddTexture(Texture& texture, bool preMultiplied = false);
+DALI_UI_API String AddTexture(Texture& texture);
 
 /**
  * @brief Add a TextureSet to texture manager
@@ -53,10 +52,9 @@ DALI_UI_API String AddTexture(Texture& texture, bool preMultiplied = false);
  * @note this method does not check for duplicates,
  *       if same TextureSet is added multiple times, a different URL is returned each time
  * @param[in] textureSet the TextureSet to add
- * @param[in] preMultiplied Whether this external texture preMultiplied or not. Default as false.
  * @return the Url string representing this texture
  */
-DALI_UI_API String AddTexture(TextureSet& textureSet, bool preMultiplied = false);
+DALI_UI_API String AddTexture(TextureSet& textureSet);
 
 /**
  * @brief Removes a TextureSet from the texture manager

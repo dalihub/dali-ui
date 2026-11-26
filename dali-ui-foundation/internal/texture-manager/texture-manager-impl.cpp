@@ -81,16 +81,11 @@ Debug::Filter* gTextureManagerLogFilter = Debug::Filter::New(Debug::NoLogging, f
 
 namespace
 {
-void PreMultiply(PixelBuffer pixelBuffer, TextureManager::MultiplyOnLoad& preMultiplyOnLoad)
+void PreMultiply(PixelBuffer pixelBuffer, TextureManager::MultiplyOnLoad preMultiplyOnLoad)
 {
   if(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD)
   {
     DevelPixelBufferOperations::MultiplyColorByAlpha(pixelBuffer);
-
-    if(!pixelBuffer.IsAlphaPreMultiplied())
-    {
-      preMultiplyOnLoad = TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
-    }
   }
 }
 
@@ -134,8 +129,8 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
   TextureManager::TextureId& textureId, MaskingDataPointer& maskInfo, const Dali::ImageDimensions& desiredSize,
   const Dali::SamplingMode::Type samplingMode,
   const bool synchronousLoading, TextureUploadObserver* textureObserver,
-  TextureManager::MultiplyOnLoad&    preMultiplyOnLoad,
-  const TextureManager::ReloadPolicy reloadPolicy)
+  const TextureManager::MultiplyOnLoad preMultiplyOnLoad,
+  const TextureManager::ReloadPolicy   reloadPolicy)
 {
   TextureSet textureSet;
 
@@ -236,10 +231,8 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
         }
       }
 
-      if(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD)
-      {
-        PreMultiply(pixelBuffers[0], preMultiplyOnLoad);
-      }
+      PreMultiply(pixelBuffers[0], preMultiplyOnLoad);
+
       textureSet = TextureSet::New();
       if(maskTexture)
       {
@@ -288,7 +281,7 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
 PixelBuffer TextureManager::LoadPixelBuffer(
   const VisualUrl& url, const Dali::ImageDimensions& desiredSize,
   const Dali::SamplingMode::Type samplingMode, const bool synchronousLoading, TextureUploadObserver* textureObserver,
-  const bool orientationCorrection, TextureManager::MultiplyOnLoad& preMultiplyOnLoad)
+  const bool orientationCorrection, const TextureManager::MultiplyOnLoad preMultiplyOnLoad)
 {
   PixelBuffer pixelBuffer;
   if(synchronousLoading)
@@ -308,7 +301,7 @@ PixelBuffer TextureManager::LoadPixelBuffer(
       {
         pixelBuffer = LoadImageFromFile(Dali::Integration::ToDaliStringView(url.GetUrl()), desiredSize, samplingMode, orientationCorrection);
       }
-      if(pixelBuffer && preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD)
+      if(pixelBuffer)
       {
         PreMultiply(pixelBuffer, preMultiplyOnLoad);
       }
@@ -329,9 +322,9 @@ TextureSet TextureManager::LoadTexture(const VisualUrl& url, const Dali::ImageDi
                                        const Dali::SamplingMode::Type samplingMode, MaskingDataPointer& maskInfo,
                                        const bool synchronousLoading, TextureManager::TextureId& textureId,
                                        bool& loadingStatus, TextureUploadObserver* textureObserver,
-                                       const bool                         orientationCorrection,
-                                       const TextureManager::ReloadPolicy reloadPolicy,
-                                       TextureManager::MultiplyOnLoad&    preMultiplyOnLoad)
+                                       const bool                           orientationCorrection,
+                                       const TextureManager::ReloadPolicy   reloadPolicy,
+                                       const TextureManager::MultiplyOnLoad preMultiplyOnLoad)
 {
   TextureSet textureSet;
 
@@ -386,9 +379,9 @@ TextureSet TextureManager::LoadTexture(const VisualUrl& url, const Dali::ImageDi
 TextureManager::TextureId TextureManager::RequestLoad(const VisualUrl& url, const ImageDimensions& desiredSize,
                                                       const Dali::SamplingMode::Type samplingMode,
                                                       TextureUploadObserver* observer, const bool orientationCorrection,
-                                                      const TextureManager::ReloadPolicy reloadPolicy,
-                                                      TextureManager::MultiplyOnLoad&    preMultiplyOnLoad,
-                                                      const bool                         synchronousLoading)
+                                                      const TextureManager::ReloadPolicy   reloadPolicy,
+                                                      const TextureManager::MultiplyOnLoad preMultiplyOnLoad,
+                                                      const bool                           synchronousLoading)
 {
   return RequestLoadInternal(url, INVALID_TEXTURE_ID, INVALID_TEXTURE_ID, 1.0f, desiredSize, samplingMode,
                              false, TextureManager::StorageType::UPLOAD_TO_TEXTURE, observer, orientationCorrection,
@@ -400,7 +393,7 @@ TextureManager::TextureId TextureManager::RequestLoad(
   const TextureManager::TextureId previousTextureId, const float contentScale,
   const Dali::ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode, const bool cropToMask,
   TextureUploadObserver* observer, const bool orientationCorrection, const TextureManager::ReloadPolicy reloadPolicy,
-  TextureManager::MultiplyOnLoad& preMultiplyOnLoad, const bool synchronousLoading)
+  const TextureManager::MultiplyOnLoad preMultiplyOnLoad, const bool synchronousLoading)
 {
   return RequestLoadInternal(url, maskTextureId, previousTextureId, contentScale, desiredSize,
                              samplingMode, cropToMask, TextureManager::StorageType::UPLOAD_TO_TEXTURE, observer,
@@ -427,7 +420,7 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
   const Dali::ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode,
   const bool cropToMask, const TextureManager::StorageType storageType,
   TextureUploadObserver* observer, const bool orientationCorrection, const TextureManager::ReloadPolicy reloadPolicy,
-  TextureManager::MultiplyOnLoad& preMultiplyOnLoad, Dali::AnimatedImageLoading animatedImageLoading,
+  const TextureManager::MultiplyOnLoad preMultiplyOnLoad, Dali::AnimatedImageLoading animatedImageLoading,
   const uint32_t frameIndex, const bool synchronousLoading)
 {
   TextureHash       textureHash   = INITIAL_HASH_NUMBER;
@@ -458,16 +451,6 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
       ++(mTextureCacheManager[cacheIndex].referenceCount);
     }
     textureId = mTextureCacheManager[cacheIndex].textureId;
-
-    // Update preMultiplyOnLoad value. It should be changed according to preMultiplied value of the cached info.
-    if(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD)
-    {
-      // Change preMultiplyOnLoad value so make caller determine to preMultiplyAlpha or not.
-      // TODO : Should we separate input and output value?
-      preMultiplyOnLoad = mTextureCacheManager[cacheIndex].preMultiplied
-                            ? TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
-                            : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
-    }
 
     DALI_LOG_INFO(
       gTextureManagerLogFilter, Debug::General,
@@ -508,7 +491,7 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
   // WAITING_FOR_MASK.
   if(url.GetProtocolType() == VisualUrl::TEXTURE)
   {
-    UpdateExternalTextureInfo(textureInfo, preMultiplyOnLoad);
+    UpdateExternalTextureInfo(textureInfo);
   }
 
   DALI_LOG_INFO(gTextureManagerLogFilter, Debug::General,
@@ -619,7 +602,7 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
     {
       if(url.GetProtocolType() == VisualUrl::TEXTURE)
       {
-        UpdateExternalTextureInfo(textureInfo, preMultiplyOnLoad);
+        UpdateExternalTextureInfo(textureInfo);
       }
       else
       {
@@ -1484,7 +1467,7 @@ void TextureManager::EmitLoadComplete(TextureUploadObserver* observer, TextureMa
   {
     observer->LoadComplete(success, TextureUploadObserver::TextureInformation(
                                       TextureUploadObserver::ReturnType::PIXEL_BUFFER, textureInfo.pixelBuffer,
-                                      textureInfo.url.GetUrl(), textureInfo.preMultiplied));
+                                      textureInfo.url.GetUrl()));
   }
   else
   {
@@ -1494,13 +1477,12 @@ void TextureManager::EmitLoadComplete(TextureUploadObserver* observer, TextureMa
       observer->LoadComplete(
         success, TextureUploadObserver::TextureInformation(TextureUploadObserver::ReturnType::ANIMATED_IMAGE_TEXTURE,
                                                            textureInfo.textureId, textureSet, textureInfo.frameCount,
-                                                           textureInfo.frameInterval, textureInfo.preMultiplied));
+                                                           textureInfo.frameInterval));
     }
     else
     {
       observer->LoadComplete(success, TextureUploadObserver::TextureInformation(
-                                        TextureUploadObserver::ReturnType::TEXTURE, textureInfo.textureId, textureSet,
-                                        textureInfo.preMultiplied));
+                                        TextureUploadObserver::ReturnType::TEXTURE, textureInfo.textureId, textureSet));
     }
   }
 }
@@ -1563,6 +1545,18 @@ void TextureManager::RemoveTextureObserver(TextureManager::TextureInfo& textureI
 }
 
 // Internal methods
+bool TextureManager::IsAlphaPreMultiplied(const TextureSet& textureSet)
+{
+  if(!textureSet || textureSet.GetTextureCount() == 0u)
+  {
+    return false;
+  }
+
+  // The image is the first texture; a mask or the remaining YUV planes follow it.
+  const Texture texture = textureSet.GetTexture(0u);
+  return texture && texture.IsAlphaPreMultiplied();
+}
+
 TextureSet TextureManager::GetTextureSetInternal(const TextureManager::TextureInfo& textureInfo)
 {
   TextureSet textureSet;
@@ -1604,8 +1598,7 @@ TextureSet TextureManager::GetTextureSetInternal(const TextureManager::TextureIn
   return textureSet;
 }
 
-void TextureManager::UpdateExternalTextureInfo(TextureManager::TextureInfo&    textureInfo,
-                                               TextureManager::MultiplyOnLoad& preMultiplyOnLoad)
+void TextureManager::UpdateExternalTextureInfo(TextureManager::TextureInfo& textureInfo)
 {
   DALI_ASSERT_DEBUG(textureInfo.url.GetProtocolType() == VisualUrl::TEXTURE);
 
@@ -1636,18 +1629,6 @@ void TextureManager::UpdateExternalTextureInfo(TextureManager::TextureInfo&    t
       if(externalTexture)
       {
         textureInfo.textures.push_back(externalTexture);
-
-        if(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD)
-        {
-          // TODO : Shouldn't we check preMultiplied value of external texture when
-          // TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY??
-          textureInfo.preMultiplied = externalTextureInfo.preMultiplied;
-
-          // Change preMultiplyOnLoad value so make caller determine to preMultiplyAlpha or not.
-          // TODO : Should we separate input and output value?
-          preMultiplyOnLoad = textureInfo.preMultiplied ? TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
-                                                        : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
-        }
 
         if(textureInfo.maskTextureId != INVALID_TEXTURE_ID)
         {

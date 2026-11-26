@@ -695,7 +695,7 @@ void NPatchVisual::LoadComplete(bool loadSuccess, TextureInformation textureInfo
     }
     if(loadSuccess)
     {
-      EnablePreMultipliedAlpha(textureInformation.preMultiplied);
+      EnablePreMultipliedAlpha(TextureManager::IsAlphaPreMultiplied(textureInformation.textureSet));
     }
   }
   else // For the AuxiliaryUrl

@@ -277,17 +277,17 @@ EncodedImageBuffer TextureCacheManager::GetEncodedImageBuffer(const VisualUrl& u
   return encodedImageBuffer;
 }
 
-std::string TextureCacheManager::AddExternalTexture(const TextureSet& textureSet, const bool preMultiplied)
+std::string TextureCacheManager::AddExternalTexture(const TextureSet& textureSet)
 {
   TextureId textureId = GenerateTextureId(
     TextureCacheIndex(TextureCacheIndexType::TEXTURE_CACHE_INDEX_TYPE_TEXTURE, static_cast<uint32_t>(mExternalTextures.size())));
 
-  TextureCacheManager::ExternalTextureInfo textureInfo(textureId, textureSet, preMultiplied);
+  TextureCacheManager::ExternalTextureInfo textureInfo(textureId, textureSet);
   mExternalTextures.emplace_back(textureInfo);
 
   DALI_LOG_INFO(gTextureManagerLogFilter, Debug::Concise,
-                "TextureCacheManager::AddExternalTexture() : New texture registered. textureId:%d, preMultiplied:%d\n",
-                textureInfo.textureId, preMultiplied);
+                "TextureCacheManager::AddExternalTexture() : New texture registered. textureId:%d\n",
+                textureInfo.textureId);
 
   return VisualUrl::CreateTextureUrl(std::to_string(textureInfo.textureId));
 }

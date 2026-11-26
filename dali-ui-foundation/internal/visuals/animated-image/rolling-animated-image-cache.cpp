@@ -141,7 +141,7 @@ TextureSet RollingAnimatedImageCache::Frame(uint32_t frameIndex)
       interval            = mAnimatedImageLoading.GetFrameInterval(mQueue.Back().mFrameNumber);
     }
     MakeFrameReady(synchronouslyLoaded, textureSet, mAnimatedImageLoading.GetImageCount(), interval,
-                   preMultiplyOnLoading == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
+                   TextureManager::IsAlphaPreMultiplied(textureSet));
   }
 
   if(popExist || mQueue.IsEmpty() || synchronouslyLoaded)
@@ -223,7 +223,7 @@ TextureSet RollingAnimatedImageCache::RequestFrameLoading(uint32_t frameIndex)
 }
 
 TextureSet RollingAnimatedImageCache::RequestFrameLoading(uint32_t frameIndex, bool synchronousLoading,
-                                                          TextureManager::MultiplyOnLoad& preMultiplyOnLoading)
+                                                          TextureManager::MultiplyOnLoad preMultiplyOnLoading)
 {
   ImageFrame imageFrame;
   imageFrame.mFrameNumber = frameIndex;
@@ -402,7 +402,7 @@ void RollingAnimatedImageCache::LoadComplete(bool loadSuccess, TextureInformatio
   }
 
   MakeFrameReady(loadSuccess, textureInformation.textureSet, textureInformation.frameCount, textureInformation.interval,
-                 textureInformation.preMultiplied);
+                 TextureManager::IsAlphaPreMultiplied(textureInformation.textureSet));
 
   // TODO : We need to remove some below logics, since user can remove Visual during ResourceReady callback.
 

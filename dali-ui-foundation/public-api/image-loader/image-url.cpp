@@ -34,7 +34,7 @@ ImageUrl::~ImageUrl()
 
 ImageUrl ImageUrl::New(Texture& texture)
 {
-  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(texture, texture && texture.IsAlphaPreMultiplied());
+  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(texture);
   return ImageUrl(internal.Get());
 }
 

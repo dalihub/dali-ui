@@ -233,7 +233,7 @@ void FixedImageCache::LoadComplete(bool loadSuccess, TextureInformation textureI
       mImageUrls[i].mTextureId = textureInformation.textureId;
       mReadyFlags[i]           = true;
     }
-    MakeReady(wasCurrentFrameReady, mCurrentFrameIndex, textureInformation.preMultiplied);
+    MakeReady(wasCurrentFrameReady, mCurrentFrameIndex, TextureManager::IsAlphaPreMultiplied(textureInformation.textureSet));
   }
   else
   {

@@ -31,28 +31,6 @@ namespace Ui
 {
 namespace ImageUrlUtils
 {
-namespace
-{
-Dali::Ui::ImageUrl GeneratePixelDataUrl(Dali::PixelData pixelData, bool preMultiplied)
-{
-  Texture texture =
-    Texture::New(TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
-  // The url must exist before the upload tags the content, so Upload() has not recorded
-  // the flag on the texture yet when the url snapshots it.
-  Dali::Integration::SetTextureAlphaPreMultiplied(texture, preMultiplied);
-  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
-  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
-  {
-    Dali::Integration::TextureUploadWithContent(texture, pixelData, imageUrl.GetUrl(), Dali::Integration::TextureContextTypeHint::EXTERNAL_IMAGE);
-  }
-  else
-  {
-    texture.Upload(pixelData);
-  }
-  return imageUrl;
-}
-} // unnamed namespace
-
 Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, Pixel::Format pixelFormat, uint32_t width,
                                uint32_t height)
 {
@@ -78,7 +56,18 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, uint8_t index)
 
 Dali::Ui::ImageUrl GenerateUrl(Dali::PixelData pixelData)
 {
-  return GeneratePixelDataUrl(pixelData, pixelData.IsAlphaPreMultiplied());
+  Texture texture = Texture::New(TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
+
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
+  if(DALI_UNLIKELY(Dali::Integration::IsGpuMemoryProfileEnabled()))
+  {
+    Dali::Integration::TextureUploadWithContent(texture, pixelData, imageUrl.GetUrl(), Dali::Integration::TextureContextTypeHint::EXTERNAL_IMAGE);
+  }
+  else
+  {
+    texture.Upload(pixelData);
+  }
+  return imageUrl;
 }
 
 Dali::Ui::ImageUrl GenerateUrl(Dali::NativeImageInterfacePtr nativeImageInterface)

@@ -216,14 +216,9 @@ public:
   Dali::Insets GetBorder() const;
 
   /**
-   * @brief Set whether the loaded image is premultiplied or not
-   *
-   * @param [in] preMultiplyOnLoad whether the loaded image is premultiplied or not
-   */
-  void SetPreMultiplyOnLoad(bool preMultiplyOnLoad);
-
-  /**
    * @brief Retrieve whether the loaded image is premultiplied or not.
+   *
+   * Asks the uploaded texture, so it is false until the image is loaded.
    *
    * @return Return true if the image is premultiplied alpha.
    */
@@ -254,9 +249,8 @@ public:
    * @brief Set loaded pixel buffer for the cache data.
    *
    * @param [in] pixelBuffer loaded pixel buffer.
-   * @param [in] preMultiplied whether the loaded image is premultiplied or not
    */
-  void SetLoadedNPatchData(PixelBuffer& pixelBuffer, bool preMultiplied);
+  void SetLoadedNPatchData(PixelBuffer& pixelBuffer);
 
   /**
    * @brief Send LoadComplete notify with current setuped NPatchData
@@ -322,8 +316,6 @@ private:
   void* mRenderingMap;
   ///< NPatch rendering data
 
-  bool mPreMultiplyOnLoad : 1;
-  ///< Whether to multiply alpha into color channels on load
   bool mObserverNotifying : 1;
 };
 

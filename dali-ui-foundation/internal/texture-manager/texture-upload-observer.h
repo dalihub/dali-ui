@@ -51,21 +51,18 @@ public:
 
   struct TextureInformation
   {
+    TextureInformation(const ReturnType returnType, const int32_t textureId, TextureSet textureSet);
     TextureInformation(const ReturnType returnType, const int32_t textureId, TextureSet textureSet,
-                       const bool preMultiplied);
+                       const std::string& url);
+    TextureInformation(const ReturnType returnType, PixelBuffer pixelBuffer, const std::string& url);
     TextureInformation(const ReturnType returnType, const int32_t textureId, TextureSet textureSet,
-                       const std::string& url, const bool preMultiplied);
-    TextureInformation(const ReturnType returnType, PixelBuffer pixelBuffer, const std::string& url,
-                       const bool preMultiplied);
-    TextureInformation(const ReturnType returnType, const int32_t textureId, TextureSet textureSet,
-                       const uint32_t frameCount, const uint32_t interval, const bool preMultiplied);
+                       const uint32_t frameCount, const uint32_t interval);
 
     TextureInformation();
 
     ReturnType       returnType;    ///< Returned Texture type.
     int32_t          textureId;     ///< The textureId of the loaded texture in the TextureManager
     TextureSet       textureSet;    ///< The TextureSet containing the Texture
-    bool             preMultiplied; ///< True if the image had pre-multiplied alpha applied
     PixelBuffer      pixelBuffer;   ///< The PixelBuffer of the loaded image.
     std::string_view url;           ///< The url address of the loaded image.
     uint32_t         frameCount{0}; ///< The frameCount of the animated image

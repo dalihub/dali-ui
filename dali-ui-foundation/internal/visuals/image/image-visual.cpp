@@ -859,9 +859,9 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
       mLoadState = TextureManager::LoadState::LOAD_FINISHED;
     }
 
-    // preMultiplyOnLoad is an in/out parameter, so this is the load result, not the request.
     // Synchronous loading gets no LoadComplete(), so this is its only completion point.
-    SetTexturePreMultiplied(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
+    // Blend the way the textures hold their pixels, which can differ from what was requested.
+    SetTexturePreMultiplied(TextureManager::IsAlphaPreMultiplied(textures));
 
     if(mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT)
     {
@@ -1398,7 +1398,8 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
     }
     else
     {
-      SetTexturePreMultiplied(textureInformation.preMultiplied);
+      // Blend the way the textures hold their pixels, which can differ from what was requested.
+      SetTexturePreMultiplied(TextureManager::IsAlphaPreMultiplied(textureInformation.textureSet));
 
       if(mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT)
       {
