@@ -57,6 +57,33 @@ WebView는 기본적으로 Chromium을 사용합니다. 다른 웹 엔진을 사
 WebView::SetWebEngineType(WebEngineType::LWE);
 ```
 
+### 프로필 공유와 쿠키 정책
+
+이름을 지정한 `WebProfile`을 만들면 여러 WebView가 탐색 데이터를 공유할 수 있습니다. `WebProfile::New()`의 두 번째 인자에 `true`를 전달하면 시크릿 프로필을 만듭니다. 현재 뷰를 모두 닫은 뒤 같은 프로필로 새 뷰를 만들려면 프로필 핸들을 보관하세요. 각 WebView도 사용 중인 프로필을 유지합니다.
+
+```cpp
+#include <dali-ui-foundation/public-api/views/web/web-cookie-manager.h>
+#include <dali-ui-foundation/public-api/views/web/web-profile.h>
+#include <dali-ui-foundation/public-api/views/web/web-view.h>
+
+using namespace Dali::Ui;
+
+auto profile = WebProfile::New("Browser");
+if(profile)
+{
+  auto cookies = profile.GetCookieManager();
+  cookies.SetCookieAcceptPolicy(WebCookieAcceptPolicy::BLOCK_THIRD_PARTY);
+  auto firstView = WebView::New(profile);
+  auto secondView = WebView::New(profile);
+}
+```
+
+`SetCookieAcceptPolicy()`는 3.0.3부터 Tizen Chromium에서 지원합니다. 프로필의 정책으로 `ALWAYS`, `NEVER`, `BLOCK_THIRD_PARTY` 중 하나를 선택합니다. 쿠키 API는 DALi 이벤트 스레드에서 호출하세요. `ClearAllCookies()`는 해당 프로필의 쿠키 저장소를 비웁니다.
+
+`GetCookieManager()`는 프로필이 살아 있는 동안 같은 매니저를 반환합니다. 매니저 핸들은 프로필의 수명을 연장하지 않습니다. 프로필이 소멸했거나 쿠키 저장소를 사용할 수 없으면 쿠키 API는 에러 로그를 남기고 아무 작업도 하지 않습니다.
+
+인자가 세 개인 `WebProfile::New(name, incognito, injectedBundlePath)` 오버로드는 사용 중단 예정입니다.
+
 ---
 
 ## 2. 콘텐츠 로딩
