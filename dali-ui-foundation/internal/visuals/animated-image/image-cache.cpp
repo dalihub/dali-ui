@@ -23,6 +23,18 @@ namespace Ui
 {
 namespace Internal
 {
+ImageCache::LoadRequestObserver::LoadRequestObserver(LoadResultObserver& resultObserver, uint32_t frameIndex)
+: mResultObserver(resultObserver),
+  mFrameIndex(frameIndex)
+{
+}
+
+void ImageCache::LoadRequestObserver::LoadComplete(bool loadSuccess, TextureInformation textureInformation)
+{
+  auto keepAlive = shared_from_this();
+  mResultObserver.OnLoadResult(*keepAlive, mFrameIndex, loadSuccess, textureInformation);
+}
+
 ImageCache::ImageCache(TextureManager& textureManager, ImageDimensions size,
                        Dali::SamplingMode::Type samplingMode, TextureManager::MaskingDataPointer& maskingData,
                        ImageCache::FrameReadyObserver& observer, uint32_t batchSize, uint32_t interval,
@@ -35,7 +47,6 @@ ImageCache::ImageCache(TextureManager& textureManager, ImageDimensions size,
   mInterval(interval),
   mLoadState(TextureManager::LoadState::NOT_STARTED),
   mSamplingMode(samplingMode),
-  mRequestingLoad(false),
   mPreMultiplyOnLoad(preMultiplyOnLoad)
 {
 }

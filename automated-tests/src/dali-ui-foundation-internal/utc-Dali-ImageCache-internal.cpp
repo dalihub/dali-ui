@@ -105,6 +105,15 @@ public:
   uint32_t         lastInterval{0u};
   bool             lastPremultiplied{false};
 };
+
+class TestLoadRequestObserver : public Dali::Ui::Internal::ImageCache::LoadRequestObserver
+{
+public:
+  TestLoadRequestObserver(Dali::Ui::Internal::ImageCache::LoadResultObserver& cache, uint32_t frameIndex)
+  : Dali::Ui::Internal::ImageCache::LoadRequestObserver(cache, frameIndex)
+  {
+  }
+};
 } // unnamed namespace
 
 void utc_dali_image_cache_internal_startup(void)
@@ -295,12 +304,15 @@ int UtcDaliRollingImageCacheStateP(void)
   auto& textureManager = GetFactoryCache().GetTextureManager();
   auto firstTextureId  = AddUploadedTexture(textureManager, "rolling-first.png", 1);
   auto secondTextureId = AddUploadedTexture(textureManager, "rolling-second.png", 1);
+  auto thirdTextureId = AddUploadedTexture(textureManager, "rolling-third.png", 1);
 
-  Dali::Ui::Internal::ImageCache::UrlList urls(2u);
+  Dali::Ui::Internal::ImageCache::UrlList urls(3u);
   urls[0].mUrl       = Dali::Ui::Internal::VisualUrl("rolling-first.png");
   urls[0].mTextureId = firstTextureId;
   urls[1].mUrl       = Dali::Ui::Internal::VisualUrl("rolling-second.png");
   urls[1].mTextureId = secondTextureId;
+  urls[2].mUrl       = Dali::Ui::Internal::VisualUrl("rolling-third.png");
+  urls[2].mTextureId = thirdTextureId;
   Dali::Ui::Internal::TextureManager::MaskingDataPointer maskingData;
   TestFrameReadyObserver observer;
   Dali::Ui::Internal::RollingImageCache cache(textureManager,
@@ -315,19 +327,19 @@ int UtcDaliRollingImageCacheStateP(void)
                                                true);
 
   DALI_TEST_EQUALS(cache.GetCurrentFrameIndex(), -1, TEST_LOCATION);
-  DALI_TEST_EQUALS(cache.GetTotalFrameCount(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(cache.GetTotalFrameCount(), 3, TEST_LOCATION);
   DALI_TEST_EQUALS(cache.GetFrameInterval(1u), 42u, TEST_LOCATION);
   DALI_TEST_CHECK(!cache.IsFrontReady());
 
-  cache.mQueue.PushBack({0u, false});
-  cache.mRequestingLoad = true;
+  auto firstLoadRequestObserver = std::make_shared<TestLoadRequestObserver>(cache, 0u);
+  cache.mQueue.PushBack({firstLoadRequestObserver, 0u, false});
   Dali::TextureSet readyTextureSet = Dali::TextureSet::New();
   Dali::Ui::TextureUploadObserver::TextureInformation readyInformation(
     Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
     firstTextureId,
     readyTextureSet,
     true);
-  cache.LoadComplete(true, readyInformation);
+  firstLoadRequestObserver->LoadComplete(true, readyInformation);
   DALI_TEST_CHECK(cache.IsFrontReady());
   DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(observer.lastInterval, 42u, TEST_LOCATION);
@@ -337,17 +349,25 @@ int UtcDaliRollingImageCacheStateP(void)
   cache.GetFrontTextureSet();
   DALI_TEST_EQUALS(cache.GetCachedTextureId(0u), firstTextureId, TEST_LOCATION);
 
-  cache.mQueue.PushBack({1u, false});
-  cache.mRequestingLoad = false;
+  auto secondLoadRequestObserver = std::make_shared<TestLoadRequestObserver>(cache, 1u);
+  cache.mQueue.PushBack({secondLoadRequestObserver, 1u, false});
   Dali::Ui::TextureUploadObserver::TextureInformation secondInformation(
     Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
     secondTextureId,
     Dali::TextureSet::New(),
     false);
-  cache.LoadComplete(true, secondInformation);
+  secondLoadRequestObserver->LoadComplete(true, secondInformation);
   DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
 
-  cache.LoadComplete(false, secondInformation);
+  cache.PopFrontCache();
+  auto thirdLoadRequestObserver = std::make_shared<TestLoadRequestObserver>(cache, 2u);
+  cache.mQueue.PushBack({thirdLoadRequestObserver, 2u, false});
+  Dali::Ui::TextureUploadObserver::TextureInformation thirdInformation(
+    Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
+    thirdTextureId,
+    Dali::TextureSet::New(),
+    false);
+  thirdLoadRequestObserver->LoadComplete(false, thirdInformation);
   DALI_TEST_EQUALS(observer.callCount, 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(observer.lastInterval, 0u, TEST_LOCATION);
   cache.ClearCache(true);
@@ -762,14 +782,15 @@ int UtcDaliFixedImageCacheReadyAndFailedFramesP(void)
   DALI_TEST_EQUALS(cache.GetFrameInterval(0u), 42u, TEST_LOCATION);
   DALI_TEST_CHECK(!cache.Frame(2u));
 
+  auto loadRequestObserver = std::make_shared<TestLoadRequestObserver>(cache, 0u);
   cache.mReadyFlags.push_back(false);
-  cache.mRequestingLoad = true;
+  cache.mLoadObservers.push_back(loadRequestObserver);
   Dali::Ui::TextureUploadObserver::TextureInformation ready(
     Dali::Ui::TextureUploadObserver::ReturnType::TEXTURE,
     textureId,
     Dali::TextureSet::New(),
     true);
-  cache.LoadComplete(true, ready);
+  loadRequestObserver->LoadComplete(true, ready);
   DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(observer.lastInterval, 42u, TEST_LOCATION);
   DALI_TEST_CHECK(observer.lastPremultiplied);
@@ -778,10 +799,8 @@ int UtcDaliFixedImageCacheReadyAndFailedFramesP(void)
 
   cache.ClearCache();
   DALI_TEST_EQUALS(cache.mReadyFlags.size(), 0u, TEST_LOCATION);
-  cache.LoadComplete(false, ready);
-  DALI_TEST_EQUALS(observer.callCount, 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(observer.lastInterval, 0u, TEST_LOCATION);
-  DALI_TEST_CHECK(!observer.lastPremultiplied);
+  loadRequestObserver->LoadComplete(false, ready);
+  DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -810,13 +829,11 @@ int UtcDaliRollingAnimatedImageCacheCompletionTransitionsP(void)
   DALI_TEST_EQUALS(cache.GetFrameInterval(4u), 0u, TEST_LOCATION);
 
   cache.mTextureIds[0] = AddUploadedTexture(textureManager, "rolling-first.png", 1);
-  cache.mQueue.PushBack({0u, false});
+  
+  auto firstLoadRequestObserver = std::make_shared<TestLoadRequestObserver>(cache, 0u);
+  cache.mQueue.PushBack({firstLoadRequestObserver, 0u, false});
+
   auto textureSet = Dali::TextureSet::New();
-  cache.SetImageFrameReady(Dali::Ui::Internal::TextureManager::INVALID_TEXTURE_ID);
-  DALI_TEST_CHECK(!cache.IsFrontReady());
-  cache.SetImageFrameReady(cache.mTextureIds[0]);
-  DALI_TEST_CHECK(cache.IsFrontReady());
-  cache.mQueue.Front().mReady = false;
   cache.MakeFrameReady(true, textureSet, 3u, 42u, false);
   DALI_TEST_EQUALS(cache.GetTotalFrameCount(), 3, TEST_LOCATION);
   DALI_TEST_EQUALS(cache.GetCurrentFrameIndex(), 0, TEST_LOCATION);
@@ -827,7 +844,8 @@ int UtcDaliRollingAnimatedImageCacheCompletionTransitionsP(void)
   DALI_TEST_EQUALS(cache.GetCachedTextureId(0u), cache.mTextureIds[0], TEST_LOCATION);
 
   cache.mTextureIds[1] = AddUploadedTexture(textureManager, "rolling-second.png", 1);
-  cache.mQueue.PushBack({1u, false});
+  auto secondLoadRequestObserver = std::make_shared<TestLoadRequestObserver>(cache, 1u);
+  cache.mQueue.PushBack({secondLoadRequestObserver, 1u, false});
   cache.mPendingFrameIndex = 1;
   cache.MakeFrameReady(true, textureSet, 3u, 55u, true);
   DALI_TEST_EQUALS(cache.GetCurrentFrameIndex(), 1, TEST_LOCATION);
@@ -884,7 +902,8 @@ int UtcDaliRollingAnimatedImageCachePendingJumpP(void)
                                                       maskingData, observer, 2u, 1u, Dali::WrapMode::DEFAULT,
                                                       Dali::WrapMode::DEFAULT, false, false);
   cache.mTextureIds[0] = AddUploadedTexture(textureManager, "rolling-pending.png", 1);
-  cache.mQueue.PushBack({0u, false});
+  auto loadRequestObserver = std::make_shared<TestLoadRequestObserver>(cache, 0u);
+  cache.mQueue.PushBack({loadRequestObserver, 0u, false});
   DALI_TEST_CHECK(!cache.Frame(2u));
   DALI_TEST_EQUALS(cache.mPendingFrameIndex, 2, TEST_LOCATION);
   DALI_TEST_EQUALS(cache.mLoadWaitingQueue.size(), 1u, TEST_LOCATION);
@@ -907,12 +926,13 @@ int UtcDaliRollingAnimatedImageCacheCallbackStartsNextFrameP(void)
                                                       maskingData, observer, 2u, 1u, Dali::WrapMode::REPEAT,
                                                       Dali::WrapMode::REPEAT, false, false);
   cache.mTextureIds[0] = AddUploadedTexture(textureManager, "rolling-callback.png", 1);
-  cache.mQueue.PushBack({0u, false});
+  auto loadRequestObserver = std::make_shared<TestLoadRequestObserver>(cache, 0u);
+  cache.mQueue.PushBack({loadRequestObserver, 0u, false});
   cache.mLoadWaitingQueue.push_back(1u);
   Dali::Ui::TextureUploadObserver::TextureInformation ready(
     Dali::Ui::TextureUploadObserver::ReturnType::ANIMATED_IMAGE_TEXTURE,
     cache.mTextureIds[0], Dali::TextureSet::New(), 3u, 45u, false);
-  cache.LoadComplete(true, ready);
+  loadRequestObserver->LoadComplete(true, ready);
   DALI_TEST_EQUALS(observer.callCount, 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(cache.GetFrameInterval(0u), 45u, TEST_LOCATION);
   DALI_TEST_CHECK(cache.mLoadWaitingQueue.empty());
