@@ -391,6 +391,10 @@ class MockConfiguredWebEngineContext : public MockWebEngineContext, public Dali:
 public:
   Test::WebEngine::ContextConfigurationState configuration;
 
+  // Notify to compiler that we don't hide MockWebEngineContext::SetTimeOffset(float) and MockWebEngineContext::SetTimeZoneOffset(float, float)
+  using MockWebEngineContext::SetTimeOffset;
+  using MockWebEngineContext::SetTimeZoneOffset;
+
   bool SetMaxRefreshRate(int32_t rate) override
   {
     ++configuration.calls;
