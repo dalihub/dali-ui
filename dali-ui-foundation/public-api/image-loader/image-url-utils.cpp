@@ -36,20 +36,13 @@ Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, Pixel::Format pixe
 {
   Texture texture = Texture::New(Dali::TextureType::TEXTURE_2D, pixelFormat, width, height);
   frameBuffer.AttachColorTexture(texture, 0u, 0u);
-  // DALi renders pre-multiplied output, so a frame buffer result is pre-multiplied.
-  Dali::Integration::SetTextureAlphaPreMultiplied(texture, true);
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
   return imageUrl;
 }
 
 Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, uint8_t index)
 {
-  Texture texture = Dali::DevelFrameBuffer::GetColorTexture(frameBuffer, index);
-  // DALi renders pre-multiplied output, so a frame buffer result is pre-multiplied.
-  if(texture)
-  {
-    Dali::Integration::SetTextureAlphaPreMultiplied(texture, true);
-  }
+  Texture            texture  = Dali::DevelFrameBuffer::GetColorTexture(frameBuffer, index);
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture);
   return imageUrl;
 }

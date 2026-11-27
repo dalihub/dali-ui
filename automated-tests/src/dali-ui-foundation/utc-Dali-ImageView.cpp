@@ -201,6 +201,22 @@ int UtcDaliImageUrlUtilsGenerateUrlPreMultiplied(void)
   ImageUrl nativeReportedUrl = ImageUrlUtils::GenerateUrl(NativeImageInterfacePtr(reportingNativeImage.Get()));
   DALI_TEST_CHECK(nativeReportedUrl);
 
+  // A frame buffer is rendered into with pre-multiplied colors, and its color texture reports it.
+  FrameBuffer frameBuffer    = FrameBuffer::New(8u, 8u, FrameBuffer::Attachment::NONE);
+  ImageUrl    frameBufferUrl = ImageUrlUtils::GenerateUrl(frameBuffer, Pixel::RGBA8888, 8u, 8u);
+  ImageUrl    attachedUrl    = ImageUrlUtils::GenerateUrl(frameBuffer, 0u);
+
+  for(const ImageUrl& url : {frameBufferUrl, attachedUrl})
+  {
+    ImageView frameBufferView = ImageView::New(url);
+    application.GetScene().Add(frameBufferView);
+    application.SendNotification();
+    application.Render();
+
+    DALI_TEST_CHECK(frameBufferView.GetRendererCount() > 0u);
+    DALI_TEST_CHECK(frameBufferView.GetRendererAt(0u).GetProperty<bool>(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA));
+  }
+
   END_TEST;
 }
 
