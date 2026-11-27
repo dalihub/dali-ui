@@ -1,27 +1,38 @@
 #!/bin/bash
+set -euo pipefail
 
-SCRIPT_FILE=$(readlink -f $0)
-SCRIPT_DIR=$(dirname $SCRIPT_FILE)
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+REPO_DIR=$(dirname "$SCRIPT_DIR")
+SPEC="$SCRIPT_DIR/dali-ui.spec"
+TEMPLATE="$SPEC.in"
 
-RPMSPEC=$SCRIPT_DIR/dali-ui.spec
-RPMSPEC_IN=$RPMSPEC.in
-BUILD_ALL=true
-
-while getopts ":r:a" opt; do
-  case $opt in
-    r) RPM_VERSION=$OPTARG ;;
-    a) BUILD_ALL=true ;;
-    :) echo "Option -$OPTARG requires an argument."; exit 1 ;;
-  esac
-done
-
-if [ -z "$RPM_VERSION" ]; then
-  echo "-r option for rpm version is required."
-  echo "eq. makespec.sh -r 0.0.1"
+if (( $# != 0 )); then
+  echo "Usage: $0" >&2
   exit 1
 fi
 
-# Update RPM Spec
-echo "# Auto-generated from $(basename $RPMSPEC_IN) by makespec.sh" | cat - $RPMSPEC_IN > $RPMSPEC
-sed -i -e "s/@rpm_version@/$RPM_VERSION/g" $RPMSPEC
-sed -i -e "s/@build_all@/$BUILD_ALL/g" $RPMSPEC
+if ! BASE_VERSION=$(grep -Ev '^[[:space:]]*(#|$)' "$REPO_DIR/version.txt") ||
+   [[ ! $BASE_VERSION =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+  echo 'version.txt must contain one X.Y.Z version line.' >&2
+  exit 1
+fi
+
+if [[ $(git -C "$REPO_DIR" rev-parse --show-toplevel) != "$REPO_DIR" ||
+      $(git -C "$REPO_DIR" rev-parse --is-shallow-repository) != false ]]; then
+  echo 'Spec generation requires a complete dali-ui Git checkout.' >&2
+  exit 1
+fi
+
+COMMIT_COUNT=$(git -C "$REPO_DIR" rev-list --count HEAD)
+RPM_VERSION="$BASE_VERSION.$((10000 + COMMIT_COUNT))"
+
+TEMP_SPEC=$(mktemp "$SPEC.XXXXXX")
+trap 'rm -f -- "$TEMP_SPEC"' EXIT
+{
+  echo '# Auto-generated from dali-ui.spec.in by makespec.sh'
+  sed "s/@rpm_version@/$RPM_VERSION/g" "$TEMPLATE"
+} > "$TEMP_SPEC"
+chmod 644 "$TEMP_SPEC"
+mv -fT -- "$TEMP_SPEC" "$SPEC"
+
+printf '%s\n' "$RPM_VERSION"

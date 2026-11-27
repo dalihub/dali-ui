@@ -11,9 +11,6 @@ on:
         description: 'Destination branch'
         required: true
         default: 'tizen'
-      dali_version:
-        description: 'Dali version (e.g. 2.5.15)'
-        required: true
       dali_core_commit:
         description: 'dali-core commit id (optional; defaults to latest tizen)'
         required: false
@@ -63,10 +60,9 @@ jobs:
       id: version
       shell: bash
       run: |
-        VERSION=${{ github.event.inputs.dali_version }}.$((10000+$(git rev-list --count HEAD)))
+        VERSION=$(./packaging/makespec.sh)
         echo VERSION=$VERSION
         echo "version=$VERSION" >> $GITHUB_OUTPUT
-        ./packaging/makespec.sh -r $VERSION
 
     - name: Resolve dependency commits
       id: dependencies
