@@ -38,14 +38,14 @@ namespace UiIntegration = Dali::Ui::Integration;
 class TestImageCache : public UiInternal::ImageCache
 {
 public:
-  TestImageCache(UiInternal::TextureManager&                     textureManager,
-                 UiInternal::TextureManager::MaskingDataPointer& maskingData,
-                 ImageCache::FrameReadyObserver&                 observer,
-                 bool&                                           keepUnusedTexture,
-                 UiInternal::TextureManager::TextureId           textureId =
+  TestImageCache(UiInternal::TextureManager&                    textureManager,
+                 UiInternal::TextureManager::MaskingDataPointer maskingData,
+                 ImageCache::FrameReadyObserver&                observer,
+                 bool&                                          keepUnusedTexture,
+                 UiInternal::TextureManager::TextureId          textureId =
                    UiInternal::TextureManager::INVALID_TEXTURE_ID)
   : ImageCache(textureManager, Dali::ImageDimensions(), Dali::SamplingMode::BOX_THEN_LINEAR,
-               maskingData, observer, 1u, 0u, false),
+               std::move(maskingData), observer, 1u, 0u, false),
     mKeepUnusedTexture(keepUnusedTexture),
     mTextureId(textureId)
   {
@@ -132,11 +132,9 @@ bool DestroyNeverVisualWithFrameCount(uint32_t frameCount)
   auto&                       animatedImage = static_cast<UiInternal::AnimatedImageVisual&>(
     Dali::Ui::GetImplementation(visual).GetVisualObject());
 
-  delete animatedImage.mImageCache;
-
   bool keepUnusedTexture       = false;
-  animatedImage.mImageCache    = new TestImageCache(animatedImage.mFactoryCache.GetTextureManager(),
-                                                    animatedImage.mMaskingData, animatedImage,
+  animatedImage.mImageCache    = std::make_shared<TestImageCache>(animatedImage.mFactoryCache.GetTextureManager(),
+                                                    std::move(animatedImage.mPendingMaskingData), animatedImage,
                                                     keepUnusedTexture);
   animatedImage.mFrameCount    = frameCount;
   animatedImage.mReleasePolicy = Dali::Ui::Image::ReleasePolicy::NEVER;
@@ -181,10 +179,8 @@ int UtcDaliAnimatedImageReleasePolicyNeverSingleFrameClearedExplicitly(void)
   auto& textureManager = animatedImage.mFactoryCache.GetTextureManager();
   auto  textureId      = AddUploadedTexture(textureManager, "release-policy-single-frame.jpg");
 
-  delete animatedImage.mImageCache;
-
   bool keepUnusedTexture       = false;
-  animatedImage.mImageCache    = new TestImageCache(textureManager, animatedImage.mMaskingData, animatedImage,
+  animatedImage.mImageCache    = std::make_shared<TestImageCache>(textureManager, std::move(animatedImage.mPendingMaskingData), animatedImage,
                                                     keepUnusedTexture, textureId);
   animatedImage.mFrameCount    = 1u;
   animatedImage.mReleasePolicy = Dali::Ui::Image::ReleasePolicy::NEVER;
@@ -242,10 +238,9 @@ int UtcDaliAnimatedImageVisualFrameTransitionsP(void)
     Dali::Ui::GetImplementation(visual).GetVisualObject());
 
   bool keepUnusedTexture = false;
-  delete animated.mImageCache;
-  auto* cache = new TestImageCache(animated.mFactoryCache.GetTextureManager(), animated.mMaskingData,
+  animated.mImageCache = std::make_shared<TestImageCache>(animated.mFactoryCache.GetTextureManager(), std::move(animated.mPendingMaskingData),
                                   animated, keepUnusedTexture);
-  animated.mImageCache = cache;
+  auto* cache = static_cast<TestImageCache*>(animated.mImageCache.get());
   cache->mTotalFrameCount = 3;
 
   Dali::TextureSet frame = Dali::TextureSet::New();
@@ -286,14 +281,14 @@ int UtcDaliAnimatedImageVisualFrameTransitionsP(void)
   DALI_TEST_EQUALS(cache->mCurrentFrameIndex, 2, TEST_LOCATION);
 
   animated.AllocateMaskData();
-  animated.mMaskingData->mPreappliedMasking = false;
+  animated.GetMaskingDataOwner()->mPreappliedMasking = false;
   DALI_TEST_CHECK(animated.CheckMaskTexture());
   DALI_TEST_CHECK(!animated.CheckMaskTexture());
   Dali::TextureSet masked = Dali::TextureSet::New();
   masked.SetTexture(0u, frame.GetTexture(0u));
   masked.SetTexture(1u, Dali::Texture::New(Dali::TextureType::TEXTURE_2D, Dali::Pixel::L8, 8u, 6u));
-  animated.mMaskingData->mCropToMask = true;
-  animated.mMaskingData->mContentScaleFactor = 0.5f;
+  animated.GetMaskingDataOwner()->mCropToMask = true;
+  animated.GetMaskingDataOwner()->mContentScaleFactor = 0.5f;
   animated.SetImageSize(masked);
   DALI_TEST_EQUALS(animated.mImageSize.GetWidth(), 8u, TEST_LOCATION);
   animated.mImpl->mRenderer.SetTextures(masked);
@@ -366,8 +361,8 @@ int UtcDaliAnimatedImageVisualPropertyBoundaryMatrixP(void)
 
   DALI_TEST_EQUALS(animated.mDesiredSize.GetWidth(), 42u, TEST_LOCATION);
   DALI_TEST_EQUALS(animated.mDesiredSize.GetHeight(), 24u, TEST_LOCATION);
-  DALI_TEST_CHECK(animated.mMaskingData);
-  DALI_TEST_CHECK(animated.mMaskingData->mCropToMask);
+  DALI_TEST_CHECK(animated.GetMaskingDataOwner());
+  DALI_TEST_CHECK(animated.GetMaskingDataOwner()->mCropToMask);
   DALI_TEST_CHECK(animated.mImageLoadWithViewSize);
   DALI_TEST_CHECK(!animated.mBrokenImageEnabled);
   animated.mImpl->AddCustomShader(Dali::Property::Map{});
@@ -408,7 +403,7 @@ int UtcDaliAnimatedImageVisualNaturalSizeAndFailureP(void)
   DALI_TEST_EQUALS(naturalSize, Dali::Vector2(20.0f, 12.0f), TEST_LOCATION);
 
   animated.AllocateMaskData();
-  animated.mMaskingData->mCropToMask = true;
+  animated.GetMaskingDataOwner()->mCropToMask = true;
   Dali::Property::Map result;
   animated.DoCreatePropertyMap(result);
   DALI_TEST_CHECK(result.Find(UiIntegration::ImageVisual::Property::CROP_TO_MASK));

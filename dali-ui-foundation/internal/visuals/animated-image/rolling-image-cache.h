@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/image-cache.h>
 #include <dali/devel-api/common/circular-queue.h>
+#include <memory>
 
 namespace DALI_NAMESPACE
 {
@@ -32,7 +33,7 @@ namespace Internal
  * Class to manage a rolling cache of images, where the cache size
  * is smaller than the total number of images.
  */
-class RollingImageCache : public ImageCache, public TextureUploadObserver
+class RollingImageCache : public ImageCache, public ImageCache::LoadResultObserver
 {
 public:
   /**
@@ -47,14 +48,22 @@ public:
    * @param[in] batchSize         The size of a batch to load
    * @param[in] interval          Time interval between each frame
    * @param[in] preMultiplyOnLoad The flag if image's color should be multiplied by it's alpha
+   * @param[in] reloadPolicy      Whether the first time of each frame load should reuse cache or force reload.
    *
    * This will start loading textures immediately, according to the
    * batch and cache sizes.
    */
-  RollingImageCache(TextureManager& textureManager, ImageDimensions size,
-                    Dali::SamplingMode::Type samplingMode, UrlList& urlList,
-                    TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer,
-                    uint16_t cacheSize, uint16_t batchSize, uint32_t interval, bool preMultiplyOnLoad);
+  RollingImageCache(TextureManager&                    textureManager,
+                    ImageDimensions                    size,
+                    Dali::SamplingMode::Type           samplingMode,
+                    const ImageCache::UrlList&         urlList,
+                    TextureManager::MaskingDataPointer maskingData,
+                    ImageCache::FrameReadyObserver&    observer,
+                    uint16_t                           cacheSize,
+                    uint16_t                           batchSize,
+                    uint32_t                           interval,
+                    bool                               preMultiplyOnLoad,
+                    TextureManager::ReloadPolicy       reloadPolicy = TextureManager::ReloadPolicy::CACHED);
 
   /**
    * Destructor
@@ -127,9 +136,9 @@ private:
 
 protected:
   /**
-   * @copydoc Ui::TextureUploadObserver::LoadComplete()
+   * @copydoc ImageCache::LoadResultObserver::OnLoadResult()
    */
-  void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
+  void OnLoadResult(LoadRequestObserver& requestObserver, uint32_t frameIndex, bool loadSuccess, TextureUploadObserver::TextureInformation textureInformation) override;
 
 private:
   /**
@@ -137,12 +146,17 @@ private:
    */
   struct ImageFrame
   {
-    unsigned int mUrlIndex = 0u;
-    bool         mReady    = false;
+    std::shared_ptr<LoadRequestObserver> mLoadObserver;
+    unsigned int                         mUrlIndex = 0u;
+    bool                                 mReady    = false;
   };
 
-  std::vector<UrlStore>&    mImageUrls;
-  CircularQueue<ImageFrame> mQueue;
+  const ImageCache::UrlList&             mImageUrls;
+  std::vector<TextureManager::TextureId> mTextureIds;
+  CircularQueue<ImageFrame>              mQueue;
+  bool                                   mBatchCancelled : 1;
+
+  std::unique_ptr<std::vector<TextureManager::ReloadPolicy>> mReloadPolicies; // allocate only if mReloadPolicy is not CACHED
 };
 
 } // namespace Internal

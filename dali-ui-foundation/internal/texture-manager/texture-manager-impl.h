@@ -329,6 +329,7 @@ private: // Internal Load Request API
    * @param[in] maskTextureId         The texture id of an image to mask this with
    *                                  (can be INVALID if no masking required)
    * @param[in] previousTextureId     The texture id of an image which the requestor already has before
+   * @param[out] textureId            The texture id assigned before notifying the observer
    * @param[in] contentScale          The scale factor to apply to the image before masking
    * @param[in] desiredSize           The size the image is likely to appear at. This can be set to 0,0 for automatic
    * @param[in] fittingMode           The FittingMode to use
@@ -343,15 +344,21 @@ private: // Internal Load Request API
    * @param[in] preMultiplyOnLoad True if the image color should be multiplied by it's alpha.
    * @param[in] synchronousLoading    True if the frame should be loaded synchronously. If you skip this parameter,
    *                                  default is false.
-   * @return                          A TextureId to use as a handle to reference this Texture
    */
-  TextureId RequestLoad(const VisualUrl& url, const TextureManager::TextureId maskTextureId,
-                        const TextureManager::TextureId previousTextureId, const float contentScale,
-                        const ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode,
-                        const bool             cropToMask,
-                        TextureUploadObserver* observer, const bool orientationCorrection,
-                        const TextureManager::ReloadPolicy   reloadPolicy,
-                        const TextureManager::MultiplyOnLoad preMultiplyOnLoad, const bool synchronousLoading = false);
+  void RequestLoad(
+    const VisualUrl&                   url,
+    const TextureManager::TextureId    maskTextureId,
+    const TextureManager::TextureId    previousTextureId,
+    TextureManager::TextureId&         textureId,
+    const float                        contentScale,
+    const ImageDimensions&             desiredSize,
+    const Dali::SamplingMode::Type     samplingMode,
+    const bool                         cropToMask,
+    TextureUploadObserver*             observer,
+    const bool                         orientationCorrection,
+    const TextureManager::ReloadPolicy reloadPolicy,
+    const TextureManager::MultiplyOnLoad    preMultiplyOnLoad,
+    const bool                         synchronousLoading = false);
 
   /**
    * @brief Requests a masking image to be loaded. This mask is not uploaded to GL,
@@ -380,6 +387,7 @@ private: // Internal Load Request API
    *                                  to INVALID_TEXTURE_ID
    * @param[in] previousTextureId     The texture id of an image which the requestor already has before. It will be used
    *                                  when reloadPolicy is FORCED.
+   * @param[out] textureId            The texture id assigned before notifying the observer
    * @param[in] contentScale          The scaling factor to apply to the content when masking
    * @param[in] desiredSize           The size the image is likely to appear at. This can be set to 0,0 for automatic
    * @param[in] fittingMode           The FittingMode to use
@@ -397,17 +405,24 @@ private: // Internal Load Request API
    * @param[in] frameIndex            The frame index of a frame to be loaded frame
    * @param[in] synchronousLoading    True if the frame should be loaded synchronously. If you skip this parameter,
    *                                  default is false.
-   * @return                          A TextureId to use as a handle to reference this Texture
    */
-  TextureId RequestLoadInternal(const VisualUrl& url, const TextureManager::TextureId maskTextureId,
-                                const TextureManager::TextureId previousTextureId, const float contentScale,
-                                const Dali::ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode,
-                                const bool                        cropToMask,
-                                const TextureManager::StorageType storageType, TextureUploadObserver* observer,
-                                const bool orientationCorrection, const TextureManager::ReloadPolicy reloadPolicy,
-                                const TextureManager::MultiplyOnLoad preMultiplyOnLoad,
-                                Dali::AnimatedImageLoading animatedImageLoading, const uint32_t frameIndex,
-                                const bool synchronousLoading);
+  void RequestLoadInternal(
+    const VisualUrl&                   url,
+    const TextureManager::TextureId    maskTextureId,
+    const TextureManager::TextureId    previousTextureId,
+    TextureManager::TextureId&         textureId,
+    const float                        contentScale,
+    const Dali::ImageDimensions&       desiredSize,
+    const Dali::SamplingMode::Type     samplingMode,
+    const bool                         cropToMask,
+    const TextureManager::StorageType  storageType,
+    TextureUploadObserver*             observer,
+    const bool                         orientationCorrection,
+    const TextureManager::ReloadPolicy reloadPolicy,
+    const TextureManager::MultiplyOnLoad    preMultiplyOnLoad,
+    Dali::AnimatedImageLoading         animatedImageLoading,
+    const uint32_t                     frameIndex,
+    const bool                         synchronousLoading);
 
   /**
    * @brief Load a new image synchronously.

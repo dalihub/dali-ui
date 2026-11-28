@@ -36,7 +36,7 @@ namespace Internal
  * Frames are always ready, so the observer.FrameReady callback is never triggered;
  * the FirstFrame and NextFrame APIs will always return a texture.
  */
-class RollingAnimatedImageCache : public ImageCache, public TextureUploadObserver
+class RollingAnimatedImageCache : public ImageCache, public ImageCache::LoadResultObserver
 {
 public:
   /**
@@ -60,7 +60,7 @@ public:
    */
   RollingAnimatedImageCache(TextureManager& textureManager, ImageDimensions size,
                             Dali::SamplingMode::Type samplingMode, AnimatedImageLoading& animatedImageLoading,
-                            TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer,
+                            TextureManager::MaskingDataPointer maskingData, ImageCache::FrameReadyObserver& observer,
                             uint16_t cacheSize, uint16_t batchSize, const Dali::WrapMode::Type& wrapModeU,
                             const Dali::WrapMode::Type& wrapModeV, bool isSynchronousLoading, bool preMultiplyOnLoad,
                             TextureManager::ReloadPolicy reloadPolicy = TextureManager::ReloadPolicy::CACHED);
@@ -137,13 +137,6 @@ private:
   void LoadBatch(uint32_t frameIndex);
 
   /**
-   * @brief Find the matching image frame, and set it to ready
-   *
-   * @param[in] textureId texture id to be marked as ready.
-   */
-  void SetImageFrameReady(TextureManager::TextureId textureId);
-
-  /**
    * @brief Get the texture set of the front frame.
    *
    * @return the texture set of the front of Cache.
@@ -174,11 +167,53 @@ private:
    */
   void PopFrontCache(bool keepUnusedTexture = false);
 
+  /**
+   * @brief Get the texture id of the given frame index
+   *
+   * @param[in] frameIndex index of the frame.
+   * @return reference to the texture id.
+   */
+  TextureManager::TextureId& GetTextureIdReference(uint32_t frameIndex)
+  {
+    if(frameIndex == 0u)
+    {
+      return mFirstFrameTextureId;
+    }
+    else
+    {
+      DALI_ASSERT_DEBUG(static_cast<std::size_t>(frameIndex) <= mTextureIds.size() && "Frame index is out of range");
+      return mTextureIds[frameIndex - 1u];
+    }
+  }
+
+  /**
+   * @brief Get the texture id of the given frame index
+   *
+   * @param[in] frameIndex index of the frame.
+   * @return texture id.
+   */
+  const TextureManager::TextureId GetTextureIdFromFrameIndex(uint32_t frameIndex) const
+  {
+    if(frameIndex == 0u)
+    {
+      return mFirstFrameTextureId;
+    }
+    else if(DALI_LIKELY(static_cast<std::size_t>(frameIndex) <= mTextureIds.size()))
+    {
+      return mTextureIds[frameIndex - 1u];
+    }
+    else
+    {
+      return TextureManager::INVALID_TEXTURE_ID;
+    }
+  }
+
 protected:
   /**
-   * @copydoc Ui::TextureUploadObserver::LoadComplete()
+   * @copydoc ImageCache::LoadResultObserver::OnLoadResult()
    */
-  void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
+  void OnLoadResult(LoadRequestObserver& requestObserver, uint32_t frameIndex, bool loadSuccess,
+                    TextureUploadObserver::TextureInformation textureInformation) override;
 
 private:
   /**
@@ -186,10 +221,13 @@ private:
    */
   struct ImageFrame
   {
-    uint32_t mFrameNumber = 0u;
-    bool     mReady       = false;
+    std::shared_ptr<LoadRequestObserver> mLoadObserver;
+    uint32_t                             mFrameNumber = 0u;
+    bool                                 mReady       = false;
   };
-  std::vector<TextureManager::TextureId> mTextureIds;
+
+  TextureManager::TextureId              mFirstFrameTextureId;
+  std::vector<TextureManager::TextureId> mTextureIds; ///< Texture Ids for each frame of the animated image except the first frame, which is stored in mFirstFrameTextureId
 
   VisualUrl                  mImageUrl;
   Dali::AnimatedImageLoading mAnimatedImageLoading;
@@ -199,12 +237,13 @@ private:
   std::vector<uint32_t>      mLoadWaitingQueue;
   CircularQueue<ImageFrame>  mQueue;
   // Frame requested while another frame's decode is still in flight (-1: none).
-  // Keep the in-flight entry until LoadComplete() so its observer is not removed.
+  // Keep the in-flight entry until OnLoadResult() so its observer is not removed.
   int32_t                      mPendingFrameIndex{-1};
+  TextureManager::ReloadPolicy mReloadPolicy;
   Dali::WrapMode::Type         mWrapModeU : 3;
   Dali::WrapMode::Type         mWrapModeV : 3;
+  bool                         mBatchCancelled : 1;
   bool                         mIsSynchronousLoading;
-  TextureManager::ReloadPolicy mReloadPolicy;
 };
 
 } // namespace Internal

@@ -23,33 +23,38 @@
 #include <dali/integration-api/debug.h>
 
 #include <locale>
+#include <utility>
 
 namespace
 {
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gAnimImgLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_ANIMATED_IMAGE");
 
-// clang-format off
 #define LOG_CACHE                                                              \
   if(gAnimImgLogFilter->IsEnabledFor(Debug::Concise))                          \
   {                                                                            \
     std::ostringstream oss;                                                    \
     oss.imbue(std::locale::classic());                                         \
-    oss << "Size:" << mQueue.Count() << " [ ";                                 \
-    for(uint32_t _i = 0u; _i < mQueue.Count(); ++_i)                          \
+    if(DALI_UNLIKELY(mBatchCancelled))                                         \
     {                                                                          \
-      oss << _i << "={ frm#: " << mQueue[_i].mFrameNumber << " tex: ";         \
-      oss << (DALI_LIKELY(mQueue[_i].mFrameNumber < mTextureIds.size()) ?      \
-              mTextureIds[mQueue[_i].mFrameNumber] :                           \
-              TextureManager::INVALID_TEXTURE_ID) << "}, ";                    \
+      oss << "Batch cancelled." << std::endl;                                  \
     }                                                                          \
-    oss << " ]" << std::endl;                                                  \
+    else                                                                       \
+    {                                                                          \
+      oss << "Size:" << mQueue.Count() << " [ ";                               \
+      for(uint32_t _i = 0u; _i < mQueue.Count(); ++_i)                         \
+      {                                                                        \
+        oss << _i << "={ frm#: " << mQueue[_i].mFrameNumber << " tex: ";       \
+        oss << GetTextureIdFromFrameIndex(mQueue[_i].mFrameNumber);            \
+        oss << " observer:" << mQueue[_i].mLoadObserver.get() << "}, ";        \
+      }                                                                        \
+      oss << " ]" << std::endl;                                                \
+    }                                                                          \
     DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "%s", oss.str().c_str()); \
   }
 #else
 #define LOG_CACHE
 #endif
-// clang-format on
 
 } // namespace
 
@@ -65,26 +70,33 @@ static constexpr uint32_t SINGLE_IMAGE_COUNT = 1u;
 static constexpr uint32_t FIRST_FRAME_INDEX  = 0u;
 } // namespace
 
-RollingAnimatedImageCache::RollingAnimatedImageCache(
-  TextureManager& textureManager, ImageDimensions size,
-  Dali::SamplingMode::Type samplingMode, AnimatedImageLoading& animatedImageLoading,
-  TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer, uint16_t cacheSize,
-  uint16_t batchSize, const Dali::WrapMode::Type& wrapModeU, const Dali::WrapMode::Type& wrapModeV,
-  bool isSynchronousLoading, bool preMultiplyOnLoad, TextureManager::ReloadPolicy reloadPolicy)
-: ImageCache(textureManager, size, samplingMode, maskingData, observer, batchSize, 0u,
-             preMultiplyOnLoad),
+RollingAnimatedImageCache::RollingAnimatedImageCache(TextureManager&                    textureManager,
+                                                     ImageDimensions                    size,
+                                                     Dali::SamplingMode::Type           samplingMode,
+                                                     AnimatedImageLoading&              animatedImageLoading,
+                                                     TextureManager::MaskingDataPointer maskingData,
+                                                     ImageCache::FrameReadyObserver&    observer,
+                                                     uint16_t                           cacheSize,
+                                                     uint16_t                           batchSize,
+                                                     const Dali::WrapMode::Type&        wrapModeU,
+                                                     const Dali::WrapMode::Type&        wrapModeV,
+                                                     bool                               isSynchronousLoading,
+                                                     bool                               preMultiplyOnLoad,
+                                                     TextureManager::ReloadPolicy       reloadPolicy)
+: ImageCache(textureManager, size, samplingMode, std::move(maskingData), observer, batchSize, 0u, preMultiplyOnLoad),
+  mFirstFrameTextureId(TextureManager::INVALID_TEXTURE_ID),
+  mTextureIds(),
   mImageUrl(animatedImageLoading.GetUrl()),
   mAnimatedImageLoading(animatedImageLoading),
   mFrameCount(SINGLE_IMAGE_COUNT),
   mCacheSize(cacheSize),
   mQueue(cacheSize),
+  mReloadPolicy(reloadPolicy),
   mWrapModeU(wrapModeU),
   mWrapModeV(wrapModeV),
-  mIsSynchronousLoading(isSynchronousLoading),
-  mReloadPolicy(reloadPolicy)
+  mBatchCancelled(false),
+  mIsSynchronousLoading(isSynchronousLoading)
 {
-  mTextureIds.resize(mFrameCount);
-  mTextureIds[0] = TextureManager::INVALID_TEXTURE_ID;
   mIntervals.assign(mFrameCount, 0);
 }
 
@@ -121,6 +133,8 @@ TextureSet RollingAnimatedImageCache::Frame(uint32_t frameIndex)
     LOG_CACHE;
     return TextureSet();
   }
+
+  mBatchCancelled = false;
 
   TextureSet textureSet;
   uint32_t   batchFrameIndex = frameIndex;
@@ -188,7 +202,7 @@ TextureSet RollingAnimatedImageCache::FirstFrame()
 
 uint32_t RollingAnimatedImageCache::GetFrameInterval(uint32_t frameIndex) const
 {
-  if(frameIndex >= mIntervals.size())
+  if(static_cast<std::size_t>(frameIndex) >= mIntervals.size())
   {
     return 0u;
   }
@@ -226,26 +240,32 @@ TextureSet RollingAnimatedImageCache::RequestFrameLoading(uint32_t frameIndex, b
                                                           TextureManager::MultiplyOnLoad preMultiplyOnLoading)
 {
   ImageFrame imageFrame;
-  imageFrame.mFrameNumber = frameIndex;
-  imageFrame.mReady       = false;
+  imageFrame.mFrameNumber  = frameIndex;
+  imageFrame.mReady        = false;
+  imageFrame.mLoadObserver = std::make_shared<LoadRequestObserver>(*this, weak_from_this(), frameIndex);
 
   mQueue.PushBack(imageFrame);
 
   mLoadState = TextureManager::LoadState::LOADING;
 
-  TextureManager::TextureId loadTextureId = TextureManager::INVALID_TEXTURE_ID;
-  TextureSet                textureSet    = mTextureManager.LoadAnimatedImageTexture(
-    mImageUrl, mAnimatedImageLoading, frameIndex, loadTextureId, mMaskingData, mDesiredSize,
-    mSamplingMode, synchronousLoading, this, preMultiplyOnLoading, mReloadPolicy);
-  mReloadPolicy = TextureManager::ReloadPolicy::CACHED;
+  TextureSet textureSet = mTextureManager.LoadAnimatedImageTexture(mImageUrl,
+                                                                   mAnimatedImageLoading,
+                                                                   frameIndex,
+                                                                   GetTextureIdReference(frameIndex),
+                                                                   mMaskingData,
+                                                                   mDesiredSize,
+                                                                   mSamplingMode,
+                                                                   synchronousLoading,
+                                                                   imageFrame.mLoadObserver.get(),
+                                                                   preMultiplyOnLoading,
+                                                                   mReloadPolicy);
+  mReloadPolicy         = TextureManager::ReloadPolicy::CACHED;
   if(textureSet && (mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT))
   {
     Sampler sampler = Sampler::New();
     sampler.SetWrapMode(mWrapModeU, mWrapModeV);
     textureSet.SetSampler(0u, sampler);
   }
-
-  mTextureIds[frameIndex] = loadTextureId;
 
   return textureSet;
 }
@@ -255,8 +275,8 @@ void RollingAnimatedImageCache::LoadBatch(uint32_t frameIndex)
   // Try and load up to mBatchSize images, until the cache is filled.
   // Once the cache is filled, as frames progress, the old frame is
   // removed, and another frame is loaded
-  uint32_t minimumSize = std::min(mCacheSize, mFrameCount);
-  for(uint32_t i = 0; i < mBatchSize && (mQueue.Count() + mLoadWaitingQueue.size()) < minimumSize; ++i)
+  uint32_t minimumSize = Min(mCacheSize, mFrameCount);
+  for(uint32_t i = 0; i < mBatchSize && DALI_LIKELY(!mBatchCancelled) && (mQueue.Count() + mLoadWaitingQueue.size()) < static_cast<std::size_t>(minimumSize); ++i)
   {
     if(mLoadState != TextureManager::LoadState::LOADING)
     {
@@ -272,18 +292,6 @@ void RollingAnimatedImageCache::LoadBatch(uint32_t frameIndex)
   }
 
   LOG_CACHE;
-}
-
-void RollingAnimatedImageCache::SetImageFrameReady(TextureManager::TextureId textureId)
-{
-  for(uint32_t i = 0u; i < mQueue.Count(); ++i)
-  {
-    if(GetCachedTextureId(i) == textureId)
-    {
-      mQueue[i].mReady = true;
-      break;
-    }
-  }
 }
 
 TextureSet RollingAnimatedImageCache::GetFrontTextureSet() const
@@ -304,16 +312,17 @@ TextureSet RollingAnimatedImageCache::GetFrontTextureSet() const
 
 TextureManager::TextureId RollingAnimatedImageCache::GetCachedTextureId(uint32_t index) const
 {
-  return DALI_LIKELY(mQueue[index].mFrameNumber < mTextureIds.size()) ? mTextureIds[mQueue[index].mFrameNumber]
-                                                                      : TextureManager::INVALID_TEXTURE_ID;
+  return GetTextureIdFromFrameIndex(mQueue[index].mFrameNumber);
 }
 
 void RollingAnimatedImageCache::PopFrontCache(bool keepUnusedTexture)
 {
+  auto requestObserver = mQueue.Front().mLoadObserver;
+  mQueue.Front().mLoadObserver.reset();
   ImageFrame imageFrame = mQueue.PopFront();
 
-  mTextureManager.RequestRemove(mTextureIds[imageFrame.mFrameNumber], this, keepUnusedTexture);
-  mTextureIds[imageFrame.mFrameNumber] = TextureManager::INVALID_TEXTURE_ID;
+  mTextureManager.RequestRemove(GetTextureIdReference(imageFrame.mFrameNumber), requestObserver.get(), keepUnusedTexture);
+  GetTextureIdReference(imageFrame.mFrameNumber) = TextureManager::INVALID_TEXTURE_ID;
 
   if(mMaskingData && mMaskingData->mAlphaMaskId != TextureManager::INVALID_TEXTURE_ID)
   {
@@ -326,6 +335,7 @@ void RollingAnimatedImageCache::PopFrontCache(bool keepUnusedTexture)
 
 void RollingAnimatedImageCache::ClearCache(bool keepUnusedTexture)
 {
+  mBatchCancelled = true;
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
     while(!mQueue.IsEmpty())
@@ -341,7 +351,7 @@ void RollingAnimatedImageCache::ClearCache(bool keepUnusedTexture)
 void RollingAnimatedImageCache::MakeFrameReady(bool loadSuccess, TextureSet textureSet, uint32_t frameCount,
                                                uint32_t interval, bool preMultiplied)
 {
-  if(!loadSuccess)
+  if(!loadSuccess || DALI_UNLIKELY(frameCount == 0u))
   {
     mLoadState = TextureManager::LoadState::LOAD_FAILED;
     // preMultiplied should be false because broken image don't premultiply alpha on load
@@ -355,7 +365,8 @@ void RollingAnimatedImageCache::MakeFrameReady(bool loadSuccess, TextureSet text
     if(mFrameCount != frameCount)
     {
       mFrameCount = frameCount;
-      mTextureIds.resize(mFrameCount);
+      DALI_ASSERT_DEBUG(mFrameCount > 0u && "Frame count must be greater than 0");
+      mTextureIds.resize(mFrameCount - 1u, TextureManager::INVALID_TEXTURE_ID);
       mIntervals.assign(mFrameCount, 0u);
     }
 
@@ -388,11 +399,40 @@ void RollingAnimatedImageCache::MakeFrameReady(bool loadSuccess, TextureSet text
   }
 }
 
-void RollingAnimatedImageCache::LoadComplete(bool loadSuccess, TextureInformation textureInformation)
+void RollingAnimatedImageCache::OnLoadResult(LoadRequestObserver& requestObserver, uint32_t frameIndex, bool loadSuccess,
+                                             TextureUploadObserver::TextureInformation textureInformation)
 {
-  DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "AnimatedImageVisual::LoadComplete(textureId:%d) start\n",
-                textureInformation.textureId);
+  DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "RollingAnimatedImageCache::OnLoadResult(textureId:%d, observer:%p, frameIndex:%d, loadSuccess:%d) start\n", textureInformation.textureId, &requestObserver, frameIndex, loadSuccess);
   LOG_CACHE;
+
+  if(DALI_UNLIKELY(mBatchCancelled))
+  {
+    DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "RollingAnimatedImageCache::OnLoadResult() batch cancelled\n");
+    return;
+  }
+
+  bool requestFound = false;
+  for(uint32_t i = 0u; i < mQueue.Count(); ++i)
+  {
+    if(mQueue[i].mFrameNumber == frameIndex)
+    {
+      if(DALI_LIKELY(mQueue[i].mLoadObserver.get() == &requestObserver))
+      {
+        mQueue[i].mLoadObserver.reset();
+        requestFound = true;
+        break;
+      }
+      else
+      {
+        DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "RollingAnimatedImageCache::OnLoadResult() Observer mismatched (has : %p but caller : %p)\n", mQueue[i].mLoadObserver.get(), &requestObserver);
+      }
+    }
+  }
+  if(DALI_UNLIKELY(!requestFound))
+  {
+    DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "RollingAnimatedImageCache::OnLoadResult() Observer mismatched\n");
+    return;
+  }
 
   if(textureInformation.textureSet && (mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT))
   {
@@ -406,7 +446,7 @@ void RollingAnimatedImageCache::LoadComplete(bool loadSuccess, TextureInformatio
 
   // TODO : We need to remove some below logics, since user can remove Visual during ResourceReady callback.
 
-  if(loadSuccess)
+  if(loadSuccess && DALI_LIKELY(!mBatchCancelled))
   {
     // The frames of a single animated image can not be loaded parallelly.
     // Therefore, a frame is now loading, other orders are waiting.

@@ -26,6 +26,7 @@
 #include <dali/integration-api/rendering/decorated-visual-renderer.h>
 #include <dali/integration-api/string-utils.h>
 #include <memory>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
@@ -250,17 +251,15 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&             
 
   for(unsigned int i = 0; i < imageUrls.Count(); ++i)
   {
-    ImageCache::UrlStore urlStore;
-    urlStore.mTextureId = TextureManager::INVALID_TEXTURE_ID;
-    urlStore.mUrl       = ToStdString(imageUrls[i]);
+    VisualUrl url = Dali::Integration::ToStdString(imageUrls[i]);
     if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
     {
       // Increase reference count of External Resources :
       // EncodedImageBuffer or ExternalTextures.
       // Reference count will be decreased at destructor of the visual.
-      urlStore.mUrl.IncreaseExternalResourceReference(factoryCache.GetTextureManager());
+      url.IncreaseExternalResourceReference(factoryCache.GetTextureManager());
     }
-    visual->mImageUrls->push_back(std::move(urlStore));
+    visual->mImageUrls->push_back(std::move(url));
   }
   visual->mFrameCount = imageUrls.Count();
   visual->SetProperties(properties);
@@ -297,17 +296,15 @@ void AnimatedImageVisual::InitializeAnimatedImage(const VisualUrl& imageUrl)
 
     for(unsigned int i = 0; i < SINGLE_IMAGE_COUNT; ++i)
     {
-      ImageCache::UrlStore urlStore;
-      urlStore.mTextureId = TextureManager::INVALID_TEXTURE_ID;
-      urlStore.mUrl       = imageUrl;
+      VisualUrl url = imageUrl;
       if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
       {
         // Increase reference count of External Resources :
         // EncodedImageBuffer or ExternalTextures.
         // Reference count will be decreased at destructor of the visual.
-        urlStore.mUrl.IncreaseExternalResourceReference(mFactoryCache.GetTextureManager());
+        url.IncreaseExternalResourceReference(mFactoryCache.GetTextureManager());
       }
-      mImageUrls->push_back(std::move(urlStore));
+      mImageUrls->push_back(std::move(url));
     }
     mFrameCount = SINGLE_IMAGE_COUNT;
   }
@@ -320,11 +317,15 @@ void AnimatedImageVisual::CreateImageCache(TextureManager::ReloadPolicy reloadPo
 
   TextureManager& textureManager = mFactoryCache.GetTextureManager();
 
+  const auto& desiredSize       = (mImageLoadWithViewSize && reloadPolicy == TextureManager::ReloadPolicy::FORCED) ? mLastRequiredSize : mDesiredSize;
+  const auto  samplingMode      = static_cast<Dali::SamplingMode::Type>(mSamplingMode);
+  const bool  preMultiplyOnLoad = mPreMultiplyAlphaOnLoad;
+
   if(mAnimatedImageLoading)
   {
-    mImageCache = new RollingAnimatedImageCache(
-      textureManager, mDesiredSize, static_cast<Dali::SamplingMode::Type>(mSamplingMode), mAnimatedImageLoading, mMaskingData, *this,
-      mCacheSize, mBatchSize, mWrapModeU, mWrapModeV, IsSynchronousLoadingRequired(), mPreMultiplyAlphaOnLoad, reloadPolicy);
+    const auto wrapModeU = static_cast<Dali::WrapMode::Type>(mWrapModeU);
+    const auto wrapModeV = static_cast<Dali::WrapMode::Type>(mWrapModeV);
+    mImageCache          = std::make_shared<RollingAnimatedImageCache>(textureManager, desiredSize, samplingMode, mAnimatedImageLoading, std::move(GetMaskingDataOwner()), *this, mCacheSize, mBatchSize, wrapModeU, wrapModeV, IsSynchronousLoadingRequired(), preMultiplyOnLoad, reloadPolicy);
   }
   else if(mImageUrls)
   {
@@ -336,14 +337,11 @@ void AnimatedImageVisual::CreateImageCache(TextureManager::ReloadPolicy reloadPo
 
     if(cacheSize < numUrls)
     {
-      mImageCache =
-        new RollingImageCache(textureManager, mDesiredSize, static_cast<Dali::SamplingMode::Type>(mSamplingMode), *mImageUrls, mMaskingData,
-                              *this, cacheSize, batchSize, mFrameDelay, mPreMultiplyAlphaOnLoad);
+      mImageCache = std::make_shared<RollingImageCache>(textureManager, desiredSize, samplingMode, *mImageUrls, std::move(GetMaskingDataOwner()), *this, cacheSize, batchSize, mFrameDelay, preMultiplyOnLoad, reloadPolicy);
     }
     else
     {
-      mImageCache = new FixedImageCache(textureManager, mDesiredSize, static_cast<Dali::SamplingMode::Type>(mSamplingMode), *mImageUrls,
-                                        mMaskingData, *this, batchSize, mFrameDelay, mPreMultiplyAlphaOnLoad);
+      mImageCache = std::make_shared<FixedImageCache>(textureManager, desiredSize, samplingMode, *mImageUrls, std::move(GetMaskingDataOwner()), *this, batchSize, mFrameDelay, preMultiplyOnLoad, reloadPolicy);
     }
   }
 
@@ -353,7 +351,7 @@ void AnimatedImageVisual::CreateImageCache(TextureManager::ReloadPolicy reloadPo
   }
   else
   {
-    mLastRequiredSize = mDesiredSize;
+    mLastRequiredSize = desiredSize;
   }
 }
 
@@ -372,7 +370,7 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mFrameIndexForJumpTo(0),
   mCurrentFrameIndex(FIRST_FRAME_INDEX),
   mImageUrls(nullptr),
-  mImageCache(nullptr),
+  mImageCache(),
   mCacheSize(2),
   mBatchSize(2),
   mFrameDelay(100),
@@ -381,7 +379,7 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mFittingMode(Ui::Image::FittingMode::FILL),
-  mMaskingData(),
+  mPendingMaskingData(),
   mDesiredSize(desiredSize),
   mFrameSpeedFactor(1.0f),
   mFrameCount(0),
@@ -428,18 +426,15 @@ AnimatedImageVisual::~AnimatedImageVisual()
 
     if(mImageUrls != nullptr && !mImageUrls->empty())
     {
-      for(const auto& urlStore : *mImageUrls)
+      for(const auto& imageUrl : *mImageUrls)
       {
-        urlStore.mUrl.DecreaseExternalResourceReference(textureManager);
+        imageUrl.DecreaseExternalResourceReference(textureManager);
       }
     }
 
-    if(mMaskingData)
-    {
-      mMaskingData->mAlphaMaskUrl.DecreaseExternalResourceReference(textureManager);
-    }
+    ImageCache::ReleaseMaskingData(textureManager, mPendingMaskingData);
   }
-  delete mImageCache;
+  mImageCache.reset();
   delete mImageUrls;
 }
 
@@ -501,9 +496,10 @@ void AnimatedImageVisual::GetNaturalSize(Vector2& naturalSize)
   naturalSize = Vector2::ZERO;
   if(mImageSize.GetWidth() == 0 && mImageSize.GetHeight() == 0)
   {
-    if(mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid() && mMaskingData->mCropToMask)
+    const auto& maskingData = GetMaskingDataOwner();
+    if(maskingData && maskingData->mAlphaMaskUrl.IsValid() && maskingData->mCropToMask)
     {
-      ImageDimensions dimensions = Dali::GetClosestImageSize(mMaskingData->mAlphaMaskUrl.GetUrl());
+      ImageDimensions dimensions = Dali::GetClosestImageSize(maskingData->mAlphaMaskUrl.GetUrl());
       if(dimensions != ImageDimensions(0, 0))
       {
         mImageSize    = dimensions;
@@ -519,7 +515,7 @@ void AnimatedImageVisual::GetNaturalSize(Vector2& naturalSize)
     }
     else if(mImageUrls && mImageUrls->size() > 0)
     {
-      mImageSize = Dali::GetClosestImageSize((*mImageUrls)[0].mUrl.GetUrl());
+      mImageSize = Dali::GetClosestImageSize((*mImageUrls)[0].GetUrl());
     }
   }
 
@@ -530,6 +526,7 @@ void AnimatedImageVisual::GetNaturalSize(Vector2& naturalSize)
 void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
+  const auto& maskingData = GetMaskingDataOwner();
 
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::Integration::ImageVisual::Property::SYNCHRONOUS_LOADING, sync);
@@ -543,9 +540,9 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
   if(mImageUrls != nullptr && !mImageUrls->empty())
   {
     Property::Array urls;
-    for(unsigned int i = 0; i < mImageUrls->size(); ++i)
+    for(std::size_t i = 0u; i < mImageUrls->size(); ++i)
     {
-      urls.Add(ToPropertyValue((*mImageUrls)[i].mUrl.GetUrl()));
+      urls.Add(ToPropertyValue((*mImageUrls)[i].GetUrl()));
     }
     Property::Value value(const_cast<Property::Array&>(urls));
     map.Insert(Ui::Integration::ImageVisual::Property::URL, value);
@@ -598,12 +595,12 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 
   map.Insert(Ui::Integration::ImageVisual::Property::STOP_BEHAVIOR, mStopBehavior);
 
-  if(mMaskingData != nullptr)
+  if(maskingData != nullptr)
   {
-    map.Insert(Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, ToPropertyValue(mMaskingData->mAlphaMaskUrl.GetUrl()));
-    map.Insert(Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING, mMaskingData->mContentScaleFactor);
-    map.Insert(Ui::Integration::ImageVisual::Property::CROP_TO_MASK, mMaskingData->mCropToMask);
-    map.Insert(Ui::Integration::ImageVisual::Property::MASKING_POLICY, mMaskingData->mPreappliedMasking
+    map.Insert(Ui::Integration::ImageVisual::Property::ALPHA_MASK_URL, ToPropertyValue(maskingData->mAlphaMaskUrl.GetUrl()));
+    map.Insert(Ui::Integration::ImageVisual::Property::CONTENT_SCALE_FOR_MASKING, maskingData->mContentScaleFactor);
+    map.Insert(Ui::Integration::ImageVisual::Property::CROP_TO_MASK, maskingData->mCropToMask);
+    map.Insert(Ui::Integration::ImageVisual::Property::MASKING_POLICY, maskingData->mPreappliedMasking
                                                                          ? Ui::Image::MaskingPolicy::ON_LOADING
                                                                          : Ui::Image::MaskingPolicy::ON_RENDERING);
   }
@@ -684,11 +681,11 @@ void AnimatedImageVisual::OnDoAction(const Dali::Property::Index actionId, const
         mFrameDelayTimer.Reset();
       }
 
-      if(mImageCache)
+      auto imageCache = std::move(mImageCache);
+      if(imageCache)
       {
-        mImageCache->ClearCache();
-        delete mImageCache;
-        mImageCache = nullptr;
+        imageCache->ClearCache();
+        mPendingMaskingData = imageCache->ReleaseMaskingDataOwnership();
       }
 
       if(mImageUrl.IsValid())
@@ -943,19 +940,20 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       if(GetStdString(value, alphaUrl))
       {
         AllocateMaskData();
-        mMaskingData->mAlphaMaskUrl = alphaUrl;
-        if(mMaskingData->mAlphaMaskUrl.IsValid())
+        auto& maskingData          = GetMaskingDataOwner();
+        maskingData->mAlphaMaskUrl = alphaUrl;
+        if(maskingData->mAlphaMaskUrl.IsValid())
         {
           if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
           {
             // Increase reference count of External Resources :
             // EncodedImageBuffer or ExternalTextures.
-            // Reference count will be decreased at destructor of the visual.
-            mMaskingData->mAlphaMaskUrl.IncreaseExternalResourceReference(mFactoryCache.GetTextureManager());
+            // Reference count will be decreased at destructor of the image cache.
+            maskingData->mAlphaMaskUrl.IncreaseExternalResourceReference(mFactoryCache.GetTextureManager());
           }
-          if(mMaskingData->mAlphaMaskUrl.GetProtocolType() == VisualUrl::TEXTURE)
+          if(maskingData->mAlphaMaskUrl.GetProtocolType() == VisualUrl::TEXTURE)
           {
-            mMaskingData->mPreappliedMasking = false;
+            maskingData->mPreappliedMasking = false;
           }
         }
       }
@@ -968,7 +966,8 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       if(value.Get(scale))
       {
         AllocateMaskData();
-        mMaskingData->mContentScaleFactor = scale;
+        auto& maskingData                = GetMaskingDataOwner();
+        maskingData->mContentScaleFactor = scale;
       }
       break;
     }
@@ -979,7 +978,8 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       if(value.Get(crop))
       {
         AllocateMaskData();
-        mMaskingData->mCropToMask = crop;
+        auto& maskingData        = GetMaskingDataOwner();
+        maskingData->mCropToMask = crop;
       }
       break;
     }
@@ -990,18 +990,18 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       if(value.Get(maskingPolicy))
       {
         AllocateMaskData();
+        auto& maskingData = GetMaskingDataOwner();
 
         bool externalTextureUsed = false;
-        if(mMaskingData->mAlphaMaskUrl.IsValid() &&
-           mMaskingData->mAlphaMaskUrl.GetProtocolType() == VisualUrl::TEXTURE)
+        if(maskingData->mAlphaMaskUrl.IsValid() &&
+           maskingData->mAlphaMaskUrl.GetProtocolType() == VisualUrl::TEXTURE)
         {
           externalTextureUsed = true;
         }
         else if(mImageUrls != nullptr && !mImageUrls->empty())
         {
-          for(const auto& urlStore : *mImageUrls)
+          for(const auto& imageUrl : *mImageUrls)
           {
-            const auto& imageUrl = urlStore.mUrl;
             if(imageUrl.IsValid() && imageUrl.GetProtocolType() == VisualUrl::TEXTURE)
             {
               externalTextureUsed = true;
@@ -1014,12 +1014,12 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
         {
           // For external textures, only gpu masking is available.
           // Therefore, MASKING_POLICY is set to ON_RENDERING forcelly.
-          mMaskingData->mPreappliedMasking = false;
+          maskingData->mPreappliedMasking = false;
         }
         else
         {
-          mMaskingData->mPreappliedMasking = (Ui::Image::MaskingPolicy(maskingPolicy) ==
-                                              Ui::Image::MaskingPolicy::ON_LOADING);
+          maskingData->mPreappliedMasking = (Ui::Image::MaskingPolicy(maskingPolicy) ==
+                                             Ui::Image::MaskingPolicy::ON_LOADING);
         }
       }
       break;
@@ -1141,9 +1141,10 @@ void AnimatedImageVisual::DoSetOnScene(Actor& actor)
   // TODO : Could we remove this cache clearing code?
   if(mReleasePolicy != Ui::Image::ReleasePolicy::DETACHED)
   {
-    if(DALI_LIKELY(mImageCache))
+    auto imageCache = mImageCache;
+    if(DALI_LIKELY(imageCache))
     {
-      mImageCache->ClearCache();
+      imageCache->ClearCache();
     }
     mImpl->mResourceStatus = Ui::Visual::ResourceStatus::PREPARING;
 
@@ -1168,9 +1169,10 @@ void AnimatedImageVisual::DoSetOffScene(Actor& actor)
 
   if(mReleasePolicy == Ui::Image::ReleasePolicy::DETACHED)
   {
-    if(DALI_LIKELY(mImageCache))
+    auto imageCache = mImageCache;
+    if(DALI_LIKELY(imageCache))
     {
-      mImageCache->ClearCache();
+      imageCache->ClearCache();
     }
     mImpl->mResourceStatus = Ui::Visual::ResourceStatus::PREPARING;
 
@@ -1209,11 +1211,16 @@ void AnimatedImageVisual::OnSetTransform()
     {
       mLastRequiredSize = visualSize;
 
-      if(DALI_LIKELY(mImageCache))
+      auto imageCache = mImageCache;
+      if(DALI_LIKELY(imageCache))
       {
-        DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "mLastRequiredSize : %hux%hu\n", mLastRequiredSize.GetWidth(),
-                      mLastRequiredSize.GetHeight());
-        mImageCache->SetDesiredSize(mLastRequiredSize);
+        DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "mLastRequiredSize : %hux%hu\n", mLastRequiredSize.GetWidth(), mLastRequiredSize.GetHeight());
+        imageCache->SetDesiredSize(mLastRequiredSize);
+
+        if(imageCache != mImageCache)
+        {
+          return;
+        }
 
         // TODO : Is their more good way to request current frame again??
         if(mStartFirstFrame)
@@ -1262,9 +1269,10 @@ Shader AnimatedImageVisual::GenerateShader() const
   }
   else
   {
-    bool defaultWrapMode = mWrapModeU <= WrapMode::CLAMP_TO_EDGE && mWrapModeV <= WrapMode::CLAMP_TO_EDGE;
-    bool requiredAlphaMaskingOnRendering =
-      (mMaskingData && !mMaskingData->mMaskImageLoadingFailed) ? !mMaskingData->mPreappliedMasking : false;
+    bool        defaultWrapMode = mWrapModeU <= WrapMode::CLAMP_TO_EDGE && mWrapModeV <= WrapMode::CLAMP_TO_EDGE;
+    const auto& maskingData     = GetMaskingDataOwner();
+    bool        requiredAlphaMaskingOnRendering =
+      (maskingData && !maskingData->mMaskImageLoadingFailed) ? !maskingData->mPreappliedMasking : false;
 
     shader = mImageVisualShaderFactory.GetShader(
       mFactoryCache, ImageVisualShaderFeature::FeatureBuilder()
@@ -1332,10 +1340,11 @@ void AnimatedImageVisual::OnInitialize()
                              : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
   EnablePreMultipliedAlpha(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
 
-  if(mMaskingData)
+  const auto& maskingData = GetMaskingDataOwner();
+  if(maskingData)
   {
     mImpl->mRenderer.RegisterUniqueProperty(Ui::Integration::ImageVisual::Property::CROP_TO_MASK, CROP_TO_MASK_NAME,
-                                            static_cast<float>(mMaskingData->mCropToMask));
+                                            static_cast<float>(maskingData->mCropToMask));
   }
 }
 
@@ -1380,10 +1389,11 @@ void AnimatedImageVisual::StartFirstFrame(TextureSet& textureSet, uint32_t first
 
 void AnimatedImageVisual::PrepareTextureSet()
 {
+  auto       imageCache = mImageCache;
   TextureSet textureSet;
-  if(DALI_LIKELY(mImageCache))
+  if(DALI_LIKELY(imageCache))
   {
-    textureSet = mImageCache->FirstFrame();
+    textureSet = imageCache->FirstFrame();
   }
   else
   {
@@ -1392,7 +1402,7 @@ void AnimatedImageVisual::PrepareTextureSet()
   }
 
   // Check whether synchronous loading is true or false for the first frame.
-  if(textureSet)
+  if(textureSet && imageCache == mImageCache)
   {
     SetImageSize(textureSet);
   }
@@ -1409,19 +1419,20 @@ void AnimatedImageVisual::SetImageSize(TextureSet& textureSet)
       mImageSize.SetHeight(texture.GetHeight());
     }
 
-    if(textureSet.GetTextureCount() >= TEXTURE_COUNT_FOR_GPU_ALPHA_MASK && mMaskingData && mMaskingData->mCropToMask)
+    const auto& maskingData = GetMaskingDataOwner();
+    if(textureSet.GetTextureCount() >= TEXTURE_COUNT_FOR_GPU_ALPHA_MASK && maskingData && maskingData->mCropToMask)
     {
       Texture maskTexture = textureSet.GetTexture(1);
       if(maskTexture)
       {
-        mImageSize.SetWidth(std::min(static_cast<uint32_t>(mImageSize.GetWidth() * mMaskingData->mContentScaleFactor),
+        mImageSize.SetWidth(std::min(static_cast<uint32_t>(mImageSize.GetWidth() * maskingData->mContentScaleFactor),
                                      maskTexture.GetWidth()));
-        mImageSize.SetHeight(std::min(static_cast<uint32_t>(mImageSize.GetHeight() * mMaskingData->mContentScaleFactor),
+        mImageSize.SetHeight(std::min(static_cast<uint32_t>(mImageSize.GetHeight() * maskingData->mContentScaleFactor),
                                       maskTexture.GetHeight()));
 
-        float   textureWidth  = std::max(static_cast<float>(texture.GetWidth() * mMaskingData->mContentScaleFactor),
+        float   textureWidth  = std::max(static_cast<float>(texture.GetWidth() * maskingData->mContentScaleFactor),
                                          Dali::Math::MACHINE_EPSILON_1);
-        float   textureHeight = std::max(static_cast<float>(texture.GetHeight() * mMaskingData->mContentScaleFactor),
+        float   textureHeight = std::max(static_cast<float>(texture.GetHeight() * maskingData->mContentScaleFactor),
                                          Dali::Math::MACHINE_EPSILON_1);
         Vector2 textureRatio(std::min(static_cast<float>(maskTexture.GetWidth()), textureWidth) / textureWidth,
                              std::min(static_cast<float>(maskTexture.GetHeight()), textureHeight) / textureHeight);
@@ -1436,10 +1447,11 @@ void AnimatedImageVisual::SetImageSize(TextureSet& textureSet)
 
 void AnimatedImageVisual::FrameReady(TextureSet textureSet, uint32_t interval, bool preMultiplied)
 {
+  auto imageCache = mImageCache;
   EnablePreMultipliedAlpha(preMultiplied);
 
   // When image visual requested to load new frame to mImageCache and it is failed.
-  if(!mImageCache || !textureSet)
+  if(!imageCache || !textureSet)
   {
     SetLoadingFailed();
     return;
@@ -1455,9 +1467,9 @@ void AnimatedImageVisual::FrameReady(TextureSet textureSet, uint32_t interval, b
 
   if(mStartFirstFrame)
   {
-    if(DALI_LIKELY(mImageCache))
+    if(DALI_LIKELY(imageCache))
     {
-      mFrameCount = mImageCache->GetTotalFrameCount();
+      mFrameCount = imageCache->GetTotalFrameCount();
     }
     StartFirstFrame(textureSet, interval);
   }
@@ -1477,12 +1489,13 @@ void AnimatedImageVisual::FrameReady(TextureSet textureSet, uint32_t interval, b
 
 bool AnimatedImageVisual::DisplayNextFrame()
 {
+  auto       imageCache = mImageCache;
   TextureSet textureSet;
   bool       continueTimer = false;
 
-  if(DALI_LIKELY(mImageCache))
+  if(DALI_LIKELY(imageCache))
   {
-    uint32_t frameIndex = mImageCache->GetCurrentFrameIndex();
+    uint32_t frameIndex = imageCache->GetCurrentFrameIndex();
 
     if(mIsJumpTo)
     {
@@ -1540,7 +1553,12 @@ bool AnimatedImageVisual::DisplayNextFrame()
     DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise,
                   "AnimatedImageVisual::DisplayNextFrame(this:%p) CurrentFrameIndex:%d\n", this, frameIndex);
 
-    textureSet = mImageCache->Frame(frameIndex);
+    textureSet = imageCache->Frame(frameIndex);
+
+    if(imageCache != mImageCache)
+    {
+      return false;
+    }
 
     if(textureSet)
     {
@@ -1550,7 +1568,7 @@ bool AnimatedImageVisual::DisplayNextFrame()
 
       if(mFrameDelayTimer)
       {
-        mFrameDelayTimer.SetInterval(CalculateInterval(mImageCache->GetFrameInterval(frameIndex), mFrameSpeedFactor));
+        mFrameDelayTimer.SetInterval(CalculateInterval(imageCache->GetFrameInterval(frameIndex), mFrameSpeedFactor));
       }
     }
 
@@ -1613,33 +1631,50 @@ void AnimatedImageVisual::SetLoadingFailed()
   ResourceReady(Ui::Visual::ResourceStatus::FAILED);
 }
 
+TextureManager::MaskingDataPointer& AnimatedImageVisual::GetMaskingDataOwner()
+{
+  return DALI_LIKELY(mImageCache && mImageCache->GetMaskingData()) ? mImageCache->GetMaskingData() : mPendingMaskingData;
+}
+
+const TextureManager::MaskingDataPointer& AnimatedImageVisual::GetMaskingDataOwner() const
+{
+  return DALI_LIKELY(mImageCache && mImageCache->GetMaskingData()) ? mImageCache->GetMaskingData() : mPendingMaskingData;
+}
+
 void AnimatedImageVisual::AllocateMaskData()
 {
-  if(!mMaskingData)
+  auto& maskingData = GetMaskingDataOwner();
+  if(!maskingData)
   {
-    mMaskingData.reset(new TextureManager::MaskingData());
+    maskingData.reset(new TextureManager::MaskingData());
 
     // Note : If input url was TEXTURE protocol, it will fail to create AnimatedImageLoading.
     // So it should be added at mImageUrls.
     if(mImageUrls != nullptr && !mImageUrls->empty())
     {
-      for(const auto& urlStore : *mImageUrls)
+      for(const auto& imageUrl : *mImageUrls)
       {
-        const auto& imageUrl = urlStore.mUrl;
         if(imageUrl.IsValid() && imageUrl.GetProtocolType() == VisualUrl::TEXTURE)
         {
-          mMaskingData->mPreappliedMasking = false;
+          maskingData->mPreappliedMasking = false;
           break;
         }
       }
+    }
+
+    // Move allocated ownership of masking data to ImageCache.
+    if(DALI_LIKELY(mImageCache && mPendingMaskingData.get() == maskingData.get()))
+    {
+      mImageCache->TakeMaskingDataOwnership(std::move(mPendingMaskingData));
     }
   }
 }
 
 bool AnimatedImageVisual::CheckMaskTexture()
 {
-  bool needShaderUpdate = false;
-  if(mMaskingData && !mMaskingData->mPreappliedMasking)
+  bool  needShaderUpdate = false;
+  auto& maskingData      = GetMaskingDataOwner();
+  if(maskingData && !maskingData->mPreappliedMasking)
   {
     bool       maskLoadFailed = true;
     TextureSet textures       = mImpl->mRenderer.GetTextures();
@@ -1647,10 +1682,10 @@ bool AnimatedImageVisual::CheckMaskTexture()
     {
       maskLoadFailed = false;
     }
-    if(mMaskingData->mMaskImageLoadingFailed != maskLoadFailed)
+    if(maskingData->mMaskImageLoadingFailed != maskLoadFailed)
     {
-      mMaskingData->mMaskImageLoadingFailed = maskLoadFailed;
-      needShaderUpdate                      = true;
+      maskingData->mMaskImageLoadingFailed = maskLoadFailed;
+      needShaderUpdate                     = true;
     }
   }
   return needShaderUpdate;
